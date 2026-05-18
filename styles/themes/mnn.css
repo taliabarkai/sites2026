@@ -21,6 +21,8 @@
   --footer-main-background: #f7f7f4;
   --footer-newsletter-background: #f4eee9;
   --footer-newsletter-text: #000000;
+  --footer-text: var(--text);
+  --footer-text-muted: var(--text-secondary);
 
   --formfield-background: #f7f7f4;
   --formfield-border: #ebebeb;

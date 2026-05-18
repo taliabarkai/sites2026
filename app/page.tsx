@@ -6,5 +6,5 @@ type PageProps = {
 
 export default async function Home({ searchParams }: PageProps) {
   await searchParams
-  redirect('/styleguide')
+  redirect('/oal')
 }
