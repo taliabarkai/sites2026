@@ -1,6 +1,6 @@
 .footer {
-  background: var(--footer-main-background);
-  color: var(--text);
+  background: var(--surface-secondary);
+  color: var(--footer-text);
   font-family: var(--font-family-body);
 }
 
@@ -40,13 +40,13 @@
   border: 1px solid var(--border-default);
   border-radius: var(--radius-sm);
   font-size: 11px;
-  color: var(--text-secondary);
+  color: var(--footer-text-muted);
 }
 
 .copyright {
   margin: 0;
   font-size: 12px;
-  color: var(--text-secondary);
+  color: var(--footer-text-muted);
 }
 
 @media (min-width: 1024px) {

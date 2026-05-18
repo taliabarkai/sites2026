@@ -30,7 +30,7 @@ export const DEFAULT_NAV_LINKS: NavLink[] = [
   { label: 'Earrings', href: '/earrings' },
   { label: 'Gifts', href: '/gifts' },
   { label: 'Best Sellers', href: '/best-sellers' },
-  { label: 'Personalize', href: '/personalize', highlight: true },
+  { label: 'Design System', href: '/styleguide', highlight: true },
 ]
 
 export const DEFAULT_FOOTER_COLUMNS: FooterColumn[] = [

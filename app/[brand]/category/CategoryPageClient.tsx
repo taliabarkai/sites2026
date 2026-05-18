@@ -10,7 +10,11 @@
  * Radius: 0 (sharp edges, OAL style)
  */
 
-import { ThemeSwitcher } from '../_components/ThemeSwitcher'
+import { usePathname } from 'next/navigation'
+import { Header } from '../_components/Header'
+import { getBrandFromPathname } from '../_config/brands'
+import { prefixNavLinks, withBrandPrefix } from '../_config/brandPaths'
+import { DEFAULT_NAV_LINKS, DEFAULT_TOPLINE } from '../_config/siteContent'
 import styles from './CategoryPage.module.css'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -147,73 +151,6 @@ const FAQS: FaqItem[] = [
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
-function AnnouncementBar() {
-  return (
-    <div className={styles.announcementBar} role="banner">
-      Free shipping on orders over $75 &nbsp;·&nbsp; Use code <strong>OAL20</strong> for 20% off
-    </div>
-  )
-}
-
-function Header() {
-  return (
-    <header className={styles.header}>
-      {/* Mobile: hamburger */}
-      <button className={styles.headerMenuBtn} aria-label="Open menu">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-          <line x1="3" y1="6" x2="21" y2="6" />
-          <line x1="3" y1="12" x2="21" y2="12" />
-          <line x1="3" y1="18" x2="21" y2="18" />
-        </svg>
-      </button>
-
-      {/* Logo */}
-      <div className={styles.headerLogo}>
-        <a href="/" className={styles.logoText}>OAK &amp; LUNA</a>
-      </div>
-
-      {/* Desktop nav */}
-      <nav aria-label="Main navigation">
-        <ul className={styles.headerNav}>
-          <li><a href="#" className={styles.headerNavLink}>Necklaces</a></li>
-          <li><a href="#" className={styles.headerNavLink}>Bracelets</a></li>
-          <li><a href="#" className={styles.headerNavLink}>Rings</a></li>
-          <li><a href="#" className={styles.headerNavLink}>Earrings</a></li>
-          <li><a href="#" className={styles.headerNavLink}>Sets</a></li>
-          <li><a href="#" className={styles.headerNavLink}>Gifts</a></li>
-          <li><a href="#" className={styles.headerNavHighlight}>Sale</a></li>
-        </ul>
-      </nav>
-
-      {/* Icons */}
-      <div className={styles.headerIcons}>
-        <ThemeSwitcher />
-        {/* Search */}
-        <button className={styles.headerIcon} aria-label="Search">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-            <circle cx="11" cy="11" r="8" />
-            <line x1="21" y1="21" x2="16.65" y2="16.65" />
-          </svg>
-        </button>
-        {/* Account */}
-        <button className={styles.headerIcon} aria-label="Account">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-            <circle cx="12" cy="7" r="4" />
-          </svg>
-        </button>
-        {/* Cart */}
-        <button className={styles.headerIcon} aria-label="Cart">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-            <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
-            <line x1="3" y1="6" x2="21" y2="6" />
-            <path d="M16 10a4 4 0 0 1-8 0" />
-          </svg>
-        </button>
-      </div>
-    </header>
-  )
-}
 
 function SeoCategoryBubble({ item }: { item: SeoCategoryItem }) {
   return (
@@ -513,10 +450,18 @@ function Footer() {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function CategoryPage() {
+  const pathname = usePathname()
+  const brand = getBrandFromPathname(pathname)
+  const navLinks = prefixNavLinks(brand, DEFAULT_NAV_LINKS)
+  const topline = {
+    ...DEFAULT_TOPLINE,
+    helpHref: withBrandPrefix(brand, DEFAULT_TOPLINE.helpHref),
+    trackHref: withBrandPrefix(brand, DEFAULT_TOPLINE.trackHref),
+  }
+
   return (
     <div className={styles.page}>
-      <AnnouncementBar />
-      <Header />
+      <Header variant="white" brand={brand} navLinks={navLinks} topline={topline} />
       <main>
         <CategoryBanner />
         <FilterBar itemCount={100} />

@@ -14,7 +14,7 @@
   --oal-light-grey: #ebebeb;
   --oal-mid-grey: #9b9b9b;
   --oal-dark-grey: #808080;
-  --oal-black: #1f1f1f;
+  --oal-black: #000000;
   --oal-white: #ffffff;
   --oal-off-white: #f8f8f8;
 }
@@ -27,7 +27,7 @@
 
   /* Surfaces */
   --surface-primary: var(--oal-warm-white);
-  --surface-secondary: var(--oal-off-white);
+  --surface-secondary: var(--oal-black);
 
   /* Text */
   --text: var(--oal-black);
@@ -43,6 +43,8 @@
   --footer-main-background: var(--oal-white);
   --footer-newsletter-background: var(--oal-black);
   --footer-newsletter-text: var(--oal-white);
+  --footer-text: var(--text-inverse);
+  --footer-text-muted: var(--oal-mid-grey);
 
   /* Form */
   --formfield-background: var(--oal-white);
@@ -97,12 +99,12 @@
   --transition-base: 250ms ease;
 
   /* Buttons */
-  --button-primary-background: #000000;
+  --button-primary-background: var(--oal-black);
   --button-primary-text: #ffffff;
   --button-primary-border: transparent;
   --button-secondary-background: transparent;
-  --button-secondary-text: #000000;
-  --button-secondary-border: #000000;
+  --button-secondary-text: var(--oal-black);
+  --button-secondary-border: var(--oal-black);
   --radius-button: 0px;
   --button-font-size: 14px;
   --button-line-height: 17px;

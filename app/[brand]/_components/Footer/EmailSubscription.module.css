@@ -1,5 +1,5 @@
 .section {
-  background: var(--footer-newsletter-background);
+  background: var(--surface-secondary);
   color: var(--footer-newsletter-text);
   padding: var(--spacing-2xl) var(--spacing-md);
   font-family: var(--font-family-body);
@@ -66,11 +66,11 @@
 }
 
 .messageError {
-  color: var(--text);
+  color: var(--footer-text);
 }
 
 .messageSuccess {
-  color: var(--text);
+  color: var(--footer-text);
 }
 
 .socialList {

@@ -1,4 +1,4 @@
-import StyleguideClient from './StyleguideClient'
+import StyleguidePageClient from './StyleguidePageClient'
 
 type PageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>
@@ -6,5 +6,5 @@ type PageProps = {
 
 export default async function StyleguidePage({ searchParams }: PageProps) {
   await searchParams
-  return <StyleguideClient />
+  return <StyleguidePageClient />
 }

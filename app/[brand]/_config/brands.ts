@@ -27,6 +27,10 @@ export function getBrandFromPathname(pathname: string): BrandKey {
 export function buildBrandPath(pathname: string, brand: BrandKey): string {
   const segments = pathname.split('/').filter(Boolean)
 
+  if (segments[0] === 'styleguide') {
+    return `/styleguide?brand=${brand}`
+  }
+
   if (segments.length === 0) {
     return `/${brand}`
   }
@@ -41,4 +45,32 @@ export function buildBrandPath(pathname: string, brand: BrandKey): string {
 
 export function getBrandMeta(brand: BrandKey) {
   return BRANDS.find((entry) => entry.key === brand) ?? BRANDS[0]
+}
+
+export function getBrandHomePath(brand: BrandKey): string {
+  return `/${brand}`
+}
+
+export const BRAND_TO_THEME_KEY: Record<BrandKey, string> = {
+  oal: 'OAL',
+  tgr: 'TGR',
+  lal: 'LAL',
+  ib: 'IB',
+  mnn: 'MNN',
+}
+
+export const THEME_KEY_TO_BRAND: Record<string, BrandKey> = {
+  OAL: 'oal',
+  TGR: 'tgr',
+  LAL: 'lal',
+  IB: 'ib',
+  MNN: 'mnn',
+}
+
+export function themeKeyToBrand(themeKey: string): BrandKey {
+  return THEME_KEY_TO_BRAND[themeKey] ?? 'oal'
+}
+
+export function brandToThemeKey(brand: BrandKey): string {
+  return BRAND_TO_THEME_KEY[brand]
 }

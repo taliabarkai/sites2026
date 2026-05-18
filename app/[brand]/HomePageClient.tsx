@@ -48,7 +48,6 @@ export function HomePageClient() {
         brand={brand}
         navLinks={navLinks}
         topline={topline}
-        homeHref={`/${brand}`}
       />
       <main id="main-content">
         <Hero {...hero} />

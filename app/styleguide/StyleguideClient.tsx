@@ -1,6 +1,8 @@
 'use client'
 
+import { useRouter } from 'next/navigation'
 import { useState, useEffect } from 'react'
+import { brandToThemeKey, themeKeyToBrand, type BrandKey } from '../[brand]/_config/brands'
 
 // ── Token data — sourced from tokens.json (Figma: Tenengroup — Design System) ──
 
@@ -374,9 +376,26 @@ const NAV_SECTIONS = [
   { id: 'breakpoints',label: 'Breakpoints' },
 ]
 
-export default function StyleGuidePage() {
-  const [activeTheme, setActiveTheme] = useState('TGR')
+const SITE_HEADER_OFFSET = 'calc(var(--layout-topline-height) + var(--layout-header-height))'
+const THEME_BAR_HEIGHT = 46
+
+interface StyleguideClientProps {
+  brand: BrandKey
+}
+
+export default function StyleguideClient({ brand }: StyleguideClientProps) {
+  const router = useRouter()
+  const [activeTheme, setActiveTheme] = useState(() => brandToThemeKey(brand))
   const [activeSection, setActiveSection] = useState('colors')
+
+  useEffect(() => {
+    setActiveTheme(brandToThemeKey(brand))
+  }, [brand])
+
+  const handleThemeChange = (key: string) => {
+    setActiveTheme(key)
+    router.replace(`/styleguide?brand=${themeKeyToBrand(key)}`, { scroll: false })
+  }
 
   const theme = THEMES[activeTheme]
   const c = theme.colors
@@ -414,7 +433,7 @@ export default function StyleGuidePage() {
   const showTertiary  = theme.fontTertiaryName && theme.fontTertiaryName !== theme.fontMainName && theme.fontTertiaryName !== theme.fontSecondaryName
 
   return (
-    <div style={{ fontFamily: theme.fontMain, color: c.textPrimary, background: '#ffffff', minHeight: '100vh', margin: 0 }}>
+    <div style={{ fontFamily: theme.fontMain, color: c.textPrimary, background: '#ffffff', margin: 0 }}>
 
       {/* ── Header ── */}
       <header style={{ background: '#ffffff', color: '#111', padding: '28px 64px 24px', borderBottom: '1px solid #ebebeb' }}>
@@ -428,12 +447,12 @@ export default function StyleGuidePage() {
       </header>
 
       {/* ── Theme switcher ── */}
-      <div style={{ background: '#ffffff', borderBottom: '1px solid #ebebeb', padding: '10px 64px', display: 'flex', alignItems: 'center', gap: 8, position: 'sticky', top: 0, zIndex: 101 }}>
+      <div style={{ background: '#ffffff', borderBottom: '1px solid #ebebeb', padding: '10px 64px', display: 'flex', alignItems: 'center', gap: 8, position: 'sticky', top: SITE_HEADER_OFFSET, zIndex: 40 }}>
         <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(0,0,0,0.35)', marginRight: 4 }}>Theme</span>
         {THEME_KEYS.map((key) => (
           <button
             key={key}
-            onClick={() => setActiveTheme(key)}
+            onClick={() => handleThemeChange(key)}
             style={{
               padding: '5px 14px', borderRadius: 100, border: '1px solid',
               borderColor: activeTheme === key ? '#111' : 'rgba(0,0,0,0.2)',
@@ -451,7 +470,7 @@ export default function StyleGuidePage() {
       {/* ── Sticky nav ── */}
       <nav style={{
         background: '#f8f8f8', borderBottom: '1px solid #ebebeb', padding: '0 64px',
-        display: 'flex', gap: 0, position: 'sticky', top: 46, zIndex: 100,
+        display: 'flex', gap: 0, position: 'sticky', top: `calc(${SITE_HEADER_OFFSET} + ${THEME_BAR_HEIGHT}px)`, zIndex: 39,
         overflowX: 'auto', scrollbarWidth: 'none',
       }}>
         {NAV_SECTIONS.map(({ id, label }) => (

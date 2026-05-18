@@ -1,3 +1,9 @@
+import '@/styles/themes/oal.css'
+import '@/styles/themes/tgr.css'
+import '@/styles/themes/lal.css'
+import '@/styles/themes/ib.css'
+import '@/styles/themes/mnn.css'
+
 export default function StyleguideLayout({ children }: { children: React.ReactNode }) {
   return (
     <>

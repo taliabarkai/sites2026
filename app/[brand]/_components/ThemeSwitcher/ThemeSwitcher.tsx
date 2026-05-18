@@ -12,14 +12,18 @@ import {
 import { IconChevronDown } from '../icons/Icons'
 import styles from './ThemeSwitcher.module.css'
 
-export function ThemeSwitcher() {
+interface ThemeSwitcherProps {
+  brand?: BrandKey
+}
+
+export function ThemeSwitcher({ brand }: ThemeSwitcherProps = {}) {
   const pathname = usePathname()
   const router = useRouter()
   const menuId = useId()
   const rootRef = useRef<HTMLDivElement>(null)
   const [open, setOpen] = useState(false)
 
-  const currentBrand = getBrandFromPathname(pathname)
+  const currentBrand = brand ?? getBrandFromPathname(pathname)
   const current = getBrandMeta(currentBrand)
 
   useEffect(() => {

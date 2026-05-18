@@ -9,7 +9,7 @@ import { IconAccount, IconCart, IconClose, IconMenu, IconSearch } from '../icons
 import { SiteLogo } from '../SiteLogo'
 import { ThemeSwitcher } from '../ThemeSwitcher'
 import { Topline, type ToplineProps } from '../Topline'
-import { getBrandFromPathname } from '../../_config/brands'
+import { getBrandFromPathname, getBrandHomePath, resolveBrand, type BrandKey } from '../../_config/brands'
 import styles from './Header.module.css'
 import { useHeaderScroll } from './useHeaderScroll'
 
@@ -17,10 +17,9 @@ export type HeaderVariant = 'white' | 'transparent'
 
 export interface HeaderProps {
   variant?: HeaderVariant
-  brand?: string
+  brand?: BrandKey
   navLinks?: NavLink[]
   topline?: ToplineProps
-  homeHref?: string
 }
 
 export function Header({
@@ -28,11 +27,10 @@ export function Header({
   brand,
   navLinks = DEFAULT_NAV_LINKS,
   topline = DEFAULT_TOPLINE,
-  homeHref,
 }: HeaderProps) {
   const pathname = usePathname()
-  const brandSegment = brand ?? getBrandFromPathname(pathname)
-  const resolvedHomeHref = homeHref ?? `/${brandSegment}`
+  const brandSegment = resolveBrand(brand ?? getBrandFromPathname(pathname))
+  const logoHref = getBrandHomePath(brandSegment)
 
   const isScrolled = useHeaderScroll()
   const [menuOpen, setMenuOpen] = useState(false)
@@ -71,7 +69,7 @@ export function Header({
               </button>
             </div>
 
-            <Link href={resolvedHomeHref} className={styles.logo} aria-label="Home">
+            <Link href={logoHref} className={styles.logo} aria-label="Home">
               <SiteLogo brand={brandSegment} priority />
             </Link>
 
@@ -98,7 +96,7 @@ export function Header({
             </nav>
 
             <div className={styles.actions}>
-              <ThemeSwitcher />
+              <ThemeSwitcher brand={brandSegment} />
               <button type="button" className={styles.iconButton} aria-label="Search">
                 <IconSearch />
               </button>

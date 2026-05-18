@@ -1,0 +1,10 @@
+.page {
+  min-height: 100vh;
+  background: var(--surface-primary);
+  color: var(--text);
+  font-family: var(--font-family-body);
+}
+
+.main {
+  display: block;
+}
