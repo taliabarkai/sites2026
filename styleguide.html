@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="TGR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Style Guide — Tenengroup Design System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Akatab:wght@400;600;700&family=EB+Garamond:wght@400;700&family=Lato:wght@300;400;700&family=Poppins:wght@300;400;600;700&family=Assistant:wght@300;400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    @font-face {
+      font-family: 'Ano';
+      src: url('fonts/AnoRegular-Regular.otf') format('opentype');
+      font-weight: 400;
+      font-style: normal;
+    }
+    @font-face {
+      font-family: 'Ano';
+      src: url('fonts/AnoHalf-Regular.otf') format('opentype');
+      font-weight: 300;
+      font-style: normal;
+    }
+    @font-face {
+      font-family: 'Ano';
+      src: url('fonts/AnoBold-Regular.otf') format('opentype');
+      font-weight: 700;
+      font-style: normal;
+    }
+
+    /* ── Reset ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* ── CSS custom properties — set by JS on theme switch ── */
+    :root {
+      --color-primary: #1e1e1e;
+      --color-secondary: #ffffff;
+      --surface-primary: #f8f8f8;
+      --surface-secondary: #f4f1ee;
+      --surface-disabled: #808080;
+      --text: #1e1e1e;
+      --text-secondary: #808080;
+      --text-disabled: #f8f8f8;
+      --status-error: #b6475f;
+      --status-info: #e6f0f8;
+      --status-success: #478978;
+      --status-warning: #f36641;
+      --border: #ebebeb;
+      --border-hover: #1e1e1e;
+      --font-main: 'Lato', system-ui, sans-serif;
+      --font-secondary: 'Big Caslon', Georgia, serif;
+      --font-tertiary: var(--font-main);
+      --bold-weight: 700;
+    }
+
+    body { font-family: var(--font-main); background: #ffffff; color: var(--text); line-height: 1.5; transition: color 0.2s; }
+
+    /* ── Header ── */
+    .header { background: #ffffff; color: #111; padding: 28px 64px 24px; border-bottom: 1px solid #ebebeb; }
+    .header-eyebrow { font-size: 11px; letter-spacing: 0.08em; opacity: 0.45; margin-bottom: 5px; }
+    .header h1 { font-size: 34px; font-weight: 600; letter-spacing: -0.01em; }
+    .header-sub { font-size: 12px; opacity: 0.4; font-family: monospace; margin-top: 5px; }
+
+    /* ── Theme Toggle ── */
+    .theme-bar { background: #ffffff; border-bottom: 1px solid #ebebeb; padding: 10px 64px; display: flex; align-items: center; gap: 8px; position: sticky; top: 0; z-index: 101; }
+    .theme-bar-label { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(0,0,0,0.35); margin-right: 4px; }
+    .theme-btn { padding: 5px 14px; border-radius: 100px; border: 1px solid rgba(0,0,0,0.2); background: transparent; color: rgba(0,0,0,0.45); font-size: 11px; font-weight: 700; letter-spacing: 0.06em; cursor: pointer; transition: all 0.15s; font-family: inherit; }
+    .theme-btn:hover { background: rgba(0,0,0,0.06); color: #111; }
+    .theme-btn.active { background: #111; color: #fff; border-color: #111; }
+
+    /* ── Nav ── */
+    .nav { background: #f8f8f8; border-bottom: 1px solid var(--border); padding: 0 64px; display: flex; gap: 0; position: sticky; top: 46.5px; z-index: 100; overflow-x: auto; scrollbar-width: none; transition: background 0.25s, border-color 0.25s; }
+    .nav::-webkit-scrollbar { display: none; }
+    .nav a { display: block; white-space: nowrap; padding: 13px 16px; font-size: 12px; font-weight: 600; letter-spacing: 0.04em; text-decoration: none; color: var(--text-secondary); border-bottom: 2px solid transparent; transition: color 0.15s, border-color 0.15s; font-family: var(--font-tertiary); }
+    .nav a:hover, .nav a.active { color: var(--text); border-bottom-color: var(--color-primary); }
+
+    /* ── Layout ── */
+    .container { max-width: 1280px; margin: 0 auto; padding: 0 64px 80px; }
+    .section { padding: 52px 0 0; }
+    .section + .section { border-top: 1px solid var(--border); margin-top: 8px; }
+    .section-title { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 28px; }
+    .group-label { font-size: 12px; font-weight: 600; color: var(--text-secondary); margin: 20px 0 10px; }
+    .group-label:first-of-type { margin-top: 0; }
+
+    /* ── Color swatches ── */
+    .swatch-grid { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 4px; }
+    .swatch-card { width: max-content; min-width: 64px; }
+    .swatch-box { width: 48px; height: 48px; border-radius: 50%; border: 1px solid var(--border); margin-bottom: 6px; transition: background 0.2s; }
+    .swatch-name { font-size: 10px; font-weight: 600; color: var(--text); line-height: 1.4; }
+    .swatch-hex { font-size: 10px; color: var(--text-secondary); font-family: monospace; }
+
+    /* ── Button variants ── */
+    .btn-grid { display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start; }
+    .btn-wrap { display: flex; flex-direction: column; gap: 6px; }
+    .btn-sample { padding: 10px 22px; border: 1px solid; cursor: default; font-weight: 700; text-align: center; letter-spacing: var(--btn-letter-spacing, 0.04em); font-family: var(--font-tertiary); transition: background 0.2s, color 0.2s, border-color 0.2s, border-radius 0.2s; }
+    .btn-meta { font-size: 9px; color: var(--text-secondary); font-family: monospace; }
+    .btn-label { font-size: 11px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.06em; }
+
+    /* ── Inputs ── */
+    .field-input { transition: border-color 0.15s; }
+    .field-input:hover { border-color: var(--text) !important; }
+    .field-input:focus { border-color: var(--text) !important; outline: none; }
+
+    /* ── Ribbon variants ── */
+    .ribbon-grid { display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start; }
+    .ribbon-sample { padding: 4px 12px; letter-spacing: 0.04em; font-family: var(--font-ribbon); display: inline-block; width: fit-content; transition: background 0.2s, color 0.2s, border-radius 0.2s; }
+    @media (max-width: 768px) { .ribbon-sample { font-size: 12px !important; } }
+
+    /* ── Price ── */
+    .price-row { display: flex; align-items: baseline; gap: 10px; padding: 12px 0; border-bottom: 1px solid var(--border); }
+    .price-selling { font-size: 18px; font-weight: var(--bold-weight); transition: color 0.2s; }
+    .price-crossed { font-size: 16px; text-decoration: line-through; transition: color 0.2s; }
+    .price-discount-badge { font-size: 11px; font-weight: var(--bold-weight); padding: 2px 8px; border-radius: 4px; transition: background 0.2s, color 0.2s; }
+    .price-label { font-size: 10px; font-family: monospace; color: var(--text-secondary); margin-left: 8px; }
+
+    /* ── Type scale ── */
+    .type-row { display: grid; grid-template-columns: 200px 1fr; align-items: center; gap: 20px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+    .type-meta code { font-size: 10px; background: var(--surface-primary); padding: 2px 7px; border-radius: 4px; color: var(--color-primary); font-family: monospace; display: inline-block; margin-bottom: 4px; }
+    .type-details { font-size: 10px; color: var(--text-secondary); font-family: monospace; }
+    .type-preview { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; color: var(--text); transition: font-family 0.2s; }
+
+    /* ── Spacing ── */
+    .spacing-row { display: flex; align-items: center; gap: 16px; padding: 8px 0; border-bottom: 1px solid var(--border); }
+    .spacing-token { width: 64px; font-size: 12px; font-weight: 600; font-family: monospace; }
+    .spacing-val { width: 52px; font-size: 12px; color: var(--text-secondary); font-family: monospace; }
+    .spacing-bar { height: 20px; background: var(--color-primary); border-radius: 3px; transition: background 0.2s; }
+
+    /* ── Radius ── */
+    .radius-grid { display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-end; }
+    .radius-card { text-align: center; }
+    .radius-box { width: 80px; height: 80px; background: var(--surface-secondary); border: 2px solid var(--border); margin: 0 auto 8px; transition: background 0.2s, border-color 0.2s, border-radius 0.2s; }
+    .radius-token { font-size: 11px; font-weight: 600; font-family: monospace; color: var(--color-primary); display: block; }
+    .radius-val { font-size: 10px; color: var(--text-secondary); font-family: monospace; }
+    .radius-section-label { font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-secondary); margin: 24px 0 12px; }
+
+    /* ── Shadows ── */
+    .shadow-grid { display: flex; flex-wrap: wrap; gap: 40px; padding: 24px 0; }
+    .shadow-card { text-align: center; }
+    .shadow-box { width: 80px; height: 60px; background: #fff; border-radius: 8px; margin: 0 auto 12px; }
+    .shadow-token { font-size: 11px; font-weight: 600; font-family: monospace; color: var(--text); }
+
+    /* ── Breakpoints ── */
+    .bp-row { display: flex; align-items: center; gap: 16px; padding: 8px 0; border-bottom: 1px solid var(--border); max-width: 680px; }
+    .bp-token { width: 48px; font-size: 12px; font-weight: 600; font-family: monospace; }
+    .bp-val { width: 56px; font-size: 12px; color: var(--text-secondary); font-family: monospace; }
+    .bp-track { flex: 1; height: 8px; background: var(--surface-primary); border-radius: 4px; overflow: hidden; transition: background 0.2s; }
+    .bp-fill { height: 100%; background: var(--color-primary); border-radius: 4px; transition: background 0.2s; }
+  </style>
+</head>
+<body>
+
+<header class="header">
+  <p class="header-eyebrow">Tenengroup Design System · 5 Brand Themes · Source: Figma → Tenengroup — Design System → tokens.json</p>
+  <h1>Style Guide</h1>
+  <p class="header-sub">tokens.json extracted 2026-05-18 · 4 Figma variable collections · Color · Radius · Spacing · Fonts</p>
+</header>
+
+<div class="theme-bar">
+  <span class="theme-bar-label">Theme</span>
+  <button class="theme-btn active" data-theme="TGR">TGR</button>
+  <button class="theme-btn" data-theme="OAL">OAL</button>
+  <button class="theme-btn" data-theme="LAL">LAL</button>
+  <button class="theme-btn" data-theme="IB">IB</button>
+  <button class="theme-btn" data-theme="MNN">MNN</button>
+</div>
+
+<nav class="nav">
+  <a href="#colors">Colors</a>
+  <a href="#buttons">Buttons</a>
+  <a href="#ribbons">Ribbons &amp; Price</a>
+  <a href="#inputs">Inputs</a>
+  <a href="#typography">Typography</a>
+  <a href="#spacing">Spacing</a>
+  <a href="#radius">Radius</a>
+  <a href="#shadows">Shadows</a>
+  <a href="#breakpoints">Breakpoints</a>
+</nav>
+
+<div class="container">
+
+  <!-- ── COLORS ── -->
+  <section class="section" id="colors">
+    <p class="section-title">01 — Colors</p>
+    <div id="color-swatches"></div>
+  </section>
+
+  <!-- ── BUTTONS ── -->
+  <section class="section" id="buttons">
+    <p class="section-title">02 — Button Variants</p>
+    <div class="btn-grid" id="buttons-section"></div>
+  </section>
+
+  <!-- ── RIBBONS & PRICE ── -->
+  <section class="section" id="ribbons">
+    <p class="section-title">03 — Ribbons &amp; Price</p>
+    <p class="group-label">Ribbons</p>
+    <div class="ribbon-grid" id="ribbons-section"></div>
+    <p class="group-label" style="margin-top:28px">Price</p>
+    <div id="price-section"></div>
+  </section>
+
+  <!-- ── INPUTS ── -->
+  <section class="section" id="inputs">
+    <p class="section-title">04 — Form Inputs</p>
+    <div id="inputs-section"></div>
+  </section>
+
+  <!-- ── TYPOGRAPHY ── -->
+  <section class="section" id="typography">
+    <p class="section-title">05 — Typography</p>
+    <div id="font-specimens" style="display:flex;gap:40px;flex-wrap:wrap;margin-bottom:28px"></div>
+    <p class="group-label" style="margin-top:0">Headlines</p>
+    <div id="type-headlines"></div>
+    <p class="group-label">Paragraphs</p>
+    <div id="type-paragraphs"></div>
+    <p class="group-label">Body Text</p>
+    <div id="type-body"></div>
+    <p class="group-label">Captions, Disclaimers &amp; UI</p>
+    <div id="type-ui"></div>
+  </section>
+
+  <!-- ── SPACING ── -->
+  <section class="section" id="spacing">
+    <p class="section-title">06 — Spacing</p>
+    <div style="max-width:500px">
+      <div class="spacing-row"><span class="spacing-token">xxxs</span><span class="spacing-val">4px</span><div class="spacing-bar" style="width:12px"></div></div>
+      <div class="spacing-row"><span class="spacing-token">xxs</span><span class="spacing-val">8px</span><div class="spacing-bar" style="width:24px"></div></div>
+      <div class="spacing-row"><span class="spacing-token">xs</span><span class="spacing-val">12px</span><div class="spacing-bar" style="width:36px"></div></div>
+      <div class="spacing-row"><span class="spacing-token">sm</span><span class="spacing-val">16px</span><div class="spacing-bar" style="width:48px"></div></div>
+      <div class="spacing-row"><span class="spacing-token">md</span><span class="spacing-val">24px</span><div class="spacing-bar" style="width:72px"></div></div>
+      <div class="spacing-row"><span class="spacing-token">lg</span><span class="spacing-val">32px</span><div class="spacing-bar" style="width:96px"></div></div>
+      <div class="spacing-row"><span class="spacing-token">xl</span><span class="spacing-val">40px</span><div class="spacing-bar" style="width:120px"></div></div>
+      <div class="spacing-row"><span class="spacing-token">xxl</span><span class="spacing-val">60px</span><div class="spacing-bar" style="width:180px"></div></div>
+      <div class="spacing-row"><span class="spacing-token">xxxl</span><span class="spacing-val">72px</span><div class="spacing-bar" style="width:216px"></div></div>
+    </div>
+  </section>
+
+  <!-- ── RADIUS ── -->
+  <section class="section" id="radius">
+    <p class="section-title">07 — Border Radius</p>
+    <p class="radius-section-label">Base Scale</p>
+    <div class="radius-grid">
+      <div class="radius-card"><div class="radius-box" style="border-radius:0"></div><span class="radius-token">none</span><span class="radius-val">0</span></div>
+      <div class="radius-card"><div class="radius-box" style="border-radius:4px"></div><span class="radius-token">sm</span><span class="radius-val">4px</span></div>
+      <div class="radius-card"><div class="radius-box" style="border-radius:8px"></div><span class="radius-token">md</span><span class="radius-val">8px</span></div>
+      <div class="radius-card"><div class="radius-box" id="radius-lg"></div><span class="radius-token">lg</span><span class="radius-val" id="radius-lg-val"></span></div>
+      <div class="radius-card"><div class="radius-box" style="border-radius:20px"></div><span class="radius-token">xl</span><span class="radius-val">20px</span></div>
+      <div class="radius-card"><div class="radius-box" style="border-radius:50px"></div><span class="radius-token">xxl</span><span class="radius-val">100px</span></div>
+    </div>
+    <p class="radius-section-label" style="margin-top:32px">Component Radius — Per Brand</p>
+    <div class="radius-grid" id="radius-components"></div>
+  </section>
+
+  <!-- ── SHADOWS ── -->
+  <section class="section" id="shadows">
+    <p class="section-title">08 — Shadows</p>
+    <div class="shadow-grid">
+      <div class="shadow-card"><div class="shadow-box" style="box-shadow:0 1px 3px 0 rgba(0,0,0,0.08),0 1px 2px -1px rgba(0,0,0,0.06)"></div><span class="shadow-token">sm</span></div>
+      <div class="shadow-card"><div class="shadow-box" style="box-shadow:0 4px 6px -1px rgba(0,0,0,0.08),0 2px 4px -2px rgba(0,0,0,0.06)"></div><span class="shadow-token">md</span></div>
+      <div class="shadow-card"><div class="shadow-box" style="box-shadow:0 10px 15px -3px rgba(0,0,0,0.08),0 4px 6px -4px rgba(0,0,0,0.05)"></div><span class="shadow-token">lg</span></div>
+      <div class="shadow-card"><div class="shadow-box" style="box-shadow:0 20px 25px -5px rgba(0,0,0,0.08),0 8px 10px -6px rgba(0,0,0,0.05)"></div><span class="shadow-token">xl</span></div>
+      <div class="shadow-card"><div class="shadow-box" style="box-shadow:0 25px 50px -12px rgba(0,0,0,0.18)"></div><span class="shadow-token">xxl</span></div>
+    </div>
+  </section>
+
+  <!-- ── BREAKPOINTS ── -->
+  <section class="section" id="breakpoints">
+    <p class="section-title">09 — Breakpoints</p>
+    <div style="max-width:680px">
+      <div class="bp-row"><span class="bp-token">sm</span><span class="bp-val">640px</span><div class="bp-track"><div class="bp-fill" style="width:44.4%"></div></div></div>
+      <div class="bp-row"><span class="bp-token">md</span><span class="bp-val">768px</span><div class="bp-track"><div class="bp-fill" style="width:53.3%"></div></div></div>
+      <div class="bp-row"><span class="bp-token">lg</span><span class="bp-val">1024px</span><div class="bp-track"><div class="bp-fill" style="width:71.1%"></div></div></div>
+      <div class="bp-row"><span class="bp-token">xl</span><span class="bp-val">1280px</span><div class="bp-track"><div class="bp-fill" style="width:88.9%"></div></div></div>
+      <div class="bp-row"><span class="bp-token">2xl</span><span class="bp-val">1440px</span><div class="bp-track"><div class="bp-fill" style="width:100%"></div></div></div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+// ── Token data — sourced directly from tokens.json (Figma: Tenengroup — Design System) ──
+
+const THEMES = {
+  TGR: {
+    label: 'TGR — Theo Grace',
+    fontMain: "'Lato', system-ui, sans-serif",
+    fontMainName: 'Lato',
+    fontSecondary: "'Big Caslon', Georgia, serif",
+    fontSecondaryName: 'Big Caslon',
+    textTransform: 'capitalize',
+    btnLetterSpacing: 0,
+    colors: {
+      background:        '#ffffff',
+      brandPrimary:      '#1e1e1e',
+      brandSecondary:    '#ffffff',
+      textPrimary:       '#1e1e1e',
+      textSecondary:     '#808080',
+      textDisabled:      '#f8f8f8',
+      surfacePrimary:    '#f8f8f8',
+      surfaceSecondary:  '#f4f1ee',
+      surfaceDisabled:   '#808080',
+      error:             '#b6475f',
+      warning:           '#f36641',
+      success:           '#478978',
+      info:              '#e6f0f8',
+      border:            '#ebebeb',
+      inputBg:           '#ffffff',
+      inputBorder:       '#ebebeb',
+      inputText:         '#1e1e1e',
+      inputPlaceholder:  '#808080',
+      cardImageBg:       '#f6f8fa',
+    },
+    buttons: [
+      { label: 'Primary',    bg: '#1e1e1e',    text: '#ffffff',    border: 'transparent' },
+      { label: 'Secondary',  bg: '#ffffff',    text: '#1e1e1e',    border: '#1e1e1e'    },
+      { label: 'Add to Cart',bg: '#1e1e1e',    text: '#ffffff',    border: 'transparent' },
+      { label: 'Preview',    bg: '#e6f0f8',    text: '#1e1e1e',    border: '#e6f0f8'    },
+      { label: 'Disabled',   bg: '#808080',    text: '#f8f8f8',    border: '#808080'    },
+      { label: 'Danger',     bg: '#8e0000',    text: '#ffffff',    border: '#8e0000'    },
+      { label: 'Success',    bg: '#2b8b68',    text: '#ffffff',    border: '#2b8b68'    },
+      { label: 'Link',       bg: 'transparent',text: '#1e1e1e',    border: 'transparent', link: true },
+    ],
+    radius: { button: 100, ribbon: 100, input: 4, lg: 12 },
+    ribbons: [
+      { label: 'Default',   bg: '#bedff7', text: '#1e1e1e' },
+      { label: 'Bundle',    bg: '#478978', text: '#ffffff'  },
+      { label: 'OOS',       bg: '#808080', text: '#ffffff'  },
+      { label: 'Secondary', bg: '#1e1e1e', text: '#ffffff'  },
+    ],
+    price: { selling: '#1e1e1e', crossed: '#808080', discountText: '#1e1e1e', discountBg: '#f8f8f8' },
+  },
+  OAL: {
+    label: 'OAL — Oak and Luna',
+    fontMain: "GillSans, 'Gill Sans MT', 'Century Gothic', sans-serif",
+    fontMainName: 'Gill Sans',
+    fontSecondary: "'Bebas Neue', sans-serif",
+    fontSecondaryName: 'Bebas Neue',
+    fontTertiary: "'Akatab', sans-serif",
+    ribbonFont: "'Bebas Neue', sans-serif",
+    fontTertiaryName: 'Akatab',
+    textTransform: 'uppercase',
+    boldWeight: 600,
+    colors: {
+      background:        '#ffffff',
+      brandPrimary:      '#000000',
+      brandSecondary:    '#ffffff',
+      textPrimary:       '#000000',
+      textSecondary:     '#808080',
+      textDisabled:      '#9b9b9b',
+      surfacePrimary:    '#f8f8f8',
+      surfaceSecondary:  '#f8f8f8',
+      surfaceDisabled:   '#f8f8f8',
+      error:             '#8e0000',
+      warning:           '#cd644c',
+      success:           '#2b8b68',
+      info:              '#393781',
+      border:            '#ebebeb',
+      inputBg:           '#ffffff',
+      inputBorder:       '#000000',
+      inputText:         '#000000',
+      inputPlaceholder:  '#808080',
+      cardImageBg:       '#ffffff',
+    },
+    buttons: [
+      { label: 'Primary',    bg: '#000000',    text: '#ffffff',    border: 'transparent' },
+      { label: 'Secondary',  bg: 'transparent',text: '#000000',    border: '#000000'    },
+      { label: 'Add to Cart',bg: '#f8f8f8',    text: '#000000',    border: 'transparent' },
+      { label: 'Preview',    bg: '#f8f8f8',    text: '#000000',    border: '#000000'    },
+      { label: 'Disabled',   bg: '#f5f5f5',    text: '#989898',    border: '#f5f5f5'    },
+      { label: 'Danger',     bg: '#8e0000',    text: '#ffffff',    border: '#8e0000'    },
+      { label: 'Success',    bg: '#2b8b68',    text: '#ffffff',    border: '#2b8b68'    },
+      { label: 'Link',       bg: 'transparent',text: '#000000',    border: 'transparent', link: true },
+    ],
+    radius: { button: 0, ribbon: 0, input: 4, lg: 16 },
+    ribbons: [
+      { label: 'Default',   bg: '#ffffff', text: '#000000' },
+      { label: 'Bundle',    bg: '#000000', text: '#ffffff' },
+      { label: 'OOS',       bg: '#808080', text: '#ffffff' },
+      { label: 'Secondary', bg: '#000000', text: '#ffffff' },
+    ],
+    price: { selling: '#000000', crossed: '#808080', discountText: '#000000', discountBg: '#f8f8f8' },
+  },
+  LAL: {
+    label: 'LAL — Lime and Lou',
+    fontMain: "'Poppins', system-ui, sans-serif",
+    fontMainName: 'Poppins',
+    fontSecondary: "'EB Garamond', Georgia, serif",
+    fontSecondaryName: 'EB Garamond',
+    textTransform: 'uppercase',
+    colors: {
+      background:        '#ffffff',
+      brandPrimary:      '#e8ff36',
+      brandSecondary:    '#000000',
+      textPrimary:       '#000000',
+      textSecondary:     '#989898',
+      textDisabled:      '#f5f5f5',
+      surfacePrimary:    '#f5f5f5',
+      surfaceSecondary:  '#ebe2de',
+      surfaceDisabled:   '#e3e3e3',
+      error:             '#8e0000',
+      warning:           '#f36641',
+      success:           '#2b8b68',
+      info:              '#000000',
+      border:            '#e3e3e3',
+      inputBg:           '#ffffff',
+      inputBorder:       '#e3e3e3',
+      inputText:         '#000000',
+      inputPlaceholder:  '#989898',
+      cardImageBg:       '#ffffff',
+    },
+    buttons: [
+      { label: 'Primary',    bg: '#000000',    text: '#ffffff',    border: 'transparent' },
+      { label: 'Secondary',  bg: 'transparent',text: '#000000',    border: '#000000'    },
+      { label: 'Add to Cart',bg: '#e8ff36',    text: '#000000',    border: 'transparent' },
+      { label: 'Preview',    bg: '#ebe2de',    text: '#000000',    border: '#ebe2de'    },
+      { label: 'Disabled',   bg: '#f5f5f5',    text: '#989898',    border: '#f5f5f5'    },
+      { label: 'Danger',     bg: '#8e0000',    text: '#ffffff',    border: '#8e0000'    },
+      { label: 'Success',    bg: '#2b8b68',    text: '#ffffff',    border: '#2b8b68'    },
+      { label: 'Link',       bg: 'transparent',text: '#000000',    border: 'transparent', link: true },
+    ],
+    radius: { button: 0, ribbon: 0, input: 8, lg: 16 },
+    ribbons: [
+      { label: 'Default',   bg: '#000000', text: '#ffffff' },
+      { label: 'Bundle',    bg: '#e8ff36', text: '#000000' },
+      { label: 'OOS',       bg: '#808080', text: '#ffffff' },
+      { label: 'Secondary', bg: '#e8ff36', text: '#000000' },
+    ],
+    price: { selling: '#8e0000', crossed: '#989898', discountText: '#000000', discountBg: '#f8f8f8' },
+  },
+  IB: {
+    label: 'IB — Irena Bauer',
+    fontMain: "'Assistant', system-ui, sans-serif",
+    fontMainName: 'Assistant',
+    fontSecondary: "'Assistant', system-ui, sans-serif",
+    fontSecondaryName: 'Assistant',
+    textTransform: 'uppercase',
+    colors: {
+      background:        '#ffffff',
+      brandPrimary:      '#122f4f',
+      brandSecondary:    '#ffffff',
+      textPrimary:       '#122f4f',
+      textSecondary:     '#bebebe',
+      textDisabled:      '#f8f8f8',
+      surfacePrimary:    '#f3f5f6',
+      surfaceSecondary:  '#f9f8f7',
+      surfaceDisabled:   '#e0dcd5',
+      error:             '#bc0000',
+      warning:           '#f36641',
+      success:           '#2b8b68',
+      info:              '#4a5f7f',
+      border:            '#ebebeb',
+      inputBg:           '#f3f5f6',
+      inputBorder:       '#ebebeb',
+      inputText:         '#122f4f',
+      inputPlaceholder:  '#bebebe',
+      cardImageBg:       '#f9f8f7',
+    },
+    buttons: [
+      { label: 'Primary',    bg: '#8e9279',    text: '#ffffff',    border: '#8e9279'    },
+      { label: 'Secondary',  bg: '#ffffff',    text: '#122f4f',    border: '#122f4f'    },
+      { label: 'Add to Cart',bg: '#122f4f',    text: '#ffffff',    border: '#122f4f'    },
+      { label: 'Preview',    bg: '#f9f8f7',    text: '#122f4f',    border: '#f9f8f7'    },
+      { label: 'Disabled',   bg: '#f8f8f8',    text: '#bebebe',    border: '#f8f8f8'    },
+      { label: 'Danger',     bg: '#bc0000',    text: '#ffffff',    border: '#bc0000'    },
+      { label: 'Success',    bg: '#2b8b68',    text: '#ffffff',    border: '#2b8b68'    },
+      { label: 'Link',       bg: 'transparent',text: '#122f4f',    border: 'transparent', link: true },
+    ],
+    radius: { button: 4, ribbon: 0, input: 4, lg: 16 },
+    ribbons: [
+      { label: 'Default',   bg: '#8e9279', text: '#ffffff' },
+      { label: 'Bundle',    bg: '#a3754d', text: '#ffffff' },
+      { label: 'OOS',       bg: '#808080', text: '#ffffff' },
+      { label: 'Secondary', bg: '#8e9279', text: '#ffffff' },
+    ],
+    price: { selling: '#122f4f', crossed: '#122f4f', discountText: '#122f4f', discountBg: '#f3f5f6' },
+  },
+  MNN: {
+    label: 'MNN — MYKA',
+    fontMain: "'Ano', 'Arial Narrow', sans-serif",
+    fontMainName: 'Ano',
+    fontSecondary: "'Ano', 'Arial Narrow', sans-serif",
+    fontSecondaryName: 'Ano (Mafra)',
+    btnFontSize: 14,
+    textTransform: 'uppercase',
+    colors: {
+      background:        '#ffffff',
+      brandPrimary:      '#000000',
+      brandSecondary:    '#ffffff',
+      textPrimary:       '#000000',
+      textSecondary:     '#808080',
+      textDisabled:      '#f8f8f8',
+      surfacePrimary:    '#f7f7f4',
+      surfaceSecondary:  '#f4eee9',
+      surfaceDisabled:   '#808080',
+      error:             '#bc0000',
+      warning:           '#ef7d60',
+      success:           '#2b8b68',
+      info:              '#548fcb',
+      border:            '#ebebeb',
+      inputBg:           '#f7f7f4',
+      inputBorder:       '#ebebeb',
+      inputText:         '#000000',
+      inputPlaceholder:  '#808080',
+      cardImageBg:       '#f7f7f4',
+    },
+    buttons: [
+      { label: 'Primary',    bg: '#000000',    text: '#ffffff',    border: '#000000'    },
+      { label: 'Secondary',  bg: 'transparent',text: '#000000',    border: '#000000'    },
+      { label: 'Add to Cart',bg: '#e6c379',    text: '#000000',    border: 'transparent' },
+      { label: 'Preview',    bg: '#f7f7f4',    text: '#000000',    border: '#000000'    },
+      { label: 'Disabled',   bg: '#f8f8f8',    text: '#808080',    border: '#f8f8f8'    },
+      { label: 'Danger',     bg: '#8e0000',    text: '#ffffff',    border: '#8e0000'    },
+      { label: 'Success',    bg: '#2b8b68',    text: '#ffffff',    border: '#2b8b68'    },
+      { label: 'Link',       bg: 'transparent',text: '#000000',    border: 'transparent', link: true },
+    ],
+    radius: { button: 4, ribbon: 100, input: 4, lg: 12 },
+    ribbons: [
+      { label: 'Default',   bg: '#ffffff', text: '#000000' },
+      { label: 'Bundle',    bg: '#09391e', text: '#ffffff' },
+      { label: 'OOS',       bg: '#808080', text: '#ffffff' },
+      { label: 'Secondary', bg: '#000000', text: '#ffffff' },
+    ],
+    price: { selling: '#bc0000', crossed: '#808080', discountText: '#000000', discountBg: '#f7f7f4' },
+  },
+};
+
+// ── Type scale (shared across brands — only font-family changes) ──
+const TYPE_SCALE = {
+  headlines: [
+    { token: 'headline1',  fs: 40, lh: 48, fw: 400, family: 'secondary', mob: '30px mob' },
+    { token: 'headline2',  fs: 28, lh: 36, fw: 400, family: 'secondary', mob: '20px mob' },
+    { token: 'headline3',  fs: 28, lh: 36, fw: 400, family: 'secondary', mob: '20px mob' },
+    { token: 'headline4',  fs: 24, lh: 28, fw: 400, family: 'main'      },
+    { token: 'headline5',  fs: 20, lh: 24, fw: 300, family: 'main'      },
+    { token: 'headline6',  fs: 16, lh: 20, fw: 400, family: 'secondary' },
+    { token: 'headline7',  fs: 14, lh: 20, fw: 400, family: 'tertiary'  },
+    { token: 'headline8',  fs: 16, lh: 20, fw: 400, family: 'main', transform: 'uppercase' },
+    { token: 'headline9',  fs: 24, lh: 28, fw: 400, family: 'secondary', mob: '16px mob' },
+  ],
+  paragraphs: [
+    { token: 'paragraph1', fs: 18, lh: 22, fw: 400, family: 'main' },
+    { token: 'paragraph2', fs: 18, lh: 22, fw: 700, family: 'main' },
+    { token: 'paragraph3', fs: 16, lh: 22, fw: 700, family: 'main' },
+    { token: 'paragraph4', fs: 16, lh: 22, fw: 400, family: 'main' },
+  ],
+  body: [
+    { token: 'text1',  fs: 14, lh: 20, fw: 400, family: 'main' },
+    { token: 'text2',  fs: 14, lh: 20, fw: 700, family: 'main' },
+    { token: 'text3',  fs: 12, lh: 16, fw: 400, family: 'main' },
+    { token: 'text4',  fs: 12, lh: 16, fw: 700, family: 'main' },
+    { token: 'text7',  fs: 14, lh: 20, fw: 300, family: 'main' },
+    { token: 'text8',  fs: 10, lh: 14, fw: 400, family: 'main' },
+    { token: 'text9',  fs: 10, lh: 14, fw: 700, family: 'main' },
+  ],
+  ui: [
+    { token: 'caption1',    fs: 12, lh: 16, fw: 400, family: 'main' },
+    { token: 'caption2',    fs: 12, lh: 16, fw: 700, family: 'main' },
+    { token: 'disclaimer1', fs: 10, lh: 14, fw: 400, family: 'main' },
+    { token: 'disclaimer2', fs: 10, lh: 14, fw: 700, family: 'main' },
+    { token: 'button',      fs: 16, lh: 24, fw: 700, family: 'tertiary' },
+    { token: 'button2',     fs: 14, lh: 20, fw: 400, family: 'main' },
+    { token: 'link',        fs: 14, lh: 20, fw: 500, family: 'main', decoration: 'underline' },
+    { token: 'ribbon',      fs: 14, lh: 20, fw: 400, family: 'secondary', mob: '12px mob' },
+  ],
+};
+
+// ── Helpers ──
+function swatch(name, hex) {
+  const display = hex === 'transparent' ? 'rgba(0,0,0,0)' : hex;
+  return `<div class="swatch-card">
+    <div class="swatch-box" style="background:${display}"></div>
+    <div class="swatch-name">${name}</div>
+    <div class="swatch-hex">${hex}</div>
+  </div>`;
+}
+
+function typeRow(entry, theme) {
+  const ff   = entry.family === 'secondary' ? theme.fontSecondary : entry.family === 'tertiary' ? (theme.fontTertiary || theme.fontMain) : theme.fontMain;
+  const ffName = entry.family === 'secondary' ? theme.fontSecondaryName : entry.family === 'tertiary' ? (theme.fontTertiaryName || theme.fontMainName) : theme.fontMainName;
+  const fw = (entry.fw === 700 && entry.family !== 'secondary') ? (theme.boldWeight || 700) : entry.fw;
+  const details = `${fw}px / ${entry.lh}px · w${fw} · ${ffName}${entry.mob ? ' · ' + entry.mob : ''}`;
+  const style = [
+    `font-family:${ff}`,
+    `font-size:${Math.min(entry.fs, 34)}px`,
+    `line-height:${entry.lh}px`,
+    `font-weight:${fw}`,
+    entry.transform  ? `text-transform:${entry.transform}` : '',
+    entry.decoration ? `text-decoration:${entry.decoration}` : '',
+  ].filter(Boolean).join(';');
+  return `<div class="type-row">
+    <div class="type-meta">
+      <code>${entry.token}</code>
+      <div class="type-details">${details}</div>
+    </div>
+    <div class="type-preview" style="${style}">The quick brown fox jumps over the lazy dog</div>
+  </div>`;
+}
+
+// ── Apply theme ──
+function applyTheme(key) {
+  const theme = THEMES[key];
+  const c = theme.colors;
+  const r = theme.radius;
+  const root = document.documentElement;
+
+  // Set CSS vars
+  root.style.setProperty('--color-primary',    c.brandPrimary);
+  root.style.setProperty('--color-secondary',  c.brandSecondary);
+  root.style.setProperty('--surface-primary',  c.surfacePrimary);
+  root.style.setProperty('--surface-secondary',c.surfaceSecondary);
+  root.style.setProperty('--surface-disabled', c.surfaceDisabled);
+  root.style.setProperty('--text',             c.textPrimary);
+  root.style.setProperty('--text-secondary',   c.textSecondary);
+  root.style.setProperty('--text-disabled',    c.textDisabled);
+  root.style.setProperty('--status-error',     c.error);
+  root.style.setProperty('--status-info',      c.info);
+  root.style.setProperty('--status-success',   c.success);
+  root.style.setProperty('--status-warning',   c.warning);
+  root.style.setProperty('--border',           c.border);
+  root.style.setProperty('--border-hover',     c.brandPrimary);
+  root.style.setProperty('--font-main',        theme.fontMain);
+  root.style.setProperty('--font-secondary',   theme.fontSecondary);
+  root.style.setProperty('--font-tertiary',    theme.fontTertiary || theme.fontMain);
+  root.style.setProperty('--font-ribbon',      theme.ribbonFont   || theme.fontMain);
+  root.style.setProperty('--bold-weight',      theme.boldWeight || 700);
+  root.style.setProperty('--btn-letter-spacing', theme.btnLetterSpacing !== undefined ? theme.btnLetterSpacing : '0.04em');
+  root.setAttribute('data-theme', key);
+
+  // Theme buttons
+  document.querySelectorAll('.theme-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.theme === key);
+  });
+
+  // ── Colors section ──
+  document.getElementById('color-swatches').innerHTML = [
+    { group: 'Brand', tokens: [
+      ['brand/primary', c.brandPrimary], ['brand/secondary', c.brandSecondary],
+      ['background', c.background],
+    ]},
+    { group: 'Text', tokens: [
+      ['text/primary', c.textPrimary], ['text/secondary', c.textSecondary], ['text/disabled', c.textDisabled],
+    ]},
+    { group: 'Surface', tokens: [
+      ['surface/primary', c.surfacePrimary], ['surface/secondary', c.surfaceSecondary], ['surface/disabled', c.surfaceDisabled],
+    ]},
+    { group: 'Feedback', tokens: [
+      ['error', c.error], ['warning', c.warning], ['success', c.success], ['info', c.info],
+    ]},
+    { group: 'UI', tokens: [
+      ['border', c.border], ['card/image-bg', c.cardImageBg],
+    ]},
+  ].map(group => `
+    <p class="group-label">${group.group}</p>
+    <div class="swatch-grid">${group.tokens.map(([n, h]) => swatch(n, h)).join('')}</div>
+  `).join('');
+
+  // ── Buttons section ──
+  const btnType = TYPE_SCALE.ui.find(e => e.token === 'button');
+  const btnFs = theme.btnFontSize || btnType.fs;
+  const btnFw = theme.boldWeight || btnType.fw;
+  document.getElementById('buttons-section').innerHTML = theme.buttons.map(b => {
+    const br = b.link ? '0' : `${r.button}px`;
+    const linkStyle = b.link ? 'text-decoration:underline;padding:8px 4px;border:none;' : '';
+    const fw = b.link ? 'inherit' : btnFw;
+    return `<div class="btn-wrap">
+      <div class="btn-label">${b.label}</div>
+      <div class="btn-sample" style="background:${b.bg};color:${b.text};border-color:${b.border};border-radius:${br};text-transform:${theme.textTransform};font-size:${btnFs}px;line-height:${btnType.lh}px;font-weight:${fw};${linkStyle}">${b.label}</div>
+      <div class="btn-meta">${btnFs}px / lh${btnType.lh} · w${btnFw} · bg ${b.bg}</div>
+    </div>`;
+  }).join('');
+
+  // ── Ribbons section ──
+  const ribbonType = TYPE_SCALE.ui.find(e => e.token === 'ribbon');
+  document.getElementById('ribbons-section').innerHTML = theme.ribbons.map(rb => {
+    return `<div class="btn-wrap">
+      <div class="btn-label">${rb.label}</div>
+      <div class="ribbon-sample" style="background:${rb.bg};color:${rb.text};border-radius:${r.ribbon}px;text-transform:${theme.textTransform};font-size:${ribbonType.fs}px;line-height:${ribbonType.lh}px;font-weight:${ribbonType.fw};font-family:${theme.ribbonFont || theme.fontMain};">${rb.label}</div>
+      <div class="btn-meta">bg ${rb.bg} · text ${rb.text} · r:${r.ribbon}px · ${ribbonType.fs}px/${ribbonType.lh} · fw${ribbonType.fw} · mob 12px</div>
+    </div>`;
+  }).join('');
+
+  // ── Price section ──
+  const p = theme.price;
+  document.getElementById('price-section').innerHTML = `
+    <div class="price-row">
+      <span class="price-selling" style="color:${p.selling}">$99.00</span>
+      <span class="price-crossed" style="color:${p.crossed}">$149.00</span>
+      <span class="price-discount-badge" style="color:${p.discountText};background:${p.discountBg}">–33%</span>
+      <span class="price-label">price/selling · price/crossed · price/discount</span>
+    </div>
+    <div class="price-row">
+      <span class="price-selling" style="color:${p.selling}">$49.00</span>
+      <span class="price-label">price/selling (no discount)</span>
+    </div>
+  `;
+
+  // ── Inputs section ──
+  document.getElementById('inputs-section').innerHTML = `
+    <div style="display:flex;flex-wrap:wrap;gap:24px;max-width:800px">
+      <div style="flex:1;min-width:220px">
+        <div style="font-size:11px;font-weight:600;color:${c.textSecondary};margin-bottom:6px;text-transform:uppercase;letter-spacing:0.06em">Text Input</div>
+        <input type="text" placeholder="Placeholder text" class="field-input" style="
+          width:100%;padding:10px 14px;
+          background:${c.inputBg};
+          border:1px solid ${c.inputBorder};
+          border-radius:${r.input}px;
+          color:${c.inputText};
+          font-family:${theme.fontMain};
+          font-size:14px;
+          outline:none;
+        " />
+        <div style="font-size:9px;color:${c.textSecondary};font-family:monospace;margin-top:4px">bg ${c.inputBg} · border ${c.inputBorder} · r:${r.input}px</div>
+      </div>
+      <div style="flex:1;min-width:220px">
+        <div style="font-size:11px;font-weight:600;color:${c.textSecondary};margin-bottom:6px;text-transform:uppercase;letter-spacing:0.06em">With Value</div>
+        <input type="text" value="user@example.com" class="field-input" style="
+          width:100%;padding:10px 14px;
+          background:${c.inputBg};
+          border:1px solid ${c.inputBorder};
+          border-radius:${r.input}px;
+          color:${c.inputText};
+          font-family:${theme.fontMain};
+          font-size:14px;
+          outline:none;
+        " />
+      </div>
+      <div style="flex:1;min-width:220px">
+        <div style="font-size:11px;font-weight:600;color:${c.textSecondary};margin-bottom:6px;text-transform:uppercase;letter-spacing:0.06em">Checkbox</div>
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-family:${theme.fontMain};font-size:14px;color:${c.textPrimary}">
+          <input type="checkbox" checked style="accent-color:${c.brandPrimary};width:16px;height:16px;cursor:pointer" />
+          Checked state
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;margin-top:8px;cursor:pointer;font-family:${theme.fontMain};font-size:14px;color:${c.textPrimary}">
+          <input type="checkbox" style="accent-color:${c.brandPrimary};width:16px;height:16px;cursor:pointer" />
+          Unchecked state
+        </label>
+      </div>
+    </div>
+  `;
+
+  // ── Radius — per-brand component values ──
+  document.getElementById('radius-lg').style.borderRadius = `${r.lg}px`;
+  document.getElementById('radius-lg-val').textContent = `${r.lg}px`;
+
+  document.getElementById('radius-components').innerHTML = [
+    { token: 'button', val: r.button },
+    { token: 'ribbon', val: r.ribbon },
+    { token: 'input',  val: r.input  },
+  ].map(item => `
+    <div class="radius-card">
+      <div class="radius-box" style="border-radius:${Math.min(item.val, 40)}px"></div>
+      <span class="radius-token">${item.token}</span>
+      <span class="radius-val">${item.val}px</span>
+    </div>
+  `).join('');
+
+  // ── Font specimens ──
+  const showSecondary = theme.fontSecondaryName !== theme.fontMainName;
+  const showTertiary = theme.fontTertiaryName && theme.fontTertiaryName !== theme.fontMainName && theme.fontTertiaryName !== theme.fontSecondaryName;
+  document.getElementById('font-specimens').innerHTML = [
+    { label: `Main — ${theme.fontMainName}`, family: theme.fontMain, bw: 700 },
+    ...(showSecondary ? [{ label: `Secondary — ${theme.fontSecondaryName}`, family: theme.fontSecondary, bw: 700 }] : []),
+    ...(showTertiary  ? [{ label: `Tertiary — ${theme.fontTertiaryName}`,   family: theme.fontTertiary,  bw: 700 }] : []),
+  ].map(f => `
+    <div>
+      <div style="font-size:11px;color:${c.textSecondary};margin-bottom:6px">${f.label}</div>
+      <div style="font-family:${f.family};font-size:22px;font-weight:400">The quick brown fox</div>
+      <div style="font-family:${f.family};font-size:22px;font-weight:${theme.boldWeight || f.bw};margin-top:2px">The quick brown fox</div>
+    </div>
+  `).join('');
+
+  // ── Type scale ──
+  document.getElementById('type-headlines').innerHTML  = TYPE_SCALE.headlines.map(e => typeRow(e, theme)).join('');
+  document.getElementById('type-paragraphs').innerHTML = TYPE_SCALE.paragraphs.map(e => typeRow(e, theme)).join('');
+  document.getElementById('type-body').innerHTML       = TYPE_SCALE.body.map(e => typeRow(e, theme)).join('');
+  document.getElementById('type-ui').innerHTML         = TYPE_SCALE.ui.map(e => typeRow(e, theme)).join('');
+}
+
+// ── Events ──
+document.querySelectorAll('.theme-btn').forEach(btn => {
+  btn.addEventListener('click', () => applyTheme(btn.dataset.theme));
+});
+
+// Sticky nav highlight
+const sections = document.querySelectorAll('section[id]');
+const navLinks  = document.querySelectorAll('.nav a');
+const io = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      navLinks.forEach(a => a.classList.remove('active'));
+      const l = document.querySelector(`.nav a[href="#${e.target.id}"]`);
+      if (l) l.classList.add('active');
+    }
+  });
+}, { threshold: 0.25 });
+sections.forEach(s => io.observe(s));
+
+// Init
+applyTheme('TGR');
+</script>
+</body>
+</html>

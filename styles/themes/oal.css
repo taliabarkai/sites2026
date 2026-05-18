@@ -1,0 +1,97 @@
+/**
+ * OAL — Oak and Luna
+ * Theme CSS custom properties
+ *
+ * Apply via [data-theme="oal"] on a root element.
+ * Components reference only the semantic variables below.
+ */
+
+/* ── Primitives (internal only) ───────────────────────────────────────────── */
+:root {
+  --oal-deep-blue: #393781;
+  --oal-terracotta: #cd644c;
+  --oal-warm-white: #f9f8f5;
+  --oal-light-grey: #ebebeb;
+  --oal-mid-grey: #9b9b9b;
+  --oal-dark-grey: #808080;
+  --oal-black: #1f1f1f;
+  --oal-white: #ffffff;
+  --oal-off-white: #f8f8f8;
+}
+
+/* ── Semantic tokens ──────────────────────────────────────────────────────── */
+[data-theme="oal"] {
+  /* Brand */
+  --brand-default-primary: var(--oal-deep-blue);
+  --brand-default-secondary: var(--oal-terracotta);
+
+  /* Surfaces */
+  --surface-primary: var(--oal-warm-white);
+  --surface-secondary: var(--oal-off-white);
+
+  /* Text */
+  --text: var(--oal-black);
+  --text-secondary: var(--oal-mid-grey);
+  --text-inverse: var(--oal-white);
+  --text-disabled: var(--oal-dark-grey);
+
+  /* Borders */
+  --border-default: var(--oal-light-grey);
+  --border-strong: var(--oal-black);
+
+  /* Footer */
+  --footer-main-background: var(--oal-white);
+  --footer-newsletter-background: var(--oal-deep-blue);
+  --footer-newsletter-text: var(--oal-white);
+
+  /* Form */
+  --formfield-background: var(--oal-white);
+  --formfield-border: var(--oal-light-grey);
+  --formfield-placeholder: var(--oal-mid-grey);
+
+  /* Ribbon */
+  --ribbon-background: var(--oal-black);
+  --ribbon-text: var(--oal-white);
+
+  /* Announcement bar */
+  --announcement-background: var(--oal-deep-blue);
+  --announcement-text: var(--oal-white);
+
+  /* Typography */
+  --font-family-heading: 'Bebas Neue', sans-serif;
+  --font-family-body: 'Akatab', 'Helvetica Neue', Helvetica, sans-serif;
+
+  /* Spacing (shared, never overridden per theme) */
+  --spacing-xxxs: 2px;
+  --spacing-xxs: 4px;
+  --spacing-xs: 8px;
+  --spacing-sm: 12px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  --spacing-2xl: 48px;
+  --spacing-3xl: 64px;
+  --spacing-4xl: 96px;
+
+  /* Layout */
+  --layout-max-width: 1440px;
+  --layout-content-width: 1200px;
+  --layout-page-margin: 32px;
+  --layout-header-height: 64px;
+  --field-min-height: 44px;
+
+  /* Border radius — OAL is sharp (near zero) */
+  --radius-sm: 0px;
+  --radius-md: 0px;
+  --radius-lg: 4px;
+  --radius-xl: 8px;
+  --radius-full: 9999px;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
+
+  /* Transitions */
+  --transition-fast: 150ms ease;
+  --transition-base: 250ms ease;
+}

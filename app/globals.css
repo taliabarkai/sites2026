@@ -1,0 +1,41 @@
+/* ── OAL: Bebas Neue (display heading font) ─────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap');
+
+@import "tailwindcss";
+
+/* ── MNN: Ano (local font) ───────────────────────────────────────────────── */
+@font-face {
+  font-family: 'Ano';
+  src: url('/fonts/AnoRegular-Regular.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Ano';
+  src: url('/fonts/AnoHalf-Regular.otf') format('opentype');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Ano';
+  src: url('/fonts/AnoBold-Regular.otf') format('opentype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ── Global resets ──────────────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}

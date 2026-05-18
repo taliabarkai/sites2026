@@ -1,0 +1,63 @@
+/* [project]/styles/themes/oal.css [app-client] (css) */
+:root {
+  --oal-deep-blue: #393781;
+  --oal-terracotta: #cd644c;
+  --oal-warm-white: #f9f8f5;
+  --oal-light-grey: #ebebeb;
+  --oal-mid-grey: #9b9b9b;
+  --oal-dark-grey: gray;
+  --oal-black: #1f1f1f;
+  --oal-white: #fff;
+  --oal-off-white: #f8f8f8;
+}
+
+[data-theme="oal"] {
+  --brand-default-primary: var(--oal-deep-blue);
+  --brand-default-secondary: var(--oal-terracotta);
+  --surface-primary: var(--oal-warm-white);
+  --surface-secondary: var(--oal-off-white);
+  --text: var(--oal-black);
+  --text-secondary: var(--oal-mid-grey);
+  --text-inverse: var(--oal-white);
+  --text-disabled: var(--oal-dark-grey);
+  --border-default: var(--oal-light-grey);
+  --border-strong: var(--oal-black);
+  --footer-main-background: var(--oal-white);
+  --footer-newsletter-background: var(--oal-deep-blue);
+  --footer-newsletter-text: var(--oal-white);
+  --formfield-background: var(--oal-white);
+  --formfield-border: var(--oal-light-grey);
+  --formfield-placeholder: var(--oal-mid-grey);
+  --ribbon-background: var(--oal-black);
+  --ribbon-text: var(--oal-white);
+  --announcement-background: var(--oal-deep-blue);
+  --announcement-text: var(--oal-white);
+  --font-family-heading: "Bebas Neue", sans-serif;
+  --font-family-body: "Akatab", "Helvetica Neue", Helvetica, sans-serif;
+  --spacing-xxxs: 2px;
+  --spacing-xxs: 4px;
+  --spacing-xs: 8px;
+  --spacing-sm: 12px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  --spacing-2xl: 48px;
+  --spacing-3xl: 64px;
+  --spacing-4xl: 96px;
+  --layout-max-width: 1440px;
+  --layout-content-width: 1200px;
+  --layout-page-margin: 32px;
+  --layout-header-height: 64px;
+  --field-min-height: 44px;
+  --radius-sm: 0px;
+  --radius-md: 0px;
+  --radius-lg: 4px;
+  --radius-xl: 8px;
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 3px #00000014;
+  --shadow-md: 0 4px 12px #0000001a;
+  --transition-fast: .15s ease;
+  --transition-base: .25s ease;
+}
+
+/*# sourceMappingURL=styles_themes_oal_css_0w3-wzy._.single.css.map*/
