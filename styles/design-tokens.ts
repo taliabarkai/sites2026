@@ -220,9 +220,11 @@ export interface Typography {
 
 export const typography = rawTokens.typography as unknown as Typography
 
-/** Resolve a fontFamily key to the actual CSS font-family string */
-export function resolveFontFamily(key: 'main' | 'secondary'): string {
-  return typography.fontFamilies[key]
+export const fonts = rawTokens.fonts
+
+/** Resolve a fontFamily key to the actual CSS font-family string (default brand: TGR) */
+export function resolveFontFamily(key: 'main' | 'secondary', brand: BrandKey = 'TGR'): string {
+  return fonts[key][brand]
 }
 
 // ─── Spacing ─────────────────────────────────────────────────────────────────
@@ -248,17 +250,28 @@ export function px(value: number): string {
 
 // ─── Border Radius ────────────────────────────────────────────────────────────
 
-export interface BorderRadius {
-  none: number
-  sm: number
-  md: number
-  lg: number
-  xl: number
-  xxl: number
-  full: number
+export type BrandKey = 'OAL' | 'MNN' | 'TGR' | 'LAL' | 'IB'
+
+export interface BrandTokenValue {
+  OAL: number
+  MNN: number
+  TGR: number
+  LAL: number
+  IB: number
 }
 
-export const radii = rawTokens.radius as unknown as BorderRadius
+export interface BorderRadius {
+  sm: BrandTokenValue
+  md: BrandTokenValue
+  lg: BrandTokenValue
+  xl: BrandTokenValue
+  xxl: BrandTokenValue
+  button: BrandTokenValue
+  ribbon: BrandTokenValue
+  input: BrandTokenValue
+}
+
+export const radii = rawTokens.radius as BorderRadius
 
 // ─── Shadows ─────────────────────────────────────────────────────────────────
 
@@ -271,7 +284,14 @@ export interface Shadows {
   xxl: string
 }
 
-export const shadows = rawTokens.shadows as unknown as Shadows
+export const shadows = {
+  none: 'none',
+  sm: '0 1px 3px rgba(0,0,0,0.08)',
+  md: '0 4px 12px rgba(0,0,0,0.10)',
+  lg: '0 8px 24px rgba(0,0,0,0.12)',
+  xl: '0 16px 40px rgba(0,0,0,0.14)',
+  xxl: '0 24px 64px rgba(0,0,0,0.16)',
+} as Shadows
 
 // ─── Breakpoints ─────────────────────────────────────────────────────────────
 
@@ -283,7 +303,13 @@ export interface Breakpoints {
   '2xl': string
 }
 
-export const breakpoints = rawTokens.breakpoints as unknown as Breakpoints
+export const breakpoints = {
+  sm: '640px',
+  md: '768px',
+  lg: '1024px',
+  xl: '1280px',
+  '2xl': '1536px',
+} as Breakpoints
 
 /** Returns the numeric value of a breakpoint, e.g. breakpointValue('lg') → 1024 */
 export function breakpointValue(key: keyof Breakpoints): number {
@@ -301,7 +327,14 @@ export interface Layout {
   borderWidth: number
 }
 
-export const layout = rawTokens.layout as unknown as Layout
+export const layout = {
+  containerNarrow: 768,
+  containerWide: 1200,
+  headerHeight: 64,
+  pageMargin: 32,
+  fieldMinHeight: 44,
+  borderWidth: 1,
+} as Layout
 
 // ─── Convenience re-exports ───────────────────────────────────────────────────
 
@@ -312,6 +345,7 @@ export const semanticColorMap: Record<string, HexColor> = colors.semantic as unk
 const designTokens = {
   colors,
   typography,
+  fonts,
   spacing,
   radii,
   shadows,
