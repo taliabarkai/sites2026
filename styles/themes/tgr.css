@@ -1,9 +1,81 @@
 /**
  * TGR — Theo Grace
- * Theme CSS custom properties
  * Apply via [data-theme="tgr"] on a root element.
  */
 
 [data-theme="tgr"] {
-  /* Tokens to be defined */
+  --brand-default-primary: #1e1e1e;
+  --brand-default-secondary: #ffffff;
+
+  --surface-primary: #f8f8f8;
+  --surface-secondary: #f4f1ee;
+
+  --text: #1e1e1e;
+  --text-secondary: #808080;
+  --text-inverse: #ffffff;
+  --text-disabled: #f8f8f8;
+
+  --border-default: #ebebeb;
+  --border-strong: #1e1e1e;
+
+  --footer-main-background: #f4f1ee;
+  --footer-newsletter-background: #bedff7;
+  --footer-newsletter-text: #1e1e1e;
+
+  --formfield-background: #ffffff;
+  --formfield-border: #ebebeb;
+  --formfield-placeholder: #808080;
+
+  --announcement-background: #f4f1ee;
+  --announcement-text: #1e1e1e;
+
+  --ribbon-background: #bedff7;
+  --ribbon-text: #1e1e1e;
+
+  --font-family-heading: 'Big Caslon', Georgia, serif;
+  --font-family-body: 'Lato', system-ui, sans-serif;
+
+  --spacing-xxxs: 2px;
+  --spacing-xxs: 4px;
+  --spacing-xs: 8px;
+  --spacing-sm: 12px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  --spacing-2xl: 48px;
+  --spacing-3xl: 64px;
+  --spacing-4xl: 96px;
+
+  --layout-max-width: 1440px;
+  --layout-content-width: 1200px;
+  --layout-page-margin: 32px;
+  --layout-header-height: 64px;
+  --layout-topline-height: 36px;
+  --field-min-height: 44px;
+
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 20px;
+  --radius-full: 100px;
+
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
+
+  --transition-fast: 150ms ease;
+  --transition-base: 250ms ease;
+
+  /* Buttons */
+  --button-primary-background: #1e1e1e;
+  --button-primary-text: #ffffff;
+  --button-primary-border: transparent;
+  --button-secondary-background: #ffffff;
+  --button-secondary-text: #1e1e1e;
+  --button-secondary-border: #1e1e1e;
+  --radius-button: 100px;
+  --button-font-size: 16px;
+  --button-line-height: 20px;
+  --button-font-weight: 700;
+  --button-letter-spacing: normal;
+  --button-text-transform: capitalize;
 }

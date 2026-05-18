@@ -1,9 +1,81 @@
 /**
  * MNN — MYKA (My Name Necklace)
- * Theme CSS custom properties
  * Apply via [data-theme="mnn"] on a root element.
  */
 
 [data-theme="mnn"] {
-  /* Tokens to be defined */
+  --brand-default-primary: #000000;
+  --brand-default-secondary: #ffffff;
+
+  --surface-primary: #f7f7f4;
+  --surface-secondary: #f4eee9;
+
+  --text: #000000;
+  --text-secondary: #808080;
+  --text-inverse: #ffffff;
+  --text-disabled: #f8f8f8;
+
+  --border-default: #ebebeb;
+  --border-strong: #000000;
+
+  --footer-main-background: #f7f7f4;
+  --footer-newsletter-background: #f4eee9;
+  --footer-newsletter-text: #000000;
+
+  --formfield-background: #f7f7f4;
+  --formfield-border: #ebebeb;
+  --formfield-placeholder: #808080;
+
+  --announcement-background: #ede3db;
+  --announcement-text: #1f1f1f;
+
+  --ribbon-background: #ffffff;
+  --ribbon-text: #000000;
+
+  --font-family-heading: 'Ano', 'Arial Narrow', sans-serif;
+  --font-family-body: 'Ano', 'Arial Narrow', sans-serif;
+
+  --spacing-xxxs: 2px;
+  --spacing-xxs: 4px;
+  --spacing-xs: 8px;
+  --spacing-sm: 12px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  --spacing-2xl: 48px;
+  --spacing-3xl: 64px;
+  --spacing-4xl: 96px;
+
+  --layout-max-width: 1440px;
+  --layout-content-width: 1200px;
+  --layout-page-margin: 32px;
+  --layout-header-height: 64px;
+  --layout-topline-height: 36px;
+  --field-min-height: 44px;
+
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 20px;
+  --radius-full: 100px;
+
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
+
+  --transition-fast: 150ms ease;
+  --transition-base: 250ms ease;
+
+  /* Buttons */
+  --button-primary-background: #000000;
+  --button-primary-text: #ffffff;
+  --button-primary-border: #000000;
+  --button-secondary-background: transparent;
+  --button-secondary-text: #000000;
+  --button-secondary-border: #000000;
+  --radius-button: 4px;
+  --button-font-size: 14px;
+  --button-line-height: 20px;
+  --button-font-weight: 700;
+  --button-letter-spacing: 1px;
+  --button-text-transform: uppercase;
 }

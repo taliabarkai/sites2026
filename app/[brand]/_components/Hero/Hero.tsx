@@ -1,0 +1,55 @@
+import { DEFAULT_HERO, HERO_IMAGES } from '../../_config/siteContent'
+import { Button } from '../Button'
+import styles from './Hero.module.css'
+
+export interface HeroProps {
+  eyebrow?: string
+  title?: string
+  description?: string
+  ctaPrimary?: { label: string; href: string }
+  ctaSecondary?: { label: string; href: string }
+  imageAlt?: string
+  imageDesktop?: string
+  imageMobile?: string
+}
+
+export function Hero({
+  eyebrow = DEFAULT_HERO.eyebrow,
+  title = DEFAULT_HERO.title,
+  description = DEFAULT_HERO.description,
+  ctaPrimary = DEFAULT_HERO.ctaPrimary,
+  ctaSecondary = DEFAULT_HERO.ctaSecondary,
+  imageAlt = DEFAULT_HERO.imageAlt,
+  imageDesktop = HERO_IMAGES.desktop,
+  imageMobile = HERO_IMAGES.mobile,
+}: HeroProps) {
+  return (
+    <section className={styles.hero} aria-labelledby="home-hero-title">
+      <picture className={styles.media}>
+        <source media="(min-width: 768px)" srcSet={imageDesktop} />
+        <img
+          src={imageMobile}
+          alt={imageAlt}
+          className={styles.mediaImage}
+          fetchPriority="high"
+          decoding="async"
+        />
+      </picture>
+      <div className={styles.content}>
+        <p className={styles.eyebrow}>{eyebrow}</p>
+        <h1 id="home-hero-title" className={styles.title}>
+          {title}
+        </h1>
+        <p className={styles.description}>{description}</p>
+        <div className={styles.actions}>
+          <Button href={ctaPrimary.href} variant="primary">
+            {ctaPrimary.label}
+          </Button>
+          <Button href={ctaSecondary.href} variant="secondary">
+            {ctaSecondary.label}
+          </Button>
+        </div>
+      </div>
+    </section>
+  )
+}

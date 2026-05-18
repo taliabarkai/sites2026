@@ -1,9 +1,81 @@
 /**
  * IB — Israel Blessing
- * Theme CSS custom properties
  * Apply via [data-theme="ib"] on a root element.
  */
 
 [data-theme="ib"] {
-  /* Tokens to be defined */
+  --brand-default-primary: #122f4f;
+  --brand-default-secondary: #ffffff;
+
+  --surface-primary: #f3f5f6;
+  --surface-secondary: #f9f8f7;
+
+  --text: #122f4f;
+  --text-secondary: #bebebe;
+  --text-inverse: #ffffff;
+  --text-disabled: #f8f8f8;
+
+  --border-default: #ebebeb;
+  --border-strong: #122f4f;
+
+  --footer-main-background: #f3f5f6;
+  --footer-newsletter-background: #e0dcd5;
+  --footer-newsletter-text: #122f4f;
+
+  --formfield-background: #f3f5f6;
+  --formfield-border: #ebebeb;
+  --formfield-placeholder: #bebebe;
+
+  --announcement-background: #122f4f;
+  --announcement-text: #ffffff;
+
+  --ribbon-background: #8e9279;
+  --ribbon-text: #ffffff;
+
+  --font-family-heading: 'Assistant', system-ui, sans-serif;
+  --font-family-body: 'Assistant', system-ui, sans-serif;
+
+  --spacing-xxxs: 2px;
+  --spacing-xxs: 4px;
+  --spacing-xs: 8px;
+  --spacing-sm: 12px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  --spacing-2xl: 48px;
+  --spacing-3xl: 64px;
+  --spacing-4xl: 96px;
+
+  --layout-max-width: 1440px;
+  --layout-content-width: 1200px;
+  --layout-page-margin: 32px;
+  --layout-header-height: 64px;
+  --layout-topline-height: 36px;
+  --field-min-height: 44px;
+
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-full: 9999px;
+
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
+
+  --transition-fast: 150ms ease;
+  --transition-base: 250ms ease;
+
+  /* Buttons */
+  --button-primary-background: #8e9279;
+  --button-primary-text: #ffffff;
+  --button-primary-border: #8e9279;
+  --button-secondary-background: #ffffff;
+  --button-secondary-text: #122f4f;
+  --button-secondary-border: #122f4f;
+  --radius-button: 4px;
+  --button-font-size: 16px;
+  --button-line-height: 20px;
+  --button-font-weight: 700;
+  --button-letter-spacing: 1px;
+  --button-text-transform: uppercase;
 }

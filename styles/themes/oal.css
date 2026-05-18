@@ -41,7 +41,7 @@
 
   /* Footer */
   --footer-main-background: var(--oal-white);
-  --footer-newsletter-background: var(--oal-deep-blue);
+  --footer-newsletter-background: var(--oal-black);
   --footer-newsletter-text: var(--oal-white);
 
   /* Form */
@@ -54,7 +54,7 @@
   --ribbon-text: var(--oal-white);
 
   /* Announcement bar */
-  --announcement-background: var(--oal-deep-blue);
+  --announcement-background: var(--oal-black);
   --announcement-text: var(--oal-white);
 
   /* Typography */
@@ -78,6 +78,7 @@
   --layout-content-width: 1200px;
   --layout-page-margin: 32px;
   --layout-header-height: 64px;
+  --layout-topline-height: 36px;
   --field-min-height: 44px;
 
   /* Border radius — OAL is sharp (near zero) */
@@ -94,4 +95,18 @@
   /* Transitions */
   --transition-fast: 150ms ease;
   --transition-base: 250ms ease;
+
+  /* Buttons */
+  --button-primary-background: #000000;
+  --button-primary-text: #ffffff;
+  --button-primary-border: transparent;
+  --button-secondary-background: transparent;
+  --button-secondary-text: #000000;
+  --button-secondary-border: #000000;
+  --radius-button: 0px;
+  --button-font-size: 14px;
+  --button-line-height: 17px;
+  --button-font-weight: 600;
+  --button-letter-spacing: 0.6px;
+  --button-text-transform: uppercase;
 }

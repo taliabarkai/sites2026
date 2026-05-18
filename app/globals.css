@@ -39,3 +39,9 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+[data-theme] {
+  background: var(--surface-primary);
+  color: var(--text);
+  font-family: var(--font-family-body);
+}

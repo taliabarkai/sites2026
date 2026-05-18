@@ -10,6 +10,7 @@
  * Radius: 0 (sharp edges, OAL style)
  */
 
+import { ThemeSwitcher } from '../_components/ThemeSwitcher'
 import styles from './CategoryPage.module.css'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -186,6 +187,7 @@ function Header() {
 
       {/* Icons */}
       <div className={styles.headerIcons}>
+        <ThemeSwitcher />
         {/* Search */}
         <button className={styles.headerIcon} aria-label="Search">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">

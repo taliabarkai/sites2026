@@ -1,9 +1,81 @@
 /**
  * LAL — Lime and Lou
- * Theme CSS custom properties
  * Apply via [data-theme="lal"] on a root element.
  */
 
 [data-theme="lal"] {
-  /* Tokens to be defined */
+  --brand-default-primary: #e8ff36;
+  --brand-default-secondary: #000000;
+
+  --surface-primary: #f5f5f5;
+  --surface-secondary: #ebe2de;
+
+  --text: #000000;
+  --text-secondary: #989898;
+  --text-inverse: #ffffff;
+  --text-disabled: #f5f5f5;
+
+  --border-default: #e3e3e3;
+  --border-strong: #000000;
+
+  --footer-main-background: #f5f5f5;
+  --footer-newsletter-background: #e8ff36;
+  --footer-newsletter-text: #000000;
+
+  --formfield-background: #ffffff;
+  --formfield-border: #e3e3e3;
+  --formfield-placeholder: #989898;
+
+  --announcement-background: #000000;
+  --announcement-text: #ffffff;
+
+  --ribbon-background: #000000;
+  --ribbon-text: #ffffff;
+
+  --font-family-heading: 'EB Garamond', Georgia, serif;
+  --font-family-body: 'Poppins', system-ui, sans-serif;
+
+  --spacing-xxxs: 2px;
+  --spacing-xxs: 4px;
+  --spacing-xs: 8px;
+  --spacing-sm: 12px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  --spacing-2xl: 48px;
+  --spacing-3xl: 64px;
+  --spacing-4xl: 96px;
+
+  --layout-max-width: 1440px;
+  --layout-content-width: 1200px;
+  --layout-page-margin: 32px;
+  --layout-header-height: 64px;
+  --layout-topline-height: 36px;
+  --field-min-height: 44px;
+
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-full: 9999px;
+
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
+
+  --transition-fast: 150ms ease;
+  --transition-base: 250ms ease;
+
+  /* Buttons */
+  --button-primary-background: #000000;
+  --button-primary-text: #ffffff;
+  --button-primary-border: transparent;
+  --button-secondary-background: transparent;
+  --button-secondary-text: #000000;
+  --button-secondary-border: #000000;
+  --radius-button: 0px;
+  --button-font-size: 14px;
+  --button-line-height: 18px;
+  --button-font-weight: 600;
+  --button-letter-spacing: normal;
+  --button-text-transform: uppercase;
 }

@@ -1,0 +1,14 @@
+.logo {
+  display: block;
+  height: 32px;
+  width: auto;
+  max-width: min(200px, 42vw);
+  flex-shrink: 0;
+  object-fit: contain;
+  transition: filter var(--transition-base);
+}
+
+/* Match header icons: dark CDN SVGs → white on transparent shell */
+.inverse {
+  filter: brightness(0) invert(1);
+}
