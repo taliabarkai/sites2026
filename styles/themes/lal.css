@@ -36,6 +36,7 @@
 
   --font-family-heading: 'EB Garamond', Georgia, serif;
   --font-family-body: 'Poppins', system-ui, sans-serif;
+  --nav-text-transform: uppercase;
 
   --spacing-xxxs: 2px;
   --spacing-xxs: 4px;
@@ -48,7 +49,7 @@
   --spacing-3xl: 64px;
   --spacing-4xl: 96px;
 
-  --layout-max-width: 1440px;
+  --layout-max-width: 1920px;
   --layout-content-width: 1200px;
   --layout-page-margin: 32px;
   --layout-header-height: 64px;

@@ -11,6 +11,7 @@ export interface HeroProps {
   imageAlt?: string
   imageDesktop?: string
   imageMobile?: string
+  transparentHeader?: boolean
 }
 
 export function Hero({
@@ -22,9 +23,11 @@ export function Hero({
   imageAlt = DEFAULT_HERO.imageAlt,
   imageDesktop = HERO_IMAGES.desktop,
   imageMobile = HERO_IMAGES.mobile,
+  transparentHeader = false,
 }: HeroProps) {
+  const heroClass = [styles.hero, transparentHeader ? styles.heroTransparent : ''].join(' ').trim()
   return (
-    <section className={styles.hero} aria-labelledby="home-hero-title">
+    <section className={heroClass} aria-labelledby="home-hero-title">
       <picture className={styles.media}>
         <source media="(min-width: 768px)" srcSet={imageDesktop} />
         <img
@@ -44,9 +47,6 @@ export function Hero({
         <div className={styles.actions}>
           <Button href={ctaPrimary.href} variant="primary">
             {ctaPrimary.label}
-          </Button>
-          <Button href={ctaSecondary.href} variant="secondary">
-            {ctaSecondary.label}
           </Button>
         </div>
       </div>

@@ -5,13 +5,25 @@ import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { DEFAULT_NAV_LINKS, DEFAULT_TOPLINE, type NavLink } from '../../_config/siteContent'
 import { Button } from '../Button'
-import { IconAccount, IconCart, IconClose, IconMenu, IconSearch } from '../icons/Icons'
+import * as oalIcons from '@/src/components/icons/oal'
+import * as mnnIcons from '@/src/components/icons/mnn'
+import * as tgrIcons from '@/src/components/icons/tgr'
+import * as lalIcons from '@/src/components/icons/lal'
+import * as ibIcons from '@/src/components/icons/ib'
 import { SiteLogo } from '../SiteLogo'
 import { ThemeSwitcher } from '../ThemeSwitcher'
 import { Topline, type ToplineProps } from '../Topline'
 import { getBrandFromPathname, getBrandHomePath, resolveBrand, type BrandKey } from '../../_config/brands'
 import styles from './Header.module.css'
 import { useHeaderScroll } from './useHeaderScroll'
+
+const BRAND_ICONS = {
+  oal: oalIcons,
+  mnn: mnnIcons,
+  tgr: tgrIcons,
+  lal: lalIcons,
+  ib: ibIcons,
+} as const
 
 export type HeaderVariant = 'white' | 'transparent'
 
@@ -35,6 +47,9 @@ export function Header({
   const isScrolled = useHeaderScroll()
   const [menuOpen, setMenuOpen] = useState(false)
   const isSolid = variant === 'white' || isScrolled
+
+  const icons = BRAND_ICONS[brandSegment]
+  const { HamburgerIcon, XIcon, MagnifyingGlassIcon, PersonIcon, ShoppingBagIcon } = icons
 
   useEffect(() => {
     document.body.style.overflow = menuOpen ? 'hidden' : ''
@@ -62,10 +77,10 @@ export function Header({
                 aria-expanded={menuOpen}
                 onClick={() => setMenuOpen((open) => !open)}
               >
-                {menuOpen ? <IconClose /> : <IconMenu />}
+                {menuOpen ? <XIcon /> : <HamburgerIcon />}
               </button>
               <button type="button" className={styles.iconButton} aria-label="Search">
-                <IconSearch />
+                <MagnifyingGlassIcon />
               </button>
             </div>
 
@@ -98,13 +113,13 @@ export function Header({
             <div className={styles.actions}>
               <ThemeSwitcher brand={brandSegment} />
               <button type="button" className={styles.iconButton} aria-label="Search">
-                <IconSearch />
+                <MagnifyingGlassIcon />
               </button>
               <button type="button" className={styles.iconButton} aria-label="Account">
-                <IconAccount />
+                <PersonIcon />
               </button>
               <button type="button" className={styles.iconButton} aria-label="Cart">
-                <IconCart />
+                <ShoppingBagIcon />
               </button>
             </div>
           </div>
@@ -128,7 +143,7 @@ export function Header({
                 aria-label="Close menu"
                 onClick={() => setMenuOpen(false)}
               >
-                <IconClose />
+                <XIcon />
               </button>
             </div>
             <ul className={styles.drawerList}>

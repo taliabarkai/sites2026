@@ -41,16 +41,18 @@ export function HomePageClient() {
     trackHref: withBrandPrefix(brand, DEFAULT_TOPLINE.trackHref),
   }
 
+  const transparentHeader = brand === 'oal'
+
   return (
     <div className={styles.page}>
       <Header
-        variant="transparent"
+        variant={transparentHeader ? 'transparent' : 'white'}
         brand={brand}
         navLinks={navLinks}
         topline={topline}
       />
       <main id="main-content">
-        <Hero {...hero} />
+        <Hero {...hero} transparentHeader={transparentHeader} />
       </main>
       <Footer columns={footerColumns} />
     </div>

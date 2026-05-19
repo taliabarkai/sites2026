@@ -1,0 +1,24 @@
+import React from 'react'
+import type { IconProps } from '../Icon'
+
+export function BulletListIcon({ size = 24, color = 'currentColor', className }: IconProps) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+      style={{ color }}
+    >
+      <path d="M19.38 2.92999H5.62001C4.6977 2.92999 3.95001 3.67768 3.95001 4.59999V18.76C3.95001 19.6823 4.6977 20.43 5.62001 20.43H19.38C20.3023 20.43 21.05 19.6823 21.05 18.76V4.59999C21.05 3.67768 20.3023 2.92999 19.38 2.92999Z" stroke="currentColor" strokeWidth="0.9"/>
+<path d="M7.58002 7.98001H8.14002" stroke="currentColor" strokeWidth="0.9" strokeLinecap="round"/>
+<path d="M9.83002 7.98001H17.42" stroke="currentColor" strokeWidth="0.9" strokeLinecap="round"/>
+<path d="M7.58002 11.68H8.14002" stroke="currentColor" strokeWidth="0.9" strokeLinecap="round"/>
+<path d="M9.83002 11.68H17.42" stroke="currentColor" strokeWidth="0.9" strokeLinecap="round"/>
+<path d="M7.58002 15.37H8.14002" stroke="currentColor" strokeWidth="0.9" strokeLinecap="round"/>
+<path d="M9.83002 15.37H17.42" stroke="currentColor" strokeWidth="0.9" strokeLinecap="round"/>
+    </svg>
+  )
+}

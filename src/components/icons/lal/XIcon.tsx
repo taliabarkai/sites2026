@@ -1,0 +1,18 @@
+import React from 'react'
+import type { IconProps } from '../Icon'
+
+export function XIcon({ size = 24, color = 'currentColor', className }: IconProps) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+      style={{ color }}
+    >
+      <path d="M20 5.03L18.98 4L12 10.97L5.03 4L4 5.03L10.98 12L4 18.97L5.03 20L12 13.03L18.98 20L20 18.97L13.03 12L20 5.03Z" fill="currentColor"/>
+    </svg>
+  )
+}

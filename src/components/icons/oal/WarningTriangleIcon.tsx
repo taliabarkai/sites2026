@@ -1,0 +1,20 @@
+import React from 'react'
+import type { IconProps } from '../Icon'
+
+export function WarningTriangleIcon({ size = 24, color = 'currentColor', className }: IconProps) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+      style={{ color }}
+    >
+      <path d="M20.1167 17.0055L13.45 5.33881C13.3047 5.08231 13.0939 4.86897 12.8391 4.72053C12.5844 4.5721 12.2949 4.4939 12 4.4939C11.7052 4.4939 11.4157 4.5721 11.1609 4.72053C10.9062 4.86897 10.6954 5.08231 10.55 5.33881L3.88336 17.0055C3.73643 17.26 3.65938 17.5487 3.66004 17.8426C3.66069 18.1363 3.739 18.4248 3.88706 18.6787C4.03513 18.9325 4.24765 19.1426 4.5031 19.2878C4.75856 19.4331 5.04786 19.5081 5.34169 19.5055H18.6751C18.9674 19.5052 19.2547 19.428 19.5078 19.2816C19.7609 19.1351 19.9711 18.9247 20.1171 18.6713C20.2632 18.4181 20.3401 18.1308 20.3399 17.8383C20.3399 17.546 20.2629 17.2587 20.1167 17.0055Z" fill="#CD644C" stroke="#CD644C" strokeWidth="1.66666" strokeLinecap="round" strokeLinejoin="round"/>
+<path d="M12.0082 9.50537V12.8387" stroke="white" strokeWidth="1.66666" strokeLinecap="round" strokeLinejoin="round"/>
+<path d="M12.0082 16.1721H12.0155" stroke="white" strokeWidth="1.66666" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  )
+}

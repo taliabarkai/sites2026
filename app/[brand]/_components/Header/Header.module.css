@@ -44,7 +44,7 @@
 .mobileLeft {
   display: flex;
   align-items: center;
-  gap: var(--spacing-xs);
+  gap: 12px;
 }
 
 .logo {
@@ -77,6 +77,7 @@
   font-family: var(--font-family-body);
   font-size: 14px;
   font-weight: 600;
+  text-transform: var(--nav-text-transform, none);
   text-decoration: none;
   color: inherit;
   transition: opacity var(--transition-fast);
@@ -91,7 +92,7 @@
   align-items: center;
   justify-content: flex-end;
   justify-self: end;
-  gap: var(--spacing-xs);
+  gap: 12px;
 }
 
 .actions .iconButton:first-child {
@@ -102,8 +103,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
+  width: 24px;
+  height: 24px;
   padding: 0;
   border: none;
   background: transparent;

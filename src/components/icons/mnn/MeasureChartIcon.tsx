@@ -1,0 +1,21 @@
+import React from 'react'
+import type { IconProps } from '../Icon'
+
+export function MeasureChartIcon({ size = 24, color = 'currentColor', className }: IconProps) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+      style={{ color }}
+    >
+      <path d="M18.2459 5.16882H5.84783C5.39199 5.16882 5.02246 5.53835 5.02246 5.99419V16.0508C5.02246 16.5066 5.39199 16.8761 5.84783 16.8761H18.2459C18.7017 16.8761 19.0712 16.5066 19.0712 16.0508V5.99419C19.0712 5.53835 18.7017 5.16882 18.2459 5.16882Z" stroke="currentColor" strokeWidth="0.878049"/>
+<path d="M5.41461 9.21948H19.0478" stroke="currentColor" strokeWidth="0.878049"/>
+<path d="M5.41461 12.7317H19.0478" stroke="currentColor" strokeWidth="0.878049"/>
+<path d="M12.2927 5.58435L12.3044 16.6829" stroke="currentColor" strokeWidth="0.878049"/>
+    </svg>
+  )
+}

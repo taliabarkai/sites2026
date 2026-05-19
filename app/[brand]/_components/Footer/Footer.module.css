@@ -20,9 +20,9 @@
 
 .lower {
   display: flex;
-  flex-direction: column;
+  flex-direction: column-reverse;
   gap: var(--spacing-md);
-  padding: var(--spacing-lg) var(--spacing-md) var(--spacing-2xl);
+  padding: var(--spacing-lg) var(--spacing-md) var(--spacing-lg);
   border-top: 1px solid var(--border-default);
 }
 
@@ -77,6 +77,6 @@
     justify-content: space-between;
     max-width: var(--layout-max-width);
     margin: 0 auto;
-    padding: var(--spacing-lg) var(--layout-page-margin) var(--spacing-2xl);
+    padding: var(--spacing-lg) var(--layout-page-margin) var(--spacing-lg);
   }
 }

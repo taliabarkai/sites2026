@@ -1,0 +1,18 @@
+import React from 'react'
+import type { IconProps } from '../Icon'
+
+export function StarIcon({ size = 24, color = 'currentColor', className }: IconProps) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+      style={{ color }}
+    >
+      <path d="M14.292 9.57588L14.352 9.79188H14.568H21.744L15.588 14.2679L15.396 14.3999L15.48 14.6159L18.252 21.8279L12.18 17.3999L12 17.2799L11.82 17.3999L5.74798 21.8279L8.51998 14.6159L8.60398 14.3999L8.41198 14.2679L2.25598 9.79188H9.43198H9.64798L9.70798 9.57588L12 2.32788L14.292 9.57588Z" fill="currentColor" stroke="currentColor" strokeWidth="0.6"/>
+    </svg>
+  )
+}

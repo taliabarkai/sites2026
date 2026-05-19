@@ -1,0 +1,20 @@
+import React from 'react'
+import type { IconProps } from '../Icon'
+
+export function EyeIcon({ size = 24, color = 'currentColor', className }: IconProps) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+      style={{ color }}
+    >
+      <path d="M13.58 11.98C13.58 12.86 12.87 13.56 12 13.56C11.13 13.56 10.42 12.86 10.42 11.98C10.42 11.11 11.13 10.4 12 10.4C12.87 10.4 13.58 11.11 13.58 11.98Z" stroke="currentColor" strokeWidth="0.71"/>
+<path d="M3.16002 12.2C3.08002 12.11 3.01002 12.03 2.96002 11.96C3.01002 11.9 3.08002 11.82 3.15002 11.73C5.18002 9.76997 9.88002 7.02997 14.03 7.53997C18.16 8.02997 20.52 11.96 21.01 11.96C18.52 14.63 16.16 15.96 14.03 16.46C11.85 16.98 9.88002 16.63 8.21002 15.94C6.54002 15.24 5.18002 14.19 4.24002 13.31C3.77002 12.88 3.40002 12.48 3.16002 12.2Z" stroke="currentColor" strokeWidth="0.71"/>
+<path d="M4.40002 19.33L19.13 5.13" stroke="currentColor" strokeWidth="0.71"/>
+    </svg>
+  )
+}

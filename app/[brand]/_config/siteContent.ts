@@ -24,13 +24,11 @@ export const DEFAULT_TOPLINE = {
 }
 
 export const DEFAULT_NAV_LINKS: NavLink[] = [
-  { label: 'Necklaces', href: '/category' },
-  { label: 'Bracelets', href: '/bracelets' },
-  { label: 'Rings', href: '/rings' },
-  { label: 'Earrings', href: '/earrings' },
+  { label: 'Shop All', href: '/category' },
   { label: 'Gifts', href: '/gifts' },
   { label: 'Best Sellers', href: '/best-sellers' },
-  { label: 'Design System', href: '/styleguide', highlight: true },
+  { label: 'Sale', href: '/sale' },
+  { label: 'Design System', href: '/styleguide' },
 ]
 
 export const DEFAULT_FOOTER_COLUMNS: FooterColumn[] = [
@@ -76,8 +74,8 @@ export const DEFAULT_NEWSLETTER = {
 
 /** Shared hero imagery for all brands until per-brand assets are available. */
 export const HERO_IMAGES = {
-  desktop: 'https://cdn.oakandluna.com/digital-asset/banners/OAL_1ct_DT-SD.jpg',
-  mobile: 'https://cdn.oakandluna.com/digital-asset/banners/1ct_MB-SD.jpg',
+  desktop: '/images/hero-desktop.jpg',
+  mobile: '/images/hero-mobile.jpg',
 } as const
 
 export const DEFAULT_HERO = {

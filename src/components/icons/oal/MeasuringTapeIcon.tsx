@@ -1,0 +1,18 @@
+import React from 'react'
+import type { IconProps } from '../Icon'
+
+export function MeasuringTapeIcon({ size = 24, color = 'currentColor', className }: IconProps) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+      style={{ color }}
+    >
+      <path fillRule="evenodd" clipRule="evenodd" d="M6.6 12.2101V9.96006H3.9V15.4601H20.1V9.96006H17.4V12.2101H16.5V9.96006H12.45V12.2101H11.55V9.96006H7.5V12.2101H6.6ZM3.9 9.06006C3.4 9.06006 3 9.46006 3 9.96006V15.4601C3 15.9501 3.4 16.3601 3.9 16.3601H20.1C20.6 16.3601 21 15.9501 21 15.4601V9.96006C21 9.46006 20.6 9.06006 20.1 9.06006H3.9Z" fill="currentColor"/>
+    </svg>
+  )
+}

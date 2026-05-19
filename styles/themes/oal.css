@@ -22,8 +22,8 @@
 /* ── Semantic tokens ──────────────────────────────────────────────────────── */
 [data-theme="oal"] {
   /* Brand */
-  --brand-default-primary: var(--oal-deep-blue);
-  --brand-default-secondary: var(--oal-terracotta);
+  --brand-default-primary: var(--oal-black);
+  --brand-default-secondary: var(--oal-white);
 
   /* Surfaces */
   --surface-primary: var(--oal-warm-white);
@@ -62,6 +62,7 @@
   /* Typography */
   --font-family-heading: 'Bebas Neue', sans-serif;
   --font-family-body: 'Akatab', 'Helvetica Neue', Helvetica, sans-serif;
+  --nav-text-transform: uppercase;
 
   /* Spacing (shared, never overridden per theme) */
   --spacing-xxxs: 2px;
@@ -76,7 +77,7 @@
   --spacing-4xl: 96px;
 
   /* Layout */
-  --layout-max-width: 1440px;
+  --layout-max-width: 1920px;
   --layout-content-width: 1200px;
   --layout-page-margin: 32px;
   --layout-header-height: 64px;

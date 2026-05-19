@@ -73,12 +73,13 @@
 }
 
 .option:hover {
-  background: var(--surface-secondary);
+  background: var(--surface-primary);
+  opacity: 0.85;
 }
 
 .optionActive {
   font-weight: 600;
-  background: var(--surface-secondary);
+  background: var(--surface-primary);
 }
 
 .optionCode {

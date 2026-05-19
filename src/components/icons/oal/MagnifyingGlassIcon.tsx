@@ -1,0 +1,18 @@
+import React from 'react'
+import type { IconProps } from '../Icon'
+
+export function MagnifyingGlassIcon({ size = 24, color = 'currentColor', className }: IconProps) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+      style={{ color }}
+    >
+      <path fillRule="evenodd" clipRule="evenodd" d="M13.5 14.5C12.66 15.12 11.63 15.49 10.5 15.49C7.75002 15.49 5.51002 13.26 5.51002 10.5C5.51002 7.75002 7.75002 5.51002 10.5 5.51002C13.26 5.51002 15.49 7.75002 15.49 10.5C15.49 11.63 15.12 12.66 14.5 13.5L13.5 14.5ZM14.53 15.59C13.42 16.47 12.02 16.99 10.5 16.99C6.92002 16.99 4.02002 14.09 4.02002 10.5C4.02002 6.92002 6.92002 4.02002 10.5 4.02002C14.09 4.02002 16.99 6.92002 16.99 10.5C16.99 12.02 16.47 13.42 15.59 14.53L20.02 18.96L18.96 20.02L14.53 15.59Z" fill="currentColor"/>
+    </svg>
+  )
+}
