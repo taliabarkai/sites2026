@@ -14,6 +14,7 @@ import { SiteLogo } from '../SiteLogo'
 import { ThemeSwitcher } from '../ThemeSwitcher'
 import { Topline, type ToplineProps } from '../Topline'
 import { getBrandFromPathname, getBrandHomePath, resolveBrand, type BrandKey } from '../../_config/brands'
+import { useCart } from '../../_context/CartContext'
 import styles from './Header.module.css'
 import { useHeaderScroll } from './useHeaderScroll'
 
@@ -44,6 +45,7 @@ export function Header({
   const brandSegment = resolveBrand(brand ?? getBrandFromPathname(pathname))
   const logoHref = getBrandHomePath(brandSegment)
 
+  const { items, openCart } = useCart()
   const isScrolled = useHeaderScroll()
   const [menuOpen, setMenuOpen] = useState(false)
   const isSolid = variant === 'white' || isScrolled
@@ -112,14 +114,17 @@ export function Header({
 
             <div className={styles.actions}>
               <ThemeSwitcher brand={brandSegment} />
-              <button type="button" className={styles.iconButton} aria-label="Search">
+              <button type="button" className={`${styles.iconButton} ${styles.desktopOnly}`} aria-label="Search">
                 <MagnifyingGlassIcon />
               </button>
               <button type="button" className={styles.iconButton} aria-label="Account">
                 <PersonIcon />
               </button>
-              <button type="button" className={styles.iconButton} aria-label="Cart">
+              <button type="button" className={styles.cartButton} aria-label={`Cart${items.length > 0 ? ` (${items.length})` : ''}`} onClick={openCart}>
                 <ShoppingBagIcon />
+                {items.length > 0 && (
+                  <span className={styles.cartCount}>{items.length}</span>
+                )}
               </button>
             </div>
           </div>

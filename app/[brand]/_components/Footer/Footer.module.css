@@ -1,7 +1,7 @@
 .footer {
-  background: var(--surface-secondary);
+  background: var(--footer-main-background);
   color: var(--footer-text);
-  font-family: var(--font-family-body);
+  font-family: var(--typography-rules-text1-font-family);
 }
 
 .upper {
@@ -15,15 +15,14 @@
 }
 
 .nav {
-  padding: var(--spacing-xl) var(--spacing-md);
+  padding: var(--spacing-md);
 }
 
 .lower {
   display: flex;
-  flex-direction: column-reverse;
-  gap: var(--spacing-md);
-  padding: var(--spacing-lg) var(--spacing-md) var(--spacing-lg);
-  border-top: 1px solid var(--border-default);
+  justify-content: center;
+  padding: var(--spacing-lg) var(--spacing-md);
+  border-top: 1px solid var(--border-color);
 }
 
 .payments {
@@ -37,15 +36,23 @@
 
 .paymentBadge {
   padding: var(--spacing-xs) var(--spacing-sm);
-  border: 1px solid var(--border-default);
+  border: 1px solid var(--border-color);
   border-radius: var(--radius-sm);
-  font-size: 11px;
+  font-family:    var(--typography-rules-disclaimer1-font-family);
+  font-size:      var(--typography-rules-disclaimer1-font-size);
+  line-height:    var(--typography-rules-disclaimer1-line-height);
+  font-weight:    var(--typography-rules-disclaimer1-font-weight, normal);
+  letter-spacing: var(--typography-rules-disclaimer1-letter-spacing, normal);
   color: var(--footer-text-muted);
 }
 
 .copyright {
   margin: 0;
-  font-size: 12px;
+  font-family:    var(--typography-rules-disclaimer1-font-family);
+  font-size:      var(--typography-rules-disclaimer1-font-size);
+  line-height:    var(--typography-rules-disclaimer1-line-height);
+  font-weight:    var(--typography-rules-disclaimer1-font-weight, normal);
+  letter-spacing: var(--typography-rules-disclaimer1-letter-spacing, normal);
   color: var(--footer-text-muted);
 }
 
@@ -72,11 +79,9 @@
   }
 
   .lower {
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
+    justify-content: center;
     max-width: var(--layout-max-width);
     margin: 0 auto;
-    padding: var(--spacing-lg) var(--layout-page-margin) var(--spacing-lg);
+    padding: var(--spacing-lg) var(--layout-page-margin);
   }
 }

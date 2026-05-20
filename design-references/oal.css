@@ -34,7 +34,7 @@
 
   /* Text */
   --colors-text:          var(--oal-black);
-  --colors-text-secondary: var(--oal-dark-grey);
+  --colors-text-secondary: var(--oal-mid-grey);
   --colors-text-inverse:   var(--oal-white);
   --colors-text-disabled:  var(--oal-dark-grey);
 
@@ -48,7 +48,7 @@
   --colors-error:   var(--oal-red);
 
   /* Footer */
-  --footer-main-background:       var(--oal-black);
+  --footer-main-background:       var(--oal-white);
   --footer-newsletter-background: var(--oal-black);
   --footer-newsletter-text:       var(--oal-white);
   --footer-text:                  var(--oal-white);

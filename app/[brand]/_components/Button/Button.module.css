@@ -3,17 +3,9 @@
   align-items: center;
   justify-content: center;
   gap: var(--spacing-xs);
-  min-height: var(--field-min-height);
-  padding: 10px 22px;
   border: 1px solid transparent;
-  font-family: var(--font-family-body);
-  font-size: var(--button-font-size);
-  line-height: var(--button-line-height);
-  font-weight: var(--button-font-weight);
-  letter-spacing: var(--button-letter-spacing);
-  text-transform: var(--button-text-transform);
+  font-family: var(--font-family-main-regular);
   text-decoration: none;
-  border-radius: var(--radius-button);
   cursor: pointer;
   transition:
     background var(--transition-base),
@@ -28,29 +20,44 @@
 }
 
 .primary {
-  background: var(--button-primary-background);
-  color: var(--button-primary-text);
-  border-color: var(--button-primary-border);
+  background:      var(--buttons-primary-background);
+  color:           var(--buttons-primary-text);
+  border-color:    var(--buttons-primary-border-color);
+  border-radius:   var(--buttons-primary-border-radius);
+  padding:         var(--buttons-primary-padding);
+  min-height:      var(--buttons-primary-min-height);
+  font-size:       var(--buttons-primary-font-size);
+  line-height:     var(--buttons-primary-line-height);
+  font-weight:     var(--buttons-primary-font-weight);
+  letter-spacing:  var(--buttons-primary-letter-spacing);
+  text-transform:  var(--buttons-primary-text-transform);
 }
 
 .primary:hover:not(:disabled) {
-  background: color-mix(in srgb, var(--button-primary-background) 88%, var(--text));
+  background: color-mix(in srgb, var(--buttons-primary-background) 88%, var(--colors-text));
 }
 
 .secondary {
-  background: var(--button-secondary-background);
-  color: var(--button-secondary-text);
-  border-color: var(--button-secondary-border);
+  background:      var(--buttons-secondary-background);
+  color:           var(--buttons-secondary-text);
+  border-color:    var(--buttons-secondary-border-color);
+  border-radius:   var(--buttons-secondary-border-radius);
+  padding:         var(--buttons-secondary-padding);
+  min-height:      var(--buttons-secondary-min-height);
+  font-size:       var(--buttons-secondary-font-size);
+  line-height:     var(--buttons-secondary-line-height);
+  font-weight:     var(--buttons-secondary-font-weight);
+  letter-spacing:  var(--buttons-secondary-letter-spacing);
+  text-transform:  var(--buttons-secondary-text-transform);
 }
 
 .secondary:hover:not(:disabled) {
-  background: color-mix(in srgb, var(--button-secondary-background) 92%, var(--text));
+  background: color-mix(in srgb, var(--buttons-secondary-background) 92%, var(--colors-text));
 }
 
 .compact {
   min-height: auto;
   padding: var(--spacing-xs) var(--spacing-md);
-  font-size: 14px;
 }
 
 .iconOnly {
@@ -60,4 +67,42 @@
 
 .iconOnly svg {
   display: block;
+}
+
+.upsellPrimary {
+  background:     var(--buttons-upsell-primary-background);
+  color:          var(--buttons-upsell-primary-text);
+  border-color:   var(--buttons-upsell-primary-border-color);
+  border-radius:  var(--buttons-upsell-primary-border-radius);
+  padding:        var(--buttons-upsell-primary-padding);
+  min-height:     var(--buttons-upsell-primary-min-height);
+  font-size:      var(--buttons-upsell-primary-font-size);
+  line-height:    var(--buttons-upsell-primary-line-height);
+  font-weight:    400;
+  text-transform: none;
+  letter-spacing: 0;
+  align-self:     flex-start;
+  width:          fit-content;
+}
+
+.upsellPrimary:hover:not(:disabled) {
+  border-color: var(--colors-text);
+}
+
+.link {
+  display: inline;
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--colors-text);
+  font-family: var(--font-family-main-regular);
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 400;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.link:hover {
+  opacity: 0.7;
 }

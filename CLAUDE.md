@@ -1,17 +1,19 @@
 # Tenengroup Sites — Design System
 
-This is a multi-brand design system built in Next.js (App Router) with Tailwind CSS and CSS custom properties. It houses the UI for all 5 Tenengroup brands in a single project, each with its own theme.
+This is a multi-brand design system built in Next.js (App Router) with Tailwind CSS and CSS
+custom properties. It houses the UI for all 5 Tenengroup brands in a single project, each
+with its own theme.
 
 ---
 
 ## Brands
 
-| Key | Brand Name |
-|-----|------------|
-| `oal` | Oak and Luna |
-| `tgr` | Theo Grace |
-| `lal` | Lime and Lou |
-| `ib` | Israel Blessing |
+| Key   | Brand Name              |
+|-------|-------------------------|
+| `oal` | Oak and Luna            |
+| `tgr` | Theo Grace              |
+| `lal` | Lime and Lou            |
+| `ib`  | Israel Blessing         |
 | `mnn` | MYKA (My Name Necklace) |
 
 ---
@@ -20,32 +22,54 @@ This is a multi-brand design system built in Next.js (App Router) with Tailwind 
 
 ```
 app/
-├── [brand]/                    # Dynamic brand segment (oal | tgr | lal | ib | mnn)
-│   ├── layout.tsx              # Reads brand from params, sets data-theme, imports theme CSS
-│   ├── page.tsx                # Homepage — one file, all brands
-│   ├── category/
-│   │   └── page.tsx            # Category / PLP — one file, all brands
+├── [brand]/                        # Dynamic brand segment (oal | tgr | lal | ib | mnn)
+│   ├── layout.tsx                  # Reads brand from params, sets data-theme
+│   ├── page.tsx                    # Homepage — one file, all brands
+│   ├── category/page.tsx           # Category / PLP — one file, all brands
 │   ├── checkout/
-│   │   ├── page.tsx            # Payment page — one file, all brands
-│   │   └── confirmation/
-│   │       └── page.tsx        # Order confirmation — one file, all brands
-│   └── _components/            # Shared components (same for all brands, themed via CSS vars)
+│   │   ├── page.tsx                # Payment page — one file, all brands
+│   │   └── confirmation/page.tsx
+│   └── _components/                # Shared components — themed via CSS vars
 │       ├── header/
 │       ├── footer/
-│       └── cart/
-└── styleguide/                 # Design system styleguide / token viewer
+│       ├── cart/
+│       └── icons/
+│           └── Icons.tsx           # Universal UI icons (Close, ChevronDown, etc.)
+└── styleguide/                     # Design system styleguide / token viewer
+
+src/
+├── components/
+│   └── icons/
+│       ├── oal/                    # ~50 brand-scoped SVG icon components
+│       ├── tgr/
+│       ├── lal/
+│       ├── ib/
+│       ├── mnn/
+│       └── index.ts                # Namespaced re-exports
+└── assets/
+    └── icons/
+        ├── oal/                    # Raw SVG source files
+        ├── tgr/
+        ├── lal/
+        ├── ib/
+        └── mnn/
 
 styles/
-├── design-tokens.ts            # Typed TypeScript token exports (source of truth)
+├── design-tokens.ts                # Typed TypeScript token exports (source of truth)
+├── typography.ts                   # TypographyScale map
 └── themes/
-    ├── oal.css                 # OAL semantic CSS variables
-    ├── tgr.css                 # TGR semantic CSS variables
-    ├── lal.css                 # LAL semantic CSS variables
-    ├── ib.css                  # IB semantic CSS variables
-    └── mnn.css                 # MNN semantic CSS variables
+    ├── oal.css
+    ├── tgr.css
+    ├── lal.css
+    ├── ib.css
+    └── mnn.css
 
-fonts/                          # Local font files
-tokens.json                     # Raw design tokens extracted from Figma
+design-references/
+├── typography-tokens.css           # Typography token definitions — all 5 brands
+└── typography-reference.md        # Scale lookup table + font family map
+
+fonts/                              # Local font files
+tokens.json                         # Raw design tokens extracted from Figma
 ```
 
 ---
@@ -54,225 +78,380 @@ tokens.json                     # Raw design tokens extracted from Figma
 
 ### How it works
 Each brand has a CSS file in `styles/themes/` that defines semantic CSS custom properties
-scoped to a `[data-theme="brand"]` selector. The `[brand]` layout file reads the brand
-from the URL params and sets `data-theme` dynamically on the root element, which activates
-the correct theme for all components underneath it.
+scoped to `[data-theme="brand"]`. The `[brand]/layout.tsx` reads the brand from URL params
+and sets `data-theme` dynamically — **one set of pages and components serves all 5 brands**.
 
-This means **one set of pages serves all 5 brands** — navigate to `/oal/checkout` for OAL,
-`/tgr/checkout` for TGR. Components never need to know which brand they're rendering for.
-
-### Semantic variable naming
-Always use semantic variable names in components. Never use primitive variable names (prefixed with the brand, e.g. `--oal-deep-blue`) outside of the theme CSS file itself.
-
-```css
-/* ✅ Correct — semantic */
-color: var(--text);
-background: var(--surface-primary);
-border-color: var(--border-default);
-
-/* ❌ Wrong — primitive, not portable across themes */
-color: var(--oal-black);
-background: #f9f8f5;
-```
-
-### Available semantic variables
-Every theme defines these variables. Use them and only them in components:
-
-**Brand**
-- `--brand-default-primary` — primary brand color
-- `--brand-default-secondary` — secondary/accent brand color
-
-**Surfaces**
-- `--surface-primary` — main page background
-- `--surface-secondary` — secondary surface (cards, panels)
-
-**Text**
-- `--text` — primary text
-- `--text-secondary` — muted/secondary text
-- `--text-inverse` — text on dark backgrounds
-- `--text-disabled` — disabled state text
-
-**Borders**
-- `--border-default` — default border color
-- `--border-strong` — emphasized border
-
-**Footer**
-- `--footer-main-background`
-- `--footer-newsletter-background`
-- `--footer-newsletter-text`
-
-**Form fields**
-- `--formfield-background`
-- `--formfield-border`
-- `--formfield-placeholder`
-
-**Announcement / Topline bar**
-- `--announcement-background`
-- `--announcement-text`
-
-**Ribbon**
-- `--ribbon-background`
-- `--ribbon-text`
-
-**Typography**
-- `--font-family-heading`
-- `--font-family-body`
-
-**Spacing** (shared across all themes, never overridden)
-- `--spacing-xxxs` through `--spacing-4xl`
-
-**Layout**
-- `--layout-max-width`
-- `--layout-content-width`
-- `--layout-page-margin`
-- `--layout-header-height`
-- `--field-min-height`
-
-**Border radius** (varies per brand personality)
-- `--radius-sm`, `--radius-md`, `--radius-lg`, `--radius-xl`, `--radius-full`
-
-**Shadows**
-- `--shadow-sm`, `--shadow-md`
-
-**Transitions**
-- `--transition-fast` — 150ms ease
-- `--transition-base` — 250ms ease
-
-### TypeScript tokens
-For any logic that needs token values (e.g. JS animations, dynamic styles), import from `styles/design-tokens.ts`:
-
-```ts
-import { colors, typography, spacing, radii } from '@/styles/design-tokens'
-```
-
-Do not import `tokens.json` directly — always use the typed exports from `design-tokens.ts`.
-
----
-
-## How to Build a New Page
-
-### 1. Create the page file
-Place it under the dynamic brand folder — one file serves all brands:
-```
-app/[brand]/page-name/page.tsx
-```
-
-### The brand layout — how theming is applied
-The `app/[brand]/layout.tsx` reads the brand from URL params and sets `data-theme` dynamically:
+Navigate to `/oal/checkout` → OAL theme. `/tgr/checkout` → TGR theme. Components never
+need to know which brand they are rendering for.
 
 ```tsx
 // app/[brand]/layout.tsx
-import '../../../styles/themes/oal.css'
-import '../../../styles/themes/tgr.css'
-import '../../../styles/themes/lal.css'
-import '../../../styles/themes/ib.css'
-import '../../../styles/themes/mnn.css'
-
 const VALID_BRANDS = ['oal', 'tgr', 'lal', 'ib', 'mnn']
 
-export default function BrandLayout({
-  children,
-  params,
-}: {
-  children: React.ReactNode
-  params: { brand: string }
-}) {
+export default function BrandLayout({ children, params }) {
   const brand = VALID_BRANDS.includes(params.brand) ? params.brand : 'oal'
-
-  return (
-    <div data-theme={brand}>
-      {children}
-    </div>
-  )
+  return <div data-theme={brand}>{children}</div>
 }
 ```
 
-Navigate to `/oal/checkout` → OAL theme. `/tgr/checkout` → TGR theme. Same page, same components.
+### Semantic vs primitive — always use semantic
 
-### 2. Use Tailwind for layout and spacing
-Use Tailwind utility classes for structural layout (flexbox, grid, padding, margin, width). Use spacing tokens via CSS variables for brand-consistent spacing where needed.
-
-```tsx
-<section className="flex flex-col gap-4 px-4 md:px-8">
-```
-
-### 3. Use CSS variables for all brand values
-Never hardcode colors, fonts, or brand-specific values. Always reference CSS variables:
-
-```tsx
-<h1 style={{ color: 'var(--text)', fontFamily: 'var(--font-family-heading)' }}>
-  Page Title
-</h1>
-```
-
-Or in a CSS Module:
 ```css
-.title {
-  color: var(--text);
-  font-family: var(--font-family-heading);
-}
+/* ✅ Correct — semantic, works across all brands */
+color: var(--colors-text);
+background: var(--colors-surface-primary);
+border-color: var(--border-color);
+
+/* ❌ Wrong — primitive, breaks other themes */
+color: var(--oal-black);
+background: #f9f8f5;
+
+/* ❌ Wrong — old naming, no longer exists */
+color: var(--text);
+background: var(--surface-primary);
 ```
-
-### 4. Make it responsive
-- Mobile first
-- Use Tailwind breakpoints: `sm:`, `md:`, `lg:`, `xl:`
-- Key breakpoints: `md` = 768px (tablet), `lg` = 1024px (desktop)
-
-### 5. Use placeholder data for content
-If real API data isn't available yet, use realistic placeholder content (real product names, real-looking prices, sensible copy). Never use "Lorem ipsum".
 
 ---
 
-## How to Build a New Component
+## Semantic Variable Reference
 
-### Placement
-Since all brands share the same pages, all components live in one place:
-- `app/[brand]/_components/` — all components, shared across every brand
-- Components are themed automatically via CSS variables — no brand-specific component folders needed
+Use only these variables in components. Never use primitive variables
+(e.g. `--oal-black`) outside of theme CSS files.
 
-### Structure
-Each component gets its own folder:
+### Brand
+- `--colors-brand-default-primary` — primary brand color
+- `--colors-brand-default-secondary` — secondary brand color
+
+### Surfaces
+- `--colors-background` — base page background (white for all brands)
+- `--colors-surface-primary` — main surface (warm white, light grey, etc.)
+- `--colors-surface-secondary` — secondary surface (cards, panels)
+- `--colors-surface-disabled` — disabled state background
+
+### Text
+- `--colors-text` — primary text
+- `--colors-text-secondary` — muted / secondary text
+- `--colors-text-inverse` — text on dark backgrounds
+- `--colors-text-disabled` — disabled state text
+
+### Borders
+- `--border-color` — default border
+- `--border-width` — default border width (1px)
+- `--border-strong` — emphasized border
+
+### Status
+- `--colors-success`
+- `--colors-error`
+
+### Buttons — full token set per variant
+Pattern: `--buttons-{variant}-{property}`
+
+Variants: `primary` · `secondary` · `upsell-primary` · `upsell-secondary`
+
+Properties per variant:
+- `--buttons-{variant}-background`
+- `--buttons-{variant}-text`
+- `--buttons-{variant}-border-color`
+- `--buttons-{variant}-border-radius`
+- `--buttons-{variant}-padding`
+- `--buttons-{variant}-min-height`
+- `--buttons-{variant}-font-size`
+- `--buttons-{variant}-line-height`
+- `--buttons-{variant}-font-weight`
+- `--buttons-{variant}-letter-spacing`
+- `--buttons-{variant}-text-transform`
+
+### Form fields
+- `--form-field-background`
+- `--form-field-border-color`
+- `--form-input-placeholder`
+- `--field-min-height`
+
+### Footer
+- `--footer-main-background`
+- `--footer-newsletter-background`
+- `--footer-newsletter-text`
+- `--footer-text`
+- `--footer-text-muted`
+
+### Announcement bar
+- `--layout-announcements-bar-background`
+- `--layout-announcements-bar-text`
+
+### Ribbon
+- `--ribbon-background`
+- `--ribbon-text`
+
+### Spacing — shared, never overridden per brand
+Defined in `globals.css` via `--spacing-base: 1.6rem` calc scale:
+- `--spacing-xxxs` (4px) · `--spacing-xxs` (8px) · `--spacing-xs` (12px)
+- `--spacing-sm` (16px) · `--spacing-md` (24px) · `--spacing-lg` (32px)
+- `--spacing-xl` (40px) · `--spacing-xxl` (60px) · `--spacing-xxxl` (72px)
+
+### Layout
+- `--layout-page-margin`
+- `--layout-container-narrow` / `--layout-container-wide`
+- `--layout-header-height`
+- `--layout-announcements-bar-min-height`
+- `--sticky-top` — calculated offset for `position: sticky` elements
+
+### Border radius — varies per brand personality
+- `--radius-sm` · `--radius-md` · `--radius-lg` · `--radius-xl` · `--radius-full`
+- `--radius-panel`
+
+### Shadows
+- `--shadow-sm` · `--shadow-md`
+
+### Transitions
+- `--transition-fast` — 150ms ease
+- `--transition-base` — 250ms ease
+
+### Z-index layers — shared, never overridden per brand
+Always use these tokens — never write a raw z-index number in a component.
+
+- `--z-base: 0` — normal document flow
+- `--z-raised: 10` — hover states, card overlays
+- `--z-sticky: 100` — sticky page elements (add-to-cart bar)
+- `--z-header: 200` — site header + announcement bar
+- `--z-cart: 300` — floating cart panel
+- `--z-overlay: 400` — modal backdrop
+- `--z-modal: 500` — modal / dialog
+- `--z-toast: 600` — toast notifications
+- `--z-tooltip: 700` — tooltips (always topmost)
+
+### Material / swatch colors — shared across all brands
+Used for product color swatches. Defined in `globals.css`:
+- `--gold-vermeil-18k` · `--gold-plating-18k` · `--solid-gold-14k`
+- `--rose-gold-14k` · `--white-gold-14k` · `--sterling-silver-925`
+- (see globals.css for full list)
+
+### TypeScript tokens
+For JS/TS logic that needs token values:
+```ts
+import { colors, typography, spacing, radii } from '@/styles/design-tokens'
+```
+Never import `tokens.json` directly.
+
+---
+
+## Typography
+
+All typography must use `--typography-rules-{scale}-{property}` CSS variables.
+**Never hardcode** font-size, font-family, font-weight, line-height, letter-spacing,
+or text-transform anywhere — not in components, modules, or inline styles.
+
+**Token pattern:** `var(--typography-rules-{scale}-{property})`
+
+**Available scales:** headline1–12 · text1–9 · caption1–2 · paragraph1–4 ·
+links1 · button1–2 · disclaimer1–2 · ribbons1
+
+**Usage in CSS Modules:**
+```css
+.element {
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+  text-transform: var(--typography-rules-text1-text-transform, none);
+  font-weight:    var(--typography-rules-text1-font-weight, normal);
+}
+```
+
+**Scale guidance:**
+| UI element | Scale |
+|------------|-------|
+| Display / page title | `headline1` / `headline2` |
+| Section headings | `headline4` / `headline12` |
+| Panel / drawer title | `headline4` |
+| Small uppercase label / nav | `headline6` / `headline8` |
+| Product name | `text1` |
+| Selling price | `text2` |
+| Crossed-out price | `text1` + `text-decoration: line-through` + `--colors-text-secondary` |
+| Body / regular text | `text1` (regular) / `text2` (bold) / `text7` (light) |
+| Small body | `text3` (regular) / `text4` (bold) |
+| View Details toggle | `text2` |
+| Edit / Remove links | `text1` + underline |
+| Long-form paragraph | `paragraph1`–`paragraph4` |
+| Inline links | `links1` |
+| Announcement / topline bar | `ribbons1` |
+| Footer fine print | `disclaimer1` |
+| Captions / metadata | `caption1` / `text3` |
+
+**Buttons — typography rules by variant:**
+
+Most variants use `--buttons-{variant}-*` tokens for all typography:
+```css
+font-family:    var(--buttons-primary-font-family);
+font-size:      var(--buttons-primary-font-size);
+line-height:    var(--buttons-primary-line-height);
+font-weight:    var(--buttons-primary-font-weight);
+letter-spacing: var(--buttons-primary-letter-spacing, normal);
+text-transform: var(--buttons-primary-text-transform, none);
+```
+
+**Exception — `upsell-primary` and `link` variants use `--typography-rules-text1-*`**
+not `--buttons-{variant}-*`. This is intentional — these variants are visually closer
+to body text than button labels (smaller, lighter, no uppercase):
+```css
+font-family:    var(--typography-rules-text1-font-family);
+font-size:      var(--typography-rules-text1-font-size);
+line-height:    var(--typography-rules-text1-line-height);
+letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+font-weight:    var(--typography-rules-text1-font-weight, normal);
+```
+
+**Font family variables** — never hardcode font names:
+
+| Variable | OAL | MNN | LAL | IB | TGR |
+|----------|-----|-----|-----|-----|-----|
+| `--font-family-main-regular` | Helvetica Neue 300 | AnoRegular | Poppins 400 | Assistant 400 | Lato 400 |
+| `--font-family-main-bold` | Helvetica Neue 500 | AnoBold | Poppins 600 | Assistant 600 | Lato 700 |
+| `--font-family-main-light` | Helvetica Neue 200 | AnoHalf | Poppins 300 | Assistant 300 | Lato 300 |
+| `--font-family-secondary-regular` | Bebas Neue | — | — | — | Big Caslon |
+| `--font-family-tertiary-regular` | Akatab | — | — | — | — |
+
+> OAL only: `--font-family-tertiary-regular` applies to `headline8`, `button1`, `button2`.
+> OAL requires Typekit in layout.tsx: `<link rel="stylesheet" href="https://use.typekit.net/vle4ewv.css" />`
+> MNN Ano fonts load via `@font-face` in `globals.css` — no external CDN needed.
+
+**How it works:**
+- Token values defined per brand in `design-references/typography-tokens.css`
+- Selectors use `[data-theme="brand"]` — NOT `:root[data-theme]`
+- Imported via `app/globals.css`
+- `html { font-size: 62.5% }` sets rem base: `1rem = 10px`
+
+Reference: `design-references/typography-tokens.css`
+Quick lookup: `design-references/typography-reference.md`
+
+When unsure which scale to use for a new element, check the reference or ask.
+
+---
+
+## Icon System
+
+Two icon systems exist — use the right one for each job.
+
+### 1. Brand-scoped icons — `src/components/icons/{brand}/`
+~50 named SVG components per brand. Use for any icon with a brand-specific visual style.
+
+```tsx
+import * as oalIcons from '@/src/components/icons/oal'
+import * as mnnIcons from '@/src/components/icons/mnn'
+import * as tgrIcons from '@/src/components/icons/tgr'
+import * as lalIcons from '@/src/components/icons/lal'
+import * as ibIcons  from '@/src/components/icons/ib'
+
+const BRAND_ICONS = {
+  oal: oalIcons, mnn: mnnIcons, tgr: tgrIcons, lal: lalIcons, ib: ibIcons
+} as const
+
+const { GiftIcon, ChevronIcon, TrashIcon } = BRAND_ICONS[brand]
+```
+
+Rules:
+- Always resolve at runtime via `BRAND_ICONS[brand]` — never import a single brand folder directly in a shared component
+- Before using any icon, verify it exists in **all 5 brand folders** — if missing from any brand, stop and ask
+- Icon components use `currentColor` — control size and color from the parent
+- Never hardcode `fill`, `stroke`, `width`, or `height` inside icon components
+
+### 2. Universal icons — `app/[brand]/_components/icons/Icons.tsx`
+UI chrome icons identical across all brands: `Search`, `Account`, `Cart`, `Menu`,
+`Close`, `ChevronDown`, `ArrowRight`. Import directly — no brand resolution needed.
+
+```tsx
+import { Close, ChevronDown } from '@/app/[brand]/_components/icons/Icons'
+```
+
+### Icon sizing — always use spacing tokens
+```tsx
+<GiftIcon style={{ width: 'var(--spacing-md)', height: 'var(--spacing-md)' }} />
+```
+
+| Token | Size | Use case |
+|-------|------|----------|
+| `--spacing-xs` | 12px | Inline with small text |
+| `--spacing-sm` | 16px | Inline with body text |
+| `--spacing-md` | 24px | Standalone action icons |
+
+### Before building any new component
+Run this check first:
+> "List the icon names available in each brand folder under `src/components/icons/`
+> and confirm which of the following exist across all 5 brands: [list the icons you need]."
+
+If a needed icon is missing from any brand, stop and ask before proceeding.
+
+---
+
+## Building a New Page
+
+1. Create `app/[brand]/page-name/page.tsx` — one file, works for all brands
+2. Use Tailwind for layout and spacing structure
+3. Use `--typography-rules-*` for all text styling — never hardcode
+4. Use `--colors-*` variables for all colors — never hardcode
+5. Use `--z-*` tokens for any z-index — never hardcode
+6. Build mobile-first — `md:` = 768px, `lg:` = 1024px
+7. Use realistic placeholder content — never Lorem ipsum
+
+```tsx
+<section className="flex flex-col gap-4 px-4 md:px-8">
+  <h1
+    style={{
+      color:         'var(--colors-text)',
+      fontFamily:    'var(--typography-rules-headline2-font-family)',
+      fontSize:      'var(--typography-rules-headline2-font-size)',
+      lineHeight:    'var(--typography-rules-headline2-line-height)',
+      letterSpacing: 'var(--typography-rules-headline2-letter-spacing, normal)',
+      textTransform: 'var(--typography-rules-headline2-text-transform, none)',
+    }}
+  >
+    Page Title
+  </h1>
+</section>
+```
+
+---
+
+## Building a New Component
+
+All components live in `app/[brand]/_components/` — shared across every brand,
+themed automatically via CSS variables.
+
 ```
 _components/
 └── ComponentName/
     ├── ComponentName.tsx
-    ├── ComponentName.module.css   (if styles are complex)
-    └── index.ts                   (re-export)
+    ├── ComponentName.module.css
+    └── index.ts
 ```
 
-### Styling rules
-- Use Tailwind for layout, spacing, and structural styles
-- Use CSS variables for all color, typography, and brand values
-- Use CSS Modules (`.module.css`) for complex or dynamic styles
-- Never use inline style objects for colors or fonts unless passing a CSS variable value
+**Styling rules:**
+- Tailwind → layout, spacing, structure
+- CSS variables → all colors, typography, brand values, z-index
+- CSS Modules → complex or dynamic styles
+- Never hardcode colors, fonts, or z-index values anywhere
 
-### Component example
+**Button example — correct pattern:**
 ```tsx
-// app/oal/_components/Button/Button.tsx
-
-interface ButtonProps {
-  label: string
-  variant?: 'primary' | 'secondary'
-  onClick?: () => void
-  disabled?: boolean
-}
-
 export function Button({ label, variant = 'primary', onClick, disabled }: ButtonProps) {
   return (
     <button
       onClick={onClick}
       disabled={disabled}
-      className="px-6 py-3 text-sm font-medium transition-colors"
+      className="flex items-center justify-center"
       style={{
-        background: variant === 'primary'
-          ? 'var(--brand-default-primary)'
-          : 'transparent',
-        color: variant === 'primary'
-          ? 'var(--text-inverse)'
-          : 'var(--brand-default-primary)',
-        borderRadius: 'var(--radius-md)',
-        border: `1px solid var(--brand-default-primary)`,
-        transition: 'var(--transition-base)',
+        background:    `var(--buttons-${variant}-background)`,
+        color:         `var(--buttons-${variant}-text)`,
+        border:        `var(--border-width) solid var(--buttons-${variant}-border-color)`,
+        borderRadius:  `var(--buttons-${variant}-border-radius)`,
+        padding:       `var(--buttons-${variant}-padding)`,
+        minHeight:     `var(--buttons-${variant}-min-height)`,
+        fontFamily:    `var(--buttons-${variant}-font-family, var(--font-family-main-bold))`,
+        fontSize:      `var(--buttons-${variant}-font-size)`,
+        lineHeight:    `var(--buttons-${variant}-line-height)`,
+        fontWeight:    `var(--buttons-${variant}-font-weight)`,
+        letterSpacing: `var(--buttons-${variant}-letter-spacing, normal)`,
+        textTransform: `var(--buttons-${variant}-text-transform, none)`,
+        transition:    'var(--transition-base)',
       }}
     >
       {label}
@@ -285,21 +464,26 @@ export function Button({ label, variant = 'primary', onClick, disabled }: Button
 
 ## Adding a New Brand Theme
 
-Since pages are shared, adding a new brand only requires:
-
-1. Create `styles/themes/[brand].css` — same structure as `oal.css`, scoped to `[data-theme="[brand]"]`
-2. Import the new theme CSS in `app/[brand]/layout.tsx`
-3. Add the brand key to the `VALID_BRANDS` array in `app/[brand]/layout.tsx`
-4. All existing pages automatically work for the new brand — no page or component changes needed
+1. Create `styles/themes/[brand].css` — primitives block first, then semantic tokens using those primitives. No raw hex values in semantic tokens.
+2. Add brand icon folder at `src/components/icons/[brand]/` with matching icon names
+3. Import the new theme CSS in `app/[brand]/layout.tsx`
+4. Add the brand key to `VALID_BRANDS` in `app/[brand]/layout.tsx`
+5. All existing pages automatically work for the new brand
 
 ---
 
-## Rules — Always Follow These
+## Hard Rules — Never Break These
 
-- **Never hardcode colors, fonts, or spacing** — always use `var(--token-name)`
-- **Never modify** `tokens.json` or `design-tokens.ts` directly — these are generated from Figma
-- **Never use primitive CSS variables** (e.g. `--oal-deep-blue`) outside of theme CSS files
+- **Never hardcode** colors, fonts, spacing, or z-index — always `var(--token-name)`
+- **Never use old variable names** — `--text`, `--surface-primary`, `--border-default`, `--formfield-*`, `--announcement-*`, `--brand-default-primary` no longer exist
+- **Never use** `--font-family-heading` or `--font-family-body` — use `--font-family-main-regular/bold/light`, `--font-family-secondary-regular`, `--font-family-tertiary-regular`
+- **Never apply typography** without the full `--typography-rules-{scale}-*` variable set
+- **Never use raw hex values** in semantic token blocks — define a primitive first
+- **Never use primitive variables** (e.g. `--oal-black`) outside of theme CSS files
+- **Never use a raw z-index number** — always use `--z-*` tokens
+- **Always verify icons** exist in all 5 brand folders before using in a component
 - **Always use semantic variable names** so components work across all 5 brands
+- **Never modify** `tokens.json` or `design-tokens.ts` — generated from Figma
 - **Never install new dependencies** without checking `package.json` first
-- **Always build mobile-first** — start with the mobile layout, then add breakpoints
-- **Stop and ask** if a required token, component, or design reference is missing
+- **Always build mobile-first** — mobile layout first, then add breakpoints
+- **Stop and ask** if a required token, component, icon, or design reference is missing

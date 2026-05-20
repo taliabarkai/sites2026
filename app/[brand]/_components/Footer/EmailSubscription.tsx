@@ -1,9 +1,9 @@
 'use client'
 
-import { FormEvent, useState } from 'react'
+import { useState } from 'react'
 import { DEFAULT_NEWSLETTER, SOCIAL_LINKS } from '../../_config/siteContent'
-import { Button } from '../Button'
 import { IconArrowRight } from '../icons/Icons'
+import { InputAction } from '../InputAction'
 import styles from './EmailSubscription.module.css'
 
 export interface EmailSubscriptionProps {
@@ -25,22 +25,18 @@ export function EmailSubscription({
   successMessage = DEFAULT_NEWSLETTER.successMessage,
   errorMessage = DEFAULT_NEWSLETTER.errorMessage,
 }: EmailSubscriptionProps) {
-  const [email, setEmail] = useState('')
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
-    setSuccess(false)
-
-    if (!EMAIL_PATTERN.test(email.trim())) {
+  const handleSubmit = (value: string) => {
+    if (!EMAIL_PATTERN.test(value.trim())) {
       setError(errorMessage)
+      setSuccess(false)
       return
     }
 
     setError('')
     setSuccess(true)
-    setEmail('')
   }
 
   return (
@@ -51,41 +47,17 @@ export function EmailSubscription({
       </h2>
       <p className={styles.description}>{description}</p>
 
-      <form className={styles.form} onSubmit={handleSubmit} noValidate>
-        <label className={styles.srOnly} htmlFor="footer-email">
-          Email address
-        </label>
-        <input
-          id="footer-email"
-          name="email"
-          type="email"
-          autoComplete="email"
-          className={styles.input}
-          placeholder={emailPlaceholder}
-          value={email}
-          onChange={(event) => {
-            setEmail(event.target.value)
-            if (error) setError('')
-            if (success) setSuccess(false)
-          }}
-          aria-invalid={Boolean(error)}
-          aria-describedby={error ? 'footer-email-error' : success ? 'footer-email-success' : undefined}
-        />
-        <Button type="submit" variant="primary" size="iconOnly" className={styles.submit} aria-label="Subscribe">
-          <IconArrowRight />
-        </Button>
-      </form>
-
-      {error && (
-        <p id="footer-email-error" className={styles.messageError} role="alert">
-          {error}
-        </p>
-      )}
-      {success && (
-        <p id="footer-email-success" className={styles.messageSuccess} role="status">
-          {successMessage}
-        </p>
-      )}
+      <InputAction
+        inputType="email"
+        placeholder={emailPlaceholder}
+        buttonIcon={<IconArrowRight />}
+        onSubmit={handleSubmit}
+        errorMessage={error || undefined}
+        successMessage={success ? successMessage : undefined}
+        groupLabel="Newsletter signup"
+        inputLabel="Email address"
+        className={styles.form}
+      />
 
       <ul className={styles.socialList} aria-label="Social media">
         {SOCIAL_LINKS.map((item) => (

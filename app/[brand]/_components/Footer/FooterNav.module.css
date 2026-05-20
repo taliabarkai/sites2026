@@ -1,7 +1,7 @@
 .nav {
-  font-family: var(--font-family-body);
-  color: var(--footer-text-muted);
-  background-color: var(--surface-secondary);
+  font-family: var(--typography-rules-text1-font-family);
+  color: var(--footer-text);
+  background-color: var(--footer-main-background);
 }
 
 .desktop {
@@ -17,10 +17,12 @@
 
 .columnTitle {
   margin: 0 0 var(--spacing-md);
-  font-family: var(--font-family-heading);
-  font-size: 16px;
-  font-weight: 400;
-  letter-spacing: 0.02em;
+  font-family:    var(--typography-rules-paragraph4-font-family);
+  font-size:      var(--typography-rules-paragraph4-font-size);
+  line-height:    var(--typography-rules-paragraph4-line-height);
+  font-weight:    var(--typography-rules-paragraph4-font-weight, normal);
+  letter-spacing: var(--typography-rules-paragraph4-letter-spacing, normal);
+  text-transform: var(--typography-rules-paragraph4-text-transform, none);
   color: var(--footer-text);
 }
 
@@ -34,8 +36,12 @@
 }
 
 .link {
-  font-size: 14px;
-  color: var(--footer-text-muted);
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  font-weight:    var(--typography-rules-text1-font-weight, normal);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+  color: var(--footer-text);
   text-decoration: none;
   transition: color var(--transition-fast);
 }
@@ -50,7 +56,7 @@
 }
 
 .accordionItem {
-  border-bottom: 1px solid var(--border-default);
+  border-bottom: 1px solid var(--border-color);
 }
 
 .accordionTrigger {
@@ -61,8 +67,11 @@
   padding: var(--spacing-md) 0;
   border: none;
   background: transparent;
-  font-family: var(--font-family-heading);
-  font-size: 16px;
+  font-family:    var(--typography-rules-paragraph4-font-family);
+  font-size:      var(--typography-rules-paragraph4-font-size);
+  line-height:    var(--typography-rules-paragraph4-line-height);
+  font-weight:    var(--typography-rules-paragraph4-font-weight, normal);
+  letter-spacing: var(--typography-rules-paragraph4-letter-spacing, normal);
   color: var(--footer-text);
   cursor: pointer;
   text-align: left;

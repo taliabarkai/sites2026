@@ -1,0 +1,1054 @@
+/*
+ * ============================================================
+ * TENENGROUP DESIGN SYSTEM — TYPOGRAPHY TOKENS
+ * ============================================================
+ * Source of truth: extracted from compiled theme.css
+ * Do NOT edit manually — re-extract from theme.css if fonts change.
+ *
+ * FONT FAMILY REFERENCE
+ * These variables must be defined in each brand's theme CSS file.
+ * Never hardcode font names in components — always use the variables.
+ *
+ *  Brand  | --font-family-main-regular        | --font-family-main-bold           | --font-family-main-light          | --font-family-secondary-regular | --font-family-tertiary-regular
+ *  -------|-----------------------------------|-----------------------------------|-----------------------------------|---------------------------------|-------------------------------
+ *  oal    | Helvetica Neue (weight 300)       | Helvetica Neue (weight 500)       | Helvetica Neue (weight 200)       | Bebas Neue                      | Akatab (headline8, button1, button2)
+ *  mnn    | AnoRegular (@font-face)           | AnoBold (@font-face)              | AnoHalf (@font-face)              | —                               | —
+ *  lal    | Poppins (weight 400)              | Poppins (weight 600)              | Poppins (weight 300)              | —                               | —
+ *  ib     | Assistant (weight 400)            | Assistant (weight 600)            | Assistant (weight 300)            | —                               | —
+ *  tgr    | Lato (weight 400)                 | Lato (weight 700)                 | Lato (weight 300)                 | BigCaslonRegular                | —
+ *
+ * TOKEN NAMING PATTERN
+ * --typography-rules-{scale}-{property}
+ *
+ * Scales: headline1–12, text1–9, caption1–2, paragraph1–4,
+ *         links1, button1–2, disclaimer1–2, ribbons1
+ *
+ * Properties: font-family, font-size, line-height,
+ *             letter-spacing, text-transform, font-weight
+ *
+ * USAGE IN COMPONENTS
+ * Always use the semantic variable, never hardcode values:
+ *
+ *   font-family:    var(--typography-rules-text1-font-family, inherit);
+ *   font-size:      var(--typography-rules-text1-font-size);
+ *   line-height:    var(--typography-rules-text1-line-height, normal);
+ *   letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+ *   text-transform: var(--typography-rules-text1-text-transform, none);
+ *   font-weight:    var(--typography-rules-text1-font-weight, normal);
+ *
+ * ============================================================
+ */
+
+
+/* ============================================================
+ * MNN — MYKA (My Name Necklace)
+ * Font: AnoRegular (regular) / AnoBold (bold) / AnoHalf (light)
+ * Character: uppercase buttons, rounded corners
+ * ============================================================ */
+
+[data-theme="mnn"] {
+  --typography-default-font-size: 14;
+
+  /* Headlines */
+  --typography-rules-headline1-font-family:   var(--font-family-main-regular);
+  --typography-rules-headline1-font-size:     32px;
+  --typography-rules-headline1-line-height:   32px;
+
+  --typography-rules-headline2-font-family:   var(--font-family-main-regular);
+  --typography-rules-headline2-font-size:     20px;
+  --typography-rules-headline2-line-height:   28px;
+
+  --typography-rules-headline3-font-family:   var(--font-family-main-regular);
+  --typography-rules-headline3-font-size:     20px;
+  --typography-rules-headline3-line-height:   28px;
+
+  --typography-rules-headline4-font-family:   var(--font-family-main-regular);
+  --typography-rules-headline4-font-size:     20px;
+  --typography-rules-headline4-line-height:   28px;
+
+  --typography-rules-headline5-font-family:   var(--font-family-main-light);
+  --typography-rules-headline5-font-size:     20px;
+  --typography-rules-headline5-line-height:   28px;
+
+  --typography-rules-headline6-font-family:   var(--font-family-main-bold);
+  --typography-rules-headline6-font-size:     13px;
+  --typography-rules-headline6-line-height:   18px;
+  --typography-rules-headline6-letter-spacing: 1px;
+  --typography-rules-headline6-text-transform: uppercase;
+
+  --typography-rules-headline7-font-family:   var(--font-family-main-regular);
+  --typography-rules-headline7-font-size:     14px;
+  --typography-rules-headline7-line-height:   20px;
+
+  --typography-rules-headline8-font-family:   var(--font-family-main-regular);
+  --typography-rules-headline8-font-size:     14px;
+  --typography-rules-headline8-line-height:   20px;
+  --typography-rules-headline8-letter-spacing: 1px;
+  --typography-rules-headline8-text-transform: uppercase;
+
+  --typography-rules-headline9-font-family:   var(--font-family-main-regular);
+  --typography-rules-headline9-font-size:     16px;
+  --typography-rules-headline9-line-height:   22px;
+
+  --typography-rules-headline10-font-family:  var(--font-family-main-regular);
+  --typography-rules-headline10-font-size:    13px;
+  --typography-rules-headline10-line-height:  18px;
+
+  --typography-rules-headline11-font-family:  var(--font-family-main-regular);
+  --typography-rules-headline11-font-size:    16px;
+  --typography-rules-headline11-line-height:  22px;
+
+  --typography-rules-headline12-font-family:  var(--font-family-main-regular);
+  --typography-rules-headline12-font-size:    20px;
+  --typography-rules-headline12-line-height:  26px;
+
+  /* Text */
+  --typography-rules-text1-font-family:       var(--font-family-main-regular);
+  --typography-rules-text1-font-size:         14px;
+  --typography-rules-text1-line-height:       20px;
+
+  --typography-rules-text2-font-family:       var(--font-family-main-bold);
+  --typography-rules-text2-font-size:         14px;
+  --typography-rules-text2-line-height:       20px;
+
+  --typography-rules-text3-font-family:       var(--font-family-main-regular);
+  --typography-rules-text3-font-size:         12px;
+  --typography-rules-text3-line-height:       18px;
+  --typography-rules-text3-letter-spacing:    0;
+
+  --typography-rules-text4-font-family:       var(--font-family-main-bold);
+  --typography-rules-text4-font-size:         12px;
+  --typography-rules-text4-line-height:       18px;
+
+  --typography-rules-text5-font-family:       var(--font-family-main-regular);
+  --typography-rules-text5-font-size:         13px;
+  --typography-rules-text5-line-height:       18px;
+
+  --typography-rules-text6-font-family:       var(--font-family-main-regular);
+  --typography-rules-text6-font-size:         14px;
+  --typography-rules-text6-line-height:       21px;
+
+  --typography-rules-text7-font-family:       var(--font-family-main-light);
+  --typography-rules-text7-font-size:         14px;
+  --typography-rules-text7-line-height:       21px;
+
+  --typography-rules-text8-font-family:       var(--font-family-main-regular);
+  --typography-rules-text8-font-size:         10px;
+  --typography-rules-text8-line-height:       14px;
+
+  --typography-rules-text9-font-family:       var(--font-family-main-bold);
+  --typography-rules-text9-font-size:         10px;
+  --typography-rules-text9-line-height:       14px;
+
+  /* Captions */
+  --typography-rules-caption1-font-family:    var(--font-family-main-regular);
+  --typography-rules-caption1-font-size:      12px;
+  --typography-rules-caption1-line-height:    16px;
+
+  --typography-rules-caption2-font-family:    var(--font-family-main-bold);
+  --typography-rules-caption2-font-size:      12px;
+  --typography-rules-caption2-line-height:    16px;
+
+  /* Paragraphs */
+  --typography-rules-paragraph1-font-family:  var(--font-family-main-regular);
+  --typography-rules-paragraph1-font-size:    14px;
+  --typography-rules-paragraph1-line-height:  20px;
+
+  --typography-rules-paragraph2-font-family:  var(--font-family-main-bold);
+  --typography-rules-paragraph2-font-size:    14px;
+  --typography-rules-paragraph2-line-height:  20px;
+
+  --typography-rules-paragraph3-font-family:  var(--font-family-main-bold);
+  --typography-rules-paragraph3-font-size:    16px;
+  --typography-rules-paragraph3-line-height:  24px;
+
+  --typography-rules-paragraph4-font-family:  var(--font-family-main-regular);
+  --typography-rules-paragraph4-font-size:    16px;
+  --typography-rules-paragraph4-line-height:  24px;
+
+  /* Links */
+  --typography-rules-links1-font-family:      var(--font-family-main-bold);
+  --typography-rules-links1-font-size:        12px;
+  --typography-rules-links1-line-height:      18px;
+
+  /* Buttons */
+  --typography-rules-button1-font-family:     var(--font-family-main-bold);
+  --typography-rules-button1-font-size:       14px;
+  --typography-rules-button1-line-height:     20px;
+  --typography-rules-button1-letter-spacing:  1px;
+  --typography-rules-button1-text-transform:  uppercase;
+
+  --typography-rules-button2-font-family:     var(--font-family-main-bold);
+  --typography-rules-button2-font-size:       14px;
+  --typography-rules-button2-line-height:     20px;
+
+  /* Disclaimers */
+  --typography-rules-disclaimer1-font-family: var(--font-family-main-regular);
+  --typography-rules-disclaimer1-font-size:   10px;
+  --typography-rules-disclaimer1-line-height: 14px;
+
+  --typography-rules-disclaimer2-font-family: var(--font-family-main-bold);
+  --typography-rules-disclaimer2-font-size:   10px;
+  --typography-rules-disclaimer2-line-height: 14px;
+
+  /* Ribbons */
+  --typography-rules-ribbons1-font-family:    var(--font-family-main-regular);
+  --typography-rules-ribbons1-font-size:      12px;
+  --typography-rules-ribbons1-line-height:    12px;
+}
+
+@media (min-width: 768px) {
+  [data-theme="mnn"] {
+    --typography-rules-headline1-font-size:    56px;
+    --typography-rules-headline1-line-height:  56px;
+    --typography-rules-headline2-font-size:    26px;
+    --typography-rules-headline2-line-height:  30px;
+    --typography-rules-headline3-font-size:    26px;
+    --typography-rules-headline3-line-height:  30px;
+    --typography-rules-headline9-font-size:    20px;
+    --typography-rules-headline9-line-height:  28px;
+    --typography-rules-headline10-font-size:   14px;
+    --typography-rules-headline10-line-height: 20px;
+    --typography-rules-headline11-font-size:   20px;
+    --typography-rules-headline11-line-height: 28px;
+    --typography-rules-text5-font-size:        14px;
+    --typography-rules-text5-line-height:      20px;
+    --typography-rules-paragraph1-font-size:   16px;
+    --typography-rules-paragraph1-line-height: 24px;
+    --typography-rules-paragraph2-font-size:   16px;
+    --typography-rules-paragraph2-line-height: 24px;
+    --typography-rules-disclaimer1-font-size:  16px;
+    --typography-rules-disclaimer2-font-size:  16px;
+    --typography-rules-ribbons1-font-size:     14px;
+    --typography-rules-ribbons1-line-height:   14px;
+  }
+}
+
+
+/* ============================================================
+ * OAL — Oak and Luna
+ * Main font:      Helvetica Neue via Adobe Typekit (vle4ewv)
+ *                 regular = weight 300, bold = weight 500, light = weight 200
+ * Secondary font: Bebas Neue (display headings)
+ * Tertiary font:  Akatab via Google Fonts (headline8, button1, button2)
+ *
+ * Load order in layout.tsx (before any other styles):
+ *   <link rel="stylesheet" href="https://use.typekit.net/vle4ewv.css" />
+ * ============================================================ */
+
+[data-theme="oal"] {
+  --typography-default-font-size: 14;
+
+  /* Headlines */
+  --typography-rules-headline1-font-family:    var(--font-family-secondary-regular);
+  --typography-rules-headline1-font-size:      48px;
+  --typography-rules-headline1-line-height:    40px;
+  --typography-rules-headline1-letter-spacing: 1.2px;
+  --typography-rules-headline1-text-transform: uppercase;
+  --typography-rules-headline1-font-weight:    400;
+
+  --typography-rules-headline2-font-family:    var(--font-family-secondary-regular);
+  --typography-rules-headline2-font-size:      22px;
+  --typography-rules-headline2-line-height:    28px;
+  --typography-rules-headline2-letter-spacing: 1px;
+  --typography-rules-headline2-text-transform: uppercase;
+  --typography-rules-headline2-font-weight:    400;
+
+  --typography-rules-headline3-font-family:    var(--font-family-secondary-regular);
+  --typography-rules-headline3-font-size:      22px;
+  --typography-rules-headline3-line-height:    28px;
+  --typography-rules-headline3-letter-spacing: 1px;
+  --typography-rules-headline3-text-transform: uppercase;
+  --typography-rules-headline3-font-weight:    400;
+
+  --typography-rules-headline4-font-family:    var(--font-family-secondary-regular);
+  --typography-rules-headline4-font-size:      20px;
+  --typography-rules-headline4-line-height:    26px;
+  --typography-rules-headline4-letter-spacing: 0.4px;
+  --typography-rules-headline4-text-transform: uppercase;
+  --typography-rules-headline4-font-weight:    400;
+
+  --typography-rules-headline5-font-family:    var(--font-family-main-regular);
+  --typography-rules-headline5-font-size:      20px;
+  --typography-rules-headline5-line-height:    26px;
+  --typography-rules-headline5-letter-spacing: 0.4px;
+  --typography-rules-headline5-font-weight:    400;
+
+  --typography-rules-headline6-font-family:    var(--font-family-main-bold);
+  --typography-rules-headline6-font-size:      14px;
+  --typography-rules-headline6-line-height:    18px;
+  --typography-rules-headline6-letter-spacing: 0.7px;
+  --typography-rules-headline6-text-transform: uppercase;
+  --typography-rules-headline6-font-weight:    500;
+
+  --typography-rules-headline7-font-family:    var(--font-family-main-regular);
+  --typography-rules-headline7-font-size:      14px;
+  --typography-rules-headline7-line-height:    18px;
+  --typography-rules-headline7-letter-spacing: 0.5px;
+  --typography-rules-headline7-font-weight:    400;
+
+  --typography-rules-headline8-font-family:    var(--font-family-tertiary-regular);
+  --typography-rules-headline8-font-size:      12px;
+  --typography-rules-headline8-line-height:    16px;
+  --typography-rules-headline8-letter-spacing: 0.7px;
+  --typography-rules-headline8-text-transform: uppercase;
+  --typography-rules-headline8-font-weight:    700;
+
+  --typography-rules-headline9-font-family:    var(--font-family-main-bold);
+  --typography-rules-headline9-font-size:      14px;
+  --typography-rules-headline9-line-height:    20px;
+  --typography-rules-headline9-letter-spacing: 1px;
+  --typography-rules-headline9-text-transform: uppercase;
+  --typography-rules-headline9-font-weight:    500;
+
+  --typography-rules-headline10-font-family:   var(--font-family-main-regular);
+  --typography-rules-headline10-font-size:     14px;
+  --typography-rules-headline10-line-height:   14px;
+  --typography-rules-headline10-text-transform: capitalize;
+  --typography-rules-headline10-font-weight:   400;
+
+  --typography-rules-headline11-font-family:   var(--font-family-main-regular);
+  --typography-rules-headline11-font-size:     16px;
+  --typography-rules-headline11-line-height:   22px;
+  --typography-rules-headline11-font-weight:   400;
+
+  --typography-rules-headline12-font-family:   var(--font-family-main-bold);
+  --typography-rules-headline12-font-size:     20px;
+  --typography-rules-headline12-line-height:   26px;
+  --typography-rules-headline12-letter-spacing: 0.4px;
+  --typography-rules-headline12-text-transform: uppercase;
+  --typography-rules-headline12-font-weight:   500;
+
+  /* Text */
+  --typography-rules-text1-font-family:        var(--font-family-main-regular);
+  --typography-rules-text1-font-size:          14px;
+  --typography-rules-text1-line-height:        18px;
+  --typography-rules-text1-font-weight:        400;
+
+  --typography-rules-text2-font-family:        var(--font-family-main-bold);
+  --typography-rules-text2-font-size:          14px;
+  --typography-rules-text2-line-height:        18px;
+  --typography-rules-text2-font-weight:        500;
+
+  --typography-rules-text3-font-family:        var(--font-family-main-regular);
+  --typography-rules-text3-font-size:          12px;
+  --typography-rules-text3-line-height:        16px;
+  --typography-rules-text3-font-weight:        400;
+
+  --typography-rules-text4-font-family:        var(--font-family-main-bold);
+  --typography-rules-text4-font-size:          12px;
+  --typography-rules-text4-line-height:        16px;
+  --typography-rules-text4-font-weight:        500;
+
+  --typography-rules-text5-font-family:        var(--font-family-main-regular);
+  --typography-rules-text5-font-size:          12px;
+  --typography-rules-text5-line-height:        16px;
+  --typography-rules-text5-font-weight:        400;
+
+  --typography-rules-text6-font-family:        var(--font-family-main-bold);
+  --typography-rules-text6-font-size:          12px;
+  --typography-rules-text6-line-height:        16px;
+  --typography-rules-text6-font-weight:        500;
+
+  --typography-rules-text7-font-family:        var(--font-family-main-regular);
+  --typography-rules-text7-font-size:          12px;
+  --typography-rules-text7-line-height:        16px;
+  --typography-rules-text7-font-weight:        400;
+
+  --typography-rules-text8-font-family:        var(--font-family-main-regular);
+  --typography-rules-text8-font-size:          10px;
+  --typography-rules-text8-line-height:        14px;
+  --typography-rules-text8-font-weight:        400;
+
+  --typography-rules-text9-font-family:        var(--font-family-main-bold);
+  --typography-rules-text9-font-size:          10px;
+  --typography-rules-text9-line-height:        14px;
+  --typography-rules-text9-font-weight:        500;
+
+  /* Captions */
+  --typography-rules-caption1-font-family:     var(--font-family-main-regular);
+  --typography-rules-caption1-font-size:       12px;
+  --typography-rules-caption1-line-height:     16px;
+  --typography-rules-caption1-font-weight:     400;
+
+  --typography-rules-caption2-font-family:     var(--font-family-main-bold);
+  --typography-rules-caption2-font-size:       12px;
+  --typography-rules-caption2-line-height:     16px;
+  --typography-rules-caption2-font-weight:     500;
+
+  /* Paragraphs */
+  --typography-rules-paragraph1-font-family:   var(--font-family-main-regular);
+  --typography-rules-paragraph1-font-size:     16px;
+  --typography-rules-paragraph1-line-height:   21px;
+  --typography-rules-paragraph1-font-weight:   400;
+
+  --typography-rules-paragraph2-font-family:   var(--font-family-main-bold);
+  --typography-rules-paragraph2-font-size:     16px;
+  --typography-rules-paragraph2-line-height:   21px;
+  --typography-rules-paragraph2-font-weight:   500;
+
+  --typography-rules-paragraph3-font-family:   var(--font-family-main-bold);
+  --typography-rules-paragraph3-font-size:     16px;
+  --typography-rules-paragraph3-line-height:   21px;
+  --typography-rules-paragraph3-font-weight:   500;
+
+  --typography-rules-paragraph4-font-family:   var(--font-family-main-regular);
+  --typography-rules-paragraph4-font-size:     16px;
+  --typography-rules-paragraph4-line-height:   24px;
+  --typography-rules-paragraph4-font-weight:   400;
+
+  /* Links */
+  --typography-rules-links1-font-family:       var(--font-family-main-regular);
+  --typography-rules-links1-font-size:         12px;
+  --typography-rules-links1-line-height:       16px;
+  --typography-rules-links1-font-weight:       400;
+
+  /* Buttons */
+  --typography-rules-button1-font-family:      var(--font-family-tertiary-regular);
+  --typography-rules-button1-font-size:        14px;
+  --typography-rules-button1-line-height:      17px;
+  --typography-rules-button1-letter-spacing:   0.7px;
+  --typography-rules-button1-text-transform:   uppercase;
+  --typography-rules-button1-font-weight:      600;
+
+  --typography-rules-button2-font-family:      var(--font-family-tertiary-regular);
+  --typography-rules-button2-font-size:        12px;
+  --typography-rules-button2-line-height:      16px;
+  --typography-rules-button2-letter-spacing:   0.4px;
+  --typography-rules-button2-font-weight:      600;
+
+  /* Disclaimers */
+  --typography-rules-disclaimer1-font-family:  var(--font-family-main-regular);
+  --typography-rules-disclaimer1-font-size:    10px;
+  --typography-rules-disclaimer1-line-height:  14px;
+  --typography-rules-disclaimer1-font-weight:  400;
+
+  --typography-rules-disclaimer2-font-family:  var(--font-family-main-bold);
+  --typography-rules-disclaimer2-font-size:    10px;
+  --typography-rules-disclaimer2-line-height:  14px;
+  --typography-rules-disclaimer2-font-weight:  500;
+
+  /* Ribbons */
+  --typography-rules-ribbons1-font-family:     var(--font-family-secondary-regular);
+  --typography-rules-ribbons1-font-size:       14px;
+  --typography-rules-ribbons1-line-height:     14px;
+  --typography-rules-ribbons1-letter-spacing:  0.4px;
+  --typography-rules-ribbons1-font-weight:     400;
+}
+
+@media (min-width: 768px) {
+  [data-theme="oal"] {
+    --typography-rules-headline1-font-size:    100px;
+    --typography-rules-headline1-line-height:  90px;
+    --typography-rules-headline2-font-size:    60px;
+    --typography-rules-headline2-line-height:  58px;
+    --typography-rules-headline3-font-size:    40px;
+    --typography-rules-headline3-line-height:  38px;
+    --typography-rules-headline8-font-size:    14px;
+    --typography-rules-headline8-line-height:  18px;
+    --typography-rules-headline9-font-size:    20px;
+    --typography-rules-headline9-line-height:  24px;
+    --typography-rules-headline11-font-size:   20px;
+    --typography-rules-headline11-line-height: 28px;
+    --typography-rules-text5-font-size:        14px;
+    --typography-rules-text5-line-height:      18px;
+    --typography-rules-text6-font-size:        14px;
+    --typography-rules-text6-line-height:      18px;
+    --typography-rules-text7-font-size:        14px;
+    --typography-rules-text7-line-height:      18px;
+    --typography-rules-paragraph1-font-size:   20px;
+    --typography-rules-paragraph1-line-height: 25px;
+    --typography-rules-paragraph2-font-size:   20px;
+    --typography-rules-paragraph2-line-height: 25px;
+    --typography-rules-links1-font-size:       14px;
+    --typography-rules-links1-line-height:     18px;
+    --typography-rules-button2-font-size:      14px;
+    --typography-rules-button2-line-height:    18px;
+    --typography-rules-disclaimer1-font-size:  16px;
+    --typography-rules-disclaimer2-font-size:  16px;
+    --typography-rules-ribbons1-font-size:     16px;
+    --typography-rules-ribbons1-line-height:   16px;
+  }
+}
+
+
+/* ============================================================
+ * LAL — Lime and Lou
+ * Font: Poppins (regular) / Poppins weight 600 (bold) / Poppins weight 300 (light)
+ * Character: bold uppercase, sharp corners, lime accent
+ * ============================================================ */
+
+[data-theme="lal"] {
+  --typography-default-font-size: 14;
+
+  --typography-rules-headline1-font-family:    var(--font-family-main-bold);
+  --typography-rules-headline1-font-size:      24px;
+  --typography-rules-headline1-line-height:    28px;
+  --typography-rules-headline1-letter-spacing: 0.5px;
+  --typography-rules-headline1-text-transform: uppercase;
+  --typography-rules-headline1-font-weight:    700;
+
+  --typography-rules-headline2-font-family:    var(--font-family-main-bold);
+  --typography-rules-headline2-font-size:      22px;
+  --typography-rules-headline2-line-height:    26px;
+  --typography-rules-headline2-letter-spacing: 0.5px;
+  --typography-rules-headline2-text-transform: uppercase;
+  --typography-rules-headline2-font-weight:    700;
+
+  --typography-rules-headline3-font-family:    var(--font-family-main-bold);
+  --typography-rules-headline3-font-size:      22px;
+  --typography-rules-headline3-line-height:    26px;
+  --typography-rules-headline3-letter-spacing: 0.5px;
+  --typography-rules-headline3-text-transform: uppercase;
+  --typography-rules-headline3-font-weight:    700;
+
+  --typography-rules-headline4-font-family:    var(--font-family-main-bold);
+  --typography-rules-headline4-font-size:      20px;
+  --typography-rules-headline4-line-height:    24px;
+  --typography-rules-headline4-text-transform: uppercase;
+  --typography-rules-headline4-font-weight:    600;
+
+  --typography-rules-headline5-font-family:    var(--font-family-main-regular);
+  --typography-rules-headline5-font-size:      20px;
+  --typography-rules-headline5-line-height:    24px;
+
+  --typography-rules-headline6-font-family:    var(--font-family-main-bold);
+  --typography-rules-headline6-font-size:      15px;
+  --typography-rules-headline6-line-height:    20px;
+  --typography-rules-headline6-font-weight:    700;
+
+  --typography-rules-headline7-font-family:    var(--font-family-main-regular);
+  --typography-rules-headline7-font-size:      14px;
+  --typography-rules-headline7-line-height:    18px;
+  --typography-rules-headline7-font-weight:    500;
+
+  --typography-rules-headline8-font-family:    var(--font-family-main-bold);
+  --typography-rules-headline8-font-size:      14px;
+  --typography-rules-headline8-line-height:    18px;
+  --typography-rules-headline8-letter-spacing: 0.5px;
+  --typography-rules-headline8-text-transform: uppercase;
+  --typography-rules-headline8-font-weight:    600;
+
+  --typography-rules-headline9-font-family:    var(--font-family-main-bold);
+  --typography-rules-headline9-font-size:      14px;
+  --typography-rules-headline9-line-height:    18px;
+  --typography-rules-headline9-letter-spacing: 0.5px;
+  --typography-rules-headline9-text-transform: uppercase;
+  --typography-rules-headline9-font-weight:    700;
+
+  --typography-rules-headline10-font-family:   var(--font-family-main-bold);
+  --typography-rules-headline10-font-size:     13px;
+  --typography-rules-headline10-line-height:   16px;
+  --typography-rules-headline10-font-weight:   600;
+  --typography-rules-headline10-text-transform: uppercase;
+
+  --typography-rules-headline11-font-family:   var(--font-family-main-bold);
+  --typography-rules-headline11-font-size:     14px;
+  --typography-rules-headline11-line-height:   16px;
+  --typography-rules-headline11-font-weight:   700;
+
+  --typography-rules-headline12-font-family:   var(--font-family-main-bold);
+  --typography-rules-headline12-font-size:     20px;
+  --typography-rules-headline12-line-height:   24px;
+  --typography-rules-headline12-font-weight:   600;
+
+  --typography-rules-text1-font-family:        var(--font-family-main-regular);
+  --typography-rules-text1-font-size:          13px;
+  --typography-rules-text1-line-height:        18px;
+
+  --typography-rules-text2-font-family:        var(--font-family-main-bold);
+  --typography-rules-text2-font-size:          13px;
+  --typography-rules-text2-line-height:        20px;
+  --typography-rules-text2-font-weight:        600;
+
+  --typography-rules-text3-font-family:        var(--font-family-main-regular);
+  --typography-rules-text3-font-size:          12px;
+  --typography-rules-text3-line-height:        16px;
+  --typography-rules-text3-letter-spacing:     0;
+
+  --typography-rules-text4-font-family:        var(--font-family-main-bold);
+  --typography-rules-text4-font-size:          12px;
+  --typography-rules-text4-line-height:        16px;
+  --typography-rules-text4-font-weight:        600;
+
+  --typography-rules-text5-font-family:        var(--font-family-main-regular);
+  --typography-rules-text5-font-size:          13px;
+  --typography-rules-text5-line-height:        17px;
+
+  --typography-rules-text6-font-family:        var(--font-family-main-bold);
+  --typography-rules-text6-font-size:          12px;
+  --typography-rules-text6-line-height:        14px;
+  --typography-rules-text6-font-weight:        600;
+
+  --typography-rules-text7-font-family:        var(--font-family-main-regular);
+  --typography-rules-text7-font-size:          12px;
+  --typography-rules-text7-line-height:        14px;
+
+  --typography-rules-text8-font-family:        var(--font-family-main-regular);
+  --typography-rules-text8-font-size:          10px;
+  --typography-rules-text8-line-height:        14px;
+
+  --typography-rules-text9-font-family:        var(--font-family-main-bold);
+  --typography-rules-text9-font-size:          10px;
+  --typography-rules-text9-line-height:        14px;
+  --typography-rules-text9-font-weight:        600;
+
+  --typography-rules-caption1-font-family:     var(--font-family-main-regular);
+  --typography-rules-caption1-font-size:       12px;
+  --typography-rules-caption1-line-height:     16px;
+
+  --typography-rules-caption2-font-family:     var(--font-family-main-regular);
+  --typography-rules-caption2-font-size:       12px;
+  --typography-rules-caption2-line-height:     16px;
+  --typography-rules-caption2-font-weight:     600;
+
+  --typography-rules-paragraph1-font-family:   var(--font-family-main-regular);
+  --typography-rules-paragraph1-font-size:     13px;
+  --typography-rules-paragraph1-line-height:   20px;
+
+  --typography-rules-paragraph2-font-family:   var(--font-family-main-bold);
+  --typography-rules-paragraph2-font-size:     13px;
+  --typography-rules-paragraph2-line-height:   20px;
+  --typography-rules-paragraph2-font-weight:   600;
+
+  --typography-rules-paragraph3-font-family:   var(--font-family-main-regular);
+  --typography-rules-paragraph3-font-size:     16px;
+  --typography-rules-paragraph3-line-height:   20px;
+  --typography-rules-paragraph3-font-weight:   600;
+
+  --typography-rules-paragraph4-font-family:   var(--font-family-main-regular);
+  --typography-rules-paragraph4-font-size:     16px;
+  --typography-rules-paragraph4-line-height:   24px;
+
+  --typography-rules-links1-font-family:       var(--font-family-main-bold);
+  --typography-rules-links1-font-size:         12px;
+  --typography-rules-links1-line-height:       18px;
+
+  --typography-rules-button1-font-family:      var(--font-family-main-bold);
+  --typography-rules-button1-font-size:        14px;
+  --typography-rules-button1-line-height:      18px;
+  --typography-rules-button1-text-transform:   uppercase;
+  --typography-rules-button1-font-weight:      600;
+
+  --typography-rules-button2-font-family:      var(--font-family-main-bold);
+  --typography-rules-button2-font-size:        14px;
+  --typography-rules-button2-line-height:      18px;
+  --typography-rules-button2-font-weight:      600;
+  --typography-rules-button2-text-transform:   uppercase;
+
+  --typography-rules-disclaimer1-font-family:  var(--font-family-main-regular);
+  --typography-rules-disclaimer1-font-size:    10px;
+  --typography-rules-disclaimer1-line-height:  14px;
+
+  --typography-rules-disclaimer2-font-family:  var(--font-family-main-bold);
+  --typography-rules-disclaimer2-font-size:    10px;
+  --typography-rules-disclaimer2-line-height:  14px;
+
+  --typography-rules-ribbons1-font-family:     var(--font-family-main-regular);
+  --typography-rules-ribbons1-font-size:       11px;
+  --typography-rules-ribbons1-line-height:     11px;
+  --typography-rules-ribbons1-letter-spacing:  0.5px;
+  --typography-rules-ribbons1-text-transform:  uppercase;
+  --typography-rules-ribbons1-font-weight:     600;
+}
+
+@media (min-width: 768px) {
+  [data-theme="lal"] {
+    --typography-rules-headline1-font-size:    40px;
+    --typography-rules-headline1-line-height:  44px;
+    --typography-rules-headline2-font-size:    32px;
+    --typography-rules-headline2-line-height:  38px;
+    --typography-rules-headline3-font-size:    32px;
+    --typography-rules-headline3-line-height:  38px;
+    --typography-rules-headline6-font-size:    16px;
+    --typography-rules-headline9-font-size:    20px;
+    --typography-rules-headline9-line-height:  24px;
+    --typography-rules-headline10-font-size:   14px;
+    --typography-rules-headline10-line-height: 18px;
+    --typography-rules-headline11-font-size:   20px;
+    --typography-rules-headline11-line-height: 24px;
+    --typography-rules-text5-font-size:        14px;
+    --typography-rules-text5-line-height:      20px;
+    --typography-rules-text6-font-size:        13px;
+    --typography-rules-text6-line-height:      20px;
+    --typography-rules-text7-font-size:        13px;
+    --typography-rules-text7-line-height:      20px;
+    --typography-rules-paragraph1-font-size:   18px;
+    --typography-rules-paragraph1-line-height: 24px;
+    --typography-rules-paragraph2-font-size:   18px;
+    --typography-rules-paragraph2-line-height: 24px;
+    --typography-rules-ribbons1-font-size:     14px;
+    --typography-rules-ribbons1-line-height:   14px;
+  }
+}
+
+
+/* ============================================================
+ * IB — Israel Blessing
+ * Font: Assistant (regular) / Assistant weight 600 (bold) / Assistant weight 300 (light)
+ * Character: larger base size (18), no uppercase, serif-adjacent feel
+ * ============================================================ */
+
+[data-theme="ib"] {
+  --typography-default-font-size: 18;
+
+  --typography-rules-headline1-font-family:    var(--font-family-main-regular);
+  --typography-rules-headline1-font-size:      36px;
+  --typography-rules-headline1-line-height:    40px;
+  --typography-rules-headline1-font-weight:    600;
+
+  --typography-rules-headline2-font-family:    var(--font-family-main-regular);
+  --typography-rules-headline2-font-size:      24px;
+  --typography-rules-headline2-line-height:    28px;
+
+  --typography-rules-headline3-font-family:    var(--font-family-main-regular);
+  --typography-rules-headline3-font-size:      24px;
+  --typography-rules-headline3-line-height:    28px;
+  --typography-rules-headline3-font-weight:    600;
+
+  --typography-rules-headline4-font-family:    var(--font-family-main-regular);
+  --typography-rules-headline4-font-size:      26px;
+  --typography-rules-headline4-line-height:    36px;
+  --typography-rules-headline4-font-weight:    600;
+
+  --typography-rules-headline5-font-family:    var(--font-family-main-regular);
+  --typography-rules-headline5-font-size:      26px;
+  --typography-rules-headline5-line-height:    32px;
+
+  --typography-rules-headline6-font-family:    var(--font-family-main-regular);
+  --typography-rules-headline6-font-size:      18px;
+  --typography-rules-headline6-line-height:    24px;
+  --typography-rules-headline6-letter-spacing: 1px;
+  --typography-rules-headline6-text-transform: uppercase;
+  --typography-rules-headline6-font-weight:    700;
+
+  --typography-rules-headline7-font-family:    var(--font-family-main-regular);
+  --typography-rules-headline7-font-size:      18px;
+  --typography-rules-headline7-line-height:    24px;
+  --typography-rules-headline7-font-weight:    600;
+
+  --typography-rules-headline8-font-family:    var(--font-family-main-regular);
+  --typography-rules-headline8-font-size:      18px;
+  --typography-rules-headline8-line-height:    24px;
+  --typography-rules-headline8-font-weight:    600;
+
+  --typography-rules-headline9-font-family:    var(--font-family-main-regular);
+  --typography-rules-headline9-font-size:      18px;
+  --typography-rules-headline9-line-height:    24px;
+  --typography-rules-headline9-font-weight:    600;
+
+  --typography-rules-headline10-font-family:   var(--font-family-main-regular);
+  --typography-rules-headline10-font-size:     14px;
+  --typography-rules-headline10-line-height:   16px;
+  --typography-rules-headline10-font-weight:   600;
+  --typography-rules-headline10-text-transform: uppercase;
+
+  --typography-rules-headline11-font-family:   var(--font-family-main-regular);
+  --typography-rules-headline11-font-size:     18px;
+  --typography-rules-headline11-line-height:   24px;
+
+  --typography-rules-headline12-font-family:   var(--font-family-main-regular);
+  --typography-rules-headline12-font-size:     26px;
+  --typography-rules-headline12-line-height:   34px;
+
+  --typography-rules-text1-font-family:        var(--font-family-main-regular);
+  --typography-rules-text1-font-size:          16px;
+  --typography-rules-text1-line-height:        22px;
+
+  --typography-rules-text2-font-family:        var(--font-family-main-regular);
+  --typography-rules-text2-font-size:          16px;
+  --typography-rules-text2-line-height:        22px;
+  --typography-rules-text2-font-weight:        600;
+
+  --typography-rules-text3-font-family:        var(--font-family-main-regular);
+  --typography-rules-text3-font-size:          13px;
+  --typography-rules-text3-line-height:        16px;
+  --typography-rules-text3-letter-spacing:     0;
+
+  --typography-rules-text4-font-family:        var(--font-family-main-regular);
+  --typography-rules-text4-font-size:          13px;
+  --typography-rules-text4-line-height:        16px;
+  --typography-rules-text4-font-weight:        600;
+
+  --typography-rules-text5-font-family:        var(--font-family-main-regular);
+  --typography-rules-text5-font-size:          16px;
+  --typography-rules-text5-line-height:        20px;
+
+  --typography-rules-text6-font-family:        var(--font-family-main-regular);
+  --typography-rules-text6-font-size:          16px;
+  --typography-rules-text6-line-height:        20px;
+  --typography-rules-text6-font-weight:        600;
+
+  --typography-rules-text7-font-family:        var(--font-family-main-regular);
+  --typography-rules-text7-font-size:          16px;
+  --typography-rules-text7-line-height:        20px;
+
+  --typography-rules-text8-font-family:        var(--font-family-main-regular);
+  --typography-rules-text8-font-size:          10px;
+  --typography-rules-text8-line-height:        14px;
+
+  --typography-rules-text9-font-family:        var(--font-family-main-regular);
+  --typography-rules-text9-font-size:          10px;
+  --typography-rules-text9-line-height:        14px;
+  --typography-rules-text9-font-weight:        600;
+
+  --typography-rules-caption1-font-family:     var(--font-family-main-regular);
+  --typography-rules-caption1-font-size:       13px;
+  --typography-rules-caption1-line-height:     16px;
+
+  --typography-rules-caption2-font-family:     var(--font-family-main-regular);
+  --typography-rules-caption2-font-size:       13px;
+  --typography-rules-caption2-line-height:     16px;
+  --typography-rules-caption2-font-weight:     600;
+
+  --typography-rules-paragraph1-font-family:   var(--font-family-main-regular);
+  --typography-rules-paragraph1-font-size:     16px;
+  --typography-rules-paragraph1-line-height:   22px;
+
+  --typography-rules-paragraph2-font-family:   var(--font-family-main-regular);
+  --typography-rules-paragraph2-font-size:     16px;
+  --typography-rules-paragraph2-line-height:   22px;
+  --typography-rules-paragraph2-font-weight:   600;
+
+  --typography-rules-paragraph3-font-family:   var(--font-family-main-regular);
+  --typography-rules-paragraph3-font-size:     18px;
+  --typography-rules-paragraph3-line-height:   26px;
+  --typography-rules-paragraph3-font-weight:   600;
+
+  --typography-rules-paragraph4-font-family:   var(--font-family-main-regular);
+  --typography-rules-paragraph4-font-size:     16px;
+  --typography-rules-paragraph4-line-height:   24px;
+
+  --typography-rules-links1-font-family:       var(--font-family-main-regular);
+  --typography-rules-links1-font-size:         12px;
+  --typography-rules-links1-line-height:       18px;
+
+  --typography-rules-button1-font-family:      var(--font-family-main-regular);
+  --typography-rules-button1-font-size:        16px;
+  --typography-rules-button1-line-height:      20px;
+  --typography-rules-button1-letter-spacing:   1px;
+  --typography-rules-button1-text-transform:   uppercase;
+  --typography-rules-button1-font-weight:      700;
+
+  --typography-rules-button2-font-family:      var(--font-family-main-bold);
+  --typography-rules-button2-font-size:        14px;
+  --typography-rules-button2-line-height:      20px;
+
+  --typography-rules-disclaimer1-font-family:  var(--font-family-main-regular);
+  --typography-rules-disclaimer1-font-size:    10px;
+  --typography-rules-disclaimer1-line-height:  14px;
+
+  --typography-rules-disclaimer2-font-family:  var(--font-family-main-bold);
+  --typography-rules-disclaimer2-font-size:    10px;
+  --typography-rules-disclaimer2-line-height:  14px;
+
+  --typography-rules-ribbons1-font-family:     var(--font-family-main-regular);
+  --typography-rules-ribbons1-font-size:       13px;
+  --typography-rules-ribbons1-line-height:     13px;
+  --typography-rules-ribbons1-font-weight:     600;
+}
+
+@media (min-width: 768px) {
+  [data-theme="ib"] {
+    --typography-rules-headline1-font-size:    60px;
+    --typography-rules-headline1-line-height:  68px;
+    --typography-rules-headline2-font-size:    36px;
+    --typography-rules-headline2-line-height:  42px;
+    --typography-rules-headline3-font-size:    36px;
+    --typography-rules-headline3-line-height:  42px;
+    --typography-rules-headline9-font-size:    22px;
+    --typography-rules-headline9-line-height:  28px;
+    --typography-rules-headline10-font-size:   16px;
+    --typography-rules-headline10-line-height: 20px;
+    --typography-rules-headline11-font-size:   22px;
+    --typography-rules-headline11-line-height: 28px;
+    --typography-rules-paragraph1-font-size:   18px;
+    --typography-rules-paragraph1-line-height: 22px;
+    --typography-rules-paragraph2-font-size:   18px;
+    --typography-rules-paragraph2-line-height: 22px;
+    --typography-rules-disclaimer1-font-size:  16px;
+    --typography-rules-disclaimer2-font-size:  16px;
+    --typography-rules-ribbons1-font-size:     20px;
+    --typography-rules-ribbons1-line-height:   20px;
+  }
+}
+
+
+/* ============================================================
+ * TGR — Theo Grace
+ * Font: Lato (regular) / Lato weight 700 (bold) / Lato weight 300 (light) / BigCaslonRegular (secondary display)
+ * Character: rounded buttons, capitalize (not uppercase), editorial serif headings
+ * Note: headlines 1–4, 6, 9 use --font-family-secondary-regular (BigCaslonRegular)
+ * ============================================================ */
+
+[data-theme="tgr"] {
+  --typography-default-font-size: 14;
+
+  --typography-rules-headline1-font-family:    var(--font-family-secondary-regular);
+  --typography-rules-headline1-font-size:      24px;
+  --typography-rules-headline1-line-height:    30px;
+
+  --typography-rules-headline2-font-family:    var(--font-family-secondary-regular);
+  --typography-rules-headline2-font-size:      24px;
+  --typography-rules-headline2-line-height:    30px;
+
+  --typography-rules-headline3-font-family:    var(--font-family-secondary-regular);
+  --typography-rules-headline3-font-size:      24px;
+  --typography-rules-headline3-line-height:    28px;
+
+  --typography-rules-headline4-font-family:    var(--font-family-secondary-regular);
+  --typography-rules-headline4-font-size:      24px;
+  --typography-rules-headline4-line-height:    28px;
+
+  --typography-rules-headline5-font-family:    var(--font-family-main-light);
+  --typography-rules-headline5-font-size:      20px;
+  --typography-rules-headline5-line-height:    24px;
+  --typography-rules-headline5-font-weight:    300;
+
+  --typography-rules-headline6-font-family:    var(--font-family-secondary-regular);
+  --typography-rules-headline6-font-size:      16px;
+  --typography-rules-headline6-line-height:    20px;
+
+  --typography-rules-headline7-font-family:    var(--font-family-main-regular);
+  --typography-rules-headline7-font-size:      14px;
+  --typography-rules-headline7-line-height:    20px;
+
+  --typography-rules-headline8-font-family:    var(--font-family-main-regular);
+  --typography-rules-headline8-font-size:      15px;
+  --typography-rules-headline8-line-height:    20px;
+  --typography-rules-headline8-text-transform: uppercase;
+
+  --typography-rules-headline9-font-family:    var(--font-family-secondary-regular);
+  --typography-rules-headline9-font-size:      16px;
+  --typography-rules-headline9-line-height:    20px;
+
+  --typography-rules-headline10-font-family:   var(--font-family-main-regular);
+  --typography-rules-headline10-font-size:     14px;
+  --typography-rules-headline10-line-height:   20px;
+
+  --typography-rules-headline11-font-family:   var(--font-family-main-regular);
+  --typography-rules-headline11-font-size:     20px;
+  --typography-rules-headline11-line-height:   28px;
+
+  --typography-rules-headline12-font-family:   var(--font-family-main-regular);
+  --typography-rules-headline12-font-size:     20px;
+  --typography-rules-headline12-line-height:   24px;
+
+  --typography-rules-text1-font-family:        var(--font-family-main-regular);
+  --typography-rules-text1-font-size:          14px;
+  --typography-rules-text1-line-height:        20px;
+
+  --typography-rules-text2-font-family:        var(--font-family-main-bold);
+  --typography-rules-text2-font-size:          14px;
+  --typography-rules-text2-line-height:        20px;
+  --typography-rules-text2-font-weight:        600;
+
+  --typography-rules-text3-font-family:        var(--font-family-main-regular);
+  --typography-rules-text3-font-size:          12px;
+  --typography-rules-text3-line-height:        16px;
+
+  --typography-rules-text4-font-family:        var(--font-family-main-bold);
+  --typography-rules-text4-font-size:          12px;
+  --typography-rules-text4-line-height:        18px;
+  --typography-rules-text4-font-weight:        600;
+
+  --typography-rules-text5-font-family:        var(--font-family-main-regular);
+  --typography-rules-text5-font-size:          14px;
+  --typography-rules-text5-line-height:        20px;
+
+  --typography-rules-text6-font-family:        var(--font-family-main-regular);
+  --typography-rules-text6-font-size:          14px;
+  --typography-rules-text6-line-height:        20px;
+
+  --typography-rules-text7-font-family:        var(--font-family-main-light);
+  --typography-rules-text7-font-size:          14px;
+  --typography-rules-text7-line-height:        20px;
+  --typography-rules-text7-font-weight:        300;
+
+  --typography-rules-text8-font-family:        var(--font-family-main-regular);
+  --typography-rules-text8-font-size:          10px;
+  --typography-rules-text8-line-height:        14px;
+
+  --typography-rules-text9-font-family:        var(--font-family-main-bold);
+  --typography-rules-text9-font-size:          10px;
+  --typography-rules-text9-line-height:        14px;
+  --typography-rules-text9-font-weight:        600;
+
+  --typography-rules-caption1-font-family:     var(--font-family-main-regular);
+  --typography-rules-caption1-font-size:       12px;
+  --typography-rules-caption1-line-height:     14px;
+
+  --typography-rules-caption2-font-family:     var(--font-family-main-bold);
+  --typography-rules-caption2-font-size:       12px;
+  --typography-rules-caption2-line-height:     14px;
+  --typography-rules-caption2-font-weight:     600;
+
+  --typography-rules-paragraph1-font-family:   var(--font-family-main-regular);
+  --typography-rules-paragraph1-font-size:     14px;
+  --typography-rules-paragraph1-line-height:   20px;
+
+  --typography-rules-paragraph2-font-family:   var(--font-family-main-bold);
+  --typography-rules-paragraph2-font-size:     14px;
+  --typography-rules-paragraph2-line-height:   20px;
+  --typography-rules-paragraph2-font-weight:   600;
+
+  --typography-rules-paragraph3-font-family:   var(--font-family-main-bold);
+  --typography-rules-paragraph3-font-size:     16px;
+  --typography-rules-paragraph3-line-height:   22px;
+  --typography-rules-paragraph3-font-weight:   600;
+
+  --typography-rules-paragraph4-font-family:   var(--font-family-main-regular);
+  --typography-rules-paragraph4-font-size:     16px;
+  --typography-rules-paragraph4-line-height:   22px;
+
+  --typography-rules-links1-font-family:       var(--font-family-main-bold);
+  --typography-rules-links1-font-size:         12px;
+  --typography-rules-links1-line-height:       18px;
+  --typography-rules-links1-font-weight:       600;
+
+  --typography-rules-button1-font-family:      var(--font-family-main-bold);
+  --typography-rules-button1-font-size:        16px;
+  --typography-rules-button1-line-height:      20px;
+  --typography-rules-button1-text-transform:   capitalize;
+
+  --typography-rules-button2-font-family:      var(--font-family-main-bold);
+  --typography-rules-button2-font-size:        16px;
+  --typography-rules-button2-line-height:      20px;
+  --typography-rules-button2-font-weight:      600;
+  --typography-rules-button2-text-transform:   capitalize;
+
+  --typography-rules-disclaimer1-font-family:  var(--font-family-main-regular);
+  --typography-rules-disclaimer1-font-size:    10px;
+  --typography-rules-disclaimer1-line-height:  14px;
+
+  --typography-rules-disclaimer2-font-family:  var(--font-family-main-bold);
+  --typography-rules-disclaimer2-font-size:    10px;
+  --typography-rules-disclaimer2-line-height:  14px;
+  --typography-rules-disclaimer2-font-weight:  600;
+
+  --typography-rules-ribbons1-font-family:     var(--font-family-main-regular);
+  --typography-rules-ribbons1-font-size:       12px;
+  --typography-rules-ribbons1-line-height:     16px;
+  --typography-rules-ribbons1-text-transform:  capitalize;
+}
+
+@media (min-width: 768px) {
+  [data-theme="tgr"] {
+    --typography-rules-headline1-font-size:    36px;
+    --typography-rules-headline1-line-height:  40px;
+    --typography-rules-headline2-font-size:    28px;
+    --typography-rules-headline2-line-height:  36px;
+    --typography-rules-headline3-font-size:    28px;
+    --typography-rules-headline3-line-height:  36px;
+    --typography-rules-headline9-font-size:    24px;
+    --typography-rules-headline9-line-height:  28px;
+    --typography-rules-paragraph1-font-size:   18px;
+    --typography-rules-paragraph1-line-height: 22px;
+    --typography-rules-paragraph2-font-size:   18px;
+    --typography-rules-paragraph2-line-height: 22px;
+    --typography-rules-disclaimer1-font-size:  12px;
+    --typography-rules-disclaimer2-font-size:  12px;
+    --typography-rules-ribbons1-font-size:     14px;
+    --typography-rules-ribbons1-line-height:   20px;
+  }
+}

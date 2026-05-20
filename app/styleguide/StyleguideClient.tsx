@@ -31,6 +31,7 @@ const THEMES: Record<string, ThemeData> = {
       { label: 'Disabled',    bg: '#808080',    text: '#f8f8f8',    border: '#808080' },
       { label: 'Danger',      bg: '#8e0000',    text: '#ffffff',    border: '#8e0000' },
       { label: 'Success',     bg: '#2b8b68',    text: '#ffffff',    border: '#2b8b68' },
+      { label: 'Upsell',      bg: 'transparent',text: '#1e1e1e',    border: '#ebebeb',    upsell: true },
       { label: 'Link',        bg: 'transparent',text: '#1e1e1e',    border: 'transparent', link: true },
     ],
     radius: { button: 100, ribbon: 100, input: 4, lg: 12 },
@@ -69,6 +70,7 @@ const THEMES: Record<string, ThemeData> = {
       { label: 'Disabled',    bg: '#f5f5f5',    text: '#989898',    border: '#f5f5f5' },
       { label: 'Danger',      bg: '#8e0000',    text: '#ffffff',    border: '#8e0000' },
       { label: 'Success',     bg: '#2b8b68',    text: '#ffffff',    border: '#2b8b68' },
+      { label: 'Upsell',      bg: 'transparent',text: '#000000',    border: '#ebebeb',    upsell: true },
       { label: 'Link',        bg: 'transparent',text: '#000000',    border: 'transparent', link: true },
     ],
     radius: { button: 0, ribbon: 0, input: 4, lg: 16 },
@@ -90,8 +92,8 @@ const THEMES: Record<string, ThemeData> = {
     label: 'LAL — Lime and Lou',
     fontMain: "'Poppins', system-ui, sans-serif",
     fontMainName: 'Poppins',
-    fontSecondary: "'EB Garamond', Georgia, serif",
-    fontSecondaryName: 'EB Garamond',
+    fontSecondary: "'Poppins', system-ui, sans-serif",
+    fontSecondaryName: 'Poppins',
     textTransform: 'uppercase',
     colors: {
       background: '#ffffff', brandPrimary: '#e8ff36', brandSecondary: '#000000',
@@ -109,6 +111,7 @@ const THEMES: Record<string, ThemeData> = {
       { label: 'Disabled',    bg: '#f5f5f5',    text: '#989898',    border: '#f5f5f5' },
       { label: 'Danger',      bg: '#8e0000',    text: '#ffffff',    border: '#8e0000' },
       { label: 'Success',     bg: '#2b8b68',    text: '#ffffff',    border: '#2b8b68' },
+      { label: 'Upsell',      bg: 'transparent',text: '#000000',    border: '#e3e3e3',    upsell: true },
       { label: 'Link',        bg: 'transparent',text: '#000000',    border: 'transparent', link: true },
     ],
     radius: { button: 0, ribbon: 0, input: 8, lg: 16 },
@@ -143,6 +146,7 @@ const THEMES: Record<string, ThemeData> = {
       { label: 'Disabled',    bg: '#f8f8f8',    text: '#bebebe',    border: '#f8f8f8' },
       { label: 'Danger',      bg: '#bc0000',    text: '#ffffff',    border: '#bc0000' },
       { label: 'Success',     bg: '#2b8b68',    text: '#ffffff',    border: '#2b8b68' },
+      { label: 'Upsell',      bg: 'transparent',text: '#122f4f',    border: '#ebebeb',    upsell: true },
       { label: 'Link',        bg: 'transparent',text: '#122f4f',    border: 'transparent', link: true },
     ],
     radius: { button: 4, ribbon: 0, input: 4, lg: 16 },
@@ -156,10 +160,10 @@ const THEMES: Record<string, ThemeData> = {
   },
   MNN: {
     label: 'MNN — MYKA',
-    fontMain: "'Ano', 'Arial Narrow', sans-serif",
-    fontMainName: 'Ano',
-    fontSecondary: "'Ano', 'Arial Narrow', sans-serif",
-    fontSecondaryName: 'Ano (Mafra)',
+    fontMain: "'AnoRegular', 'Arial Narrow', sans-serif",
+    fontMainName: 'AnoRegular',
+    fontSecondary: "'AnoRegular', 'Arial Narrow', sans-serif",
+    fontSecondaryName: 'AnoRegular',
     btnFontSize: 14,
     textTransform: 'uppercase',
     colors: {
@@ -178,6 +182,7 @@ const THEMES: Record<string, ThemeData> = {
       { label: 'Disabled',    bg: '#f8f8f8',    text: '#808080',    border: '#f8f8f8' },
       { label: 'Danger',      bg: '#8e0000',    text: '#ffffff',    border: '#8e0000' },
       { label: 'Success',     bg: '#2b8b68',    text: '#ffffff',    border: '#2b8b68' },
+      { label: 'Upsell',      bg: 'transparent',text: '#000000',    border: '#ebebeb',    upsell: true },
       { label: 'Link',        bg: 'transparent',text: '#000000',    border: 'transparent', link: true },
     ],
     radius: { button: 4, ribbon: 100, input: 4, lg: 12 },
@@ -241,7 +246,7 @@ interface ThemeColors {
   inputText: string; inputPlaceholder: string; cardImageBg: string
 }
 
-interface ThemeButton { label: string; bg: string; text: string; border: string; link?: boolean }
+interface ThemeButton { label: string; bg: string; text: string; border: string; link?: boolean; upsell?: boolean }
 interface ThemeRibbon { label: string; bg: string; text: string }
 interface ThemeRadius { button: number; ribbon: number; input: number; lg: number }
 interface ThemePrice  { selling: string; crossed: string; discountText: string; discountBg: string }
@@ -376,7 +381,7 @@ const NAV_SECTIONS = [
   { id: 'breakpoints',label: 'Breakpoints' },
 ]
 
-const SITE_HEADER_OFFSET = 'calc(var(--layout-topline-height) + var(--layout-header-height))'
+const SITE_HEADER_OFFSET = 'calc(var(--topline-height) + var(--layout-header-height))'
 const THEME_BAR_HEIGHT = 46
 
 interface StyleguideClientProps {
@@ -518,24 +523,24 @@ export default function StyleguideClient({ brand }: StyleguideClientProps) {
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, alignItems: 'flex-start' }}>
             {theme.buttons.filter(btn => btn.label !== 'Danger' && btn.label !== 'Success').map((btn) => {
               const br   = btn.link ? 0 : r.button
-              const fs   = btnFs
-              const lh   = btnType.lh
+              const fs   = btn.upsell ? 14 : btnFs
+              const lh   = btn.upsell ? 20 : btnType.lh
               return (
                 <div key={btn.label} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                   <div style={{ fontSize: 11, fontWeight: 700, color: '#808080', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{btn.label}</div>
                   <div style={{
-                    padding: btn.link ? '8px 4px' : '10px 22px',
+                    padding: btn.link ? '8px 4px' : btn.upsell ? '6px 12px' : '10px 22px',
                     border: btn.link ? 'none' : '1px solid',
                     borderColor: btn.border,
                     borderRadius: br,
                     background: btn.bg,
                     color: btn.text,
-                    fontWeight: btn.link ? 'inherit' : btnFw,
+                    fontWeight: btn.link || btn.upsell ? 'normal' : btnFw,
                     fontSize: fs,
                     lineHeight: `${lh}px`,
                     fontFamily: theme.fontMain,
-                    textTransform: theme.textTransform as any,
-                    letterSpacing: theme.btnLetterSpacing !== undefined ? theme.btnLetterSpacing : '0.04em',
+                    textTransform: btn.upsell ? 'none' : (theme.textTransform as any),
+                    letterSpacing: btn.upsell ? 0 : (theme.btnLetterSpacing !== undefined ? theme.btnLetterSpacing : '0.04em'),
                     textDecoration: btn.link ? 'underline' : 'none',
                     cursor: 'default',
                     textAlign: 'center',
@@ -543,7 +548,7 @@ export default function StyleguideClient({ brand }: StyleguideClientProps) {
                     {btn.label}
                   </div>
                   <div style={{ fontSize: 9, color: '#808080', fontFamily: 'monospace' }}>
-                    {fs}px / lh{lh} · w{btnFw} · bg {btn.bg}
+                    {fs}px / lh{lh} · {btn.upsell ? 'w400' : `w${btnFw}`} · bg {btn.bg || 'transparent'}
                   </div>
                 </div>
               )

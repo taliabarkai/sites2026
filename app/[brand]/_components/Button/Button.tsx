@@ -2,7 +2,7 @@ import Link from 'next/link'
 import type { ButtonHTMLAttributes, MouseEventHandler, ReactNode } from 'react'
 import styles from './Button.module.css'
 
-export type ButtonVariant = 'primary' | 'secondary'
+export type ButtonVariant = 'primary' | 'secondary' | 'upsell-primary' | 'link'
 export type ButtonSize = 'default' | 'compact' | 'iconOnly'
 
 export interface ButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'children'> {
@@ -11,10 +11,19 @@ export interface ButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement
   size?: ButtonSize
   href?: string
   className?: string
+  leadingIcon?: ReactNode
+  trailingIcon?: ReactNode
 }
 
 function joinClasses(...parts: Array<string | false | undefined>) {
   return parts.filter(Boolean).join(' ')
+}
+
+function variantClass(variant: ButtonVariant, s: typeof styles) {
+  if (variant === 'primary') return s.primary
+  if (variant === 'upsell-primary') return s.upsellPrimary
+  if (variant === 'link') return s.link
+  return s.secondary
 }
 
 export function Button({
@@ -25,14 +34,25 @@ export function Button({
   className,
   type = 'button',
   disabled,
+  leadingIcon,
+  trailingIcon,
   ...rest
 }: ButtonProps) {
+  const isLink = variant === 'link'
   const classes = joinClasses(
-    styles.base,
-    variant === 'primary' ? styles.primary : styles.secondary,
-    size === 'compact' && styles.compact,
-    size === 'iconOnly' && styles.iconOnly,
+    !isLink && styles.base,
+    variantClass(variant, styles),
+    !isLink && size === 'compact' && styles.compact,
+    !isLink && size === 'iconOnly' && styles.iconOnly,
     className,
+  )
+
+  const content = (
+    <>
+      {leadingIcon}
+      {children}
+      {trailingIcon}
+    </>
   )
 
   if (href && !disabled) {
@@ -42,14 +62,14 @@ export function Button({
         className={classes}
         onClick={rest.onClick as MouseEventHandler<HTMLAnchorElement> | undefined}
       >
-        {children}
+        {content}
       </Link>
     )
   }
 
   return (
     <button type={type} className={classes} disabled={disabled} {...rest}>
-      {children}
+      {content}
     </button>
   )
 }

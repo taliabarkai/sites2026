@@ -1,0 +1,272 @@
+'use client'
+
+import { useEffect, useRef, useState } from 'react'
+import { usePathname } from 'next/navigation'
+import Link from 'next/link'
+import * as oalIcons from '@/src/components/icons/oal'
+import * as mnnIcons from '@/src/components/icons/mnn'
+import * as tgrIcons from '@/src/components/icons/tgr'
+import * as lalIcons from '@/src/components/icons/lal'
+import * as ibIcons from '@/src/components/icons/ib'
+import { getBrandFromPathname } from '../../_config/brands'
+import { Button } from '../Button'
+import { GiftOptionsModal } from './GiftOptionsModal'
+import type { CartItem } from '../../_context/CartContext'
+import styles from './FloatingCart.module.css'
+
+const BRAND_ICONS = {
+  oal: oalIcons,
+  mnn: mnnIcons,
+  tgr: tgrIcons,
+  lal: lalIcons,
+  ib: ibIcons,
+} as const
+
+export interface FloatingCartProps {
+  isOpen: boolean
+  onClose: () => void
+  items: CartItem[]
+  subtotal: number
+  onRemoveItem: (id: string) => void
+  onEditItem: (id: string) => void
+  onContinueToCheckout: () => void
+  onGenerateGiftNote: () => Promise<string>
+}
+
+function formatPrice(cents: number) {
+  return `$${(cents / 100).toFixed(2)}`
+}
+
+interface CartItemRowProps {
+  item: CartItem
+  onRemove: (id: string) => void
+  onEdit: (id: string) => void
+  onGenerateGiftNote: () => Promise<string>
+  GiftIcon: React.ComponentType<{ size?: number }>
+  PlusMinusIcon: React.ComponentType<{ size?: number }>
+}
+
+function CartItemRow({ item, onRemove, onEdit, onGenerateGiftNote, GiftIcon, PlusMinusIcon }: CartItemRowProps) {
+  const [detailsOpen, setDetailsOpen] = useState(false)
+  const [confirmRemove, setConfirmRemove] = useState(false)
+  const [giftModalOpen, setGiftModalOpen] = useState(false)
+  const hasOptions = item.selectedOptions && item.selectedOptions.length > 0
+
+  const handleRemoveConfirm = () => {
+    onRemove(item.id)
+  }
+
+  return (
+    <article className={styles.item}>
+      {giftModalOpen && (
+        <GiftOptionsModal
+          onClose={() => setGiftModalOpen(false)}
+          onAddToCart={() => setGiftModalOpen(false)}
+          onGenerateGiftNote={onGenerateGiftNote}
+        />
+      )}
+
+      <div className={styles.itemMain}>
+        <img
+          src={item.image}
+          alt={item.name}
+          className={styles.itemImage}
+          width={80}
+          height={80}
+        />
+
+        <div className={styles.itemBody}>
+          <p className={styles.itemName}>{item.name}</p>
+
+          <div className={styles.itemPriceRow}>
+            {item.originalPrice != null && (
+              <span className={styles.itemOriginalPrice}>{formatPrice(item.originalPrice)}</span>
+            )}
+            <span className={styles.itemPrice}>{formatPrice(item.price)}</span>
+          </div>
+
+          {hasOptions && (
+            <div className={styles.detailsBlock}>
+              <button
+                type="button"
+                className={styles.detailsToggle}
+                aria-expanded={detailsOpen}
+                onClick={() => setDetailsOpen(o => !o)}
+              >
+                View Details {detailsOpen ? '▲' : '▼'}
+              </button>
+              {detailsOpen && (
+                <dl className={styles.optionsList}>
+                  {item.selectedOptions!.map(opt => (
+                    <div key={opt.label} className={styles.optionRow}>
+                      <dt className={styles.optionKey}>{opt.label}</dt>
+                      <dd className={styles.optionValue}>{opt.value}</dd>
+                    </div>
+                  ))}
+                </dl>
+              )}
+            </div>
+          )}
+
+          <div className={styles.itemActions}>
+            {item.isPersonalized && (
+              <button type="button" className={styles.editLink} onClick={() => onEdit(item.id)}>
+                Edit
+              </button>
+            )}
+
+            {confirmRemove ? (
+              <span className={styles.removeConfirm}>
+                Remove item?{' '}
+                <button type="button" className={styles.removeConfirmYes} onClick={handleRemoveConfirm}>
+                  Yes
+                </button>
+                {' / '}
+                <button type="button" className={styles.removeConfirmCancel} onClick={() => setConfirmRemove(false)}>
+                  Cancel
+                </button>
+              </span>
+            ) : (
+              <button type="button" className={styles.removeLink} onClick={() => setConfirmRemove(true)}>
+                Remove
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <Button
+        variant="upsell-primary"
+        leadingIcon={<GiftIcon size={24} />}
+        trailingIcon={<PlusMinusIcon size={24} />}
+        onClick={() => setGiftModalOpen(true)}
+      >
+        Add Gifting Options
+      </Button>
+    </article>
+  )
+}
+
+export function FloatingCart({
+  isOpen,
+  onClose,
+  items,
+  subtotal,
+  onRemoveItem,
+  onEditItem,
+  onContinueToCheckout,
+  onGenerateGiftNote,
+}: FloatingCartProps) {
+  const pathname = usePathname()
+  const brand = getBrandFromPathname(pathname)
+  const icons = BRAND_ICONS[brand]
+  const { XIcon } = icons
+  const panelRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose()
+    }
+    if (isOpen) document.addEventListener('keydown', handleEscape)
+    return () => document.removeEventListener('keydown', handleEscape)
+  }, [isOpen, onClose])
+
+  useEffect(() => {
+    if (!isOpen) return
+    const el = panelRef.current
+    if (!el) return
+    const focusables = Array.from(
+      el.querySelectorAll<HTMLElement>('a[href],button:not([disabled]),input,textarea,[tabindex]:not([tabindex="-1"])')
+    )
+    focusables[0]?.focus()
+
+    const handleTab = (e: KeyboardEvent) => {
+      if (e.key !== 'Tab') return
+      const first = focusables[0]
+      const last = focusables[focusables.length - 1]
+      if (e.shiftKey) {
+        if (document.activeElement === first) { e.preventDefault(); last?.focus() }
+      } else {
+        if (document.activeElement === last) { e.preventDefault(); first?.focus() }
+      }
+    }
+    el.addEventListener('keydown', handleTab)
+    return () => el.removeEventListener('keydown', handleTab)
+  }, [isOpen])
+
+  useEffect(() => {
+    document.body.style.overflow = isOpen ? 'hidden' : ''
+    return () => { document.body.style.overflow = '' }
+  }, [isOpen])
+
+  return (
+    <>
+      <div
+        className={`${styles.overlay} ${isOpen ? styles.overlayVisible : ''}`}
+        aria-hidden="true"
+        onClick={onClose}
+      />
+
+      <div
+        ref={panelRef}
+        className={`${styles.panel} ${isOpen ? styles.panelOpen : ''}`}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Shopping cart"
+      >
+        <div className={styles.header}>
+          <h2 className={styles.title}>
+            My Bag {items.length > 0 && <span className={styles.count}>({items.length})</span>}
+          </h2>
+          <button
+            type="button"
+            className={styles.closeBtn}
+            aria-label="Close cart"
+            onClick={onClose}
+          >
+            <XIcon size={24} />
+          </button>
+        </div>
+
+        <div className={styles.itemsList}>
+          {items.length === 0 ? (
+            <div className={styles.empty}>
+              <p className={styles.emptyText}>Your bag is empty.</p>
+              <Button href="#" variant="secondary" onClick={onClose}>
+                Continue Shopping
+              </Button>
+            </div>
+          ) : (
+            items.map(item => (
+              <CartItemRow
+                key={item.id}
+                item={item}
+                onRemove={onRemoveItem}
+                onEdit={onEditItem}
+                onGenerateGiftNote={onGenerateGiftNote}
+                GiftIcon={icons.GiftIcon}
+                PlusMinusIcon={icons.PlusMinusIcon}
+              />
+            ))
+          )}
+        </div>
+
+        {items.length > 0 && (
+          <div className={styles.footer}>
+            <div className={styles.subtotalRow}>
+              <span className={styles.footerLabel}>Subtotal</span>
+              <span className={styles.footerAmount}>{formatPrice(subtotal)}</span>
+            </div>
+            <div className={styles.taxRow}>
+              <span className={styles.footerLabel}>Tax</span>
+              <span className={styles.taxNote}>Calculated at checkout</span>
+            </div>
+            <Button variant="primary" className={styles.checkoutBtn} onClick={onContinueToCheckout}>
+              Continue to Checkout
+            </Button>
+          </div>
+        )}
+      </div>
+    </>
+  )
+}

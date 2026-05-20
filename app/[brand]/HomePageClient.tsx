@@ -8,17 +8,21 @@ import {
   DEFAULT_TOPLINE,
 } from './_config/siteContent'
 import { prefixFooterColumns, prefixNavLinks, withBrandPrefix } from './_config/brandPaths'
+import { CartProvider, useCart } from './_context/CartContext'
 import { Footer } from './_components/Footer'
 import { Header } from './_components/Header'
 import { Hero } from './_components/Hero'
+import { FloatingCart } from './_components/FloatingCart'
 import styles from './HomePage.module.css'
 
 import { resolveBrand } from './_config/brands'
 
-export function HomePageClient() {
+function HomePageInner() {
   const params = useParams()
   const brandParam = typeof params.brand === 'string' ? params.brand : 'oal'
   const brand = resolveBrand(brandParam)
+
+  const { items, isOpen, subtotal, closeCart, removeItem } = useCart()
 
   const navLinks = prefixNavLinks(brand, DEFAULT_NAV_LINKS)
   const footerColumns = prefixFooterColumns(brand, DEFAULT_FOOTER_COLUMNS)
@@ -55,6 +59,24 @@ export function HomePageClient() {
         <Hero {...hero} transparentHeader={transparentHeader} />
       </main>
       <Footer columns={footerColumns} />
+      <FloatingCart
+        isOpen={isOpen}
+        onClose={closeCart}
+        items={items}
+        subtotal={subtotal}
+        onRemoveItem={removeItem}
+        onEditItem={() => {}}
+        onContinueToCheckout={() => {}}
+        onGenerateGiftNote={async () => 'Wishing you a wonderful day filled with joy!'}
+      />
     </div>
+  )
+}
+
+export function HomePageClient() {
+  return (
+    <CartProvider>
+      <HomePageInner />
+    </CartProvider>
   )
 }

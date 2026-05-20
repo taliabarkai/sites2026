@@ -3,28 +3,69 @@
 
 @import "tailwindcss";
 
-/* ── MNN: Ano (local font) ───────────────────────────────────────────────── */
+/* ── Base font size: 10px = 1rem (required for typography token rem values) ── */
+html {
+  font-size: 62.5%;
+}
+
+/* ── MNN: Ano (local font — 3 separate families for explicit variant control) ── */
 @font-face {
-  font-family: 'Ano';
+  font-family: 'AnoRegular';
   src: url('/fonts/AnoRegular-Regular.otf') format('opentype');
   font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
-  font-family: 'Ano';
+  font-family: 'AnoHalf';
   src: url('/fonts/AnoHalf-Regular.otf') format('opentype');
-  font-weight: 300;
+  font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
-  font-family: 'Ano';
+  font-family: 'AnoBold';
   src: url('/fonts/AnoBold-Regular.otf') format('opentype');
-  font-weight: 700;
+  font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
+
+/* ── Z-index layers ─────────────────────────────────────────────────────── */
+:root {
+  --z-base:    0;    /* normal document flow        */
+  --z-raised:  10;   /* hover states, card overlays */
+  --z-sticky:  100;  /* sticky add-to-cart bar      */
+  --z-header:  200;  /* site header + topbar        */
+  --z-cart:    300;  /* floating cart panel         */
+  --z-overlay: 400;  /* modal backdrop              */
+  --z-modal:   500;  /* modal / gift options panel  */
+  --z-toast:   600;  /* toast notifications         */
+  --z-tooltip: 700;  /* tooltips — always topmost   */
+
+  /* ── Fallback defaults (overridden per brand by [data-theme]) ── */
+  --colors-background:      #ffffff;
+  --colors-text:            #000000;
+  --colors-surface-primary: #f8f8f8;
+
+  /* ── Spacing scale (shared across all brands) ── */
+  --spacing-xxxs: 2px;
+  --spacing-xxs:  4px;
+  --spacing-xs:   8px;
+  --spacing-sm:   12px;
+  --spacing-md:   16px;
+  --spacing-lg:   24px;
+  --spacing-xl:   32px;
+  --spacing-2xl:  48px;
+  --spacing-3xl:  64px;
+  --spacing-4xl:  96px;
+
+  /* ── Layout primitives (shared across all brands) ── */
+  --layout-max-width:     1920px;
+  --layout-content-width: 1200px;
+}
+
+@import '../styles/typography-tokens.css';
 
 /* ── Global resets ──────────────────────────────────────────────────────── */
 *,
@@ -41,7 +82,7 @@ body {
 }
 
 [data-theme] {
-  background: var(--surface-primary);
-  color: var(--text);
-  font-family: var(--font-family-body);
+  background:  var(--colors-background);
+  color:       var(--colors-text);
+  font-family: var(--font-family-main-regular);
 }

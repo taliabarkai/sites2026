@@ -1,0 +1,100 @@
+.root {
+  width: 100%;
+}
+
+.wrapper {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: var(--buttons-primary-min-height);
+  background: var(--form-field-background);
+  border: 1px solid transparent;
+  border-radius: var(--buttons-primary-border-radius);
+  transition: border-color var(--transition-fast);
+}
+
+.wrapper:hover:not([data-disabled]) {
+  border-color: var(--border-strong);
+}
+
+.wrapper:focus-within {
+  outline: none;
+}
+
+.wrapper[data-disabled] {
+  opacity: 0.6;
+}
+
+/* OAL: the footer/newsletter sits on a black background, so the white pill
+   needs a defined boundary even at rest. Hover stays white for the same reason. */
+:global([data-theme='oal']) .wrapper,
+:global([data-theme='oal']) .wrapper:hover:not([data-disabled]) {
+  border-color: var(--colors-text-inverse);
+}
+
+.input {
+  flex: 1;
+  min-width: 0;
+  height: var(--buttons-primary-min-height);
+  padding: 0 var(--spacing-md);
+  border: none;
+  background: transparent;
+  color: var(--colors-text);
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  font-weight:    var(--typography-rules-text1-font-weight, normal);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+  outline: none;
+}
+
+.input::placeholder {
+  color: var(--form-input-placeholder);
+}
+
+.input:disabled {
+  cursor: not-allowed;
+}
+
+/* Button keeps its theme-native border-radius (--buttons-primary-border-radius),
+   matching the wrapper above so the right edge aligns cleanly across all brands. */
+.action {
+  flex-shrink: 0;
+}
+
+.wrapper .actionIconOnly {
+  width: var(--buttons-primary-min-height);
+  min-width: var(--buttons-primary-min-height);
+  height: var(--buttons-primary-min-height);
+  padding: 0;
+  aspect-ratio: 1;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.message {
+  margin: var(--spacing-xs) 0 0;
+  font-family:    var(--typography-rules-text3-font-family);
+  font-size:      var(--typography-rules-text3-font-size);
+  line-height:    var(--typography-rules-text3-line-height);
+  font-weight:    var(--typography-rules-text3-font-weight, normal);
+  letter-spacing: var(--typography-rules-text3-letter-spacing, normal);
+}
+
+.error {
+  color: var(--colors-error, currentColor);
+}
+
+.success {
+  color: var(--footer-text, currentColor);
+}
