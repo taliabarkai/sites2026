@@ -289,7 +289,7 @@ letter-spacing: var(--buttons-primary-letter-spacing, normal);
 text-transform: var(--buttons-primary-text-transform, none);
 ```
 
-**Exception — `upsell-primary` and `link` variants use `--typography-rules-text1-*`**
+**Exception — `upsell-primary`, `upsell-secondary`, and `link` variants use `--typography-rules-text1-*`**
 not `--buttons-{variant}-*`. This is intentional — these variants are visually closer
 to body text than button labels (smaller, lighter, no uppercase):
 ```css
@@ -329,10 +329,11 @@ When unsure which scale to use for a new element, check the reference or ask.
 
 ## Icon System
 
-Two icon systems exist — use the right one for each job.
+All icons are brand-scoped. There are no universal icons — every icon must exist
+in all 5 brand folders. Never create a shared/universal icon component.
 
-### 1. Brand-scoped icons — `src/components/icons/{brand}/`
-~50 named SVG components per brand. Use for any icon with a brand-specific visual style.
+### How to use icons — `src/components/icons/{brand}/`
+~50 named SVG components per brand. Always resolve at runtime via `BRAND_ICONS[brand]`.
 
 ```tsx
 import * as oalIcons from '@/src/components/icons/oal'
@@ -348,19 +349,34 @@ const BRAND_ICONS = {
 const { GiftIcon, ChevronIcon, TrashIcon } = BRAND_ICONS[brand]
 ```
 
-Rules:
-- Always resolve at runtime via `BRAND_ICONS[brand]` — never import a single brand folder directly in a shared component
-- Before using any icon, verify it exists in **all 5 brand folders** — if missing from any brand, stop and ask
+### Rules
+- **Never import a single brand's icon folder directly** inside a shared component — always use `BRAND_ICONS[brand]`
+- **Never create a universal/shared icon component** — all icons are brand-scoped
+- **Never use one brand's icon in another brand's component** — e.g. hardcoding `tgrIcons.PlusMinusIcon` or any `{brand}Icons.{Icon}` directly is forbidden
+- **Every icon must exist in all 5 brand folders** — before using any icon, verify it exists across all 5 brands
+- **If an icon is missing from any brand, stop and ask** — do not proceed, do not create a fallback, do not substitute another brand's version
 - Icon components use `currentColor` — control size and color from the parent
 - Never hardcode `fill`, `stroke`, `width`, or `height` inside icon components
 
-### 2. Universal icons — `app/[brand]/_components/icons/Icons.tsx`
-UI chrome icons identical across all brands: `Search`, `Account`, `Cart`, `Menu`,
-`Close`, `ChevronDown`, `ArrowRight`. Import directly — no brand resolution needed.
+### Adding a new icon
+When a new icon is needed that doesn't exist in all 5 brands:
+1. Stop immediately
+2. Ask: "I need `{IconName}` — it is missing from [list of brands]. Can you add the SVG to those brand folders before I proceed?"
+3. Wait for confirmation before writing any code that references it
 
+**Never do this:**
 ```tsx
-import { Close, ChevronDown } from '@/app/[brand]/_components/icons/Icons'
+// ❌ Wrong — using one brand's icon for all brands
+const { PlusMinusIcon } = tgrIcons  // hardcoded brand
+<Button PlusMinusIcon={tgrIcons.PlusMinusIcon} />  // override hack
 ```
+
+**Always do this:**
+```tsx
+// ✅ Correct — each brand provides its own icon
+const { PlusMinusIcon } = BRAND_ICONS[brand]
+```
+If `BRAND_ICONS[brand].PlusMinusIcon` doesn't exist for some brands — stop and ask the user to add it. Do not work around it.
 
 ### Icon sizing — always use spacing tokens
 ```tsx
@@ -374,11 +390,11 @@ import { Close, ChevronDown } from '@/app/[brand]/_components/icons/Icons'
 | `--spacing-md` | 24px | Standalone action icons |
 
 ### Before building any new component
-Run this check first:
-> "List the icon names available in each brand folder under `src/components/icons/`
-> and confirm which of the following exist across all 5 brands: [list the icons you need]."
+Always run this check first and wait for confirmation:
+> "List `src/components/icons/{oal,tgr,lal,ib,mnn}/index.ts` and confirm every icon
+> I need exists in all 5 brand folders."
 
-If a needed icon is missing from any brand, stop and ask before proceeding.
+If any icon is missing from any brand — stop and ask. Never proceed without all 5.
 
 ---
 
@@ -481,7 +497,9 @@ export function Button({ label, variant = 'primary', onClick, disabled }: Button
 - **Never use raw hex values** in semantic token blocks — define a primitive first
 - **Never use primitive variables** (e.g. `--oal-black`) outside of theme CSS files
 - **Never use a raw z-index number** — always use `--z-*` tokens
-- **Always verify icons** exist in all 5 brand folders before using in a component
+- **Always verify icons** exist in all 5 brand folders before using in a component — if any brand is missing an icon, stop and ask
+- **Never create universal/shared icon components** — all icons are brand-scoped and must exist in every brand folder
+- **Never use one brand's icon in another brand's component** — never hardcode `{brand}Icons.{Icon}` directly; always use `BRAND_ICONS[brand].{Icon}`
 - **Always use semantic variable names** so components work across all 5 brands
 - **Never modify** `tokens.json` or `design-tokens.ts` — generated from Figma
 - **Never install new dependencies** without checking `package.json` first

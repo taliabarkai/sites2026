@@ -47,8 +47,6 @@
   border: none;
   background: transparent;
   color: var(--colors-text);
-  font-size: 20px;   /* structural — icon character size */
-  line-height: 1;    /* structural — vertical centering for icon */
   cursor: pointer;
 }
 

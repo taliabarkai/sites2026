@@ -1,10 +1,24 @@
 'use client'
 
 import { useState } from 'react'
+import { usePathname } from 'next/navigation'
 import { DEFAULT_NEWSLETTER, SOCIAL_LINKS } from '../../_config/siteContent'
-import { IconArrowRight } from '../icons/Icons'
+import { getBrandFromPathname } from '../../_config/brands'
+import * as oalIcons from '@/src/components/icons/oal'
+import * as mnnIcons from '@/src/components/icons/mnn'
+import * as tgrIcons from '@/src/components/icons/tgr'
+import * as lalIcons from '@/src/components/icons/lal'
+import * as ibIcons from '@/src/components/icons/ib'
 import { InputAction } from '../InputAction'
 import styles from './EmailSubscription.module.css'
+
+const BRAND_ICONS = {
+  oal: oalIcons,
+  mnn: mnnIcons,
+  tgr: tgrIcons,
+  lal: lalIcons,
+  ib: ibIcons,
+} as const
 
 export interface EmailSubscriptionProps {
   eyebrow?: string
@@ -27,6 +41,9 @@ export function EmailSubscription({
 }: EmailSubscriptionProps) {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
+  const pathname = usePathname()
+  const brand = getBrandFromPathname(pathname)
+  const { ArrowIcon } = BRAND_ICONS[brand]
 
   const handleSubmit = (value: string) => {
     if (!EMAIL_PATTERN.test(value.trim())) {
@@ -50,7 +67,7 @@ export function EmailSubscription({
       <InputAction
         inputType="email"
         placeholder={emailPlaceholder}
-        buttonIcon={<IconArrowRight />}
+        buttonIcon={<ArrowIcon size={24} />}
         onSubmit={handleSubmit}
         errorMessage={error || undefined}
         successMessage={success ? successMessage : undefined}

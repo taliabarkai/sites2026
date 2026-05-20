@@ -102,11 +102,6 @@
   --buttons-primary-border-radius: 4px;
   --buttons-primary-padding:       1.2rem 2.8rem;
   --buttons-primary-min-height:    5.2rem;
-  --buttons-primary-font-size:     16px;
-  --buttons-primary-line-height:   20px;
-  --buttons-primary-font-weight:   700;
-  --buttons-primary-letter-spacing: 1px;
-  --buttons-primary-text-transform: uppercase;
 
   --buttons-secondary-background:    var(--ib-white);
   --buttons-secondary-text:          var(--ib-navy);
@@ -114,11 +109,6 @@
   --buttons-secondary-border-radius: 4px;
   --buttons-secondary-padding:       1.2rem 2.8rem;
   --buttons-secondary-min-height:    5.2rem;
-  --buttons-secondary-font-size:     16px;
-  --buttons-secondary-line-height:   20px;
-  --buttons-secondary-font-weight:   700;
-  --buttons-secondary-letter-spacing: 1px;
-  --buttons-secondary-text-transform: uppercase;
 
   --buttons-upsell-primary-background:    var(--ib-white);
   --buttons-upsell-primary-text:          var(--ib-navy);
@@ -126,6 +116,4 @@
   --buttons-upsell-primary-border-radius: 4px;
   --buttons-upsell-primary-padding:       0.8rem 1.2rem;
   --buttons-upsell-primary-min-height:    4rem;
-  --buttons-upsell-primary-font-size:     16px;
-  --buttons-upsell-primary-line-height:   2.2rem;
 }

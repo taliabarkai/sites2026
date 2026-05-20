@@ -1,8 +1,23 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { usePathname } from 'next/navigation'
+import * as oalIcons from '@/src/components/icons/oal'
+import * as mnnIcons from '@/src/components/icons/mnn'
+import * as tgrIcons from '@/src/components/icons/tgr'
+import * as lalIcons from '@/src/components/icons/lal'
+import * as ibIcons from '@/src/components/icons/ib'
+import { getBrandFromPathname } from '../../_config/brands'
 import { Button } from '../Button'
 import styles from './GiftOptionsModal.module.css'
+
+const BRAND_ICONS = {
+  oal: oalIcons,
+  mnn: mnnIcons,
+  tgr: tgrIcons,
+  lal: lalIcons,
+  ib: ibIcons,
+} as const
 
 interface GiftOptionsModalProps {
   onClose: () => void
@@ -16,6 +31,9 @@ export function GiftOptionsModal({ onClose, onAddToCart, onGenerateGiftNote }: G
   const [note, setNote] = useState('')
   const [generating, setGenerating] = useState(false)
   const panelRef = useRef<HTMLDivElement>(null)
+  const pathname = usePathname()
+  const brand = getBrandFromPathname(pathname)
+  const { XIcon } = BRAND_ICONS[brand]
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
@@ -67,7 +85,7 @@ export function GiftOptionsModal({ onClose, onAddToCart, onGenerateGiftNote }: G
         <div className={styles.header}>
           <span className={styles.title}>Add to Bag</span>
           <button type="button" className={styles.closeBtn} aria-label="Close gift options" onClick={onClose}>
-            ×
+            <XIcon size={24} />
           </button>
         </div>
 

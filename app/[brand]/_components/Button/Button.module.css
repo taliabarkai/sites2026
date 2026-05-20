@@ -26,11 +26,12 @@
   border-radius:   var(--buttons-primary-border-radius);
   padding:         var(--buttons-primary-padding);
   min-height:      var(--buttons-primary-min-height);
-  font-size:       var(--buttons-primary-font-size);
-  line-height:     var(--buttons-primary-line-height);
-  font-weight:     var(--buttons-primary-font-weight);
-  letter-spacing:  var(--buttons-primary-letter-spacing);
-  text-transform:  var(--buttons-primary-text-transform);
+  font-family:     var(--typography-rules-button1-font-family);
+  font-size:       var(--typography-rules-button1-font-size);
+  line-height:     var(--typography-rules-button1-line-height);
+  font-weight:     var(--typography-rules-button1-font-weight);
+  letter-spacing:  var(--typography-rules-button1-letter-spacing);
+  text-transform:  var(--typography-rules-button1-text-transform);
 }
 
 .primary:hover:not(:disabled) {
@@ -44,15 +45,40 @@
   border-radius:   var(--buttons-secondary-border-radius);
   padding:         var(--buttons-secondary-padding);
   min-height:      var(--buttons-secondary-min-height);
-  font-size:       var(--buttons-secondary-font-size);
-  line-height:     var(--buttons-secondary-line-height);
-  font-weight:     var(--buttons-secondary-font-weight);
-  letter-spacing:  var(--buttons-secondary-letter-spacing);
-  text-transform:  var(--buttons-secondary-text-transform);
+  font-family:     var(--typography-rules-button1-font-family);
+  font-size:       var(--typography-rules-button1-font-size);
+  line-height:     var(--typography-rules-button1-line-height);
+  font-weight:     var(--typography-rules-button1-font-weight);
+  letter-spacing:  var(--typography-rules-button1-letter-spacing);
+  text-transform:  var(--typography-rules-button1-text-transform);
 }
 
 .secondary:hover:not(:disabled) {
   background: color-mix(in srgb, var(--buttons-secondary-background) 92%, var(--colors-text));
+}
+
+/* Add-to-Cart — same structural chrome + button1 typography as .primary.
+   Defaults to brand-default colors; each theme can override via
+   --buttons-add-to-cart-{background,text} (e.g. MNN uses dune-yellow). */
+.addToCart {
+  background:      var(--buttons-add-to-cart-background, var(--colors-brand-default-primary));
+  color:           var(--buttons-add-to-cart-text,       var(--colors-brand-default-secondary));
+  /* border-color:    var(--buttons-primary-border-color); */
+  border-radius:   var(--buttons-primary-border-radius);
+  padding:         var(--buttons-primary-padding);
+  min-height:      var(--buttons-primary-min-height);
+  font-family:     var(--typography-rules-button1-font-family);
+  font-size:       var(--typography-rules-button1-font-size);
+  line-height:     var(--typography-rules-button1-line-height);
+  font-weight:     var(--typography-rules-button1-font-weight);
+  letter-spacing:  var(--typography-rules-button1-letter-spacing);
+  text-transform:  var(--typography-rules-button1-text-transform);
+}
+
+.addToCart:hover:not(:disabled) {
+  background: color-mix(
+    in srgb,
+    var(--buttons-add-to-cart-background, var(--colors-brand-default-primary)) 95%,var(--colors-text));
 }
 
 .compact {
@@ -76,17 +102,18 @@
   border-radius:  var(--buttons-upsell-primary-border-radius);
   padding:        var(--buttons-upsell-primary-padding);
   min-height:     var(--buttons-upsell-primary-min-height);
-  font-size:      var(--buttons-upsell-primary-font-size);
-  line-height:    var(--buttons-upsell-primary-line-height);
-  font-weight:    400;
-  text-transform: none;
-  letter-spacing: 0;
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  font-weight:    var(--typography-rules-text1-font-weight);
+  letter-spacing: var(--typography-rules-text1-letter-spacing);
+  text-transform: var(--typography-rules-text1-text-transform);
   align-self:     flex-start;
   width:          fit-content;
 }
 
 .upsellPrimary:hover:not(:disabled) {
-  border-color: var(--colors-text);
+  /* border-color: var(--colors-text); */
 }
 
 .link {

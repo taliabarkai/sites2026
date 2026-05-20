@@ -101,11 +101,6 @@
   --buttons-primary-border-radius: 100px;
   --buttons-primary-padding:       1.2rem 2.8rem;
   --buttons-primary-min-height:    5rem;
-  --buttons-primary-font-size:     16px;
-  --buttons-primary-line-height:   20px;
-  --buttons-primary-font-weight:   700;
-  --buttons-primary-letter-spacing: normal;
-  --buttons-primary-text-transform: capitalize;
 
   --buttons-secondary-background:    var(--tgr-white);
   --buttons-secondary-text:          var(--tgr-raisin);
@@ -113,11 +108,6 @@
   --buttons-secondary-border-radius: 100px;
   --buttons-secondary-padding:       1.2rem 2.8rem;
   --buttons-secondary-min-height:    5rem;
-  --buttons-secondary-font-size:     16px;
-  --buttons-secondary-line-height:   20px;
-  --buttons-secondary-font-weight:   700;
-  --buttons-secondary-letter-spacing: normal;
-  --buttons-secondary-text-transform: capitalize;
 
   --buttons-upsell-primary-background:    var(--tgr-alice-blue);
   --buttons-upsell-primary-text:          var(--tgr-raisin);
@@ -125,6 +115,4 @@
   --buttons-upsell-primary-border-radius: 100px;
   --buttons-upsell-primary-padding:       0.8rem 1.2rem;
   --buttons-upsell-primary-min-height:    4rem;
-  --buttons-upsell-primary-font-size:     14px;
-  --buttons-upsell-primary-line-height:   2rem;
 }

@@ -109,11 +109,11 @@ function CartItemRow({ item, onRemove, onEdit, onGenerateGiftNote, GiftIcon, Plu
           )}
 
           <div className={styles.itemActions}>
-            {item.isPersonalized && (
-              <button type="button" className={styles.editLink} onClick={() => onEdit(item.id)}>
-                Edit
-              </button>
-            )}
+            <button type="button" className={styles.editLink} onClick={() => onEdit(item.id)}>
+              Edit
+            </button>
+
+            <span className={styles.actionsDivider} aria-hidden="true" />
 
             {confirmRemove ? (
               <span className={styles.removeConfirm}>
@@ -253,15 +253,17 @@ export function FloatingCart({
 
         {items.length > 0 && (
           <div className={styles.footer}>
-            <div className={styles.subtotalRow}>
-              <span className={styles.footerLabel}>Subtotal</span>
-              <span className={styles.footerAmount}>{formatPrice(subtotal)}</span>
+            <div className={styles.totals}>
+              <div className={styles.subtotalRow}>
+                <span className={styles.footerLabel}>Subtotal</span>
+                <span className={styles.footerAmount}>{formatPrice(subtotal)}</span>
+              </div>
+              <div className={styles.taxRow}>
+                <span className={styles.footerLabel}>Tax</span>
+                <span className={styles.taxNote}>Calculated at checkout</span>
+              </div>
             </div>
-            <div className={styles.taxRow}>
-              <span className={styles.footerLabel}>Tax</span>
-              <span className={styles.taxNote}>Calculated at checkout</span>
-            </div>
-            <Button variant="primary" className={styles.checkoutBtn} onClick={onContinueToCheckout}>
+            <Button variant="add-to-cart" className={styles.checkoutBtn} onClick={onContinueToCheckout}>
               Continue to Checkout
             </Button>
           </div>

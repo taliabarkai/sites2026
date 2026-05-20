@@ -1,8 +1,35 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, type FC } from 'react'
 import { brandToThemeKey, themeKeyToBrand, type BrandKey } from '../[brand]/_config/brands'
+
+// Per-brand icon sets (same pattern as Header.tsx)
+import * as oalIcons from '@/src/components/icons/oal'
+import * as mnnIcons from '@/src/components/icons/mnn'
+import * as tgrIcons from '@/src/components/icons/tgr'
+import * as lalIcons from '@/src/components/icons/lal'
+import * as ibIcons from '@/src/components/icons/ib'
+
+type IconComponent = FC<{ size?: number; className?: string }>
+
+const BRAND_ICONS: Record<'oal' | 'mnn' | 'tgr' | 'lal' | 'ib', Record<string, IconComponent>> = {
+  oal: oalIcons as unknown as Record<string, IconComponent>,
+  mnn: mnnIcons as unknown as Record<string, IconComponent>,
+  tgr: tgrIcons as unknown as Record<string, IconComponent>,
+  lal: lalIcons as unknown as Record<string, IconComponent>,
+  ib:  ibIcons  as unknown as Record<string, IconComponent>,
+}
+
+// Union of every icon name across all brand sets, alphabetically sorted.
+// Lets us flag icons that exist in some brands but not the active one.
+const ALL_BRAND_ICON_NAMES: string[] = Array.from(
+  new Set(
+    Object.values(BRAND_ICONS).flatMap((set) =>
+      Object.entries(set).filter(([, v]) => typeof v === 'function').map(([k]) => k),
+    ),
+  ),
+).sort()
 
 // ── Token data — sourced from tokens.json (Figma: Tenengroup — Design System) ──
 
@@ -379,6 +406,7 @@ const NAV_SECTIONS = [
   { id: 'radius',     label: 'Radius' },
   { id: 'shadows',    label: 'Shadows' },
   { id: 'breakpoints',label: 'Breakpoints' },
+  { id: 'icons',      label: 'Icons' },
 ]
 
 const SITE_HEADER_OFFSET = 'calc(var(--topline-height) + var(--layout-header-height))'
@@ -781,6 +809,60 @@ export default function StyleguideClient({ brand }: StyleguideClientProps) {
                 </div>
               </div>
             ))}
+          </div>
+        </section>
+
+        {/* ── 10 Icons ── */}
+        <section data-section="icons" id="icons" style={{ paddingTop: 52, borderTop: '1px solid #ebebeb', marginTop: 8 }}>
+          <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#808080', marginBottom: 28 }}>
+            10 — Icons
+          </p>
+
+          <p style={{ fontSize: 11, color: '#808080', margin: '0 0 16px' }}>
+            Per-brand icon set. Updates with the brand switcher. Dashed cells indicate icons missing in the current brand.
+          </p>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(80px, 1fr))',
+            gap: 'var(--spacing-md)',
+            color: 'var(--colors-text)',
+          }}>
+            {ALL_BRAND_ICON_NAMES.map((name) => {
+              const brandSlug = themeKeyToBrand(activeTheme) as keyof typeof BRAND_ICONS
+              const Icon = BRAND_ICONS[brandSlug]?.[name]
+              const missing = typeof Icon !== 'function'
+              return (
+                <div key={name} style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  textAlign: 'center',
+                  gap: 8,
+                  padding: 8,
+                }}>
+                  {missing ? (
+                    <div
+                      style={{ width: 24, height: 24, border: '1px dashed #c0c0c0', borderRadius: 4 }}
+                      role="img"
+                      aria-label={`${name} (missing in this brand)`}
+                    />
+                  ) : (
+                    <Icon size={24} />
+                  )}
+                  <code style={{
+                    fontFamily:    'var(--typography-rules-caption1-font-family)',
+                    fontSize:      'var(--typography-rules-caption1-font-size)',
+                    lineHeight:    'var(--typography-rules-caption1-line-height)',
+                    fontWeight:    'var(--typography-rules-caption1-font-weight)',
+                    letterSpacing: 'var(--typography-rules-caption1-letter-spacing)',
+                    opacity: missing ? 0.45 : 1,
+                    wordBreak: 'break-word',
+                  }}>
+                    {name}
+                  </code>
+                </div>
+              )
+            })}
           </div>
         </section>
 

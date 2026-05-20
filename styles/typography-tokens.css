@@ -262,7 +262,7 @@
   --typography-rules-headline3-font-weight:    400;
 
   --typography-rules-headline4-font-family:    var(--font-family-secondary-regular);
-  --typography-rules-headline4-font-size:      20px;
+  --typography-rules-headline4-font-size:      28px;
   --typography-rules-headline4-line-height:    26px;
   --typography-rules-headline4-letter-spacing: 0.4px;
   --typography-rules-headline4-text-transform: uppercase;
@@ -288,7 +288,7 @@
   --typography-rules-headline7-font-weight:    400;
 
   --typography-rules-headline8-font-family:    var(--font-family-tertiary-regular);
-  --typography-rules-headline8-font-size:      12px;
+  --typography-rules-headline8-font-size:      14px;
   --typography-rules-headline8-line-height:    16px;
   --typography-rules-headline8-letter-spacing: 0.7px;
   --typography-rules-headline8-text-transform: uppercase;
@@ -405,17 +405,17 @@
 
   /* Buttons */
   --typography-rules-button1-font-family:      var(--font-family-tertiary-regular);
-  --typography-rules-button1-font-size:        14px;
+  --typography-rules-button1-font-size:        15px;
   --typography-rules-button1-line-height:      17px;
-  --typography-rules-button1-letter-spacing:   0.7px;
+  --typography-rules-button1-letter-spacing:   0.4px;
   --typography-rules-button1-text-transform:   uppercase;
-  --typography-rules-button1-font-weight:      600;
+  --typography-rules-button1-font-weight:      700;
 
   --typography-rules-button2-font-family:      var(--font-family-tertiary-regular);
-  --typography-rules-button2-font-size:        12px;
+  --typography-rules-button2-font-size:        13px;
   --typography-rules-button2-line-height:      16px;
-  --typography-rules-button2-letter-spacing:   0.4px;
-  --typography-rules-button2-font-weight:      600;
+  /* --typography-rules-button2-letter-spacing:   ; */
+  --typography-rules-button2-font-weight:      700;
 
   /* Disclaimers */
   --typography-rules-disclaimer1-font-family:  var(--font-family-main-regular);
@@ -444,7 +444,7 @@
     --typography-rules-headline2-line-height:  58px;
     --typography-rules-headline3-font-size:    40px;
     --typography-rules-headline3-line-height:  38px;
-    --typography-rules-headline8-font-size:    14px;
+    --typography-rules-headline8-font-size:    16px;
     --typography-rules-headline8-line-height:  18px;
     --typography-rules-headline9-font-size:    20px;
     --typography-rules-headline9-line-height:  24px;
@@ -916,6 +916,7 @@
   --typography-rules-headline8-font-family:    var(--font-family-main-regular);
   --typography-rules-headline8-font-size:      15px;
   --typography-rules-headline8-line-height:    20px;
+  --typography-rules-headline8-letter-spacing: 0.8px;
   --typography-rules-headline8-text-transform: uppercase;
 
   --typography-rules-headline9-font-family:    var(--font-family-secondary-regular);
@@ -1012,9 +1013,9 @@
   --typography-rules-button1-text-transform:   capitalize;
 
   --typography-rules-button2-font-family:      var(--font-family-main-bold);
-  --typography-rules-button2-font-size:        16px;
+  --typography-rules-button2-font-size:        14px;
   --typography-rules-button2-line-height:      20px;
-  --typography-rules-button2-font-weight:      600;
+  --typography-rules-button2-font-weight:      500;
   --typography-rules-button2-text-transform:   capitalize;
 
   --typography-rules-disclaimer1-font-family:  var(--font-family-main-regular);

@@ -9,8 +9,20 @@ import {
   getBrandMeta,
   type BrandKey,
 } from '../../_config/brands'
-import { IconChevronDown } from '../icons/Icons'
+import * as oalIcons from '@/src/components/icons/oal'
+import * as mnnIcons from '@/src/components/icons/mnn'
+import * as tgrIcons from '@/src/components/icons/tgr'
+import * as lalIcons from '@/src/components/icons/lal'
+import * as ibIcons from '@/src/components/icons/ib'
 import styles from './ThemeSwitcher.module.css'
+
+const BRAND_ICONS = {
+  oal: oalIcons,
+  mnn: mnnIcons,
+  tgr: tgrIcons,
+  lal: lalIcons,
+  ib: ibIcons,
+} as const
 
 interface ThemeSwitcherProps {
   brand?: BrandKey
@@ -25,6 +37,7 @@ export function ThemeSwitcher({ brand }: ThemeSwitcherProps = {}) {
 
   const currentBrand = brand ?? getBrandFromPathname(pathname)
   const current = getBrandMeta(currentBrand)
+  const { ChevronIcon } = BRAND_ICONS[currentBrand]
 
   useEffect(() => {
     if (!open) return
@@ -67,7 +80,7 @@ export function ThemeSwitcher({ brand }: ThemeSwitcherProps = {}) {
         onClick={() => setOpen((value) => !value)}
       >
         <span className={styles.triggerLabel}>{current.shortLabel}</span>
-        <IconChevronDown
+        <ChevronIcon
           className={`${styles.chevron} ${open ? styles.chevronOpen : ''}`}
           size={16}
         />

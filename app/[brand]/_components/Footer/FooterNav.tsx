@@ -1,9 +1,23 @@
 'use client'
 
 import { useState } from 'react'
+import { usePathname } from 'next/navigation'
 import { DEFAULT_FOOTER_COLUMNS, type FooterColumn } from '../../_config/siteContent'
-import { IconChevronDown } from '../icons/Icons'
+import { getBrandFromPathname } from '../../_config/brands'
+import * as oalIcons from '@/src/components/icons/oal'
+import * as mnnIcons from '@/src/components/icons/mnn'
+import * as tgrIcons from '@/src/components/icons/tgr'
+import * as lalIcons from '@/src/components/icons/lal'
+import * as ibIcons from '@/src/components/icons/ib'
 import styles from './FooterNav.module.css'
+
+const BRAND_ICONS = {
+  oal: oalIcons,
+  mnn: mnnIcons,
+  tgr: tgrIcons,
+  lal: lalIcons,
+  ib: ibIcons,
+} as const
 
 export interface FooterNavProps {
   columns?: FooterColumn[]
@@ -11,6 +25,9 @@ export interface FooterNavProps {
 
 export function FooterNav({ columns = DEFAULT_FOOTER_COLUMNS }: FooterNavProps) {
   const [openIndex, setOpenIndex] = useState<number | null>(null)
+  const pathname = usePathname()
+  const brand = getBrandFromPathname(pathname)
+  const { ChevronIcon } = BRAND_ICONS[brand]
 
   return (
     <nav className={styles.nav} aria-label="Footer">
@@ -46,7 +63,7 @@ export function FooterNav({ columns = DEFAULT_FOOTER_COLUMNS }: FooterNavProps) 
                 onClick={() => setOpenIndex(isOpen ? null : index)}
               >
                 <span>{column.title}</span>
-                <IconChevronDown
+                <ChevronIcon
                   className={`${styles.chevron} ${isOpen ? styles.chevronOpen : ''}`}
                 />
               </button>

@@ -79,11 +79,14 @@
 
 .chevron {
   flex-shrink: 0;
+  /* Brand ChevronIcon points right (>) by default;
+     rotate 90deg to face down (closed state). */
+  transform: rotate(90deg);
   transition: transform var(--transition-fast);
 }
 
 .chevronOpen {
-  transform: rotate(180deg);
+  transform: rotate(-90deg); /* face up when expanded */
 }
 
 .accordionPanel {

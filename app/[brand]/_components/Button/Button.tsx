@@ -2,7 +2,7 @@ import Link from 'next/link'
 import type { ButtonHTMLAttributes, MouseEventHandler, ReactNode } from 'react'
 import styles from './Button.module.css'
 
-export type ButtonVariant = 'primary' | 'secondary' | 'upsell-primary' | 'link'
+export type ButtonVariant = 'primary' | 'secondary' | 'upsell-primary' | 'add-to-cart' | 'link'
 export type ButtonSize = 'default' | 'compact' | 'iconOnly'
 
 export interface ButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'children'> {
@@ -22,6 +22,7 @@ function joinClasses(...parts: Array<string | false | undefined>) {
 function variantClass(variant: ButtonVariant, s: typeof styles) {
   if (variant === 'primary') return s.primary
   if (variant === 'upsell-primary') return s.upsellPrimary
+  if (variant === 'add-to-cart') return s.addToCart
   if (variant === 'link') return s.link
   return s.secondary
 }
