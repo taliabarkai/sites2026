@@ -43,7 +43,7 @@
   position: sticky;
   /* top: var(--sticky-top); */
   top: 96px;
-  z-index: var(--z-sticky);
+  z-index: 1;
   background: var(--colors-background);
 }
 
@@ -52,7 +52,7 @@
   align-items: center;
   justify-content: space-between;
   gap: var(--spacing-md);
-  padding: var(--spacing-md) var(--layout-page-margin);
+  padding: var(--spacing-lg) var(--layout-page-margin);
   max-width: var(--layout-max-width);
   margin: 0 auto;
 }

@@ -24,10 +24,10 @@ export const DEFAULT_TOPLINE = {
 }
 
 export const DEFAULT_NAV_LINKS: NavLink[] = [
-  { label: 'Shop All', href: '/category' },
-  { label: 'Gifts', href: '/gifts' },
+  // { label: 'Shop All', href: '/category' },
+  // { label: 'Gifts', href: '/gifts' },
   { label: 'Best Sellers', href: '/category' },
-  { label: 'Sale', href: '/sale' },
+  // { label: 'Sale', href: '/sale' },
   { label: 'Design System', href: '/styleguide' },
 ]
 

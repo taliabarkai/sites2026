@@ -173,6 +173,8 @@ function CategoryPageInner() {
                 originalPrice={p.originalPrice}
                 defaultImage={p.defaultImage}
                 hoverImage={p.hoverImage}
+                // swatches={DEFAULT_PRODUCT_SWATCHES}
+                swatches={brand !== 'lal' ? DEFAULT_PRODUCT_SWATCHES : undefined}
               />
             ))}
           </div>
