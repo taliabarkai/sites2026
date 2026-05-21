@@ -114,4 +114,9 @@
   --buttons-upsell-primary-border-radius: 4px;
   --buttons-upsell-primary-padding:       0.8rem 1.2rem;
   --buttons-upsell-primary-min-height:    4rem;
+
+
+@media (max-width: 1024px) {
+  --layout-page-margin:  16px;
+}
 }

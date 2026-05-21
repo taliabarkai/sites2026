@@ -15,14 +15,15 @@
 }
 
 .nav {
-  padding: var(--spacing-md);
+  /* padding: var(--spacing-md); */
+  margin: var(--layout-page-margin);
 }
 
 .lower {
   display: flex;
   justify-content: center;
-  padding: var(--spacing-lg) var(--spacing-md);
-  border-top: 1px solid var(--border-color);
+  padding: var(--spacing-md);
+  /* border-top: 1px solid var(--border-color); */
 }
 
 .payments {
@@ -48,12 +49,12 @@
 
 .copyright {
   margin: 0;
-  font-family:    var(--typography-rules-disclaimer1-font-family);
-  font-size:      var(--typography-rules-disclaimer1-font-size);
-  line-height:    var(--typography-rules-disclaimer1-line-height);
-  font-weight:    var(--typography-rules-disclaimer1-font-weight, normal);
-  letter-spacing: var(--typography-rules-disclaimer1-letter-spacing, normal);
-  /* color: var(--footer-text-muted); */
+  font-family:    var(--typography-rules-text3-font-family);
+  font-size:      var(--typography-rules-text3-font-size);
+  line-height:    var(--typography-rules-text3-line-height);
+  font-weight:    var(--typography-rules-text3-font-weight, normal);
+  letter-spacing: var(--typography-rules-text3-letter-spacing, normal);
+  /* color: var(--footer-text-muted);  */
 }
 
 @media (min-width: 1024px) {
@@ -79,7 +80,7 @@
   }
 
   .lower {
-    justify-content: center;
+    justify-content: left;
     max-width: var(--layout-max-width);
     margin: 0 auto;
     padding: var(--spacing-lg) var(--layout-page-margin);

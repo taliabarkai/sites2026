@@ -1,7 +1,8 @@
 .section {
   background: var(--footer-newsletter-background);
   color: var(--footer-newsletter-text);
-  padding: var(--spacing-md) var(--spacing-md);
+  padding: var(--spacing-lg) var(--spacing-md);
+  /* margin: 0 var(--layout-page-margin); */
   font-family: var(--typography-rules-text1-font-family);
 }
 
@@ -36,7 +37,7 @@
 }
 
 .form {
-  max-width: 400px;
+  max-width: 500px;
   margin-bottom: var(--spacing-sm);
 }
 

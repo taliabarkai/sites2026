@@ -122,4 +122,8 @@
      dune-yellow background with black text. */
   --buttons-add-to-cart-background: var(--mnn-dune-yellow);
   --buttons-add-to-cart-text:       var(--mnn-black);
+
+  @media (max-width: 1024px) {
+    --layout-page-margin:  16px;
+  }
 }

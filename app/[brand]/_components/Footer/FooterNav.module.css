@@ -101,7 +101,6 @@
   .desktop {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    padding-top: var(--spacing-2xl);
     padding-left: var(--layout-page-margin);
   }
 
