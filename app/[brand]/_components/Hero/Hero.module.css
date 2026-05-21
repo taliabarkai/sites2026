@@ -49,7 +49,7 @@
 
 .title {
   margin: 0 0 var(--spacing-md);
-  max-width: 28ch;
+  max-width: 20ch;
   font-family:    var(--typography-rules-headline1-font-family);
   font-size:      var(--typography-rules-headline1-font-size);
   line-height:    var(--typography-rules-headline1-line-height);
@@ -80,7 +80,7 @@
   .content {
     justify-content: center;
     padding-top: var(--spacing-3xl);
-    padding-bottom: var(--spacing-3xl);
+    /* padding-bottom: var(--spacing-3xl); */
   }
 
   .heroTransparent .content {
