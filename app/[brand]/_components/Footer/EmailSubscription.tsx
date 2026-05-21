@@ -75,16 +75,6 @@ export function EmailSubscription({
         inputLabel="Email address"
         className={styles.form}
       />
-
-      <ul className={styles.socialList} aria-label="Social media">
-        {SOCIAL_LINKS.map((item) => (
-          <li key={item.label}>
-            <a href={item.href} className={styles.socialLink}>
-              {item.label}
-            </a>
-          </li>
-        ))}
-      </ul>
     </section>
   )
 }

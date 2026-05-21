@@ -49,7 +49,7 @@
   position: absolute;
   top: calc(100% + var(--spacing-xs));
   right: 0;
-  z-index: 80;
+  z-index: var(--z-sticky);
   min-width: 200px;
   margin: 0;
   padding: var(--spacing-xs);

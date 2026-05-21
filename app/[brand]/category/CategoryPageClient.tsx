@@ -1,10 +1,12 @@
 'use client'
 
+import { useState } from 'react'
 import { usePathname } from 'next/navigation'
+import { CartProvider, useCart } from '../_context/CartContext'
 import { Footer } from '../_components/Footer'
 import { Header } from '../_components/Header'
 import { FloatingCart } from '../_components/FloatingCart'
-import { CartProvider, useCart } from '../_context/CartContext'
+import { ProductCard } from '../_components/ProductCard'
 import { getBrandFromPathname } from '../_config/brands'
 import { prefixFooterColumns, prefixNavLinks, withBrandPrefix } from '../_config/brandPaths'
 import {
@@ -14,262 +16,112 @@ import {
 } from '../_config/siteContent'
 import styles from './CategoryPage.module.css'
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
-interface SeoCategoryItem {
-  label: string
-  imageUrl?: string
-}
-
-interface ProductItem {
-  id: string
-  name: string
-  price: number
-  originalPrice?: number
-  imageUrl?: string
-  swatches: string[]
-  ribbonText?: string
-}
-
-interface FaqItem {
-  question: string
-  answer: string
-}
-
 // ─── Data ─────────────────────────────────────────────────────────────────────
 
-const SEO_CATEGORIES: SeoCategoryItem[] = [
-  { label: 'Pendants' },
-  { label: 'Chains' },
-  { label: 'Chokers' },
-  { label: 'Layering' },
-  { label: 'Initial' },
-  { label: 'Birthstone' },
+interface Product {
+  id: number
+  name: string
+  price: string
+  originalPrice?: string
+  defaultImage: string
+  hoverImage: string
+}
+
+const products: Product[] = [
+  { id: 1,  name: 'Lock & Luna Charm with Round Cut Moissanite — Gold', price: '$105', defaultImage: 'https://cdn.oakandluna.com/digital-asset/product/lock-luna-charm-with-round-cut-moissanite-gold-vermeil-6.jpg',  hoverImage: 'https://cdn.oakandluna.com/digital-asset/product/lock-luna-charm-with-round-cut-moissanite-gold-vermeil-4.jpg' },
+  { id: 2,  name: 'Engraved Compass Necklace with Diamond — Gold Vermeil', price: '$150', defaultImage: 'https://cdn.oakandluna.com/digital-asset/product/engraved-comprass-necklace-gold-vermeil-1.jpg', hoverImage: 'https://cdn.oakandluna.com/digital-asset/products/engraved-comprass-necklace-gold-vermeil-3.jpg' },
+  { id: 3,  name: 'Willow Tag Initial Necklace with Diamond — Gold Vermeil', price: '$120', defaultImage: 'https://cdn.oakandluna.com/digital-asset/product/willow-tag-initial-necklace-with-diamond-gold-vermeil-6.jpg', hoverImage: 'https://cdn.oakandluna.com/digital-asset/product/willow-tag-initial-necklace-with-diamond-gold-vermeil-10.jpg' },
+  { id: 4,  name: 'Herringbone Engraved Slim Chain Necklace — Gold Vermeil', price: '$95',  defaultImage: 'https://cdn.oakandluna.com/digital-asset/products/herringbone-thin-chain-necklace-gold-vermeil-4.jpg', hoverImage: 'https://cdn.oakandluna.com/digital-asset/products/herringbone-thin-chain-necklace-gold-vermeil-2.jpg' },
+  { id: 5,  name: 'Singapore Chain Name Necklace — Gold Vermeil', price: '$110', defaultImage: 'https://cdn.oakandluna.com/digital-asset/product/singapore-chain-name-necklace-gold-vermeil-8.jpg', hoverImage: 'https://cdn.oakandluna.com/digital-asset/product/singapore-chain-name-necklace-gold-vermeil-9.jpg' },
+  { id: 6,  name: 'Inez Initial Heart Necklace with Diamond — Gold Vermeil', price: '$130', defaultImage: 'https://cdn.oakandluna.com/digital-asset/product/red-heart-inez-initial-necklace-with-diamond-gold-vermeil-2.jpg', hoverImage: 'https://cdn.oakandluna.com/digital-asset/product/red-heart-inez-initial-necklace-with-diamond-gold-vermeil-5.jpg' },
+  { id: 7,  name: 'Initial Lock Necklace — Gold Plated', price: '$85',  defaultImage: 'https://cdn.oakandluna.com/digital-asset/products/initial-lock-necklace-in-vermeil-1.jpg', hoverImage: 'https://cdn.oakandluna.com/digital-asset/products/initial-lock-necklace-in-vermeil-3.jpg' },
+  { id: 8,  name: 'Heart Charm Lock Necklace — Gold Plated', price: '$90',  defaultImage: 'https://cdn.oakandluna.com/digital-asset/product/heart-charm-padlock-necklace-gold-vermeil-16.jpg', hoverImage: 'https://cdn.oakandluna.com/digital-asset/product/heart-charm-padlock-necklace-gold-vermeil-10.jpg' },
+  { id: 9,  name: 'Inez Initial Necklace with Diamonds — Gold Vermeil', price: '$145', defaultImage: 'https://cdn.oakandluna.com/digital-asset/product/inez-initial-necklace-gold-vermeil-with-diamond-12.jpg', hoverImage: 'https://cdn.oakandluna.com/digital-asset/product/inez-initial-necklace-gold-vermeil-with-diamond-9.jpg' },
+  { id: 10, name: 'Pillar Bar Necklace — Gold Plated', price: '$80',  defaultImage: 'https://cdn.oakandluna.com/digital-asset/product/pillar-bar-necklace-18k-gold-vermeil-16.jpg', hoverImage: 'https://cdn.oakandluna.com/digital-asset/product/pillar-bar-necklace-18k-gold-vermeil-24.jpg' },
+  { id: 11, name: 'Engraved Dot Bracelet — Silver', price: '$75',  defaultImage: 'https://cdn.oakandluna.com/digital-asset/product/engraved-dot-bracelet-silver-8.jpg', hoverImage: 'https://cdn.oakandluna.com/digital-asset/product/engraved-dot-bracelet-silver-6.jpg' },
+  { id: 12, name: 'Lock & Luna Charm with Emerald Cut Moissanite — Silver', price: '$115', defaultImage: 'https://cdn.oakandluna.com/digital-asset/product/lock-luna-charm-with-emerald-cut-moissanite-silver-6.jpg', hoverImage: 'https://cdn.oakandluna.com/digital-asset/product/lock-luna-charm-with-emerald-cut-moissanite-silver-4.jpg' },
+  { id: 13, name: 'Belle Custom Name Necklace — Gold Plated', price: '$100', defaultImage: 'https://cdn.oakandluna.com/digital-asset/product/belle-custom-name-necklace-gold-vermeil-33.jpg', hoverImage: 'https://cdn.oakandluna.com/digital-asset/product/belle-custom-name-necklace-gold-vermeil-35.jpg' },
+  { id: 14, name: 'Singapore Chain Name Necklace with Heart Shaped Gemstone — Gold Vermeil', price: '$135', defaultImage: 'https://cdn.oakandluna.com/digital-asset/product/singapore-chain-name-necklace-with-pink-heart-mosinight-gold-vermeil-13.jpg', hoverImage: 'https://cdn.oakandluna.com/digital-asset/product/singapore-chain-name-necklace-with-pink-heart-mosinight-gold-vermeil-15.jpg' },
+  { id: 15, name: 'Ivy Name Paperclip Chain Bracelet — Gold Plated', price: '$88',  defaultImage: 'https://cdn.oakandluna.com/digital-asset/products/ivy-name-link-chain-bracelet-gold-plating-8.jpg', hoverImage: 'https://cdn.oakandluna.com/digital-asset/products/ivy-name-link-chain-bracelet-gold-plating-11.jpg' },
+  { id: 16, name: 'Multiple Name Necklace — Gold Vermeil', price: '$125', defaultImage: 'https://cdn.oakandluna.com/digital-asset/products/multiple-name-necklace-vermeil-gold-plated-1.jpg', hoverImage: 'https://cdn.oakandluna.com/digital-asset/products/multiple-name-necklace-vermeil-gold-plated-3.jpg' },
+  { id: 17, name: 'Mon Petit Name Necklace — Gold Plated', price: '$92',  defaultImage: 'https://cdn.oakandluna.com/digital-asset/products/mon-petit-name-necklace-vermeil-gold-plated-14.jpg', hoverImage: 'https://cdn.oakandluna.com/digital-asset/product/mon-petit-name-necklace-gold-plated-1.jpg' },
+  { id: 18, name: 'Bubble Up Initial Necklace — Gold Plated', price: '$78',  defaultImage: 'https://cdn.oakandluna.com/digital-asset/product/bubble-up-initial-necklace-gold-vermeil-6.jpg', hoverImage: 'https://cdn.oakandluna.com/digital-asset/product/bubble-up-initial-necklace-gold-vermeil-4.jpg' },
+  { id: 19, name: 'Petite Paperclip Necklace with Moissanite — Gold Plated', price: '$98',  defaultImage: 'https://cdn.oakandluna.com/digital-asset/products/petite-paperclip-necklace-with-diamond-gold-vermeil-1.jpg', hoverImage: 'https://cdn.oakandluna.com/digital-asset/product/petite-paperclip-necklace-with-diamond-gold-vermeil-5.jpg' },
+  { id: 20, name: 'Puffy Heart Pendant — Gold Plated', price: '$72',  defaultImage: 'https://cdn.oakandluna.com/digital-asset/product/puffy-heart-pendant-gold-1.jpg', hoverImage: 'https://cdn.oakandluna.com/digital-asset/product/puffy-heart-pendant-gold-2.jpg' },
+  { id: 21, name: 'Willow Disc Initial Necklace — Gold Vermeil', price: '$108', defaultImage: 'https://cdn.oakandluna.com/digital-asset/product/willow-disc-initial-necklace-gold-vermeil-9.jpg', hoverImage: 'https://cdn.oakandluna.com/digital-asset/product/willow-disc-initial-necklace-gold-vermeil-13.jpg' },
+  { id: 22, name: 'Ivy Name Paperclip Chain Necklace with Sparkling Stones — Gold Plated', price: '$118', defaultImage: 'https://cdn.oakandluna.com/digital-asset/product/ivy-name-link-chain-necklace-gold-plated-with-birthstones-1.jpg', hoverImage: 'https://cdn.oakandluna.com/digital-asset/product/ivy-name-link-chain-necklace-gold-plated-with-birthstones-3.jpg' },
+  { id: 23, name: 'The Charmer Coins & Initials Necklace — Gold Plated', price: '$140', defaultImage: 'https://cdn.oakandluna.com/digital-asset/product/the-charmer-coins-initials-necklace-gold-vermeil-1.jpg', hoverImage: 'https://cdn.oakandluna.com/digital-asset/product/the-charmer-coins-initials-necklace-gold-vermeil-3.jpg' },
+  { id: 24, name: 'My Signature Initial — Gold', price: '$95',  defaultImage: 'https://cdn.oakandluna.com/digital-asset/product/my-signature-initial-gold-vermeil-10.jpg', hoverImage: 'https://cdn.oakandluna.com/digital-asset/product/my-signature-initial-gold-vermeil-4.jpg' },
+  { id: 25, name: 'Initial Necklace — Gold Plated', price: '$82',  defaultImage: 'https://cdn.oakandluna.com/digital-asset/product/initial-necklace-gold-vermeil-8.jpg', hoverImage: 'https://cdn.oakandluna.com/digital-asset/product/initial-necklace-gold-vermeil-14.jpg' },
+  { id: 26, name: 'Inez Initial Necklace — Gold Plated', price: '$79',  defaultImage: 'https://cdn.oakandluna.com/digital-asset/products/inez-initial-necklace-gold-plated-2.jpg', hoverImage: 'https://cdn.oakandluna.com/digital-asset/product/inez-initial-necklace-gold-plated-1.jpg' },
 ]
 
-const PRODUCTS: ProductItem[] = [
-  {
-    id: '1',
-    name: 'Belle Custom Name Necklace - Gold Vermeil',
-    price: 125,
-    originalPrice: 135,
-    swatches: ['#cbcbcb', '#f2e6a1', '#e7e7e7', '#f5ccb9'],
-    ribbonText: '20% off',
-    imageUrl: 'https://www.figma.com/api/mcp/asset/7feaa718-befe-4b5c-9ccf-4a61bb92a9ad',
-  },
-  {
-    id: '2',
-    name: 'Constellation Circle Pendant - Silver',
-    price: 89,
-    swatches: ['#cbcbcb', '#f2e6a1'],
-  },
-  {
-    id: '3',
-    name: 'Luna Arc Choker - Gold Vermeil',
-    price: 145,
-    originalPrice: 165,
-    swatches: ['#f2e6a1', '#e7e7e7', '#cbcbcb'],
-    ribbonText: '12% off',
-  },
-  {
-    id: '4',
-    name: 'Iris Layering Chain Set - Rose Gold',
-    price: 210,
-    swatches: ['#f5ccb9', '#f2e6a1', '#cbcbcb'],
-  },
-  {
-    id: '5',
-    name: 'Celestial Initial Pendant Necklace',
-    price: 175,
-    originalPrice: 195,
-    swatches: ['#f2e6a1', '#cbcbcb', '#e7e7e7', '#f5ccb9'],
-    ribbonText: '10% off',
-    imageUrl: 'https://www.figma.com/api/mcp/asset/7feaa718-befe-4b5c-9ccf-4a61bb92a9ad',
-  },
-  {
-    id: '6',
-    name: 'Soleil Birthstone Drop Necklace',
-    price: 165,
-    swatches: ['#cbcbcb', '#f2e6a1'],
-  },
-  {
-    id: '7',
-    name: 'Arc Minimalist Bar Necklace - Gold',
-    price: 95,
-    swatches: ['#f2e6a1', '#cbcbcb'],
-  },
-  {
-    id: '8',
-    name: 'Nova Pavé Heart Pendant',
-    price: 120,
-    originalPrice: 140,
-    swatches: ['#f2e6a1', '#e7e7e7', '#f5ccb9'],
-    ribbonText: '15% off',
-  },
-  {
-    id: '9',
-    name: 'Zodiac Circle Chain Necklace',
-    price: 110,
-    swatches: ['#cbcbcb', '#f2e6a1', '#e7e7e7'],
-  },
-  {
-    id: '10',
-    name: 'Name Script Layered Necklace Set',
-    price: 245,
-    originalPrice: 275,
-    swatches: ['#f2e6a1', '#cbcbcb', '#f5ccb9'],
-    ribbonText: '11% off',
-  },
-]
+const MATERIAL_FILTERS = [
+  { key: 'silver',  label: 'Silver',       swatchVar: 'var(--sterling-silver-925)' },
+  { key: 'vermeil', label: 'Gold Vermeil', swatchVar: 'var(--gold-vermeil-18k)' },
+  { key: 'solid',   label: 'Solid Gold',   swatchVar: 'var(--solid-gold-14k)' },
+  { key: 'white',   label: 'White Gold',   swatchVar: 'var(--white-gold-14k)' },
+] as const
 
-const FAQS: FaqItem[] = [
-  {
-    question: 'WHY IS A CHARM BRACELET IMPORTANT?',
-    answer:
-      "Charm bracelet is important because it's special and meaningful. At Oak and Luna, the charms that adorn our charm bracelet or charm bangle aren't just placed randomly. There's always a heartwarming context behind each of them. The customized charms make an ordinary bracelet extraordinarily unique. It's this personalized approach that makes a charm bracelet an important piece in any accessory collection. It's designed to be cherished for years.",
-  },
-  {
-    question: 'CAN YOU CUSTOMIZE CHARMS?',
-    answer:
-      "Yes! In fact, that's the unique charm of charms. There are different ways to customize them, depending on what the charms are and how much space they offer for personalization. They may feature initials, monograms, names, special dates, zodiac signs, and even inspirational words.",
-  },
+type MaterialKey = (typeof MATERIAL_FILTERS)[number]['key']
+
+// Default material swatch set rendered under each product card image.
+// Order matches the design reference: silver, vermeil, solid gold, rose gold.
+const DEFAULT_PRODUCT_SWATCHES = [
+  'var(--sterling-silver-925)',
+  'var(--gold-vermeil-18k)',
+  'var(--solid-gold-14k)',
+  'var(--rose-gold-plating-18k)',
 ]
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
-function SeoCategoryBubble({ item }: { item: SeoCategoryItem }) {
+function CategoryHero() {
   return (
-    <div className={styles.seoBubbleItem}>
-      {item.imageUrl ? (
-        <img src={item.imageUrl} alt={item.label} className={styles.seoBubbleImage} />
-      ) : (
-        <div className={styles.seoBubbleImage} role="img" aria-label={item.label} />
-      )}
-      <span className={styles.seoBubbleLabel}>{item.label}</span>
-    </div>
-  )
-}
-
-function CategoryBanner() {
-  return (
-    <section className={styles.categoryBanner} aria-label="Category hero">
-      <div className={styles.bannerContent}>
-        <h1 className={styles.categoryTitle}>
-          Necklaces
-          <br />
-          For Women
-        </h1>
-        <p className={styles.categoryDescription}>
-          Capture your unique personality effortlessly with pendants for women, as your
-          jewelry should be just as unique as you are.
-        </p>
-      </div>
-
-      <div className={styles.seoBubbles} aria-label="Browse by style">
-        {SEO_CATEGORIES.map((item) => (
-          <SeoCategoryBubble key={item.label} item={item} />
-        ))}
-      </div>
+    <section className={styles.hero} aria-label="Best Sellers">
+      <p className={styles.heroTitle}>Best Sellers</p>
+      <h1 className={styles.heroDescription}>Adored & Loved. Our most coveted pieces.</h1>
     </section>
   )
 }
 
-function FilterBar({ itemCount = 100 }: { itemCount?: number }) {
+function FilterBar({
+  activeMaterials,
+  onToggle,
+  itemCount,
+}: {
+  activeMaterials: Set<MaterialKey>
+  onToggle: (key: MaterialKey) => void
+  itemCount: number
+}) {
   return (
     <div className={styles.filterBar}>
-      <button className={styles.filterButton} aria-label="Filter and sort products">
-        <svg
-          className={styles.filterIcon}
-          viewBox="0 0 20 20"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          aria-hidden="true"
-        >
-          <line x1="2" y1="5" x2="18" y2="5" />
-          <line x1="2" y1="10" x2="18" y2="10" />
-          <line x1="2" y1="15" x2="18" y2="15" />
-          <circle cx="6" cy="5" r="2" fill="currentColor" stroke="none" />
-          <circle cx="13" cy="10" r="2" fill="currentColor" stroke="none" />
-          <circle cx="7" cy="15" r="2" fill="currentColor" stroke="none" />
-        </svg>
-        Filter / Sort
-      </button>
-      <span className={styles.itemCount}>{itemCount} items</span>
-    </div>
-  )
-}
+      <div className={styles.filterBarInner}>
+        {/* <ul className={styles.materialPills} aria-label="Filter by material">
+          {MATERIAL_FILTERS.map((m) => {
+            const active = activeMaterials.has(m.key)
+            return (
+              <li key={m.key}>
+                <button
+                  type="button"
+                  className={`${styles.pill} ${active ? styles.pillActive : ''}`}
+                  aria-pressed={active}
+                  onClick={() => onToggle(m.key)}
+                >
+                  <span className={styles.pillSwatch} style={{ backgroundColor: m.swatchVar }} aria-hidden="true" />
+                  <span className={styles.pillLabel}>{m.label}</span>
+                </button>
+              </li>
+            )
+          })}
+        </ul> */}
 
-function ProductCard({ product }: { product: ProductItem }) {
-  return (
-    <article className={styles.productCard}>
-      <div className={styles.productCardImageWrap}>
-        {product.imageUrl ? (
-          <img src={product.imageUrl} alt={product.name} className={styles.productCardImageInner} />
-        ) : (
-          <div className={styles.productCardImageInner} role="img" aria-label={product.name} />
-        )}
-      </div>
-
-      {product.ribbonText && (
-        <div className={styles.ribbon} aria-label={product.ribbonText}>
-          <svg className={styles.ribbonIcon} viewBox="0 0 10 10" fill="currentColor" aria-hidden="true">
-            <path d="M5 0L6.12 3.45H9.76L6.82 5.59L7.94 9.04L5 6.9L2.06 9.04L3.18 5.59L0.24 3.45H3.88L5 0Z" />
-          </svg>
-          {product.ribbonText}
+        <div className={styles.filterRight}>
+          <span className={styles.itemCount}>{itemCount} items</span>
+          <button type="button" className={styles.filtersTrigger}>Filters</button>
         </div>
-      )}
-
-      <div className={styles.productCardInfo}>
-        <div className={styles.productCardSwatches} aria-label="Available colours">
-          {product.swatches.slice(0, 5).map((color, i) => (
-            <span
-              key={i}
-              className={styles.swatch}
-              style={{ backgroundColor: color }}
-              aria-label={`Colour option ${i + 1}`}
-            />
-          ))}
-          {product.swatches.length > 5 && <span className={styles.swatchMore}>+</span>}
-        </div>
-
-        <p className={styles.productCardName}>{product.name}</p>
-
-        <div className={styles.productCardPrices}>
-          {product.originalPrice && (
-            <span className={styles.productCardPriceOriginal}>${product.originalPrice}</span>
-          )}
-          <span className={styles.productCardPrice}>${product.price}</span>
-        </div>
-      </div>
-    </article>
-  )
-}
-
-function ProductsGrid({ products }: { products: ProductItem[] }) {
-  return (
-    <div className={styles.productsSection}>
-      <div className={styles.productsGrid}>
-        {products.map((p) => (
-          <ProductCard key={p.id} product={p} />
-        ))}
       </div>
     </div>
-  )
-}
-
-function FaqSection({ faqs }: { faqs: FaqItem[] }) {
-  return (
-    <section className={styles.faqSection} aria-label="Frequently asked questions">
-      <div className={styles.faqInner}>
-        {faqs.map((faq) => (
-          <div key={faq.question} className={styles.faqItem}>
-            <h2 className={styles.faqQuestion}>{faq.question}</h2>
-            <p className={styles.faqAnswer}>{faq.answer}</p>
-          </div>
-        ))}
-      </div>
-    </section>
   )
 }
 
@@ -282,8 +134,18 @@ function CategoryPageInner() {
   const footerColumns = prefixFooterColumns(brand, DEFAULT_FOOTER_COLUMNS)
   const topline = {
     ...DEFAULT_TOPLINE,
-    helpHref: withBrandPrefix(brand, DEFAULT_TOPLINE.helpHref),
+    helpHref:  withBrandPrefix(brand, DEFAULT_TOPLINE.helpHref),
     trackHref: withBrandPrefix(brand, DEFAULT_TOPLINE.trackHref),
+  }
+
+  const [activeMaterials, setActiveMaterials] = useState<Set<MaterialKey>>(new Set())
+  const toggleMaterial = (key: MaterialKey) => {
+    setActiveMaterials((prev) => {
+      const next = new Set(prev)
+      if (next.has(key)) next.delete(key)
+      else next.add(key)
+      return next
+    })
   }
 
   const { items, isOpen, subtotal, closeCart, removeItem } = useCart()
@@ -291,12 +153,32 @@ function CategoryPageInner() {
   return (
     <div className={styles.page}>
       <Header variant="white" brand={brand} navLinks={navLinks} topline={topline} />
+
       <main id="main-content">
-        <CategoryBanner />
-        <FilterBar itemCount={100} />
-        <ProductsGrid products={PRODUCTS} />
-        <FaqSection faqs={FAQS} />
+        <CategoryHero />
+
+        <FilterBar
+          activeMaterials={activeMaterials}
+          onToggle={toggleMaterial}
+          itemCount={products.length}
+        />
+
+        <section className={styles.productsSection} aria-label="Products">
+          <div className={styles.productsGrid}>
+            {products.map((p) => (
+              <ProductCard
+                key={p.id}
+                name={p.name}
+                price={p.price}
+                originalPrice={p.originalPrice}
+                defaultImage={p.defaultImage}
+                hoverImage={p.hoverImage}
+              />
+            ))}
+          </div>
+        </section>
       </main>
+
       <Footer columns={footerColumns} />
       <FloatingCart
         isOpen={isOpen}
@@ -312,7 +194,7 @@ function CategoryPageInner() {
   )
 }
 
-export default function CategoryPage() {
+export default function CategoryPageClient() {
   return (
     <CartProvider>
       <CategoryPageInner />

@@ -10,7 +10,7 @@
   --lal-white:       #ffffff;
   --lal-lime:        #e8ff36;
   --lal-light-grey:  #f5f5f5;
-  --lal-warm-beige:  #ebe2de;
+  --lal-warm-beige:  #F2EEEB;
   --lal-border-grey: #e3e3e3;
   --lal-mid-grey:    #989898;
   --lal-green:       #2b8b68;
@@ -46,7 +46,7 @@
   --colors-error:   var(--lal-red);
 
   /* Footer */
-  --footer-main-background:       var(--lal-light-grey);
+  --footer-main-background:       var(--lal-warm-beige);
   --footer-newsletter-background: var(--lal-lime);
   --footer-newsletter-text:       var(--lal-black);
   --footer-text:                  var(--lal-black);
@@ -59,8 +59,8 @@
   --field-min-height:        44px;
 
   /* Announcement bar */
-  --layout-announcements-bar-background: var(--lal-black);
-  --layout-announcements-bar-text:       var(--lal-white);
+  --layout-announcements-bar-background: var(--lal-lime);
+  --layout-announcements-bar-text:       var(--lal-black);
 
   /* Ribbon */
   --ribbon-background: var(--lal-black);

@@ -47,7 +47,7 @@
   --colors-error:   var(--tgr-red);
 
   /* Footer */
-  --footer-main-background:       var(--tgr-neutral);
+  --footer-main-background:       var(--tgr-light-grey);
   --footer-newsletter-background: var(--tgr-baby-blue);
   --footer-newsletter-text:       var(--tgr-raisin);
   --footer-text:                  var(--tgr-raisin);

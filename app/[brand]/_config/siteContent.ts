@@ -26,7 +26,7 @@ export const DEFAULT_TOPLINE = {
 export const DEFAULT_NAV_LINKS: NavLink[] = [
   { label: 'Shop All', href: '/category' },
   { label: 'Gifts', href: '/gifts' },
-  { label: 'Best Sellers', href: '/best-sellers' },
+  { label: 'Best Sellers', href: '/category' },
   { label: 'Sale', href: '/sale' },
   { label: 'Design System', href: '/styleguide' },
 ]
@@ -83,7 +83,7 @@ export const DEFAULT_HERO = {
   title: 'Jewelry made personal',
   description:
     'Discover handcrafted necklaces, bracelets, and rings designed to celebrate the moments that matter most.',
-  ctaPrimary: { label: 'Shop Best Sellers', href: '/best-sellers' },
+  ctaPrimary: { label: 'Shop Best Sellers', href: '/category' },
   ctaSecondary: { label: 'Personalize Yours', href: '/personalize' },
   imageAlt: 'Gold diamond pendant necklace in jewelry tweezers beside a model wearing gold jewelry',
 }

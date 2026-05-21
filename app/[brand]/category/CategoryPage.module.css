@@ -1,303 +1,24 @@
 /* ── Page shell ───────────────────────────────────────────────────────────── */
 .page {
-  background-color: var(--colors-surface-primary);
+  background-color: var(--colors-background);
   color: var(--colors-text);
   font-family: var(--typography-rules-text1-font-family);
   min-height: 100vh;
 }
 
-/* ── Category Banner ──────────────────────────────────────────────────────── */
-.categoryBanner {
+/* ── SEO / hero banner ────────────────────────────────────────────────────── */
+.hero {
   display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-xs);
   padding: var(--spacing-xl) var(--layout-page-margin);
-  min-height: 392px;
-  position: relative;
-  overflow: hidden;
-}
-
-.bannerContent {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-xs);
-  max-width: 600px;
-  flex-shrink: 0;
-}
-
-.categoryTitle {
-  font-family:    var(--typography-rules-headline1-font-family);
-  font-size:      var(--typography-rules-headline1-font-size);
-  line-height:    var(--typography-rules-headline1-line-height);
-  font-weight:    var(--typography-rules-headline1-font-weight, normal);
-  letter-spacing: var(--typography-rules-headline1-letter-spacing, normal);
-  text-transform: var(--typography-rules-headline1-text-transform, none);
-  color: var(--colors-text);
-  margin: 0;
-}
-
-.categoryDescription {
-  font-family:    var(--typography-rules-text7-font-family);
-  font-size:      var(--typography-rules-text7-font-size);
-  line-height:    var(--typography-rules-text7-line-height);
-  font-weight:    var(--typography-rules-text7-font-weight, normal);
-  letter-spacing: var(--typography-rules-text7-letter-spacing, normal);
-  color: var(--colors-text);
-  margin: 0;
-  max-width: 480px;
-}
-
-/* ── SEO Category Bubbles ─────────────────────────────────────────────────── */
-.seoBubbles {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--spacing-xxs);
-  width: 368px;
-  flex-shrink: 0;
-  align-content: flex-start;
-}
-
-.seoBubbleItem {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-xs);
-  align-items: center;
-  width: 120px;
-  cursor: pointer;
-}
-
-.seoBubbleImage {
-  width: 120px;
-  height: 150px;
-  object-fit: cover;
-  background-color: var(--border-color);
-  display: block;
-}
-
-.seoBubbleLabel {
-  font-family:    var(--typography-rules-text4-font-family);
-  font-size:      var(--typography-rules-text4-font-size);
-  line-height:    var(--typography-rules-text4-line-height);
-  font-weight:    var(--typography-rules-text4-font-weight, 600);
-  letter-spacing: var(--typography-rules-text4-letter-spacing, normal);
-  color: var(--colors-text);
   text-align: center;
-  width: 100%;
+  background-color: var(--colors-background);
 }
 
-/* ── Filter bar ───────────────────────────────────────────────────────────── */
-.filterBar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: var(--spacing-lg) var(--layout-page-margin);
-  border-top:    1px solid var(--border-color);
-  border-bottom: 1px solid var(--border-color);
-  background-color: var(--colors-surface-primary);
-}
-
-.filterButton {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-sm);
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0;
-  font-family:    var(--typography-rules-text7-font-family);
-  font-size:      var(--typography-rules-text7-font-size);
-  line-height:    var(--typography-rules-text7-line-height);
-  font-weight:    var(--typography-rules-text7-font-weight, normal);
-  letter-spacing: var(--typography-rules-text7-letter-spacing, normal);
-  color: var(--colors-text);
-  min-height: var(--field-min-height);
-  transition: color var(--transition-fast);
-}
-
-.filterButton:hover {
-  color: var(--colors-brand-default-primary);
-}
-
-.filterIcon {
-  width: 20px;
-  height: 20px;
-  flex-shrink: 0;
-}
-
-.itemCount {
-  font-family:    var(--typography-rules-text7-font-family);
-  font-size:      var(--typography-rules-text7-font-size);
-  line-height:    var(--typography-rules-text7-line-height);
-  font-weight:    var(--typography-rules-text7-font-weight, normal);
-  letter-spacing: var(--typography-rules-text7-letter-spacing, normal);
-  color: var(--colors-text);
-}
-
-/* ── Products section ─────────────────────────────────────────────────────── */
-.productsSection {
-  padding: var(--spacing-lg) var(--layout-page-margin);
-}
-
-.productsGrid {
-  display: grid;
-  gap: var(--spacing-md);
-  grid-template-columns: repeat(2, 1fr); /* mobile default — 2 per row */
-}
-
-@media (min-width: 1024px) {
-  .productsGrid {
-    grid-template-columns: repeat(4, 1fr); /* desktop — 4 per row */
-    gap: var(--spacing-lg);
-  }
-}
-
-/* ── Product Card ─────────────────────────────────────────────────────────── */
-.productCard {
-  display: flex;
-  flex-direction: column;
-  position: relative;
-  background-color: var(--colors-surface-primary);
-  cursor: pointer;
-}
-
-.productCard:hover .productCardImageInner {
-  transform: scale(1.03);
-}
-
-.productCardImageWrap {
-  position: relative;
-  width: 100%;
-  overflow: hidden;
-  aspect-ratio: 1;
-  flex-shrink: 0;
-  background-color: var(--border-color);
-}
-
-.productCardImageInner {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-  transition: transform var(--transition-base);
-}
-
-.productCardInfo {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-xs);
-  padding: var(--spacing-md) 0 0;
-}
-
-.productCardSwatches {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-xxs);
-}
-
-.swatch {
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  border: 1px solid var(--border-color);
-  flex-shrink: 0;
-}
-
-.swatchMore {
-  font-family:    var(--typography-rules-text3-font-family);
-  font-size:      var(--typography-rules-text3-font-size);
-  font-weight:    var(--typography-rules-text3-font-weight, normal);
-  letter-spacing: var(--typography-rules-text3-letter-spacing, normal);
-  color: var(--colors-text-secondary);
-  line-height: 1; /* structural — aligns "+" with swatch dots */
-}
-
-.productCardName {
-  font-family:    var(--typography-rules-text7-font-family);
-  font-size:      var(--typography-rules-text7-font-size);
-  line-height:    var(--typography-rules-text7-line-height);
-  font-weight:    var(--typography-rules-text7-font-weight, normal);
-  letter-spacing: var(--typography-rules-text7-letter-spacing, normal);
-  color: var(--colors-text);
+.heroTitle {
   margin: 0;
-}
-
-.productCardPrices {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-xs);
-  padding-bottom: var(--spacing-lg);
-}
-
-.productCardPriceOriginal {
-  font-family:    var(--typography-rules-text7-font-family);
-  font-size:      var(--typography-rules-text7-font-size);
-  line-height:    var(--typography-rules-text7-line-height);
-  font-weight:    var(--typography-rules-text7-font-weight, normal);
-  letter-spacing: var(--typography-rules-text7-letter-spacing, normal);
-  color: var(--colors-text-disabled);
-  text-decoration: line-through;
-}
-
-.productCardPrice {
-  font-family:    var(--typography-rules-text7-font-family);
-  font-size:      var(--typography-rules-text7-font-size);
-  line-height:    var(--typography-rules-text7-line-height);
-  font-weight:    var(--typography-rules-text7-font-weight, normal);
-  letter-spacing: var(--typography-rules-text7-letter-spacing, normal);
-  color: var(--colors-text);
-}
-
-/* ── Ribbon badge ─────────────────────────────────────────────────────────── */
-.ribbon {
-  position: absolute;
-  top: var(--spacing-xs);
-  left: var(--spacing-xs);
-  background-color: var(--ribbon-background);
-  color: var(--ribbon-text);
-  font-family:    var(--typography-rules-ribbons1-font-family);
-  font-size:      var(--typography-rules-ribbons1-font-size);
-  font-weight:    var(--typography-rules-ribbons1-font-weight, normal);
-  letter-spacing: var(--typography-rules-ribbons1-letter-spacing, normal);
-  line-height: 1; /* structural — keeps badge compact */
-  padding: 4px 6px 3px;
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-xxs);
-  white-space: nowrap;
-  z-index: 1;
-}
-
-.ribbonIcon {
-  width: 10px;
-  height: 10px;
-  flex-shrink: 0;
-}
-
-/* ── FAQ Section ──────────────────────────────────────────────────────────── */
-.faqSection {
-  background-color: var(--colors-surface-secondary);
-  padding: var(--spacing-3xl) var(--layout-page-margin);
-}
-
-.faqInner {
-  max-width: 800px;
-  margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-xl);
-}
-
-.faqItem {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-sm);
-  align-items: center;
-  text-align: center;
-}
-
-.faqQuestion {
   font-family:    var(--typography-rules-headline2-font-family);
   font-size:      var(--typography-rules-headline2-font-size);
   line-height:    var(--typography-rules-headline2-line-height);
@@ -305,82 +26,143 @@
   letter-spacing: var(--typography-rules-headline2-letter-spacing, normal);
   text-transform: var(--typography-rules-headline2-text-transform, none);
   color: var(--colors-text);
+}
+
+.heroDescription {
   margin: 0;
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  font-weight:    var(--typography-rules-text1-font-weight, normal);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+  color: var(--colors-text);
 }
 
-.faqAnswer {
-  font-family:    var(--typography-rules-text7-font-family);
-  font-size:      var(--typography-rules-text7-font-size);
-  line-height:    var(--typography-rules-text7-line-height);
-  font-weight:    var(--typography-rules-text7-font-weight, normal);
-  letter-spacing: var(--typography-rules-text7-letter-spacing, normal);
-  color: var(--colors-text);
+/* ── Sticky filter bar ────────────────────────────────────────────────────── */
+.filterBar {
+  position: sticky;
+  /* top: var(--sticky-top); */
+  top: 96px;
+  z-index: var(--z-sticky);
+  background: var(--colors-background);
+}
+
+.filterBarInner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md) var(--layout-page-margin);
+  max-width: var(--layout-max-width);
+  margin: 0 auto;
+}
+
+.materialPills {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
   margin: 0;
-  max-width: 100%;
+  padding: 0;
+  list-style: none;
+  flex-wrap: wrap;
 }
 
-.faqAnswerLink {
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xxs) var(--spacing-sm);
+  background: transparent;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-full);
   color: var(--colors-text);
-  text-decoration: underline;
+  cursor: pointer;
+  transition: border-color var(--transition-fast);
 }
 
-/* ── Responsive — mobile ─────────────────────────────────────────────────── */
+.pillActive {
+  border-color: var(--border-strong);
+}
+
+.pillSwatch {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border-color);
+  flex-shrink: 0;
+  /* backgroundColor set inline per swatch */
+}
+
+.pillLabel {
+  font-family:    var(--typography-rules-text5-font-family);
+  font-size:      var(--typography-rules-text5-font-size);
+  line-height:    var(--typography-rules-text5-line-height);
+  font-weight:    var(--typography-rules-text5-font-weight, normal);
+  letter-spacing: var(--typography-rules-text5-letter-spacing, normal);
+  color: var(--colors-text);
+}
+
+.filterRight {
+  display: flex;
+  flex-direction: row-reverse;
+  align-items: center;
+  gap: var(--spacing-md);
+  width: 100%;
+  justify-content: space-between;
+}
+
+.itemCount {
+  font-family:    var(--typography-rules-text5-font-family);
+  font-size:      var(--typography-rules-text5-font-size);
+  line-height:    var(--typography-rules-text5-line-height);
+  font-weight:    var(--typography-rules-text5-font-weight, normal);
+  letter-spacing: var(--typography-rules-text5-letter-spacing, normal);
+}
+
+.filtersTrigger {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: var(--colors-text);
+  font-family:    var(--typography-rules-text5-font-family);
+  font-size:      var(--typography-rules-text5-font-size);
+  line-height:    var(--typography-rules-text5-line-height);
+  font-weight:    var(--typography-rules-text5-font-weight, normal);
+  letter-spacing: var(--typography-rules-text5-letter-spacing, normal);
+}
+
+/* ── Products section ─────────────────────────────────────────────────────── */
+.productsSection {
+  padding: 0 var(--layout-page-margin) var(--spacing-lg);
+  /* max-width: var(--layout-max-width); */
+  /* margin: 0 auto; */
+}
+
+.productsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* mobile: 2 columns */
+  /* Intentional pixel-perfect design values for grid gap (only hardcoded
+     values permitted in this file): 4px mobile, 8px desktop. */
+  gap: 4px;
+}
+
+@media (min-width: 768px) {
+  .productsGrid {
+    grid-template-columns: repeat(4, 1fr); /* desktop: 4 columns */
+    gap: 8px;
+  }
+}
+
+/* ── Responsive — mobile filter bar tweaks ───────────────────────────────── */
 @media (max-width: 768px) {
-  /* Category banner — stack vertically */
-  .categoryBanner {
-    flex-direction: column;
-    align-items: flex-start;
-    padding: var(--spacing-xl) var(--spacing-md) 0;
-    min-height: unset;
-    gap: var(--spacing-xl);
+  .filterBarInner {
+    flex-wrap: wrap;
+    padding: var(--spacing-sm) var(--spacing-md);
   }
 
-  /* SEO bubbles — horizontal scroll on mobile */
-  .seoBubbles {
-    width: 100%;
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    gap: var(--spacing-lg);
-    padding: var(--spacing-md) var(--spacing-md) var(--spacing-md) 0;
-  }
-
-  .seoBubbles::-webkit-scrollbar {
-    display: none;
-  }
-
-  .seoBubbleItem {
-    width: 120px;
-    flex-shrink: 0;
-  }
-
-  .seoBubbleImage {
-    width: 120px;
-    height: 150px;
-  }
-
-  /* Filter bar */
-  .filterBar {
-    padding: var(--spacing-md);
-  }
-
-  /* Products section — tighter padding on mobile */
   .productsSection {
     padding: var(--spacing-md);
-  }
-
-  .productsGrid {
-    gap: var(--spacing-sm);
-  }
-
-  /* FAQ */
-  .faqSection {
-    padding: var(--spacing-2xl) var(--spacing-md);
-  }
-
-  .faqItem {
-    align-items: flex-start;
-    text-align: left;
   }
 }

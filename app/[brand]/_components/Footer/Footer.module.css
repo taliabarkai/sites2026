@@ -43,7 +43,7 @@
   line-height:    var(--typography-rules-disclaimer1-line-height);
   font-weight:    var(--typography-rules-disclaimer1-font-weight, normal);
   letter-spacing: var(--typography-rules-disclaimer1-letter-spacing, normal);
-  color: var(--footer-text-muted);
+  /* color: var(--footer-text-muted); */
 }
 
 .copyright {
@@ -53,7 +53,7 @@
   line-height:    var(--typography-rules-disclaimer1-line-height);
   font-weight:    var(--typography-rules-disclaimer1-font-weight, normal);
   letter-spacing: var(--typography-rules-disclaimer1-letter-spacing, normal);
-  color: var(--footer-text-muted);
+  /* color: var(--footer-text-muted); */
 }
 
 @media (min-width: 1024px) {

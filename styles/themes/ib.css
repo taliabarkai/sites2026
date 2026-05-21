@@ -49,7 +49,7 @@
   --colors-error:   var(--ib-red);
 
   /* Footer */
-  --footer-main-background:       var(--ib-light-blue);
+  --footer-main-background:       var(--ib-stone);
   --footer-newsletter-background: var(--ib-stone);
   --footer-newsletter-text:       var(--ib-navy);
   --footer-text:                  var(--ib-navy);

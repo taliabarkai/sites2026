@@ -329,27 +329,27 @@
 }
 
 .footerLabel {
-  font-family:    var(--typography-rules-text2-font-family);
-  font-size:      var(--typography-rules-text2-font-size);
-  line-height:    var(--typography-rules-text2-line-height);
-  font-weight:    var(--typography-rules-text2-font-weight, 600);
-  letter-spacing: var(--typography-rules-text2-letter-spacing, normal);
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  font-weight:    var(--typography-rules-text1-font-weight);
+  letter-spacing: var(--typography-rules-text1-letter-spacing);
 }
 
 .footerAmount {
-  font-family:    var(--typography-rules-text1-font-family);
-  font-size:      var(--typography-rules-text1-font-size);
-  line-height:    var(--typography-rules-text1-line-height);
-  font-weight:    var(--typography-rules-text1-font-weight, normal);
-  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+  font-family:    var(--typography-rules-text2-font-family);
+  font-size:      var(--typography-rules-text2-font-size);
+  line-height:    var(--typography-rules-text2-line-height);
+  font-weight:    var(--typography-rules-text2-font-weight);
+  letter-spacing: var(--typography-rules-text2-letter-spacing);
 }
 
 .taxNote {
-  font-family:    var(--typography-rules-text1-font-family);
-  font-size:      var(--typography-rules-text1-font-size);
-  line-height:    var(--typography-rules-text1-line-height);
-  font-weight:    var(--typography-rules-text1-font-weight, normal);
-  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+  font-family:    var(--typography-rules-text2-font-family);
+  font-size:      var(--typography-rules-text2-font-size);
+  line-height:    var(--typography-rules-text2-line-height);
+  font-weight:    var(--typography-rules-text2-font-weight);
+  letter-spacing: var(--typography-rules-text2-letter-spacing);
   color: var(--colors-text);
 }
 

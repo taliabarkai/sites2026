@@ -63,6 +63,17 @@ html {
   /* ── Layout primitives (shared across all brands) ── */
   --layout-max-width:     1920px;
   --layout-content-width: 1200px;
+  --sticky-top:           var(--layout-header-height);
+
+  /* ── Material colors (universal product attributes — not brand-themed) ── */
+  --sterling-silver-925:   #CBCBCB;
+  --gold-vermeil-18k:      #E2C385;
+  --solid-gold-10k:        #DBC883;
+  --solid-gold-14k:        #DBC883;
+  --white-gold-10k:        #E7E7E7;
+  --white-gold-14k:        #E7E7E7;
+  --rose-gold-plating-18k: #F1D4CE;
+  --rose-gold-14k:         #F1D4CE;
 }
 
 @import '../styles/typography-tokens.css';

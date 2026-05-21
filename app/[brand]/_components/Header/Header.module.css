@@ -20,7 +20,7 @@
 }
 
 .solid {
-  background: var(--colors-surface-primary);
+  background: var(--colors-background);
   color: var(--colors-text);
   box-shadow: var(--shadow-sm);
 }

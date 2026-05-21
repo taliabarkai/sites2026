@@ -1,0 +1,104 @@
+.card {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  background: transparent; /* card itself has no bg; page background shows through */
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+.imageWrap {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  aspect-ratio: 1;
+  object-fit: cover;
+  object-position: center;
+  flex-shrink: 0;
+  background-color: var(--colors-surface-primary); /* placeholder while images load */
+
+}
+
+[data-theme="oal"] .imageWrap {
+  aspect-ratio: 4/5;
+}
+
+.image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: opacity var(--transition-base);
+}
+
+/* Default image is fully opaque; hover image is layered above at opacity 0. */
+.imageDefault { opacity: 1; }
+.imageHover   { opacity: 0; }
+
+/* Hover crossfade — desktop only (≥768px). No transform / no zoom. */
+@media (min-width: 768px) {
+  .card:hover .imageDefault { opacity: 0; }
+  .card:hover .imageHover   { opacity: 1; }
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-sm) 0 var(--spacing-lg);
+}
+
+.swatches {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.swatch {
+  width: 20px;
+  height: 20px;
+  border-radius: var(--radius-full);
+  flex-shrink: 0;
+  /* backgroundColor set inline per swatch */
+}
+
+.name {
+  margin: 0;
+  font-family:    var(--typography-rules-text5-font-family);
+  font-size:      var(--typography-rules-text5-font-size);
+  line-height:    var(--typography-rules-text5-line-height);
+  font-weight:    var(--typography-rules-text5-font-weight, normal);
+  letter-spacing: var(--typography-rules-text5-letter-spacing, normal);
+  color: var(--colors-text);
+}
+
+.prices {
+  display: flex;
+  align-items: baseline;
+  gap: var(--spacing-xs);
+}
+
+.price {
+  font-family:    var(--typography-rules-text6-font-family);
+  font-size:      var(--typography-rules-text6-font-size);
+  line-height:    var(--typography-rules-text6-line-height);
+  font-weight:    var(--typography-rules-text6-font-weight, 600);
+  letter-spacing: var(--typography-rules-text6-letter-spacing, normal);
+  color: var(--colors-text);
+}
+
+.priceOriginal {
+  font-family:    var(--typography-rules-text7-font-family);
+  font-size:      var(--typography-rules-text7-font-size);
+  line-height:    var(--typography-rules-text7-line-height);
+  font-weight:    var(--typography-rules-text7-font-weight, normal);
+  letter-spacing: var(--typography-rules-text7-letter-spacing, normal);
+  color: var(--colors-text-secondary);
+  text-decoration: line-through;
+}
