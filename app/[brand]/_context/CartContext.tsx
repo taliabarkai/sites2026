@@ -31,11 +31,23 @@ const CartContext = createContext<CartContextValue | null>(null)
 
 const DEFAULT_ITEMS: CartItem[] = [
   {
-    id: 'statement-one-carat-diamond-necklace-gold',
-    name: 'The Statement One Carat Diamond Necklace - Gold Vermeil',
-    price: 55000,
-    image: 'https://cdn.oakandluna.com/digital-asset/product/the-statement-one-carat-diamond-necklace-gold-1.jpg',
+    id: 'interlace-earrings-gold-vermeil',
+    name: 'Interlace Earrings - Gold Vermeil',
+    price: 17400,
+    originalPrice: 20500,
+    image: 'https://cdn.oakandluna.com/digital-asset/product/inez-initial-necklace-gold-vermeil-with-diamond-12.jpg',
     isPersonalized: false,
+  },
+  {
+    id: 'classic-scalloped-hoop-gold-vermeil',
+    name: 'Classic Scalloped Hoop - Gold Vermeil',
+    price: 13500,
+    image: 'https://cdn.oakandluna.com/digital-asset/product/engraved-comprass-necklace-gold-vermeil-1.jpg',
+    isPersonalized: true,
+    selectedOptions: [
+      { label: 'Material', value: 'Gold Vermeil' },
+      { label: 'Choose your style', value: 'Classic' },
+    ],
   },
 ]
 

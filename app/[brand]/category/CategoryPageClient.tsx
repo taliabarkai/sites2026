@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { CartProvider, useCart } from '../_context/CartContext'
 import { Footer } from '../_components/Footer'
 import { Header } from '../_components/Header'
@@ -149,6 +149,7 @@ function CategoryPageInner() {
   }
 
   const { items, isOpen, subtotal, closeCart, removeItem } = useCart()
+  const router = useRouter()
 
   return (
     <div className={styles.page}>
@@ -189,7 +190,7 @@ function CategoryPageInner() {
         subtotal={subtotal}
         onRemoveItem={removeItem}
         onEditItem={() => {}}
-        onContinueToCheckout={() => {}}
+        onContinueToCheckout={() => router.push(`/${brand}/cart`)}
         onGenerateGiftNote={async () => 'Wishing you a wonderful day filled with joy!'}
       />
     </div>

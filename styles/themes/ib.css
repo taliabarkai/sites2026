@@ -101,14 +101,14 @@
   --buttons-primary-border-color:  var(--ib-olive);
   --buttons-primary-border-radius: 4px;
   --buttons-primary-padding:       1.2rem 2.8rem;
-  --buttons-primary-min-height:    5.2rem;
+  --buttons-primary-min-height:    4.4rem;
 
   --buttons-secondary-background:    var(--ib-white);
   --buttons-secondary-text:          var(--ib-navy);
   --buttons-secondary-border-color:  var(--ib-navy);
   --buttons-secondary-border-radius: 4px;
   --buttons-secondary-padding:       1.2rem 2.8rem;
-  --buttons-secondary-min-height:    5.2rem;
+  --buttons-secondary-min-height:    4.4rem;
 
   --buttons-upsell-primary-background:    var(--ib-white);
   --buttons-upsell-primary-text:          var(--ib-navy);

@@ -263,8 +263,8 @@ export function FloatingCart({
                 <span className={styles.taxNote}>Calculated at checkout</span>
               </div>
             </div>
-            <Button variant="add-to-cart" className={styles.checkoutBtn} onClick={onContinueToCheckout}>
-              Continue to Checkout
+            <Button variant="add-to-cart" href={`/${brand}/checkout`} className={styles.checkoutBtn}>
+              Checkout
             </Button>
           </div>
         )}

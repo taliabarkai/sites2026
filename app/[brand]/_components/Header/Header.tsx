@@ -47,6 +47,7 @@ export function Header({
 
   const { items, openCart } = useCart()
   const isScrolled = useHeaderScroll()
+  const isCheckout = pathname.includes('/checkout')
   const [menuOpen, setMenuOpen] = useState(false)
   const isSolid = variant === 'white' || isScrolled
 
@@ -120,12 +121,21 @@ export function Header({
               <button type="button" className={styles.iconButton} aria-label="Account">
                 <PersonIcon />
               </button>
-              <button type="button" className={styles.cartButton} aria-label={`Cart${items.length > 0 ? ` (${items.length})` : ''}`} onClick={openCart}>
-                <ShoppingBagIcon />
-                {items.length > 0 && (
-                  <span className={styles.cartCount}>{items.length}</span>
-                )}
-              </button>
+              {isCheckout ? (
+                <Link href={`/${brandSegment}/cart`} className={styles.cartButton} aria-label={`Cart${items.length > 0 ? ` (${items.length})` : ''}`}>
+                  <ShoppingBagIcon />
+                  {items.length > 0 && (
+                    <span className={styles.cartCount}>{items.length}</span>
+                  )}
+                </Link>
+              ) : (
+                <button type="button" className={styles.cartButton} aria-label={`Cart${items.length > 0 ? ` (${items.length})` : ''}`} onClick={openCart}>
+                  <ShoppingBagIcon />
+                  {items.length > 0 && (
+                    <span className={styles.cartCount}>{items.length}</span>
+                  )}
+                </button>
+              )}
             </div>
           </div>
         </div>

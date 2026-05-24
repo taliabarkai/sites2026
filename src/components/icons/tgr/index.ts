@@ -1,3 +1,5 @@
+import { emit } from 'node:process'
+
 export { AiMagicIcon } from './AiMagicIcon'
 export { AiSparkleIcon } from './AiSparkleIcon'
 export { ArrowIcon } from './ArrowIcon'
@@ -47,3 +49,6 @@ export { WarrantyIcon } from './WarrantyIcon'
 export { XIcon } from './XIcon'
 export { ZoomInIcon } from './ZoomInIcon'
 export { ZoomOutIcon } from './ZoomOutIcon'
+export { TooltipIcon } from './TooltipIcon'
+export { LockIcon } from './LockIcon'
+export { CouponIcon } from './CouponIcon'

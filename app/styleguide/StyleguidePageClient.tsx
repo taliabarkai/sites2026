@@ -4,6 +4,7 @@ import { Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { Footer } from '../[brand]/_components/Footer'
 import { Header } from '../[brand]/_components/Header'
+import { CartProvider } from '../[brand]/_context/CartContext'
 import { resolveBrand, type BrandKey } from '../[brand]/_config/brands'
 import { prefixFooterColumns, prefixNavLinks, withBrandPrefix } from '../[brand]/_config/brandPaths'
 import { DEFAULT_FOOTER_COLUMNS, DEFAULT_NAV_LINKS, DEFAULT_TOPLINE } from '../[brand]/_config/siteContent'
@@ -23,13 +24,15 @@ function StyleguidePageContent() {
   }
 
   return (
-    <div data-theme={brand} className={styles.page}>
-      <Header variant="white" brand={brand} navLinks={navLinks} topline={topline} />
-      <main className={styles.main}>
-        <StyleguideClient brand={brand} />
-      </main>
-      <Footer columns={footerColumns} />
-    </div>
+    <CartProvider>
+      <div data-theme={brand} className={styles.page}>
+        <Header variant="white" brand={brand} navLinks={navLinks} topline={topline} />
+        <main className={styles.main}>
+          <StyleguideClient brand={brand} />
+        </main>
+        <Footer columns={footerColumns} />
+      </div>
+    </CartProvider>
   )
 }
 
