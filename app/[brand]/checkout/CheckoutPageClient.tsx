@@ -143,7 +143,7 @@ function CheckoutItemRow({ item, icons }: CheckoutItemRowProps) {
           trailingIcon={<PlusMinusIcon size={24} />}
           onClick={() => setGiftModalOpen(true)}
         >
-          Add Gifting Options
+          Add Gift Packaging
         </Button>
       </div>
     </article>
@@ -212,31 +212,6 @@ function OrderSummary({ items, subtotal, selectedShipping, icons, collapsible }:
 
   return (
     <section className={styles.orderSummary} aria-labelledby="summary-heading">
-      {/* Promo code — above header */}
-      <div className={styles.promoRow}>
-        <span className={styles.promoQuestion}>
-          <CouponIcon size={16} />
-          Have a promo code?
-        </span>
-        {promoVisible && (
-          <div className={styles.storeCreditRow}>
-            <div className={styles.storeCreditInput}>
-              <input
-                type="text"
-                placeholder="Promo code"
-                value={promoCode}
-                onChange={e => setPromoCode(e.target.value)}
-                className={styles.input}
-                aria-label="Promo code"
-              />
-            </div>
-            <Button variant="primary" className={styles.applyButton}>
-              Apply
-            </Button>
-          </div>
-        )}
-      </div>
-
       {/* Header */}
       <div
         className={collapsible ? styles.summaryHeaderCollapsible : styles.summaryHeader}
@@ -269,6 +244,31 @@ function OrderSummary({ items, subtotal, selectedShipping, icons, collapsible }:
           ))}
         </div>
       )}
+
+      {/* Promo code — below summary items */}
+      <div className={styles.promoRow}>
+        <span className={styles.promoQuestion}>
+          <CouponIcon size={16} />
+          Have a promo code?
+        </span>
+        {promoVisible && (
+          <div className={styles.storeCreditRow}>
+            <div className={styles.storeCreditInput}>
+              <input
+                type="text"
+                placeholder="Promo code"
+                value={promoCode}
+                onChange={e => setPromoCode(e.target.value)}
+                className={styles.input}
+                aria-label="Promo code"
+              />
+            </div>
+            <Button variant="primary" className={styles.applyButton}>
+              Apply
+            </Button>
+          </div>
+        )}
+      </div>
 
       {/* Totals — always visible */}
       <div className={styles.totalsRows}>

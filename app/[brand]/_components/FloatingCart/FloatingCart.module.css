@@ -185,6 +185,9 @@
 }
 
 .detailsToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   font-family:    var(--typography-rules-text1-font-family);
   font-size:      var(--typography-rules-text1-font-size);
   line-height:    var(--typography-rules-text1-line-height);
@@ -195,8 +198,7 @@
   border: none;
   padding: 0;
   cursor: pointer;
-  text-decoration: underline;
-  text-underline-offset: 2px;
+  text-decoration: none;
   text-align: left;
 }
 

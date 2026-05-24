@@ -44,9 +44,10 @@ interface CartItemRowProps {
   onGenerateGiftNote: () => Promise<string>
   GiftIcon: React.ComponentType<{ size?: number }>
   PlusMinusIcon: React.ComponentType<{ size?: number }>
+  DropdownIcon: React.ComponentType<{ size?: number }>
 }
 
-function CartItemRow({ item, onRemove, onEdit, onGenerateGiftNote, GiftIcon, PlusMinusIcon }: CartItemRowProps) {
+function CartItemRow({ item, onRemove, onEdit, onGenerateGiftNote, GiftIcon, PlusMinusIcon, DropdownIcon }: CartItemRowProps) {
   const [detailsOpen, setDetailsOpen] = useState(false)
   const [confirmRemove, setConfirmRemove] = useState(false)
   const [giftModalOpen, setGiftModalOpen] = useState(false)
@@ -93,7 +94,7 @@ function CartItemRow({ item, onRemove, onEdit, onGenerateGiftNote, GiftIcon, Plu
                 aria-expanded={detailsOpen}
                 onClick={() => setDetailsOpen(o => !o)}
               >
-                View Details {detailsOpen ? '▲' : '▼'}
+                View Details <DropdownIcon size={16} />
               </button>
               {detailsOpen && (
                 <dl className={styles.optionsList}>
@@ -141,7 +142,7 @@ function CartItemRow({ item, onRemove, onEdit, onGenerateGiftNote, GiftIcon, Plu
         trailingIcon={<PlusMinusIcon size={24} />}
         onClick={() => setGiftModalOpen(true)}
       >
-        Add Gifting Options
+        Add Gift Packaging
       </Button>
     </article>
   )
@@ -246,6 +247,7 @@ export function FloatingCart({
                 onGenerateGiftNote={onGenerateGiftNote}
                 GiftIcon={icons.GiftIcon}
                 PlusMinusIcon={icons.PlusMinusIcon}
+                DropdownIcon={icons.DropdownIcon}
               />
             ))
           )}
