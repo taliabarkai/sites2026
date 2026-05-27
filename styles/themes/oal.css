@@ -97,6 +97,29 @@
   --transition-fast: 150ms ease;
   --transition-base: 250ms ease;
 
+  /* Status */
+  --colors-warning: var(--oal-terracotta);
+
+  /* Price */
+  --colors-price-selling: var(--oal-black);
+
+  /* Cards */
+  --colors-card-image-bg: var(--oal-white);
+  --product-image-background-blend: transparent;
+
+  /* Form field extras */
+  --form-field-border-color-hover: var(--oal-black);
+  --form-field-border-radius:      4px;
+
+  /* Ribbon variants */
+  --ribbon-border-radius:          var(--radius-sm);
+  --ribbon-bundle-background:      var(--oal-black);
+  --ribbon-bundle-text:            var(--oal-white);
+  --ribbon-oos-background:         var(--oal-dark-grey);
+  --ribbon-oos-text:               var(--oal-white);
+  --ribbon-secondary-background:   var(--oal-black);
+  --ribbon-secondary-text:         var(--oal-white);
+
   /* Buttons */
   --buttons-primary-background:   var(--oal-black);
   --buttons-primary-text:         var(--oal-white);

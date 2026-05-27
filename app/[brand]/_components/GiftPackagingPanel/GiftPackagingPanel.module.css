@@ -1,0 +1,596 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-overlay);
+  background: rgba(0, 0, 0, 0.45);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition-base);
+}
+
+.overlayVisible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Mobile: bottom sheet */
+.panel {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: var(--z-modal);
+  max-height: 90dvh;
+  background: #ffffff;
+  color: var(--colors-text);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  box-shadow: var(--shadow-md);
+  transform: translateY(100%);
+  transition: transform var(--transition-base);
+}
+
+.panelOpen {
+  transform: translateY(0);
+}
+
+/* Desktop: right drawer */
+@media (min-width: 768px) {
+  .panel {
+    top: 0;
+    right: 0;
+    bottom: auto;
+    left: auto;
+    width: 100%;
+    max-width: 440px;
+    max-height: none;
+    height: 100dvh;
+    border-radius: var(--radius-panel) 0 0 var(--radius-panel);
+    transform: translateX(100%);
+  }
+
+  .panelOpen {
+    transform: translateX(0);
+  }
+}
+
+/* ── Panel header ─────────────────────────────────────────────────────────── */
+
+.panelHeader {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm);
+  border-bottom: 1px solid var(--border-color);
+}
+
+@media (min-width: 768px) {
+  .panelHeader {
+    padding: var(--spacing-md) var(--spacing-lg);
+  }
+}
+
+.backBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--colors-text);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.panelTitle {
+  flex: 1;
+  font-family:    var(--typography-rules-paragraph4-font-family);
+  font-size:      var(--typography-rules-paragraph4-font-size);
+  line-height:    var(--typography-rules-paragraph4-line-height);
+  font-weight:    var(--typography-rules-paragraph4-font-weight, normal);
+  letter-spacing: var(--typography-rules-paragraph4-letter-spacing, normal);
+  text-transform: var(--typography-rules-paragraph4-text-transform, none);
+  margin: 0;
+}
+
+.closeBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--colors-text);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+/* ── Scroll body ──────────────────────────────────────────────────────────── */
+
+.scrollBody {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Picker step ──────────────────────────────────────────────────────────── */
+
+.pickerGrid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+}
+
+@media (min-width: 768px) {
+  .pickerGrid {
+    padding: var(--spacing-lg);
+  }
+}
+
+.pickerSubtitle {
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  font-weight:    var(--typography-rules-text1-font-weight, normal);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+  color: var(--colors-text);
+  margin: 0;
+}
+
+.optionCard {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  cursor: pointer;
+  background: none;
+  width: 100%;
+  text-align: left;
+  transition: border-color var(--transition-fast);
+}
+
+.optionCard:hover {
+  border-color: var(--border-strong);
+}
+
+.optionCardImageWrap {
+  width: 120px;
+  height: 120px;
+  flex-shrink: 0;
+  overflow: hidden;
+  background-color: var(--product-image-background-blend);
+}
+
+.optionCardImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  mix-blend-mode: multiply;
+}
+
+.optionCardBody {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xxs);
+  padding: var(--spacing-sm) var(--spacing-md);
+}
+
+.optionCardName {
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  font-weight:    var(--typography-rules-text1-font-weight, normal);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+  margin: 0;
+}
+
+.optionCardPriceRow {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.optionCardSelectBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--buttons-upsell-primary-background);
+  color: var(--buttons-upsell-primary-text);
+  border: var(--border-width) solid var(--buttons-upsell-primary-border-color);
+  border-radius: var(--buttons-upsell-primary-border-radius);
+  padding: var(--buttons-upsell-primary-padding);
+  min-height: var(--buttons-upsell-primary-min-height);
+  min-width: 72px;
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  font-weight:    var(--typography-rules-text1-font-weight, normal);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+  align-self: flex-end;
+}
+
+.optionCardOriginalPrice {
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  font-weight:    var(--typography-rules-text1-font-weight, normal);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+  color: var(--colors-text-secondary);
+  text-decoration: line-through;
+}
+
+.optionCardPrice {
+  font-family:    var(--typography-rules-text2-font-family);
+  font-size:      var(--typography-rules-text2-font-size);
+  line-height:    var(--typography-rules-text2-line-height);
+  font-weight:    var(--typography-rules-text2-font-weight, 600);
+  letter-spacing: var(--typography-rules-text2-letter-spacing, normal);
+  color: var(--colors-price-selling);
+}
+
+/* ── Detail step shared ───────────────────────────────────────────────────── */
+
+.productImageWrap {
+  padding: var(--spacing-sm) var(--spacing-sm) 0;
+  flex-shrink: 0;
+}
+
+@media (min-width: 768px) {
+  .productImageWrap {
+    padding: var(--spacing-md) var(--spacing-md) 0;
+  }
+}
+
+.productImageInner {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  border-radius: var(--radius-sm);
+  background-color: var(--product-image-background-blend);
+}
+
+.productImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  mix-blend-mode: multiply;
+}
+
+.dotsRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-xxs);
+  padding: var(--spacing-xs) 0 0;
+  flex-shrink: 0;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-full);
+  background: var(--border-color);
+}
+
+.dotActive {
+  background: var(--colors-text);
+}
+
+.detailBody {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  padding: var(--spacing-sm);
+}
+
+@media (min-width: 768px) {
+  .detailBody {
+    padding: var(--spacing-md);
+  }
+}
+
+.productName {
+  font-family:    var(--typography-rules-headline4-font-family);
+  font-size:      var(--typography-rules-headline4-font-size);
+  line-height:    var(--typography-rules-headline4-line-height);
+  font-weight:    var(--typography-rules-headline4-font-weight, normal);
+  letter-spacing: var(--typography-rules-headline4-letter-spacing, normal);
+  text-transform: var(--typography-rules-headline4-text-transform, none);
+  margin: 0;
+}
+
+.priceRow {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.originalPrice {
+  font-family:    var(--typography-rules-headline12-font-family);
+  font-size:      var(--typography-rules-headline12-font-size);
+  line-height:    var(--typography-rules-headline12-line-height);
+  font-weight:    var(--typography-rules-headline12-font-weight, normal);
+  letter-spacing: var(--typography-rules-headline12-letter-spacing, normal);
+  text-transform: var(--typography-rules-headline12-text-transform, none);
+  color: var(--colors-text-secondary);
+  text-decoration: line-through;
+}
+
+.sellingPrice {
+  font-family:    var(--typography-rules-headline12-font-family);
+  font-size:      var(--typography-rules-headline12-font-size);
+  line-height:    var(--typography-rules-headline12-line-height);
+  font-weight:    var(--typography-rules-headline12-font-weight, normal);
+  letter-spacing: var(--typography-rules-headline12-letter-spacing, normal);
+  text-transform: var(--typography-rules-headline12-text-transform, none);
+  color: var(--colors-price-selling);
+}
+
+.kitContents {
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  font-weight:    var(--typography-rules-text1-font-weight, normal);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+  color: var(--colors-text);
+  margin: 0;
+}
+
+/* ── Gift note ────────────────────────────────────────────────────────────── */
+
+.noteSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.noteRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-sm);
+}
+
+.noteLabel {
+  font-family:    var(--typography-rules-text2-font-family);
+  font-size:      var(--typography-rules-text2-font-size);
+  line-height:    var(--typography-rules-text2-line-height);
+  font-weight:    var(--typography-rules-text2-font-weight, 600);
+  letter-spacing: var(--typography-rules-text2-letter-spacing, normal);
+}
+
+.generateLink {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xxs);
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  font-weight:    var(--typography-rules-text1-font-weight, normal);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+  color: var(--colors-text);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: default;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.textareaWrapper {
+  position: relative;
+}
+
+.textarea {
+  width: 100%;
+  resize: vertical;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background: var(--form-field-background);
+  border: var(--border-width) solid var(--form-field-border-color);
+  border-radius: var(--form-field-border-radius);
+  color: var(--colors-text);
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  font-weight:    var(--typography-rules-text1-font-weight, normal);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+  box-sizing: border-box;
+  min-height: var(--field-min-height);
+}
+
+.textarea::placeholder {
+  color: var(--form-input-placeholder);
+}
+
+.textarea:hover {
+  border-color: var(--form-field-border-color-hover);
+}
+
+.textarea:focus {
+  outline: none;
+  border-color: var(--form-field-border-color-hover);
+}
+
+.counter {
+  display: block;
+  text-align: right;
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  color: var(--colors-text-secondary);
+  margin-top: var(--spacing-xxs);
+}
+
+/* ── Personalized step extras ─────────────────────────────────────────────── */
+
+.designGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--spacing-xs);
+  padding-top: var(--spacing-sm);
+}
+
+.designTile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-xxs);
+  cursor: pointer;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: var(--spacing-xxs);
+  transition: border-color var(--transition-fast);
+  background: none;
+}
+
+.designTile:hover {
+  border-color: var(--border-strong);
+}
+
+.designTileSelected {
+  border-color: var(--border-strong);
+}
+
+.designTileImageWrap {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  border-radius: var(--radius-xs, var(--radius-sm));
+  background-color: var(--product-image-background-blend);
+}
+
+.designTileImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  mix-blend-mode: multiply;
+}
+
+.designTilePlaceholder {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  background: var(--colors-surface-primary);
+  border-radius: var(--radius-xs, var(--radius-sm));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-xxs);
+  box-sizing: border-box;
+}
+
+.designTileLabel {
+  font-family:    var(--typography-rules-text2-font-family);
+  font-size:      var(--typography-rules-text2-font-size);
+  line-height:    var(--typography-rules-text2-line-height);
+  font-weight:    var(--typography-rules-text2-font-weight, 600);
+  letter-spacing: var(--typography-rules-text2-letter-spacing, normal);
+  text-align: center;
+  color: var(--colors-text);
+}
+
+.fieldLabel {
+  font-family:    var(--typography-rules-text2-font-family);
+  font-size:      var(--typography-rules-text2-font-size);
+  line-height:    var(--typography-rules-text2-line-height);
+  font-weight:    var(--typography-rules-text2-font-weight, 600);
+  letter-spacing: var(--typography-rules-text2-letter-spacing, normal);
+}
+
+.fieldWrap {
+  position: relative;
+}
+
+.input {
+  width: 100%;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background: var(--form-field-background);
+  border: var(--border-width) solid var(--form-field-border-color);
+  border-radius: var(--form-field-border-radius);
+  color: var(--colors-text);
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  font-weight:    var(--typography-rules-text1-font-weight, normal);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+  min-height: var(--field-min-height);
+  box-sizing: border-box;
+}
+
+.input::placeholder {
+  color: var(--form-input-placeholder);
+}
+
+.input:hover {
+  border-color: var(--form-field-border-color-hover);
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--form-field-border-color-hover);
+}
+
+.inputCounter {
+  display: block;
+  text-align: right;
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  color: var(--colors-text-secondary);
+  margin-top: var(--spacing-xxs);
+}
+
+/* ── Panel footer ─────────────────────────────────────────────────────────── */
+
+.panelFooter {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+  padding: var(--spacing-sm);
+  border-top: 1px solid var(--border-color);
+  min-height: calc(var(--spacing-sm) * 2 + var(--buttons-primary-min-height));
+}
+
+@media (min-width: 768px) {
+  .panelFooter {
+    padding: var(--spacing-lg);
+    min-height: calc(var(--spacing-lg) * 2 + var(--buttons-primary-min-height));
+  }
+}
+
+.cancelLink {
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  font-weight:    var(--typography-rules-text1-font-weight, normal);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+  color: var(--colors-text);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.addToBagBtn {
+  flex: 0 0 auto;
+}

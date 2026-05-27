@@ -74,3 +74,45 @@ export function themeKeyToBrand(themeKey: string): BrandKey {
 export function brandToThemeKey(brand: BrandKey): string {
   return BRAND_TO_THEME_KEY[brand]
 }
+
+// ── Gift packaging config ──────────────────────────────────────────────────────
+
+export interface DesignOption {
+  key: string
+  label: string
+  image: string | null
+}
+
+export interface GiftAssets {
+  classicGiftImage: string
+  personalizedGiftImage: string
+  designOptions: DesignOption[]
+}
+
+const TGR_MNN_DESIGN_OPTIONS: DesignOption[] = [
+  { key: 'birthday', label: 'Happy Birthday', image: 'https://cdn.theograce.com/digital-asset/product/personalized-gift-boxes-4.jpg' },
+  { key: 'made-with-love', label: 'Made with love', image: 'https://cdn.theograce.com/digital-asset/option-image/made-with-love-tgr-1.jpg' },
+  { key: 'you-are-amazing', label: 'You are amazing', image: 'https://cdn.theograce.com/digital-asset/option-image/you-are-amazing-tgr-1-1.jpg' },
+]
+
+const TGR_MNN_GIFT_ASSETS: GiftAssets = {
+  classicGiftImage: 'https://cdn.theograce.com/digital-asset/product/gift-box-21.jpg',
+  personalizedGiftImage: 'https://cdn.theograce.com/digital-asset/product/personalized-gift-boxes-4.jpg',
+  designOptions: TGR_MNN_DESIGN_OPTIONS,
+}
+
+export const BRAND_GIFT_CONFIG: Record<BrandKey, { mode: 'single' | 'multiple'; assets: GiftAssets | null }> = {
+  oal: { mode: 'single', assets: null },
+  tgr: { mode: 'multiple', assets: TGR_MNN_GIFT_ASSETS },
+  lal: { mode: 'single', assets: null },
+  ib:  { mode: 'single', assets: null },
+  mnn: { mode: 'multiple', assets: TGR_MNN_GIFT_ASSETS },
+}
+
+export function getGiftOptionsMode(brand: BrandKey): 'single' | 'multiple' {
+  return BRAND_GIFT_CONFIG[brand].mode
+}
+
+export function getBrandGiftAssets(brand: BrandKey): GiftAssets | null {
+  return BRAND_GIFT_CONFIG[brand].assets
+}

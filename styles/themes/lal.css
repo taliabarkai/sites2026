@@ -15,6 +15,8 @@
   --lal-mid-grey:    #989898;
   --lal-green:       #2b8b68;
   --lal-red:         #8e0000;
+  --lal-warning:     #f36641;
+  --lal-slate:       #808080;
 }
 
 /* ── Semantic tokens ──────────────────────────────────────────────────────── */
@@ -92,6 +94,29 @@
   /* Transitions */
   --transition-fast: 150ms ease;
   --transition-base: 250ms ease;
+
+  /* Status */
+  --colors-warning: var(--lal-warning);
+
+  /* Price */
+  --colors-price-selling: var(--lal-red);
+
+  /* Cards */
+  --colors-card-image-bg: var(--lal-white);
+  --product-image-background-blend: transparent;
+
+  /* Form field extras */
+  --form-field-border-color-hover: var(--lal-black);
+  --form-field-border-radius:      8px;
+
+  /* Ribbon variants */
+  --ribbon-border-radius:          var(--radius-sm);
+  --ribbon-bundle-background:      var(--lal-lime);
+  --ribbon-bundle-text:            var(--lal-black);
+  --ribbon-oos-background:         var(--lal-slate);
+  --ribbon-oos-text:               var(--lal-white);
+  --ribbon-secondary-background:   var(--lal-lime);
+  --ribbon-secondary-text:         var(--lal-black);
 
   /* Buttons */
   --buttons-primary-background:    var(--lal-black);

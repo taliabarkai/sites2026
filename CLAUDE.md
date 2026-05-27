@@ -142,6 +142,16 @@ Use only these variables in components. Never use primitive variables
 ### Status
 - `--colors-success`
 - `--colors-error`
+- `--colors-warning`
+
+### Price
+- `--colors-price-selling` — selling price text color (varies per brand — MNN/LAL use red)
+- Crossed-out price → use `--colors-text-secondary`
+- Discount badge bg → use `--colors-surface-primary`
+- Discount badge text → use `--colors-text`
+
+### Cards
+- `--colors-card-image-bg` — product image background per brand
 
 ### Buttons — full token set per variant
 Pattern: `--buttons-{variant}-{property}`
@@ -164,6 +174,8 @@ Properties per variant:
 ### Form fields
 - `--form-field-background`
 - `--form-field-border-color`
+- `--form-field-border-color-hover`
+- `--form-field-border-radius`
 - `--form-input-placeholder`
 - `--field-min-height`
 
@@ -179,8 +191,11 @@ Properties per variant:
 - `--layout-announcements-bar-text`
 
 ### Ribbon
-- `--ribbon-background`
-- `--ribbon-text`
+- `--ribbon-background` / `--ribbon-text` — default ribbon
+- `--ribbon-bundle-background` / `--ribbon-bundle-text`
+- `--ribbon-oos-background` / `--ribbon-oos-text`
+- `--ribbon-secondary-background` / `--ribbon-secondary-text`
+- `--ribbon-border-radius`
 
 ### Spacing — shared, never overridden per brand
 Defined in `globals.css` via `--spacing-base: 1.6rem` calc scale:

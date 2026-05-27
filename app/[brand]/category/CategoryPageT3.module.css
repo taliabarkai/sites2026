@@ -1,0 +1,261 @@
+/* ── Page shell ───────────────────────────────────────────────────────────── */
+.page {
+  background-color: var(--colors-background);
+  color: var(--colors-text);
+  font-family: var(--typography-rules-text1-font-family);
+  min-height: 100vh;
+}
+
+/* ── SEO / hero banner ────────────────────────────────────────────────────── */
+.hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xl) var(--layout-page-margin);
+  text-align: center;
+  background-color: var(--colors-background);
+}
+
+.heroTitle {
+  margin: 0;
+  font-family:    var(--typography-rules-headline2-font-family);
+  font-size:      var(--typography-rules-headline2-font-size);
+  line-height:    var(--typography-rules-headline2-line-height);
+  font-weight:    var(--typography-rules-headline2-font-weight, normal);
+  letter-spacing: var(--typography-rules-headline2-letter-spacing, normal);
+  text-transform: var(--typography-rules-headline2-text-transform, none);
+  color: var(--colors-text);
+}
+
+.heroDescription {
+  margin: 0;
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  font-weight:    var(--typography-rules-text1-font-weight, normal);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+  color: var(--colors-text);
+}
+
+/* ── Sticky filter bar ────────────────────────────────────────────────────── */
+.filterBar {
+  position: sticky;
+  top: 96px;
+  z-index: 1;
+  background: var(--colors-background);
+}
+
+.filterBarInner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+  padding: var(--spacing-lg) var(--layout-page-margin);
+  max-width: var(--layout-max-width);
+  margin: 0 auto;
+}
+
+.materialPills {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  flex-wrap: wrap;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xxs) var(--spacing-sm);
+  background: transparent;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-full);
+  color: var(--colors-text);
+  cursor: pointer;
+  transition: border-color var(--transition-fast);
+}
+
+.pillActive {
+  border-color: var(--border-strong);
+}
+
+.pillSwatch {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border-color);
+  flex-shrink: 0;
+}
+
+.pillLabel {
+  font-family:    var(--typography-rules-text5-font-family);
+  font-size:      var(--typography-rules-text5-font-size);
+  line-height:    var(--typography-rules-text5-line-height);
+  font-weight:    var(--typography-rules-text5-font-weight, normal);
+  letter-spacing: var(--typography-rules-text5-letter-spacing, normal);
+  color: var(--colors-text);
+}
+
+.filterRight {
+  display: flex;
+  flex-direction: row-reverse;
+  align-items: center;
+  gap: var(--spacing-md);
+  width: 100%;
+  justify-content: space-between;
+}
+
+.itemCount {
+  font-family:    var(--typography-rules-text5-font-family);
+  font-size:      var(--typography-rules-text5-font-size);
+  line-height:    var(--typography-rules-text5-line-height);
+  font-weight:    var(--typography-rules-text5-font-weight, normal);
+  letter-spacing: var(--typography-rules-text5-letter-spacing, normal);
+}
+
+.filtersTrigger {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: var(--colors-text);
+  font-family:    var(--typography-rules-text5-font-family);
+  font-size:      var(--typography-rules-text5-font-size);
+  line-height:    var(--typography-rules-text5-line-height);
+  font-weight:    var(--typography-rules-text5-font-weight, normal);
+  letter-spacing: var(--typography-rules-text5-letter-spacing, normal);
+}
+
+/* ── Products section ─────────────────────────────────────────────────────── */
+.productsSection {
+  padding: 0 var(--layout-page-margin) var(--spacing-lg);
+}
+
+/* ── Responsive — mobile filter bar tweaks ───────────────────────────────── */
+@media (max-width: 768px) {
+  .filterBarInner {
+    flex-wrap: wrap;
+    padding: var(--spacing-sm) var(--spacing-md);
+  }
+
+  .productsSection {
+    padding: var(--spacing-md);
+  }
+}
+
+/* ── T3: Rhythm grid — identical structure to T2 ─────────────────────────── */
+
+.productsGridT2 {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.rhythmGroup {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 4px;
+}
+
+/* ── T3: FeaturedCard — full-bleed image with overlaid product info ────────
+ *
+ * Differs from T2: the image fills the ENTIRE card area (no reserved space
+ * below). Swatches, name, and price are positioned absolutely at the bottom
+ * of the image with a gradient for readability.
+ */
+.featuredCard {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 1;
+  background-color: var(--colors-surface-primary);
+  cursor: pointer;
+}
+
+[data-theme="oal"] .featuredCard {
+  aspect-ratio: 4/5;
+}
+
+.featuredCardImage {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  transition: opacity var(--transition-base);
+}
+
+.featuredCardImageDefault { opacity: 1; }
+.featuredCardImageHover   { opacity: 0; }
+
+@media (min-width: 768px) {
+  .featuredCard:hover .featuredCardImageDefault { opacity: 0; }
+  .featuredCard:hover .featuredCardImageHover   { opacity: 1; }
+}
+
+/* Product info sits at the bottom of the image */
+.featuredCardInfo {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xl) 0 var(--spacing-lg);
+  /* Gradient fades from transparent into the page background colour so text
+     reads cleanly regardless of the image content at the bottom */
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    var(--colors-background) 55%
+  );
+}
+
+/* Group A: featured RIGHT on desktop → full-width row after the 4 cards on mobile */
+.featuredCardRight {
+  grid-column: 1 / -1;
+  order: 1;
+}
+
+/* Group C: featured LEFT on desktop → full-width row before the 4 cards on mobile */
+.featuredCardLeft {
+  grid-column: 1 / -1;
+  order: 0;
+}
+
+@media (min-width: 1440px) {
+  .productsGridT2 {
+    gap: 8px;
+  }
+
+  .rhythmGroup {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+  }
+
+  /* On desktop the card fills its entire 2-row grid allocation */
+  .featuredCard {
+    aspect-ratio: unset;
+  }
+
+  /* Group A: featured spans cols 3–4, rows 1–2 */
+  .featuredCardRight {
+    order: 0;
+    grid-column: 3 / 5;
+    grid-row: 1 / 3;
+  }
+
+  /* Group C: featured spans cols 1–2, rows 1–2 */
+  .featuredCardLeft {
+    order: 0;
+    grid-column: 1 / 3;
+    grid-row: 1 / 3;
+  }
+}

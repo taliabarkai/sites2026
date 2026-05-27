@@ -17,7 +17,9 @@
   --mnn-charcoal:   #1f1f1f;
   --mnn-green:      #2b8b68;
   --mnn-red:        #bc0000;
-  --mnn-dune-yellow: #E6C379; 
+  --mnn-dune-yellow: #E6C379;
+  --mnn-warning:    #ef7d60;
+  --mnn-forest:     #09391e;
 }
 
 /* ── Semantic tokens ──────────────────────────────────────────────────────── */
@@ -117,6 +119,29 @@
   --buttons-upsell-primary-border-radius: 4px;
   --buttons-upsell-primary-padding:       0.8rem 1.2rem;
   --buttons-upsell-primary-min-height:    4rem;
+
+  /* Status */
+  --colors-warning: var(--mnn-warning);
+
+  /* Price */
+  --colors-price-selling: var(--mnn-red);
+
+  /* Cards */
+  --colors-card-image-bg: var(--mnn-off-white);
+  --product-image-background-blend: var(--mnn-off-white);
+
+  /* Form field extras */
+  --form-field-border-color-hover: var(--mnn-black);
+  --form-field-border-radius:      4px;
+
+  /* Ribbon variants */
+  --ribbon-border-radius:          var(--radius-full);
+  --ribbon-bundle-background:      var(--mnn-forest);
+  --ribbon-bundle-text:            var(--mnn-white);
+  --ribbon-oos-background:         var(--mnn-mid-grey);
+  --ribbon-oos-text:               var(--mnn-white);
+  --ribbon-secondary-background:   var(--mnn-black);
+  --ribbon-secondary-text:         var(--mnn-white);
 
   /* Add-to-Cart — MNN diverges from brand-default colors:
      dune-yellow background with black text. */

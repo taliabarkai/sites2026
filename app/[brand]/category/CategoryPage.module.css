@@ -147,13 +147,6 @@
      values permitted in this file): 4px mobile, 8px desktop. */
   gap: 4px;
 }
-@media (min-width: 768px) {
-  .productsGrid {
-    grid-template-columns: repeat(3, 1fr); /* desktop: 3 columns */
-    gap: 8px;
-  }
-}
-
 @media (min-width: 1440px) {
   .productsGrid {
     grid-template-columns: repeat(4, 1fr); /* desktop: 4 columns */

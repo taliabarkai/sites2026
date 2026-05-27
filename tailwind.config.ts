@@ -39,9 +39,7 @@ const config: Config = {
         },
         status: {
           error: c.feedback.error[BRAND],
-          info: c.feedback.info[BRAND],
           success: c.feedback.success[BRAND],
-          warning: c.feedback.warning[BRAND],
         },
         border: {
           DEFAULT: c.input.border[BRAND],
@@ -106,7 +104,7 @@ const config: Config = {
         md: `${r.md[BRAND]}px`,
         lg: `${r.lg[BRAND]}px`,
         xl: `${r.xl[BRAND]}px`,
-        xxl: `${r.xxl[BRAND]}px`,
+        full: `${r.full[BRAND]}px`,
         button: `${r.button[BRAND]}px`,
         ribbon: `${r.ribbon[BRAND]}px`,
         input: `${r.input[BRAND]}px`,

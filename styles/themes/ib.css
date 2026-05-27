@@ -18,6 +18,9 @@
   --ib-off-white:   #f8f8f8;
   --ib-green:       #2b8b68;
   --ib-red:         #bc0000;
+  --ib-warning:     #f36641;
+  --ib-copper:      #a3754d;
+  --ib-slate:       #808080;
 }
 
 /* ── Semantic tokens ──────────────────────────────────────────────────────── */
@@ -94,6 +97,29 @@
   /* Transitions */
   --transition-fast: 150ms ease;
   --transition-base: 250ms ease;
+
+  /* Status */
+  --colors-warning: var(--ib-warning);
+
+  /* Price */
+  --colors-price-selling: var(--ib-navy);
+
+  /* Cards */
+  --colors-card-image-bg: var(--ib-light-stone);
+  --product-image-background-blend: var(--ib-light-stone);
+
+  /* Form field extras */
+  --form-field-border-color-hover: var(--ib-navy);
+  --form-field-border-radius:      4px;
+
+  /* Ribbon variants */
+  --ribbon-border-radius:          var(--radius-sm);
+  --ribbon-bundle-background:      var(--ib-copper);
+  --ribbon-bundle-text:            var(--ib-white);
+  --ribbon-oos-background:         var(--ib-slate);
+  --ribbon-oos-text:               var(--ib-white);
+  --ribbon-secondary-background:   var(--ib-olive);
+  --ribbon-secondary-text:         var(--ib-white);
 
   /* Buttons */
   --buttons-primary-background:    var(--ib-olive);

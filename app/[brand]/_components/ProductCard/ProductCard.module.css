@@ -16,8 +16,7 @@
   object-fit: cover;
   object-position: center;
   flex-shrink: 0;
-  background-color: var(--colors-surface-primary); /* placeholder while images load */
-
+  background-color: var(--product-image-background-blend);
 }
 
 [data-theme="oal"] .imageWrap {
@@ -31,6 +30,7 @@
   height: 100%;
   object-fit: cover;
   display: block;
+  mix-blend-mode: multiply;
   transition: opacity var(--transition-base);
 }
 

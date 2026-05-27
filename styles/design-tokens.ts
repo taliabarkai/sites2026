@@ -224,7 +224,7 @@ export const fonts = rawTokens.fonts
 
 /** Resolve a fontFamily key to the actual CSS font-family string (default brand: TGR) */
 export function resolveFontFamily(key: 'main' | 'secondary', brand: BrandKey = 'TGR'): string {
-  return fonts[key][brand]
+  return fonts[key][brand] ?? ''
 }
 
 // ─── Spacing ─────────────────────────────────────────────────────────────────
@@ -265,7 +265,7 @@ export interface BorderRadius {
   md: BrandTokenValue
   lg: BrandTokenValue
   xl: BrandTokenValue
-  xxl: BrandTokenValue
+  full: BrandTokenValue
   button: BrandTokenValue
   ribbon: BrandTokenValue
   input: BrandTokenValue

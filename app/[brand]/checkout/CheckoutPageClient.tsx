@@ -14,7 +14,9 @@ import type { CartItem } from '../_context/CartContext'
 import { Button } from '../_components/Button'
 import { Header } from '../_components/Header'
 import { GiftOptionsModal } from '../_components/FloatingCart/GiftOptionsModal'
-import { getBrandFromPathname } from '../_config/brands'
+import type { SavedGift } from '../_components/FloatingCart/GiftOptionsModal'
+import { GiftPackagingPanel } from '../_components/GiftPackagingPanel/GiftPackagingPanel'
+import { getBrandFromPathname, getGiftOptionsMode, getBrandGiftAssets } from '../_config/brands'
 import { prefixNavLinks, withBrandPrefix } from '../_config/brandPaths'
 import { DEFAULT_NAV_LINKS, DEFAULT_TOPLINE } from '../_config/siteContent'
 import styles from './CheckoutPage.module.css'
@@ -33,6 +35,7 @@ interface BrandIcons {
   TooltipIcon:   React.ComponentType<IconProps>
   LockIcon:      React.ComponentType<IconProps>
   CouponIcon:    React.ComponentType<IconProps>
+  XIcon:         React.ComponentType<IconProps>
 }
 
 const BRAND_ICONS: Record<string, BrandIcons> = {
@@ -76,75 +79,253 @@ const UPSELL_PRODUCTS: UpsellProduct[] = [
   },
 ]
 
+// ─── Step Breadcrumb ──────────────────────────────────────────────────────────
+
+interface StepBreadcrumbProps {
+  currentStep:    number
+  completedSteps: Set<number>
+  icons:          BrandIcons
+  onEditStep:     (step: number) => void
+}
+
+const BREADCRUMB_STEPS = [
+  { n: 1, label: 'Contact & Delivery' },
+  { n: 2, label: 'Shipping' },
+  { n: 3, label: 'Payment' },
+] as const
+
+function StepBreadcrumb({ currentStep, completedSteps, icons, onEditStep }: StepBreadcrumbProps) {
+  const { ChevronIcon } = icons
+
+  return (
+    <nav className={styles.stepBreadcrumb} aria-label="Checkout steps">
+      {BREADCRUMB_STEPS.map(({ n, label }, i) => {
+        const isActive    = n === currentStep
+        const isCompleted = completedSteps.has(n)
+
+        return (
+          <span key={n} className={styles.stepBreadcrumbItem}>
+            {i > 0 && (
+              <span className={styles.stepBreadcrumbSep} aria-hidden="true">
+                <ChevronIcon size={12} />
+              </span>
+            )}
+            {isCompleted ? (
+              <button
+                type="button"
+                className={`${styles.stepBreadcrumbLabel} ${styles.stepBreadcrumbCompleted}`}
+                onClick={() => onEditStep(n)}
+                aria-label={`${label}, completed — click to edit`}
+              >
+                {label}
+              </button>
+            ) : (
+              <span
+                className={`${styles.stepBreadcrumbLabel} ${isActive ? styles.stepBreadcrumbActive : styles.stepBreadcrumbLocked}`}
+                aria-current={isActive ? 'step' : undefined}
+              >
+                {label}
+              </span>
+            )}
+          </span>
+        )
+      })}
+    </nav>
+  )
+}
+
+// ─── Accordion Step ───────────────────────────────────────────────────────────
+
+interface AccordionStepProps {
+  title:            string
+  isActive:         boolean
+  isCompleted:      boolean
+  completedSummary?: React.ReactNode
+  onEdit:           () => void
+  children:         React.ReactNode
+}
+
+function AccordionStep({ title, isActive, isCompleted, completedSummary, onEdit, children }: AccordionStepProps) {
+  if (!isActive && !isCompleted) return null
+
+  if (isCompleted && !isActive) {
+    return (
+      <div className={styles.accordionStep}>
+        <div className={styles.accordionCompletedCard}>
+          <div className={styles.accordionCompletedHeader}>
+            <h2 className={styles.accordionCompletedTitle}>{title}</h2>
+            <button type="button" className={styles.accordionEditBtn} onClick={onEdit}>Edit</button>
+          </div>
+          {completedSummary && (
+            <div className={styles.accordionCompletedDetails}>{completedSummary}</div>
+          )}
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className={styles.accordionStep}>
+      <div className={styles.accordionHeader}>
+        <h2 className={styles.accordionTitle}>{title}</h2>
+      </div>
+
+      {isActive && (
+        <div className={styles.accordionBody}>
+          {children}
+        </div>
+      )}
+    </div>
+  )
+}
+
 // ─── Checkout Item Row ────────────────────────────────────────────────────────
 
 interface CheckoutItemRowProps {
-  item:  CartItem
-  icons: BrandIcons
+  item:               CartItem
+  brand:              string
+  icons:              BrandIcons
+  onOpenGiftPanel:    (itemId: string) => void
+  onOpenGiftModal:    (itemId: string) => void
+  savedGifts:         Record<string, SavedGift>
+  onRemoveSavedGift:  (itemId: string) => void
 }
 
-function CheckoutItemRow({ item, icons }: CheckoutItemRowProps) {
+function CheckoutItemRow({ item, brand, icons, onOpenGiftPanel, onOpenGiftModal, savedGifts, onRemoveSavedGift }: CheckoutItemRowProps) {
   const [detailsOpen, setDetailsOpen] = useState(false)
-  const [giftModalOpen, setGiftModalOpen] = useState(false)
   const hasOptions = item.selectedOptions && item.selectedOptions.length > 0
-  const { ChevronIcon, GiftIcon, PlusMinusIcon } = icons
-
-  const handleGenerateGiftNote = async () => ''
+  const { ChevronIcon, GiftIcon, PlusMinusIcon, CheckmarkIcon } = icons
+  const { updateGiftPackaging } = useCart()
+  const isMultiple = getGiftOptionsMode(brand as Parameters<typeof getGiftOptionsMode>[0]) === 'multiple'
+  const giftAssets = isMultiple ? getBrandGiftAssets(brand as Parameters<typeof getBrandGiftAssets>[0]) : null
+  const savedGift  = savedGifts[item.id]
 
   return (
     <article className={styles.checkoutItem}>
-      {giftModalOpen && (
-        <GiftOptionsModal
-          onClose={() => setGiftModalOpen(false)}
-          onAddToCart={() => setGiftModalOpen(false)}
-          onGenerateGiftNote={handleGenerateGiftNote}
-        />
-      )}
-      <div className={styles.itemImageWrap}>
-        <img src={item.image} alt={item.name} className={styles.itemImage} />
-      </div>
-      <div className={styles.itemContent}>
-        <p className={styles.itemName}>{item.name}</p>
-        <div className={styles.itemPrices}>
-          {item.originalPrice && (
-            <span className={styles.priceOriginal}>{formatPrice(item.originalPrice)}</span>
-          )}
-          <span className={styles.priceSelling}>{formatPrice(item.price)}</span>
+      <p className={styles.deliveryGuarantee}>Guaranteed to arrive by Christmas</p>
+      <div className={styles.checkoutItemRow}>
+        <div className={styles.itemImageWrap}>
+          <img src={item.image} alt={item.name} className={styles.itemImage} />
         </div>
+        <div className={styles.itemContent}>
+          <div className={styles.itemInfoGroup}>
+            <p className={styles.itemName}>{item.name}</p>
+            <div className={styles.itemPrices}>
+              {item.originalPrice && (
+                <span className={styles.priceOriginal}>{formatPrice(item.originalPrice)}</span>
+              )}
+              <span className={styles.priceSelling}>{formatPrice(item.price)}</span>
+            </div>
 
-        {hasOptions && (
-          <button
-            type="button"
-            className={styles.viewDetailsToggle}
-            onClick={() => setDetailsOpen(prev => !prev)}
-            aria-expanded={detailsOpen}
-          >
-            View Details
-            <span className={detailsOpen ? styles.chevronOpen : styles.chevronClosed} aria-hidden="true">
-              <ChevronIcon size={16} />
-            </span>
-          </button>
-        )}
+            {hasOptions && (
+              <button
+                type="button"
+                className={styles.viewDetailsToggle}
+                onClick={() => setDetailsOpen(prev => !prev)}
+                aria-expanded={detailsOpen}
+              >
+                View Details
+                <span className={detailsOpen ? styles.chevronOpen : styles.chevronClosed} aria-hidden="true">
+                  <ChevronIcon size={16} />
+                </span>
+              </button>
+            )}
 
-        {detailsOpen && hasOptions && (
-          <dl className={styles.optionsGrid}>
-            {item.selectedOptions!.map(({ label, value }) => (
-              <div key={label} className={styles.optionRow}>
-                <dt className={styles.optionLabel}>{label}:</dt>
-                <dd className={styles.optionValue}>{value}</dd>
+            {detailsOpen && hasOptions && (
+              <dl className={styles.optionsGrid}>
+                {item.selectedOptions!.map(({ label, value }) => (
+                  <div key={label} className={styles.optionRow}>
+                    <dt className={styles.optionLabel}>{label}:</dt>
+                    <dd className={styles.optionValue}>{value}</dd>
+                  </div>
+                ))}
+              </dl>
+            )}
+          </div>
+
+          <div className={styles.itemGiftGroup}>
+        {/* Single-mode gift area */}
+        {!isMultiple && (
+          savedGift ? (
+            <div className={styles.giftSaved}>
+              <div className={styles.giftSavedRow}>
+                <div className={styles.giftSavedImageWrap}>
+                  <img src={savedGift.image} alt="Gift packaging" className={styles.giftSavedImage} />
+                </div>
+                <div className={styles.giftSavedBody}>
+                  <div className={styles.giftSavedNameRow}>
+                    <span className={styles.giftSavedName}>{savedGift.name}</span>
+                    <span className={styles.giftSavedPrice}>{savedGift.price}</span>
+                  </div>
+                  <div className={styles.giftConfiguredActions}>
+                    <button type="button" className={styles.giftConfiguredEdit} onClick={() => onOpenGiftModal(item.id)}>Edit</button>
+                    <span className={styles.giftActionsDivider} aria-hidden="true" />
+                    <button type="button" className={styles.giftConfiguredEdit} onClick={() => onRemoveSavedGift(item.id)}>Remove</button>
+                  </div>
+                </div>
               </div>
-            ))}
-          </dl>
+            </div>
+          ) : (
+            <Button
+              variant="upsell-primary"
+              leadingIcon={<GiftIcon size={24} />}
+              trailingIcon={<PlusMinusIcon size={24} />}
+              onClick={() => onOpenGiftModal(item.id)}
+            >
+              Add Gift Packaging
+            </Button>
+          )
         )}
 
-        <Button
-          variant="upsell-primary"
-          leadingIcon={<GiftIcon size={24} />}
-          trailingIcon={<PlusMinusIcon size={24} />}
-          onClick={() => setGiftModalOpen(true)}
-        >
-          Add Gift Packaging
-        </Button>
+        {/* Multi-mode gift area */}
+        {isMultiple && (
+          item.giftPackaging ? (
+            <div className={styles.giftSaved}>
+              <div className={styles.giftSavedRow}>
+                <div className={styles.giftSavedImageWrap}>
+                  <img
+                    src={
+                      item.giftPackaging.type === 'classic'
+                        ? giftAssets!.classicGiftImage
+                        : (giftAssets?.designOptions.find(d => d.key === item.giftPackaging!.selectedDesign)?.image ?? giftAssets!.personalizedGiftImage)
+                    }
+                    alt="Gift packaging"
+                    className={styles.giftSavedImage}
+                  />
+                </div>
+                <div className={styles.giftSavedBody}>
+                  <div className={styles.giftSavedNameRow}>
+                    <span className={styles.giftSavedName}>
+                      {item.giftPackaging.type === 'classic'
+                        ? 'Classic Gift Set'
+                        : `Personalized Gift Box${item.giftPackaging.selectedDesign
+                            ? ` · ${giftAssets?.designOptions.find(d => d.key === item.giftPackaging!.selectedDesign)?.label ?? item.giftPackaging.selectedDesign}`
+                            : ''}${item.giftPackaging.recipientName ? ` · ${item.giftPackaging.recipientName}` : ''}`
+                      }
+                    </span>
+                    <span className={styles.giftSavedPrice}>{formatPrice(item.giftPackaging.price)}</span>
+                  </div>
+                  <div className={styles.giftConfiguredActions}>
+                    <button type="button" className={styles.giftConfiguredEdit} onClick={() => onOpenGiftPanel(item.id)}>Edit</button>
+                    <span className={styles.giftActionsDivider} aria-hidden="true" />
+                    <button type="button" className={styles.giftConfiguredEdit} onClick={() => updateGiftPackaging(item.id, undefined)}>Remove</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <Button
+              variant="upsell-primary"
+              leadingIcon={<GiftIcon size={24} />}
+              trailingIcon={<PlusMinusIcon size={24} />}
+              onClick={() => onOpenGiftPanel(item.id)}
+            >
+              Add Gift Packaging
+            </Button>
+          )
+        )}
+          </div>{/* end itemGiftGroup */}
+        </div>{/* end itemContent */}
       </div>
     </article>
   )
@@ -178,7 +359,7 @@ function UpsellCard({ product, icons }: { product: UpsellProduct; icons: BrandIc
 
 // ─── You May Also Like ────────────────────────────────────────────────────────
 
-function YouMayAlsoLike({ icons }: { icons: BrandIcons }) {
+function _YouMayAlsoLike({ icons }: { icons: BrandIcons }) {
   return (
     <section className={styles.upsellSection} aria-labelledby="upsell-heading">
       <h2 id="upsell-heading" className={styles.sectionTitle}>You May Also Like</h2>
@@ -194,124 +375,160 @@ function YouMayAlsoLike({ icons }: { icons: BrandIcons }) {
 // ─── Order Summary ────────────────────────────────────────────────────────────
 
 interface OrderSummaryProps {
-  items:           CartItem[]
-  subtotal:        number
-  selectedShipping: 'free' | 'standard'
-  icons:           BrandIcons
-  collapsible?:    boolean
+  items:             CartItem[]
+  icons:             BrandIcons
+  brand:             string
+  onOpenGiftPanel:   (itemId: string) => void
+  onOpenGiftModal:   (itemId: string) => void
+  savedGifts:        Record<string, SavedGift>
+  onRemoveSavedGift: (itemId: string) => void
+  showDetails?:      boolean
+  subtotal?:         number
+  selectedShipping?: 'free' | 'standard'
+  hideHeader?:       boolean
+  hideBenefits?:     boolean
 }
 
-function OrderSummary({ items, subtotal, selectedShipping, icons, collapsible }: OrderSummaryProps) {
-  const [open, setOpen] = useState(!collapsible)
-  const [promoVisible, setPromoVisible] = useState(true)
-  const [promoCode, setPromoCode] = useState('')
-  const { ChevronIcon, ShippingIcon, ReturnIcon, WarrantyIcon, CouponIcon } = icons
+function OrderSummary({ items, icons, brand, onOpenGiftPanel, onOpenGiftModal, savedGifts, onRemoveSavedGift, showDetails, subtotal = 0, selectedShipping = 'free', hideHeader, hideBenefits }: OrderSummaryProps) {
+  const [promoCode,    setPromoCode]    = useState('')
+  const [promoApplied, setPromoApplied] = useState(false)
+  const [appliedCode,  setAppliedCode]  = useState('')
 
-  const shippingCost = selectedShipping === 'standard' ? 500 : 0
-  const orderTotal = subtotal + shippingCost
+  const { ShippingIcon, ReturnIcon, WarrantyIcon, CouponIcon, XIcon } = icons
+  const shippingCost   = selectedShipping === 'standard' ? 500 : 0
+  const discountAmount = promoApplied ? Math.round(subtotal * 0.20) : 0
+  const orderTotal     = subtotal + shippingCost - discountAmount
+
+  const handleApplyPromo = () => {
+    if (promoCode.trim()) {
+      setAppliedCode(promoCode.trim().toUpperCase())
+      setPromoApplied(true)
+    }
+  }
+
+  const handleRemovePromo = () => {
+    setPromoApplied(false)
+    setAppliedCode('')
+    setPromoCode('')
+  }
 
   return (
     <section className={styles.orderSummary} aria-labelledby="summary-heading">
-      {/* Header */}
-      <div
-        className={collapsible ? styles.summaryHeaderCollapsible : styles.summaryHeader}
-        onClick={collapsible ? () => setOpen(prev => !prev) : undefined}
-        role={collapsible ? 'button' : undefined}
-        aria-expanded={collapsible ? open : undefined}
-        tabIndex={collapsible ? 0 : undefined}
-        onKeyDown={collapsible ? (e) => { if (e.key === 'Enter' || e.key === ' ') setOpen(prev => !prev) } : undefined}
-      >
-        <div className={styles.summaryTitleRow}>
-          <h2 id="summary-heading" className={styles.summaryTitle}>
-            Order Summary
-            {collapsible && (
-              <span className={open ? styles.chevronOpen : styles.chevronClosed} aria-hidden="true">
-                <ChevronIcon size={16} />
-              </span>
-            )}
-          </h2>
-        </div>
-        <span className={styles.itemCount}>
-          {items.length} {items.length === 1 ? 'item' : 'items'}
-        </span>
-      </div>
-
-      {/* Cart items — collapsed when collapsible and closed */}
-      {open && (
-        <div className={styles.summaryItems}>
-          {items.map(item => (
-            <CheckoutItemRow key={item.id} item={item} icons={icons} />
-          ))}
+      {!hideHeader && (
+        <div className={styles.summaryHeader}>
+          <h2 id="summary-heading" className={styles.summaryTitle}>Order Summary</h2>
+          <span className={styles.itemCount}>{items.length} {items.length === 1 ? 'item' : 'items'}</span>
         </div>
       )}
 
-      {/* Promo code — below summary items */}
-      <div className={styles.promoRow}>
-        <span className={styles.promoQuestion}>
-          <CouponIcon size={16} />
-          Have a promo code?
-        </span>
-        {promoVisible && (
-          <div className={styles.storeCreditRow}>
-            <div className={styles.storeCreditInput}>
-              <input
-                type="text"
-                placeholder="Promo code"
-                value={promoCode}
-                onChange={e => setPromoCode(e.target.value)}
-                className={styles.input}
-                aria-label="Promo code"
-              />
-            </div>
-            <Button variant="primary" className={styles.applyButton}>
-              Apply
-            </Button>
+      <div className={styles.summaryItems}>
+        {items.map(item => (
+          <CheckoutItemRow
+            key={item.id}
+            item={item}
+            brand={brand}
+            icons={icons}
+            onOpenGiftPanel={onOpenGiftPanel}
+            onOpenGiftModal={onOpenGiftModal}
+            savedGifts={savedGifts}
+            onRemoveSavedGift={onRemoveSavedGift}
+          />
+        ))}
+      </div>
+
+      {showDetails && (
+        <>
+          <div className={styles.promoRow}>
+            <span className={styles.promoQuestion}>
+              <CouponIcon size={16} />
+              Have a promo code?
+            </span>
+            {promoApplied ? (
+              <div className={styles.promoAppliedWrap}>
+                <div className={styles.appliedPromoBox}>
+                  <span className={styles.appliedPromoIcon}><CouponIcon size={16} /></span>
+                  <span className={styles.appliedPromoCode}>{appliedCode}</span>
+                  <button type="button" className={styles.removePromoBtn} onClick={handleRemovePromo} aria-label="Remove promo code">
+                    <XIcon size={16} />
+                  </button>
+                </div>
+                <p className={styles.promoSuccessMsg}>You saved 20% with this coupon.</p>
+              </div>
+            ) : (
+              <div className={styles.storeCreditRow}>
+                <div className={styles.storeCreditInput}>
+                  <input
+                    type="text"
+                    placeholder="Promo code"
+                    value={promoCode}
+                    onChange={e => setPromoCode(e.target.value)}
+                    onKeyDown={e => e.key === 'Enter' && handleApplyPromo()}
+                    className={styles.input}
+                    aria-label="Promo code"
+                  />
+                </div>
+                <Button variant="primary" className={styles.applyButton} onClick={handleApplyPromo}>Apply</Button>
+              </div>
+            )}
           </div>
-        )}
-      </div>
 
-      {/* Totals — always visible */}
-      <div className={styles.totalsRows}>
-        <div className={styles.totalRow}>
-          <span className={styles.totalLabel}>Subtotal:</span>
-          <span className={styles.totalValue}>{formatPrice(subtotal)}</span>
-        </div>
-        <div className={styles.totalRow}>
-          <span className={styles.totalLabel}>Shipping:</span>
-          <span className={styles.totalValue}>
-            {selectedShipping === 'free' ? 'Free' : formatPrice(shippingCost)}
-          </span>
-        </div>
-        <div className={styles.totalRow}>
-          <span className={styles.totalLabel}>Tax:</span>
-          <span className={styles.totalValueMuted}>Not calculated</span>
-        </div>
-      </div>
+          <div className={styles.totalsRows}>
+            <div className={styles.totalRow}>
+              <span className={styles.totalLabel}>Subtotal:</span>
+              <span className={styles.totalValue}>{formatPrice(subtotal)}</span>
+            </div>
+            <div className={styles.totalRow}>
+              <span className={styles.totalLabel}>Shipping:</span>
+              <span className={styles.totalValue}>
+                {selectedShipping === 'free' ? 'Free' : formatPrice(shippingCost)}
+              </span>
+            </div>
+            {promoApplied && (
+              <div className={styles.totalRow}>
+                <span className={styles.totalLabel}>Promotional Discounts:</span>
+                <span className={styles.promoDiscountValue}>
+                  <CouponIcon size={14} />
+                  -{formatPrice(discountAmount)}
+                </span>
+              </div>
+            )}
+            <div className={styles.totalRow}>
+              <span className={styles.totalLabel}>Tax:</span>
+              <span className={styles.totalValueMuted}>Not calculated</span>
+            </div>
+          </div>
 
-      <div className={styles.summaryDivider} />
+          <div className={styles.summaryDivider} />
 
-      <div className={styles.orderTotalRow}>
-        <span className={styles.orderTotalLabel}>Order Total:</span>
-        <span className={styles.orderTotalValue}>{formatPrice(orderTotal)}</span>
-      </div>
+          <div className={styles.orderTotalRow}>
+            <span className={styles.orderTotalLabel}>Order Total:</span>
+            <span className={styles.orderTotalValue}>{formatPrice(orderTotal)}</span>
+          </div>
+          {promoApplied && (
+            <p className={styles.savingsNote}>You're saving {formatPrice(discountAmount)} on this order!</p>
+          )}
 
-      <div className={styles.summaryDivider} />
-
-      {/* Benefits — always visible */}
-      <ul className={styles.benefits}>
-        <li className={styles.benefit}>
-          <span className={styles.benefitIcon}><ShippingIcon size={24} /></span>
-          <span>Free shipping on all orders</span>
-        </li>
-        <li className={styles.benefit}>
-          <span className={styles.benefitIcon}><ReturnIcon size={24} /></span>
-          <span>60-day extended returns</span>
-        </li>
-        <li className={styles.benefit}>
-          <span className={styles.benefitIcon}><WarrantyIcon size={24} /></span>
-          <span>2-year warranty</span>
-        </li>
-      </ul>
+          {!hideBenefits && (
+            <>
+              <div className={styles.summaryDivider} />
+              <ul className={styles.benefits}>
+                <li className={styles.benefit}>
+                  <span className={styles.benefitIcon}><ShippingIcon size={24} /></span>
+                  <span>Free shipping on all orders</span>
+                </li>
+                <li className={styles.benefit}>
+                  <span className={styles.benefitIcon}><ReturnIcon size={24} /></span>
+                  <span>60-day extended returns</span>
+                </li>
+                <li className={styles.benefit}>
+                  <span className={styles.benefitIcon}><WarrantyIcon size={24} /></span>
+                  <span>2-year warranty</span>
+                </li>
+              </ul>
+            </>
+          )}
+        </>
+      )}
     </section>
   )
 }
@@ -320,56 +537,221 @@ function OrderSummary({ items, subtotal, selectedShipping, icons, collapsible }:
 
 function CheckoutPageInner() {
   const pathname = usePathname()
-  const brand = getBrandFromPathname(pathname)
-  const icons = BRAND_ICONS[brand]
+  const brand    = getBrandFromPathname(pathname)
+  const icons    = BRAND_ICONS[brand]
   const navLinks = prefixNavLinks(brand, DEFAULT_NAV_LINKS)
-  const topline = {
+  const topline  = {
     ...DEFAULT_TOPLINE,
     helpHref:  withBrandPrefix(brand, DEFAULT_TOPLINE.helpHref),
     trackHref: withBrandPrefix(brand, DEFAULT_TOPLINE.trackHref),
   }
 
-  const { items, subtotal } = useCart()
+  const { items, subtotal, updateGiftPackaging } = useCart()
 
-  // Contact section state
-  const [email, setEmail] = useState('')
-  const [emailOptIn, setEmailOptIn] = useState(false)
+  // ── Step state machine ──────────────────────────────────────────────────────
+  const [currentStep,    setCurrentStep]    = useState<1 | 2 | 3>(1)
+  const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set())
 
-  // Deliver to state
-  const [country, setCountry] = useState('')
-  const [firstName, setFirstName] = useState('')
-  const [lastName, setLastName] = useState('')
+  const isActive    = (s: number) => s === currentStep
+  const isCompleted = (s: number) => completedSteps.has(s)
+
+  const editStep = (step: number) => setCurrentStep(step as 1 | 2 | 3)
+
+  const completeStep = (step: number) => {
+    setCompletedSteps(prev => new Set([...prev, step]))
+    if (step < 3) setCurrentStep((step + 1) as 1 | 2 | 3)
+  }
+
+  // ── Mobile summary sheet ────────────────────────────────────────────────────
+  const [mobileSummaryOpen, setMobileSummaryOpen] = useState(false)
+
+  // ── Gift panel / modal — page level ────────────────────────────────────────
+  const [giftPanelItemId, setGiftPanelItemId] = useState<string | null>(null)
+  const [giftModalItemId, setGiftModalItemId] = useState<string | null>(null)
+  const [savedGifts,      setSavedGifts]      = useState<Record<string, SavedGift>>({})
+
+  const handleSaveGift = (itemId: string, gift: SavedGift) => {
+    setSavedGifts(prev => ({ ...prev, [itemId]: gift }))
+    setGiftModalItemId(null)
+  }
+  const handleRemoveSavedGift = (itemId: string) => {
+    setSavedGifts(prev => { const n = { ...prev }; delete n[itemId]; return n })
+  }
+  const handleGenerateGiftNote = async () => ''
+
+  const giftPanelItem = giftPanelItemId ? items.find(i => i.id === giftPanelItemId) : null
+
+  // ── Form state ──────────────────────────────────────────────────────────────
+
+  // Contact
+  const [email,      setEmail]      = useState('')
+  const [emailOptIn, setEmailOptIn] = useState(true)
+
+  // Delivery
+  const [country,       setCountry]       = useState('')
+  const [firstName,     setFirstName]     = useState('')
+  const [lastName,      setLastName]      = useState('')
   const [streetAddress, setStreetAddress] = useState('')
-  const [aptSuite, setAptSuite] = useState('')
-  const [city, setCity] = useState('')
-  const [state, setState] = useState('')
-  const [zipCode, setZipCode] = useState('')
-  const [phone, setPhone] = useState('')
-  const [billingSameAsShipping, setBillingSameAsShipping] = useState(true)
+  const [aptSuite,      setAptSuite]      = useState('')
+  const [city,          setCity]          = useState('')
+  const [addrState,     setAddrState]     = useState('')
+  const [zipCode,       setZipCode]       = useState('')
+  const [phone,         setPhone]         = useState('')
 
-  // Billing address state (shown when billingSameAsShipping is false)
-  const [billingFirstName, setBillingFirstName] = useState('')
-  const [billingLastName, setBillingLastName] = useState('')
-  const [billingStreetAddress, setBillingStreetAddress] = useState('')
-  const [billingAptSuite, setBillingAptSuite] = useState('')
-  const [billingCity, setBillingCity] = useState('')
-  const [billingState, setBillingState] = useState('')
-  const [billingZipCode, setBillingZipCode] = useState('')
-
-  // Shipping method state
+  // Shipping
   const [selectedShipping, setSelectedShipping] = useState<'free' | 'standard'>('free')
 
-  // Payment state
-  const [applyStoreCredit, setApplyStoreCredit] = useState(false)
-  const [storeCreditCode, setStoreCreditCode] = useState('')
-  const [paymentMethod, setPaymentMethod] = useState<'credit-card' | 'paypal' | 'applepay'>('credit-card')
+  // Payment
+  const [billingSameAsShipping, setBillingSameAsShipping] = useState(true)
+  const [billingFirstName,      setBillingFirstName]      = useState('')
+  const [billingLastName,       setBillingLastName]       = useState('')
+  const [billingStreetAddress,  setBillingStreetAddress]  = useState('')
+  const [billingAptSuite,       setBillingAptSuite]       = useState('')
+  const [billingCity,           setBillingCity]           = useState('')
+  const [billingState,          setBillingState]          = useState('')
+  const [billingZipCode,        setBillingZipCode]        = useState('')
+  const [applyStoreCredit,      setApplyStoreCredit]      = useState(false)
+  const [storeCreditCode,       setStoreCreditCode]       = useState('')
+  const [paymentMethod,    setPaymentMethod]    = useState<'credit-card' | 'paypal' | 'applepay'>('credit-card')
+  const [promoCode,        setPromoCode]        = useState('')
+  const [promoApplied,     setPromoApplied]     = useState(false)
+  const [appliedPromoCode, setAppliedPromoCode] = useState('')
 
-  const { DropdownIcon, TooltipIcon, CheckmarkIcon, LockIcon } = icons
+  const { DropdownIcon, TooltipIcon, CheckmarkIcon, LockIcon, XIcon, CouponIcon, ShippingIcon, ReturnIcon, WarrantyIcon } = icons
+
+  const handleApplyMobilePromo = () => {
+    if (promoCode.trim()) {
+      setAppliedPromoCode(promoCode.trim().toUpperCase())
+      setPromoApplied(true)
+    }
+  }
+
+  const handleRemoveMobilePromo = () => {
+    setPromoApplied(false)
+    setAppliedPromoCode('')
+    setPromoCode('')
+  }
+
+  // ── Derived ─────────────────────────────────────────────────────────────────
+  const shippingCost   = selectedShipping === 'standard' ? 500 : 0
+  const discountAmount = promoApplied ? Math.round(subtotal * 0.20) : 0
+  const orderTotal     = subtotal + shippingCost - discountAmount
+
+  const step1Valid = email.trim() !== '' && firstName.trim() !== '' && lastName.trim() !== ''
+    && streetAddress.trim() !== '' && city.trim() !== '' && addrState.trim() !== '' && zipCode.trim() !== ''
+
+  const step1Summary = (
+    <div className={styles.completedGroup}>
+      <div className={styles.completedSection}>
+        <span className={styles.completedLabel}>Contact</span>
+        <span className={styles.completedValue}>{email}</span>
+      </div>
+      <div className={styles.completedSection}>
+        <span className={styles.completedLabel}>Deliver to</span>
+        <span className={styles.completedValue}>{country}</span>
+        <span className={styles.completedValue}>{firstName} {lastName}</span>
+        <span className={styles.completedValue}>{streetAddress}{aptSuite ? `, ${aptSuite}` : ''}</span>
+        <span className={styles.completedValue}>{city}, {addrState} {zipCode}</span>
+        <span className={styles.completedValue}>{phone}</span>
+      </div>
+    </div>
+  )
+  const step2Summary = (
+    <div className={styles.completedGroup}>
+      <div className={styles.completedSection}>
+        <div className={styles.completedLabelRow}>
+          <span className={styles.completedLabel}>
+            {selectedShipping === 'free' ? 'Free Shipping' : 'Standard Shipping'}
+          </span>
+          <span className={styles.completedLabel}>
+            {selectedShipping === 'free' ? 'FREE' : formatPrice(shippingCost)}
+          </span>
+        </div>
+        <span className={styles.completedValue}>
+          {selectedShipping === 'free' ? 'Arrives 6-8 business days after production time' : 'Arrives 4-6 business days after production time'}
+        </span>
+      </div>
+    </div>
+  )
+  const step3Summary = (
+    <div className={styles.completedGroup}>
+      <div className={styles.completedSection}>
+        <span className={styles.completedLabel}>Payment method</span>
+        <span className={styles.completedValue}>
+          {paymentMethod === 'credit-card' ? 'Credit Card' : paymentMethod === 'paypal' ? 'PayPal' : 'Apple Pay'}
+        </span>
+      </div>
+    </div>
+  )
+
+  const summaryProps = {
+    items, icons, brand,
+    onOpenGiftPanel: setGiftPanelItemId,
+    onOpenGiftModal: setGiftModalItemId,
+    savedGifts,
+    onRemoveSavedGift: handleRemoveSavedGift,
+  }
 
   return (
     <div className={styles.page}>
+      <div className={styles.checkoutHeaderWrap}>
+        <Header variant="white" brand={brand} navLinks={navLinks} topline={topline} />
+      </div>
 
-      <Header variant="white" brand={brand} navLinks={navLinks} topline={topline} />
+      {/* Mobile sticky order summary bar — top, below header */}
+      <div className={styles.mobileSummaryTopBar} onClick={() => setMobileSummaryOpen(true)} role="button" tabIndex={0} aria-label="View order summary" onKeyDown={e => e.key === 'Enter' && setMobileSummaryOpen(true)}>
+        <div className={styles.mobileSummaryTopBarInner}>
+          <div className={styles.mobileSummaryTopBarLeft}>
+            <span className={styles.mobileSummaryTopBarTitle}>Order Summary</span>
+            <span className={styles.mobileSummaryTopBarCount}>{items.length} {items.length === 1 ? 'item' : 'items'}</span>
+          </div>
+          <div className={styles.mobileSummaryTopBarRight}>
+            <span className={styles.mobileSummaryTopBarPrice}>{formatPrice(orderTotal)}</span>
+            <span className={`${styles.mobileSummaryTopBarChevron} ${mobileSummaryOpen ? styles.mobileSummaryTopBarChevronOpen : ''}`}>
+              <DropdownIcon size={24} />
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Gift panel — page level portal */}
+      {giftPanelItemId && giftPanelItem && (
+        <GiftPackagingPanel
+          onClose={() => setGiftPanelItemId(null)}
+          onAddToCart={(gift) => { updateGiftPackaging(giftPanelItemId, gift); setGiftPanelItemId(null) }}
+          initialGift={giftPanelItem.giftPackaging}
+          productName={giftPanelItem.name}
+        />
+      )}
+
+      {/* Gift modal — page level */}
+      {giftModalItemId && (
+        <GiftOptionsModal
+          onClose={() => setGiftModalItemId(null)}
+          onAddToCart={(gift) => handleSaveGift(giftModalItemId, gift)}
+          onGenerateGiftNote={handleGenerateGiftNote}
+        />
+      )}
+
+      {/* Mobile summary backdrop */}
+      <div
+        className={`${styles.mobileSummaryOverlay} ${mobileSummaryOpen ? styles.mobileSummaryOverlayVisible : ''}`}
+        aria-hidden="true"
+        onClick={() => setMobileSummaryOpen(false)}
+      />
+
+      {/* Mobile summary bottom sheet */}
+      <div className={`${styles.mobileSummarySheet} ${mobileSummaryOpen ? styles.mobileSummarySheetOpen : ''}`} role="dialog" aria-label="Order summary">
+        <div className={styles.mobileSummarySheetHeader}>
+          <h2 className={styles.mobileSummarySheetTitle}>Order Summary ({items.length})</h2>
+          <button type="button" className={styles.mobileSummarySheetClose} aria-label="Close order summary" onClick={() => setMobileSummaryOpen(false)}>
+            <XIcon size={24} />
+          </button>
+        </div>
+        <div className={styles.mobileSummarySheetBody}>
+          <OrderSummary {...summaryProps} hideHeader showDetails hideBenefits subtotal={subtotal} selectedShipping={selectedShipping} />
+        </div>
+      </div>
 
       <main id="main-content" className={styles.main}>
         <div className={styles.pageInner}>
@@ -378,190 +760,146 @@ function CheckoutPageInner() {
             {/* ══════════════ LEFT COLUMN ══════════════ */}
             <div className={styles.leftCol}>
 
-              {/* ── Contact ── */}
-              <section className={styles.formSection} aria-labelledby="contact-heading">
-                <div className={styles.sectionHead}>
-                  <h2 id="contact-heading" className={styles.sectionTitle}>Contact</h2>
-                  <p className={styles.sectionSubtitle}>(Notifications will be sent to this email)</p>
+              {/* Step breadcrumb */}
+              <StepBreadcrumb
+                currentStep={currentStep}
+                completedSteps={completedSteps}
+                icons={icons}
+                onEditStep={editStep}
+              />
+
+              {/* Express checkout — hidden once step 1 is completed */}
+              {!isCompleted(1) && (
+                <section className={styles.expressCheckout}>
+                  <p className={styles.expressTitle}>Express Checkout</p>
+                  <div className={styles.expressButtons}>
+                    <button type="button" className={styles.expressBtn} aria-label="Pay with Apple Pay">
+                      <img src="/images/payment/ApplePay.svg" alt="Apple Pay" height={20} style={{ filter: 'invert(1)' }} />
+                    </button>
+                  </div>
+                  <div className={styles.expressDivider}><span>or</span></div>
+                </section>
+              )}
+
+              {/* ── Step 1: Contact & Delivery ── */}
+              <AccordionStep
+                title="Contact & Delivery"
+                isActive={isActive(1)}
+                isCompleted={isCompleted(1)}
+                completedSummary={step1Summary}
+                onEdit={() => editStep(1)}
+              >
+                {/* Contact */}
+                <div className={styles.formSubSection}>
+                  <div className={styles.formSubHead}>
+                    <h3 className={styles.formSubTitle}>Contact</h3>
+                    <p className={styles.sectionSubtitle}>(Notifications will be sent to this email)</p>
+                  </div>
+                  <div className={styles.fieldGroup}>
+                    <div className={styles.fieldWrap}>
+                      <input
+                        type="email"
+                        placeholder="Email Address"
+                        value={email}
+                        onChange={e => setEmail(e.target.value)}
+                        className={styles.input}
+                        aria-label="Email address"
+                        autoComplete="email"
+                      />
+                    </div>
+                    <label className={styles.checkboxLabel}>
+                      <input
+                        type="checkbox"
+                        checked={emailOptIn}
+                        onChange={e => setEmailOptIn(e.target.checked)}
+                        className={styles.checkbox}
+                      />
+                      <span className={styles.checkboxText}>
+                        Yes, email me special offers and 20% off my next purchase!{' '}
+                        <a href="#" className={styles.inlineLink}>Mailing Conditions</a>
+                      </span>
+                    </label>
+                  </div>
                 </div>
 
-                <div className={styles.fieldGroup}>
-                  <div className={styles.fieldWrap}>
-                    <input
-                      type="email"
-                      placeholder="Email Address"
-                      value={email}
-                      onChange={e => setEmail(e.target.value)}
-                      className={styles.input}
-                      aria-label="Email address"
-                      autoComplete="email"
-                    />
-                  </div>
+                {/* Delivery */}
+                <div className={styles.formSubSection}>
+                  <h3 className={styles.formSubTitle}>Deliver to</h3>
+                  <div className={styles.fieldGroup}>
+                    <div className={styles.fieldWrap}>
+                      <select
+                        value={country}
+                        onChange={e => setCountry(e.target.value)}
+                        className={styles.select}
+                        aria-label="Country"
+                      >
+                        <option value="" disabled hidden>Select Country</option>
+                        <option value="US">United States</option>
+                        <option value="CA">Canada</option>
+                        <option value="GB">United Kingdom</option>
+                        <option value="AU">Australia</option>
+                        <option value="IL">Israel</option>
+                      </select>
+                      <span className={styles.selectIcon} aria-hidden="true">
+                        <DropdownIcon size={24} />
+                      </span>
+                    </div>
 
-                  <label className={styles.checkboxLabel}>
-                    <input
-                      type="checkbox"
-                      checked={emailOptIn}
-                      onChange={e => setEmailOptIn(e.target.checked)}
-                      className={styles.checkbox}
-                    />
-                    <span className={styles.checkboxText}>
-                      Yes, email me special offers and 20% off my next purchase!{' '}
-                      <a href="#" className={styles.inlineLink}>Mailing Conditions</a>
-                    </span>
-                  </label>
+                    <div className={styles.twoCol}>
+                      <div className={styles.fieldWrap}>
+                        <input type="text" placeholder="First Name" value={firstName} onChange={e => setFirstName(e.target.value)} className={styles.input} aria-label="First name" autoComplete="given-name" />
+                      </div>
+                      <div className={styles.fieldWrap}>
+                        <input type="text" placeholder="Last Name" value={lastName} onChange={e => setLastName(e.target.value)} className={styles.input} aria-label="Last name" autoComplete="family-name" />
+                      </div>
+                    </div>
+
+                    <div className={styles.fieldWrap}>
+                      <input type="text" placeholder="Street Address" value={streetAddress} onChange={e => setStreetAddress(e.target.value)} className={styles.input} aria-label="Street address" autoComplete="address-line1" />
+                    </div>
+
+                    <div className={styles.fieldWrap}>
+                      <input type="text" placeholder="Apt, suite, unit, building (optional)" value={aptSuite} onChange={e => setAptSuite(e.target.value)} className={styles.input} aria-label="Apartment, suite (optional)" autoComplete="address-line2" />
+                    </div>
+
+                    <div className={styles.fieldWrap}>
+                      <input type="text" placeholder="City" value={city} onChange={e => setCity(e.target.value)} className={styles.input} aria-label="City" autoComplete="address-level2" />
+                    </div>
+
+                    <div className={styles.twoCol}>
+                      <div className={styles.fieldWrap}>
+                        <input type="text" placeholder="State" value={addrState} onChange={e => setAddrState(e.target.value)} className={styles.input} aria-label="State" autoComplete="address-level1" />
+                      </div>
+                      <div className={styles.fieldWrap}>
+                        <input type="text" placeholder="Zip Code" value={zipCode} onChange={e => setZipCode(e.target.value)} className={styles.input} aria-label="Zip code" autoComplete="postal-code" />
+                      </div>
+                    </div>
+
+                    <div className={styles.fieldWrap}>
+                      <input type="tel" placeholder="Phone Number" value={phone} onChange={e => setPhone(e.target.value)} className={styles.input} aria-label="Phone number" autoComplete="tel" />
+                    </div>
+                    <p className={styles.sectionSubtitle}>(Delivery notifications will be sent to this number)</p>
+                  </div>
                 </div>
-              </section>
 
-              {/* ── Deliver to ── */}
-              <section className={styles.formSection} aria-labelledby="deliver-heading">
-                <h2 id="deliver-heading" className={styles.sectionTitle}>Deliver to</h2>
-
-                <div className={styles.fieldGroup}>
-                  {/* Country dropdown */}
-                  <div className={styles.fieldWrap}>
-                    <select
-                      value={country}
-                      onChange={e => setCountry(e.target.value)}
-                      className={styles.select}
-                      aria-label="Country"
-                    >
-                      <option value="" disabled hidden>Select Country</option>
-                      <option value="US">United States</option>
-                      <option value="CA">Canada</option>
-                      <option value="GB">United Kingdom</option>
-                      <option value="AU">Australia</option>
-                      <option value="IL">Israel</option>
-                    </select>
-                    <span className={styles.selectIcon} aria-hidden="true">
-                      <DropdownIcon size={16} />
-                    </span>
-                  </div>
-
-                  {/* First Name / Last Name */}
-                  <div className={styles.twoCol}>
-                    <div className={styles.fieldWrap}>
-                      <input
-                        type="text"
-                        placeholder="First Name"
-                        value={firstName}
-                        onChange={e => setFirstName(e.target.value)}
-                        className={styles.input}
-                        aria-label="First name"
-                        autoComplete="given-name"
-                      />
-                    </div>
-                    <div className={styles.fieldWrap}>
-                      <input
-                        type="text"
-                        placeholder="Last Name"
-                        value={lastName}
-                        onChange={e => setLastName(e.target.value)}
-                        className={styles.input}
-                        aria-label="Last name"
-                        autoComplete="family-name"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Street Address */}
-                  <div className={styles.fieldWrap}>
-                    <input
-                      type="text"
-                      placeholder="Street Address"
-                      value={streetAddress}
-                      onChange={e => setStreetAddress(e.target.value)}
-                      className={styles.input}
-                      aria-label="Street address"
-                      autoComplete="address-line1"
-                    />
-                  </div>
-
-                  {/* Apt, suite */}
-                  <div className={styles.fieldWrap}>
-                    <input
-                      type="text"
-                      placeholder="Apt, suite, unit, building (optional)"
-                      value={aptSuite}
-                      onChange={e => setAptSuite(e.target.value)}
-                      className={styles.input}
-                      aria-label="Apartment, suite, unit (optional)"
-                      autoComplete="address-line2"
-                    />
-                  </div>
-
-                  {/* City */}
-                  <div className={styles.fieldWrap}>
-                    <input
-                      type="text"
-                      placeholder="City"
-                      value={city}
-                      onChange={e => setCity(e.target.value)}
-                      className={styles.input}
-                      aria-label="City"
-                      autoComplete="address-level2"
-                    />
-                  </div>
-
-                  {/* State / Zip Code */}
-                  <div className={styles.twoCol}>
-                    <div className={styles.fieldWrap}>
-                      <input
-                        type="text"
-                        placeholder="State"
-                        value={state}
-                        onChange={e => setState(e.target.value)}
-                        className={styles.input}
-                        aria-label="State"
-                        autoComplete="address-level1"
-                      />
-                    </div>
-                    <div className={styles.fieldWrap}>
-                      <input
-                        type="text"
-                        placeholder="Zip Code"
-                        value={zipCode}
-                        onChange={e => setZipCode(e.target.value)}
-                        className={styles.input}
-                        aria-label="Zip code"
-                        autoComplete="postal-code"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Phone Number */}
-                  <div className={styles.fieldWrap}>
-                    <input
-                      type="tel"
-                      placeholder="Phone Number"
-                      value={phone}
-                      onChange={e => setPhone(e.target.value)}
-                      className={styles.input}
-                      aria-label="Phone number"
-                      autoComplete="tel"
-                    />
-                    <span className={styles.fieldIconRight} aria-label="Why we need your phone number">
-                      <TooltipIcon size={16} />
-                    </span>
-                  </div>
-
+                <div className={styles.stepContinueRow}>
+                  <Button variant="primary" className={styles.continueBtn} disabled={!step1Valid} onClick={() => completeStep(1)}>
+                    Continue to Shipping
+                  </Button>
                 </div>
-              </section>
+              </AccordionStep>
 
-              {/* ── Shipping Method ── */}
-              <section className={styles.formSection} aria-labelledby="shipping-heading">
-                <h2 id="shipping-heading" className={styles.sectionTitle}>Shipping Method</h2>
-
+              {/* ── Step 2: Shipping Method ── */}
+              <AccordionStep
+                title="Shipping Method"
+                isActive={isActive(2)}
+                isCompleted={isCompleted(2)}
+                completedSummary={step2Summary}
+                onEdit={() => editStep(2)}
+              >
                 <div className={styles.shippingOptions} role="radiogroup" aria-label="Shipping method">
                   <label className={`${styles.shippingOption} ${selectedShipping === 'free' ? styles.shippingOptionSelected : ''}`}>
-                    <input
-                      type="radio"
-                      name="shippingMethod"
-                      value="free"
-                      checked={selectedShipping === 'free'}
-                      onChange={() => setSelectedShipping('free')}
-                      className={styles.radioInput}
-                    />
+                    <input type="radio" name="shippingMethod" value="free" checked={selectedShipping === 'free'} onChange={() => setSelectedShipping('free')} className={styles.radioInput} />
                     <div className={styles.shippingOptionContent}>
                       <div className={styles.shippingOptionInfo}>
                         <span className={styles.shippingOptionName}>Free Shipping</span>
@@ -572,17 +910,11 @@ function CheckoutPageInner() {
                   </label>
 
                   <label className={`${styles.shippingOption} ${selectedShipping === 'standard' ? styles.shippingOptionSelected : ''}`}>
-                    <input
-                      type="radio"
-                      name="shippingMethod"
-                      value="standard"
-                      checked={selectedShipping === 'standard'}
-                      onChange={() => setSelectedShipping('standard')}
-                      className={styles.radioInput}
-                    />
+                    <input type="radio" name="shippingMethod" value="standard" checked={selectedShipping === 'standard'} onChange={() => setSelectedShipping('standard')} className={styles.radioInput} />
                     <div className={styles.shippingOptionContent}>
                       <div className={styles.shippingOptionInfo}>
                         <span className={styles.shippingOptionName}>Standard Shipping</span>
+                        <p className={styles.shippingOptionGuarantee}>Guaranteed to arrive by Christmas</p>
                         <span className={styles.shippingOptionDate}>Arrives 4-6 business days after production time</span>
                       </div>
                       <span className={styles.shippingOptionPrice}>$5</span>
@@ -591,222 +923,195 @@ function CheckoutPageInner() {
                 </div>
 
                 <div className={styles.shippingInsurance}>
-                  <span className={styles.insuranceIcon}>
-                    <CheckmarkIcon size={24} />
-                  </span>
+                  <span className={styles.insuranceIcon}><CheckmarkIcon size={24} /></span>
                   <span className={styles.checkboxText}>All methods are tracked &amp; insured</span>
                 </div>
 
                 <div className={styles.carriersRow}>
-                  <img src="/images/carriers/ups.svg"  alt="UPS"  className={styles.carrierLogo} />
-                  <img src="/images/carriers/usps.svg" alt="USPS" className={styles.carrierLogo} />
+                  <img src="/images/carriers/ups.svg"   alt="UPS"   className={styles.carrierLogo} />
+                  <img src="/images/carriers/usps.svg"  alt="USPS"  className={styles.carrierLogo} />
                   <img src="/images/carriers/fedex.svg" alt="FedEx" className={styles.carrierLogo} />
-                  <img src="/images/carriers/dhl.svg"  alt="DHL"  className={styles.carrierLogo} />
+                  <img src="/images/carriers/dhl.svg"   alt="DHL"   className={styles.carrierLogo} />
                 </div>
-              </section>
 
-              {/* ── You May Also Like — mobile only (between Shipping and Order Summary) ── */}
-              <div className={styles.upsellMobile}>
-                <YouMayAlsoLike icons={icons} />
-              </div>
+                <div className={styles.stepContinueRow}>
+                  <Button variant="primary" className={styles.continueBtn} onClick={() => completeStep(2)}>
+                    Continue to Payment
+                  </Button>
+                </div>
+              </AccordionStep>
 
-              {/* ── Order Summary — mobile collapsible ── */}
-              <div className={styles.orderSummaryMobile}>
-                <OrderSummary
-                  items={items}
-                  subtotal={subtotal}
-                  selectedShipping={selectedShipping}
-                  icons={icons}
-                  collapsible
-                />
-              </div>
-
-              {/* ── Payment ── */}
-              <section className={styles.formSection} aria-labelledby="payment-heading">
-                <h2 id="payment-heading" className={styles.sectionTitle}>Payment</h2>
-
-                <div className={styles.fieldGroup}>
-                  {/* Billing matches shipping — first item below Payment title */}
-                  <label className={styles.checkboxLabel}>
-                    <input
-                      type="checkbox"
-                      checked={billingSameAsShipping}
-                      onChange={e => setBillingSameAsShipping(e.target.checked)}
-                      className={styles.checkbox}
-                    />
-                    <span className={styles.checkboxText}>Billing matches shipping address</span>
-                  </label>
-
-                  {/* Billing Address form — shown when unchecked */}
-                  {!billingSameAsShipping && (
-                    <div className={styles.fieldGroup}>
-                      <div className={styles.twoCol}>
-                        <div className={styles.fieldWrap}>
-                          <input
-                            type="text"
-                            placeholder="First Name"
-                            value={billingFirstName}
-                            onChange={e => setBillingFirstName(e.target.value)}
-                            className={styles.input}
-                            aria-label="Billing first name"
-                            autoComplete="billing given-name"
-                          />
-                        </div>
-                        <div className={styles.fieldWrap}>
-                          <input
-                            type="text"
-                            placeholder="Last Name"
-                            value={billingLastName}
-                            onChange={e => setBillingLastName(e.target.value)}
-                            className={styles.input}
-                            aria-label="Billing last name"
-                            autoComplete="billing family-name"
-                          />
-                        </div>
-                      </div>
-                      <div className={styles.fieldWrap}>
-                        <input
-                          type="text"
-                          placeholder="Street Address"
-                          value={billingStreetAddress}
-                          onChange={e => setBillingStreetAddress(e.target.value)}
-                          className={styles.input}
-                          aria-label="Billing street address"
-                          autoComplete="billing address-line1"
-                        />
-                      </div>
-                      <div className={styles.fieldWrap}>
-                        <input
-                          type="text"
-                          placeholder="Apt, suite, unit, building (optional)"
-                          value={billingAptSuite}
-                          onChange={e => setBillingAptSuite(e.target.value)}
-                          className={styles.input}
-                          aria-label="Billing apartment, suite, unit (optional)"
-                          autoComplete="billing address-line2"
-                        />
-                      </div>
-                      <div className={styles.fieldWrap}>
-                        <input
-                          type="text"
-                          placeholder="City"
-                          value={billingCity}
-                          onChange={e => setBillingCity(e.target.value)}
-                          className={styles.input}
-                          aria-label="Billing city"
-                          autoComplete="billing address-level2"
-                        />
-                      </div>
-                      <div className={styles.twoCol}>
-                        <div className={styles.fieldWrap}>
-                          <input
-                            type="text"
-                            placeholder="State"
-                            value={billingState}
-                            onChange={e => setBillingState(e.target.value)}
-                            className={styles.input}
-                            aria-label="Billing state"
-                            autoComplete="billing address-level1"
-                          />
-                        </div>
-                        <div className={styles.fieldWrap}>
-                          <input
-                            type="text"
-                            placeholder="Zip Code"
-                            value={billingZipCode}
-                            onChange={e => setBillingZipCode(e.target.value)}
-                            className={styles.input}
-                            aria-label="Billing zip code"
-                            autoComplete="billing postal-code"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Payment method radio group */}
-                  <div className={styles.paymentOptions} role="radiogroup" aria-label="Payment method">
-                    <label className={`${styles.paymentOption} ${paymentMethod === 'credit-card' ? styles.paymentOptionSelected : ''}`}>
-                      <input
-                        type="radio"
-                        name="paymentMethod"
-                        value="credit-card"
-                        checked={paymentMethod === 'credit-card'}
-                        onChange={() => setPaymentMethod('credit-card')}
-                        className={styles.radioInput}
-                      />
-                      <span className={styles.paymentOptionName}>Credit Card</span>
-                      <span className={styles.paymentOptionIcons}>
-                        <img src="/images/payment/creditcard.svg" alt="Credit card" height={24} />
-                      </span>
-                    </label>
-
-                    <label className={`${styles.paymentOption} ${paymentMethod === 'paypal' ? styles.paymentOptionSelected : ''}`}>
-                      <input
-                        type="radio"
-                        name="paymentMethod"
-                        value="paypal"
-                        checked={paymentMethod === 'paypal'}
-                        onChange={() => setPaymentMethod('paypal')}
-                        className={styles.radioInput}
-                      />
-                      <span className={styles.paymentOptionName}>PayPal</span>
-                      <span className={styles.paymentOptionIcons}>
-                        <img src="/images/payment/PayPal.svg" alt="PayPal" height={24} />
-                      </span>
-                    </label>
-
-                    <label className={`${styles.paymentOption} ${paymentMethod === 'applepay' ? styles.paymentOptionSelected : ''}`}>
-                      <input
-                        type="radio"
-                        name="paymentMethod"
-                        value="applepay"
-                        checked={paymentMethod === 'applepay'}
-                        onChange={() => setPaymentMethod('applepay')}
-                        className={styles.radioInput}
-                      />
-                      <span className={styles.paymentOptionName}>ApplePay</span>
-                      <span className={styles.paymentOptionIcons}>
-                        <img src="/images/payment/ApplePay.svg" alt="Apple Pay" height={24} />
-                      </span>
-                    </label>
+              {/* ── Step 3: Payment ── */}
+              <AccordionStep
+                title="Payment"
+                isActive={isActive(3)}
+                isCompleted={isCompleted(3)}
+                completedSummary={step3Summary}
+                onEdit={() => editStep(3)}
+              >
+                {/* Billing Address */}
+                <div className={styles.formSubSection}>
+                  <div className={styles.formSubHead}>
+                    <h3 className={styles.formSubTitle}>Billing Address</h3>
                   </div>
-
-                  {/* Store credit — below ApplePay */}
-                  <div className={styles.storeCreditSection}>
+                  <div className={styles.fieldGroup}>
                     <label className={styles.checkboxLabel}>
-                      <input
-                        type="checkbox"
-                        checked={applyStoreCredit}
-                        onChange={e => setApplyStoreCredit(e.target.checked)}
-                        className={styles.checkbox}
-                      />
-                      <span className={styles.checkboxText}>Apply Store Credit</span>
+                      <input type="checkbox" checked={billingSameAsShipping} onChange={e => setBillingSameAsShipping(e.target.checked)} className={styles.checkbox} />
+                      <span className={styles.checkboxText}>Billing matches shipping address</span>
                     </label>
 
-                    {applyStoreCredit && (
-                      <div className={styles.storeCreditRow}>
-                        <div className={styles.storeCreditInput}>
-                          <input
-                            type="text"
-                            placeholder="Please enter code"
-                            value={storeCreditCode}
-                            onChange={e => setStoreCreditCode(e.target.value)}
-                            className={styles.input}
-                            aria-label="Store credit code"
-                          />
+                    {!billingSameAsShipping && (
+                      <div className={styles.fieldGroup}>
+                        <div className={styles.twoCol}>
+                          <div className={styles.fieldWrap}>
+                            <input type="text" placeholder="First Name" value={billingFirstName} onChange={e => setBillingFirstName(e.target.value)} className={styles.input} aria-label="Billing first name" autoComplete="billing given-name" />
+                          </div>
+                          <div className={styles.fieldWrap}>
+                            <input type="text" placeholder="Last Name" value={billingLastName} onChange={e => setBillingLastName(e.target.value)} className={styles.input} aria-label="Billing last name" autoComplete="billing family-name" />
+                          </div>
                         </div>
-                        <Button variant="primary" className={styles.applyButton}>
-                          Apply
-                        </Button>
+                        <div className={styles.fieldWrap}>
+                          <input type="text" placeholder="Street Address" value={billingStreetAddress} onChange={e => setBillingStreetAddress(e.target.value)} className={styles.input} aria-label="Billing street address" autoComplete="billing address-line1" />
+                        </div>
+                        <div className={styles.fieldWrap}>
+                          <input type="text" placeholder="Apt, suite (optional)" value={billingAptSuite} onChange={e => setBillingAptSuite(e.target.value)} className={styles.input} aria-label="Billing apt, suite" autoComplete="billing address-line2" />
+                        </div>
+                        <div className={styles.fieldWrap}>
+                          <input type="text" placeholder="City" value={billingCity} onChange={e => setBillingCity(e.target.value)} className={styles.input} aria-label="Billing city" autoComplete="billing address-level2" />
+                        </div>
+                        <div className={styles.twoCol}>
+                          <div className={styles.fieldWrap}>
+                            <input type="text" placeholder="State" value={billingState} onChange={e => setBillingState(e.target.value)} className={styles.input} aria-label="Billing state" autoComplete="billing address-level1" />
+                          </div>
+                          <div className={styles.fieldWrap}>
+                            <input type="text" placeholder="Zip Code" value={billingZipCode} onChange={e => setBillingZipCode(e.target.value)} className={styles.input} aria-label="Billing zip code" autoComplete="billing postal-code" />
+                          </div>
+                        </div>
                       </div>
                     )}
                   </div>
                 </div>
 
-                {/* Place Order — desktop only inside form; mobile is sticky bar */}
-                <div className={styles.placeOrderDesktop}>
-                  <Button variant="primary" className={styles.placeOrderButton}>
+                {/* Payment Options */}
+                <div className={styles.formSubSection}>
+                  <div className={styles.formSubHead}>
+                    <h3 className={styles.formSubTitle}>Payment Options</h3>
+                  </div>
+                  <div className={styles.fieldGroup}>
+                    <div className={styles.paymentOptions} role="radiogroup" aria-label="Payment method">
+                      <label className={`${styles.paymentOption} ${paymentMethod === 'credit-card' ? styles.paymentOptionSelected : ''}`}>
+                        <input type="radio" name="paymentMethod" value="credit-card" checked={paymentMethod === 'credit-card'} onChange={() => setPaymentMethod('credit-card')} className={styles.radioInput} />
+                        <span className={styles.paymentOptionName}>Credit Card</span>
+                        <span className={styles.paymentOptionIcons}><img src="/images/payment/creditcard.svg" alt="Credit card" height={24} /></span>
+                      </label>
+                      <label className={`${styles.paymentOption} ${paymentMethod === 'paypal' ? styles.paymentOptionSelected : ''}`}>
+                        <input type="radio" name="paymentMethod" value="paypal" checked={paymentMethod === 'paypal'} onChange={() => setPaymentMethod('paypal')} className={styles.radioInput} />
+                        <span className={styles.paymentOptionName}>PayPal</span>
+                        <span className={styles.paymentOptionIcons}><img src="/images/payment/PayPal.svg" alt="PayPal" height={24} /></span>
+                      </label>
+                      <label className={`${styles.paymentOption} ${paymentMethod === 'applepay' ? styles.paymentOptionSelected : ''}`}>
+                        <input type="radio" name="paymentMethod" value="applepay" checked={paymentMethod === 'applepay'} onChange={() => setPaymentMethod('applepay')} className={styles.radioInput} />
+                        <span className={styles.paymentOptionName}>Apple Pay</span>
+                        <span className={styles.paymentOptionIcons}><img src="/images/payment/ApplePay.svg" alt="Apple Pay" height={24} /></span>
+                      </label>
+                    </div>
+
+                    <div className={styles.storeCreditSection}>
+                      <label className={styles.checkboxLabel}>
+                        <input type="checkbox" checked={applyStoreCredit} onChange={e => setApplyStoreCredit(e.target.checked)} className={styles.checkbox} />
+                        <span className={styles.checkboxText}>Apply Store Credit</span>
+                      </label>
+                      {applyStoreCredit && (
+                        <div className={styles.storeCreditRow}>
+                          <div className={styles.storeCreditInput}>
+                            <input type="text" placeholder="Please enter code" value={storeCreditCode} onChange={e => setStoreCreditCode(e.target.value)} className={styles.input} aria-label="Store credit code" />
+                          </div>
+                          <Button variant="primary" className={styles.applyButton}>Apply</Button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Promo code / totals / benefits — mobile only (desktop shows these in right column) */}
+                <div className={styles.step3MobileDetails}>
+                  <div className={styles.promoRow}>
+                    <span className={styles.promoQuestion}>
+                      <CouponIcon size={16} />
+                      Have a promo code?
+                    </span>
+                    {promoApplied ? (
+                      <div className={styles.promoAppliedWrap}>
+                        <div className={styles.appliedPromoBox}>
+                          <span className={styles.appliedPromoIcon}><CouponIcon size={16} /></span>
+                          <span className={styles.appliedPromoCode}>{appliedPromoCode}</span>
+                          <button type="button" className={styles.removePromoBtn} onClick={handleRemoveMobilePromo} aria-label="Remove promo code">
+                            <XIcon size={16} />
+                          </button>
+                        </div>
+                        <p className={styles.promoSuccessMsg}>You saved 20% with this coupon.</p>
+                      </div>
+                    ) : (
+                      <div className={styles.storeCreditRow}>
+                        <div className={styles.storeCreditInput}>
+                          <input
+                            type="text"
+                            placeholder="Promo code"
+                            value={promoCode}
+                            onChange={e => setPromoCode(e.target.value)}
+                            onKeyDown={e => e.key === 'Enter' && handleApplyMobilePromo()}
+                            className={styles.input}
+                            aria-label="Promo code"
+                          />
+                        </div>
+                        <Button variant="primary" className={styles.applyButton} onClick={handleApplyMobilePromo}>Apply</Button>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Totals */}
+                  <div className={styles.totalsRows}>
+                    <div className={styles.totalRow}>
+                      <span className={styles.totalLabel}>Subtotal:</span>
+                      <span className={styles.totalValue}>{formatPrice(subtotal)}</span>
+                    </div>
+                    <div className={styles.totalRow}>
+                      <span className={styles.totalLabel}>Shipping:</span>
+                      <span className={styles.totalValue}>
+                        {selectedShipping === 'free' ? 'Free' : formatPrice(shippingCost)}
+                      </span>
+                    </div>
+                    {promoApplied && (
+                      <div className={styles.totalRow}>
+                        <span className={styles.totalLabel}>Promotional Discounts:</span>
+                        <span className={styles.promoDiscountValue}>
+                          <CouponIcon size={14} />
+                          -{formatPrice(discountAmount)}
+                        </span>
+                      </div>
+                    )}
+                    <div className={styles.totalRow}>
+                      <span className={styles.totalLabel}>Tax:</span>
+                      <span className={styles.totalValueMuted}>Not calculated</span>
+                    </div>
+                  </div>
+
+                  <div className={styles.summaryDivider} />
+
+                  <div className={styles.orderTotalRow}>
+                    <span className={styles.orderTotalLabel}>Order Total:</span>
+                    <span className={styles.orderTotalValue}>{formatPrice(orderTotal)}</span>
+                  </div>
+                  {promoApplied && (
+                    <p className={styles.savingsNote}>You're saving {formatPrice(discountAmount)} on this order!</p>
+                  )}
+
+                  <div className={styles.summaryDivider} />
+                </div>
+
+                {/* Place Order */}
+                <div className={styles.placeOrderSection}>
+                  <Button variant="primary" className={styles.placeOrderButton} onClick={() => completeStep(3)}>
                     Place Order
                   </Button>
                   <p className={styles.secureNote}>
@@ -814,35 +1119,40 @@ function CheckoutPageInner() {
                     All transactions are secure and encrypted
                   </p>
                 </div>
-              </section>
+
+                {/* Benefits — below secure note, mobile only */}
+                <ul className={`${styles.benefits} ${styles.benefitsMobileBelow}`}>
+                  <li className={styles.benefit}>
+                    <span className={styles.benefitIcon}><ShippingIcon size={24} /></span>
+                    <span>Free shipping on all orders</span>
+                  </li>
+                  <li className={styles.benefit}>
+                    <span className={styles.benefitIcon}><ReturnIcon size={24} /></span>
+                    <span>60-day extended returns</span>
+                  </li>
+                  <li className={styles.benefit}>
+                    <span className={styles.benefitIcon}><WarrantyIcon size={24} /></span>
+                    <span>2-year warranty</span>
+                  </li>
+                </ul>
+              </AccordionStep>
+
+              {/* You May Also Like — mobile (hidden) */}
 
             </div>
             {/* ══════════════ END LEFT COLUMN ══════════════ */}
 
             {/* ══════════════ RIGHT COLUMN ══════════════ */}
             <aside className={styles.rightCol}>
-
-              {/* Order Summary — desktop */}
               <div className={styles.orderSummaryDesktop}>
-                <OrderSummary
-                  items={items}
-                  subtotal={subtotal}
-                  selectedShipping={selectedShipping}
-                  icons={icons}
-                />
+                <OrderSummary {...summaryProps} showDetails subtotal={subtotal} selectedShipping={selectedShipping} />
               </div>
-
-              {/* You May Also Like — desktop */}
-              <div className={styles.upsellDesktop}>
-                <YouMayAlsoLike icons={icons} />
-              </div>
-
+              {/* You May Also Like — desktop (hidden) */}
             </aside>
             {/* ══════════════ END RIGHT COLUMN ══════════════ */}
 
           </div>
 
-          {/* ── Footer links ── */}
           <footer className={styles.pageFooter}>
             <p className={styles.footerHelp}>
               Need some help?{' '}
@@ -860,12 +1170,6 @@ function CheckoutPageInner() {
         </div>
       </main>
 
-      {/* ── Mobile sticky Place Order bar ── */}
-      <div className={styles.mobileStickyBar} aria-label="Place order">
-        <Button variant="primary" className={styles.mobilePlaceOrderButton}>
-          PLACE ORDER
-        </Button>
-      </div>
 
     </div>
   )

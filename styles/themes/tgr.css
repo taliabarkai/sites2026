@@ -16,6 +16,8 @@
   --tgr-mid-grey:    #808080;
   --tgr-green:       #478978;
   --tgr-red:         #b6475f;
+  --tgr-warning:     #f36641;
+  --tgr-snow:        #f6f8fa;
 }
 
 /* ── Semantic tokens ──────────────────────────────────────────────────────── */
@@ -93,6 +95,29 @@
   /* Transitions */
   --transition-fast: 150ms ease;
   --transition-base: 250ms ease;
+
+  /* Status */
+  --colors-warning: var(--tgr-warning);
+
+  /* Price */
+  --colors-price-selling: var(--tgr-raisin);
+
+  /* Cards */
+  --colors-card-image-bg: var(--tgr-snow);
+  --product-image-background-blend: var(--tgr-snow);
+
+  /* Form field extras */
+  --form-field-border-color-hover: var(--tgr-raisin);
+  --form-field-border-radius:      4px;
+
+  /* Ribbon variants */
+  --ribbon-border-radius:          var(--radius-full);
+  --ribbon-bundle-background:      var(--tgr-green);
+  --ribbon-bundle-text:            var(--tgr-white);
+  --ribbon-oos-background:         var(--tgr-mid-grey);
+  --ribbon-oos-text:               var(--tgr-white);
+  --ribbon-secondary-background:   var(--tgr-raisin);
+  --ribbon-secondary-text:         var(--tgr-white);
 
   /* Buttons */
   --buttons-primary-background:    var(--tgr-raisin);

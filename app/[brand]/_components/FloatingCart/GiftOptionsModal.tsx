@@ -21,9 +21,16 @@ const BRAND_ICONS = {
 
 const GIFT_IMAGE = 'https://cdn.oakandluna.com/digital-asset/product/gift-box-25.jpg'
 
+export interface SavedGift {
+  image: string
+  name: string
+  price: string
+  note: string
+}
+
 interface GiftOptionsModalProps {
   onClose: () => void
-  onAddToCart: (note: string) => void
+  onAddToCart: (gift: SavedGift) => void
   onGenerateGiftNote: () => Promise<string>
 }
 
@@ -166,7 +173,15 @@ export function GiftOptionsModal({ onClose, onAddToCart, onGenerateGiftNote }: G
           <button type="button" className={styles.cancelLink} onClick={handleClose}>
             Cancel
           </button>
-          <Button variant="primary" onClick={() => onAddToCart(note)}>
+          <Button
+            variant="primary"
+            onClick={() => onAddToCart({
+              image: GIFT_IMAGE,
+              name: 'Gift Packaging — Gift Bag, Gift Box, Fabric Pouch and a Custom Note',
+              price: '$7',
+              note,
+            })}
+          >
             Add To Bag
           </Button>
         </div>

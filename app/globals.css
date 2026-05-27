@@ -98,3 +98,9 @@ body {
   color:       var(--colors-text);
   font-family: var(--font-family-main-regular);
 }
+
+[data-theme] input:hover,
+[data-theme] select:hover,
+[data-theme] textarea:hover {
+  border-color: var(--form-field-border-color-hover);
+}
