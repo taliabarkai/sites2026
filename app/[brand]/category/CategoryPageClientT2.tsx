@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
-import { CartProvider, useCart } from '../_context/CartContext'
+import { useCart } from '../_context/CartContext'
 import { Footer } from '../_components/Footer'
 import { Header } from '../_components/Header'
 import { FloatingCart } from '../_components/FloatingCart'
@@ -355,9 +355,5 @@ function CategoryPageInnerT2() {
 }
 
 export default function CategoryPageClientT2() {
-  return (
-    <CartProvider>
-      <CategoryPageInnerT2 />
-    </CartProvider>
-  )
+  return <CategoryPageInnerT2 />
 }

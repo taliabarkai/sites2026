@@ -11,7 +11,7 @@
  *
  *  Brand  | --font-family-main-regular        | --font-family-main-bold           | --font-family-main-light          | --font-family-secondary-regular | --font-family-tertiary-regular
  *  -------|-----------------------------------|-----------------------------------|-----------------------------------|---------------------------------|-------------------------------
- *  oal    | Helvetica Neue (weight 300)       | Helvetica Neue (weight 500)       | Helvetica Neue (weight 200)       | Bebas Neue                      | Akatab (headline8, button1, button2)
+ *  oal    | Inter (weight 300)                | Inter (weight 500)                | Inter (weight 200)                | Bebas Neue                      | Akatab (headline8, button1, button2)
  *  mnn    | AnoRegular (@font-face)           | AnoBold (@font-face)              | AnoHalf (@font-face)              | —                               | —
  *  lal    | Poppins (weight 400)              | Poppins (weight 600)              | Poppins (weight 300)              | —                               | —
  *  ib     | Assistant (weight 400)            | Assistant (weight 600)            | Assistant (weight 300)            | —                               | —
@@ -227,7 +227,7 @@
 
 /* ============================================================
  * OAL — Oak and Luna
- * Main font:      Helvetica Neue via Adobe Typekit (vle4ewv)
+ * Main font:      Inter via Google Fonts
  *                 regular = weight 300, bold = weight 500, light = weight 200
  * Secondary font: Bebas Neue (display headings)
  * Tertiary font:  Akatab via Google Fonts (headline8, button1, button2)
@@ -262,8 +262,8 @@
   --typography-rules-headline3-font-weight:    400;
 
   --typography-rules-headline4-font-family:    var(--font-family-secondary-regular);
-  --typography-rules-headline4-font-size:      28px;
-  --typography-rules-headline4-line-height:    26px;
+  --typography-rules-headline4-font-size:      32px;
+  --typography-rules-headline4-line-height:    32px;
   --typography-rules-headline4-letter-spacing: 0.4px;
   --typography-rules-headline4-text-transform: uppercase;
   --typography-rules-headline4-font-weight:    400;
@@ -901,7 +901,7 @@
   --typography-rules-headline4-line-height:    28px;
 
   --typography-rules-headline5-font-family:    var(--font-family-main-light);
-  --typography-rules-headline5-font-size:      24px;
+  --typography-rules-headline5-font-size:      20px;
   --typography-rules-headline5-line-height:    28px;
   --typography-rules-headline5-font-weight:    300;
 
@@ -932,7 +932,7 @@
   --typography-rules-headline11-line-height:   28px;
 
   --typography-rules-headline12-font-family:   var(--font-family-main-regular);
-  --typography-rules-headline12-font-size:     24px;
+  --typography-rules-headline12-font-size:     20px;
   --typography-rules-headline12-line-height:   28px;
 
   --typography-rules-text1-font-family:        var(--font-family-main-regular);

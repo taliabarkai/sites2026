@@ -9,7 +9,7 @@ import * as tgrIcons from '@/src/components/icons/tgr'
 import * as lalIcons from '@/src/components/icons/lal'
 import * as ibIcons from '@/src/components/icons/ib'
 import type { IconProps } from '@/src/components/icons/Icon'
-import { CartProvider, useCart } from '../_context/CartContext'
+import { useCart } from '../_context/CartContext'
 import type { CartItem } from '../_context/CartContext'
 import { Header } from '../_components/Header'
 import { Footer } from '../_components/Footer'
@@ -497,9 +497,5 @@ function CartPageInner() {
 // ─── Export ────────────────────────────────────────────────────────────────────
 
 export default function CartPageClient() {
-  return (
-    <CartProvider>
-      <CartPageInner />
-    </CartProvider>
-  )
+  return <CartPageInner />
 }

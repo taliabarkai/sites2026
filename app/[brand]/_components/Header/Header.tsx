@@ -61,6 +61,22 @@ export function Header({
     }
   }, [menuOpen])
 
+  /* ── Checkout mode: logo only, horizontally centered ── */
+  if (isCheckout) {
+    return (
+      <header className={styles.wrapper}>
+        <div className={`${styles.shell} ${styles.solid}`}>
+          <div className={styles.checkoutBarInner}>
+            <Link href={logoHref} className={styles.checkoutLogo} aria-label="Home">
+              <SiteLogo brand={brandSegment} priority />
+            </Link>
+          </div>
+        </div>
+      </header>
+    )
+  }
+
+  /* ── Default & transparent modes ── */
   const shellClass = [
     styles.shell,
     isSolid ? styles.solid : styles.transparent,
@@ -121,21 +137,17 @@ export function Header({
               <button type="button" className={styles.iconButton} aria-label="Account">
                 <PersonIcon />
               </button>
-              {isCheckout ? (
-                <Link href={`/${brandSegment}/cart`} className={styles.cartButton} aria-label={`Cart${items.length > 0 ? ` (${items.length})` : ''}`}>
-                  <ShoppingBagIcon />
-                  {items.length > 0 && (
-                    <span className={styles.cartCount}>{items.length}</span>
-                  )}
-                </Link>
-              ) : (
-                <button type="button" className={styles.cartButton} aria-label={`Cart${items.length > 0 ? ` (${items.length})` : ''}`} onClick={openCart}>
-                  <ShoppingBagIcon />
-                  {items.length > 0 && (
-                    <span className={styles.cartCount}>{items.length}</span>
-                  )}
-                </button>
-              )}
+              <button
+                type="button"
+                className={styles.cartButton}
+                aria-label={`Cart${items.length > 0 ? ` (${items.length})` : ''}`}
+                onClick={openCart}
+              >
+                <ShoppingBagIcon />
+                {items.length > 0 && (
+                  <span className={styles.cartCount}>{items.length}</span>
+                )}
+              </button>
             </div>
           </div>
         </div>

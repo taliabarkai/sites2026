@@ -40,30 +40,8 @@ interface CartContextValue {
 
 const CartContext = createContext<CartContextValue | null>(null)
 
-const DEFAULT_ITEMS: CartItem[] = [
-  {
-    id: 'interlace-earrings-gold-vermeil',
-    name: 'Interlace Earrings - Gold Vermeil',
-    price: 17400,
-    originalPrice: 20500,
-    image: 'https://cdn.oakandluna.com/digital-asset/product/inez-initial-necklace-gold-vermeil-with-diamond-12.jpg',
-    isPersonalized: false,
-  },
-  {
-    id: 'classic-scalloped-hoop-gold-vermeil',
-    name: 'Classic Scalloped Hoop - Gold Vermeil',
-    price: 13500,
-    image: 'https://cdn.oakandluna.com/digital-asset/product/engraved-comprass-necklace-gold-vermeil-1.jpg',
-    isPersonalized: true,
-    selectedOptions: [
-      { label: 'Material', value: 'Gold Vermeil' },
-      { label: 'Choose your style', value: 'Classic' },
-    ],
-  },
-]
-
 export function CartProvider({ children }: { children: React.ReactNode }) {
-  const [items, setItems] = useState<CartItem[]>(DEFAULT_ITEMS)
+  const [items, setItems] = useState<CartItem[]>([])
   const [isOpen, setIsOpen] = useState(false)
 
   const addItem = useCallback((item: CartItem) => {

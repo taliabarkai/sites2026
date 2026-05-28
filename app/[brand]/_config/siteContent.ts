@@ -64,9 +64,9 @@ export const DEFAULT_FOOTER_COLUMNS: FooterColumn[] = [
 ]
 
 export const DEFAULT_NEWSLETTER = {
-  eyebrow: 'Stay in the loop',
-  title: 'Sign up and get 10% off',
-  description: 'Be the first to hear about new arrivals, exclusive offers, and styling tips.',
+  eyebrow: '',
+  title: 'Sign up for 15% off',
+  description: 'Be the first to discover new drops, special offers, and all things Oak and Luna.',
   emailPlaceholder: 'Email Address',
   successMessage: 'Thank you — check your inbox for your welcome offer.',
   errorMessage: 'Please enter a valid email address.',

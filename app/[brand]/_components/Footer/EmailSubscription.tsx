@@ -58,7 +58,7 @@ export function EmailSubscription({
 
   return (
     <section className={styles.section} aria-labelledby="footer-newsletter-title">
-      <p className={styles.eyebrow}>{eyebrow}</p>
+      {eyebrow && <p className={styles.eyebrow}>{eyebrow}</p>}
       <h2 id="footer-newsletter-title" className={styles.title}>
         {title}
       </h2>

@@ -8,7 +8,7 @@ import {
   DEFAULT_TOPLINE,
 } from './_config/siteContent'
 import { prefixFooterColumns, prefixNavLinks, withBrandPrefix } from './_config/brandPaths'
-import { CartProvider, useCart } from './_context/CartContext'
+import { useCart } from './_context/CartContext'
 import { Footer } from './_components/Footer'
 import { Header } from './_components/Header'
 import { Hero } from './_components/Hero'
@@ -74,9 +74,5 @@ function HomePageInner() {
 }
 
 export function HomePageClient() {
-  return (
-    <CartProvider>
-      <HomePageInner />
-    </CartProvider>
-  )
+  return <HomePageInner />
 }
