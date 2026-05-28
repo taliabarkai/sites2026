@@ -85,6 +85,7 @@ interface StepBreadcrumbProps {
   currentStep:    number
   completedSteps: Set<number>
   icons:          BrandIcons
+  brand:          string
   onEditStep:     (step: number) => void
 }
 
@@ -94,11 +95,24 @@ const BREADCRUMB_STEPS = [
   { n: 3, label: 'Payment' },
 ] as const
 
-function StepBreadcrumb({ currentStep, completedSteps, icons, onEditStep }: StepBreadcrumbProps) {
+function StepBreadcrumb({ currentStep, completedSteps, icons, brand, onEditStep }: StepBreadcrumbProps) {
   const { ChevronIcon } = icons
 
   return (
     <nav className={styles.stepBreadcrumb} aria-label="Checkout steps">
+      {/* Cart — always a link back */}
+      <span className={styles.stepBreadcrumbItem}>
+        <Link
+          href={`/${brand}/cart`}
+          className={`${styles.stepBreadcrumbLabel} ${styles.stepBreadcrumbCompleted}`}
+        >
+          Cart
+        </Link>
+        <span className={styles.stepBreadcrumbSep} aria-hidden="true">
+          <ChevronIcon size={12} />
+        </span>
+      </span>
+
       {BREADCRUMB_STEPS.map(({ n, label }, i) => {
         const isActive    = n === currentStep
         const isCompleted = completedSteps.has(n)
@@ -784,6 +798,7 @@ function CheckoutPageInner() {
                 currentStep={currentStep}
                 completedSteps={completedSteps}
                 icons={icons}
+                brand={brand}
                 onEditStep={editStep}
               />
 

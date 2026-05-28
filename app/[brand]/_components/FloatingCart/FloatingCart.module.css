@@ -110,12 +110,13 @@
 }
 
 .emptyText {
-  font-family:    var(--typography-rules-text1-font-family);
-  font-size:      var(--typography-rules-text1-font-size);
-  line-height:    var(--typography-rules-text1-line-height);
-  font-weight:    var(--typography-rules-text1-font-weight, normal);
-  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
-  color: var(--colors-text-secondary);
+  font-family:    var(--typography-rules-headline4-font-family);
+  font-size:      var(--typography-rules-headline4-font-size);
+  line-height:    var(--typography-rules-headline4-line-height);
+  font-weight:    var(--typography-rules-headline4-font-weight, normal);
+  letter-spacing: var(--typography-rules-headline4-letter-spacing, normal);
+  text-transform: var(--typography-rules-headline4-text-transform, none);
+  color: var(--colors-text);
   margin: 0;
 }
 
