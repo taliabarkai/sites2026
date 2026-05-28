@@ -104,3 +104,12 @@ body {
 [data-theme] textarea:hover {
   border-color: var(--form-field-border-color-hover);
 }
+
+/* Prevent iOS Safari from zooming on input focus — requires font-size ≥ 16px */
+@media screen and (max-width: 768px) {
+  input:not([type="checkbox"]):not([type="radio"]),
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+}

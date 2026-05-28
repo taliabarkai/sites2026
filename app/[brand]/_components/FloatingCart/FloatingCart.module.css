@@ -80,6 +80,8 @@
   background: transparent;
   color: var(--colors-text);
   cursor: pointer;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .itemsList {

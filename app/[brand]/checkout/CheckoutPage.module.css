@@ -498,6 +498,26 @@
   flex-shrink: 0;
 }
 
+/* ─── Mobile inter-step order summary (between Shipping and Payment) ────────── */
+
+.mobileInterStepSummary {
+  display: flex;
+  flex-direction: column;
+  padding: var(--spacing-lg) var(--layout-page-margin);
+  margin-left: calc(-1 * var(--layout-page-margin));
+  margin-right: calc(-1 * var(--layout-page-margin));
+}
+
+.mobileInterStepSummary .promoRow {
+  padding-top: 0;
+}
+
+@media (min-width: 1024px) {
+  .mobileInterStepSummary {
+    display: none;
+  }
+}
+
 /* ─── Place Order — desktop ──────────────────────────────────────────────────── */
 
 .step3MobileDetails {
@@ -612,7 +632,7 @@
   display: flex;
   align-items: center;
   flex-wrap: nowrap;
-  padding: 0 0 var(--spacing-lg);
+  padding: 0 0 var(--spacing-md);
   overflow: hidden;
 }
 
@@ -726,14 +746,14 @@
 
 .accordionStep {
   /* border-bottom: var(--border-width) solid var(--border-color); */
-  padding: var(--spacing-lg) var(--layout-page-margin);
+  padding: var(--spacing-sm) var(--layout-page-margin);
   margin-left: calc(-1 * var(--layout-page-margin));
   margin-right: calc(-1 * var(--layout-page-margin));
 }
 
 @media (min-width: 1024px) {
   .accordionStep {
-    padding: var(--spacing-lg) 0;
+    padding: var(--spacing-sm) 0;
     margin-left: 0;
     margin-right: 0;
   }
@@ -807,11 +827,18 @@
 
 .accordionCompletedCard {
   background: var(--colors-surface-primary);
-  padding: var(--spacing-lg);
+  padding: var(--spacing-md);
   border-radius: var(--radius-sm);
   display: flex;
   flex-direction: column;
   gap: var(--spacing-md);
+  border: 1px solid var(--border-color);
+}
+
+@media (min-width: 1024px) {
+  .accordionCompletedCard {
+    padding: var(--spacing-lg);
+  }
 }
 
 .accordionCompletedHeader {

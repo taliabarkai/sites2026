@@ -387,9 +387,10 @@ interface OrderSummaryProps {
   selectedShipping?: 'free' | 'standard'
   hideHeader?:       boolean
   hideBenefits?:     boolean
+  taxAmount?:        number | null
 }
 
-function OrderSummary({ items, icons, brand, onOpenGiftPanel, onOpenGiftModal, savedGifts, onRemoveSavedGift, showDetails, subtotal = 0, selectedShipping = 'free', hideHeader, hideBenefits }: OrderSummaryProps) {
+function OrderSummary({ items, icons, brand, onOpenGiftPanel, onOpenGiftModal, savedGifts, onRemoveSavedGift, showDetails, subtotal = 0, selectedShipping = 'free', hideHeader, hideBenefits, taxAmount }: OrderSummaryProps) {
   const [promoCode,    setPromoCode]    = useState('')
   const [promoApplied, setPromoApplied] = useState(false)
   const [appliedCode,  setAppliedCode]  = useState('')
@@ -397,7 +398,7 @@ function OrderSummary({ items, icons, brand, onOpenGiftPanel, onOpenGiftModal, s
   const { ShippingIcon, ReturnIcon, WarrantyIcon, CouponIcon, XIcon } = icons
   const shippingCost   = selectedShipping === 'standard' ? 500 : 0
   const discountAmount = promoApplied ? Math.round(subtotal * 0.20) : 0
-  const orderTotal     = subtotal + shippingCost - discountAmount
+  const orderTotal     = subtotal + shippingCost - discountAmount + (taxAmount ?? 0)
 
   const handleApplyPromo = () => {
     if (promoCode.trim()) {
@@ -494,7 +495,10 @@ function OrderSummary({ items, icons, brand, onOpenGiftPanel, onOpenGiftModal, s
             )}
             <div className={styles.totalRow}>
               <span className={styles.totalLabel}>Tax:</span>
-              <span className={styles.totalValueMuted}>Not calculated</span>
+              {taxAmount != null
+                ? <span className={styles.totalValue}>{formatPrice(taxAmount)}</span>
+                : <span className={styles.totalValueMuted}>Not calculated</span>
+              }
             </div>
           </div>
 
@@ -635,7 +639,8 @@ function CheckoutPageInner() {
   // ── Derived ─────────────────────────────────────────────────────────────────
   const shippingCost   = selectedShipping === 'standard' ? 500 : 0
   const discountAmount = promoApplied ? Math.round(subtotal * 0.20) : 0
-  const orderTotal     = subtotal + shippingCost - discountAmount
+  const taxAmount      = isCompleted(1) ? Math.round(subtotal * 0.08) : null
+  const orderTotal     = subtotal + shippingCost - discountAmount + (taxAmount ?? 0)
 
   const step1Valid = email.trim() !== '' && firstName.trim() !== '' && lastName.trim() !== ''
     && streetAddress.trim() !== '' && city.trim() !== '' && addrState.trim() !== '' && zipCode.trim() !== ''
@@ -690,6 +695,7 @@ function CheckoutPageInner() {
     onOpenGiftModal: setGiftModalItemId,
     savedGifts,
     onRemoveSavedGift: handleRemoveSavedGift,
+    taxAmount,
   }
 
   return (
@@ -941,6 +947,88 @@ function CheckoutPageInner() {
                 </div>
               </AccordionStep>
 
+              {/* Mini order summary — mobile only, shown after shipping is confirmed */}
+              {isCompleted(2) && (
+                <div className={styles.mobileInterStepSummary}>
+                  <div className={styles.summaryHeader}>
+                    <h2 className={styles.summaryTitle}>Order Summary</h2>
+                    <span className={styles.itemCount}>{items.length} {items.length === 1 ? 'item' : 'items'}</span>
+                  </div>
+                  <div className={styles.promoRow}>
+                    <span className={styles.promoQuestion}>
+                      <CouponIcon size={16} />
+                      Have a promo code?
+                    </span>
+                    {promoApplied ? (
+                      <div className={styles.promoAppliedWrap}>
+                        <div className={styles.appliedPromoBox}>
+                          <span className={styles.appliedPromoIcon}><CouponIcon size={16} /></span>
+                          <span className={styles.appliedPromoCode}>{appliedPromoCode}</span>
+                          <button type="button" className={styles.removePromoBtn} onClick={handleRemoveMobilePromo} aria-label="Remove promo code">
+                            <XIcon size={16} />
+                          </button>
+                        </div>
+                        <p className={styles.promoSuccessMsg}>You saved 20% with this coupon.</p>
+                      </div>
+                    ) : (
+                      <div className={styles.storeCreditRow}>
+                        <div className={styles.storeCreditInput}>
+                          <input
+                            type="text"
+                            placeholder="Promo code"
+                            value={promoCode}
+                            onChange={e => setPromoCode(e.target.value)}
+                            onKeyDown={e => e.key === 'Enter' && handleApplyMobilePromo()}
+                            className={styles.input}
+                            aria-label="Promo code"
+                          />
+                        </div>
+                        <Button variant="primary" className={styles.applyButton} onClick={handleApplyMobilePromo}>Apply</Button>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className={styles.totalsRows}>
+                    <div className={styles.totalRow}>
+                      <span className={styles.totalLabel}>Subtotal:</span>
+                      <span className={styles.totalValue}>{formatPrice(subtotal)}</span>
+                    </div>
+                    <div className={styles.totalRow}>
+                      <span className={styles.totalLabel}>Shipping:</span>
+                      <span className={styles.totalValue}>
+                        {selectedShipping === 'free' ? 'Free' : formatPrice(shippingCost)}
+                      </span>
+                    </div>
+                    {promoApplied && (
+                      <div className={styles.totalRow}>
+                        <span className={styles.totalLabel}>Promotional Discounts:</span>
+                        <span className={styles.promoDiscountValue}>
+                          <CouponIcon size={14} />
+                          -{formatPrice(discountAmount)}
+                        </span>
+                      </div>
+                    )}
+                    <div className={styles.totalRow}>
+                      <span className={styles.totalLabel}>Tax:</span>
+                      {taxAmount != null
+                        ? <span className={styles.totalValue}>{formatPrice(taxAmount)}</span>
+                        : <span className={styles.totalValueMuted}>Not calculated</span>
+                      }
+                    </div>
+                  </div>
+
+                  <div className={styles.summaryDivider} />
+
+                  <div className={styles.orderTotalRow}>
+                    <span className={styles.orderTotalLabel}>Order Total:</span>
+                    <span className={styles.orderTotalValue}>{formatPrice(orderTotal)}</span>
+                  </div>
+                  {promoApplied && (
+                    <p className={styles.savingsNote}>You're saving {formatPrice(discountAmount)} on this order!</p>
+                  )}
+                </div>
+              )}
+
               {/* ── Step 3: Payment ── */}
               <AccordionStep
                 title="Payment"
@@ -1031,82 +1119,6 @@ function CheckoutPageInner() {
                       )}
                     </div>
                   </div>
-                </div>
-
-                {/* Promo code / totals / benefits — mobile only (desktop shows these in right column) */}
-                <div className={styles.step3MobileDetails}>
-                  <div className={styles.promoRow}>
-                    <span className={styles.promoQuestion}>
-                      <CouponIcon size={16} />
-                      Have a promo code?
-                    </span>
-                    {promoApplied ? (
-                      <div className={styles.promoAppliedWrap}>
-                        <div className={styles.appliedPromoBox}>
-                          <span className={styles.appliedPromoIcon}><CouponIcon size={16} /></span>
-                          <span className={styles.appliedPromoCode}>{appliedPromoCode}</span>
-                          <button type="button" className={styles.removePromoBtn} onClick={handleRemoveMobilePromo} aria-label="Remove promo code">
-                            <XIcon size={16} />
-                          </button>
-                        </div>
-                        <p className={styles.promoSuccessMsg}>You saved 20% with this coupon.</p>
-                      </div>
-                    ) : (
-                      <div className={styles.storeCreditRow}>
-                        <div className={styles.storeCreditInput}>
-                          <input
-                            type="text"
-                            placeholder="Promo code"
-                            value={promoCode}
-                            onChange={e => setPromoCode(e.target.value)}
-                            onKeyDown={e => e.key === 'Enter' && handleApplyMobilePromo()}
-                            className={styles.input}
-                            aria-label="Promo code"
-                          />
-                        </div>
-                        <Button variant="primary" className={styles.applyButton} onClick={handleApplyMobilePromo}>Apply</Button>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Totals */}
-                  <div className={styles.totalsRows}>
-                    <div className={styles.totalRow}>
-                      <span className={styles.totalLabel}>Subtotal:</span>
-                      <span className={styles.totalValue}>{formatPrice(subtotal)}</span>
-                    </div>
-                    <div className={styles.totalRow}>
-                      <span className={styles.totalLabel}>Shipping:</span>
-                      <span className={styles.totalValue}>
-                        {selectedShipping === 'free' ? 'Free' : formatPrice(shippingCost)}
-                      </span>
-                    </div>
-                    {promoApplied && (
-                      <div className={styles.totalRow}>
-                        <span className={styles.totalLabel}>Promotional Discounts:</span>
-                        <span className={styles.promoDiscountValue}>
-                          <CouponIcon size={14} />
-                          -{formatPrice(discountAmount)}
-                        </span>
-                      </div>
-                    )}
-                    <div className={styles.totalRow}>
-                      <span className={styles.totalLabel}>Tax:</span>
-                      <span className={styles.totalValueMuted}>Not calculated</span>
-                    </div>
-                  </div>
-
-                  <div className={styles.summaryDivider} />
-
-                  <div className={styles.orderTotalRow}>
-                    <span className={styles.orderTotalLabel}>Order Total:</span>
-                    <span className={styles.orderTotalValue}>{formatPrice(orderTotal)}</span>
-                  </div>
-                  {promoApplied && (
-                    <p className={styles.savingsNote}>You're saving {formatPrice(discountAmount)} on this order!</p>
-                  )}
-
-                  <div className={styles.summaryDivider} />
                 </div>
 
                 {/* Place Order */}
