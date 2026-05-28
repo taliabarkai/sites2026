@@ -82,6 +82,7 @@
     border: var(--border-width) solid var(--border-color);
     border-radius: var(--radius-lg);
     padding: var(--spacing-lg);
+    margin-bottom: var(--spacing-lg);
   }
 }
 
@@ -952,8 +953,8 @@
     padding: 0;
     margin-left: 0;
     margin-right: 0;
+    padding: var(--spacing-lg) 0 0;
     border-top: var(--border-width) solid var(--border-color);
-    padding-top: var(--spacing-md);
   }
 }
 
