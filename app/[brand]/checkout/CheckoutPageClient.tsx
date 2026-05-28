@@ -766,14 +766,6 @@ function CheckoutPageInner() {
             {/* ══════════════ LEFT COLUMN ══════════════ */}
             <div className={styles.leftCol}>
 
-              {/* Step breadcrumb */}
-              <StepBreadcrumb
-                currentStep={currentStep}
-                completedSteps={completedSteps}
-                icons={icons}
-                onEditStep={editStep}
-              />
-
               {/* Express checkout — hidden once step 1 is completed */}
               {!isCompleted(1) && (
                 <section className={styles.expressCheckout}>
@@ -786,6 +778,14 @@ function CheckoutPageInner() {
                   <div className={styles.expressDivider}><span>or</span></div>
                 </section>
               )}
+
+              {/* Step breadcrumb */}
+              <StepBreadcrumb
+                currentStep={currentStep}
+                completedSteps={completedSteps}
+                icons={icons}
+                onEditStep={editStep}
+              />
 
               {/* ── Step 1: Contact & Delivery ── */}
               <AccordionStep
