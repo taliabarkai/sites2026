@@ -542,7 +542,7 @@
   flex-direction: column;
   gap: var(--spacing-xxs);
   margin: 0;
-  padding: 0;
+  padding: 0 0 var(--spacing-md) 0;
   list-style: none;
 }
 

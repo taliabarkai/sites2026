@@ -763,7 +763,7 @@ function CheckoutPageInner() {
       {/* Mobile summary bottom sheet */}
       <div className={`${styles.mobileSummarySheet} ${mobileSummaryOpen ? styles.mobileSummarySheetOpen : ''}`} role="dialog" aria-label="Order summary">
         <div className={styles.mobileSummarySheetHeader}>
-          <h2 className={styles.mobileSummarySheetTitle}>Order Summary ({items.length})</h2>
+          <h2 className={styles.mobileSummarySheetTitle}>Order Summary ({items.length} {items.length === 1 ? 'item' : 'items'})</h2>
           <button type="button" className={styles.mobileSummarySheetClose} aria-label="Close order summary" onClick={() => setMobileSummaryOpen(false)}>
             <XIcon size={24} />
           </button>

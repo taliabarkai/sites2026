@@ -159,6 +159,7 @@
 }
 
 .itemImageWrap {
+  display: block;
   width: 148px;
   height: 148px;
   flex-shrink: 0;

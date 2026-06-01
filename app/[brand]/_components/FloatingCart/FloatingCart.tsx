@@ -97,13 +97,13 @@ function CartItemRow({ item, brand, onRemove, onEdit, onGenerateGiftNote, GiftIc
 
       <p className={styles.deliveryGuarantee}>Guaranteed to arrive by Christmas</p>
       <div className={styles.itemMain}>
-        <div className={styles.itemImageWrap}>
+        <Link href={`/${brand}/product`} className={styles.itemImageWrap} tabIndex={-1} aria-hidden="true">
           <img
             src={item.image}
             alt={item.name}
             className={styles.itemImage}
           />
-        </div>
+        </Link>
 
         <div className={styles.itemBody}>
           <p className={styles.itemName}>{item.name}</p>
