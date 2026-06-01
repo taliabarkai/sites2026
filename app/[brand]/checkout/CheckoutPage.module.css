@@ -572,8 +572,8 @@
 .mobileSummaryTopBar {
   position: sticky;
   top: 0;
-  background: var(--colors-surface-primary);
-  border-bottom: var(--border-width) solid var(--border-color);
+  background: var(--colors-background);
+  padding: var(--spacing-sm);
   z-index: var(--z-sticky);
   cursor: pointer;
 }
@@ -589,7 +589,10 @@
   align-items: center;
   justify-content: space-between;
   gap: var(--spacing-sm);
-  padding: var(--spacing-md) var(--layout-page-margin);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: var(--border-width) solid var(--colors-text);
+  border-radius: var(--radius-sm);
+  background: var(--colors-background);
 }
 
 .mobileSummaryTopBarLeft {
