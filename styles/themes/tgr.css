@@ -101,6 +101,7 @@
 
   /* Price */
   --colors-price-selling: var(--tgr-raisin);
+  --colors-star-filled:   var(--tgr-raisin);
 
   /* Cards */
   --colors-card-image-bg: var(--tgr-snow);

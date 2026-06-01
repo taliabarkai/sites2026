@@ -320,7 +320,7 @@
 }
 
 .starFilled {
-  color: var(--colors-text);
+  color: var(--colors-star-filled, var(--colors-text));
 }
 
 .starEmpty {
@@ -410,7 +410,7 @@
   font-family:    var(--typography-rules-text2-font-family);
   font-size:      var(--typography-rules-text2-font-size);
   line-height:    var(--typography-rules-text2-line-height);
-  font-weight:    var(--typography-rules-text2-font-weight, 600);
+  font-weight:    var(--typography-rules-text2-font-weight);
   letter-spacing: var(--typography-rules-text2-letter-spacing, normal);
   color: var(--colors-text);
 }

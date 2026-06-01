@@ -103,6 +103,7 @@
 
   /* Price */
   --colors-price-selling: var(--ib-navy);
+  --colors-star-filled:   var(--ib-navy);
 
   /* Cards */
   --colors-card-image-bg: var(--ib-light-stone);

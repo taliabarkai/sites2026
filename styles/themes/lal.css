@@ -100,6 +100,7 @@
 
   /* Price */
   --colors-price-selling: var(--lal-red);
+  --colors-star-filled:   var(--lal-black);
 
   /* Cards */
   --colors-card-image-bg: var(--lal-white);

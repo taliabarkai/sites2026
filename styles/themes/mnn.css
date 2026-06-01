@@ -125,6 +125,7 @@
 
   /* Price */
   --colors-price-selling: var(--mnn-red);
+  --colors-star-filled:   var(--mnn-dune-yellow);
 
   /* Cards */
   --colors-card-image-bg: var(--mnn-off-white);

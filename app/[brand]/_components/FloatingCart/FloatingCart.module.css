@@ -163,7 +163,6 @@
   height: 148px;
   flex-shrink: 0;
   overflow: hidden;
-  border-radius: var(--radius-sm);
   background-color: var(--product-image-background-blend);
 }
 

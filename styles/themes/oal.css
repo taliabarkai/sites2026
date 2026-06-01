@@ -102,6 +102,7 @@
 
   /* Price */
   --colors-price-selling: var(--oal-black);
+  --colors-star-filled:   var(--oal-black);
 
   /* Cards */
   --colors-card-image-bg: var(--oal-white);
