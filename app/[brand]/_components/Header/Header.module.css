@@ -4,6 +4,11 @@
   z-index: var(--z-header);
 }
 
+.wrapperStatic {
+  position: relative;
+  z-index: var(--z-header);
+}
+
 .shell {
   display: flex;
   flex-direction: column;

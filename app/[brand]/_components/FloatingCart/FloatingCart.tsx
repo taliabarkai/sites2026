@@ -123,7 +123,10 @@ function CartItemRow({ item, brand, onRemove, onEdit, onGenerateGiftNote, GiftIc
                 aria-expanded={detailsOpen}
                 onClick={() => setDetailsOpen(o => !o)}
               >
-                View Details <DropdownIcon size={16} />
+                View Details{' '}
+                <span style={{ display: 'inline-flex', transform: detailsOpen ? 'rotate(-90deg)' : 'rotate(90deg)', transition: 'transform var(--transition-fast)' }}>
+                  <DropdownIcon size={24} />
+                </span>
               </button>
               {detailsOpen && (
                 <dl className={styles.optionsList}>

@@ -683,7 +683,7 @@
 }
 
 .stepBreadcrumbCompleted {
-  color: var(--colors-text);
+  color: var(--colors-text-secondary);
   background: none;
   border: none;
   padding: 0;
@@ -996,7 +996,7 @@
 
 @media (min-width: 1024px) {
   .expressCheckout {
-    padding: 0;
+    padding: 0 0 var(--spacing-lg) 0;
     margin-left: 0;
     margin-right: 0;
   }
@@ -1530,8 +1530,7 @@
   align-items: center;
   justify-content: space-between;
   gap: var(--spacing-sm);
-  padding: var(--spacing-lg) 0 0 0;
-  border-top: var(--border-width) solid var(--border-color);
+  padding: 0;
   margin-bottom: var(--spacing-md);
 }
 

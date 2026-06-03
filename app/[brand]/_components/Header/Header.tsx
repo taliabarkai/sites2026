@@ -33,6 +33,7 @@ export interface HeaderProps {
   brand?: BrandKey
   navLinks?: NavLink[]
   topline?: ToplineProps
+  sticky?: boolean
 }
 
 export function Header({
@@ -40,6 +41,7 @@ export function Header({
   brand,
   navLinks = DEFAULT_NAV_LINKS,
   topline = DEFAULT_TOPLINE,
+  sticky = true,
 }: HeaderProps) {
   const pathname = usePathname()
   const brandSegment = resolveBrand(brand ?? getBrandFromPathname(pathname))
@@ -62,9 +64,11 @@ export function Header({
   }, [menuOpen])
 
   /* ── Checkout mode: logo only, horizontally centered ── */
+  const wrapperClass = sticky ? styles.wrapper : styles.wrapperStatic
+
   if (isCheckout) {
     return (
-      <header className={styles.wrapper}>
+      <header className={wrapperClass}>
         <div className={`${styles.shell} ${styles.solid}`}>
           <div className={styles.checkoutBarInner}>
             <Link href={logoHref} className={styles.checkoutLogo} aria-label="Home">
@@ -83,7 +87,7 @@ export function Header({
   ].join(' ')
 
   return (
-    <header className={styles.wrapper}>
+    <header className={wrapperClass}>
       <div className={shellClass}>
         <Topline {...topline} />
         <div className={styles.bar}>

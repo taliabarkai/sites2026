@@ -284,7 +284,7 @@
   --typography-rules-headline7-font-family:    var(--font-family-main-regular);
   --typography-rules-headline7-font-size:      14px;
   --typography-rules-headline7-line-height:    18px;
-  --typography-rules-headline7-letter-spacing: 0.5px;
+  --typography-rules-headline7-letter-spacing: 0;
   --typography-rules-headline7-font-weight:    400;
 
   --typography-rules-headline8-font-family:    var(--font-family-tertiary-regular);

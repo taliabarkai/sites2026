@@ -28,6 +28,7 @@ export const DEFAULT_NAV_LINKS: NavLink[] = [
   // { label: 'Gifts', href: '/gifts' },
   { label: 'Best Sellers', href: '/category' },
   // { label: 'Sale', href: '/sale' },
+  { label: 'New In', href: '/category/t2' },
   { label: 'Design System', href: '/styleguide' },
 ]
 

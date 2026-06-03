@@ -12,6 +12,7 @@ import { useCart } from './_context/CartContext'
 import { Footer } from './_components/Footer'
 import { Header } from './_components/Header'
 import { Hero } from './_components/Hero'
+import { ParallaxBanners } from './_components/ParallaxBanners/ParallaxBanners'
 import { FloatingCart } from './_components/FloatingCart'
 import styles from './HomePage.module.css'
 
@@ -57,6 +58,7 @@ function HomePageInner() {
       />
       <main id="main-content">
         <Hero {...hero} transparentHeader={transparentHeader} />
+        <ParallaxBanners />
       </main>
       <Footer columns={footerColumns} />
       <FloatingCart

@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect, useRef } from 'react'
 import { DEFAULT_HERO, HERO_IMAGES } from '../../_config/siteContent'
 import { useCart } from '../../_context/CartContext'
 import { Button } from '../Button'
@@ -37,6 +38,27 @@ export function Hero({
   transparentHeader = false,
 }: HeroProps) {
   const { addItem, openCart } = useCart()
+  const sectionRef = useRef<HTMLElement>(null)
+  const bgRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (window.matchMedia('(max-width: 768px)').matches) return
+
+    const section = sectionRef.current
+    const bg = bgRef.current
+    if (!section || !bg) return
+
+    const onScroll = () => {
+      const rect = section.getBoundingClientRect()
+      const scrolled = -rect.top
+      if (scrolled > -window.innerHeight && scrolled < rect.height) {
+        bg.style.transform = `translateY(${scrolled * 0.35}px)`
+      }
+    }
+
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
 
   const handleAddToBag = () => {
     addItem(DEMO_PRODUCT)
@@ -44,23 +66,24 @@ export function Hero({
   }
 
   const heroClass = [styles.hero, transparentHeader ? styles.heroTransparent : ''].join(' ').trim()
+
   return (
-    <section className={heroClass} aria-labelledby="home-hero-title">
-      <picture className={styles.media}>
-        <source media="(min-width: 768px)" srcSet={imageDesktop} />
-        <img
-          src={imageMobile}
-          alt={imageAlt}
-          className={styles.mediaImage}
-          fetchPriority="high"
-          decoding="async"
-        />
-      </picture>
+    <section ref={sectionRef} className={heroClass} aria-labelledby="home-hero-title">
+      {/* Parallax background layer */}
+      <div
+        ref={bgRef}
+        className={styles.bg}
+        aria-hidden="true"
+        style={{
+          '--bg-mobile': `url('${imageMobile}')`,
+          '--bg-desktop': `url('${imageDesktop}')`,
+        } as React.CSSProperties}
+      />
+
+      {/* Sticky text content — pins to viewport top while section scrolls past */}
       <div className={styles.content}>
         <p className={styles.eyebrow}>{eyebrow}</p>
-        <h1 id="home-hero-title" className={styles.title}>
-          {title}
-        </h1>
+        <h1 id="home-hero-title" className={styles.title}>{title}</h1>
         <p className={styles.description}>{description}</p>
         <div className={styles.actions}>
           <Button href={ctaPrimary.href} variant="primary">

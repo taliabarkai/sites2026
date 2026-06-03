@@ -1,0 +1,107 @@
+/* ── Two-panel parallax section ───────────────────────────────────────────── */
+.section {
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  height: 160vh;
+  margin: 8px;
+}
+
+/* ── Individual panel ─────────────────────────────────────────────────────── */
+.panel {
+  position: relative;
+  flex: 1;
+}
+
+/* ── Background clip wrapper — isolates overflow to the bg layer only ─────── */
+.bgClip {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+/* ── Parallax background ──────────────────────────────────────────────────── */
+.bg {
+  position: absolute;
+  top: -20%;
+  left: 0;
+  right: 0;
+  bottom: -20%;
+  background-size: cover;
+  background-position: center;
+  will-change: transform;
+}
+
+/* ── Sticky text content — vertically centered, left-aligned ─────────────── */
+.content {
+  position: sticky;
+  top: 40%;
+  transform: translateY(-20%);
+  z-index: var(--z-raised);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--spacing-sm);
+  padding-top: 82px;
+  padding-bottom: 0;
+  padding-left: var(--layout-page-margin);
+  padding-right: var(--layout-page-margin);
+  max-width: 50rem;
+}
+
+/* ── Typography ───────────────────────────────────────────────────────────── */
+.eyebrow {
+  margin: 0;
+  font-family:    var(--typography-rules-headline8-font-family);
+  font-size:      var(--typography-rules-headline8-font-size);
+  line-height:    var(--typography-rules-headline8-line-height);
+  font-weight:    var(--typography-rules-headline8-font-weight, 600);
+  letter-spacing: var(--typography-rules-headline8-letter-spacing, 0.12em);
+  text-transform: var(--typography-rules-headline8-text-transform, uppercase);
+  color: var(--colors-text);
+}
+
+.title {
+  margin: 0;
+  font-family:    var(--typography-rules-headline2-font-family);
+  font-size:      var(--typography-rules-headline2-font-size);
+  line-height:    var(--typography-rules-headline2-line-height);
+  font-weight:    var(--typography-rules-headline2-font-weight, normal);
+  letter-spacing: var(--typography-rules-headline2-letter-spacing, normal);
+  text-transform: var(--typography-rules-headline2-text-transform, none);
+  color: var(--colors-text);
+}
+
+/* ── Mobile: stack panels, bottom-left content, 4:5 image ─────────────────── */
+@media (max-width: 768px) {
+  .section {
+    flex-direction: column;
+    height: auto;
+    gap: 8px;
+    margin: 8px
+  }
+
+  .panel {
+    aspect-ratio: 4 / 5;
+    height: auto;
+    min-height: unset;
+  }
+
+  .bg {
+    top: 0;
+    bottom: 0;
+  }
+
+  .content {
+    position: absolute;
+    top: auto;
+    transform: none;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding-top: var(--spacing-md);
+    padding-bottom: var(--spacing-xl);
+    padding-left: var(--layout-page-margin);
+    padding-right: var(--layout-page-margin);
+  }
+}
