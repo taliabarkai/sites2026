@@ -69,9 +69,9 @@
   --ribbon-text:       var(--oal-white);
 
   /* Typography — font families */
-  --font-family-main-regular:      'Inter', sans-serif;
-  --font-family-main-bold:         'Inter', sans-serif;
-  --font-family-main-light:        'Inter', sans-serif;
+  --font-family-main-regular:      'Roboto', sans-serif;
+  --font-family-main-bold:         'Roboto', sans-serif;
+  --font-family-main-light:        'Roboto', sans-serif;
   --font-family-secondary-regular: 'Bebas Neue', sans-serif;
   --font-family-tertiary-regular:  'Akatab', sans-serif;
   --nav-text-transform:            uppercase;

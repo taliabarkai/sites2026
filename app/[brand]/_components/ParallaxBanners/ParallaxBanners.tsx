@@ -50,7 +50,7 @@ export function ParallaxBanners({
       const rect = section.getBoundingClientRect()
       const scrolled = -rect.top
       if (scrolled > -window.innerHeight && scrolled < rect.height) {
-        const offset = `translateY(${scrolled * 0.35}px)`
+        const offset = `translateY(${scrolled * 0.2}px)`
         bg1.style.transform = offset
         bg2.style.transform = offset
       }

@@ -687,17 +687,17 @@ export default function StyleguideClient({ brand }: StyleguideClientProps) {
           <SubLabel label="Font Families" />
           <div style={{ display: 'flex', gap: 40, flexWrap: 'wrap', marginBottom: 28 }}>
             {[
-              { label: '--font-family-main-regular',       varName: '--font-family-main-regular' },
-              { label: '--font-family-main-bold',          varName: '--font-family-main-bold' },
-              { label: '--font-family-main-light',         varName: '--font-family-main-light' },
-              { label: '--font-family-secondary-regular',  varName: '--font-family-secondary-regular' },
-              { label: '--font-family-tertiary-regular',   varName: '--font-family-tertiary-regular' },
-            ].map(({ label, varName }) => (
+              { label: '--font-family-main-regular',       varName: '--font-family-main-regular',      fontWeight: 400 },
+              { label: '--font-family-main-bold',          varName: '--font-family-main-bold',          fontWeight: 700 },
+              { label: '--font-family-main-light',         varName: '--font-family-main-light',         fontWeight: 300 },
+              { label: '--font-family-secondary-regular',  varName: '--font-family-secondary-regular',  fontWeight: 400 },
+              { label: '--font-family-tertiary-regular',   varName: '--font-family-tertiary-regular',   fontWeight: 400 },
+            ].map(({ label, varName, fontWeight }) => (
               <div key={label} style={{ minWidth: 200 }}>
                 <code style={{ fontSize: 9, color: 'var(--colors-text-secondary)', fontFamily: 'monospace', display: 'block', marginBottom: 4 }}>
                   {label}
                 </code>
-                <div style={{ fontFamily: `var(${varName})`, fontSize: 20, color: 'var(--colors-text)' }}>
+                <div style={{ fontFamily: `var(${varName})`, fontWeight, fontSize: 20, color: 'var(--colors-text)' }}>
                   The quick brown fox
                 </div>
               </div>

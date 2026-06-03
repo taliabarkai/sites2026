@@ -279,7 +279,7 @@
   --typography-rules-headline6-line-height:    18px;
   --typography-rules-headline6-letter-spacing: 0.7px;
   --typography-rules-headline6-text-transform: uppercase;
-  --typography-rules-headline6-font-weight:    500;
+  --typography-rules-headline6-font-weight:    600;
 
   --typography-rules-headline7-font-family:    var(--font-family-main-regular);
   --typography-rules-headline7-font-size:      14px;
@@ -299,7 +299,7 @@
   --typography-rules-headline9-line-height:    20px;
   --typography-rules-headline9-letter-spacing: 1px;
   --typography-rules-headline9-text-transform: uppercase;
-  --typography-rules-headline9-font-weight:    500;
+  --typography-rules-headline9-font-weight:    600;
 
   --typography-rules-headline10-font-family:   var(--font-family-main-regular);
   --typography-rules-headline10-font-size:     14px;
@@ -317,7 +317,7 @@
   --typography-rules-headline12-line-height:   26px;
   --typography-rules-headline12-letter-spacing: 0.4px;
   --typography-rules-headline12-text-transform: uppercase;
-  --typography-rules-headline12-font-weight:   500;
+  --typography-rules-headline12-font-weight:   600;
 
   /* Text */
   --typography-rules-text1-font-family:        var(--font-family-main-regular);
@@ -353,7 +353,7 @@
   --typography-rules-text7-font-family:        var(--font-family-main-regular);
   --typography-rules-text7-font-size:          12px;
   --typography-rules-text7-line-height:        16px;
-  --typography-rules-text7-font-weight:        400;
+  --typography-rules-text7-font-weight:        300;
 
   --typography-rules-text8-font-family:        var(--font-family-main-regular);
   --typography-rules-text8-font-size:          10px;
@@ -363,7 +363,7 @@
   --typography-rules-text9-font-family:        var(--font-family-main-bold);
   --typography-rules-text9-font-size:          10px;
   --typography-rules-text9-line-height:        14px;
-  --typography-rules-text9-font-weight:        500;
+  --typography-rules-text9-font-weight:        600;
 
   /* Captions */
   --typography-rules-caption1-font-family:     var(--font-family-main-regular);
@@ -374,7 +374,7 @@
   --typography-rules-caption2-font-family:     var(--font-family-main-bold);
   --typography-rules-caption2-font-size:       12px;
   --typography-rules-caption2-line-height:     16px;
-  --typography-rules-caption2-font-weight:     500;
+  --typography-rules-caption2-font-weight:     600;
 
   /* Paragraphs */
   --typography-rules-paragraph1-font-family:   var(--font-family-main-regular);
@@ -385,12 +385,12 @@
   --typography-rules-paragraph2-font-family:   var(--font-family-main-bold);
   --typography-rules-paragraph2-font-size:     16px;
   --typography-rules-paragraph2-line-height:   21px;
-  --typography-rules-paragraph2-font-weight:   500;
+  --typography-rules-paragraph2-font-weight:   600;
 
   --typography-rules-paragraph3-font-family:   var(--font-family-main-bold);
   --typography-rules-paragraph3-font-size:     16px;
   --typography-rules-paragraph3-line-height:   21px;
-  --typography-rules-paragraph3-font-weight:   500;
+  --typography-rules-paragraph3-font-weight:   600;
 
   --typography-rules-paragraph4-font-family:   var(--font-family-main-regular);
   --typography-rules-paragraph4-font-size:     16px;
@@ -426,7 +426,7 @@
   --typography-rules-disclaimer2-font-family:  var(--font-family-main-bold);
   --typography-rules-disclaimer2-font-size:    10px;
   --typography-rules-disclaimer2-line-height:  14px;
-  --typography-rules-disclaimer2-font-weight:  500;
+  --typography-rules-disclaimer2-font-weight:  600;
 
   /* Ribbons */
   --typography-rules-ribbons1-font-family:     var(--font-family-secondary-regular);
