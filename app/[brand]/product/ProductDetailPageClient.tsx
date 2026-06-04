@@ -431,8 +431,8 @@ function ProductDetailPageInner({ productId }: { productId: number }) {
 
         {/* Two-column layout on desktop, single column on mobile */}
         <div className={styles.layout}>
-          {/* Left: gallery — OAL + TGR use sticky+scroll, others use 2×2 grid */}
-          {(brand === 'oal' || brand === 'tgr')
+          {/* Left: gallery — OAL, TGR, LAL use sticky+scroll; others use 2×2 grid */}
+          {(brand === 'oal' || brand === 'tgr' || brand === 'lal')
             ? <OALDesktopGallery images={images} name={product.name} />
             : <DesktopGallery images={images} name={product.name} />
           }
