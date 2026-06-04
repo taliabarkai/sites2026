@@ -16,6 +16,8 @@ import {
 } from '../_config/siteContent'
 import styles from './CategoryPageT3.module.css'
 import pcStyles from '../_components/ProductCard/ProductCard.module.css'
+import { getBrandProducts } from '../../../data/products/getBrandProducts'
+import type { ProductItem } from '../../../data/products'
 import * as oalIcons from '@/src/components/icons/oal'
 import * as mnnIcons from '@/src/components/icons/mnn'
 import * as tgrIcons from '@/src/components/icons/tgr'
@@ -26,45 +28,7 @@ const BRAND_ICONS = {
   oal: oalIcons, mnn: mnnIcons, tgr: tgrIcons, lal: lalIcons, ib: ibIcons,
 } as const
 
-// ─── Data ─────────────────────────────────────────────────────────────────────
-
-interface Product {
-  id: number
-  name: string
-  price: string
-  originalPrice?: string
-  defaultImage: string
-  hoverImage: string
-}
-
-const products: Product[] = [
-  { id: 1,  name: 'Lock & Luna Charm with Round Cut Moissanite — Gold', price: '$105', defaultImage: 'https://cdn.oakandluna.com/digital-asset/product/lock-luna-charm-with-round-cut-moissanite-gold-vermeil-6.jpg',  hoverImage: 'https://cdn.oakandluna.com/digital-asset/product/lock-luna-charm-with-round-cut-moissanite-gold-vermeil-4.jpg' },
-  { id: 2,  name: 'Engraved Compass Necklace with Diamond — Gold Vermeil', price: '$150', defaultImage: 'https://cdn.oakandluna.com/digital-asset/product/engraved-comprass-necklace-gold-vermeil-1.jpg', hoverImage: 'https://cdn.oakandluna.com/digital-asset/products/engraved-comprass-necklace-gold-vermeil-3.jpg' },
-  { id: 3,  name: 'Willow Tag Initial Necklace with Diamond — Gold Vermeil', price: '$120', defaultImage: 'https://cdn.oakandluna.com/digital-asset/product/willow-tag-initial-necklace-with-diamond-gold-vermeil-6.jpg', hoverImage: 'https://cdn.oakandluna.com/digital-asset/product/willow-tag-initial-necklace-with-diamond-gold-vermeil-10.jpg' },
-  { id: 4,  name: 'Herringbone Engraved Slim Chain Necklace — Gold Vermeil', price: '$95',  defaultImage: 'https://cdn.oakandluna.com/digital-asset/products/herringbone-thin-chain-necklace-gold-vermeil-4.jpg', hoverImage: 'https://cdn.oakandluna.com/digital-asset/products/herringbone-thin-chain-necklace-gold-vermeil-2.jpg' },
-  { id: 5,  name: 'Singapore Chain Name Necklace — Gold Vermeil', price: '$110', defaultImage: 'https://cdn.oakandluna.com/digital-asset/product/singapore-chain-name-necklace-gold-vermeil-8.jpg', hoverImage: 'https://cdn.oakandluna.com/digital-asset/product/singapore-chain-name-necklace-gold-vermeil-9.jpg' },
-  { id: 6,  name: 'Inez Initial Heart Necklace with Diamond — Gold Vermeil', price: '$130', defaultImage: 'https://cdn.oakandluna.com/digital-asset/product/red-heart-inez-initial-necklace-with-diamond-gold-vermeil-2.jpg', hoverImage: 'https://cdn.oakandluna.com/digital-asset/product/red-heart-inez-initial-necklace-with-diamond-gold-vermeil-5.jpg' },
-  { id: 7,  name: 'Initial Lock Necklace — Gold Plated', price: '$85',  defaultImage: 'https://cdn.oakandluna.com/digital-asset/products/initial-lock-necklace-in-vermeil-1.jpg', hoverImage: 'https://cdn.oakandluna.com/digital-asset/products/initial-lock-necklace-in-vermeil-3.jpg' },
-  { id: 8,  name: 'Heart Charm Lock Necklace — Gold Plated', price: '$90',  defaultImage: 'https://cdn.oakandluna.com/digital-asset/product/heart-charm-padlock-necklace-gold-vermeil-16.jpg', hoverImage: 'https://cdn.oakandluna.com/digital-asset/product/heart-charm-padlock-necklace-gold-vermeil-10.jpg' },
-  { id: 9,  name: 'Inez Initial Necklace with Diamonds — Gold Vermeil', price: '$145', defaultImage: 'https://cdn.oakandluna.com/digital-asset/product/inez-initial-necklace-gold-vermeil-with-diamond-12.jpg', hoverImage: 'https://cdn.oakandluna.com/digital-asset/product/inez-initial-necklace-gold-vermeil-with-diamond-9.jpg' },
-  { id: 10, name: 'Pillar Bar Necklace — Gold Plated', price: '$80',  defaultImage: 'https://cdn.oakandluna.com/digital-asset/product/pillar-bar-necklace-18k-gold-vermeil-16.jpg', hoverImage: 'https://cdn.oakandluna.com/digital-asset/product/pillar-bar-necklace-18k-gold-vermeil-24.jpg' },
-  { id: 11, name: 'Engraved Dot Bracelet — Silver', price: '$75',  defaultImage: 'https://cdn.oakandluna.com/digital-asset/product/engraved-dot-bracelet-silver-8.jpg', hoverImage: 'https://cdn.oakandluna.com/digital-asset/product/engraved-dot-bracelet-silver-6.jpg' },
-  { id: 12, name: 'Lock & Luna Charm with Emerald Cut Moissanite — Silver', price: '$115', defaultImage: 'https://cdn.oakandluna.com/digital-asset/product/lock-luna-charm-with-emerald-cut-moissanite-silver-6.jpg', hoverImage: 'https://cdn.oakandluna.com/digital-asset/product/lock-luna-charm-with-emerald-cut-moissanite-silver-4.jpg' },
-  { id: 13, name: 'Belle Custom Name Necklace — Gold Plated', price: '$100', defaultImage: 'https://cdn.oakandluna.com/digital-asset/product/belle-custom-name-necklace-gold-vermeil-33.jpg', hoverImage: 'https://cdn.oakandluna.com/digital-asset/product/belle-custom-name-necklace-gold-vermeil-35.jpg' },
-  { id: 14, name: 'Singapore Chain Name Necklace with Heart Shaped Gemstone — Gold Vermeil', price: '$135', defaultImage: 'https://cdn.oakandluna.com/digital-asset/product/singapore-chain-name-necklace-with-pink-heart-mosinight-gold-vermeil-13.jpg', hoverImage: 'https://cdn.oakandluna.com/digital-asset/product/singapore-chain-name-necklace-with-pink-heart-mosinight-gold-vermeil-15.jpg' },
-  { id: 15, name: 'Ivy Name Paperclip Chain Bracelet — Gold Plated', price: '$88',  defaultImage: 'https://cdn.oakandluna.com/digital-asset/products/ivy-name-link-chain-bracelet-gold-plating-8.jpg', hoverImage: 'https://cdn.oakandluna.com/digital-asset/products/ivy-name-link-chain-bracelet-gold-plating-11.jpg' },
-  { id: 16, name: 'Multiple Name Necklace — Gold Vermeil', price: '$125', defaultImage: 'https://cdn.oakandluna.com/digital-asset/products/multiple-name-necklace-vermeil-gold-plated-1.jpg', hoverImage: 'https://cdn.oakandluna.com/digital-asset/products/multiple-name-necklace-vermeil-gold-plated-3.jpg' },
-  { id: 17, name: 'Mon Petit Name Necklace — Gold Plated', price: '$92',  defaultImage: 'https://cdn.oakandluna.com/digital-asset/products/mon-petit-name-necklace-vermeil-gold-plated-14.jpg', hoverImage: 'https://cdn.oakandluna.com/digital-asset/product/mon-petit-name-necklace-gold-plated-1.jpg' },
-  { id: 18, name: 'Bubble Up Initial Necklace — Gold Plated', price: '$78',  defaultImage: 'https://cdn.oakandluna.com/digital-asset/product/bubble-up-initial-necklace-gold-vermeil-6.jpg', hoverImage: 'https://cdn.oakandluna.com/digital-asset/product/bubble-up-initial-necklace-gold-vermeil-4.jpg' },
-  { id: 19, name: 'Petite Paperclip Necklace with Moissanite — Gold Plated', price: '$98',  defaultImage: 'https://cdn.oakandluna.com/digital-asset/products/petite-paperclip-necklace-with-diamond-gold-vermeil-1.jpg', hoverImage: 'https://cdn.oakandluna.com/digital-asset/product/petite-paperclip-necklace-with-diamond-gold-vermeil-5.jpg' },
-  { id: 20, name: 'Puffy Heart Pendant — Gold Plated', price: '$72',  defaultImage: 'https://cdn.oakandluna.com/digital-asset/product/puffy-heart-pendant-gold-1.jpg', hoverImage: 'https://cdn.oakandluna.com/digital-asset/product/puffy-heart-pendant-gold-2.jpg' },
-  { id: 21, name: 'Willow Disc Initial Necklace — Gold Vermeil', price: '$108', defaultImage: 'https://cdn.oakandluna.com/digital-asset/product/willow-disc-initial-necklace-gold-vermeil-9.jpg', hoverImage: 'https://cdn.oakandluna.com/digital-asset/product/willow-disc-initial-necklace-gold-vermeil-13.jpg' },
-  { id: 22, name: 'Ivy Name Paperclip Chain Necklace with Sparkling Stones — Gold Plated', price: '$118', defaultImage: 'https://cdn.oakandluna.com/digital-asset/product/ivy-name-link-chain-necklace-gold-plated-with-birthstones-1.jpg', hoverImage: 'https://cdn.oakandluna.com/digital-asset/product/ivy-name-link-chain-necklace-gold-plated-with-birthstones-3.jpg' },
-  { id: 23, name: 'The Charmer Coins & Initials Necklace — Gold Plated', price: '$140', defaultImage: 'https://cdn.oakandluna.com/digital-asset/product/the-charmer-coins-initials-necklace-gold-vermeil-1.jpg', hoverImage: 'https://cdn.oakandluna.com/digital-asset/product/the-charmer-coins-initials-necklace-gold-vermeil-3.jpg' },
-  { id: 24, name: 'My Signature Initial — Gold', price: '$95',  defaultImage: 'https://cdn.oakandluna.com/digital-asset/product/my-signature-initial-gold-vermeil-10.jpg', hoverImage: 'https://cdn.oakandluna.com/digital-asset/product/my-signature-initial-gold-vermeil-4.jpg' },
-  { id: 25, name: 'Initial Necklace — Gold Plated', price: '$82',  defaultImage: 'https://cdn.oakandluna.com/digital-asset/product/initial-necklace-gold-vermeil-8.jpg', hoverImage: 'https://cdn.oakandluna.com/digital-asset/product/initial-necklace-gold-vermeil-14.jpg' },
-  { id: 26, name: 'Inez Initial Necklace — Gold Plated', price: '$79',  defaultImage: 'https://cdn.oakandluna.com/digital-asset/products/inez-initial-necklace-gold-plated-2.jpg', hoverImage: 'https://cdn.oakandluna.com/digital-asset/product/inez-initial-necklace-gold-plated-1.jpg' },
-]
+// ─── Data — sourced from data/products registry ────────────────────────────
 
 const MATERIAL_FILTERS = [
   { key: 'silver',  label: 'Silver',       swatchVar: 'var(--sterling-silver-925)' },
@@ -90,40 +54,14 @@ const DEFAULT_PRODUCT_SWATCHES = [
   'var(--rose-gold-plating-18k)',
 ]
 
-// ─── T3: Featured product data ────────────────────────────────────────────
-
-const featuredProducts: Product[] = [
-  {
-    id: 100,
-    name: 'Willow Tag Initial Necklace with Diamond — Gold Vermeil',
-    price: '$120',
-    defaultImage: 'https://cdn.oakandluna.com/digital-asset/product/willow-tag-initial-necklace-with-diamond-gold-vermeil-6.jpg',
-    hoverImage:   'https://cdn.oakandluna.com/digital-asset/product/willow-tag-initial-necklace-with-diamond-gold-vermeil-10.jpg',
-  },
-  {
-    id: 101,
-    name: 'Singapore Chain Name Necklace — Gold Vermeil',
-    price: '$110',
-    defaultImage: 'https://cdn.oakandluna.com/digital-asset/product/singapore-chain-name-necklace-gold-vermeil-8.jpg',
-    hoverImage:   'https://cdn.oakandluna.com/digital-asset/product/singapore-chain-name-necklace-gold-vermeil-9.jpg',
-  },
-  {
-    id: 102,
-    name: 'Lock & Luna Charm with Round Cut Moissanite — Gold Vermeil',
-    price: '$105',
-    defaultImage: 'https://cdn.oakandluna.com/digital-asset/product/lock-luna-charm-with-round-cut-moissanite-gold-vermeil-6.jpg',
-    hoverImage:   'https://cdn.oakandluna.com/digital-asset/product/lock-luna-charm-with-round-cut-moissanite-gold-vermeil-4.jpg',
-  },
-]
-
 // ─── T3: Rhythm group types ────────────────────────────────────────────────
 
 type RhythmGroup =
-  | { type: 'A'; cards: Product[]; featured: Product }
-  | { type: 'B'; cards: Product[] }
-  | { type: 'C'; cards: Product[]; featured: Product }
+  | { type: 'A'; cards: ProductItem[]; featured: ProductItem }
+  | { type: 'B'; cards: ProductItem[] }
+  | { type: 'C'; cards: ProductItem[]; featured: ProductItem }
 
-function buildRhythmGroups(allProducts: Product[]): RhythmGroup[] {
+function buildRhythmGroups(allProducts: ProductItem[], featuredProducts: ProductItem[]): RhythmGroup[] {
   const groups: RhythmGroup[] = []
   let pi = 0
   let fi = 0
@@ -161,7 +99,7 @@ function FeaturedCard({
   swatches,
   slotClassName,
 }: {
-  product: Product
+  product: ProductItem
   swatches?: string[]
   slotClassName: string
 }) {
@@ -169,13 +107,13 @@ function FeaturedCard({
     <article className={`${styles.featuredCard} ${slotClassName}`}>
       {/* Model image as default; packshot on hover */}
       <img
-        src={product.hoverImage ?? product.defaultImage}
+        src={product.hoverImage ?? product.image}
         alt={product.name}
         className={`${styles.featuredCardImage} ${styles.featuredCardImageDefault}`}
         loading="lazy"
       />
       <img
-        src={product.defaultImage}
+        src={product.image}
         alt=""
         aria-hidden="true"
         className={`${styles.featuredCardImage} ${styles.featuredCardImageHover}`}
@@ -407,7 +345,10 @@ function CategoryPageInnerT3() {
   const { items, isOpen, subtotal, closeCart, removeItem } = useCart()
   const router = useRouter()
 
-  const rhythmGroups = buildRhythmGroups(products)
+  const allBrandProducts = getBrandProducts(brand)
+  const featuredProducts = allBrandProducts.slice(0, 3)
+  const products = allBrandProducts.slice(3)
+  const rhythmGroups = buildRhythmGroups(products, featuredProducts)
 
   return (
     <div className={styles.page}>
@@ -417,7 +358,7 @@ function CategoryPageInnerT3() {
         <CategoryHero brand={brand} />
 
         <FilterBar
-          itemCount={products.length}
+          itemCount={allBrandProducts.length}
           onOpenFilters={() => setFilterPanelOpen(true)}
           FilterIcon={FilterIcon}
         />
@@ -432,11 +373,11 @@ function CategoryPageInnerT3() {
                       <ProductCard
                         key={p.id}
                         name={p.name}
-                        price={p.price}
+                        price={p.price ?? ''}
                         originalPrice={p.originalPrice}
-                        defaultImage={p.defaultImage}
+                        defaultImage={p.image}
                         hoverImage={p.hoverImage}
-                        href={`/${brand}/product/${p.id}`}
+                        href={`/${brand}${p.href}`}
                         swatches={brand !== 'lal' ? DEFAULT_PRODUCT_SWATCHES : undefined}
                       />
                     ))}
@@ -457,11 +398,11 @@ function CategoryPageInnerT3() {
                       <ProductCard
                         key={p.id}
                         name={p.name}
-                        price={p.price}
+                        price={p.price ?? ''}
                         originalPrice={p.originalPrice}
-                        defaultImage={p.defaultImage}
+                        defaultImage={p.image}
                         hoverImage={p.hoverImage}
-                        href={`/${brand}/product/${p.id}`}
+                        href={`/${brand}${p.href}`}
                         swatches={brand !== 'lal' ? DEFAULT_PRODUCT_SWATCHES : undefined}
                       />
                     ))}
@@ -482,11 +423,11 @@ function CategoryPageInnerT3() {
                     <ProductCard
                       key={p.id}
                       name={p.name}
-                      price={p.price}
+                      price={p.price ?? ''}
                       originalPrice={p.originalPrice}
-                      defaultImage={p.defaultImage}
+                      defaultImage={p.image}
                       hoverImage={p.hoverImage}
-                      href={`/${brand}/product/${p.id}`}
+                      href={`/${brand}${p.href}`}
                       swatches={brand !== 'lal' ? DEFAULT_PRODUCT_SWATCHES : undefined}
                     />
                   ))}

@@ -14,7 +14,8 @@ import {
   DEFAULT_NAV_LINKS,
   DEFAULT_TOPLINE,
 } from '../_config/siteContent'
-import { PRODUCTS, DEFAULT_PRODUCT_SWATCHES } from '../_config/products'
+import { DEFAULT_PRODUCT_SWATCHES } from '../_config/products'
+import { getBrandProducts } from '../../../data/products/getBrandProducts'
 import * as oalIcons from '@/src/components/icons/oal'
 import * as mnnIcons from '@/src/components/icons/mnn'
 import * as tgrIcons from '@/src/components/icons/tgr'
@@ -281,22 +282,22 @@ function CategoryPageInner() {
         <CategoryHero brand={brand} />
 
         <FilterBar
-          itemCount={PRODUCTS.length}
+          itemCount={getBrandProducts(brand).length}
           onOpenFilters={() => setFilterPanelOpen(true)}
           FilterIcon={FilterIcon}
         />
 
         <section className={styles.productsSection} aria-label="Products">
           <div className={styles.productsGrid}>
-            {PRODUCTS.map((p) => (
+            {getBrandProducts(brand).map((p) => (
               <ProductCard
                 key={p.id}
                 name={p.name}
-                price={p.price}
+                price={p.price ?? ''}
                 originalPrice={p.originalPrice}
-                defaultImage={p.defaultImage}
+                defaultImage={p.image}
                 hoverImage={p.hoverImage}
-                href={`/${brand}/product/${p.id}`}
+                href={`/${brand}${p.href}`}
                 swatches={brand !== 'lal' ? DEFAULT_PRODUCT_SWATCHES : undefined}
               />
             ))}
