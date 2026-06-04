@@ -106,6 +106,11 @@
   --colors-card-image-bg: var(--lal-white);
   --product-image-background-blend: transparent;
 
+  /* SEO category pills */
+  --related-category-background:  var(--lal-light-grey);
+  --related-category-text:        var(--colors-text);
+  --related-category-hover-text:  var(--lal-black);
+
   /* Form field extras */
   --form-field-border-color-hover: var(--lal-black);
   --form-field-border-radius:      8px;

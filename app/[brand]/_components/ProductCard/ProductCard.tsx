@@ -63,12 +63,14 @@ export function ProductCard({
           </ul>
         )}
         <p className={styles.name}>{name}</p>
-        <div className={styles.prices}>
-          {originalPrice && (
-            <span className={styles.priceOriginal}>{originalPrice}</span>
-          )}
-          <span className={styles.price}>{price}</span>
-        </div>
+        {price && (
+          <div className={styles.prices}>
+            {originalPrice && (
+              <span className={styles.priceOriginal}>{originalPrice}</span>
+            )}
+            <span className={styles.price}>{price}</span>
+          </div>
+        )}
       </div>
     </>
   )

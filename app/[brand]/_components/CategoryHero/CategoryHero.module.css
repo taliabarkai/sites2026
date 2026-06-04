@@ -1,0 +1,235 @@
+/* ── SEO / hero banner ────────────────────────────────────────────────────── */
+
+/* Default layout — all brands except OAL: centered column */
+.hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-lg);
+  padding: var(--spacing-xl) var(--layout-page-margin);
+  text-align: center;
+  background-color: var(--colors-background);
+}
+
+/* OAL layout — text left / images right on desktop, stacked on mobile */
+.heroOal {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--spacing-lg);
+  padding: var(--spacing-xl) var(--layout-page-margin);
+  background-color: var(--colors-background);
+}
+
+@media (min-width: 768px) {
+  .heroOal {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+/* OAL text block — constrained width on desktop */
+.heroTextOal {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+
+@media (min-width: 768px) {
+  .heroTextOal {
+    flex: 0 0 36%;
+    max-width: 36%;
+  }
+}
+
+.heroTitle {
+  margin: 0 0 var(--spacing-xs) 0;
+  font-family:    var(--typography-rules-headline2-font-family);
+  font-size:      var(--typography-rules-headline2-font-size);
+  line-height:    var(--typography-rules-headline2-line-height);
+  font-weight:    var(--typography-rules-headline2-font-weight, normal);
+  letter-spacing: var(--typography-rules-headline2-letter-spacing, normal);
+  text-transform: var(--typography-rules-headline2-text-transform, none);
+  color: var(--colors-text);
+}
+
+.heroDescription {
+  margin: 0;
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  font-weight:    var(--typography-rules-text1-font-weight, normal);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+  color: var(--colors-text);
+}
+
+/* ── with-image variant: category image grid ─────────────────────────────── */
+
+/* OAL: horizontal scroll on mobile → flex-wrap on desktop */
+.categoryContainerOal {
+  display: flex;
+  flex-direction: row;
+  gap: var(--spacing-xs);
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  width: 100%;
+}
+
+.categoryContainerOal::-webkit-scrollbar {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .categoryContainerOal {
+    flex-wrap: wrap;
+    overflow: visible;
+    padding-bottom: 0;
+  }
+}
+
+/* Default brands: single centered flex row, scrollable on mobile */
+.categoryContainerDefault {
+  display: flex;
+  flex-direction: row;
+  gap: var(--spacing-xs);
+  justify-content: center;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  width: 100%;
+}
+
+.categoryContainerDefault::-webkit-scrollbar {
+  display: none;
+}
+
+.categoryItem {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xxs);
+  flex-shrink: 0;
+  align-items: flex-start;
+}
+
+.categoryContainerOal .categoryItem {
+  min-width: calc(46vw - var(--spacing-lg));
+}
+
+@media (min-width: 768px) {
+  .categoryContainerOal .categoryItem {
+    min-width: unset;
+    flex-shrink: unset;
+  }
+}
+
+.categoryContainerDefault .categoryItem {
+  width: 160px;
+}
+
+.categoryImageWrap {
+  width: 100%;
+  max-width: 160px;
+  overflow: hidden;
+}
+
+.categoryImage {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  display: block;
+}
+
+.categoryLabel {
+  display: block;
+  width: 100%;
+  font-family:    var(--typography-rules-headline7-font-family);
+  font-size:      var(--typography-rules-headline7-font-size);
+  line-height:    var(--typography-rules-headline7-line-height);
+  font-weight:    var(--typography-rules-headline7-font-weight, normal);
+  letter-spacing: var(--typography-rules-headline7-letter-spacing, normal);
+  text-transform: var(--typography-rules-headline7-text-transform, none);
+  color: var(--colors-text);
+  text-align: left;
+}
+
+/* ── text-only variant: pill container ───────────────────────────────────── */
+
+.pillContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+  justify-content: center;
+}
+
+/* OAL: left-aligned (inside the heroOal flex row) */
+.heroOal .pillContainer {
+  justify-content: flex-start;
+}
+
+/* ── Pill ─────────────────────────────────────────────────────────────────── */
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--spacing-xs) var(--spacing-lg);
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border-color);
+  background: var(--related-category-background);
+  color: var(--related-category-text);
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  font-weight:    var(--typography-rules-text1-font-weight, normal);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+  transition: var(--transition-base);
+  cursor: pointer;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.pill:hover {
+  background: var(--colors-brand-default-primary);
+  color: var(--related-category-hover-text, var(--colors-text-inverse));
+  border-color: var(--colors-brand-default-primary);
+}
+
+/* ── Mobile overrides ─────────────────────────────────────────────────────── */
+
+@media (max-width: 768px) {
+  /* Default hero: left-align text on mobile */
+  .hero {
+    text-align: left;
+    align-items: flex-start;
+  }
+
+  /* Default carousel: break out of hero padding, bleed to screen edges */
+  .categoryContainerDefault {
+    justify-content: flex-start;
+    width: calc(100% + 2 * var(--layout-page-margin));
+    margin-left: calc(-1 * var(--layout-page-margin));
+    margin-right: 0;
+    padding-left: var(--layout-page-margin);
+    padding-right: 0;
+  }
+
+  .categoryContainerDefault .categoryItem {
+    width: 150px;
+  }
+
+  .categoryImageWrap {
+    max-width: 150px;
+  }
+
+  /* OAL carousel: same edge-to-edge bleed */
+  .categoryContainerOal {
+    width: calc(100% + 2 * var(--layout-page-margin));
+    margin-left: calc(-1 * var(--layout-page-margin));
+    margin-right: 0;
+    padding-left: var(--layout-page-margin);
+    padding-right: 0;
+  }
+
+  /* Pills wrap naturally — no changes needed on mobile */
+}

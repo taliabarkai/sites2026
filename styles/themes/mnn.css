@@ -131,6 +131,11 @@
   --colors-card-image-bg: var(--mnn-off-white);
   --product-image-background-blend: var(--mnn-off-white);
 
+  /* SEO category pills — closest available light neutral; update when MNN palette expands */
+  --related-category-background:  var(--mnn-oyster);
+  --related-category-text:        var(--colors-text);
+  --related-category-hover-text:  var(--colors-text-inverse);
+
   /* Form field extras */
   --form-field-border-color-hover: var(--mnn-black);
   --form-field-border-radius:      4px;

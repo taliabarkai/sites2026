@@ -109,6 +109,11 @@
   --colors-card-image-bg: var(--ib-light-stone);
   --product-image-background-blend: var(--ib-light-stone);
 
+  /* SEO category pills */
+  --related-category-background:  var(--ib-off-white); /* lightest neutral available */
+  --related-category-text:        var(--colors-text);
+  --related-category-hover-text:  var(--colors-text-inverse);
+
   /* Form field extras */
   --form-field-border-color-hover: var(--ib-navy);
   --form-field-border-radius:      4px;

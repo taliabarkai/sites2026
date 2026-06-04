@@ -241,43 +241,43 @@
 
   /* Headlines */
   --typography-rules-headline1-font-family:    var(--font-family-secondary-regular);
-  --typography-rules-headline1-font-size:      60px;
-  --typography-rules-headline1-line-height:    58px;
-  --typography-rules-headline1-letter-spacing: 1.2px;
+  --typography-rules-headline1-font-size:      80px;
+  --typography-rules-headline1-line-height:    65px;
+  --typography-rules-headline1-letter-spacing: 0;
   --typography-rules-headline1-text-transform: uppercase;
   --typography-rules-headline1-font-weight:    400;
 
   --typography-rules-headline2-font-family:    var(--font-family-secondary-regular);
-  --typography-rules-headline2-font-size:      48px;
-  --typography-rules-headline2-line-height:    46px;
-  --typography-rules-headline2-letter-spacing: 1px;
+  --typography-rules-headline2-font-size:      72px;
+  --typography-rules-headline2-line-height:    60px;
+  --typography-rules-headline2-letter-spacing: 0;
   --typography-rules-headline2-text-transform: uppercase;
   --typography-rules-headline2-font-weight:    400;
 
   --typography-rules-headline3-font-family:    var(--font-family-secondary-regular);
-  --typography-rules-headline3-font-size:      28px;
-  --typography-rules-headline3-line-height:    26px;
-  --typography-rules-headline3-letter-spacing: 1px;
+  --typography-rules-headline3-font-size:      52px;
+  --typography-rules-headline3-line-height:    40px;
+  --typography-rules-headline3-letter-spacing: 0;
   --typography-rules-headline3-text-transform: uppercase;
   --typography-rules-headline3-font-weight:    400;
 
   --typography-rules-headline4-font-family:    var(--font-family-secondary-regular);
   --typography-rules-headline4-font-size:      32px;
   --typography-rules-headline4-line-height:    32px;
-  --typography-rules-headline4-letter-spacing: 0.4px;
+  --typography-rules-headline4-letter-spacing: 0;
   --typography-rules-headline4-text-transform: uppercase;
   --typography-rules-headline4-font-weight:    400;
 
   --typography-rules-headline5-font-family:    var(--font-family-main-regular);
   --typography-rules-headline5-font-size:      20px;
   --typography-rules-headline5-line-height:    26px;
-  --typography-rules-headline5-letter-spacing: 0.4px;
+  --typography-rules-headline5-letter-spacing: 0;
   --typography-rules-headline5-font-weight:    400;
 
   --typography-rules-headline6-font-family:    var(--font-family-main-bold);
   --typography-rules-headline6-font-size:      14px;
   --typography-rules-headline6-line-height:    18px;
-  --typography-rules-headline6-letter-spacing: 0.7px;
+  --typography-rules-headline6-letter-spacing: 0;
   --typography-rules-headline6-text-transform: uppercase;
   --typography-rules-headline6-font-weight:    600;
 
@@ -290,14 +290,14 @@
   --typography-rules-headline8-font-family:    var(--font-family-tertiary-regular);
   --typography-rules-headline8-font-size:      14px;
   --typography-rules-headline8-line-height:    16px;
-  --typography-rules-headline8-letter-spacing: 0.7px;
+  --typography-rules-headline8-letter-spacing: 0;
   --typography-rules-headline8-text-transform: uppercase;
   --typography-rules-headline8-font-weight:    700;
 
   --typography-rules-headline9-font-family:    var(--font-family-main-bold);
   --typography-rules-headline9-font-size:      14px;
   --typography-rules-headline9-line-height:    20px;
-  --typography-rules-headline9-letter-spacing: 1px;
+  --typography-rules-headline9-letter-spacing: 0;
   --typography-rules-headline9-text-transform: uppercase;
   --typography-rules-headline9-font-weight:    600;
 
@@ -315,7 +315,7 @@
   --typography-rules-headline12-font-family:   var(--font-family-main-bold);
   --typography-rules-headline12-font-size:     20px;
   --typography-rules-headline12-line-height:   26px;
-  --typography-rules-headline12-letter-spacing: 0.4px;
+  --typography-rules-headline12-letter-spacing: 0;
   --typography-rules-headline12-text-transform: uppercase;
   --typography-rules-headline12-font-weight:   600;
 
@@ -440,8 +440,8 @@
   [data-theme="oal"] {
     --typography-rules-headline1-font-size:    100px;
     --typography-rules-headline1-line-height:  90px;
-    --typography-rules-headline2-font-size:    60px;
-    --typography-rules-headline2-line-height:  58px;
+    --typography-rules-headline2-font-size:    72px;
+    --typography-rules-headline2-line-height:  72px;
     --typography-rules-headline3-font-size:    40px;
     --typography-rules-headline3-line-height:  38px;
     --typography-rules-headline8-font-size:    16px;

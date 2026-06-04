@@ -17,13 +17,14 @@ import { getBrandFromPathname } from '../_config/brands'
 import { prefixFooterColumns, prefixNavLinks, withBrandPrefix } from '../_config/brandPaths'
 import { DEFAULT_FOOTER_COLUMNS, DEFAULT_NAV_LINKS, DEFAULT_TOPLINE } from '../_config/siteContent'
 import {
-  PRODUCTS,
   MATERIAL_SWATCHES,
   CHAIN_LENGTHS,
   DEFAULT_CHAIN_LENGTH,
   MAX_ENGRAVE_CHARS,
 } from '../_config/products'
 import type { MaterialSwatch } from '../_config/products'
+import { getBrandProducts } from '../../../data/products/getBrandProducts'
+import type { ProductItem } from '../../../data/products'
 import styles from './ProductDetailPage.module.css'
 
 const BRAND_ICONS = {
@@ -246,21 +247,21 @@ function TrustBadges({
 
 interface ProductFormProps {
   brand: string
-  product: (typeof PRODUCTS)[number]
+  product: ProductItem
   icons: (typeof BRAND_ICONS)[keyof typeof BRAND_ICONS]
   onAddToBag: (selectedSwatchKey: MaterialSwatch['key'], engravedText: string, chainLength: string) => void
 }
 
 function ProductForm({ brand, product, icons, onAddToBag }: ProductFormProps) {
   const [selectedSwatchKey, setSelectedSwatchKey] = useState<MaterialSwatch['key']>(
-    product.defaultSwatchKey
+    product.defaultSwatchKey ?? 'vermeil'
   )
   const [engravedText, setEngravedText] = useState('')
   const [chainLength, setChainLength] = useState(DEFAULT_CHAIN_LENGTH)
   const { DropdownIcon, StarIcon, ShippingIcon, ReturnIcon, WarrantyIcon, GiftIcon, ChevronIcon } = icons
 
   const selectedSwatch = MATERIAL_SWATCHES.find((s) => s.key === selectedSwatchKey)!
-  const currentPrice = product.priceInCents + selectedSwatch.priceOffset
+  const currentPrice = (product.priceInCents ?? 0) + selectedSwatch.priceOffset
   return (
     <section className={styles.formPanel} aria-label="Product options">
       {/* Header group: breadcrumb / title+price / stars */}
@@ -286,18 +287,13 @@ function ProductForm({ brand, product, icons, onAddToBag }: ProductFormProps) {
         <div className={styles.productTitlePriceGroup}>
           <h1 className={styles.productTitle}>{product.name}</h1>
           <div className={styles.priceRow}>
-            {product.originalPriceInCents && (
-              <span className={styles.priceOriginal}>
-                {formatPrice(product.originalPriceInCents + selectedSwatch.priceOffset)}
-              </span>
-            )}
-            <span className={styles.priceCurrent}>{formatPrice(currentPrice)}</span>
+            <span className={styles.priceCurrent}>{currentPrice > 0 ? formatPrice(currentPrice) : product.price ?? ''}</span>
           </div>
         </div>
 
         <StarRating
-          rating={product.rating}
-          reviewCount={product.reviewCount}
+          rating={product.rating ?? 0}
+          reviewCount={product.reviewCount ?? 0}
           StarIcon={StarIcon}
         />
       </div>
@@ -305,7 +301,7 @@ function ProductForm({ brand, product, icons, onAddToBag }: ProductFormProps) {
       {/* Swatch selector */}
       <SwatchSelector
         swatches={MATERIAL_SWATCHES}
-        basePrice={product.priceInCents}
+        basePrice={product.priceInCents ?? 0}
         selectedKey={selectedSwatchKey}
         onSelect={setSelectedSwatchKey}
       />
@@ -392,10 +388,12 @@ function ProductDetailPageInner({ productId }: { productId: number }) {
     trackHref: withBrandPrefix(brand, DEFAULT_TOPLINE.trackHref),
   }
 
-  const product = PRODUCTS.find((p) => p.id === productId)
+  const product = getBrandProducts(brand).find((p) => p.id === productId)
   if (!product) notFound()
 
-  const images = [product.defaultImage, product.hoverImage]
+  const images = product.hoverImage
+    ? [product.image, product.hoverImage]
+    : [product.image]
   const { items, isOpen, subtotal, closeCart, removeItem, addItem, openCart } = useCart()
   const icons = BRAND_ICONS[brand]
 
@@ -405,7 +403,7 @@ function ProductDetailPageInner({ productId }: { productId: number }) {
     chainLength: string
   ) => {
     const swatch = MATERIAL_SWATCHES.find((s) => s.key === swatchKey)!
-    const price = product.priceInCents + swatch.priceOffset
+    const price = (product.priceInCents ?? 0) + swatch.priceOffset
     const selectedOptions = [
       { label: 'Material', value: swatch.label },
       { label: 'Chain Length', value: chainLength },
@@ -415,10 +413,8 @@ function ProductDetailPageInner({ productId }: { productId: number }) {
       id: `${product.id}-${swatchKey}-${Date.now()}`,
       name: product.name,
       price,
-      originalPrice: product.originalPriceInCents
-        ? product.originalPriceInCents + swatch.priceOffset
-        : undefined,
-      image: product.defaultImage,
+      originalPrice: undefined,
+      image: product.image,
       isPersonalized: engravedText.trim().length > 0,
       selectedOptions,
     })

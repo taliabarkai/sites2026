@@ -18,6 +18,8 @@ import styles from './CategoryPageT2.module.css'
 import pcStyles from '../_components/ProductCard/ProductCard.module.css'
 import { getBrandProducts } from '../../../data/products/getBrandProducts'
 import type { ProductItem } from '../../../data/products'
+import { CategoryHero } from '../_components/CategoryHero'
+import { getSeoCategoryVariant } from '../../../data/seoCategories/variantConfig'
 import * as oalIcons from '@/src/components/icons/oal'
 import * as mnnIcons from '@/src/components/icons/mnn'
 import * as tgrIcons from '@/src/components/icons/tgr'
@@ -250,43 +252,6 @@ function FilterPanel({
   )
 }
 
-const CATEGORY_ITEMS = [
-  { label: 'Best Selling Bracelets',    src: 'https://cdn.oakandluna.com/digital-asset/product/engraved-dot-bracelet-silver-8.jpg' },
-  { label: 'Best Selling Earrings',     src: 'https://cdn.oakandluna.com/digital-asset/product/inez-initial-necklace-gold-vermeil-with-diamond-9.jpg' },
-  { label: 'Best Selling Rings',        src: 'https://cdn.oakandluna.com/digital-asset/product/willow-tag-initial-necklace-with-diamond-gold-vermeil-10.jpg' },
-  { label: 'Best Selling Fine Jewelry', src: 'https://cdn.oakandluna.com/digital-asset/product/singapore-chain-name-necklace-gold-vermeil-9.jpg' },
-]
-
-function CategoryHero({ brand }: { brand: string }) {
-  const isOal = brand === 'oal'
-  const count = CATEGORY_ITEMS.length
-  const oalCols = count <= 4 ? count : Math.ceil(count / 2)
-
-  return (
-    <section className={isOal ? styles.heroOal : styles.hero} aria-label="Category">
-      <div className={isOal ? styles.heroTextOal : undefined}>
-        <h1 className={styles.heroTitle}>Necklaces for Women</h1>
-        <p className={styles.heroDescription}>
-          Capture your unique personality effortlessly with pendants for women, as your jewelry should be just as unique as you are.
-        </p>
-      </div>
-      <div
-        className={isOal ? styles.categoryContainerOal : styles.categoryContainerDefault}
-        style={isOal ? { maxWidth: `${oalCols * 160 + (oalCols - 1) * 16}px` } : undefined}
-      >
-        {CATEGORY_ITEMS.map((cat) => (
-          <div key={cat.label} className={styles.categoryItem}>
-            <div className={styles.categoryImageWrap}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={cat.src} alt={cat.label} className={styles.categoryImage} loading="lazy" />
-            </div>
-            <span className={styles.categoryLabel}>{cat.label}</span>
-          </div>
-        ))}
-      </div>
-    </section>
-  )
-}
 
 function FilterBar({
   itemCount,
@@ -359,7 +324,7 @@ function CategoryPageInnerT2() {
       <Header variant="white" brand={brand} navLinks={navLinks} topline={topline} sticky={false} />
 
       <main id="main-content">
-        <CategoryHero brand={brand} />
+        <CategoryHero brand={brand} variant={getSeoCategoryVariant(brand)} />
 
         <FilterBar
           itemCount={allBrandProducts.length}
