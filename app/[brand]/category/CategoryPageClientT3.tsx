@@ -436,6 +436,7 @@ function CategoryPageInnerT3() {
                         originalPrice={p.originalPrice}
                         defaultImage={p.defaultImage}
                         hoverImage={p.hoverImage}
+                        href={`/${brand}/product/${p.id}`}
                         swatches={brand !== 'lal' ? DEFAULT_PRODUCT_SWATCHES : undefined}
                       />
                     ))}
@@ -460,6 +461,7 @@ function CategoryPageInnerT3() {
                         originalPrice={p.originalPrice}
                         defaultImage={p.defaultImage}
                         hoverImage={p.hoverImage}
+                        href={`/${brand}/product/${p.id}`}
                         swatches={brand !== 'lal' ? DEFAULT_PRODUCT_SWATCHES : undefined}
                       />
                     ))}
@@ -484,6 +486,7 @@ function CategoryPageInnerT3() {
                       originalPrice={p.originalPrice}
                       defaultImage={p.defaultImage}
                       hoverImage={p.hoverImage}
+                      href={`/${brand}/product/${p.id}`}
                       swatches={brand !== 'lal' ? DEFAULT_PRODUCT_SWATCHES : undefined}
                     />
                   ))}

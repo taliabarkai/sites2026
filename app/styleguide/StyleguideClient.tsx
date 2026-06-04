@@ -250,7 +250,6 @@ function TypeRow({ scale }: { scale: string }) {
         {scale}
       </code>
       <div style={{
-        overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis',
         fontFamily:    `var(--typography-rules-${scale}-font-family)`,
         fontSize:      `var(--typography-rules-${scale}-font-size)`,
         lineHeight:    `var(--typography-rules-${scale}-line-height)`,
