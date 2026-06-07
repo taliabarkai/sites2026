@@ -1,0 +1,429 @@
+/* ── Backdrop ─────────────────────────────────────────────────────────────── */
+.backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: var(--z-overlay);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition-base);
+}
+
+.backdropVisible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ── Panel — always in DOM, animation via CSS transform ───────────────────── */
+.panel {
+  position: fixed;
+  z-index: var(--z-modal);
+  background: var(--colors-background);
+  display: flex;
+  flex-direction: column;
+  transition: transform var(--transition-base);
+  overflow: hidden;
+
+  /* Mobile: slides up from bottom */
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 90dvh;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  transform: translateY(100%);
+}
+
+.panelOpen {
+  transform: translateY(0);
+}
+
+/* Desktop: slides in from right — matches FloatingCart */
+@media (min-width: 768px) {
+  .panel {
+    top: 0;
+    right: 0;
+    bottom: auto;
+    left: auto;
+    /* 600px image + 500px form = 1100px */
+    width: min(1100px, 100vw);
+    height: 100vh;
+    border-radius: var(--radius-panel) 0 0 var(--radius-panel);
+    transform: translateX(100%);
+    flex-direction: row;
+  }
+
+  .panelOpen {
+    transform: translateX(0);
+  }
+}
+
+/* ── Close button — absolute, top-right of panel ─────────────────────────── */
+.closeBtn {
+  position: absolute;
+  top: var(--spacing-md);
+  right: var(--spacing-md);
+  z-index: 2;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-full);
+  background: var(--colors-background);
+  color: var(--colors-text);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  transition: border-color var(--transition-fast);
+}
+
+.closeBtn:hover {
+  border-color: var(--colors-text);
+}
+
+/* ── Mobile drag handle ───────────────────────────────────────────────────── */
+.dragHandle {
+  display: block;
+  width: 32px;
+  height: 4px;
+  border-radius: var(--radius-full);
+  background: var(--border-color);
+  margin: var(--spacing-sm) auto var(--spacing-xs);
+  flex-shrink: 0;
+}
+
+@media (min-width: 768px) {
+  .dragHandle { display: none; }
+}
+
+/* ── Desktop: left image column ───────────────────────────────────────────── */
+.desktopImage {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .desktopImage {
+    display: block;
+    flex: 0 0 600px;
+    width: 600px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: none;
+    /* Column stretches to panel height; images scroll if they exceed it */
+    align-self: stretch;
+  }
+
+  .desktopImage::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Container aspect-ratio clips the image — object-fit: cover crops to fit */
+  .desktopImageEl {
+    display: block;
+    width: 100%;
+    aspect-ratio: 1 / 1; /* default: square for all brands */
+    object-fit: cover;
+    object-position: center;
+  }
+
+  /* OAL: 4/5 portrait crop */
+  [data-theme="oal"] .desktopImageEl {
+    aspect-ratio: 4 / 5;
+  }
+}
+
+/* ── Right column: scrollable content + sticky footer ────────────────────── */
+
+/* Mobile: transparent wrapper — children flow naturally in the panel column */
+.rightCol {
+  display: contents;
+}
+
+@media (min-width: 768px) {
+  .rightCol {
+    display: flex;
+    flex-direction: column;
+    flex: 0 0 500px;
+    width: 500px;
+    overflow: hidden;
+  }
+}
+
+/* ── Scrollable content area ──────────────────────────────────────────────── */
+.scrollArea {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 var(--spacing-lg) var(--spacing-lg);
+  padding-top: var(--spacing-xxl);
+  scrollbar-width: thin;
+}
+
+@media (min-width: 768px) {
+  .scrollArea {
+    padding-top: calc(var(--spacing-xxl) + var(--spacing-xl));
+  }
+
+  /* Title top padding — desktop only to clear the close button */
+  .title {
+    padding-top: var(--spacing-xl);
+  }
+}
+
+/* ── Header: title + price + stars ───────────────────────────────────────── */
+.header {
+  margin-bottom: var(--spacing-md);
+}
+
+.title {
+  margin: 0 0 var(--spacing-xs);
+  font-family:    var(--typography-rules-headline4-font-family);
+  font-size:      var(--typography-rules-headline4-font-size);
+  line-height:    var(--typography-rules-headline4-line-height);
+  font-weight:    var(--typography-rules-headline4-font-weight, normal);
+  letter-spacing: var(--typography-rules-headline4-letter-spacing, normal);
+  text-transform: var(--typography-rules-headline4-text-transform, none);
+  color: var(--colors-text);
+}
+
+/* Price — matches PDP .priceRow / .priceOriginal / .priceCurrent */
+.priceRow {
+  display: flex;
+  align-items: baseline;
+  gap: var(--spacing-xs);
+  margin-bottom: var(--spacing-xxs);
+}
+
+.priceOriginal {
+  font-family:    var(--typography-rules-headline5-font-family);
+  font-size:      var(--typography-rules-headline5-font-size);
+  line-height:    var(--typography-rules-headline5-line-height);
+  font-weight:    var(--typography-rules-headline5-font-weight, normal);
+  letter-spacing: var(--typography-rules-headline5-letter-spacing, normal);
+  color: var(--colors-text-secondary);
+  text-decoration: line-through;
+}
+
+.price {
+  font-family:    var(--typography-rules-headline12-font-family);
+  font-size:      var(--typography-rules-headline12-font-size);
+  line-height:    var(--typography-rules-headline12-line-height);
+  font-weight:    var(--typography-rules-headline12-font-weight, normal);
+  letter-spacing: var(--typography-rules-headline12-letter-spacing, normal);
+  color: var(--colors-price-selling);
+}
+
+/* Star rating — matches PDP .ratingRow / .stars / .ratingValue / .ratingCount */
+.rating {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.stars {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.starFilled {
+  color: var(--colors-star-filled, var(--colors-text));
+  font-size: 16px;
+  line-height: 1;
+}
+
+.starEmpty {
+  color: var(--border-color);
+  font-size: 16px;
+  line-height: 1;
+}
+
+.ratingValue {
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  font-weight:    var(--typography-rules-text1-font-weight, 600);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+  color: var(--colors-text);
+}
+
+.reviewCount {
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  font-weight:    var(--typography-rules-text1-font-weight, normal);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+  color: var(--colors-text-secondary);
+}
+
+/* ── Mini image gallery — mobile only ────────────────────────────────────── */
+.gallery {
+  display: flex;
+  gap: var(--spacing-xxs);
+  overflow-x: auto;
+  scrollbar-width: none;
+  margin-bottom: var(--spacing-lg);
+}
+
+.gallery::-webkit-scrollbar { display: none; }
+
+@media (min-width: 768px) {
+  .gallery { display: none; }
+}
+
+.galleryThumb {
+  flex-shrink: 0;
+  width: 180px;
+  overflow: hidden;
+  background: var(--colors-card-image-bg);
+  cursor: pointer;
+  padding: 0;
+  border: none;
+  /* aspect-ratio set on the image below */
+}
+
+.galleryImg {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1 / 1; /* default: square for all brands */
+  object-fit: cover;
+  object-position: center;
+}
+
+/* OAL: 4/5 portrait */
+[data-theme="oal"] .galleryImg {
+  aspect-ratio: 4 / 5;
+}
+
+/* ── Options ──────────────────────────────────────────────────────────────── */
+.options {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.optionGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.optionLabel {
+  margin: 0;
+  font-family: var(--typography-rules-text1-font-family);
+  font-size:   var(--typography-rules-text1-font-size);
+  line-height: var(--typography-rules-text1-line-height);
+  font-weight: var(--typography-rules-text1-font-weight, normal);
+  color: var(--colors-text);
+}
+
+.optionValue {
+  color: var(--colors-text-secondary);
+  font-weight: normal;
+}
+
+.swatches { display: flex; gap: var(--spacing-xs); }
+
+.swatch {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border-color);
+  cursor: pointer;
+  padding: 0;
+  transition: box-shadow var(--transition-fast);
+}
+
+.swatchSelected {
+  box-shadow: 0 0 0 1px var(--colors-background), 0 0 0 2px var(--colors-text);
+}
+
+.pills { display: flex; flex-wrap: wrap; gap: var(--spacing-xs); }
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 56px;
+  padding: var(--spacing-xxs) var(--spacing-sm);
+  border: 1px solid var(--border-color);
+  background: var(--colors-background);
+  color: var(--colors-text);
+  font-family: var(--typography-rules-text1-font-family);
+  font-size:   var(--typography-rules-text1-font-size);
+  cursor: pointer;
+  transition: border-color var(--transition-fast), background var(--transition-fast);
+}
+
+.pillSelected {
+  border-color: var(--colors-text);
+  background: var(--colors-text);
+  color: var(--colors-text-inverse);
+}
+
+.inputWrap { position: relative; }
+
+.textInput {
+  width: 100%;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  padding-right: var(--spacing-xl);
+  border: 1px solid var(--form-field-border-color);
+  border-radius: var(--form-field-border-radius, 0);
+  background: var(--form-field-background);
+  color: var(--colors-text);
+  font-family: var(--typography-rules-text1-font-family);
+  font-size:   var(--typography-rules-text1-font-size);
+  min-height: var(--field-min-height, 44px);
+  outline: none;
+  transition: border-color var(--transition-fast);
+}
+
+.textInput:focus { border-color: var(--form-field-border-color-hover); }
+
+.charCount {
+  position: absolute;
+  right: var(--spacing-sm);
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 11px;
+  color: var(--colors-text-secondary);
+  pointer-events: none;
+}
+
+.selectWrap { position: relative; }
+
+.select {
+  width: 100%;
+  appearance: none;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border: 1px solid var(--form-field-border-color);
+  background: var(--form-field-background);
+  color: var(--colors-text);
+  font-family: var(--typography-rules-text1-font-family);
+  font-size:   var(--typography-rules-text1-font-size);
+  cursor: pointer;
+  outline: none;
+}
+
+/* ── Footer — sticky at bottom of right column ────────────────────────────── */
+.footer {
+  flex-shrink: 0;
+  padding: var(--spacing-lg);
+  border-top: var(--border-width) solid var(--border-color);
+  background: var(--colors-background);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.addToBagBtn { width: 100%; }
+
+.viewDetails {
+  display: block;
+  text-align: center;
+  font-family: var(--typography-rules-text1-font-family);
+  font-size:   var(--typography-rules-text1-font-size);
+  color: var(--colors-text);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.viewDetails:hover { color: var(--colors-text-secondary); }

@@ -318,7 +318,7 @@
 @media (min-width: 1440px) {
   .productsGrid {
     grid-template-columns: repeat(4, 1fr);
-    gap: 8px;
+    gap: var(--spacing-xxs);
   }
 }
 
@@ -394,12 +394,12 @@
 
 @media (min-width: 1440px) {
   .productsGridT2 {
-    gap: 8px;
+    gap: var(--spacing-xxs);
   }
 
   .rhythmGroup {
     grid-template-columns: repeat(4, 1fr);
-    gap: 8px;
+    gap: var(--spacing-xxs);
   }
 
   /* Group A: featured spans cols 3–4, rows 1–2 */
@@ -407,6 +407,11 @@
     order: 0;
     grid-column: 3 / 5;
     grid-row: 1 / 3;
+    height: 100%;
+    overflow: hidden;
+    /* contain:layout stops the featured card from inflating the rows it spans —
+       rows are sized by product cards only, then the featured card fills them */
+    contain: layout;
   }
 
   /* Group C: featured spans cols 1–2, rows 1–2 */
@@ -414,12 +419,14 @@
     order: 0;
     grid-column: 1 / 3;
     grid-row: 1 / 3;
+    height: 100%;
+    overflow: hidden;
+    contain: layout;
   }
 
   /*
    * Image fills the 2-row span minus the info section height.
-   * This aligns the image bottom with the bottom of adjacent row-2 card images
-   * without hardcoding any height value — it derives from the grid row sizes.
+   * height:100% on the card provides the definite height flex:1 needs.
    */
   .featuredCardImageWrap {
     aspect-ratio: unset;

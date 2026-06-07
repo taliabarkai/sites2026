@@ -335,60 +335,54 @@
   gap: 4px;
 }
 
-/* ── T3: FeaturedCard — full-bleed image with overlaid product info ────────
+/* ── T3: Marketing banner — full-bleed editorial image, no product metadata ──
  *
- * Differs from T2: the image fills the ENTIRE card area (no reserved space
- * below). Swatches, name, and price are positioned absolutely at the bottom
- * of the image with a gradient for readability.
+ * The featured slot in T3 is a static editorial banner.
+ * Grid positioning is unchanged; only the visual content changes.
  */
 .featuredCard {
   position: relative;
   overflow: hidden;
-  aspect-ratio: 1;
   background-color: var(--colors-surface-primary);
   cursor: pointer;
 }
 
-[data-theme="oal"] .featuredCard {
-  aspect-ratio: 4/5;
-}
-
-.featuredCardImage {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center;
+/* Full-bleed banner image */
+/* Mobile: natural dimensions — image drives container height */
+.bannerImage {
   display: block;
-  transition: opacity var(--transition-base);
+  width: 100%;
+  height: auto;
+  object-fit: initial;
 }
 
-.featuredCardImageDefault { opacity: 1; }
-.featuredCardImageHover   { opacity: 0; }
-
-@media (min-width: 768px) {
-  .featuredCard:hover .featuredCardImageDefault { opacity: 0; }
-  .featuredCard:hover .featuredCardImageHover   { opacity: 1; }
+/* Desktop: fill the 2-row grid cell with cover crop */
+@media (min-width: 1440px) {
+  .bannerImage {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+  }
 }
 
-/* Product info sits at the bottom of the image */
-.featuredCardInfo {
+/* Editorial headline — bottom-left, H2 scale, dark text (pale linen background) */
+.bannerHeadline {
   position: absolute;
   bottom: 0;
   left: 0;
-  right: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-xs);
-  padding: var(--spacing-xl) 0 var(--spacing-lg);
-  /* Gradient fades from transparent into the page background colour so text
-     reads cleanly regardless of the image content at the bottom */
-  background: linear-gradient(
-    to bottom,
-    transparent,
-    var(--colors-background) 55%
-  );
+  margin: 0;
+  padding-bottom: var(--spacing-xl);
+  padding-left: var(--spacing-xl);
+  font-family:    var(--typography-rules-headline2-font-family);
+  font-size:      var(--typography-rules-headline2-font-size);
+  line-height:    var(--typography-rules-headline2-line-height);
+  font-weight:    var(--typography-rules-headline2-font-weight, normal);
+  letter-spacing: var(--typography-rules-headline2-letter-spacing, normal);
+  text-transform: var(--typography-rules-headline2-text-transform, none);
+  color: var(--colors-text);
 }
 
 /* Group A: featured RIGHT on desktop → full-width row after the 4 cards on mobile */
@@ -405,15 +399,15 @@
 
 @media (min-width: 1440px) {
   .productsGridT2 {
-    gap: 8px;
+    gap: var(--spacing-xxs);
   }
 
   .rhythmGroup {
     grid-template-columns: repeat(4, 1fr);
-    gap: 8px;
+    gap: var(--spacing-xxs);
   }
 
-  /* On desktop the card fills its entire 2-row grid allocation */
+  /* On desktop the card fills its 2-row grid allocation via CSS grid stretch */
   .featuredCard {
     aspect-ratio: unset;
   }

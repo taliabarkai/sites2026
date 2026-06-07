@@ -67,22 +67,14 @@ function MobileGallery({ images }: { images: string[] }) {
         ))}
       </div>
       {images.length > 1 && (
-        <div className={styles.dots} role="tablist" aria-label="Image navigation">
-          {images.map((_, i) => (
-            <button
-              key={i}
-              type="button"
-              role="tab"
-              aria-selected={i === activeIdx}
-              aria-label={`Image ${i + 1}`}
-              className={`${styles.dot} ${i === activeIdx ? styles.dotActive : ''}`}
-              onClick={() => {
-                const el = trackRef.current
-                if (!el) return
-                el.scrollTo({ left: i * el.clientWidth, behavior: 'smooth' })
-              }}
-            />
-          ))}
+        <div className={styles.progressTrack} aria-hidden="true">
+          <div
+            className={styles.progressBar}
+            style={{
+              width: `${100 / images.length}%`,
+              transform: `translateX(${activeIdx * 100}%)`,
+            }}
+          />
         </div>
       )}
     </div>

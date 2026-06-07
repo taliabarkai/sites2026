@@ -55,7 +55,7 @@ export function ProductCard({
             {swatches.map((color, i) => (
               <li
                 key={i}
-                className={styles.swatch}
+                className={`${styles.swatch}${i === 0 ? ` ${styles.swatchSelected}` : ''}`}
                 style={{ backgroundColor: color }}
                 aria-label={`Material option ${i + 1}`}
               />

@@ -1,0 +1,72 @@
+.pin {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+  cursor: pointer;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-full);
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: background var(--transition-fast);
+}
+
+@media (min-width: 768px) {
+  .pin {
+    width: 44px;
+    height: 44px;
+  }
+}
+
+/* Light pin — for use on dark images */
+.light {
+  border: 1px solid var(--colors-background);
+  color: var(--colors-background);
+}
+
+/* Dark pin — for use on light images */
+.dark {
+  border: 1px solid var(--colors-text);
+  color: var(--colors-text);
+}
+
+/* Hover — desktop only */
+@media (min-width: 768px) {
+  .light:hover,
+  .light.open {
+    background: rgba(255, 255, 255, 0.2);
+  }
+
+  .dark:hover,
+  .dark.open {
+    background: rgba(0, 0, 0, 0.2);
+  }
+}
+
+/* Mobile: show active state when open */
+.light.open {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.dark.open {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+/* + icon — rotates to × when open */
+.icon {
+  font-size: 30px;
+  line-height: 1;
+  font-weight: 300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform var(--transition-fast);
+  pointer-events: none;
+}
+
+.open .icon {
+  transform: rotate(45deg);
+}

@@ -503,6 +503,33 @@ export function Button({ label, variant = 'primary', onClick, disabled }: Button
 
 ---
 
+## Panel / Drawer Animation — Standard Pattern
+
+All slide-in panels (FloatingCart, QuickAddPanel, filter panel, or any future drawer)
+**must follow the FloatingCart animation pattern exactly**:
+
+```css
+/* Always-in-DOM: panel is never unmounted — CSS transform drives show/hide */
+.panel {
+  transform: translateX(100%);           /* off-screen right (desktop) */
+  transition: transform var(--transition-base);
+  border-radius: var(--radius-panel) 0 0 var(--radius-panel);
+}
+.panelOpen { transform: translateX(0); }
+
+/* Mobile variant — slides up from bottom */
+@media (max-width: 767px) {
+  .panel { transform: translateY(100%); border-radius: var(--radius-panel) var(--radius-panel) 0 0; }
+  .panelOpen { transform: translateY(0); }
+}
+```
+
+**Why this matters:** if you conditionally render the panel (`if (!open) return null`), the
+component mounts at its final position with no prior transform to transition FROM — so the
+animation is skipped entirely. Always keep the panel in the DOM and toggle a CSS class.
+
+---
+
 ## Hard Rules — Never Break These
 
 - **Never hardcode** colors, fonts, spacing, or z-index — always `var(--token-name)`

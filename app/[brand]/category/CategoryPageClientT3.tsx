@@ -15,11 +15,13 @@ import {
   DEFAULT_TOPLINE,
 } from '../_config/siteContent'
 import styles from './CategoryPageT3.module.css'
-import pcStyles from '../_components/ProductCard/ProductCard.module.css'
 import { getBrandProducts } from '../../../data/products/getBrandProducts'
 import type { ProductItem } from '../../../data/products'
 import { CategoryHero } from '../_components/CategoryHero'
 import { getSeoCategoryVariant } from '../../../data/seoCategories/variantConfig'
+import { HotspotImage } from '../_components/HotspotImage'
+import type { HotspotPinData } from '../_components/HotspotImage'
+import type { QuickAddProduct } from '../_components/QuickAddPanel'
 import * as oalIcons from '@/src/components/icons/oal'
 import * as mnnIcons from '@/src/components/icons/mnn'
 import * as tgrIcons from '@/src/components/icons/tgr'
@@ -94,55 +96,166 @@ function buildRhythmGroups(allProducts: ProductItem[], featuredProducts: Product
   return groups
 }
 
-// ─── T3: FeaturedCard — full-bleed image with overlaid product info ────────
+// ─── T3: Banner tile configs ───────────────────────────────────────────────
+
+// Tile 2 — STACK EM UP: ring products with hotspot pins
+const STACK_RING_1: QuickAddProduct = {
+  title: 'Rix Solitaire Diamond Ring — Gold Vermeil',
+  price: 12500,
+  salePrice: 13500,
+  currency: '$',
+  rating: 4.8,
+  reviewCount: 247,
+  images: [
+    { src: 'https://cdn.oakandluna.com/digital-asset/product/my-signature-initial-gold-vermeil-10.jpg', alt: 'Rix Solitaire Diamond Ring' },
+    { src: 'https://cdn.oakandluna.com/digital-asset/product/my-signature-initial-gold-vermeil-4.jpg', alt: 'Rix Solitaire Diamond Ring detail' },
+  ],
+  pdpUrl: '/product/24',
+  options: [
+    {
+      name: 'Metal',
+      type: 'swatch',
+      values: [
+        { label: 'Gold Vermeil', value: 'vermeil', color: 'var(--gold-vermeil-18k)', price: 0 },
+        { label: 'Sterling Silver', value: 'silver', color: 'var(--sterling-silver-925)', price: -2000 },
+        { label: 'Solid 14k Gold', value: 'solid-14k', color: 'var(--solid-gold-14k)', price: 5000 },
+        { label: 'Rose Gold', value: 'rose', color: 'var(--rose-gold-14k)', price: 1500 },
+      ],
+    },
+    { name: 'Add Initials', type: 'text-input', maxLength: 2, placeholder: 'e.g. A' },
+    {
+      name: 'Ring Size',
+      type: 'pills',
+      values: ['5', '6', '7', '8', '9'].map(s => ({ label: s, value: s })),
+    },
+  ],
+}
+
+const STACK_RING_2: QuickAddProduct = {
+  title: 'Wave Stacking Ring — Sterling Silver',
+  price: 8500,
+  currency: '$',
+  rating: 4.6,
+  reviewCount: 183,
+  images: [
+    { src: 'https://cdn.oakandluna.com/digital-asset/product/initial-necklace-gold-vermeil-8.jpg', alt: 'Wave  ing Ring' },
+  ],
+  pdpUrl: '/product/25',
+  options: [
+    {
+      name: 'Metal',
+      type: 'swatch',
+      values: [
+        { label: 'Sterling Silver', value: 'silver', color: 'var(--sterling-silver-925)', price: 0 },
+        { label: 'Gold Vermeil', value: 'vermeil', color: 'var(--gold-vermeil-18k)', price: 2000 },
+      ],
+    },
+    {
+      name: 'Ring Size',
+      type: 'pills',
+      values: ['5', '6', '7', '8', '9'].map(s => ({ label: s, value: s })),
+    },
+  ],
+}
+
+const STACK_RING_3: QuickAddProduct = {
+  title: 'Chunky Twisted Ring — Gold Plated',
+  price: 9500,
+  currency: '$',
+  rating: 4.7,
+  reviewCount: 312,
+  images: [
+    { src: 'https://cdn.oakandluna.com/digital-asset/product/puffy-heart-pendant-gold-1.jpg', alt: 'Chunky Twisted Ring' },
+  ],
+  pdpUrl: '/product/26',
+  options: [
+    {
+      name: 'Metal',
+      type: 'swatch',
+      values: [
+        { label: 'Gold Plated', value: 'vermeil', color: 'var(--gold-vermeil-18k)', price: 0 },
+        { label: 'Rose Gold', value: 'rose', color: 'var(--rose-gold-14k)', price: 1500 },
+      ],
+    },
+    {
+      name: 'Ring Size',
+      type: 'pills',
+      values: ['5', '6', '7', '8', '9'].map(s => ({ label: s, value: s })),
+    },
+  ],
+}
+
+const STACK_EM_UP_PINS: HotspotPinData[] = [
+  { x: 63, y: 28, pinColor: 'dark', product: STACK_RING_1 }, // top-right: diamond solitaire ring
+  { x: 26, y: 55, pinColor: 'dark', product: STACK_RING_2 }, // left: silver braided ring
+  { x: 73, y: 71, pinColor: 'dark', product: STACK_RING_3 }, // bottom-center: gold chunky ring
+]
+
+// Map featured product id → tile config (id 1 = Wedding Shop, id 2 = Stack Em Up, id 3 = placeholder)
+type TileConfig =
+  | { type: 'static'; image: string; imageAlt: string; headline: string }
+  | { type: 'hotspot'; image: string; imageAlt: string; headline: string; pins: HotspotPinData[] }
+
+const TILE_CONFIGS: Record<number, TileConfig> = {
+  1: {
+    type: 'static',
+    image: 'https://cdn.oakandluna.com/digital-asset/banners/oal-Bridal-box2.jpg',
+    imageAlt: 'The Wedding Shop',
+    headline: 'The Wedding Shop',
+  },
+  2: {
+    type: 'hotspot',
+    image: 'https://cdn.oakandluna.com/digital-asset/banners/RINGS-banner_HP_OAL.jpg',
+    imageAlt: 'Stack Em Up — ring collection',
+    headline: 'Stack Em Up',
+    pins: STACK_EM_UP_PINS,
+  },
+  3: {
+    type: 'static',
+    image: 'https://cdn.oakandluna.com/digital-asset/banners/oal-Bridal-box2.jpg',
+    imageAlt: 'Discover More',
+    headline: 'Discover More',
+  },
+}
+
+// ─── T3: FeaturedCard — resolves to a tile config by product id ───────────
 
 function FeaturedCard({
   product,
-  swatches,
+  swatches: _swatches,
   slotClassName,
 }: {
   product: ProductItem
   swatches?: string[]
   slotClassName: string
 }) {
+  const config = TILE_CONFIGS[product.id] ?? TILE_CONFIGS[1]
+
+  if (config.type === 'hotspot') {
+    return (
+      <article className={`${styles.featuredCard} ${slotClassName}`}>
+        <HotspotImage
+          src={config.image}
+          alt={config.imageAlt}
+          pins={config.pins}
+        >
+          <p className={styles.bannerHeadline}>{config.headline}</p>
+        </HotspotImage>
+      </article>
+    )
+  }
+
+  // Static banner (Tiles 1 & 3)
   return (
     <article className={`${styles.featuredCard} ${slotClassName}`}>
-      {/* Model image as default; packshot on hover */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        src={product.hoverImage ?? product.image}
-        alt={product.name}
-        className={`${styles.featuredCardImage} ${styles.featuredCardImageDefault}`}
+        src={config.image}
+        alt={config.imageAlt}
+        className={styles.bannerImage}
         loading="lazy"
       />
-      <img
-        src={product.image}
-        alt=""
-        aria-hidden="true"
-        className={`${styles.featuredCardImage} ${styles.featuredCardImageHover}`}
-        loading="lazy"
-      />
-      {/* Info overlaid at the bottom — same classes as ProductCard for identical typography */}
-      <div className={styles.featuredCardInfo}>
-        {swatches && swatches.length > 0 && (
-          <ul className={pcStyles.swatches} aria-label="Available materials">
-            {swatches.map((color, i) => (
-              <li
-                key={i}
-                className={pcStyles.swatch}
-                style={{ backgroundColor: color }}
-                aria-label={`Material option ${i + 1}`}
-              />
-            ))}
-          </ul>
-        )}
-        <p className={pcStyles.name}>{product.name}</p>
-        <div className={pcStyles.prices}>
-          {product.originalPrice && (
-            <span className={pcStyles.priceOriginal}>{product.originalPrice}</span>
-          )}
-          <span className={pcStyles.price}>{product.price}</span>
-        </div>
-      </div>
+      <p className={styles.bannerHeadline}>{config.headline}</p>
     </article>
   )
 }

@@ -113,10 +113,6 @@
   align-items: flex-start;
 }
 
-.categoryContainerOal .categoryItem {
-  min-width: calc(46vw - var(--spacing-lg));
-}
-
 @media (min-width: 768px) {
   .categoryContainerOal .categoryItem {
     min-width: unset;

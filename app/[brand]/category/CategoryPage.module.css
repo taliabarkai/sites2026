@@ -268,8 +268,6 @@
 /* ── Products section ─────────────────────────────────────────────────────── */
 .productsSection {
   padding: 0 0 var(--spacing-lg);
-  /* max-width: var(--layout-max-width); */
-  /* margin: 0 auto; */
 }
 
 .productsGrid {
@@ -282,7 +280,7 @@
 @media (min-width: 1440px) {
   .productsGrid {
     grid-template-columns: repeat(4, 1fr); /* desktop: 4 columns */
-    gap: 8px;
+    gap: var(--spacing-xxs);
   }
 }
 

@@ -51,29 +51,21 @@
   display: block;
 }
 
-.dots {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--spacing-xs);
-  padding: var(--spacing-sm) 0;
-}
-
-.dot {
-  width: 6px;
-  height: 6px;
-  border-radius: var(--radius-full);
-  border: none;
-  padding: 0;
+.progressTrack {
+  position: relative;
+  width: 100%;
+  height: 2px;
   background: var(--border-color);
-  cursor: pointer;
-  transition: background var(--transition-fast), transform var(--transition-fast);
-  flex-shrink: 0;
+  overflow: hidden;
 }
 
-.dotActive {
+.progressBar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
   background: var(--colors-text);
-  transform: scale(1.25);
+  transition: transform var(--transition-base);
 }
 
 /* ── Layout: single column on mobile, two-column on desktop ───────────────── */
@@ -191,6 +183,8 @@
     flex-direction: row;
     gap: 8px;
     align-items: flex-start;
+    padding-top: var(--layout-page-margin);
+    padding-left: var(--layout-page-margin);
   }
 }
 
@@ -209,10 +203,11 @@
   overflow: hidden;
   cursor: pointer;
   background: none;
-  border: 2px solid transparent;
+  border: 1px solid transparent;
+  border-radius: 4px;
   padding: 0;
   background-color: var(--colors-card-image-bg);
-  transition: border-color var(--transition-fast);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
 
 .lalThumb:hover {
@@ -221,6 +216,8 @@
 
 .lalThumbActive {
   border-color: var(--colors-text);
+  /* inner white border creates a gap between image and selection ring */
+  box-shadow: inset 0 0 0 2px var(--colors-background);
 }
 
 .lalMainCell {
@@ -309,7 +306,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--spacing-md);
-  padding-bottom: var(--spacing-lg);
+  padding-block: var(--spacing-md);
   border-bottom: var(--border-width) solid var(--border-color);
 }
 
@@ -317,6 +314,12 @@
   display: flex;
   flex-direction: column;
   gap: var(--spacing-xs);
+}
+
+@media (min-width: 1024px) {
+  .productHeader {
+    padding-block: none;
+  }
 }
 
 /* ── Title ────────────────────────────────────────────────────────────────── */
