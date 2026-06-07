@@ -19,8 +19,7 @@
   background-color: var(--product-image-background-blend);
 }
 
-[data-theme="oal"] .imageWrap,
-[data-theme="lal"] .imageWrap {
+[data-theme="oal"] .imageWrap {
   aspect-ratio: 4/5;
 }
 

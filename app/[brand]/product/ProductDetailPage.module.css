@@ -179,6 +179,58 @@
   background-color: var(--colors-card-image-bg);
 }
 
+/* ── LAL gallery — thumbnails left, large main image right ───────────────── */
+
+.lalGallery {
+  display: none; /* hidden on mobile; desktop uses MobileGallery */
+}
+
+@media (min-width: 1024px) {
+  .lalGallery {
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+    align-items: flex-start;
+  }
+}
+
+.lalThumbCol {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 90px;
+  flex-shrink: 0;
+}
+
+.lalThumb {
+  position: relative;
+  width: 90px;
+  height: 90px;
+  overflow: hidden;
+  cursor: pointer;
+  background: none;
+  border: 2px solid transparent;
+  padding: 0;
+  background-color: var(--colors-card-image-bg);
+  transition: border-color var(--transition-fast);
+}
+
+.lalThumb:hover {
+  border-color: var(--colors-text-secondary);
+}
+
+.lalThumbActive {
+  border-color: var(--colors-text);
+}
+
+.lalMainCell {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 1 / 1;
+  background-color: var(--colors-card-image-bg);
+}
+
 [data-theme="oal"] .desktopGridCell {
   aspect-ratio: 4/5;
 }

@@ -111,6 +111,32 @@ function DesktopGallery({ images, name }: { images: string[]; name: string }) {
 
 // ─── OAL: sticky-left hero + vertical scroll right ────────────────────────────
 
+function LALDesktopGallery({ images, name }: { images: string[]; name: string }) {
+  const [activeIdx, setActiveIdx] = useState(0)
+  return (
+    <div className={styles.lalGallery}>
+      {/* Thumbnails — left column */}
+      <div className={styles.lalThumbCol}>
+        {images.map((src, i) => (
+          <button
+            key={i}
+            type="button"
+            onClick={() => setActiveIdx(i)}
+            className={`${styles.lalThumb} ${i === activeIdx ? styles.lalThumbActive : ''}`}
+            aria-label={`View image ${i + 1}`}
+          >
+            <img src={src} alt="" aria-hidden="true" className={styles.oalGalleryImage} loading="lazy" />
+          </button>
+        ))}
+      </div>
+      {/* Main image — right */}
+      <div className={styles.lalMainCell}>
+        <img src={images[activeIdx]} alt={name} className={styles.oalGalleryImage} loading="eager" />
+      </div>
+    </div>
+  )
+}
+
 function OALDesktopGallery({ images, name }: { images: string[]; name: string }) {
   const scrollImages = [images[1], images[0], images[1]]
   return (
@@ -431,10 +457,12 @@ function ProductDetailPageInner({ productId }: { productId: number }) {
 
         {/* Two-column layout on desktop, single column on mobile */}
         <div className={styles.layout}>
-          {/* Left: gallery — OAL, TGR, LAL use sticky+scroll; others use 2×2 grid */}
-          {(brand === 'oal' || brand === 'tgr' || brand === 'lal')
-            ? <OALDesktopGallery images={images} name={product.name} />
-            : <DesktopGallery images={images} name={product.name} />
+          {/* Left: gallery — LAL: thumbnails left; OAL/TGR: sticky+scroll; others: 2×2 grid */}
+          {brand === 'lal'
+            ? <LALDesktopGallery images={images} name={product.name} />
+            : (brand === 'oal' || brand === 'tgr')
+              ? <OALDesktopGallery images={images} name={product.name} />
+              : <DesktopGallery images={images} name={product.name} />
           }
 
           {/* Right / main: product form */}
