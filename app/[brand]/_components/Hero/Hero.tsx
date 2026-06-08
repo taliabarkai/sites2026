@@ -89,9 +89,6 @@ export function Hero({
           <Button href={ctaPrimary.href} variant="primary">
             {ctaPrimary.label}
           </Button>
-          <Button variant="secondary" onClick={handleAddToBag}>
-            Add To Bag
-          </Button>
         </div>
       </div>
     </section>
