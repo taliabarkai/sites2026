@@ -408,6 +408,16 @@
   /* no grid placement — auto-flows into the next available cell */
 }
 
+/* Single-card banner: reduced headline size and padding on mobile */
+@media (max-width: 767px) {
+  .featuredCardSingle .bannerHeadline {
+    font-size: 3.2rem;
+    line-height: 3.2rem;
+    padding-bottom: var(--spacing-md);
+    padding-left: var(--spacing-md);
+  }
+}
+
 @media (min-width: 1440px) {
   .productsGridT2 {
     gap: var(--spacing-xs);
