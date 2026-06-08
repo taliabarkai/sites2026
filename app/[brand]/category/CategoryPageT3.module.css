@@ -397,6 +397,18 @@
   order: 0;
 }
 
+/* Group D: wide banner — full-width on mobile, 2 cols × 1 row on desktop */
+.featuredCardWide {
+  grid-column: 1 / -1;
+  order: 0;
+}
+
+/* Group E: single-card banner — 1 col on all sizes */
+.featuredCardSingle {
+  grid-column: 1 / 2;
+  order: 0;
+}
+
 @media (min-width: 1440px) {
   .productsGridT2 {
     gap: var(--spacing-xs);
@@ -424,6 +436,22 @@
     order: 0;
     grid-column: 1 / 3;
     grid-row: 1 / 3;
+  }
+
+  /* Group D: wide banner — spans cols 1–2, row 1 only (= 2 card slots side by side) */
+  .featuredCardWide {
+    order: 0;
+    grid-column: 1 / 3;
+    grid-row: 1 / 2;
+  }
+
+  /* Group E: single-card banner — col 1, row 1 (= 1 card slot) */
+  /* aspect-ratio gives the lone grid item a definite height so the inner height:100% chain resolves */
+  .featuredCardSingle {
+    order: 0;
+    grid-column: 1 / 2;
+    grid-row: 1 / 2;
+    aspect-ratio: 4 / 5;
   }
 }
 

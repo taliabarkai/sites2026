@@ -61,28 +61,38 @@ const DEFAULT_PRODUCT_SWATCHES = [
 // ─── T3: Rhythm group types ────────────────────────────────────────────────
 
 type RhythmGroup =
-  | { type: 'A'; cards: ProductItem[]; featured: ProductItem }
-  | { type: 'B'; cards: ProductItem[] }
-  | { type: 'C'; cards: ProductItem[]; featured: ProductItem }
+  | { type: 'A'; cards: ProductItem[]; featured: ProductItem }  // banner 2 cols × 2 rows (4 slots)
+  | { type: 'B'; cards: ProductItem[] }                         // plain cards
+  | { type: 'C'; cards: ProductItem[]; featured: ProductItem }  // banner 2 cols × 2 rows, left
+  | { type: 'D'; cards: ProductItem[]; featured: ProductItem }  // banner 2 cols × 1 row (2 slots)
+  | { type: 'E'; cards: ProductItem[]; featured: ProductItem }  // banner 1 col × 1 row (1 slot)
 
 function buildRhythmGroups(allProducts: ProductItem[], featuredProducts: ProductItem[]): RhythmGroup[] {
   const groups: RhythmGroup[] = []
   let pi = 0
 
-  // First group: Stack Em Up banner alongside 4 products
-  const firstCards = allProducts.slice(0, 4)
-  if (firstCards.length > 0) {
-    groups.push({ type: 'A', cards: firstCards, featured: featuredProducts[0] })
-    pi = firstCards.length
-  }
+  // Row 1: 4-slot banner (2 cols × 2 rows) + 4 cards
+  const g0 = allProducts.slice(pi, pi + 4)
+  if (g0.length > 0) { groups.push({ type: 'A', cards: g0, featured: featuredProducts[0] }); pi += g0.length }
 
-  // Remaining products: plain 8-up rows, no banners
+  // Row 2: 8 plain cards
+  const g1 = allProducts.slice(pi, pi + 8)
+  if (g1.length > 0) { groups.push({ type: 'B', cards: g1 }); pi += g1.length }
+
+  // Row 3: 2-slot banner (2 cols × 1 row) + 6 cards
+  const g2 = allProducts.slice(pi, pi + 6)
+  if (g2.length > 0) { groups.push({ type: 'D', cards: g2, featured: featuredProducts[0] }); pi += g2.length }
+
+  // Remaining products: plain 8-up rows
   while (pi < allProducts.length) {
     const cards = allProducts.slice(pi, pi + 8)
     if (cards.length === 0) break
     groups.push({ type: 'B', cards })
     pi += cards.length
   }
+
+  // Always end with: 1-slot banner (1 col × 1 row) — no product cards consumed
+  groups.push({ type: 'E', cards: [], featured: featuredProducts[0] })
 
   return groups
 }
@@ -452,6 +462,56 @@ function CategoryPageInnerT3() {
                       product={group.featured}
                       swatches={brand !== 'lal' ? DEFAULT_PRODUCT_SWATCHES : undefined}
                       slotClassName={styles.featuredCardRight}
+                    />
+                    {group.cards.map((p) => (
+                      <ProductCard
+                        key={p.id}
+                        name={p.name}
+                        price={p.price ?? ''}
+                        originalPrice={p.originalPrice}
+                        defaultImage={p.image}
+                        hoverImage={p.hoverImage}
+                        href={`/${brand}${p.href}`}
+                        swatches={brand !== 'lal' ? DEFAULT_PRODUCT_SWATCHES : undefined}
+                      />
+                    ))}
+                  </div>
+                )
+              }
+
+              // Group D — wide banner (2 cols × 1 row) + 6 cards
+              if (group.type === 'D') {
+                return (
+                  <div key={gi} className={styles.rhythmGroup}>
+                    <FeaturedCard
+                      product={group.featured}
+                      swatches={brand !== 'lal' ? DEFAULT_PRODUCT_SWATCHES : undefined}
+                      slotClassName={styles.featuredCardWide}
+                    />
+                    {group.cards.map((p) => (
+                      <ProductCard
+                        key={p.id}
+                        name={p.name}
+                        price={p.price ?? ''}
+                        originalPrice={p.originalPrice}
+                        defaultImage={p.image}
+                        hoverImage={p.hoverImage}
+                        href={`/${brand}${p.href}`}
+                        swatches={brand !== 'lal' ? DEFAULT_PRODUCT_SWATCHES : undefined}
+                      />
+                    ))}
+                  </div>
+                )
+              }
+
+              // Group E — single-card banner (1 col × 1 row) + 7 cards
+              if (group.type === 'E') {
+                return (
+                  <div key={gi} className={styles.rhythmGroup}>
+                    <FeaturedCard
+                      product={group.featured}
+                      swatches={brand !== 'lal' ? DEFAULT_PRODUCT_SWATCHES : undefined}
+                      slotClassName={styles.featuredCardSingle}
                     />
                     {group.cards.map((p) => (
                       <ProductCard
