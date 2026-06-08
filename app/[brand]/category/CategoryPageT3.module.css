@@ -317,7 +317,7 @@
   }
 
   .productsSection {
-    padding: 0 var(--spacing-md) var(--spacing-md);
+    padding: 0 0 var(--spacing-md);
   }
 }
 

@@ -481,7 +481,7 @@
   }
 
   .productsSection {
-    padding: 0 var(--spacing-md) var(--spacing-md);
+    padding: 0 0 var(--spacing-md);
   }
 
   /* Default hero: left-align text on mobile */
