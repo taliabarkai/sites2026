@@ -306,7 +306,7 @@
 
 /* ── Products section ─────────────────────────────────────────────────────── */
 .productsSection {
-  padding: 0 0 var(--spacing-lg);
+  padding: 0 var(--layout-page-margin) var(--spacing-lg);
 }
 
 .productsGrid {
@@ -330,7 +330,7 @@
   }
 
   .productsSection {
-    padding: 0 0 var(--spacing-md);
+    padding: 0 var(--spacing-md) var(--spacing-md);
   }
 }
 
@@ -340,14 +340,14 @@
 .productsGridT2 {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--spacing-xxs);
 }
 
 /* Each A/B/C rhythm group is its own grid */
 .rhythmGroup {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 4px;
+  gap: var(--spacing-xxs);
 }
 
 /* ── FeaturedCard ─────────────────────────────────────────────────────────── */
@@ -394,12 +394,12 @@
 
 @media (min-width: 1440px) {
   .productsGridT2 {
-    gap: var(--spacing-xxs);
+    gap: var(--spacing-xs);
   }
 
   .rhythmGroup {
     grid-template-columns: repeat(4, 1fr);
-    gap: var(--spacing-xxs);
+    gap: var(--spacing-xs);
   }
 
   /* Group A: featured spans cols 3–4, rows 1–2 */

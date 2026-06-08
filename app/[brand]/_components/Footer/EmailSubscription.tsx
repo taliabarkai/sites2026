@@ -58,23 +58,35 @@ export function EmailSubscription({
 
   return (
     <section className={styles.section} aria-labelledby="footer-newsletter-title">
-      {eyebrow && <p className={styles.eyebrow}>{eyebrow}</p>}
-      <h2 id="footer-newsletter-title" className={styles.title}>
-        {title}
-      </h2>
-      <p className={styles.description}>{description}</p>
+      <div className={styles.content}>
+        {eyebrow && <p className={styles.eyebrow}>{eyebrow}</p>}
+        <h2 id="footer-newsletter-title" className={styles.title}>
+          {title}
+        </h2>
+        <p className={styles.description}>{description}</p>
 
-      <InputAction
-        inputType="email"
-        placeholder={emailPlaceholder}
-        buttonIcon={<ArrowIcon size={24} />}
-        onSubmit={handleSubmit}
-        errorMessage={error || undefined}
-        successMessage={success ? successMessage : undefined}
-        groupLabel="Newsletter signup"
-        inputLabel="Email address"
-        className={styles.form}
-      />
+        <InputAction
+          inputType="email"
+          placeholder={emailPlaceholder}
+          buttonIcon={<ArrowIcon size={24} />}
+          onSubmit={handleSubmit}
+          errorMessage={error || undefined}
+          successMessage={success ? successMessage : undefined}
+          groupLabel="Newsletter signup"
+          inputLabel="Email address"
+          className={styles.form}
+        />
+      </div>
+
+      {brand === 'oal' && (
+        <div className={styles.monogramCol} aria-hidden="true">
+          <img
+            src="/images/oal_monogram.svg"
+            alt=""
+            className={styles.monogram}
+          />
+        </div>
+      )}
     </section>
   )
 }

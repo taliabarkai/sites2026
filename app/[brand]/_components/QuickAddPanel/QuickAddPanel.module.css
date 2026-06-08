@@ -102,13 +102,13 @@
 
 @media (min-width: 768px) {
   .desktopImage {
-    display: block;
+    display: flex;
+    flex-direction: column;
     flex: 0 0 600px;
     width: 600px;
     overflow-y: auto;
     overflow-x: hidden;
     scrollbar-width: none;
-    /* Column stretches to panel height; images scroll if they exceed it */
     align-self: stretch;
   }
 
@@ -116,18 +116,13 @@
     display: none;
   }
 
-  /* Container aspect-ratio clips the image — object-fit: cover crops to fit */
   .desktopImageEl {
     display: block;
     width: 100%;
-    aspect-ratio: 1 / 1; /* default: square for all brands */
+    flex-shrink: 0;
+    aspect-ratio: 4 / 5;
     object-fit: cover;
     object-position: center;
-  }
-
-  /* OAL: 4/5 portrait crop */
-  [data-theme="oal"] .desktopImageEl {
-    aspect-ratio: 4 / 5;
   }
 }
 

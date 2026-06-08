@@ -143,16 +143,19 @@ export function QuickAddPanel({ isOpen, onClose, product, closeButtonRef }: Quic
         aria-modal="true"
         aria-label="Quick add"
       >
-        {/* Desktop: left column — single image filling full height */}
+        {/* Desktop: left column — all images stacked, vertically scrollable */}
         {product && product.images.length > 0 && (
           <div className={styles.desktopImage} aria-hidden="true">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={product.images[0].src}
-              alt={product.images[0].alt}
-              className={styles.desktopImageEl}
-              loading="eager"
-            />
+            {product.images.map((img, i) => (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                key={i}
+                src={img.src}
+                alt={img.alt}
+                className={styles.desktopImageEl}
+                loading={i === 0 ? 'eager' : 'lazy'}
+              />
+            ))}
           </div>
         )}
 

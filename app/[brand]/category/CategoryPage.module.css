@@ -267,20 +267,18 @@
 
 /* ── Products section ─────────────────────────────────────────────────────── */
 .productsSection {
-  padding: 0 0 var(--spacing-lg);
+  padding: 0 var(--layout-page-margin) var(--spacing-lg);
 }
 
 .productsGrid {
   display: grid;
   grid-template-columns: repeat(2, 1fr); /* mobile: 2 columns */
-  /* Intentional pixel-perfect design values for grid gap (only hardcoded
-     values permitted in this file): 4px mobile, 8px desktop. */
-  gap: 4px;
+  gap: var(--spacing-xxs);
 }
 @media (min-width: 1440px) {
   .productsGrid {
     grid-template-columns: repeat(4, 1fr); /* desktop: 4 columns */
-    gap: var(--spacing-xxs);
+    gap: var(--spacing-xs);
   }
 }
 
@@ -483,7 +481,7 @@
   }
 
   .productsSection {
-    padding: 0 0 var(--spacing-md);
+    padding: 0 var(--spacing-md) var(--spacing-md);
   }
 
   /* Default hero: left-align text on mobile */

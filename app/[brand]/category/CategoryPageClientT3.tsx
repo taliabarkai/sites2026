@@ -68,29 +68,20 @@ type RhythmGroup =
 function buildRhythmGroups(allProducts: ProductItem[], featuredProducts: ProductItem[]): RhythmGroup[] {
   const groups: RhythmGroup[] = []
   let pi = 0
-  let fi = 0
 
+  // First group: Stack Em Up banner alongside 4 products
+  const firstCards = allProducts.slice(0, 4)
+  if (firstCards.length > 0) {
+    groups.push({ type: 'A', cards: firstCards, featured: featuredProducts[0] })
+    pi = firstCards.length
+  }
+
+  // Remaining products: plain 8-up rows, no banners
   while (pi < allProducts.length) {
-    const cycle = groups.length % 3
-
-    if (cycle === 0) {
-      const cards = allProducts.slice(pi, pi + 4)
-      if (cards.length === 0) break
-      groups.push({ type: 'A', cards, featured: featuredProducts[fi % featuredProducts.length] })
-      pi += cards.length
-      fi++
-    } else if (cycle === 1) {
-      const cards = allProducts.slice(pi, pi + 8)
-      if (cards.length === 0) break
-      groups.push({ type: 'B', cards })
-      pi += cards.length
-    } else {
-      const cards = allProducts.slice(pi, pi + 4)
-      if (cards.length === 0) break
-      groups.push({ type: 'C', cards, featured: featuredProducts[fi % featuredProducts.length] })
-      pi += cards.length
-      fi++
-    }
+    const cards = allProducts.slice(pi, pi + 8)
+    if (cards.length === 0) break
+    groups.push({ type: 'B', cards })
+    pi += cards.length
   }
 
   return groups
@@ -138,7 +129,8 @@ const STACK_RING_2: QuickAddProduct = {
   rating: 4.6,
   reviewCount: 183,
   images: [
-    { src: 'https://cdn.oakandluna.com/digital-asset/product/initial-necklace-gold-vermeil-8.jpg', alt: 'Wave  ing Ring' },
+    { src: 'https://cdn.oakandluna.com/digital-asset/product/initial-necklace-gold-vermeil-8.jpg', alt: 'Wave Stacking Ring' },
+    { src: 'https://cdn.oakandluna.com/digital-asset/product/initial-necklace-gold-vermeil-14.jpg', alt: 'Wave Stacking Ring detail' },
   ],
   pdpUrl: '/product/25',
   options: [
@@ -166,6 +158,7 @@ const STACK_RING_3: QuickAddProduct = {
   reviewCount: 312,
   images: [
     { src: 'https://cdn.oakandluna.com/digital-asset/product/puffy-heart-pendant-gold-1.jpg', alt: 'Chunky Twisted Ring' },
+    { src: 'https://cdn.oakandluna.com/digital-asset/product/puffy-heart-pendant-gold-2.jpg', alt: 'Chunky Twisted Ring detail' },
   ],
   pdpUrl: '/product/26',
   options: [
@@ -198,23 +191,11 @@ type TileConfig =
 
 const TILE_CONFIGS: Record<number, TileConfig> = {
   1: {
-    type: 'static',
-    image: 'https://cdn.oakandluna.com/digital-asset/banners/oal-Bridal-box2.jpg',
-    imageAlt: 'The Wedding Shop',
-    headline: 'The Wedding Shop',
-  },
-  2: {
     type: 'hotspot',
     image: 'https://cdn.oakandluna.com/digital-asset/banners/RINGS-banner_HP_OAL.jpg',
     imageAlt: 'Stack Em Up — ring collection',
     headline: 'Stack Em Up',
     pins: STACK_EM_UP_PINS,
-  },
-  3: {
-    type: 'static',
-    image: 'https://cdn.oakandluna.com/digital-asset/banners/oal-Bridal-box2.jpg',
-    imageAlt: 'Discover More',
-    headline: 'Discover More',
   },
 }
 
@@ -229,7 +210,7 @@ function FeaturedCard({
   swatches?: string[]
   slotClassName: string
 }) {
-  const config = TILE_CONFIGS[product.id] ?? TILE_CONFIGS[1]
+  const config = TILE_CONFIGS[product.id] ?? TILE_CONFIGS[1]!
 
   if (config.type === 'hotspot') {
     return (

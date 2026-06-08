@@ -1,9 +1,31 @@
 .section {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
   background: var(--footer-newsletter-background);
   color: var(--footer-newsletter-text);
   padding: var(--spacing-lg) var(--spacing-md);
-  /* margin: 0 var(--layout-page-margin); */
   font-family: var(--typography-rules-text1-font-family);
+}
+
+.content {
+  flex: 1;
+  min-width: 0;
+}
+
+.monogramCol {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 80px;
+}
+
+.monogram {
+  width: 72px;
+  height: auto;
+  pointer-events: none;
+  user-select: none;
 }
 
 .eyebrow {
@@ -68,5 +90,14 @@
 @media (min-width: 1024px) {
   .section {
     padding: var(--spacing-2xl);
+    gap: var(--spacing-xl);
+  }
+
+  .monogramCol {
+    width: 100px;
+  }
+
+  .monogram {
+    width: 88px;
   }
 }
