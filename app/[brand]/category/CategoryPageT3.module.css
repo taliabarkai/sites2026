@@ -408,9 +408,9 @@
   /* no grid placement — auto-flows into the next available cell */
 }
 
-/* Single-card banner: reduced headline size and padding on mobile */
+/* All banners: consistent headline size and padding on mobile */
 @media (max-width: 767px) {
-  .featuredCardSingle .bannerHeadline {
+  .bannerHeadline {
     font-size: 3.2rem;
     line-height: 3.2rem;
     padding-bottom: var(--spacing-md);
