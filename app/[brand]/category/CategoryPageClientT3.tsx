@@ -61,11 +61,10 @@ const DEFAULT_PRODUCT_SWATCHES = [
 // ─── T3: Rhythm group types ────────────────────────────────────────────────
 
 type RhythmGroup =
-  | { type: 'A'; cards: ProductItem[]; featured: ProductItem }  // banner 2 cols × 2 rows (4 slots)
-  | { type: 'B'; cards: ProductItem[] }                         // plain cards
-  | { type: 'C'; cards: ProductItem[]; featured: ProductItem }  // banner 2 cols × 2 rows, left
-  | { type: 'D'; cards: ProductItem[]; featured: ProductItem }  // banner 2 cols × 1 row (2 slots)
-  | { type: 'E'; cards: ProductItem[]; featured: ProductItem }  // banner 1 col × 1 row (1 slot)
+  | { type: 'A'; cards: ProductItem[]; featured: ProductItem }
+  | { type: 'B'; cards: ProductItem[]; trailingFeatured?: ProductItem }
+  | { type: 'C'; cards: ProductItem[]; featured: ProductItem }
+  | { type: 'D'; cards: ProductItem[]; featured: ProductItem }
 
 function buildRhythmGroups(allProducts: ProductItem[], featuredProducts: ProductItem[]): RhythmGroup[] {
   const groups: RhythmGroup[] = []
@@ -91,8 +90,12 @@ function buildRhythmGroups(allProducts: ProductItem[], featuredProducts: Product
     pi += cards.length
   }
 
-  // Always end with: 1-slot banner (1 col × 1 row) — no product cards consumed
-  groups.push({ type: 'E', cards: [], featured: featuredProducts[0] })
+  // Append 1-slot banner as the trailing item in the last B group so it
+  // auto-places into the next available grid cell (not a new row)
+  const lastB = groups.slice().reverse().find(g => g.type === 'B')
+  if (lastB && lastB.type === 'B') {
+    lastB.trailingFeatured = featuredProducts[0]
+  }
 
   return groups
 }
@@ -450,6 +453,13 @@ function CategoryPageInnerT3() {
                         swatches={brand !== 'lal' ? DEFAULT_PRODUCT_SWATCHES : undefined}
                       />
                     ))}
+                    {group.trailingFeatured && (
+                      <FeaturedCard
+                        product={group.trailingFeatured}
+                        swatches={brand !== 'lal' ? DEFAULT_PRODUCT_SWATCHES : undefined}
+                        slotClassName={styles.featuredCardSingle}
+                      />
+                    )}
                   </div>
                 )
               }
@@ -487,31 +497,6 @@ function CategoryPageInnerT3() {
                       product={group.featured}
                       swatches={brand !== 'lal' ? DEFAULT_PRODUCT_SWATCHES : undefined}
                       slotClassName={styles.featuredCardWide}
-                    />
-                    {group.cards.map((p) => (
-                      <ProductCard
-                        key={p.id}
-                        name={p.name}
-                        price={p.price ?? ''}
-                        originalPrice={p.originalPrice}
-                        defaultImage={p.image}
-                        hoverImage={p.hoverImage}
-                        href={`/${brand}${p.href}`}
-                        swatches={brand !== 'lal' ? DEFAULT_PRODUCT_SWATCHES : undefined}
-                      />
-                    ))}
-                  </div>
-                )
-              }
-
-              // Group E — single-card banner (1 col × 1 row) + 7 cards
-              if (group.type === 'E') {
-                return (
-                  <div key={gi} className={styles.rhythmGroup}>
-                    <FeaturedCard
-                      product={group.featured}
-                      swatches={brand !== 'lal' ? DEFAULT_PRODUCT_SWATCHES : undefined}
-                      slotClassName={styles.featuredCardSingle}
                     />
                     {group.cards.map((p) => (
                       <ProductCard

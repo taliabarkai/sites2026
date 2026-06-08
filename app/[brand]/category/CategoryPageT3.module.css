@@ -403,10 +403,9 @@
   order: 0;
 }
 
-/* Group E: single-card banner — 1 col on all sizes */
+/* Group E trailing: auto-placed after the last product card */
 .featuredCardSingle {
-  grid-column: 1 / 2;
-  order: 0;
+  /* no grid placement — auto-flows into the next available cell */
 }
 
 @media (min-width: 1440px) {
@@ -445,12 +444,8 @@
     grid-row: 1 / 2;
   }
 
-  /* Group E: single-card banner — col 1, row 1 (= 1 card slot) */
-  /* aspect-ratio gives the lone grid item a definite height so the inner height:100% chain resolves */
+  /* Group E trailing: auto-placed, aspect-ratio matches a product card */
   .featuredCardSingle {
-    order: 0;
-    grid-column: 1 / 2;
-    grid-row: 1 / 2;
     aspect-ratio: 4 / 5;
   }
 }
