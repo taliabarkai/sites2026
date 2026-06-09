@@ -53,10 +53,10 @@ function HomePageInner() {
   const bestSellers = getBrandProducts(brand).slice(0, 8)
 
   const CATEGORY_TILES = [
-    { label: 'Necklaces', href: `/${brand}/category` },
-    { label: 'Bracelets', href: `/${brand}/category` },
-    { label: 'Earrings', href: `/${brand}/category` },
-    { label: 'Rings', href: `/${brand}/category` },
+    { label: 'Necklaces', href: `/${brand}/category`, image: 'https://cdn.oakandluna.com/digital-asset/banners/NECKLACES_banner_HP_OAL.jpg' },
+    { label: 'Bracelets', href: `/${brand}/category`, image: 'https://cdn.oakandluna.com/digital-asset/banners/Bracelets-banner_HP_OAL.jpg' },
+    { label: 'Earrings',  href: `/${brand}/category`, image: 'https://cdn.oakandluna.com/digital-asset/banners/EARRINGS_banner_HP_OAL.jpg' },
+    { label: 'Rings',     href: `/${brand}/category`, image: 'https://cdn.oakandluna.com/digital-asset/banners/RINGS-banner_HP_OAL.jpg' },
   ]
 
   return (
@@ -74,7 +74,8 @@ function HomePageInner() {
         <section className={styles.categoryGrid} aria-label="Shop by category">
           {CATEGORY_TILES.map(tile => (
             <a key={tile.label} href={tile.href} className={styles.categoryTile}>
-              {/* image src to be filled with CDN links */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={tile.image} alt={tile.label} className={styles.categoryTileImg} loading="lazy" />
               <span className={styles.categoryTileLabel}>{tile.label}</span>
             </a>
           ))}
