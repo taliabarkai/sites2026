@@ -282,6 +282,25 @@
   }
 }
 
+/* ── Editorial text block ─────────────────────────────────────────────────── */
+
+.editorialBlock {
+  padding: 72px var(--layout-page-margin);
+  text-align: center;
+}
+
+.editorialText {
+  margin: 0 auto;
+  max-width: 1440px;
+  font-family:    var(--typography-rules-headline2-font-family);
+  font-size:      var(--typography-rules-headline2-font-size);
+  line-height:    var(--typography-rules-headline2-line-height);
+  font-weight:    var(--typography-rules-headline2-font-weight, normal);
+  letter-spacing: var(--typography-rules-headline2-letter-spacing, normal);
+  text-transform: var(--typography-rules-headline2-text-transform, none);
+  color: var(--colors-text);
+}
+
 /* ── Filter Panel ─────────────────────────────────────────────────────────── */
 
 .filterOverlay {

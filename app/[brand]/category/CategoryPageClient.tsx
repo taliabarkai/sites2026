@@ -252,7 +252,7 @@ function CategoryPageInner() {
 
         <section className={styles.productsSection} aria-label="Products">
           <div className={styles.productsGrid}>
-            {getBrandProducts(brand).map((p) => (
+            {getBrandProducts(brand).slice(0, 12).map((p) => (
               <ProductCard
                 key={p.id}
                 name={p.name}
@@ -265,6 +265,29 @@ function CategoryPageInner() {
               />
             ))}
           </div>
+
+          <div className={styles.editorialBlock}>
+            <p className={styles.editorialText}>
+              &ldquo;These are pieces that live with you, not just on you. Something you don&rsquo;t have to take off when you move between roles in your day.&rdquo;
+            </p>
+          </div>
+
+          {getBrandProducts(brand).length > 12 && (
+            <div className={styles.productsGrid}>
+              {getBrandProducts(brand).slice(12).map((p) => (
+                <ProductCard
+                  key={p.id}
+                  name={p.name}
+                  price={p.price ?? ''}
+                  originalPrice={p.originalPrice}
+                  defaultImage={p.image}
+                  hoverImage={p.hoverImage}
+                  href={`/${brand}${p.href}`}
+                  swatches={brand !== 'lal' ? DEFAULT_PRODUCT_SWATCHES : undefined}
+                />
+              ))}
+            </div>
+          )}
         </section>
       </main>
 

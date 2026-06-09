@@ -241,8 +241,8 @@ function CategoryPageInnerT4() {
   const router = useRouter()
 
   const allProducts = getBrandProducts(brand)
-  const firstBatch = allProducts.slice(0, 16)
-  const remainingBatch = allProducts.slice(16)
+  const firstBatch = allProducts.slice(0, 12)
+  const remainingBatch = allProducts.slice(12)
 
   return (
     <div className={baseStyles.page}>
