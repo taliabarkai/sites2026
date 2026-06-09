@@ -50,7 +50,7 @@ function HomePageInner() {
 
   const transparentHeader = brand === 'oal'
 
-  const bestSellers = getBrandProducts(brand).slice(0, 8)
+  const bestSellers = getBrandProducts(brand).slice(0, 4)
 
   const CATEGORY_TILES = [
     { label: 'Necklaces', href: `/${brand}/category`, image: 'https://cdn.oakandluna.com/digital-asset/banners/NECKLACES_banner_HP_OAL.jpg' },
