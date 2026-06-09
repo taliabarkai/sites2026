@@ -50,13 +50,6 @@ function HomePageInner() {
 
   const transparentHeader = brand === 'oal'
 
-  const heroImages = brand === 'oal'
-    ? {
-        imageDesktop: 'https://cdn.oakandluna.com/digital-asset/banners/FALLBACK-IMAGE-DT-BANNER_version2.jpg',
-        imageMobile:  'https://cdn.oakandluna.com/digital-asset/banners/MOBILE-FALL-BACK-SD_version2.jpg',
-      }
-    : {}
-
   const bestSellers = getBrandProducts(brand).slice(0, 4)
 
   const CATEGORY_TILES = [
@@ -75,7 +68,7 @@ function HomePageInner() {
         topline={topline}
       />
       <main id="main-content">
-        <Hero {...hero} {...heroImages} transparentHeader={transparentHeader} />
+        <Hero {...hero} transparentHeader={transparentHeader} />
 
         {/* 4-up category grid */}
         <section className={styles.categoryGrid} aria-label="Shop by category">
