@@ -3,6 +3,8 @@
 .saleTiles {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
+  gap: var(--spacing-xxs);
+  padding: var(--spacing-xxs);
 }
 
 @media (min-width: 1440px) {

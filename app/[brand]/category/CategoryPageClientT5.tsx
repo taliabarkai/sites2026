@@ -250,9 +250,15 @@ function CategoryPageInnerT5() {
       <main id="main-content">
         <CategoryHero
           brand={brand}
-          variant={getSeoCategoryVariant(brand)}
+          variant="text-only"
           title="Sale"
-          hideCategories
+          description="Rare, But Real: Grab those discounted Oak and Luna pieces. Shop now, thank us later."
+          categories={[
+            { label: 'All Trendy Jewelry', href: '#' },
+            { label: 'Best Sellers',       href: '#' },
+            { label: 'Gifts Under $250',   href: '#' },
+            { label: 'Gifts Under $150',   href: '#' },
+          ]}
         />
 
         {/* 4-tile promo grid — above filter bar, no gap */}

@@ -154,9 +154,32 @@
 
 .pillContainer {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: var(--spacing-sm);
-  justify-content: center;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  width: calc(100% + 2 * var(--layout-page-margin));
+  margin-left: calc(-1 * var(--layout-page-margin));
+  padding-left: var(--layout-page-margin);
+  padding-right: var(--layout-page-margin);
+  justify-content: flex-start;
+}
+
+.pillContainer::-webkit-scrollbar {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .pillContainer {
+    flex-wrap: wrap;
+    overflow: visible;
+    width: auto;
+    margin-left: 0;
+    padding-left: 0;
+    padding-right: 0;
+    justify-content: center;
+  }
 }
 
 /* OAL: left-aligned (inside the heroOal flex row) */
@@ -188,6 +211,19 @@
 .pill:hover {
   background: var(--colors-brand-default-primary);
   color: var(--related-category-hover-text, var(--colors-text-inverse));
+  border-color: var(--colors-brand-default-primary);
+}
+
+/* ── OAL pill overrides: no radius, lighter background ───────────────────── */
+
+.heroOal .pill {
+  border-radius: 0;
+  background: var(--colors-surface-primary);
+  border-color: var(--colors-surface-primary);
+}
+
+.heroOal .pill:hover {
+  background: var(--colors-brand-default-primary);
   border-color: var(--colors-brand-default-primary);
 }
 

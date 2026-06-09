@@ -14,7 +14,7 @@ const DEFAULT_CATEGORIES = [
 
 interface CategoryItem {
   label: string
-  src: string
+  src?: string
   href?: string
 }
 
