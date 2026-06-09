@@ -23,7 +23,8 @@ import * as mnnIcons from '@/src/components/icons/mnn'
 import * as tgrIcons from '@/src/components/icons/tgr'
 import * as lalIcons from '@/src/components/icons/lal'
 import * as ibIcons  from '@/src/components/icons/ib'
-import styles from './CategoryPage.module.css'
+import baseStyles from './CategoryPage.module.css'
+import t4Styles from './CategoryPageT4.module.css'
 
 const BRAND_ICONS = {
   oal: oalIcons, mnn: mnnIcons, tgr: tgrIcons, lal: lalIcons, ib: ibIcons,
@@ -57,6 +58,12 @@ const MATERIAL_FILTERS = [
 
 type MaterialKey = typeof MATERIAL_FILTERS[number]['key']
 
+const CATEGORY_TILES = [
+  { label: 'Shop Tennis Bracelets', href: '#', image: 'https://cdn.oakandluna.com/digital-asset/product/advantage-engraved-tennis-bracelet-silver-3.jpg' },
+  { label: 'Shop Custom Name Necklaces', href: '#', image: 'https://cdn.oakandluna.com/digital-asset/product/soltale-bordeaux-belle-name-necklace-gold-vermeil-3.jpg' },
+  { label: 'Shop Earrings', href: '#', image: 'https://cdn.oakandluna.com/digital-asset/product/interlace-earrings-gold-vermeil-4.jpg' },
+]
+
 // ─── Filter Panel ─────────────────────────────────────────────────────────────
 
 function FilterPanel({
@@ -83,21 +90,21 @@ function FilterPanel({
   return (
     <>
       <div
-        className={`${styles.filterOverlay} ${isOpen ? styles.filterOverlayVisible : ''}`}
+        className={`${baseStyles.filterOverlay} ${isOpen ? baseStyles.filterOverlayVisible : ''}`}
         onClick={onClose}
         aria-hidden="true"
       />
       <div
-        className={`${styles.filterPanel} ${isOpen ? styles.filterPanelOpen : ''}`}
+        className={`${baseStyles.filterPanel} ${isOpen ? baseStyles.filterPanelOpen : ''}`}
         role="dialog"
         aria-label="Filters"
         aria-modal="true"
       >
-        <div className={styles.filterPanelHeader}>
-          <h2 className={styles.filterPanelTitle}>Filters</h2>
+        <div className={baseStyles.filterPanelHeader}>
+          <h2 className={baseStyles.filterPanelTitle}>Filters</h2>
           <button
             type="button"
-            className={styles.filterPanelClose}
+            className={baseStyles.filterPanelClose}
             aria-label="Close filters"
             onClick={onClose}
           >
@@ -105,17 +112,16 @@ function FilterPanel({
           </button>
         </div>
 
-        <div className={styles.filterPanelBody}>
-          {/* Sort By */}
-          <div className={styles.filterSection}>
+        <div className={baseStyles.filterPanelBody}>
+          <div className={baseStyles.filterSection}>
             <button
               type="button"
-              className={styles.filterSortHeader}
+              className={baseStyles.filterSortHeader}
               onClick={() => setSortExpanded(o => !o)}
               aria-expanded={sortExpanded}
             >
-              <span className={styles.filterSectionTitle}>Sort By:</span>
-              <span className={styles.filterSortValue}>
+              <span className={baseStyles.filterSectionTitle}>Sort By:</span>
+              <span className={baseStyles.filterSortValue}>
                 {SORT_OPTIONS.find(o => o.key === sortKey)?.label}
                 <span style={{ display: 'inline-flex', transform: sortExpanded ? 'rotate(-90deg)' : 'rotate(90deg)', transition: 'transform var(--transition-fast)' }}>
                   <ChevronIcon size={24} />
@@ -123,44 +129,43 @@ function FilterPanel({
               </span>
             </button>
             {sortExpanded && (
-              <div className={styles.sortOptions} role="radiogroup" aria-label="Sort by">
+              <div className={baseStyles.sortOptions} role="radiogroup" aria-label="Sort by">
                 {SORT_OPTIONS.map((opt) => (
-                  <label key={opt.key} className={styles.sortOption}>
+                  <label key={opt.key} className={baseStyles.sortOption}>
                     <input
                       type="radio"
                       name="sort"
                       value={opt.key}
                       checked={sortKey === opt.key}
                       onChange={() => onSortChange(opt.key)}
-                      className={styles.sortOptionInput}
+                      className={baseStyles.sortOptionInput}
                     />
-                    <span className={styles.sortOptionLabel}>{opt.label}</span>
+                    <span className={baseStyles.sortOptionLabel}>{opt.label}</span>
                   </label>
                 ))}
               </div>
             )}
           </div>
 
-          {/* Materials */}
-          <div className={styles.filterSection}>
-            <p className={styles.filterSectionTitle}>Materials</p>
-            <div className={styles.materialList}>
+          <div className={baseStyles.filterSection}>
+            <p className={baseStyles.filterSectionTitle}>Materials</p>
+            <div className={baseStyles.materialList}>
               {MATERIAL_FILTERS.map((m) => {
                 const active = activeMaterials.has(m.key)
                 return (
                   <button
                     key={m.key}
                     type="button"
-                    className={`${styles.materialItem} ${active ? styles.materialItemActive : ''}`}
+                    className={`${baseStyles.materialItem} ${active ? baseStyles.materialItemActive : ''}`}
                     onClick={() => onToggleMaterial(m.key)}
                     aria-pressed={active}
                   >
                     <span
-                      className={styles.materialSwatch}
+                      className={baseStyles.materialSwatch}
                       style={{ background: m.swatch }}
                       aria-hidden="true"
                     />
-                    <span className={styles.materialLabel}>{m.label}</span>
+                    <span className={baseStyles.materialLabel}>{m.label}</span>
                   </button>
                 )
               })}
@@ -171,8 +176,6 @@ function FilterPanel({
     </>
   )
 }
-
-// ─── Category image data ──────────────────────────────────────────────────────
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
@@ -186,13 +189,13 @@ function FilterBar({
   FilterIcon: React.ComponentType<{ size?: number }>
 }) {
   return (
-    <div className={styles.filterBar}>
-      <div className={styles.filterBarInner}>
-        <div className={styles.filterRight}>
-          <span className={styles.itemCount}>{itemCount} items</span>
+    <div className={baseStyles.filterBar}>
+      <div className={baseStyles.filterBarInner}>
+        <div className={baseStyles.filterRight}>
+          <span className={baseStyles.itemCount}>{itemCount} items</span>
           <button
             type="button"
-            className={styles.filtersTrigger}
+            className={baseStyles.filtersTrigger}
             onClick={onOpenFilters}
             aria-label="Open filters"
           >
@@ -207,7 +210,7 @@ function FilterBar({
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
-function CategoryPageInner() {
+function CategoryPageInnerT4() {
   const pathname = usePathname()
   const brand = getBrandFromPathname(pathname)
   const navLinks = prefixNavLinks(brand, DEFAULT_NAV_LINKS)
@@ -237,22 +240,27 @@ function CategoryPageInner() {
   const { items, isOpen, subtotal, closeCart, removeItem } = useCart()
   const router = useRouter()
 
+  const allProducts = getBrandProducts(brand)
+  const firstBatch = allProducts.slice(0, 16)
+  const remainingBatch = allProducts.slice(16)
+
   return (
-    <div className={styles.page}>
+    <div className={baseStyles.page}>
       <Header variant="white" brand={brand} navLinks={navLinks} topline={topline} sticky={false} />
 
       <main id="main-content">
-        <CategoryHero brand={brand} variant={getSeoCategoryVariant(brand)} title="Best Sellers" />
+        <CategoryHero brand={brand} variant={getSeoCategoryVariant(brand)} title="New In" />
 
         <FilterBar
-          itemCount={getBrandProducts(brand).length}
+          itemCount={allProducts.length}
           onOpenFilters={() => setFilterPanelOpen(true)}
           FilterIcon={FilterIcon}
         />
 
-        <section className={styles.productsSection} aria-label="Products">
-          <div className={styles.productsGrid}>
-            {getBrandProducts(brand).map((p) => (
+        <section className={baseStyles.productsSection} aria-label="Products">
+          {/* First 8 products */}
+          <div className={baseStyles.productsGrid}>
+            {firstBatch.map((p) => (
               <ProductCard
                 key={p.id}
                 name={p.name}
@@ -265,6 +273,40 @@ function CategoryPageInner() {
               />
             ))}
           </div>
+
+          {/* Best sellers carousel — full-bleed on mobile, within margins on desktop */}
+          <section className={t4Styles.categorySection} aria-label="Shop our best sellers">
+            <h2 className={t4Styles.categorySectionTitle}>Customer Faves</h2>
+            <div className={t4Styles.categoryCarouselTrack}>
+              {CATEGORY_TILES.map((tile) => (
+                <div key={tile.label} className={t4Styles.categoryCarouselCard}>
+                  <a href={tile.href} className={t4Styles.categoryCarouselImgLink}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={tile.image} alt={tile.label} className={t4Styles.categoryCarouselImg} loading="lazy" />
+                  </a>
+                  <a href={tile.href} className={t4Styles.categoryCarouselCta}>{tile.label}</a>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* Remaining products */}
+          {remainingBatch.length > 0 && (
+            <div className={baseStyles.productsGrid}>
+              {remainingBatch.map((p) => (
+                <ProductCard
+                  key={p.id}
+                  name={p.name}
+                  price={p.price ?? ''}
+                  originalPrice={p.originalPrice}
+                  defaultImage={p.image}
+                  hoverImage={p.hoverImage}
+                  href={`/${brand}${p.href}`}
+                  swatches={brand !== 'lal' ? DEFAULT_PRODUCT_SWATCHES : undefined}
+                />
+              ))}
+            </div>
+          )}
         </section>
       </main>
 
@@ -295,6 +337,6 @@ function CategoryPageInner() {
   )
 }
 
-export default function CategoryPageClient() {
-  return <CategoryPageInner />
+export default function CategoryPageClientT4() {
+  return <CategoryPageInnerT4 />
 }

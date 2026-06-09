@@ -1,0 +1,44 @@
+/* ── T5 Sale — promo tiles above filter bar ──────────────────────────────── */
+
+.saleTiles {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+}
+
+@media (min-width: 1440px) {
+  .saleTiles {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.saleTile {
+  position: relative;
+  display: block;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  background: var(--colors-card-image-bg);
+  text-decoration: none;
+}
+
+.saleTileImg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.saleTileLabel {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  padding: var(--spacing-md);
+  font-family:    var(--typography-rules-headline8-font-family);
+  font-size:      var(--typography-rules-headline8-font-size);
+  line-height:    var(--typography-rules-headline8-line-height);
+  font-weight:    var(--typography-rules-headline8-font-weight, normal);
+  letter-spacing: var(--typography-rules-headline8-letter-spacing, normal);
+  text-transform: var(--typography-rules-headline8-text-transform, none);
+  color: var(--colors-text);
+}

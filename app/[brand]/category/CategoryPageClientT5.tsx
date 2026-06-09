@@ -24,6 +24,7 @@ import * as tgrIcons from '@/src/components/icons/tgr'
 import * as lalIcons from '@/src/components/icons/lal'
 import * as ibIcons  from '@/src/components/icons/ib'
 import styles from './CategoryPage.module.css'
+import t5Styles from './CategoryPageT5.module.css'
 
 const BRAND_ICONS = {
   oal: oalIcons, mnn: mnnIcons, tgr: tgrIcons, lal: lalIcons, ib: ibIcons,
@@ -56,6 +57,13 @@ const MATERIAL_FILTERS = [
 ] as const
 
 type MaterialKey = typeof MATERIAL_FILTERS[number]['key']
+
+const SALE_TILES = [
+  { label: 'Necklaces',  href: '#', image: 'https://cdn.oakandluna.com/digital-asset/banners/NECKLACES_banner_HP_OAL.jpg' },
+  { label: 'Bracelets',  href: '#', image: 'https://cdn.oakandluna.com/digital-asset/banners/Bracelets-banner_HP_OAL.jpg' },
+  { label: 'Earrings',   href: '#', image: 'https://cdn.oakandluna.com/digital-asset/banners/EARRINGS_banner_HP_OAL.jpg' },
+  { label: 'Rings',      href: '#', image: 'https://cdn.oakandluna.com/digital-asset/banners/RINGS-banner_HP_OAL.jpg' },
+]
 
 // ─── Filter Panel ─────────────────────────────────────────────────────────────
 
@@ -106,7 +114,6 @@ function FilterPanel({
         </div>
 
         <div className={styles.filterPanelBody}>
-          {/* Sort By */}
           <div className={styles.filterSection}>
             <button
               type="button"
@@ -141,7 +148,6 @@ function FilterPanel({
             )}
           </div>
 
-          {/* Materials */}
           <div className={styles.filterSection}>
             <p className={styles.filterSectionTitle}>Materials</p>
             <div className={styles.materialList}>
@@ -171,8 +177,6 @@ function FilterPanel({
     </>
   )
 }
-
-// ─── Category image data ──────────────────────────────────────────────────────
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
@@ -207,7 +211,7 @@ function FilterBar({
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
-function CategoryPageInner() {
+function CategoryPageInnerT5() {
   const pathname = usePathname()
   const brand = getBrandFromPathname(pathname)
   const navLinks = prefixNavLinks(brand, DEFAULT_NAV_LINKS)
@@ -237,22 +241,40 @@ function CategoryPageInner() {
   const { items, isOpen, subtotal, closeCart, removeItem } = useCart()
   const router = useRouter()
 
+  const allProducts = getBrandProducts(brand)
+
   return (
     <div className={styles.page}>
       <Header variant="white" brand={brand} navLinks={navLinks} topline={topline} sticky={false} />
 
       <main id="main-content">
-        <CategoryHero brand={brand} variant={getSeoCategoryVariant(brand)} title="Best Sellers" />
+        <CategoryHero
+          brand={brand}
+          variant={getSeoCategoryVariant(brand)}
+          title="Sale"
+          hideCategories
+        />
+
+        {/* 4-tile promo grid — above filter bar, no gap */}
+        <section className={t5Styles.saleTiles} aria-label="Shop sale by category">
+          {SALE_TILES.map((tile) => (
+            <a key={tile.label} href={tile.href} className={t5Styles.saleTile}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={tile.image} alt={tile.label} className={t5Styles.saleTileImg} loading="lazy" />
+              <span className={t5Styles.saleTileLabel}>{tile.label}</span>
+            </a>
+          ))}
+        </section>
 
         <FilterBar
-          itemCount={getBrandProducts(brand).length}
+          itemCount={allProducts.length}
           onOpenFilters={() => setFilterPanelOpen(true)}
           FilterIcon={FilterIcon}
         />
 
         <section className={styles.productsSection} aria-label="Products">
           <div className={styles.productsGrid}>
-            {getBrandProducts(brand).map((p) => (
+            {allProducts.map((p) => (
               <ProductCard
                 key={p.id}
                 name={p.name}
@@ -295,6 +317,6 @@ function CategoryPageInner() {
   )
 }
 
-export default function CategoryPageClient() {
-  return <CategoryPageInner />
+export default function CategoryPageClientT5() {
+  return <CategoryPageInnerT5 />
 }

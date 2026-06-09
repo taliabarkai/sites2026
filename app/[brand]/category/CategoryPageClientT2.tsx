@@ -324,7 +324,7 @@ function CategoryPageInnerT2() {
       <Header variant="white" brand={brand} navLinks={navLinks} topline={topline} sticky={false} />
 
       <main id="main-content">
-        <CategoryHero brand={brand} variant={getSeoCategoryVariant(brand)} />
+        <CategoryHero brand={brand} variant={getSeoCategoryVariant(brand)} title="Shop All" />
 
         <FilterBar
           itemCount={allBrandProducts.length}

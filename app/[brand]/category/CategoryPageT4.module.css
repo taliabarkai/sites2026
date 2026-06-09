@@ -1,0 +1,117 @@
+/* ── Category carousel — inserted after 8th product in T4 ─────────────────
+ * Mobile: horizontal scroll showing 1.5 cards, edge-to-edge
+ * Desktop: 3-column grid within page margins, no scroll
+ * ─────────────────────────────────────────────────────────────────────── */
+
+.categorySection {
+  overflow: hidden;
+  padding: var(--spacing-xl) 0;
+  /* pulls the section out of productsSection's desktop side padding */
+  margin-left: calc(-1 * var(--layout-page-margin));
+  margin-right: calc(-1 * var(--layout-page-margin));
+}
+
+@media (max-width: 768px) {
+  .categorySection {
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  .categoryCarouselTrack {
+    padding-left: var(--layout-page-margin);
+    padding-right: var(--layout-page-margin);
+    scroll-padding-left: var(--layout-page-margin);
+  }
+}
+
+.categorySectionTitle {
+  margin: 0 0 var(--spacing-md);
+  padding: 0 var(--layout-page-margin);
+  font-family:    var(--typography-rules-headline2-font-family);
+  font-size:      var(--typography-rules-headline2-font-size);
+  line-height:    var(--typography-rules-headline2-line-height);
+  font-weight:    var(--typography-rules-headline2-font-weight, normal);
+  letter-spacing: var(--typography-rules-headline2-letter-spacing, normal);
+  text-transform: var(--typography-rules-headline2-text-transform, none);
+  color: var(--colors-text);
+}
+
+/* ── Carousel track ───────────────────────────────────────────────────────── */
+
+.categoryCarouselTrack {
+  display: flex;
+  gap: var(--spacing-xxs);
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.categoryCarouselTrack::-webkit-scrollbar {
+  display: none;
+}
+
+/* ── Card ─────────────────────────────────────────────────────────────────── */
+
+.categoryCarouselCard {
+  flex: 0 0 calc(100% / 1.5);
+  scroll-snap-align: start;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.categoryCarouselImgLink {
+  display: block;
+  overflow: hidden;
+  background: var(--colors-card-image-bg);
+}
+
+.categoryCarouselImg {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  object-position: center;
+}
+
+.categoryCarouselCta {
+  display: block;
+  padding: var(--spacing-xs) 0;
+  font-family:    var(--typography-rules-headline8-font-family);
+  font-size:      var(--typography-rules-headline8-font-size);
+  line-height:    var(--typography-rules-headline8-line-height);
+  font-weight:    var(--typography-rules-headline8-font-weight, normal);
+  letter-spacing: var(--typography-rules-headline8-letter-spacing, normal);
+  text-transform: var(--typography-rules-headline8-text-transform, none);
+  color: var(--colors-text);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* ── Desktop ──────────────────────────────────────────────────────────────── */
+
+@media (min-width: 1440px) {
+  .categorySection {
+    overflow: visible;
+    padding: var(--spacing-xl) var(--layout-page-margin);
+  }
+
+  .categorySectionTitle {
+    padding: 0;
+    text-align: left;
+    margin-bottom: var(--spacing-lg);
+  }
+
+  .categoryCarouselTrack {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    overflow: visible;
+    scroll-snap-type: none;
+  }
+
+  .categoryCarouselCard {
+    flex: unset;
+    scroll-snap-align: none;
+  }
+}

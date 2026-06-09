@@ -24,6 +24,7 @@ interface CategoryHeroProps {
   description?: string
   categories?: CategoryItem[]
   variant?: SeoCategoryVariant
+  hideCategories?: boolean
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -34,6 +35,7 @@ export function CategoryHero({
   description = 'Capture your unique personality effortlessly with pendants for women, as your jewelry should be just as unique as you are.',
   categories = DEFAULT_CATEGORIES,
   variant = 'with-image',
+  hideCategories = false,
 }: CategoryHeroProps) {
   const isOal = brand === 'oal'
   const count = categories.length
@@ -47,35 +49,37 @@ export function CategoryHero({
         <p className={styles.heroDescription}>{description}</p>
       </div>
 
-      {variant === 'text-only' ? (
-        /* ── text-only: pill links ── */
-        <div className={styles.pillContainer}>
-          {categories.map((cat) => (
-            <a
-              key={cat.label}
-              href={cat.href ?? '#'}
-              className={styles.pill}
-            >
-              {cat.label}
-            </a>
-          ))}
-        </div>
-      ) : (
-        /* ── with-image: image cards ── */
-        <div
-          className={isOal ? styles.categoryContainerOal : styles.categoryContainerDefault}
-          style={isOal ? { maxWidth: `${oalCols * 160 + (oalCols - 1) * 16}px` } : undefined}
-        >
-          {categories.map((cat) => (
-            <div key={cat.label} className={styles.categoryItem}>
-              <div className={styles.categoryImageWrap}>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={cat.src} alt={cat.label} className={styles.categoryImage} loading="lazy" />
+      {!hideCategories && (
+        variant === 'text-only' ? (
+          /* ── text-only: pill links ── */
+          <div className={styles.pillContainer}>
+            {categories.map((cat) => (
+              <a
+                key={cat.label}
+                href={cat.href ?? '#'}
+                className={styles.pill}
+              >
+                {cat.label}
+              </a>
+            ))}
+          </div>
+        ) : (
+          /* ── with-image: image cards ── */
+          <div
+            className={isOal ? styles.categoryContainerOal : styles.categoryContainerDefault}
+            style={isOal ? { maxWidth: `${oalCols * 160 + (oalCols - 1) * 16}px` } : undefined}
+          >
+            {categories.map((cat) => (
+              <div key={cat.label} className={styles.categoryItem}>
+                <div className={styles.categoryImageWrap}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={cat.src} alt={cat.label} className={styles.categoryImage} loading="lazy" />
+                </div>
+                <span className={styles.categoryLabel}>{cat.label}</span>
               </div>
-              <span className={styles.categoryLabel}>{cat.label}</span>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )
       )}
     </section>
   )

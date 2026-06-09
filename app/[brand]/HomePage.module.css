@@ -13,7 +13,8 @@
 .categoryGrid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  /* no gap — tiles are seamlessly adjacent */
+  gap: var(--spacing-xxs);
+  padding: var(--spacing-xxs);
 }
 
 @media (min-width: 1440px) {
@@ -57,10 +58,12 @@
 /* ── Best sellers carousel ─────────────────────────────────────────────── */
 
 .bestSellers {
-  padding: var(--layout-page-margin) 0 var(--layout-page-margin) var(--layout-page-margin);
+  padding: var(--spacing-lg) 0;
 }
 
 .bestSellersHeader {
+  padding-left: var(--layout-page-margin);
+  padding-right: var(--layout-page-margin);
   padding-bottom: var(--spacing-md);
 }
 
@@ -82,6 +85,9 @@
   scroll-snap-type: x mandatory;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
+  padding-left: var(--layout-page-margin);
+  padding-right: var(--layout-page-margin);
+  scroll-padding-left: var(--layout-page-margin);
 }
 
 .carouselTrack::-webkit-scrollbar {
@@ -89,22 +95,178 @@
 }
 
 .carouselCard {
-  flex: 0 0 calc(100% / 2.25);
+  flex: 0 0 calc((100% - var(--layout-page-margin)) / 2.25);
   scroll-snap-align: start;
   min-width: 0;
 }
 
+/* ── Carousel wrapper + arrows (desktop only) ─────────────────────────── */
+
+.carouselWrapper {
+  position: relative;
+}
+
+.carouselArrow {
+  display: none; /* mobile: hidden */
+}
+
 @media (min-width: 1440px) {
-  .carouselTrack {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    overflow: visible;
-    padding: 0;
-    scroll-snap-type: none;
+  .bestSellers {
+    overflow: hidden;
+    padding-right: var(--layout-page-margin);
   }
 
   .carouselCard {
-    flex: unset;
-    scroll-snap-align: none;
+    /* subtract 2 page margins + 3 gaps so exactly 4 cards fit */
+    flex: 0 0 calc((100% - var(--layout-page-margin) * 2 - var(--spacing-xxs) * 3) / 4);
+  }
+
+  .carouselArrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: 40%;
+    transform: translateY(-50%);
+    width: 48px;
+    height: 48px;
+    background: #000;
+    border: none;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity var(--transition-fast);
+    z-index: var(--z-raised);
+    pointer-events: none;
+  }
+
+  .bestSellers:hover .carouselArrow {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .carouselArrowPrev { left: var(--layout-page-margin); transform: translateY(-50%) scaleX(-1); }
+  .carouselArrowNext { right: 0; }
+}
+
+/* ── Promo image carousel ──────────────────────────────────────────────── */
+
+.promoCarousel {
+  padding: var(--spacing-xl) 0;
+}
+
+/* Mobile: vertical single-column stack */
+.promoCarouselTrack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xxs);
+  padding: 0 var(--layout-page-margin);
+}
+
+.promoCarouselCard {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.promoCarouselImgLink {
+  display: block;
+  overflow: hidden;
+  background: var(--colors-card-image-bg);
+}
+
+.promoCarouselImg {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  object-position: center;
+}
+
+/* ── text-on-image variant modifiers ───────────────────────────────────── */
+
+.promoCarouselOnImage {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.promoCarouselTrackOnImage {
+  padding: 0;
+}
+
+.promoCarouselCardOnImage {
+  position: relative;
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  /* img fills the card naturally via aspect-ratio on .promoCarouselImg */
+}
+
+.promoCarouselOverlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  padding: var(--spacing-md);
+}
+
+.promoCarouselCardOnImage .promoCarouselTitle {
+  color: var(--colors-text);
+  margin: 0 0 var(--spacing-xxs);
+}
+
+.promoCarouselCardOnImage .promoCarouselCta {
+  color: var(--colors-text);
+  padding: 0;
+}
+
+/* ────────────────────────────────────────────────────────────────────────── */
+
+.promoCarouselTitle {
+  margin: var(--spacing-xs) 0 0;
+  font-family:    var(--typography-rules-headline3-font-family);
+  font-size:      var(--typography-rules-headline3-font-size);
+  line-height:    var(--typography-rules-headline3-line-height);
+  font-weight:    var(--typography-rules-headline3-font-weight, normal);
+  letter-spacing: var(--typography-rules-headline3-letter-spacing, normal);
+  text-transform: var(--typography-rules-headline3-text-transform, none);
+  color: var(--colors-text);
+}
+
+.promoCarouselCta {
+  display: block;
+  padding: var(--spacing-xs) 0;
+  font-family:    var(--typography-rules-headline8-font-family);
+  font-size:      var(--typography-rules-headline8-font-size);
+  line-height:    var(--typography-rules-headline8-line-height);
+  font-weight:    var(--typography-rules-headline8-font-weight, normal);
+  letter-spacing: var(--typography-rules-headline8-letter-spacing, normal);
+  text-transform: var(--typography-rules-headline8-text-transform, none);
+  color: var(--colors-text);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+@media (min-width: 1440px) {
+  .promoCarousel {
+    overflow: visible;
+    padding: var(--spacing-xl) var(--layout-page-margin);
+  }
+
+  .promoCarouselOnImage {
+    padding: 0;
+  }
+
+  .promoCarouselTrackOnImage {
+    padding: 0;
+    gap: 0;
+  }
+
+  .promoCarouselTrack {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    padding: 0;
+  }
+
+  .promoCarouselCard {
+    min-width: 0;
   }
 }

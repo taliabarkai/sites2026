@@ -113,7 +113,7 @@ export function Header({
 
             <nav className={styles.desktopNav} aria-label="Primary">
               <ul className={styles.navList}>
-                {navLinks.map((link) => (
+                {navLinks.filter(link => !link.desktopHidden).map((link) => (
                   <li key={link.href}>
                     {link.highlight ? (
                       <Button

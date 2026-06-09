@@ -2,6 +2,7 @@ export interface NavLink {
   label: string
   href: string
   highlight?: boolean
+  desktopHidden?: boolean
 }
 
 export interface FooterLink {
@@ -27,10 +28,10 @@ export const DEFAULT_NAV_LINKS: NavLink[] = [
   // { label: 'Shop All', href: '/category' },
   // { label: 'Gifts', href: '/gifts' },
   { label: 'Best Sellers', href: '/category' },
-  // { label: 'Sale', href: '/sale' },
-  // { label: 'New In', href: '/category/t2' },
+  { label: 'Sale', href: '/category/t5' },
+  { label: 'New In', href: '/category/t4' },
   { label: 'Shop All', href: '/category/t3' },
-  { label: 'Design System', href: '/styleguide' },
+  { label: 'Design System', href: '/styleguide', desktopHidden: true },
 ]
 
 export const DEFAULT_FOOTER_COLUMNS: FooterColumn[] = [

@@ -1,6 +1,7 @@
 'use client'
 
 import { useParams } from 'next/navigation'
+import { useRef } from 'react'
 import {
   DEFAULT_FOOTER_COLUMNS,
   DEFAULT_HERO,
@@ -19,6 +20,15 @@ import { getBrandProducts } from '../../data/products/getBrandProducts'
 import styles from './HomePage.module.css'
 
 import { resolveBrand } from './_config/brands'
+import * as oalIcons from '@/src/components/icons/oal'
+import * as mnnIcons from '@/src/components/icons/mnn'
+import * as tgrIcons from '@/src/components/icons/tgr'
+import * as lalIcons from '@/src/components/icons/lal'
+import * as ibIcons  from '@/src/components/icons/ib'
+
+const BRAND_ICONS = {
+  oal: oalIcons, mnn: mnnIcons, tgr: tgrIcons, lal: lalIcons, ib: ibIcons,
+} as const
 
 function HomePageInner() {
   const params = useParams()
@@ -50,13 +60,32 @@ function HomePageInner() {
 
   const transparentHeader = brand === 'oal'
 
-  const bestSellers = getBrandProducts(brand).slice(0, 4)
+  const bestSellers = getBrandProducts(brand).slice(0, 8)
+  const { ArrowIcon } = BRAND_ICONS[brand]
+  const carouselRef = useRef<HTMLDivElement>(null)
+
+  const scrollCarousel = (dir: 'prev' | 'next') => {
+    if (!carouselRef.current) return
+    const card = carouselRef.current.firstElementChild as HTMLElement
+    const amount = card ? card.offsetWidth + 4 : 320
+    carouselRef.current.scrollBy({ left: dir === 'next' ? amount : -amount, behavior: 'smooth' })
+  }
+
+  // 'text-on-image' — title + CTA overlaid bottom-left, no padding between cards (OAL)
+  // 'text-below'    — title + CTA below the image, with page-margin padding (all other brands)
+  const promoVariant: 'text-on-image' | 'text-below' = brand === 'oal' ? 'text-on-image' : 'text-below'
 
   const CATEGORY_TILES = [
     { label: 'Necklaces', href: `/${brand}/category`, image: 'https://cdn.oakandluna.com/digital-asset/banners/NECKLACES_banner_HP_OAL.jpg' },
     { label: 'Bracelets', href: `/${brand}/category`, image: 'https://cdn.oakandluna.com/digital-asset/banners/Bracelets-banner_HP_OAL.jpg' },
     { label: 'Earrings',  href: `/${brand}/category`, image: 'https://cdn.oakandluna.com/digital-asset/banners/EARRINGS_banner_HP_OAL.jpg' },
     { label: 'Rings',     href: `/${brand}/category`, image: 'https://cdn.oakandluna.com/digital-asset/banners/RINGS-banner_HP_OAL.jpg' },
+  ]
+
+  const PROMO_TILES = [
+    { title: 'The Summer Centerpiece', label: 'Shop Now', href: `/${brand}/category`, image: 'https://cdn.oakandluna.com/digital-asset/banners/Summer-shop-gradient.jpg?w=1920' },
+    { title: 'His New Daily Anchor',   label: 'Shop Now', href: `/${brand}/category`, image: 'https://cdn.oakandluna.com/digital-asset/banners/oal-box1-Hexagon-F_Day.jpg?w=1920' },
+    { title: 'Get Some Attention',     label: 'Shop Now', href: `/${brand}/category`, image: 'https://cdn.oakandluna.com/digital-asset/banners/oal-lower-banner-Compass-mb_2.jpg' },
   ]
 
   return (
@@ -86,18 +115,64 @@ function HomePageInner() {
           <div className={styles.bestSellersHeader}>
             <h2 id="best-sellers-title" className={styles.bestSellersTitle}>Best Sellers</h2>
           </div>
-          <div className={styles.carouselTrack}>
-            {bestSellers.map(p => (
-              <div key={p.id} className={styles.carouselCard}>
-                <ProductCard
-                  name={p.name}
-                  price={p.price ?? ''}
-                  originalPrice={p.originalPrice}
-                  defaultImage={p.image}
-                  hoverImage={p.hoverImage}
-                  href={`/${brand}${p.href}`}
-                  swatches={brand !== 'lal' ? DEFAULT_PRODUCT_SWATCHES : undefined}
-                />
+          <div className={styles.carouselWrapper}>
+            <div className={styles.carouselTrack} ref={carouselRef}>
+              {bestSellers.map(p => (
+                <div key={p.id} className={styles.carouselCard}>
+                  <ProductCard
+                    name={p.name}
+                    price={p.price ?? ''}
+                    originalPrice={p.originalPrice}
+                    defaultImage={p.image}
+                    hoverImage={p.hoverImage}
+                    href={`/${brand}${p.href}`}
+                    swatches={brand !== 'lal' ? DEFAULT_PRODUCT_SWATCHES : undefined}
+                  />
+                </div>
+              ))}
+            </div>
+            <button
+              className={`${styles.carouselArrow} ${styles.carouselArrowPrev}`}
+              onClick={() => scrollCarousel('prev')}
+              aria-label="Previous products"
+            >
+              <ArrowIcon size={24} color="white" />
+            </button>
+            <button
+              className={`${styles.carouselArrow} ${styles.carouselArrowNext}`}
+              onClick={() => scrollCarousel('next')}
+              aria-label="Next products"
+            >
+              <ArrowIcon size={24} color="white" />
+            </button>
+          </div>
+        </section>
+
+        {/* Promo image carousel */}
+        <section
+          className={`${styles.promoCarousel} ${promoVariant === 'text-on-image' ? styles.promoCarouselOnImage : ''}`}
+          aria-label="Featured collections"
+        >
+          <div className={`${styles.promoCarouselTrack} ${promoVariant === 'text-on-image' ? styles.promoCarouselTrackOnImage : ''}`}>
+            {PROMO_TILES.map((tile, i) => promoVariant === 'text-on-image' ? (
+              // Text overlaid on bottom-left of image — single link wraps everything
+              <a key={i} href={tile.href} className={`${styles.promoCarouselCard} ${styles.promoCarouselCardOnImage}`}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={tile.image} alt={tile.title} className={styles.promoCarouselImg} loading="lazy" />
+                <div className={styles.promoCarouselOverlay}>
+                  <h3 className={styles.promoCarouselTitle}>{tile.title}</h3>
+                  <span className={styles.promoCarouselCta}>{tile.label}</span>
+                </div>
+              </a>
+            ) : (
+              // Text below the image
+              <div key={i} className={styles.promoCarouselCard}>
+                <a href={tile.href} className={styles.promoCarouselImgLink}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={tile.image} alt={tile.title} className={styles.promoCarouselImg} loading="lazy" />
+                </a>
+                <h3 className={styles.promoCarouselTitle}>{tile.title}</h3>
+                <a href={tile.href} className={styles.promoCarouselCta}>{tile.label}</a>
               </div>
             ))}
           </div>
