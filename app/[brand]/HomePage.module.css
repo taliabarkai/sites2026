@@ -59,6 +59,7 @@
 
 .bestSellers {
   padding: var(--spacing-lg) 0;
+  background: var(--colors-background);
 }
 
 .bestSellersHeader {
