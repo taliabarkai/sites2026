@@ -13,6 +13,9 @@ import { Footer } from './_components/Footer'
 import { Header } from './_components/Header'
 import { Hero } from './_components/Hero'
 import { FloatingCart } from './_components/FloatingCart'
+import { ProductCard } from './_components/ProductCard'
+import { DEFAULT_PRODUCT_SWATCHES } from './_config/products'
+import { getBrandProducts } from '../../data/products/getBrandProducts'
 import styles from './HomePage.module.css'
 
 import { resolveBrand } from './_config/brands'
@@ -47,6 +50,15 @@ function HomePageInner() {
 
   const transparentHeader = brand === 'oal'
 
+  const bestSellers = getBrandProducts(brand).slice(0, 8)
+
+  const CATEGORY_TILES = [
+    { label: 'Necklaces', href: `/${brand}/category` },
+    { label: 'Bracelets', href: `/${brand}/category` },
+    { label: 'Earrings', href: `/${brand}/category` },
+    { label: 'Rings', href: `/${brand}/category` },
+  ]
+
   return (
     <div className={styles.page}>
       <Header
@@ -57,6 +69,38 @@ function HomePageInner() {
       />
       <main id="main-content">
         <Hero {...hero} transparentHeader={transparentHeader} />
+
+        {/* 4-up category grid */}
+        <section className={styles.categoryGrid} aria-label="Shop by category">
+          {CATEGORY_TILES.map(tile => (
+            <a key={tile.label} href={tile.href} className={styles.categoryTile}>
+              {/* image src to be filled with CDN links */}
+              <span className={styles.categoryTileLabel}>{tile.label}</span>
+            </a>
+          ))}
+        </section>
+
+        {/* Best sellers carousel */}
+        <section className={styles.bestSellers} aria-labelledby="best-sellers-title">
+          <div className={styles.bestSellersHeader}>
+            <h2 id="best-sellers-title" className={styles.bestSellersTitle}>Best Sellers</h2>
+          </div>
+          <div className={styles.carouselTrack}>
+            {bestSellers.map(p => (
+              <div key={p.id} className={styles.carouselCard}>
+                <ProductCard
+                  name={p.name}
+                  price={p.price ?? ''}
+                  originalPrice={p.originalPrice}
+                  defaultImage={p.image}
+                  hoverImage={p.hoverImage}
+                  href={`/${brand}${p.href}`}
+                  swatches={brand !== 'lal' ? DEFAULT_PRODUCT_SWATCHES : undefined}
+                />
+              </div>
+            ))}
+          </div>
+        </section>
       </main>
       <Footer columns={footerColumns} />
       <FloatingCart

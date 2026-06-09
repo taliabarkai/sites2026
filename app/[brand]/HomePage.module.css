@@ -7,3 +7,113 @@
 .page main {
   display: block;
 }
+
+/* ── Category grid ─────────────────────────────────────────────────────── */
+
+.categoryGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  /* no gap — tiles are seamlessly adjacent */
+}
+
+@media (min-width: 1440px) {
+  .categoryGrid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.categoryTile {
+  position: relative;
+  display: block;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  background: var(--colors-card-image-bg);
+  text-decoration: none;
+}
+
+.categoryTileImg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.categoryTileLabel {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  padding: var(--spacing-md);
+  font-family:    var(--typography-rules-headline8-font-family);
+  font-size:      var(--typography-rules-headline8-font-size);
+  line-height:    var(--typography-rules-headline8-line-height);
+  font-weight:    var(--typography-rules-headline8-font-weight, normal);
+  letter-spacing: var(--typography-rules-headline8-letter-spacing, normal);
+  text-transform: var(--typography-rules-headline8-text-transform, none);
+  color: var(--colors-text);
+}
+
+/* ── Best sellers carousel ─────────────────────────────────────────────── */
+
+.bestSellers {
+  padding: var(--spacing-xxl) 0;
+  overflow: hidden;
+}
+
+.bestSellersHeader {
+  padding: 0 var(--spacing-md) var(--spacing-md);
+}
+
+.bestSellersTitle {
+  margin: 0;
+  font-family:    var(--typography-rules-headline2-font-family);
+  font-size:      var(--typography-rules-headline2-font-size);
+  line-height:    var(--typography-rules-headline2-line-height);
+  font-weight:    var(--typography-rules-headline2-font-weight, normal);
+  letter-spacing: var(--typography-rules-headline2-letter-spacing, normal);
+  text-transform: var(--typography-rules-headline2-text-transform, none);
+  color: var(--colors-text);
+}
+
+.carouselTrack {
+  display: flex;
+  gap: var(--spacing-xxs);
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.carouselTrack::-webkit-scrollbar {
+  display: none;
+}
+
+.carouselCard {
+  flex: 0 0 calc(100% / 2.25);
+  scroll-snap-align: start;
+  min-width: 0;
+}
+
+@media (min-width: 1440px) {
+  .bestSellers {
+    overflow: visible;
+  }
+
+  .bestSellersHeader {
+    padding: 0 var(--layout-page-margin) var(--spacing-md);
+  }
+
+  .carouselTrack {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    overflow: visible;
+    padding: 0 var(--layout-page-margin);
+    scroll-snap-type: none;
+  }
+
+  .carouselCard {
+    flex: unset;
+    scroll-snap-align: none;
+  }
+}
