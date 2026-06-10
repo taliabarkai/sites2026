@@ -65,7 +65,7 @@ export function ThemeSwitcher({ brand }: ThemeSwitcherProps = {}) {
   const handleSelect = (brand: BrandKey) => {
     setOpen(false)
     if (brand === currentBrand) return
-    router.push(buildBrandPath(pathname, brand))
+    router.push(buildBrandPath(pathname, brand), { scroll: false })
   }
 
   return (

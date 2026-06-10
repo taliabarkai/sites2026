@@ -112,15 +112,19 @@ const REVIEWS_DATA = {
     { label: '4 Stars', value: '4', count: 128, pct: 40, reviewCount: 17 },
     { label: '3 Stars', value: '3', count: 65,  pct: 20, reviewCount:  9 },
     { label: '2 Stars', value: '2', count: 37,  pct: 12, reviewCount:  5 },
-    { label: '1 Stars', value: '1', count: 0,   pct: 0,  reviewCount:  0 },
+    { label: '1 Star',  value: '1', count: 2,   pct: 1,  reviewCount:  1 },
   ],
   items: [
-    { initials: 'A', name: 'Alexandra S.',  location: 'Texas, United States',      date: 'Jan 2022', rating: 4, body: 'Nice and meaningful. Looks like a nice stylish and trendy design.' },
-    { initials: 'M', name: 'Maria T.',      location: 'London, United Kingdom',    date: 'Feb 2022', rating: 5, body: 'Absolutely love it. The quality is fantastic and it arrived beautifully packaged.' },
-    { initials: 'J', name: 'Jessica R.',    location: 'Sydney, Australia',         date: 'Mar 2022', rating: 4, body: 'Great gift for my sister. She loved the personal touch and the craftsmanship.' },
-    { initials: 'S', name: 'Sofia K.',      location: 'Berlin, Germany',           date: 'Apr 2022', rating: 5, body: 'Stunning piece. Exceeded my expectations in terms of quality and presentation.' },
-    { initials: 'L', name: 'Laura B.',      location: 'Paris, France',             date: 'May 2022', rating: 4, body: 'Beautiful design, exactly as described. Delivery was fast and packaging was lovely.' },
-    { initials: 'R', name: 'Rachel M.',     location: 'New York, United States',   date: 'Jun 2022', rating: 5, body: 'Perfect in every way. The engraving looks gorgeous and the metal quality is excellent.' },
+    { initials: 'A', name: 'Alexandra S.',  location: 'Texas, United States',      dateLabel: 'May 2025', dateMs: 1746057600000, rating: 5, body: 'Absolutely stunning — the quality exceeded my expectations. Arrived beautifully packaged and looks exactly as pictured.' },
+    { initials: 'M', name: 'Maria T.',      location: 'London, United Kingdom',    dateLabel: 'Apr 2025', dateMs: 1743379200000, rating: 4, body: 'Really happy with this purchase. The craftsmanship is excellent and it feels very premium. Would definitely order again.' },
+    { initials: 'J', name: 'Jessica R.',    location: 'Sydney, Australia',         dateLabel: 'Mar 2025', dateMs: 1740787200000, rating: 5, body: 'Great gift for my sister — she loved the personal touch. Delivery was fast and the packaging was lovely.' },
+    { initials: 'S', name: 'Sofia K.',      location: 'Berlin, Germany',           dateLabel: 'Feb 2025', dateMs: 1738368000000, rating: 4, body: 'Beautiful piece. The engraving is crisp and the metal feels solid. Very pleased with the result.' },
+    { initials: 'L', name: 'Laura B.',      location: 'Paris, France',             dateLabel: 'Jan 2025', dateMs: 1735689600000, rating: 3, body: 'Nice product overall but shipping took longer than expected. The quality is good once it arrived.' },
+    { initials: 'R', name: 'Rachel M.',     location: 'New York, United States',   dateLabel: 'Dec 2024', dateMs: 1733011200000, rating: 5, body: 'Perfect in every way. The engraving looks gorgeous and the metal quality is excellent. Highly recommend.' },
+    { initials: 'D', name: 'Diana P.',      location: 'Toronto, Canada',           dateLabel: 'Nov 2024', dateMs: 1730419200000, rating: 2, body: 'The item itself is fine but the clasp feels a bit flimsy. Customer service was helpful though.' },
+    { initials: 'K', name: 'Karen W.',      location: 'Amsterdam, Netherlands',    dateLabel: 'Oct 2024', dateMs: 1727740800000, rating: 5, body: 'Incredibly well made. I have been wearing it every day and it still looks brand new. Amazing quality.' },
+    { initials: 'N', name: 'Natalie F.',    location: 'Melbourne, Australia',      dateLabel: 'Sep 2024', dateMs: 1725148800000, rating: 1, body: 'Unfortunately the sizing was not right for me and the return process was quite difficult.' },
+    { initials: 'C', name: 'Claire H.',     location: 'Dublin, Ireland',           dateLabel: 'Aug 2024', dateMs: 1722470400000, rating: 4, body: 'Really elegant design. Bought as an anniversary gift and my partner absolutely loved it.' },
   ],
 }
 
@@ -129,7 +133,7 @@ const RATING_OPTIONS = [
   { value: '4', label: '4 Stars' },
   { value: '3', label: '3 Stars' },
   { value: '2', label: '2 Stars' },
-  { value: '1', label: '1 Star' },
+  { value: '1', label: '1 Star'  },
 ]
 
 const SORT_OPTIONS_REVIEWS = [
@@ -173,6 +177,15 @@ function ReviewsSection({
         .filter(b => selectedRatings.has(b.value))
         .reduce((sum, b) => sum + b.reviewCount, 0)
 
+  const filteredReviews = REVIEWS_DATA.items
+    .filter(r => selectedRatings.size === 0 || selectedRatings.has(String(r.rating)))
+    .sort((a, b) => {
+      if (selectedSort === 'oldest')  return a.dateMs - b.dateMs
+      if (selectedSort === 'highest') return b.rating - a.rating
+      if (selectedSort === 'lowest')  return a.rating - b.rating
+      return b.dateMs - a.dateMs // newest (default)
+    })
+
   return (
     <section id="reviews" className={styles.reviews} aria-label="Customer reviews">
       {/* Summary: score + bar breakdown */}
@@ -194,16 +207,22 @@ function ReviewsSection({
           <p className={styles.reviewsBasedOn}>Based on {REVIEWS_DATA.total} global reviews</p>
         </div>
 
-        {/* Bar breakdown */}
+        {/* Bar breakdown — clicking a row applies that rating filter */}
         <div className={styles.reviewsBars} aria-label="Rating breakdown">
           {REVIEWS_DATA.breakdown.map(row => (
-            <div key={row.label} className={styles.reviewsBarRow}>
+            <button
+              key={row.label}
+              type="button"
+              className={`${styles.reviewsBarRow} ${selectedRatings.has(row.value) ? styles.reviewsBarRowActive : ''}`}
+              onClick={() => { toggleRating(row.value); setRatingOpen(false); setSortOpen(false) }}
+              aria-pressed={selectedRatings.has(row.value)}
+            >
               <span className={styles.reviewsBarLabel}>{row.label}</span>
               <div className={styles.reviewsBarTrack} role="presentation">
                 <div className={styles.reviewsBarFill} style={{ width: `${row.pct}%` }} />
               </div>
               <span className={styles.reviewsBarCount}>{row.count}</span>
-            </div>
+            </button>
           ))}
         </div>
       </div>
@@ -357,7 +376,7 @@ function ReviewsSection({
 
       {/* Review cards */}
       <div className={styles.reviewsGrid}>
-        {REVIEWS_DATA.items.map((review, i) => (
+        {filteredReviews.map((review, i) => (
           <article key={i} className={styles.reviewCard}>
             <div className={styles.reviewCardHeader}>
               <div className={styles.reviewCardMeta}>
@@ -370,7 +389,7 @@ function ReviewsSection({
                   <span className={styles.reviewCardLocation}>{review.location}</span>
                 </div>
               </div>
-              <span className={styles.reviewCardDate}>{review.date}</span>
+              <span className={styles.reviewCardDate}>{review.dateLabel}</span>
             </div>
 
             <div className={styles.reviewCardStars} aria-label={`${review.rating} out of 5 stars`}>
@@ -389,10 +408,12 @@ function ReviewsSection({
         ))}
       </div>
 
-      {/* Load more */}
-      <div className={styles.reviewsLoadMore}>
-        <Button variant="secondary">Load More Reviews</Button>
-      </div>
+      {/* Load more — hidden when filtered results fit on one page */}
+      {filteredReviews.length >= 10 && (
+        <div className={styles.reviewsLoadMore}>
+          <Button variant="secondary">Load More Reviews</Button>
+        </div>
+      )}
     </section>
   )
 }

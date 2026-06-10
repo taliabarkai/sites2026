@@ -686,7 +686,7 @@
 
 .reviews {
   padding: var(--spacing-2xl) var(--layout-page-margin);
-  max-width: 1200px;
+  max-width: 1440px;
   margin: 0 auto;
 }
 
@@ -751,7 +751,7 @@
   line-height:    var(--typography-rules-text3-line-height);
   font-weight:    var(--typography-rules-text3-font-weight, normal);
   letter-spacing: var(--typography-rules-text3-letter-spacing, normal);
-  color: var(--colors-text-secondary);
+  color: var(--colors-text);
 }
 
 /* Right: bar breakdown */
@@ -767,7 +767,18 @@
   display: flex;
   align-items: center;
   gap: var(--spacing-sm);
+  appearance: none;
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  transition: opacity var(--transition-fast);
 }
+
+.reviewsBarRow:hover { opacity: 0.7; }
 
 .reviewsBarLabel {
   flex-shrink: 0;
