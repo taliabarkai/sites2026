@@ -265,6 +265,15 @@
   letter-spacing: var(--typography-rules-text5-letter-spacing, normal);
 }
 
+.filtersTriggerCount {
+  font-family:    var(--typography-rules-text5-font-family);
+  font-size:      var(--typography-rules-text5-font-size);
+  line-height:    var(--typography-rules-text5-line-height);
+  font-weight:    var(--typography-rules-text5-font-weight, normal);
+  letter-spacing: var(--typography-rules-text5-letter-spacing, normal);
+  color: var(--colors-text);
+}
+
 /* ── Products section ─────────────────────────────────────────────────────── */
 .productsSection {
   padding: 0 var(--layout-page-margin) var(--spacing-lg);
@@ -371,6 +380,16 @@
   color: var(--colors-text);
   cursor: pointer;
   padding: 0;
+  flex-shrink: 0;
+}
+
+/* ── Active filter chips — shown when filters are applied ────────────────── */
+.filterActiveChips {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-sm) var(--layout-page-margin);
   flex-shrink: 0;
 }
 
@@ -490,6 +509,25 @@
   line-height:    var(--typography-rules-text1-line-height);
   color: var(--colors-text);
   flex: 1;
+}
+
+.materialCheck {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  color: var(--colors-text);
+}
+
+/* ── Panel footer — sticky View Items button ──────────────────────────────── */
+.filterPanelFooter {
+  flex-shrink: 0;
+  padding: var(--spacing-md) var(--layout-page-margin);
+  border-top: var(--border-width) solid var(--border-color);
+  background: var(--colors-background);
+}
+
+.filterViewItems {
+  width: 100%;
 }
 
 /* ── Responsive — mobile filter bar tweaks ───────────────────────────────── */

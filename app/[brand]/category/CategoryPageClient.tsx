@@ -18,6 +18,8 @@ import { DEFAULT_PRODUCT_SWATCHES } from '../_config/products'
 import { getBrandProducts } from '../../../data/products/getBrandProducts'
 import { CategoryHero } from '../_components/CategoryHero'
 import { getSeoCategoryVariant } from '../../../data/seoCategories/variantConfig'
+import { Button } from '../_components/Button'
+import { FilterChips } from '../_components/FilterChips'
 import * as oalIcons from '@/src/components/icons/oal'
 import * as mnnIcons from '@/src/components/icons/mnn'
 import * as tgrIcons from '@/src/components/icons/tgr'
@@ -64,21 +66,28 @@ function FilterPanel({
   onClose,
   activeMaterials,
   onToggleMaterial,
+  onClearAll,
   sortKey,
   onSortChange,
+  itemCount,
   XIcon,
   ChevronIcon,
+  CheckmarkIcon,
 }: {
   isOpen: boolean
   onClose: () => void
   activeMaterials: Set<MaterialKey>
   onToggleMaterial: (key: MaterialKey) => void
+  onClearAll: () => void
   sortKey: SortKey
   onSortChange: (key: SortKey) => void
+  itemCount: number
   XIcon: React.ComponentType<{ size?: number }>
   ChevronIcon: React.ComponentType<{ size?: number }>
+  CheckmarkIcon: React.ComponentType<{ size?: number }>
 }) {
   const [sortExpanded, setSortExpanded] = useState(true)
+  const activeList = MATERIAL_FILTERS.filter(m => activeMaterials.has(m.key))
 
   return (
     <>
@@ -105,6 +114,18 @@ function FilterPanel({
           </button>
         </div>
 
+        {/* Active filter chips */}
+        {activeList.length > 0 && (
+          <div className={styles.filterActiveChips}>
+            <FilterChips
+              chips={activeList.map(m => ({ value: m.key, label: m.label }))}
+              onRemove={(value) => onToggleMaterial(value as MaterialKey)}
+              onClearAll={onClearAll}
+              XIcon={XIcon}
+            />
+          </div>
+        )}
+
         <div className={styles.filterPanelBody}>
           {/* Sort By */}
           <div className={styles.filterSection}>
@@ -114,7 +135,7 @@ function FilterPanel({
               onClick={() => setSortExpanded(o => !o)}
               aria-expanded={sortExpanded}
             >
-              <span className={styles.filterSectionTitle}>Sort By:</span>
+              <span className={styles.filterSectionTitle}>Sort By</span>
               <span className={styles.filterSortValue}>
                 {SORT_OPTIONS.find(o => o.key === sortKey)?.label}
                 <span style={{ display: 'inline-flex', transform: sortExpanded ? 'rotate(-90deg)' : 'rotate(90deg)', transition: 'transform var(--transition-fast)' }}>
@@ -143,7 +164,7 @@ function FilterPanel({
 
           {/* Materials */}
           <div className={styles.filterSection}>
-            <p className={styles.filterSectionTitle}>Materials</p>
+            <p className={styles.filterSectionTitle}>Material</p>
             <div className={styles.materialList}>
               {MATERIAL_FILTERS.map((m) => {
                 const active = activeMaterials.has(m.key)
@@ -161,11 +182,23 @@ function FilterPanel({
                       aria-hidden="true"
                     />
                     <span className={styles.materialLabel}>{m.label}</span>
+                    {active && (
+                      <span className={styles.materialCheck} aria-hidden="true">
+                        <CheckmarkIcon size={18} />
+                      </span>
+                    )}
                   </button>
                 )
               })}
             </div>
           </div>
+        </div>
+
+        {/* Sticky footer — View Items */}
+        <div className={styles.filterPanelFooter}>
+          <Button variant="primary" className={styles.filterViewItems} onClick={onClose}>
+            View Items ({itemCount})
+          </Button>
         </div>
       </div>
     </>
@@ -178,10 +211,12 @@ function FilterPanel({
 
 function FilterBar({
   itemCount,
+  activeCount,
   onOpenFilters,
   FilterIcon,
 }: {
   itemCount: number
+  activeCount: number
   onOpenFilters: () => void
   FilterIcon: React.ComponentType<{ size?: number }>
 }) {
@@ -197,7 +232,7 @@ function FilterBar({
             aria-label="Open filters"
           >
             <FilterIcon size={24} />
-            Filters
+            Filters{activeCount > 0 && <span className={styles.filtersTriggerCount}>({activeCount})</span>}
           </button>
         </div>
       </div>
@@ -219,7 +254,7 @@ function CategoryPageInner() {
   }
 
   const icons = BRAND_ICONS[brand]
-  const { FilterIcon, XIcon, ChevronIcon } = icons
+  const { FilterIcon, XIcon, ChevronIcon, CheckmarkIcon } = icons
 
   const [activeMaterials, setActiveMaterials] = useState<Set<MaterialKey>>(new Set())
   const toggleMaterial = (key: MaterialKey) => {
@@ -230,6 +265,7 @@ function CategoryPageInner() {
       return next
     })
   }
+  const clearAllMaterials = () => setActiveMaterials(new Set())
 
   const [sortKey, setSortKey] = useState<SortKey>('featured')
   const [filterPanelOpen, setFilterPanelOpen] = useState(false)
@@ -246,6 +282,7 @@ function CategoryPageInner() {
 
         <FilterBar
           itemCount={getBrandProducts(brand).length}
+          activeCount={activeMaterials.size}
           onOpenFilters={() => setFilterPanelOpen(true)}
           FilterIcon={FilterIcon}
         />
@@ -298,10 +335,13 @@ function CategoryPageInner() {
         onClose={() => setFilterPanelOpen(false)}
         activeMaterials={activeMaterials}
         onToggleMaterial={toggleMaterial}
+        onClearAll={clearAllMaterials}
         sortKey={sortKey}
         onSortChange={setSortKey}
+        itemCount={getBrandProducts(brand).length}
         XIcon={XIcon}
         ChevronIcon={ChevronIcon}
+        CheckmarkIcon={CheckmarkIcon}
       />
 
       <FloatingCart

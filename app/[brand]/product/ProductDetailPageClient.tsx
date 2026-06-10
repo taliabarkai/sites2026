@@ -13,6 +13,7 @@ import { Header } from '../_components/Header'
 import { Footer } from '../_components/Footer'
 import { FloatingCart } from '../_components/FloatingCart'
 import { Button } from '../_components/Button'
+import { FilterChips } from '../_components/FilterChips'
 import { ProductCard } from '../_components/ProductCard'
 import { getBrandFromPathname } from '../_config/brands'
 import { prefixFooterColumns, prefixNavLinks, withBrandPrefix } from '../_config/brandPaths'
@@ -266,24 +267,12 @@ function ReviewsSection({
           {/* Active chips — inline on desktop, hidden on mobile */}
           {selectedRatings.size > 0 && (
             <div className={styles.reviewsActiveFiltersInline}>
-              {RATING_OPTIONS.filter(o => selectedRatings.has(o.value)).map(opt => (
-                <button
-                  key={opt.value}
-                  type="button"
-                  className={styles.reviewsActiveChip}
-                  onClick={() => toggleRating(opt.value)}
-                  aria-label={`Remove ${opt.label} filter`}
-                >
-                  {opt.label} <XIcon size={16} />
-                </button>
-              ))}
-              <button
-                type="button"
-                className={styles.reviewsClearAll}
-                onClick={() => setSelectedRatings(new Set())}
-              >
-                Clear All
-              </button>
+              <FilterChips
+                chips={RATING_OPTIONS.filter(o => selectedRatings.has(o.value)).map(o => ({ value: o.value, label: o.label }))}
+                onRemove={toggleRating}
+                onClearAll={() => setSelectedRatings(new Set())}
+                XIcon={XIcon}
+              />
             </div>
           )}
 
@@ -349,27 +338,15 @@ function ReviewsSection({
 
       </div>
 
-      {/* Active rating filters row */}
+      {/* Active rating filters row — mobile only */}
       {selectedRatings.size > 0 && (
         <div className={styles.reviewsActiveFilters}>
-          {RATING_OPTIONS.filter(o => selectedRatings.has(o.value)).map(opt => (
-            <button
-              key={opt.value}
-              type="button"
-              className={styles.reviewsActiveChip}
-              onClick={() => toggleRating(opt.value)}
-              aria-label={`Remove ${opt.label} filter`}
-            >
-              {opt.label} <XIcon size={16} />
-            </button>
-          ))}
-          <button
-            type="button"
-            className={styles.reviewsClearAll}
-            onClick={() => setSelectedRatings(new Set())}
-          >
-            Clear All
-          </button>
+          <FilterChips
+            chips={RATING_OPTIONS.filter(o => selectedRatings.has(o.value)).map(o => ({ value: o.value, label: o.label }))}
+            onRemove={toggleRating}
+            onClearAll={() => setSelectedRatings(new Set())}
+            XIcon={XIcon}
+          />
         </div>
       )}
       </div>

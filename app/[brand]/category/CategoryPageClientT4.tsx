@@ -16,6 +16,8 @@ import {
 } from '../_config/siteContent'
 import { DEFAULT_PRODUCT_SWATCHES } from '../_config/products'
 import { getBrandProducts } from '../../../data/products/getBrandProducts'
+import { Button } from '../_components/Button'
+import { FilterChips } from '../_components/FilterChips'
 import { CategoryHero } from '../_components/CategoryHero'
 import { getSeoCategoryVariant } from '../../../data/seoCategories/variantConfig'
 import * as oalIcons from '@/src/components/icons/oal'
@@ -71,19 +73,25 @@ function FilterPanel({
   onClose,
   activeMaterials,
   onToggleMaterial,
+  onClearAll,
+  itemCount,
   sortKey,
   onSortChange,
   XIcon,
   ChevronIcon,
+  CheckmarkIcon,
 }: {
   isOpen: boolean
   onClose: () => void
   activeMaterials: Set<MaterialKey>
   onToggleMaterial: (key: MaterialKey) => void
+  onClearAll: () => void
+  itemCount: number
   sortKey: SortKey
   onSortChange: (key: SortKey) => void
   XIcon: React.ComponentType<{ size?: number }>
   ChevronIcon: React.ComponentType<{ size?: number }>
+  CheckmarkIcon: React.ComponentType<{ size?: number }>
 }) {
   const [sortExpanded, setSortExpanded] = useState(true)
 
@@ -111,6 +119,20 @@ function FilterPanel({
             <XIcon size={24} />
           </button>
         </div>
+
+        {(() => {
+          const activeList = MATERIAL_FILTERS.filter(m => activeMaterials.has(m.key))
+          return activeList.length > 0 && (
+            <div className={baseStyles.filterActiveChips}>
+              <FilterChips
+                chips={activeList.map(m => ({ value: m.key, label: m.label }))}
+                onRemove={(value) => onToggleMaterial(value as MaterialKey)}
+                onClearAll={onClearAll}
+                XIcon={XIcon}
+              />
+            </div>
+          )
+        })()}
 
         <div className={baseStyles.filterPanelBody}>
           <div className={baseStyles.filterSection}>
@@ -166,11 +188,22 @@ function FilterPanel({
                       aria-hidden="true"
                     />
                     <span className={baseStyles.materialLabel}>{m.label}</span>
+                    {active && (
+                      <span className={baseStyles.materialCheck} aria-hidden="true">
+                        <CheckmarkIcon size={18} />
+                      </span>
+                    )}
                   </button>
                 )
               })}
             </div>
           </div>
+        </div>
+
+        <div className={baseStyles.filterPanelFooter}>
+          <Button variant="primary" className={baseStyles.filterViewItems} onClick={onClose}>
+            View Items ({itemCount})
+          </Button>
         </div>
       </div>
     </>
@@ -181,10 +214,12 @@ function FilterPanel({
 
 function FilterBar({
   itemCount,
+  activeCount,
   onOpenFilters,
   FilterIcon,
 }: {
   itemCount: number
+  activeCount: number
   onOpenFilters: () => void
   FilterIcon: React.ComponentType<{ size?: number }>
 }) {
@@ -200,7 +235,7 @@ function FilterBar({
             aria-label="Open filters"
           >
             <FilterIcon size={24} />
-            Filters
+            Filters{activeCount > 0 && <span className={baseStyles.filtersTriggerCount}>({activeCount})</span>}
           </button>
         </div>
       </div>
@@ -222,7 +257,7 @@ function CategoryPageInnerT4() {
   }
 
   const icons = BRAND_ICONS[brand]
-  const { FilterIcon, XIcon, ChevronIcon } = icons
+  const { FilterIcon, XIcon, ChevronIcon, CheckmarkIcon } = icons
 
   const [activeMaterials, setActiveMaterials] = useState<Set<MaterialKey>>(new Set())
   const toggleMaterial = (key: MaterialKey) => {
@@ -233,6 +268,7 @@ function CategoryPageInnerT4() {
       return next
     })
   }
+  const clearAllMaterials = () => setActiveMaterials(new Set())
 
   const [sortKey, setSortKey] = useState<SortKey>('featured')
   const [filterPanelOpen, setFilterPanelOpen] = useState(false)
@@ -253,6 +289,7 @@ function CategoryPageInnerT4() {
 
         <FilterBar
           itemCount={allProducts.length}
+          activeCount={activeMaterials.size}
           onOpenFilters={() => setFilterPanelOpen(true)}
           FilterIcon={FilterIcon}
         />
@@ -317,10 +354,13 @@ function CategoryPageInnerT4() {
         onClose={() => setFilterPanelOpen(false)}
         activeMaterials={activeMaterials}
         onToggleMaterial={toggleMaterial}
+        onClearAll={clearAllMaterials}
+        itemCount={allProducts.length}
         sortKey={sortKey}
         onSortChange={setSortKey}
         XIcon={XIcon}
         ChevronIcon={ChevronIcon}
+        CheckmarkIcon={CheckmarkIcon}
       />
 
       <FloatingCart
