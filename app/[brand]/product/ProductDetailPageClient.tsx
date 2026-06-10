@@ -13,10 +13,12 @@ import { Header } from '../_components/Header'
 import { Footer } from '../_components/Footer'
 import { FloatingCart } from '../_components/FloatingCart'
 import { Button } from '../_components/Button'
+import { ProductCard } from '../_components/ProductCard'
 import { getBrandFromPathname } from '../_config/brands'
 import { prefixFooterColumns, prefixNavLinks, withBrandPrefix } from '../_config/brandPaths'
 import { DEFAULT_FOOTER_COLUMNS, DEFAULT_NAV_LINKS, DEFAULT_TOPLINE } from '../_config/siteContent'
 import {
+  DEFAULT_PRODUCT_SWATCHES,
   MATERIAL_SWATCHES,
   CHAIN_LENGTHS,
   DEFAULT_CHAIN_LENGTH,
@@ -37,6 +39,362 @@ const BRAND_ICONS = {
 
 function formatPrice(cents: number): string {
   return `$${(cents / 100).toFixed(0)}`
+}
+
+// ─── Product carousel ─────────────────────────────────────────────────────────
+
+function ProductCarousel({
+  brand,
+  title,
+  ArrowIcon,
+}: {
+  brand: string
+  title: string
+  ArrowIcon: React.ComponentType<{ size?: number; color?: string }>
+}) {
+  const products = getBrandProducts(brand).slice(0, 8)
+  const carouselRef = useRef<HTMLDivElement>(null)
+
+  const scrollCarousel = (dir: 'prev' | 'next') => {
+    if (!carouselRef.current) return
+    const card = carouselRef.current.firstElementChild as HTMLElement
+    const amount = card ? card.offsetWidth + 4 : 320
+    carouselRef.current.scrollBy({ left: dir === 'next' ? amount : -amount, behavior: 'smooth' })
+  }
+
+  return (
+    <section className={styles.pdpCarousel} aria-label={title}>
+      <div className={styles.pdpCarouselHeader}>
+        <h2 className={styles.pdpCarouselTitle}>{title}</h2>
+      </div>
+      <div className={styles.pdpCarouselWrapper}>
+        <div className={styles.pdpCarouselTrack} ref={carouselRef}>
+          {products.map(p => (
+            <div key={p.id} className={styles.pdpCarouselCard}>
+              <ProductCard
+                name={p.name}
+                price={p.price ?? ''}
+                originalPrice={p.originalPrice}
+                defaultImage={p.image}
+                hoverImage={p.hoverImage}
+                href={`/${brand}${p.href}`}
+                swatches={brand !== 'lal' ? DEFAULT_PRODUCT_SWATCHES : undefined}
+              />
+            </div>
+          ))}
+        </div>
+        <button
+          className={`${styles.pdpCarouselArrow} ${styles.pdpCarouselArrowPrev}`}
+          onClick={() => scrollCarousel('prev')}
+          aria-label="Previous products"
+        >
+          <ArrowIcon size={24} color="white" />
+        </button>
+        <button
+          className={`${styles.pdpCarouselArrow} ${styles.pdpCarouselArrowNext}`}
+          onClick={() => scrollCarousel('next')}
+          aria-label="Next products"
+        >
+          <ArrowIcon size={24} color="white" />
+        </button>
+      </div>
+    </section>
+  )
+}
+
+// ─── Reviews section ──────────────────────────────────────────────────────────
+
+const REVIEWS_DATA = {
+  rating: 4.8,
+  total: 65,
+  breakdown: [
+    { label: '5 Stars', value: '5', count: 246, pct: 75, reviewCount: 34 },
+    { label: '4 Stars', value: '4', count: 128, pct: 40, reviewCount: 17 },
+    { label: '3 Stars', value: '3', count: 65,  pct: 20, reviewCount:  9 },
+    { label: '2 Stars', value: '2', count: 37,  pct: 12, reviewCount:  5 },
+    { label: '1 Stars', value: '1', count: 0,   pct: 0,  reviewCount:  0 },
+  ],
+  items: [
+    { initials: 'A', name: 'Alexandra S.',  location: 'Texas, United States',      date: 'Jan 2022', rating: 4, body: 'Nice and meaningful. Looks like a nice stylish and trendy design.' },
+    { initials: 'M', name: 'Maria T.',      location: 'London, United Kingdom',    date: 'Feb 2022', rating: 5, body: 'Absolutely love it. The quality is fantastic and it arrived beautifully packaged.' },
+    { initials: 'J', name: 'Jessica R.',    location: 'Sydney, Australia',         date: 'Mar 2022', rating: 4, body: 'Great gift for my sister. She loved the personal touch and the craftsmanship.' },
+    { initials: 'S', name: 'Sofia K.',      location: 'Berlin, Germany',           date: 'Apr 2022', rating: 5, body: 'Stunning piece. Exceeded my expectations in terms of quality and presentation.' },
+    { initials: 'L', name: 'Laura B.',      location: 'Paris, France',             date: 'May 2022', rating: 4, body: 'Beautiful design, exactly as described. Delivery was fast and packaging was lovely.' },
+    { initials: 'R', name: 'Rachel M.',     location: 'New York, United States',   date: 'Jun 2022', rating: 5, body: 'Perfect in every way. The engraving looks gorgeous and the metal quality is excellent.' },
+  ],
+}
+
+const RATING_OPTIONS = [
+  { value: '5', label: '5 Stars' },
+  { value: '4', label: '4 Stars' },
+  { value: '3', label: '3 Stars' },
+  { value: '2', label: '2 Stars' },
+  { value: '1', label: '1 Star' },
+]
+
+const SORT_OPTIONS_REVIEWS = [
+  { value: 'newest',  label: 'Newest Rating' },
+  { value: 'oldest',  label: 'Oldest Rating' },
+  { value: 'highest', label: 'Highest Rating' },
+  { value: 'lowest',  label: 'Lowest Rating' },
+]
+
+function ReviewsSection({
+  ChevronIcon,
+  StarIcon,
+  XIcon,
+  CheckmarkIcon,
+}: {
+  ChevronIcon: React.ComponentType<{ size?: number }>
+  StarIcon: React.ComponentType<{ size?: number }>
+  XIcon: React.ComponentType<{ size?: number }>
+  CheckmarkIcon: React.ComponentType<{ size?: number }>
+}) {
+  const [ratingOpen, setRatingOpen] = useState(false)
+  const [sortOpen, setSortOpen]     = useState(false)
+  const [selectedRatings, setSelectedRatings] = useState<Set<string>>(new Set())
+  const [selectedSort, setSelectedSort]       = useState('newest')
+
+  const sortLabel = SORT_OPTIONS_REVIEWS.find(o => o.value === selectedSort)?.label ?? 'Newest Rating'
+
+  const toggleRating = (value: string) => {
+    setSelectedRatings(prev => {
+      const next = new Set(prev)
+      next.has(value) ? next.delete(value) : next.add(value)
+      return next
+    })
+  }
+
+  const closeAll = () => { setRatingOpen(false); setSortOpen(false) }
+
+  const visibleCount = selectedRatings.size === 0
+    ? REVIEWS_DATA.total
+    : REVIEWS_DATA.breakdown
+        .filter(b => selectedRatings.has(b.value))
+        .reduce((sum, b) => sum + b.reviewCount, 0)
+
+  return (
+    <section id="reviews" className={styles.reviews} aria-label="Customer reviews">
+      {/* Summary: score + bar breakdown */}
+      <div className={styles.reviewsSummary}>
+        {/* Score block */}
+        <div className={styles.reviewsScoreBlock}>
+          <h2 className={styles.reviewsTitle}>Reviews</h2>
+          <p className={styles.reviewsScore}>{REVIEWS_DATA.rating}</p>
+          <div className={styles.reviewsStars} aria-label={`${REVIEWS_DATA.rating} out of 5 stars`}>
+            {[1,2,3,4,5].map(i => (
+              <span
+                key={i}
+                className={i <= Math.round(REVIEWS_DATA.rating) ? styles.starFilled : styles.starEmpty}
+              >
+                <StarIcon size={32} />
+              </span>
+            ))}
+          </div>
+          <p className={styles.reviewsBasedOn}>Based on {REVIEWS_DATA.total} global reviews</p>
+        </div>
+
+        {/* Bar breakdown */}
+        <div className={styles.reviewsBars} aria-label="Rating breakdown">
+          {REVIEWS_DATA.breakdown.map(row => (
+            <div key={row.label} className={styles.reviewsBarRow}>
+              <span className={styles.reviewsBarLabel}>{row.label}</span>
+              <div className={styles.reviewsBarTrack} role="presentation">
+                <div className={styles.reviewsBarFill} style={{ width: `${row.pct}%` }} />
+              </div>
+              <span className={styles.reviewsBarCount}>{row.count}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Filter section: bar + active chips, owns the 24px bottom margin */}
+      <div className={styles.reviewsFilterSection}>
+      {(ratingOpen || sortOpen) && (
+        <div className={styles.reviewsDropdownBackdrop} aria-hidden="true" onClick={closeAll} />
+      )}
+      <div className={styles.reviewsFilterBar} role="toolbar" aria-label="Filter and sort reviews">
+        {/* Rating chip — left side */}
+        <div className={styles.reviewsFilterLeft}>
+          <div className={styles.reviewsDropdownWrap}>
+            <button
+              type="button"
+              className={`${styles.reviewsFilterChip} ${ratingOpen ? styles.reviewsFilterChipOpen : ''}`}
+              aria-expanded={ratingOpen}
+              onClick={() => { setRatingOpen(o => !o); setSortOpen(false) }}
+            >
+              Filter by Ratings
+              <span className={`${styles.reviewsChevron} ${ratingOpen ? styles.reviewsChevronOpen : ''}`}><ChevronIcon size={24} /></span>
+            </button>
+            {ratingOpen && (
+              <div className={styles.reviewsDropdown} role="listbox" aria-label="Filter by rating">
+                {RATING_OPTIONS.map(opt => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    role="option"
+                    aria-selected={selectedRatings.has(opt.value)}
+                    className={`${styles.reviewsDropdownItem} ${selectedRatings.has(opt.value) ? styles.reviewsDropdownItemActive : ''}`}
+                    onClick={() => { toggleRating(opt.value); setRatingOpen(false) }}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Active chips — inline on desktop, hidden on mobile */}
+          {selectedRatings.size > 0 && (
+            <div className={styles.reviewsActiveFiltersInline}>
+              {RATING_OPTIONS.filter(o => selectedRatings.has(o.value)).map(opt => (
+                <button
+                  key={opt.value}
+                  type="button"
+                  className={styles.reviewsActiveChip}
+                  onClick={() => toggleRating(opt.value)}
+                  aria-label={`Remove ${opt.label} filter`}
+                >
+                  {opt.label} <XIcon size={16} />
+                </button>
+              ))}
+              <button
+                type="button"
+                className={styles.reviewsClearAll}
+                onClick={() => setSelectedRatings(new Set())}
+              >
+                Clear All
+              </button>
+            </div>
+          )}
+
+          {/* Sort chip — inline on mobile, hidden here on desktop */}
+          <div className={`${styles.reviewsDropdownWrap} ${styles.reviewsSortMobile}`}>
+            <button
+              type="button"
+              className={`${styles.reviewsFilterChip} ${sortOpen ? styles.reviewsFilterChipOpen : ''}`}
+              aria-expanded={sortOpen}
+              onClick={() => { setSortOpen(o => !o); setRatingOpen(false) }}
+            >
+              Sort: {sortLabel}
+              <span className={`${styles.reviewsChevron} ${sortOpen ? styles.reviewsChevronOpen : ''}`}><ChevronIcon size={24} /></span>
+            </button>
+            {sortOpen && (
+              <div className={styles.reviewsDropdown} role="listbox" aria-label="Sort reviews">
+                {SORT_OPTIONS_REVIEWS.map(opt => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    role="option"
+                    aria-selected={selectedSort === opt.value}
+                    className={`${styles.reviewsDropdownItem} ${selectedSort === opt.value ? styles.reviewsDropdownItemActive : ''}`}
+                    onClick={() => { setSelectedSort(opt.value); setSortOpen(false) }}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Sort chip — right side on desktop */}
+        <div className={`${styles.reviewsDropdownWrap} ${styles.reviewsSortDesktop}`}>
+          <button
+            type="button"
+            className={`${styles.reviewsFilterChip} ${sortOpen ? styles.reviewsFilterChipOpen : ''}`}
+            aria-expanded={sortOpen}
+            onClick={() => { setSortOpen(o => !o); setRatingOpen(false) }}
+          >
+            Sort: {sortLabel}
+            <span className={`${styles.reviewsChevron} ${sortOpen ? styles.reviewsChevronOpen : ''}`}><ChevronIcon size={24} /></span>
+          </button>
+          {sortOpen && (
+            <div className={`${styles.reviewsDropdown} ${styles.reviewsDropdownRight}`} role="listbox" aria-label="Sort reviews">
+              {SORT_OPTIONS_REVIEWS.map(opt => (
+                <button
+                  key={opt.value}
+                  type="button"
+                  role="option"
+                  aria-selected={selectedSort === opt.value}
+                  className={`${styles.reviewsDropdownItem} ${selectedSort === opt.value ? styles.reviewsDropdownItemActive : ''}`}
+                  onClick={() => { setSelectedSort(opt.value); setSortOpen(false) }}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+
+      </div>
+
+      {/* Active rating filters row */}
+      {selectedRatings.size > 0 && (
+        <div className={styles.reviewsActiveFilters}>
+          {RATING_OPTIONS.filter(o => selectedRatings.has(o.value)).map(opt => (
+            <button
+              key={opt.value}
+              type="button"
+              className={styles.reviewsActiveChip}
+              onClick={() => toggleRating(opt.value)}
+              aria-label={`Remove ${opt.label} filter`}
+            >
+              {opt.label} <XIcon size={16} />
+            </button>
+          ))}
+          <button
+            type="button"
+            className={styles.reviewsClearAll}
+            onClick={() => setSelectedRatings(new Set())}
+          >
+            Clear All
+          </button>
+        </div>
+      )}
+      </div>
+
+      {/* Review cards */}
+      <div className={styles.reviewsGrid}>
+        {REVIEWS_DATA.items.map((review, i) => (
+          <article key={i} className={styles.reviewCard}>
+            <div className={styles.reviewCardHeader}>
+              <div className={styles.reviewCardMeta}>
+                <div className={styles.reviewAvatarWrap} aria-hidden="true">
+                  <div className={styles.reviewAvatar}>{review.initials}</div>
+                  <span className={styles.reviewAvatarBadge}><CheckmarkIcon size={10} /></span>
+                </div>
+                <div className={styles.reviewCardNameBlock}>
+                  <span className={styles.reviewCardName}>{review.name}</span>
+                  <span className={styles.reviewCardLocation}>{review.location}</span>
+                </div>
+              </div>
+              <span className={styles.reviewCardDate}>{review.date}</span>
+            </div>
+
+            <div className={styles.reviewCardStars} aria-label={`${review.rating} out of 5 stars`}>
+              {[1,2,3,4,5].map(s => (
+                <span
+                  key={s}
+                  className={s <= review.rating ? styles.starFilled : styles.starEmpty}
+                >
+                  <StarIcon size={20} />
+                </span>
+              ))}
+            </div>
+
+            <p className={styles.reviewCardBody}>{review.body}</p>
+          </article>
+        ))}
+      </div>
+
+      {/* Load more */}
+      <div className={styles.reviewsLoadMore}>
+        <Button variant="secondary">Load More Reviews</Button>
+      </div>
+    </section>
+  )
 }
 
 // ─── Mobile swipeable gallery ─────────────────────────────────────────────────
@@ -174,7 +532,14 @@ function StarRating({
         ))}
       </div>
       <span className={styles.ratingValue}>{rating}</span>
-      <span className={styles.ratingCount}>({reviewCount.toLocaleString()} reviews)</span>
+      <a
+        href="#reviews"
+        className={styles.ratingCount}
+        onClick={e => {
+          e.preventDefault()
+          document.getElementById('reviews')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        }}
+      >{reviewCount.toLocaleString()} Reviews</a>
     </div>
   )
 }
@@ -465,6 +830,9 @@ function ProductDetailPageInner({ productId }: { productId: number }) {
             onAddToBag={handleAddToBag}
           />
         </div>
+
+        <ProductCarousel brand={brand} title="Best Sellers" ArrowIcon={icons.ArrowIcon} />
+        <ReviewsSection ChevronIcon={icons.ChevronIcon} StarIcon={icons.StarIcon} XIcon={icons.XIcon} CheckmarkIcon={icons.CheckmarkIcon} />
       </main>
 
       <Footer columns={footerColumns} />

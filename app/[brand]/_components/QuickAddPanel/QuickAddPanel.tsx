@@ -55,6 +55,7 @@ export function QuickAddPanel({ isOpen, onClose, product, closeButtonRef }: Quic
 
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({})
   const [imageIdx, setImageIdx] = useState(0)
+  const [lightboxSrc, setLightboxSrc] = useState<string | null>(null)
 
   // Focus the close button when panel opens
   useEffect(() => {
@@ -77,6 +78,7 @@ export function QuickAddPanel({ isOpen, onClose, product, closeButtonRef }: Quic
       setSelectedOptions({})
     }
     setImageIdx(0)
+    setLightboxSrc(null)
   }, [product?.title])
 
   // Escape key closes panel
@@ -205,8 +207,8 @@ export function QuickAddPanel({ isOpen, onClose, product, closeButtonRef }: Quic
                   key={i}
                   type="button"
                   className={`${styles.galleryThumb} ${i === imageIdx ? styles.galleryThumbActive : ''}`}
-                  onClick={() => setImageIdx(i)}
-                  aria-label={img.alt}
+                  onClick={() => { setImageIdx(i); setLightboxSrc(img.src) }}
+                  aria-label={`View larger image of ${img.alt}`}
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={img.src} alt={img.alt} className={styles.galleryImg} loading="lazy" />
@@ -327,6 +329,33 @@ export function QuickAddPanel({ isOpen, onClose, product, closeButtonRef }: Quic
           </a>
         </div></div>}
       </div>
+
+      {/* Mobile image lightbox */}
+      {lightboxSrc && (
+        <div
+          className={styles.lightbox}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Image preview"
+          onClick={() => setLightboxSrc(null)}
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={lightboxSrc}
+            alt=""
+            className={styles.lightboxImg}
+            onClick={e => e.stopPropagation()}
+          />
+          <button
+            type="button"
+            className={styles.lightboxClose}
+            aria-label="Close image"
+            onClick={() => setLightboxSrc(null)}
+          >
+            ✕
+          </button>
+        </div>
+      )}
     </>
   )
 }

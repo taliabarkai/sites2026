@@ -422,3 +422,43 @@
 }
 
 .viewDetails:hover { color: var(--colors-text-secondary); }
+
+/* ── Mobile image lightbox ─────────────────────────────────────────────────── */
+.lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-tooltip);
+  background: rgba(0, 0, 0, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Hidden on desktop — gallery is desktop-hidden anyway, but guard here too */
+@media (min-width: 768px) {
+  .lightbox { display: none; }
+}
+
+.lightboxImg {
+  max-width: 92vw;
+  max-height: 85dvh;
+  object-fit: contain;
+  display: block;
+}
+
+.lightboxClose {
+  position: absolute;
+  top: var(--spacing-md);
+  right: var(--spacing-md);
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  background: var(--colors-background);
+  color: var(--colors-text);
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border: none;
+}
