@@ -361,7 +361,7 @@ export function GiftPackagingPanel({ onClose, onAddToCart, initialGift, productN
                   <label className={styles.fieldLabel} htmlFor="recipient-name">
                     Recipient name
                   </label>
-                  <div className={styles.fieldWrap} style={{ marginTop: 'var(--spacing-xxs)' }}>
+                  <div className={styles.fieldWrap} style={{ marginTop: 'var(--spacing-xxxs)' }}>
                     <input
                       id="recipient-name"
                       type="text"

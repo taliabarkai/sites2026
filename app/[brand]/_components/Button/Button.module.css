@@ -2,7 +2,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: var(--spacing-xs);
+  gap: var(--spacing-xxs);
   border: 1px solid transparent;
   font-family: var(--font-family-main-regular);
   text-decoration: none;
@@ -83,12 +83,12 @@
 
 .compact {
   min-height: auto;
-  padding: var(--spacing-xs) var(--spacing-md);
+  padding: var(--spacing-xxs) var(--spacing-sm);
 }
 
 .iconOnly {
   min-width: var(--field-min-height);
-  padding: 0 var(--spacing-sm);
+  padding: 0 var(--spacing-xs);
 }
 
 .iconOnly svg {

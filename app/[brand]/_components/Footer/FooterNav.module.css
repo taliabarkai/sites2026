@@ -6,8 +6,8 @@
 
 .desktop {
   display: none;
-  gap: var(--spacing-xl);
-  padding-top: var(--spacing-md);
+  gap: var(--spacing-lg);
+  padding-top: var(--spacing-sm);
 
 }
 
@@ -16,7 +16,7 @@
 }
 
 .columnTitle {
-  margin: 0 0 var(--spacing-md);
+  margin: 0 0 var(--spacing-sm);
   font-family:    var(--typography-rules-paragraph4-font-family);
   font-size:      var(--typography-rules-paragraph4-font-size);
   line-height:    var(--typography-rules-paragraph4-line-height);
@@ -32,7 +32,7 @@
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-sm);
+  gap: var(--spacing-xs);
 }
 
 .link {
@@ -64,7 +64,7 @@
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  padding: var(--spacing-md) 0;
+  padding: var(--spacing-sm) 0;
   border: none;
   background: transparent;
   font-family:    var(--typography-rules-paragraph4-font-family);
@@ -90,7 +90,7 @@
 }
 
 .accordionPanel {
-  padding-bottom: var(--spacing-md);
+  padding-bottom: var(--spacing-sm);
 }
 
 .accordionPanelOpen {

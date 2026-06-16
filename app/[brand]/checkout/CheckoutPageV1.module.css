@@ -12,7 +12,7 @@
 .header {
   display: flex;
   align-items: center;
-  padding: var(--spacing-md) var(--layout-page-margin);
+  padding: var(--spacing-sm) var(--layout-page-margin);
   border-bottom: var(--border-width) solid var(--border-color);
 }
 
@@ -51,7 +51,7 @@
 .layout {
   display: flex;
   flex-direction: column;
-  padding-top: var(--spacing-lg);
+  padding-top: var(--spacing-md);
   padding-bottom: var(--spacing-xxl);
 }
 
@@ -81,12 +81,12 @@
   .rightCol {
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-xl);
+    gap: var(--spacing-lg);
     position: sticky;
     top: var(--sticky-top, var(--spacing-4xl));
     align-self: start;
-    padding-top: var(--spacing-lg);
-    padding-bottom: var(--spacing-lg);
+    padding-top: var(--spacing-md);
+    padding-bottom: var(--spacing-md);
   }
 }
 
@@ -123,7 +123,7 @@
 /* ─── Form Section ───────────────────────────────────────────────────────────── */
 
 .formSection {
-  padding: var(--spacing-lg) var(--layout-page-margin);
+  padding: var(--spacing-md) var(--layout-page-margin);
   margin-left: calc(-1 * var(--layout-page-margin));
   margin-right: calc(-1 * var(--layout-page-margin));
   border-bottom: var(--border-width) solid var(--border-color);
@@ -136,7 +136,7 @@
 
 @media (min-width: 1024px) {
   .formSection {
-    padding: var(--spacing-lg) 0;
+    padding: var(--spacing-md) 0;
     margin-left: 0;
     margin-right: 0;
   }
@@ -145,7 +145,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--spacing-xxxs);
-  margin-bottom: var(--spacing-md);
+  margin-bottom: var(--spacing-sm);
 }
 
 .sectionTitle {
@@ -160,7 +160,7 @@
 
 /* used standalone (no .sectionHead wrapper) */
 .formSection > .sectionTitle {
-  margin-bottom: var(--spacing-md);
+  margin-bottom: var(--spacing-sm);
 }
 
 .sectionSubtitle {
@@ -175,13 +175,13 @@
 .fieldGroup {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-xs);
+  gap: var(--spacing-xxs);
 }
 
 .twoCol {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: var(--spacing-xs);
+  gap: var(--spacing-xxs);
 }
 
 /* ─── Field Wrap (positions icon absolutely inside) ──────────────────────────── */
@@ -200,7 +200,7 @@
   border: var(--border-width) solid var(--form-field-border-color);
   border-radius: var(--radius-sm);
   min-height: var(--field-min-height);
-  padding: 0 var(--spacing-sm);
+  padding: 0 var(--spacing-xs);
   font-family: var(--typography-rules-text1-font-family);
   font-size: var(--typography-rules-text1-font-size);
   line-height: var(--typography-rules-text1-line-height);
@@ -220,7 +220,7 @@
 
 /* Input with a right-side icon — add right padding to avoid overlap */
 .fieldWrap:has(.fieldIconRight) .input {
-  padding-right: var(--spacing-xl);
+  padding-right: var(--spacing-lg);
 }
 
 /* ─── Select ─────────────────────────────────────────────────────────────────── */
@@ -232,7 +232,7 @@
   border: var(--border-width) solid var(--form-field-border-color);
   border-radius: var(--radius-sm);
   min-height: var(--field-min-height);
-  padding: 0 var(--spacing-xl) 0 var(--spacing-sm);
+  padding: 0 var(--spacing-lg) 0 var(--spacing-xs);
   font-family: var(--typography-rules-text1-font-family);
   font-size: var(--typography-rules-text1-font-size);
   line-height: var(--typography-rules-text1-line-height);
@@ -250,7 +250,7 @@
 /* Dropdown chevron icon — absolutely inside fieldWrap */
 .selectIcon {
   position: absolute;
-  right: var(--spacing-sm);
+  right: var(--spacing-xs);
   top: 50%;
   transform: translateY(-50%);
   display: inline-flex;
@@ -262,7 +262,7 @@
 /* Tooltip / help icon — absolutely inside fieldWrap on the right */
 .fieldIconRight {
   position: absolute;
-  right: var(--spacing-sm);
+  right: var(--spacing-xs);
   top: 50%;
   transform: translateY(-50%);
   display: inline-flex;
@@ -276,9 +276,9 @@
 .checkboxLabel {
   display: flex;
   align-items: flex-start;
-  gap: var(--spacing-xs);
+  gap: var(--spacing-xxs);
   cursor: pointer;
-  padding: var(--spacing-xs);
+  padding: var(--spacing-xxs);
 }
 
 .checkbox {
@@ -308,15 +308,15 @@
 .shippingOptions {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-xs);
-  margin-bottom: var(--spacing-md);
+  gap: var(--spacing-xxs);
+  margin-bottom: var(--spacing-sm);
 }
 
 .shippingOption {
   display: flex;
   align-items: flex-start;
-  gap: var(--spacing-sm);
-  padding: var(--spacing-sm) var(--spacing-md);
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xs) var(--spacing-sm);
   border: var(--border-width) solid var(--border-color);
   border-radius: var(--radius-sm);
   cursor: pointer;
@@ -339,7 +339,7 @@
   flex: 1;
   justify-content: space-between;
   align-items: flex-start;
-  gap: var(--spacing-sm);
+  gap: var(--spacing-xs);
 }
 
 .shippingOptionInfo {
@@ -375,8 +375,8 @@
 .shippingInsurance {
   display: flex;
   align-items: center;
-  gap: var(--spacing-xxs);
-  margin-bottom: var(--spacing-sm);
+  gap: var(--spacing-xxxs);
+  margin-bottom: var(--spacing-xs);
   font-family: var(--typography-rules-text3-font-family);
   font-size: var(--typography-rules-text3-font-size);
   line-height: var(--typography-rules-text3-line-height);
@@ -393,7 +393,7 @@
 .carriersRow {
   display: flex;
   align-items: center;
-  gap: var(--spacing-sm);
+  gap: var(--spacing-xs);
   flex-wrap: wrap;
 }
 
@@ -409,13 +409,13 @@
 .storeCreditSection {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-xs);
-  padding: var(--spacing-xxs) 0;
+  gap: var(--spacing-xxs);
+  padding: var(--spacing-xxxs) 0;
 }
 
 .storeCreditRow {
   display: flex;
-  gap: var(--spacing-xs);
+  gap: var(--spacing-xxs);
   align-items: center;
 }
 
@@ -431,7 +431,7 @@
 .paymentOptions {
   display: flex;
   flex-direction: column;
-  margin-top: var(--spacing-xs);
+  margin-top: var(--spacing-xxs);
   border: var(--border-width) solid var(--border-color);
   border-radius: var(--radius-sm);
   overflow: hidden;
@@ -440,8 +440,8 @@
 .paymentOption {
   display: flex;
   align-items: center;
-  gap: var(--spacing-sm);
-  padding: var(--spacing-sm);
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xs);
   border-bottom: var(--border-width) solid var(--border-color);
   cursor: pointer;
 }
@@ -465,7 +465,7 @@
 .paymentOptionIcons {
   display: flex;
   align-items: center;
-  gap: var(--spacing-xxs);
+  gap: var(--spacing-xxxs);
   flex-shrink: 0;
 }
 
@@ -479,8 +479,8 @@
   .placeOrderDesktop {
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-sm);
-    margin-top: var(--spacing-lg);
+    gap: var(--spacing-xs);
+    margin-top: var(--spacing-md);
   }
 }
 
@@ -492,7 +492,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: var(--spacing-xxs);
+  gap: var(--spacing-xxxs);
   font-family: var(--typography-rules-text1-font-family);
   font-size: var(--typography-rules-text1-font-size);
   line-height: var(--typography-rules-text1-line-height);
@@ -506,8 +506,8 @@
   bottom: 0;
   left: 0;
   right: 0;
-  padding: var(--spacing-sm) var(--layout-page-margin);
-  padding-bottom: max(var(--spacing-sm), env(safe-area-inset-bottom));
+  padding: var(--spacing-xs) var(--layout-page-margin);
+  padding-bottom: max(var(--spacing-xs), env(safe-area-inset-bottom));
   background: var(--colors-background);
   border-top: var(--border-width) solid var(--border-color);
   z-index: var(--z-sticky);
@@ -529,7 +529,7 @@
   background: var(--colors-background);
   border: var(--border-width) solid var(--border-color);
   border-radius: var(--radius-lg);
-  padding: var(--spacing-lg);
+  padding: var(--spacing-md);
 }
 
 /* Mobile: no card treatment */
@@ -538,7 +538,7 @@
     background: none;
     border: none;
     border-radius: 0;
-    padding: var(--spacing-lg) 0;
+    padding: var(--spacing-md) 0;
     border-top: var(--border-width) solid var(--border-color);
   }
 }
@@ -547,14 +547,14 @@
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  margin-bottom: var(--spacing-md);
+  margin-bottom: var(--spacing-sm);
 }
 
 .summaryHeaderCollapsible {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  margin-bottom: var(--spacing-md);
+  margin-bottom: var(--spacing-sm);
   cursor: pointer;
   user-select: none;
 }
@@ -562,7 +562,7 @@
 .summaryTitleRow {
   display: flex;
   align-items: center;
-  gap: var(--spacing-xxs);
+  gap: var(--spacing-xxxs);
 }
 
 .summaryTitle {
@@ -575,7 +575,7 @@
   color: var(--colors-text);
   display: flex;
   align-items: center;
-  gap: var(--spacing-xxs);
+  gap: var(--spacing-xxxs);
 }
 
 .itemCount {
@@ -599,8 +599,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--spacing-sm);
-  padding: var(--spacing-xs) var(--spacing-sm);
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xxs) var(--spacing-xs);
   background: #F0FDF4;
   border: 1px solid #86EFAC;
   border-radius: var(--radius-sm);
@@ -640,15 +640,15 @@
 .summaryItems {
   display: flex;
   flex-direction: column;
-  margin-bottom: var(--spacing-md);
-  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-sm);
+  gap: var(--spacing-sm);
 }
 
 .checkoutItem {
   display: grid;
   grid-template-columns: 120px 1fr;
-  gap: var(--spacing-lg);
-  /* padding: var(--spacing-sm) 0; */
+  gap: var(--spacing-md);
+  /* padding: var(--spacing-xs) 0; */
 }
 
 .itemImageWrap {
@@ -671,7 +671,7 @@
 .itemContent {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-xs);
+  gap: var(--spacing-xxs);
   min-width: 0;
 }
 
@@ -685,7 +685,7 @@
 .itemPrices {
   display: flex;
   align-items: center;
-  gap: var(--spacing-xs);
+  gap: var(--spacing-xxs);
 }
 
 .priceOriginal {
@@ -707,7 +707,7 @@
 .viewDetailsToggle {
   display: inline-flex;
   align-items: center;
-  gap: var(--spacing-xxs);
+  gap: var(--spacing-xxxs);
   background: none;
   border: none;
   padding: 0;
@@ -735,8 +735,8 @@
 .optionsGrid {
   display: grid;
   grid-template-columns: auto 1fr;
-  gap: var(--spacing-xxxs) var(--spacing-sm);
-  margin: var(--spacing-xxs) 0 0;
+  gap: var(--spacing-xxxs) var(--spacing-xs);
+  margin: var(--spacing-xxxs) 0 0;
   padding: 0;
 }
 
@@ -761,7 +761,7 @@
 }
 
 .giftRow {
-  margin-top: var(--spacing-xxs);
+  margin-top: var(--spacing-xxxs);
 }
 
 /* ─── Promo Row ──────────────────────────────────────────────────────────────── */
@@ -770,16 +770,16 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--spacing-sm);
-  padding: var(--spacing-md) 0;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-sm) 0;
   border-bottom: var(--border-width) solid var(--border-color);
-  margin-bottom: var(--spacing-sm);
+  margin-bottom: var(--spacing-xs);
 }
 
 .promoQuestion {
   display: inline-flex;
   align-items: center;
-  gap: var(--spacing-xs);
+  gap: var(--spacing-xxs);
   font-family: var(--typography-rules-text1-font-family);
   font-size: var(--typography-rules-text1-font-size);
   line-height: var(--typography-rules-text1-line-height);
@@ -811,8 +811,8 @@
 .totalsRows {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-xs);
-  margin-bottom: var(--spacing-sm);
+  gap: var(--spacing-xxs);
+  margin-bottom: var(--spacing-xs);
 }
 
 .totalRow {
@@ -845,14 +845,14 @@
 .summaryDivider {
   height: 1px;
   background: var(--border-color);
-  margin-bottom: var(--spacing-sm);
+  margin-bottom: var(--spacing-xs);
 }
 
 .orderTotalRow {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
-  margin-bottom: var(--spacing-sm);
+  margin-bottom: var(--spacing-xs);
 }
 
 .orderTotalLabel {
@@ -879,13 +879,13 @@
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-xs);
+  gap: var(--spacing-xxs);
 }
 
 .benefit {
   display: flex;
   align-items: center;
-  gap: var(--spacing-xs);
+  gap: var(--spacing-xxs);
   font-family: var(--typography-rules-text1-font-family);
   font-size: var(--typography-rules-text1-font-size);
   line-height: var(--typography-rules-text1-line-height);
@@ -902,7 +902,7 @@
 /* ─── You May Also Like ──────────────────────────────────────────────────────── */
 
 .upsellSection {
-  padding: var(--spacing-lg) 0;
+  padding: var(--spacing-md) 0;
   border-top: var(--border-width) solid var(--border-color);
 }
 
@@ -915,14 +915,14 @@
 .upsellGrid {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--spacing-xs);
-  margin-top: var(--spacing-md);
+  gap: var(--spacing-xxs);
+  margin-top: var(--spacing-sm);
 }
 
 .upsellCard {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-xxs);
+  gap: var(--spacing-xxxs);
   width: 130px;
   flex-shrink: 0;
 }
@@ -953,13 +953,13 @@
 .upsellPrices {
   display: flex;
   align-items: center;
-  gap: var(--spacing-xxs);
+  gap: var(--spacing-xxxs);
   flex-wrap: wrap;
 }
 
 .upsellButton {
   /* width: 100%; */
-  margin-top: var(--spacing-xxs);
+  margin-top: var(--spacing-xxxs);
 }
 
 /* ─── Page Footer (below main content) ──────────────────────────────────────── */
@@ -968,17 +968,17 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--spacing-xs);
-  padding: var(--spacing-xl) 0;
+  gap: var(--spacing-xxs);
+  padding: var(--spacing-lg) 0;
   /* Extra bottom padding on mobile so sticky bar doesn't obscure content */
-  padding-bottom: calc(var(--spacing-xl) + 80px);
+  padding-bottom: calc(var(--spacing-lg) + 80px);
   border-top: var(--border-width) solid var(--border-color);
   text-align: center;
 }
 
 @media (min-width: 1024px) {
   .pageFooter {
-    padding-bottom: var(--spacing-xl);
+    padding-bottom: var(--spacing-lg);
   }
 }
 

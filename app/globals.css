@@ -49,13 +49,15 @@ html {
   --colors-surface-primary: #f8f8f8;
 
   /* ── Spacing scale (shared across all brands) ── */
-  --spacing-xxxs: 2px;
-  --spacing-xxs:  4px;
-  --spacing-xs:   8px;
-  --spacing-sm:   12px;
-  --spacing-md:   16px;
-  --spacing-lg:   24px;
-  --spacing-xl:   32px;
+  --spacing-xxxs: 4px;
+  --spacing-xxs:  8px;
+  --spacing-xs:   12px;
+  --spacing-sm:   16px;
+  --spacing-md:   24px;
+  --spacing-lg:   32px;
+  --spacing-xl:   40px;
+  --spacing-xxl:  60px;
+  --spacing-xxxl: 72px;
   --spacing-2xl:  48px;
   --spacing-3xl:  64px;
   --spacing-4xl:  96px;

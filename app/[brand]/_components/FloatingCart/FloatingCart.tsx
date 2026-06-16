@@ -8,13 +8,9 @@ import * as mnnIcons from '@/src/components/icons/mnn'
 import * as tgrIcons from '@/src/components/icons/tgr'
 import * as lalIcons from '@/src/components/icons/lal'
 import * as ibIcons from '@/src/components/icons/ib'
-import { getBrandFromPathname, getGiftOptionsMode, getBrandGiftAssets } from '../../_config/brands'
+import { getBrandFromPathname } from '../../_config/brands'
 import type { BrandKey } from '../../_config/brands'
-import { useCart } from '../../_context/CartContext'
 import { Button } from '../Button'
-import { GiftOptionsModal } from './GiftOptionsModal'
-import type { SavedGift } from './GiftOptionsModal'
-import { GiftPackagingPanel } from '../GiftPackagingPanel/GiftPackagingPanel'
 import type { CartItem } from '../../_context/CartContext'
 import styles from './FloatingCart.module.css'
 
@@ -47,22 +43,13 @@ interface CartItemRowProps {
   onRemove: (id: string) => void
   onEdit: (id: string) => void
   onGenerateGiftNote: () => Promise<string>
-  GiftIcon: React.ComponentType<{ size?: number }>
-  PlusMinusIcon: React.ComponentType<{ size?: number }>
   DropdownIcon: React.ComponentType<{ size?: number }>
-  CheckmarkIcon: React.ComponentType<{ size?: number }>
 }
 
-function CartItemRow({ item, brand, onRemove, onEdit, onGenerateGiftNote, GiftIcon, PlusMinusIcon, DropdownIcon, CheckmarkIcon }: CartItemRowProps) {
+function CartItemRow({ item, brand, onRemove, onEdit, DropdownIcon }: CartItemRowProps) {
   const [detailsOpen, setDetailsOpen] = useState(false)
   const [confirmRemove, setConfirmRemove] = useState(false)
-  const [giftModalOpen, setGiftModalOpen] = useState(false)
-  const [savedGift, setSavedGift] = useState<SavedGift | null>(null)
-  const [giftPanelOpen, setGiftPanelOpen] = useState(false)
   const hasOptions = item.selectedOptions && item.selectedOptions.length > 0
-  const { updateGiftPackaging } = useCart()
-  const isMultiple = getGiftOptionsMode(brand) === 'multiple'
-  const giftAssets = isMultiple ? getBrandGiftAssets(brand) : null
 
   const handleRemoveConfirm = () => {
     onRemove(item.id)
@@ -70,31 +57,6 @@ function CartItemRow({ item, brand, onRemove, onEdit, onGenerateGiftNote, GiftIc
 
   return (
     <article className={styles.item}>
-      {/* Single-mode gift modal */}
-      {!isMultiple && giftModalOpen && (
-        <GiftOptionsModal
-          onClose={() => setGiftModalOpen(false)}
-          onAddToCart={(gift) => {
-            setSavedGift(gift)
-            setGiftModalOpen(false)
-          }}
-          onGenerateGiftNote={onGenerateGiftNote}
-        />
-      )}
-
-      {/* Multi-mode gift panel */}
-      {isMultiple && giftPanelOpen && (
-        <GiftPackagingPanel
-          onClose={() => setGiftPanelOpen(false)}
-          onAddToCart={(gift) => {
-            updateGiftPackaging(item.id, gift)
-            setGiftPanelOpen(false)
-          }}
-          initialGift={item.giftPackaging}
-          productName={item.name}
-        />
-      )}
-
       <p className={styles.deliveryGuarantee}>Guaranteed to arrive by Christmas</p>
       <div className={styles.itemMain}>
         <Link href={`/${brand}/product`} className={styles.itemImageWrap} tabIndex={-1} aria-hidden="true">
@@ -168,100 +130,6 @@ function CartItemRow({ item, brand, onRemove, onEdit, onGenerateGiftNote, GiftIc
         </div>
       </div>
 
-      {/* ── Single-mode gift area ── */}
-      {!isMultiple && (
-        savedGift ? (
-          <div className={styles.giftSaved}>
-            <div className={styles.giftSavedRow}>
-              <div className={styles.giftSavedImageWrap}>
-                <img
-                  src={savedGift.image}
-                  alt="Gift packaging"
-                  className={styles.giftSavedImage}
-                />
-              </div>
-              <div className={styles.giftSavedBody}>
-                <div className={styles.giftSavedNameRow}>
-                  <span className={styles.giftSavedName}>{savedGift.name}</span>
-                  <span className={styles.giftSavedPrice}>{savedGift.price}</span>
-                </div>
-                <div className={styles.itemActions}>
-                  <button type="button" className={styles.editLink} onClick={() => setGiftModalOpen(true)}>
-                    Edit
-                  </button>
-                  <span className={styles.actionsDivider} aria-hidden="true" />
-                  <button type="button" className={styles.removeLink} onClick={() => setSavedGift(null)}>
-                    Remove
-                  </button>
-                </div>
-              </div>
-            </div>
-            {savedGift.note && (
-              <p className={styles.giftNote}>
-                <span className={styles.giftNoteLabel}>Gift note:</span>{' '}
-                {savedGift.note}
-              </p>
-            )}
-          </div>
-        ) : (
-          <Button
-            variant="upsell-primary"
-            leadingIcon={<GiftIcon size={24} />}
-            trailingIcon={<PlusMinusIcon size={24} />}
-            onClick={() => setGiftModalOpen(true)}
-          >
-            Add Gift Packaging
-          </Button>
-        )
-      )}
-
-      {/* ── Multi-mode gift area ── */}
-      {isMultiple && (
-        item.giftPackaging ? (
-          <div className={styles.giftSaved}>
-            <div className={styles.giftSavedRow}>
-              <div className={styles.giftSavedImageWrap}>
-                <img
-                  src={
-                    item.giftPackaging.type === 'classic'
-                      ? giftAssets!.classicGiftImage
-                      : (giftAssets?.designOptions.find(d => d.key === item.giftPackaging!.selectedDesign)?.image ?? giftAssets!.personalizedGiftImage)
-                  }
-                  alt="Gift packaging"
-                  className={styles.giftSavedImage}
-                />
-              </div>
-              <div className={styles.giftSavedBody}>
-                <div className={styles.giftSavedNameRow}>
-                  <span className={styles.giftSavedName}>
-                    {item.giftPackaging.type === 'classic'
-                      ? 'Classic Gift Set'
-                      : `Personalized Gift Box${item.giftPackaging.selectedDesign
-                          ? ` · ${giftAssets?.designOptions.find(d => d.key === item.giftPackaging!.selectedDesign)?.label ?? item.giftPackaging.selectedDesign}`
-                          : ''}${item.giftPackaging.recipientName ? ` · ${item.giftPackaging.recipientName}` : ''}`
-                    }
-                  </span>
-                  <span className={styles.giftSavedPrice}>{formatPrice(item.giftPackaging.price)}</span>
-                </div>
-                <div className={styles.itemActions}>
-                  <button type="button" className={styles.editLink} onClick={() => setGiftPanelOpen(true)}>Edit</button>
-                  <span className={styles.actionsDivider} aria-hidden="true" />
-                  <button type="button" className={styles.removeLink} onClick={() => updateGiftPackaging(item.id, undefined)}>Remove</button>
-                </div>
-              </div>
-            </div>
-          </div>
-        ) : (
-          <Button
-            variant="upsell-primary"
-            leadingIcon={<GiftIcon size={24} />}
-            trailingIcon={<PlusMinusIcon size={24} />}
-            onClick={() => setGiftPanelOpen(true)}
-          >
-            Add Gift Packaging
-          </Button>
-        )
-      )}
     </article>
   )
 }
@@ -364,10 +232,7 @@ export function FloatingCart({
                 onRemove={onRemoveItem}
                 onEdit={onEditItem}
                 onGenerateGiftNote={onGenerateGiftNote}
-                GiftIcon={icons.GiftIcon}
-                PlusMinusIcon={icons.PlusMinusIcon}
                 DropdownIcon={icons.DropdownIcon}
-                CheckmarkIcon={icons.CheckmarkIcon}
               />
             ))
           )}

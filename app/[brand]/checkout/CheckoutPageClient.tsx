@@ -9,16 +9,15 @@ import * as tgrIcons from '@/src/components/icons/tgr'
 import * as lalIcons from '@/src/components/icons/lal'
 import * as ibIcons from '@/src/components/icons/ib'
 import type { IconProps } from '@/src/components/icons/Icon'
-import { useCart } from '../_context/CartContext'
 import type { CartItem } from '../_context/CartContext'
 import { Button } from '../_components/Button'
 import { Header } from '../_components/Header'
-import { GiftOptionsModal } from '../_components/FloatingCart/GiftOptionsModal'
-import type { SavedGift } from '../_components/FloatingCart/GiftOptionsModal'
-import { GiftPackagingPanel } from '../_components/GiftPackagingPanel/GiftPackagingPanel'
-import { getBrandFromPathname, getGiftOptionsMode, getBrandGiftAssets } from '../_config/brands'
+import { useCart } from '../_context/CartContext'
+import { getBrandFromPathname } from '../_config/brands'
 import { prefixNavLinks, withBrandPrefix } from '../_config/brandPaths'
 import { DEFAULT_NAV_LINKS, DEFAULT_TOPLINE } from '../_config/siteContent'
+import { GiftOptionsModal } from '../_components/FloatingCart/GiftOptionsModal'
+import type { SavedGift } from '../_components/FloatingCart/GiftOptionsModal'
 import styles from './CheckoutPage.module.css'
 
 // ─── Brand icons ──────────────────────────────────────────────────────────────
@@ -76,6 +75,33 @@ const UPSELL_PRODUCTS: UpsellProduct[] = [
     price: 2500,
     originalPrice: 5000,
     image: 'https://cdn.oakandluna.com/digital-asset/product/engraved-comprass-necklace-gold-vermeil-1.jpg',
+  },
+]
+
+// ─── Checkout Gift Options ─────────────────────────────────────────────────────
+
+interface CheckoutGiftOption {
+  id:          string
+  name:        string
+  description: string
+  price:       number
+  image:       string
+}
+
+const CHECKOUT_GIFT_OPTIONS: CheckoutGiftOption[] = [
+  {
+    id:          'classic-gift-set',
+    name:        'Classic Gift Set',
+    description: 'Includes: Gift bag, gift box and a custom note',
+    price:       400,
+    image:       'https://cdn.oakandluna.com/digital-asset/product/gift-box-25.jpg',
+  },
+  {
+    id:          'luxury-gift-bag',
+    name:        'Luxury Gift Bag',
+    description: 'Includes: Gift bag, gift box and a custom note',
+    price:       700,
+    image:       'https://cdn.oakandluna.com/digital-asset/product/gift-box-25.jpg',
   },
 ]
 
@@ -151,24 +177,46 @@ function StepBreadcrumb({ currentStep, completedSteps, icons, brand, onEditStep 
 // ─── Accordion Step ───────────────────────────────────────────────────────────
 
 interface AccordionStepProps {
-  title:            string
-  isActive:         boolean
-  isCompleted:      boolean
+  title:             string
+  stepNumber:        number
+  isActive:          boolean
+  isCompleted:       boolean
   completedSummary?: React.ReactNode
-  onEdit:           () => void
-  children:         React.ReactNode
+  onEdit:            () => void
+  children:          React.ReactNode
+  preTitle?:         React.ReactNode
+  subHeader?:        React.ReactNode
+  icon?:             React.ReactNode
+  editLabel?:        string
+  headerRight?:      React.ReactNode
 }
 
-function AccordionStep({ title, isActive, isCompleted, completedSummary, onEdit, children }: AccordionStepProps) {
-  if (!isActive && !isCompleted) return null
+function AccordionStep({ title, stepNumber, isActive, isCompleted, completedSummary, onEdit, children, preTitle, subHeader, icon, editLabel = 'Edit', headerRight }: AccordionStepProps) {
+  const prefixedTitle = `${stepNumber}. ${title}`
+
+  if (!isActive && !isCompleted) {
+    return (
+      <div className={styles.accordionStep} data-step={stepNumber}>
+        <div className={styles.accordionLockedCard}>
+          <h2 className={styles.accordionLockedTitle}>
+            {prefixedTitle}
+            {icon && <span className={styles.accordionTitleIcon}>{icon}</span>}
+          </h2>
+        </div>
+      </div>
+    )
+  }
 
   if (isCompleted && !isActive) {
     return (
-      <div className={styles.accordionStep}>
+      <div className={styles.accordionStep} data-step={stepNumber}>
         <div className={styles.accordionCompletedCard}>
           <div className={styles.accordionCompletedHeader}>
-            <h2 className={styles.accordionCompletedTitle}>{title}</h2>
-            <button type="button" className={styles.accordionEditBtn} onClick={onEdit}>Edit</button>
+            <h2 className={styles.accordionCompletedTitle}>
+              {prefixedTitle}
+              {icon && <span className={styles.accordionTitleIcon}>{icon}</span>}
+            </h2>
+            <button type="button" className={styles.accordionEditBtn} onClick={onEdit}>{editLabel}</button>
           </div>
           {completedSummary && (
             <div className={styles.accordionCompletedDetails}>{completedSummary}</div>
@@ -179,16 +227,23 @@ function AccordionStep({ title, isActive, isCompleted, completedSummary, onEdit,
   }
 
   return (
-    <div className={styles.accordionStep}>
-      <div className={styles.accordionHeader}>
-        <h2 className={styles.accordionTitle}>{title}</h2>
-      </div>
-
-      {isActive && (
-        <div className={styles.accordionBody}>
+    <div className={styles.accordionStep} data-step={stepNumber}>
+      <div className={styles.accordionActiveCard}>
+        {preTitle}
+        <div className={subHeader ? styles.accordionTitleArea : undefined}>
+          <div className={styles.accordionHeader}>
+            <h2 className={styles.accordionTitle}>
+              {prefixedTitle}
+              {icon && <span className={styles.accordionTitleIcon}>{icon}</span>}
+            </h2>
+            {headerRight && <div className={styles.accordionHeaderRight}>{headerRight}</div>}
+          </div>
+          {subHeader && <div className={styles.accordionSubHeader}>{subHeader}</div>}
+        </div>
+        <div className={`${styles.accordionBody}${subHeader ? ` ${styles.accordionBodyWithSubHeader}` : ''}`} data-accordion-body>
           {children}
         </div>
-      )}
+      </div>
     </div>
   )
 }
@@ -196,32 +251,25 @@ function AccordionStep({ title, isActive, isCompleted, completedSummary, onEdit,
 // ─── Checkout Item Row ────────────────────────────────────────────────────────
 
 interface CheckoutItemRowProps {
-  item:               CartItem
-  brand:              string
-  icons:              BrandIcons
-  onOpenGiftPanel:    (itemId: string) => void
-  onOpenGiftModal:    (itemId: string) => void
-  savedGifts:         Record<string, SavedGift>
-  onRemoveSavedGift:  (itemId: string) => void
+  item:           CartItem
+  icons:          BrandIcons
+  showGuarantee?: boolean
+  onAddGift?:     () => void
 }
 
-function CheckoutItemRow({ item, brand, icons, onOpenGiftPanel, onOpenGiftModal, savedGifts, onRemoveSavedGift }: CheckoutItemRowProps) {
+function CheckoutItemRow({ item, icons, showGuarantee, onAddGift }: CheckoutItemRowProps) {
   const [detailsOpen, setDetailsOpen] = useState(false)
   const hasOptions = item.selectedOptions && item.selectedOptions.length > 0
-  const { ChevronIcon, GiftIcon, PlusMinusIcon, CheckmarkIcon } = icons
-  const { updateGiftPackaging } = useCart()
-  const isMultiple = getGiftOptionsMode(brand as Parameters<typeof getGiftOptionsMode>[0]) === 'multiple'
-  const giftAssets = isMultiple ? getBrandGiftAssets(brand as Parameters<typeof getBrandGiftAssets>[0]) : null
-  const savedGift  = savedGifts[item.id]
+  const { ChevronIcon } = icons
 
   return (
     <article className={styles.checkoutItem}>
-      <p className={styles.deliveryGuarantee}>Guaranteed to arrive by Christmas</p>
       <div className={styles.checkoutItemRow}>
         <div className={styles.itemImageWrap}>
           <img src={item.image} alt={item.name} className={styles.itemImage} />
         </div>
         <div className={styles.itemContent}>
+          {showGuarantee && <p className={styles.deliveryGuarantee}>Guaranteed to arrive by Christmas</p>}
           <div className={styles.itemInfoGroup}>
             <p className={styles.itemName}>{item.name}</p>
             <div className={styles.itemPrices}>
@@ -257,88 +305,12 @@ function CheckoutItemRow({ item, brand, icons, onOpenGiftPanel, onOpenGiftModal,
             )}
           </div>
 
-          <div className={styles.itemGiftGroup}>
-        {/* Single-mode gift area */}
-        {!isMultiple && (
-          savedGift ? (
-            <div className={styles.giftSaved}>
-              <div className={styles.giftSavedRow}>
-                <div className={styles.giftSavedImageWrap}>
-                  <img src={savedGift.image} alt="Gift packaging" className={styles.giftSavedImage} />
-                </div>
-                <div className={styles.giftSavedBody}>
-                  <div className={styles.giftSavedNameRow}>
-                    <span className={styles.giftSavedName}>{savedGift.name}</span>
-                    <span className={styles.giftSavedPrice}>{savedGift.price}</span>
-                  </div>
-                  <div className={styles.giftConfiguredActions}>
-                    <button type="button" className={styles.giftConfiguredEdit} onClick={() => onOpenGiftModal(item.id)}>Edit</button>
-                    <span className={styles.giftActionsDivider} aria-hidden="true" />
-                    <button type="button" className={styles.giftConfiguredEdit} onClick={() => onRemoveSavedGift(item.id)}>Remove</button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <Button
-              variant="upsell-primary"
-              leadingIcon={<GiftIcon size={24} />}
-              trailingIcon={<PlusMinusIcon size={24} />}
-              onClick={() => onOpenGiftModal(item.id)}
-            >
-              Add Gift Packaging
-            </Button>
-          )
-        )}
+          {onAddGift && (
+            <button type="button" className={styles.addGiftLink} onClick={onAddGift}>
+              Add gift options
+            </button>
+          )}
 
-        {/* Multi-mode gift area */}
-        {isMultiple && (
-          item.giftPackaging ? (
-            <div className={styles.giftSaved}>
-              <div className={styles.giftSavedRow}>
-                <div className={styles.giftSavedImageWrap}>
-                  <img
-                    src={
-                      item.giftPackaging.type === 'classic'
-                        ? giftAssets!.classicGiftImage
-                        : (giftAssets?.designOptions.find(d => d.key === item.giftPackaging!.selectedDesign)?.image ?? giftAssets!.personalizedGiftImage)
-                    }
-                    alt="Gift packaging"
-                    className={styles.giftSavedImage}
-                  />
-                </div>
-                <div className={styles.giftSavedBody}>
-                  <div className={styles.giftSavedNameRow}>
-                    <span className={styles.giftSavedName}>
-                      {item.giftPackaging.type === 'classic'
-                        ? 'Classic Gift Set'
-                        : `Personalized Gift Box${item.giftPackaging.selectedDesign
-                            ? ` · ${giftAssets?.designOptions.find(d => d.key === item.giftPackaging!.selectedDesign)?.label ?? item.giftPackaging.selectedDesign}`
-                            : ''}${item.giftPackaging.recipientName ? ` · ${item.giftPackaging.recipientName}` : ''}`
-                      }
-                    </span>
-                    <span className={styles.giftSavedPrice}>{formatPrice(item.giftPackaging.price)}</span>
-                  </div>
-                  <div className={styles.giftConfiguredActions}>
-                    <button type="button" className={styles.giftConfiguredEdit} onClick={() => onOpenGiftPanel(item.id)}>Edit</button>
-                    <span className={styles.giftActionsDivider} aria-hidden="true" />
-                    <button type="button" className={styles.giftConfiguredEdit} onClick={() => updateGiftPackaging(item.id, undefined)}>Remove</button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <Button
-              variant="upsell-primary"
-              leadingIcon={<GiftIcon size={24} />}
-              trailingIcon={<PlusMinusIcon size={24} />}
-              onClick={() => onOpenGiftPanel(item.id)}
-            >
-              Add Gift Packaging
-            </Button>
-          )
-        )}
-          </div>{/* end itemGiftGroup */}
         </div>{/* end itemContent */}
       </div>
     </article>
@@ -389,22 +361,19 @@ function _YouMayAlsoLike({ icons }: { icons: BrandIcons }) {
 // ─── Order Summary ────────────────────────────────────────────────────────────
 
 interface OrderSummaryProps {
-  items:             CartItem[]
-  icons:             BrandIcons
-  brand:             string
-  onOpenGiftPanel:   (itemId: string) => void
-  onOpenGiftModal:   (itemId: string) => void
-  savedGifts:        Record<string, SavedGift>
-  onRemoveSavedGift: (itemId: string) => void
-  showDetails?:      boolean
-  subtotal?:         number
-  selectedShipping?: 'free' | 'standard'
-  hideHeader?:       boolean
-  hideBenefits?:     boolean
-  taxAmount?:        number | null
+  items:                CartItem[]
+  icons:                BrandIcons
+  showDetails?:         boolean
+  subtotal?:            number
+  selectedShipping?:    'free' | 'standard'
+  hideHeader?:          boolean
+  hideBenefits?:        boolean
+  taxAmount?:           number | null
+  orderTotalDisplay?:   number
+  onOpenGiftModal?:     (itemId: string) => void
 }
 
-function OrderSummary({ items, icons, brand, onOpenGiftPanel, onOpenGiftModal, savedGifts, onRemoveSavedGift, showDetails, subtotal = 0, selectedShipping = 'free', hideHeader, hideBenefits, taxAmount }: OrderSummaryProps) {
+function OrderSummary({ items, icons, showDetails, subtotal = 0, selectedShipping = 'free', hideHeader, hideBenefits, taxAmount, orderTotalDisplay, onOpenGiftModal }: OrderSummaryProps) {
   const [promoCode,    setPromoCode]    = useState('')
   const [promoApplied, setPromoApplied] = useState(false)
   const [appliedCode,  setAppliedCode]  = useState('')
@@ -413,6 +382,7 @@ function OrderSummary({ items, icons, brand, onOpenGiftPanel, onOpenGiftModal, s
   const shippingCost   = selectedShipping === 'standard' ? 500 : 0
   const discountAmount = promoApplied ? Math.round(subtotal * 0.20) : 0
   const orderTotal     = subtotal + shippingCost - discountAmount + (taxAmount ?? 0)
+  const displayTotal   = orderTotalDisplay ?? orderTotal
 
   const handleApplyPromo = () => {
     if (promoCode.trim()) {
@@ -441,12 +411,9 @@ function OrderSummary({ items, icons, brand, onOpenGiftPanel, onOpenGiftModal, s
           <CheckoutItemRow
             key={item.id}
             item={item}
-            brand={brand}
             icons={icons}
-            onOpenGiftPanel={onOpenGiftPanel}
-            onOpenGiftModal={onOpenGiftModal}
-            savedGifts={savedGifts}
-            onRemoveSavedGift={onRemoveSavedGift}
+            showGuarantee={selectedShipping === 'standard'}
+            onAddGift={onOpenGiftModal ? () => onOpenGiftModal(item.id) : undefined}
           />
         ))}
       </div>
@@ -520,7 +487,7 @@ function OrderSummary({ items, icons, brand, onOpenGiftPanel, onOpenGiftModal, s
 
           <div className={styles.orderTotalRow}>
             <span className={styles.orderTotalLabel}>Order Total:</span>
-            <span className={styles.orderTotalValue}>{formatPrice(orderTotal)}</span>
+            <span className={styles.orderTotalValue}>{formatPrice(displayTotal)}</span>
           </div>
           {promoApplied && (
             <p className={styles.savingsNote}>You're saving {formatPrice(discountAmount)} on this order!</p>
@@ -564,40 +531,115 @@ function CheckoutPageInner() {
     trackHref: withBrandPrefix(brand, DEFAULT_TOPLINE.trackHref),
   }
 
-  const { items, subtotal, updateGiftPackaging } = useCart()
+  const { items, subtotal } = useCart()
 
   // ── Step state machine ──────────────────────────────────────────────────────
-  const [currentStep,    setCurrentStep]    = useState<1 | 2 | 3>(1)
+  // Steps: 1=Contact & Delivery, 2=Shipping Method, 3=Gift Options, 4=Payment
+  // Steps 2 and 3 activate simultaneously when step 1 is completed.
+  const [activeSteps,    setActiveSteps]    = useState<Set<number>>(new Set([1]))
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set())
 
-  const isActive    = (s: number) => s === currentStep
+  const isActive    = (s: number) => activeSteps.has(s)
   const isCompleted = (s: number) => completedSteps.has(s)
 
-  const editStep = (step: number) => setCurrentStep(step as 1 | 2 | 3)
+  const editStep = (step: number) => {
+    if (step === 2) {
+      // Editing shipping re-opens both shipping and gift options
+      setActiveSteps(new Set([2, 3]))
+      setCompletedSteps(prev => { const n = new Set(prev); n.delete(2); n.delete(3); return n })
+    } else if (step === 3) {
+      // Editing gift options only — shipping stays completed
+      setActiveSteps(new Set([3]))
+      setCompletedSteps(prev => { const n = new Set(prev); n.delete(3); return n })
+    } else {
+      setActiveSteps(new Set([step]))
+      setCompletedSteps(prev => { const n = new Set(prev); n.delete(step); return n })
+    }
+  }
 
   const completeStep = (step: number) => {
-    setCompletedSteps(prev => new Set([...prev, step]))
-    if (step < 3) setCurrentStep((step + 1) as 1 | 2 | 3)
+    if (step === 1) {
+      setCompletedSteps(prev => new Set([...prev, 1]))
+      setActiveSteps(new Set([2, 3]))
+    } else if (step === 3) {
+      // Completing gift options phase also completes shipping
+      setCompletedSteps(prev => new Set([...prev, 2, 3]))
+      setActiveSteps(new Set([4]))
+    } else if (step === 4) {
+      setCompletedSteps(prev => new Set([...prev, 4]))
+      setActiveSteps(new Set())
+    }
+  }
+
+  const animateAndComplete = (step: number) => {
+    const nextStep = step === 1 ? 2 : step === 3 ? 4 : step + 1
+    const stepEl   = document.querySelector(`[data-step="${step}"]`) as HTMLElement | null
+    const body     = stepEl?.querySelector('[data-accordion-body]') as HTMLElement | null
+
+    const scrollToNext = () => {
+      // Double rAF: first frame lets React flush the re-render, second fires after layout is settled
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          const nextEl = document.querySelector(`[data-step="${nextStep}"]`) as HTMLElement | null
+          if (!nextEl) return
+          // Measure all sticky bars at top of viewport so the title clears them
+          let stickyHeight = 0
+          document.querySelectorAll('[data-sticky-top]').forEach(el => {
+            stickyHeight += (el as HTMLElement).getBoundingClientRect().height
+          })
+          const top = nextEl.getBoundingClientRect().top + window.scrollY - stickyHeight - 16
+          window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' })
+        })
+      })
+    }
+
+    if (!body) {
+      completeStep(step)
+      scrollToNext()
+      return
+    }
+
+    const DURATION = 300
+    const height   = body.scrollHeight
+
+    body.style.overflow   = 'hidden'
+    body.style.maxHeight  = `${height}px`
+    body.style.opacity    = '1'
+    body.style.transition = `max-height ${DURATION}ms ease, opacity ${DURATION}ms ease`
+
+    requestAnimationFrame(() => {
+      body.style.maxHeight = '0px'
+      body.style.opacity   = '0'
+
+      setTimeout(() => {
+        completeStep(step)
+        scrollToNext()
+      }, DURATION)
+    })
   }
 
   // ── Mobile summary sheet ────────────────────────────────────────────────────
   const [mobileSummaryOpen, setMobileSummaryOpen] = useState(false)
 
-  // ── Gift panel / modal — page level ────────────────────────────────────────
-  const [giftPanelItemId, setGiftPanelItemId] = useState<string | null>(null)
+  // ── Gift options modal (floating cart flow) ─────────────────────────────────
   const [giftModalItemId, setGiftModalItemId] = useState<string | null>(null)
-  const [savedGifts,      setSavedGifts]      = useState<Record<string, SavedGift>>({})
 
-  const handleSaveGift = (itemId: string, gift: SavedGift) => {
-    setSavedGifts(prev => ({ ...prev, [itemId]: gift }))
-    setGiftModalItemId(null)
-  }
-  const handleRemoveSavedGift = (itemId: string) => {
-    setSavedGifts(prev => { const n = { ...prev }; delete n[itemId]; return n })
-  }
-  const handleGenerateGiftNote = async () => ''
+  // ── Gift options — step 3 ───────────────────────────────────────────────────
+  const [itemGiftSelections, setItemGiftSelections] = useState<Record<string, string | null>>({})
+  const [expandedGiftItemId, setExpandedGiftItemId] = useState<string | null>(null)
 
-  const giftPanelItem = giftPanelItemId ? items.find(i => i.id === giftPanelItemId) : null
+  const eligibleGiftItems = items.filter(item =>
+    !item.name.toLowerCase().includes('warranty')
+  )
+
+  const selectGiftForItem = (itemId: string, optionId: string) => {
+    setItemGiftSelections(prev => ({
+      ...prev,
+      [itemId]: prev[itemId] === optionId ? null : optionId,
+    }))
+  }
+
+  const anyGiftSelected = Object.values(itemGiftSelections).some(Boolean)
 
   // ── Form state ──────────────────────────────────────────────────────────────
 
@@ -630,12 +672,17 @@ function CheckoutPageInner() {
   const [billingZipCode,        setBillingZipCode]        = useState('')
   const [applyStoreCredit,      setApplyStoreCredit]      = useState(false)
   const [storeCreditCode,       setStoreCreditCode]       = useState('')
-  const [paymentMethod,    setPaymentMethod]    = useState<'credit-card' | 'paypal' | 'applepay'>('credit-card')
+  const [paymentMethod,    setPaymentMethod]    = useState<'credit-card' | 'paypal' | 'applepay' | null>(null)
   const [promoCode,        setPromoCode]        = useState('')
   const [promoApplied,     setPromoApplied]     = useState(false)
   const [appliedPromoCode, setAppliedPromoCode] = useState('')
+  const [cardNumber,       setCardNumber]       = useState('')
+  const [cardExpiry,       setCardExpiry]       = useState('')
+  const [cardCvv,          setCardCvv]          = useState('')
+  const [cardName,         setCardName]         = useState('')
+  const [summaryOpen,      setSummaryOpen]      = useState(true)
 
-  const { DropdownIcon, TooltipIcon, CheckmarkIcon, LockIcon, XIcon, CouponIcon, ShippingIcon, ReturnIcon, WarrantyIcon } = icons
+  const { DropdownIcon, TooltipIcon, CheckmarkIcon, LockIcon, XIcon, CouponIcon, ShippingIcon, ReturnIcon, WarrantyIcon, ChevronIcon } = icons
 
   const handleApplyMobilePromo = () => {
     if (promoCode.trim()) {
@@ -692,34 +739,44 @@ function CheckoutPageInner() {
       </div>
     </div>
   )
-  const step3Summary = (
+  const giftSelectedCount = Object.values(itemGiftSelections).filter(Boolean).length
+  const step3Summary = anyGiftSelected ? (
+    <div className={styles.completedGroup}>
+      <div className={styles.completedSection}>
+        <span className={styles.completedLabel}>Gift Options</span>
+        <span className={styles.completedValue}>
+          {eligibleGiftItems.length > 1
+            ? `Gift added to ${giftSelectedCount} of ${eligibleGiftItems.length} items`
+            : CHECKOUT_GIFT_OPTIONS.find(o => o.id === itemGiftSelections[eligibleGiftItems[0]?.id ?? ''])?.name ?? ''}
+        </span>
+      </div>
+    </div>
+  ) : undefined
+  const step4Summary = (
     <div className={styles.completedGroup}>
       <div className={styles.completedSection}>
         <span className={styles.completedLabel}>Payment method</span>
         <span className={styles.completedValue}>
-          {paymentMethod === 'credit-card' ? 'Credit Card' : paymentMethod === 'paypal' ? 'PayPal' : 'Apple Pay'}
+          {paymentMethod === 'credit-card' ? 'Credit Card' : paymentMethod === 'paypal' ? 'PayPal' : paymentMethod === 'applepay' ? 'Apple Pay' : 'Not selected'}
         </span>
       </div>
     </div>
   )
 
   const summaryProps = {
-    items, icons, brand,
-    onOpenGiftPanel: setGiftPanelItemId,
-    onOpenGiftModal: setGiftModalItemId,
-    savedGifts,
-    onRemoveSavedGift: handleRemoveSavedGift,
+    items, icons,
     taxAmount,
+    onOpenGiftModal: (itemId: string) => setGiftModalItemId(itemId),
   }
 
   return (
     <div className={styles.page}>
-      <div className={styles.checkoutHeaderWrap}>
+      <div className={styles.checkoutHeaderWrap} data-sticky-top>
         <Header variant="white" brand={brand} navLinks={navLinks} topline={topline} />
       </div>
 
       {/* Mobile sticky order summary bar — top, below header */}
-      <div className={styles.mobileSummaryTopBar} onClick={() => setMobileSummaryOpen(true)} role="button" tabIndex={0} aria-label="View order summary" onKeyDown={e => e.key === 'Enter' && setMobileSummaryOpen(true)}>
+      <div className={styles.mobileSummaryTopBar} data-sticky-top onClick={() => setMobileSummaryOpen(true)} role="button" tabIndex={0} aria-label="View order summary" onKeyDown={e => e.key === 'Enter' && setMobileSummaryOpen(true)}>
         <div className={styles.mobileSummaryTopBarInner}>
           <div className={styles.mobileSummaryTopBarLeft}>
             <span className={styles.mobileSummaryTopBarTitle}>Order Summary</span>
@@ -733,25 +790,6 @@ function CheckoutPageInner() {
           </div>
         </div>
       </div>
-
-      {/* Gift panel — page level portal */}
-      {giftPanelItemId && giftPanelItem && (
-        <GiftPackagingPanel
-          onClose={() => setGiftPanelItemId(null)}
-          onAddToCart={(gift) => { updateGiftPackaging(giftPanelItemId, gift); setGiftPanelItemId(null) }}
-          initialGift={giftPanelItem.giftPackaging}
-          productName={giftPanelItem.name}
-        />
-      )}
-
-      {/* Gift modal — page level */}
-      {giftModalItemId && (
-        <GiftOptionsModal
-          onClose={() => setGiftModalItemId(null)}
-          onAddToCart={(gift) => handleSaveGift(giftModalItemId, gift)}
-          onGenerateGiftNote={handleGenerateGiftNote}
-        />
-      )}
 
       {/* Mobile summary backdrop */}
       <div
@@ -769,7 +807,7 @@ function CheckoutPageInner() {
           </button>
         </div>
         <div className={styles.mobileSummarySheetBody}>
-          <OrderSummary {...summaryProps} hideHeader showDetails hideBenefits subtotal={subtotal} selectedShipping={selectedShipping} />
+          <OrderSummary {...summaryProps} hideHeader showDetails hideBenefits subtotal={subtotal} selectedShipping={selectedShipping} orderTotalDisplay={orderTotal} />
         </div>
       </div>
 
@@ -780,22 +818,9 @@ function CheckoutPageInner() {
             {/* ══════════════ LEFT COLUMN ══════════════ */}
             <div className={styles.leftCol}>
 
-              {/* Express checkout — hidden once step 1 is completed */}
-              {!isCompleted(1) && (
-                <section className={styles.expressCheckout}>
-                  <p className={styles.expressTitle}>Express Checkout</p>
-                  <div className={styles.expressButtons}>
-                    <button type="button" className={styles.expressBtn} aria-label="Pay with Apple Pay">
-                      <img src="/images/payment/ApplePay.svg" alt="Apple Pay" height={20} style={{ filter: 'invert(1)' }} />
-                    </button>
-                  </div>
-                  <div className={styles.expressDivider}><span>or</span></div>
-                </section>
-              )}
-
-              {/* Step breadcrumb */}
+              {/* Step breadcrumb — hidden via CSS, kept for accessibility */}
               <StepBreadcrumb
-                currentStep={currentStep}
+                currentStep={[...activeSteps][0] ?? 1}
                 completedSteps={completedSteps}
                 icons={icons}
                 brand={brand}
@@ -805,10 +830,22 @@ function CheckoutPageInner() {
               {/* ── Step 1: Contact & Delivery ── */}
               <AccordionStep
                 title="Contact & Delivery"
+                stepNumber={1}
                 isActive={isActive(1)}
                 isCompleted={isCompleted(1)}
                 completedSummary={step1Summary}
                 onEdit={() => editStep(1)}
+                preTitle={
+                  <section className={styles.expressCheckout}>
+                    <p className={styles.expressTitle}>Express Checkout</p>
+                    <div className={styles.expressButtons}>
+                      <button type="button" className={styles.expressBtn} aria-label="Pay with Apple Pay">
+                        <img src="/images/payment/ApplePay.svg" alt="Apple Pay" height={20} style={{ filter: 'invert(1)' }} />
+                      </button>
+                    </div>
+                    <div className={styles.expressDivider}><span>or</span></div>
+                  </section>
+                }
               >
                 {/* Contact */}
                 <div className={styles.formSubSection}>
@@ -904,8 +941,8 @@ function CheckoutPageInner() {
                 </div>
 
                 <div className={styles.stepContinueRow}>
-                  <Button variant="primary" className={styles.continueBtn} disabled={!step1Valid} onClick={() => completeStep(1)}>
-                    Continue to Shipping
+                  <Button variant="primary" className={styles.continueBtn} disabled={!step1Valid} onClick={() => animateAndComplete(1)}>
+                    Continue
                   </Button>
                 </div>
               </AccordionStep>
@@ -913,10 +950,17 @@ function CheckoutPageInner() {
               {/* ── Step 2: Shipping Method ── */}
               <AccordionStep
                 title="Shipping Method"
+                stepNumber={2}
                 isActive={isActive(2)}
                 isCompleted={isCompleted(2)}
                 completedSummary={step2Summary}
                 onEdit={() => editStep(2)}
+                subHeader={
+                  <div className={styles.shippingInsurance}>
+                    <span className={styles.insuranceIcon}><CheckmarkIcon size={24} /></span>
+                    <span className={styles.checkboxText}>All methods are tracked &amp; insured</span>
+                  </div>
+                }
               >
                 <div className={styles.shippingOptions} role="radiogroup" aria-label="Shipping method">
                   <label className={`${styles.shippingOption} ${selectedShipping === 'free' ? styles.shippingOptionSelected : ''}`}>
@@ -943,126 +987,145 @@ function CheckoutPageInner() {
                   </label>
                 </div>
 
-                <div className={styles.shippingInsurance}>
-                  <span className={styles.insuranceIcon}><CheckmarkIcon size={24} /></span>
-                  <span className={styles.checkboxText}>All methods are tracked &amp; insured</span>
-                </div>
-
                 <div className={styles.carriersRow}>
                   <img src="/images/carriers/ups.svg"   alt="UPS"   className={styles.carrierLogo} />
                   <img src="/images/carriers/usps.svg"  alt="USPS"  className={styles.carrierLogo} />
                   <img src="/images/carriers/fedex.svg" alt="FedEx" className={styles.carrierLogo} />
                   <img src="/images/carriers/dhl.svg"   alt="DHL"   className={styles.carrierLogo} />
                 </div>
-
-                <div className={styles.stepContinueRow}>
-                  <Button variant="primary" className={styles.continueBtn} onClick={() => completeStep(2)}>
-                    Continue to Payment
-                  </Button>
-                </div>
               </AccordionStep>
 
-              {/* Mini order summary — mobile only, shown after shipping is confirmed */}
-              {isCompleted(2) && (
-                <div className={styles.mobileInterStepSummary}>
-                  <div className={styles.summaryHeader}>
-                    <h2 className={styles.summaryTitle}>Order Summary</h2>
-                    <span className={styles.itemCount}>{items.length} {items.length === 1 ? 'item' : 'items'}</span>
-                  </div>
-                  <div className={styles.promoRow}>
-                    <span className={styles.promoQuestion}>
-                      <CouponIcon size={16} />
-                      Have a promo code?
-                    </span>
-                    {promoApplied ? (
-                      <div className={styles.promoAppliedWrap}>
-                        <div className={styles.appliedPromoBox}>
-                          <span className={styles.appliedPromoIcon}><CouponIcon size={16} /></span>
-                          <span className={styles.appliedPromoCode}>{appliedPromoCode}</span>
-                          <button type="button" className={styles.removePromoBtn} onClick={handleRemoveMobilePromo} aria-label="Remove promo code">
-                            <XIcon size={16} />
-                          </button>
-                        </div>
-                        <p className={styles.promoSuccessMsg}>You saved 20% with this coupon.</p>
-                      </div>
-                    ) : (
-                      <div className={styles.storeCreditRow}>
-                        <div className={styles.storeCreditInput}>
-                          <input
-                            type="text"
-                            placeholder="Promo code"
-                            value={promoCode}
-                            onChange={e => setPromoCode(e.target.value)}
-                            onKeyDown={e => e.key === 'Enter' && handleApplyMobilePromo()}
-                            className={styles.input}
-                            aria-label="Promo code"
-                          />
-                        </div>
-                        <Button variant="primary" className={styles.applyButton} onClick={handleApplyMobilePromo}>Apply</Button>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className={styles.totalsRows}>
-                    <div className={styles.totalRow}>
-                      <span className={styles.totalLabel}>Subtotal:</span>
-                      <span className={styles.totalValue}>{formatPrice(subtotal)}</span>
-                    </div>
-                    <div className={styles.totalRow}>
-                      <span className={styles.totalLabel}>Shipping:</span>
-                      <span className={styles.totalValue}>
-                        {selectedShipping === 'free' ? 'Free' : formatPrice(shippingCost)}
-                      </span>
-                    </div>
-                    {promoApplied && (
-                      <div className={styles.totalRow}>
-                        <span className={styles.totalLabel}>Promotional Discounts:</span>
-                        <span className={styles.promoDiscountValue}>
-                          <CouponIcon size={14} />
-                          -{formatPrice(discountAmount)}
-                        </span>
-                      </div>
-                    )}
-                    <div className={styles.totalRow}>
-                      <span className={styles.totalLabel}>Tax:</span>
-                      {taxAmount != null
-                        ? <span className={styles.totalValue}>{formatPrice(taxAmount)}</span>
-                        : <span className={styles.totalValueMuted}>Not calculated</span>
-                      }
-                    </div>
-                  </div>
-
-                  <div className={styles.summaryDivider} />
-
-                  <div className={styles.orderTotalRow}>
-                    <span className={styles.orderTotalLabel}>Order Total:</span>
-                    <span className={styles.orderTotalValue}>{formatPrice(orderTotal)}</span>
-                  </div>
-                  {promoApplied && (
-                    <p className={styles.savingsNote}>You're saving {formatPrice(discountAmount)} on this order!</p>
-                  )}
-                </div>
-              )}
-
-              {/* ── Step 3: Payment ── */}
+              {/* ── Step 3: Gift Options ── */}
               <AccordionStep
-                title="Payment"
+                title="Add Gifting Options"
+                stepNumber={3}
                 isActive={isActive(3)}
                 isCompleted={isCompleted(3)}
                 completedSummary={step3Summary}
                 onEdit={() => editStep(3)}
+                icon={<icons.GiftIcon size={32} />}
+                editLabel={anyGiftSelected ? 'Edit' : 'Add'}
+              >
+                {eligibleGiftItems.length <= 1 ? (
+                  /* ── Single item: flat list of cards (unchanged layout) ── */
+                  <div className={styles.checkoutGiftOptions}>
+                    {CHECKOUT_GIFT_OPTIONS.map(option => {
+                      const itemId = eligibleGiftItems[0]?.id ?? ''
+                      const isSelected = itemGiftSelections[itemId] === option.id
+                      return (
+                        <div key={option.id} className={`${styles.checkoutGiftCard} ${isSelected ? styles.checkoutGiftCardSelected : ''}`}>
+                          <div className={styles.checkoutGiftImageWrap}>
+                            <img src={option.image} alt={option.name} className={styles.checkoutGiftImage} loading="lazy" />
+                          </div>
+                          <div className={styles.checkoutGiftInfo}>
+                            <span className={styles.checkoutGiftName}>{option.name}</span>
+                            <span className={styles.checkoutGiftDesc}>{option.description}</span>
+                            <span className={styles.checkoutGiftPrice}>{formatPrice(option.price)}</span>
+                          </div>
+                          <Button
+                            variant="upsell-primary"
+                            className={styles.checkoutGiftAddBtn}
+                            onClick={() => selectGiftForItem(itemId, option.id)}
+                          >
+                            {isSelected ? 'Added' : 'Add'}
+                          </Button>
+                        </div>
+                      )
+                    })}
+                  </div>
+                ) : (
+                  /* ── Multiple items: per-item accordion ── */
+                  <div className={styles.giftItemAccordion}>
+                    {eligibleGiftItems.map(item => {
+                      const selectedGiftId = itemGiftSelections[item.id] ?? null
+                      const isExpanded = expandedGiftItemId === item.id
+                      const hasGift = selectedGiftId !== null
+                      const variantText = item.selectedOptions?.map(o => o.value).join(' · ') ?? ''
+                      return (
+                        <div key={item.id} className={styles.giftItemRow}>
+                          <button
+                            type="button"
+                            className={styles.giftItemHeader}
+                            onClick={() => setExpandedGiftItemId(isExpanded ? null : item.id)}
+                            aria-expanded={isExpanded}
+                          >
+                            <img src={item.image} alt={item.name} className={styles.giftItemThumb} />
+                            <div className={styles.giftItemInfo}>
+                              <span className={styles.giftItemName}>{item.name}</span>
+                            </div>
+                            <div className={styles.giftItemHeaderRight}>
+                              {hasGift && <span className={styles.giftAddedBadge}>Gift added</span>}
+                              <span className={isExpanded ? styles.chevronOpen : styles.chevronClosed} aria-hidden="true">
+                                <ChevronIcon size={24} />
+                              </span>
+                            </div>
+                          </button>
+                          <div className={`${styles.giftItemBody} ${isExpanded ? styles.giftItemBodyOpen : ''}`} aria-hidden={!isExpanded}>
+                            <div className={styles.checkoutGiftOptions}>
+                              {CHECKOUT_GIFT_OPTIONS.map(option => {
+                                const isSelected = selectedGiftId === option.id
+                                return (
+                                  <div key={option.id} className={`${styles.checkoutGiftCard} ${isSelected ? styles.checkoutGiftCardSelected : ''}`}>
+                                    <div className={styles.checkoutGiftImageWrap}>
+                                      <img src={option.image} alt={option.name} className={styles.checkoutGiftImage} loading="lazy" />
+                                    </div>
+                                    <div className={styles.checkoutGiftInfo}>
+                                      <span className={styles.checkoutGiftName}>{option.name}</span>
+                                      <span className={styles.checkoutGiftDesc}>{option.description}</span>
+                                      <span className={styles.checkoutGiftPrice}>{formatPrice(option.price)}</span>
+                                    </div>
+                                    <Button
+                                      variant="upsell-primary"
+                                      className={styles.checkoutGiftAddBtn}
+                                      onClick={() => selectGiftForItem(item.id, option.id)}
+                                    >
+                                      {isSelected ? 'Added' : 'Add'}
+                                    </Button>
+                                  </div>
+                                )
+                              })}
+                            </div>
+                            <div className={styles.packingSlipNote}>
+                              <LockIcon size={14} />
+                              <span>Prices won&apos;t appear on the packing slip</span>
+                            </div>
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                )}
+
+                <div className={styles.stepContinueRow}>
+                  <Button variant="primary" className={styles.continueBtn} onClick={() => animateAndComplete(3)}>
+                    Continue
+                  </Button>
+                </div>
+              </AccordionStep>
+
+              {/* ── Step 4: Payment ── */}
+              <AccordionStep
+                title="Payment"
+                stepNumber={4}
+                isActive={isActive(4)}
+                isCompleted={isCompleted(4)}
+                completedSummary={step4Summary}
+                onEdit={() => editStep(4)}
+                headerRight={
+                  <div className={styles.secureBadge}>
+                    <LockIcon size={24} />
+                    <span className={styles.secureBadgeText}>Secure</span>
+                  </div>
+                }
               >
                 {/* Billing Address */}
                 <div className={styles.formSubSection}>
-                  <div className={styles.formSubHead}>
-                    <h3 className={styles.formSubTitle}>Billing Address</h3>
-                  </div>
+                  <h3 className={styles.formSubTitle}>Billing Address</h3>
                   <div className={styles.fieldGroup}>
                     <label className={styles.checkboxLabel}>
                       <input type="checkbox" checked={billingSameAsShipping} onChange={e => setBillingSameAsShipping(e.target.checked)} className={styles.checkbox} />
                       <span className={styles.checkboxText}>Billing matches shipping address</span>
                     </label>
-
                     {!billingSameAsShipping && (
                       <div className={styles.fieldGroup}>
                         <div className={styles.twoCol}>
@@ -1097,58 +1160,199 @@ function CheckoutPageInner() {
 
                 {/* Payment Options */}
                 <div className={styles.formSubSection}>
-                  <div className={styles.formSubHead}>
-                    <h3 className={styles.formSubTitle}>Payment Options</h3>
-                  </div>
+                  <h3 className={styles.formSubTitle}>Payment options</h3>
                   <div className={styles.fieldGroup}>
                     <div className={styles.paymentOptions} role="radiogroup" aria-label="Payment method">
-                      <label className={`${styles.paymentOption} ${paymentMethod === 'credit-card' ? styles.paymentOptionSelected : ''}`}>
-                        <input type="radio" name="paymentMethod" value="credit-card" checked={paymentMethod === 'credit-card'} onChange={() => setPaymentMethod('credit-card')} className={styles.radioInput} />
-                        <span className={styles.paymentOptionName}>Credit Card</span>
-                        <span className={styles.paymentOptionIcons}><img src="/images/payment/creditcard.svg" alt="Credit card" height={24} /></span>
-                      </label>
-                      <label className={`${styles.paymentOption} ${paymentMethod === 'paypal' ? styles.paymentOptionSelected : ''}`}>
-                        <input type="radio" name="paymentMethod" value="paypal" checked={paymentMethod === 'paypal'} onChange={() => setPaymentMethod('paypal')} className={styles.radioInput} />
+
+                      {/* Credit Card — expandable fields when selected */}
+                      <div className={styles.paymentOptionGroup}>
+                        <label className={`${styles.paymentOption} ${paymentMethod === 'credit-card' ? styles.paymentOptionSelected : ''}`} onClick={e => { e.preventDefault(); setPaymentMethod(paymentMethod === 'credit-card' ? null : 'credit-card') }}>
+                          <input type="radio" name="paymentMethod" value="credit-card" checked={paymentMethod === 'credit-card'} onChange={() => {}} className={styles.radioInputHidden} />
+                          <span className={`${styles.customRadio} ${paymentMethod === 'credit-card' ? styles.customRadioSelected : ''}`} />
+                          <span className={styles.paymentOptionName}>Credit Card</span>
+                          <span className={styles.paymentOptionIcons}><img src="/images/payment/creditcard.svg" alt="Credit card" height={24} /></span>
+                        </label>
+                        {paymentMethod === 'credit-card' && (
+                          <div className={styles.cardFields}>
+                            <div className={styles.fieldWrap}>
+                              <input type="text" placeholder="Credit card number" value={cardNumber} onChange={e => setCardNumber(e.target.value)} className={styles.input} aria-label="Credit card number" autoComplete="cc-number" />
+                            </div>
+                            <div className={styles.cardExpiryRow}>
+                              <div className={styles.fieldWrap}>
+                                <input type="text" placeholder="Expiry (MM / YY)" value={cardExpiry} onChange={e => setCardExpiry(e.target.value)} className={styles.input} aria-label="Expiry date" autoComplete="cc-exp" />
+                              </div>
+                              <div className={styles.fieldWrap}>
+                                <input type="text" placeholder="CVV" value={cardCvv} onChange={e => setCardCvv(e.target.value)} className={styles.input} aria-label="CVV" autoComplete="cc-csc" maxLength={4} />
+                              </div>
+                            </div>
+                            <div className={styles.fieldWrap}>
+                              <input type="text" placeholder="Name on card" value={cardName} onChange={e => setCardName(e.target.value)} className={styles.input} aria-label="Name on card" autoComplete="cc-name" />
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      <label className={`${styles.paymentOption} ${paymentMethod === 'paypal' ? styles.paymentOptionSelected : ''}`} onClick={e => { e.preventDefault(); setPaymentMethod(paymentMethod === 'paypal' ? null : 'paypal') }}>
+                        <input type="radio" name="paymentMethod" value="paypal" checked={paymentMethod === 'paypal'} onChange={() => {}} className={styles.radioInputHidden} />
+                        <span className={`${styles.customRadio} ${paymentMethod === 'paypal' ? styles.customRadioSelected : ''}`} />
                         <span className={styles.paymentOptionName}>PayPal</span>
                         <span className={styles.paymentOptionIcons}><img src="/images/payment/PayPal.svg" alt="PayPal" height={24} /></span>
                       </label>
-                      <label className={`${styles.paymentOption} ${paymentMethod === 'applepay' ? styles.paymentOptionSelected : ''}`}>
-                        <input type="radio" name="paymentMethod" value="applepay" checked={paymentMethod === 'applepay'} onChange={() => setPaymentMethod('applepay')} className={styles.radioInput} />
-                        <span className={styles.paymentOptionName}>Apple Pay</span>
+
+                      <label className={`${styles.paymentOption} ${paymentMethod === 'applepay' ? styles.paymentOptionSelected : ''}`} onClick={e => { e.preventDefault(); setPaymentMethod(paymentMethod === 'applepay' ? null : 'applepay') }}>
+                        <input type="radio" name="paymentMethod" value="applepay" checked={paymentMethod === 'applepay'} onChange={() => {}} className={styles.radioInputHidden} />
+                        <span className={`${styles.customRadio} ${paymentMethod === 'applepay' ? styles.customRadioSelected : ''}`} />
+                        <span className={styles.paymentOptionName}>ApplePay</span>
                         <span className={styles.paymentOptionIcons}><img src="/images/payment/ApplePay.svg" alt="Apple Pay" height={24} /></span>
                       </label>
-                    </div>
 
-                    <div className={styles.storeCreditSection}>
-                      <label className={styles.checkboxLabel}>
-                        <input type="checkbox" checked={applyStoreCredit} onChange={e => setApplyStoreCredit(e.target.checked)} className={styles.checkbox} />
-                        <span className={styles.checkboxText}>Apply Store Credit</span>
-                      </label>
-                      {applyStoreCredit && (
-                        <div className={styles.storeCreditRow}>
-                          <div className={styles.storeCreditInput}>
-                            <input type="text" placeholder="Please enter code" value={storeCreditCode} onChange={e => setStoreCreditCode(e.target.value)} className={styles.input} aria-label="Store credit code" />
+                      {/* Apply Store Credit — expandable row */}
+                      <div className={styles.storeCreditOptionRow}>
+                        <button
+                          type="button"
+                          className={styles.storeCreditOptionBtn}
+                          onClick={() => setApplyStoreCredit(prev => !prev)}
+                          aria-expanded={applyStoreCredit}
+                        >
+                          <span className={`${styles.storeCreditChevron} ${applyStoreCredit ? styles.storeCreditChevronOpen : ''}`}>
+                            <ChevronIcon size={16} />
+                          </span>
+                          <span className={styles.paymentOptionName}>Apply Store Credit</span>
+                        </button>
+                        {applyStoreCredit && (
+                          <div className={styles.storeCreditExpandedRow}>
+                            <div className={styles.storeCreditInput}>
+                              <input type="text" placeholder="Please enter code" value={storeCreditCode} onChange={e => setStoreCreditCode(e.target.value)} className={styles.input} aria-label="Store credit code" />
+                            </div>
+                            <Button variant="primary" className={styles.applyButton}>Apply</Button>
                           </div>
-                          <Button variant="primary" className={styles.applyButton}>Apply</Button>
-                        </div>
-                      )}
+                        )}
+                      </div>
+
                     </div>
                   </div>
+                </div>
+
+                {/* Order Summary — collapsible, mobile only */}
+                <div className={styles.paymentOrderSummary}>
+                  <button
+                    type="button"
+                    className={styles.paymentSummaryHeader}
+                    onClick={() => setSummaryOpen(prev => !prev)}
+                    aria-expanded={summaryOpen}
+                  >
+                    <div className={styles.paymentSummaryHeaderLeft}>
+                      <span className={`${styles.summaryToggleChevron} ${summaryOpen ? styles.summaryToggleChevronOpen : ''}`}>
+                        <ChevronIcon size={16} />
+                      </span>
+                      <span className={styles.paymentSummaryTitle}>Order Summary</span>
+                    </div>
+                    <span className={styles.itemCount}>{items.length} {items.length === 1 ? 'item' : 'items'}</span>
+                  </button>
+
+                  {summaryOpen && (
+                    <div className={styles.paymentSummaryBody}>
+                      <div className={styles.promoRow}>
+                        <span className={styles.promoQuestion}>Have a promo code?</span>
+                        {promoApplied ? (
+                          <div className={styles.promoAppliedWrap}>
+                            <div className={styles.appliedPromoBox}>
+                              <span className={styles.appliedPromoIcon}><CouponIcon size={16} /></span>
+                              <span className={styles.appliedPromoCode}>{appliedPromoCode}</span>
+                              <button type="button" className={styles.removePromoBtn} onClick={handleRemoveMobilePromo} aria-label="Remove promo code">
+                                <XIcon size={16} />
+                              </button>
+                            </div>
+                            <p className={styles.promoSuccessMsg}>You saved 20% with this coupon.</p>
+                          </div>
+                        ) : (
+                          <div className={styles.storeCreditRow}>
+                            <div className={styles.storeCreditInput}>
+                              <input
+                                type="text"
+                                placeholder="Promo"
+                                value={promoCode}
+                                onChange={e => setPromoCode(e.target.value)}
+                                onKeyDown={e => e.key === 'Enter' && handleApplyMobilePromo()}
+                                className={styles.input}
+                                aria-label="Promo code"
+                              />
+                            </div>
+                            <Button variant="primary" className={styles.applyButton} onClick={handleApplyMobilePromo}>Apply</Button>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className={styles.totalsRows}>
+                        <div className={styles.totalRow}>
+                          <span className={styles.totalLabel}>Subtotal:</span>
+                          <span className={styles.totalValue}>{formatPrice(subtotal)}</span>
+                        </div>
+                        <div className={styles.totalRow}>
+                          <span className={styles.totalLabel}>Shipping:</span>
+                          <span className={styles.totalValue}>
+                            {selectedShipping === 'free' ? 'Free' : formatPrice(shippingCost)}
+                          </span>
+                        </div>
+                        {promoApplied && (
+                          <div className={styles.totalRow}>
+                            <span className={styles.totalLabel}>Promotional Discounts:</span>
+                            <span className={styles.promoDiscountValue}>
+                              <CouponIcon size={14} />
+                              -{formatPrice(discountAmount)}
+                            </span>
+                          </div>
+                        )}
+                        <div className={styles.totalRow}>
+                          <span className={styles.totalLabel}>Tax:</span>
+                          {taxAmount != null
+                            ? <span className={styles.totalValue}>{formatPrice(taxAmount)}</span>
+                            : <span className={styles.totalValueMuted}>Not calculated</span>
+                          }
+                        </div>
+                      </div>
+
+                      <div className={styles.summaryDivider} />
+
+                      <div className={styles.orderTotalRow}>
+                        <span className={styles.orderTotalLabel}>Order Total:</span>
+                        <span className={styles.orderTotalValue}>{formatPrice(orderTotal)}</span>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* Place Order */}
                 <div className={styles.placeOrderSection}>
-                  <Button variant="primary" className={styles.placeOrderButton} onClick={() => completeStep(3)}>
-                    Place Order
+                  <Button
+                    variant="primary"
+                    className={styles.placeOrderButton}
+                    onClick={() => completeStep(4)}
+                    disabled={
+                      paymentMethod === null ||
+                      (paymentMethod === 'credit-card' && (!cardNumber.trim() || !cardCvv.trim() || !cardName.trim()))
+                    }
+                    style={
+                      paymentMethod === 'paypal'   ? { background: '#0070BA', color: '#fff', borderColor: '#0070BA' } :
+                      paymentMethod === 'applepay' ? { background: '#000000', color: '#fff', borderColor: '#000000' } :
+                      undefined
+                    }
+                  >
+                    {paymentMethod === 'paypal' ? 'Log in with PayPal' :
+                     paymentMethod === 'applepay' ? (
+                       <span className={styles.applePayBtnContent}>
+                         Continue with
+                         <img src="/images/payment/ApplePay.svg" alt="Apple Pay" className={styles.applePayBtnLogo} />
+                       </span>
+                     ) : 'Place Order'}
                   </Button>
-                  <p className={styles.secureNote}>
-                    <LockIcon size={24} />
-                    All transactions are secure and encrypted
-                  </p>
                 </div>
+                {promoApplied && (
+                  <p className={`${styles.savingsNote} ${styles.paymentSavingsNote}`}>You're saving {formatPrice(discountAmount)} on this order!</p>
+                )}
 
-                {/* Benefits — below secure note, mobile only */}
-                <ul className={`${styles.benefits} ${styles.benefitsMobileBelow}`}>
+                {/* Perks — mobile only, below CTA */}
+                <ul className={styles.paymentPerks}>
                   <li className={styles.benefit}>
                     <span className={styles.benefitIcon}><ShippingIcon size={24} /></span>
                     <span>Free shipping on all orders</span>
@@ -1162,6 +1366,7 @@ function CheckoutPageInner() {
                     <span>2-year warranty</span>
                   </li>
                 </ul>
+
               </AccordionStep>
 
               {/* You May Also Like — mobile (hidden) */}
@@ -1197,6 +1402,13 @@ function CheckoutPageInner() {
         </div>
       </main>
 
+      {giftModalItemId !== null && (
+        <GiftOptionsModal
+          onClose={() => setGiftModalItemId(null)}
+          onAddToCart={(_gift: SavedGift) => setGiftModalItemId(null)}
+          onGenerateGiftNote={async () => 'Wishing you a wonderful day filled with joy!'}
+        />
+      )}
 
     </div>
   )

@@ -36,7 +36,7 @@
   flex: 1;
   min-width: 0;
   height: var(--buttons-primary-min-height);
-  padding: 0 var(--spacing-md);
+  padding: 0 var(--spacing-sm);
   border: none;
   background: transparent;
   color: var(--colors-text);
@@ -83,7 +83,7 @@
 }
 
 .message {
-  margin: var(--spacing-xs) 0 0;
+  margin: var(--spacing-xxs) 0 0;
   font-family:    var(--typography-rules-text3-font-family);
   font-size:      var(--typography-rules-text3-font-size);
   line-height:    var(--typography-rules-text3-line-height);

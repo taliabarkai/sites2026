@@ -1,8 +1,8 @@
 .chip {
   display: inline-flex;
   align-items: center;
-  gap: var(--spacing-xs);
-  padding: var(--spacing-xs) var(--spacing-md);
+  gap: var(--spacing-xxs);
+  padding: var(--spacing-xxs) var(--spacing-sm);
   border-radius: var(--radius-full);
   background: var(--colors-surface-primary);
   border: none;
@@ -30,7 +30,7 @@
   text-decoration: underline;
   text-underline-offset: 2px;
   cursor: pointer;
-  padding: 0 var(--spacing-xs);
+  padding: 0 var(--spacing-xxs);
 }
 
 .clearAll:hover {

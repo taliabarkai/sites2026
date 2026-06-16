@@ -5,8 +5,8 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--spacing-lg);
-  padding: var(--spacing-xl) var(--layout-page-margin);
+  gap: var(--spacing-md);
+  padding: var(--spacing-lg) var(--layout-page-margin);
   text-align: center;
   background-color: var(--colors-background);
 }
@@ -16,8 +16,8 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: var(--spacing-lg);
-  padding: var(--spacing-xl) var(--layout-page-margin);
+  gap: var(--spacing-md);
+  padding: var(--spacing-lg) var(--layout-page-margin);
   background-color: var(--colors-background);
 }
 
@@ -44,7 +44,7 @@
 }
 
 .heroTitle {
-  margin: 0 0 var(--spacing-xs) 0;
+  margin: 0 0 var(--spacing-xxs) 0;
   font-family:    var(--typography-rules-headline2-font-family);
   font-size:      var(--typography-rules-headline2-font-size);
   line-height:    var(--typography-rules-headline2-line-height);
@@ -70,7 +70,7 @@
 .categoryContainerOal {
   display: flex;
   flex-direction: row;
-  gap: var(--spacing-xs);
+  gap: var(--spacing-xxs);
   overflow-x: auto;
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
@@ -93,7 +93,7 @@
 .categoryContainerDefault {
   display: flex;
   flex-direction: row;
-  gap: var(--spacing-xs);
+  gap: var(--spacing-xxs);
   justify-content: center;
   overflow-x: auto;
   scrollbar-width: none;
@@ -108,7 +108,7 @@
 .categoryItem {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-xxs);
+  gap: var(--spacing-xxxs);
   flex-shrink: 0;
   align-items: flex-start;
 }
@@ -155,7 +155,7 @@
 .pillContainer {
   display: flex;
   flex-wrap: nowrap;
-  gap: var(--spacing-sm);
+  gap: var(--spacing-xs);
   overflow-x: auto;
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
@@ -192,7 +192,7 @@
 .pill {
   display: inline-flex;
   align-items: center;
-  padding: var(--spacing-xs) var(--spacing-lg);
+  padding: var(--spacing-xxs) var(--spacing-md);
   border-radius: var(--radius-full);
   border: 1px solid var(--border-color);
   background: var(--related-category-background);

@@ -15,7 +15,7 @@
   justify-content: center;
   max-width: var(--layout-max-width);
   margin: 0 auto;
-  padding: var(--spacing-xs) var(--spacing-md);
+  padding: var(--spacing-xxs) var(--spacing-sm);
   min-height: 44px;
   text-align: center;
 }
@@ -59,8 +59,8 @@
     display: grid;
     grid-template-columns: 1fr auto 1fr;
     align-items: center;
-    gap: var(--spacing-lg);
-    padding: var(--spacing-xs) var(--spacing-xl);
+    gap: var(--spacing-md);
+    padding: var(--spacing-xxs) var(--spacing-lg);
     min-height: 0;
     text-align: left;
   }
@@ -80,7 +80,7 @@
     align-items: center;
     justify-content: flex-end;
     flex-wrap: wrap;
-    gap: var(--spacing-md);
+    gap: var(--spacing-sm);
     justify-self: end;
   }
 }

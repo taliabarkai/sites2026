@@ -150,12 +150,12 @@ const TYPOGRAPHY_GROUPS = [
 
 const SPACING_TOKENS = [
   { token: '--spacing-xxxs', label: 'xxxs', px: 2 },
-  { token: '--spacing-xxs',  label: 'xxs',  px: 4 },
-  { token: '--spacing-xs',   label: 'xs',   px: 8 },
-  { token: '--spacing-sm',   label: 'sm',   px: 12 },
-  { token: '--spacing-md',   label: 'md',   px: 16 },
-  { token: '--spacing-lg',   label: 'lg',   px: 24 },
-  { token: '--spacing-xl',   label: 'xl',   px: 32 },
+  { token: '--spacing-xxxs',  label: 'xxs',  px: 4 },
+  { token: '--spacing-xxs',   label: 'xs',   px: 8 },
+  { token: '--spacing-xs',   label: 'sm',   px: 12 },
+  { token: '--spacing-sm',   label: 'md',   px: 16 },
+  { token: '--spacing-md',   label: 'lg',   px: 24 },
+  { token: '--spacing-lg',   label: 'xl',   px: 32 },
   { token: '--spacing-2xl',  label: '2xl',  px: 48 },
   { token: '--spacing-3xl',  label: '3xl',  px: 64 },
   { token: '--spacing-4xl',  label: '4xl',  px: 96 },
@@ -848,7 +848,7 @@ export default function StyleguideClient({ brand }: StyleguideClientProps) {
           <div style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fit, minmax(80px, 1fr))',
-            gap: 'var(--spacing-md)',
+            gap: 'var(--spacing-sm)',
             color: 'var(--colors-text)',
           }}>
             {ALL_BRAND_ICON_NAMES.map((name) => {

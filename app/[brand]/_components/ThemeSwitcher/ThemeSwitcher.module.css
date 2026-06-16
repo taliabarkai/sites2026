@@ -47,12 +47,12 @@
 
 .menu {
   position: absolute;
-  top: calc(100% + var(--spacing-xs));
+  top: calc(100% + var(--spacing-xxs));
   right: 0;
   z-index: 9999;
   min-width: 200px;
   margin: 0;
-  padding: var(--spacing-xs);
+  padding: var(--spacing-xxs);
   list-style: none;
   background: var(--colors-surface-primary);
   color: var(--colors-text);
@@ -64,7 +64,7 @@
 .option {
   display: block;
   width: 100%;
-  padding: var(--spacing-sm) var(--spacing-md);
+  padding: var(--spacing-xs) var(--spacing-sm);
   border: none;
   background: transparent;
   font-family:    var(--typography-rules-text1-font-family);

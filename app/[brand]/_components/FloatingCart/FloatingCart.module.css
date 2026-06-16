@@ -39,14 +39,14 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--spacing-md) var(--spacing-md) var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-sm) var(--spacing-xs);
   border-bottom: 1px solid var(--border-color);
   flex-shrink: 0;
 }
 
 @media (min-width: 1024px) {
   .header {
-  padding: var(--spacing-md) var(--spacing-lg);
+  padding: var(--spacing-sm) var(--spacing-md);
   }
 }
 
@@ -87,15 +87,15 @@
 .itemsList {
   flex: 1;
   overflow-y: auto;
-  padding: var(--spacing-md);
+  padding: var(--spacing-sm);
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-md);
+  gap: var(--spacing-sm);
 }
 
 @media (min-width: 1024px) {
   .itemsList {
-  padding: var(--spacing-lg);
+  padding: var(--spacing-md);
   }
 }
 
@@ -104,7 +104,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: var(--spacing-md);
+  gap: var(--spacing-sm);
   height: 100%;
   text-align: center;
 }
@@ -126,10 +126,10 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: var(--spacing-md);
-  padding: 0 var(--spacing-md) var(--spacing-lg);
-  margin-left: calc(-1 * var(--spacing-md));
-  margin-right: calc(-1 * var(--spacing-md));
+  gap: var(--spacing-sm);
+  padding: 0 var(--spacing-sm) var(--spacing-md);
+  margin-left: calc(-1 * var(--spacing-sm));
+  margin-right: calc(-1 * var(--spacing-sm));
   border-bottom: 1px solid var(--border-color);
 }
 
@@ -139,8 +139,8 @@
 
 .itemMain {
   display: flex;
-  align-items: center;
-  gap: var(--spacing-md);
+  align-items: flex-start;
+  gap: var(--spacing-sm);
   width: 100%;
 }
 
@@ -179,7 +179,7 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-xs);
+  gap: var(--spacing-xxs);
   min-width: 0;
 }
 
@@ -195,7 +195,7 @@
 .itemPriceRow {
   display: flex;
   align-items: center;
-  gap: var(--spacing-sm);
+  gap: var(--spacing-xs);
 }
 
 .itemOriginalPrice {
@@ -221,7 +221,7 @@
 .detailsBlock {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-xxs);
+  gap: var(--spacing-xxxs);
 }
 
 .detailsToggle {
@@ -251,7 +251,7 @@
 
 .optionRow {
   display: flex;
-  gap: var(--spacing-xs);
+  gap: var(--spacing-xxs);
 }
 
 .optionKey {
@@ -277,7 +277,7 @@
 .itemActions {
   display: flex;
   align-items: center;
-  gap: var(--spacing-sm); /* 8px between Edit | divider | Remove */
+  gap: var(--spacing-xs); /* 8px between Edit | divider | Remove */
 }
 
 /* Vertical bar between Edit and Remove, in border-color. */
@@ -347,16 +347,16 @@
 
 .footer {
   flex-shrink: 0;
-  padding: var(--spacing-md);
+  padding: var(--spacing-sm);
   border-top: 1px solid var(--border-color);
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-sm);
+  gap: var(--spacing-xs);
 }
 
 @media (min-width: 1024px) {
   .footer {
-  padding: var(--spacing-md) var(--spacing-lg);
+  padding: var(--spacing-sm) var(--spacing-md);
   }
 }
 /* Subtotal + Tax wrapper. Inner gap is 4px smaller than the footer's gap
@@ -364,7 +364,7 @@
 .totals {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-xs);
+  gap: var(--spacing-xxs);
 }
 
 .subtotalRow,
@@ -409,13 +409,13 @@
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-xs);
+  gap: var(--spacing-xxs);
 }
 
 .giftSavedRow {
   display: flex;
   align-items: center;
-  gap: var(--spacing-md);
+  gap: var(--spacing-sm);
 }
 
 .giftSavedImageWrap {
@@ -439,13 +439,13 @@
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-xs);
+  gap: var(--spacing-xxs);
 }
 
 .giftSavedNameRow {
   display: flex;
   align-items: flex-start;
-  gap: var(--spacing-sm);
+  gap: var(--spacing-xs);
 }
 
 .giftSavedName {
@@ -490,8 +490,8 @@
   width: 100%;
   display: flex;
   align-items: flex-start;
-  gap: var(--spacing-sm);
-  padding: var(--spacing-xs) var(--spacing-sm);
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xxs) var(--spacing-xs);
   background: #F0FDF4;
   border: 1px solid #86EFAC;
   border-radius: var(--radius-sm);
@@ -504,7 +504,7 @@
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-xxs);
+  gap: var(--spacing-xxxs);
 }
 
 .giftConfiguredName {

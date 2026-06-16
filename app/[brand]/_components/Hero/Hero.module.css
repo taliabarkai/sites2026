@@ -57,8 +57,8 @@
   flex-direction: column;
   align-items: flex-start;
   width: 100%;
-  /* padding-top: var(--spacing-xl); */
-  /* padding-bottom: var(--spacing-xl); */
+  /* padding-top: var(--spacing-lg); */
+  /* padding-bottom: var(--spacing-lg); */
   padding-left: var(--layout-page-margin);
   padding-right: var(--layout-page-margin);
   max-width: 64rem;
@@ -74,8 +74,8 @@
   .content {
     top: auto;
     transform: none;
-    padding-top: var(--spacing-md);
-    padding-bottom: var(--spacing-xl);
+    padding-top: var(--spacing-sm);
+    padding-bottom: var(--spacing-lg);
     padding-left: var(--layout-page-margin);
     padding-right: var(--layout-page-margin);
   }
@@ -83,7 +83,7 @@
 
 /* ── Typography ───────────────────────────────────────────────────────────── */
 .eyebrow {
-  margin: 0 0 var(--spacing-sm);
+  margin: 0 0 var(--spacing-xs);
   font-family:    var(--typography-rules-headline8-font-family);
   font-size:      var(--typography-rules-headline8-font-size);
   line-height:    var(--typography-rules-headline8-line-height);
@@ -94,7 +94,7 @@
 }
 
 .title {
-  margin: 0 0 var(--spacing-md);
+  margin: 0 0 var(--spacing-sm);
   max-width: 20ch;
   font-family:    var(--typography-rules-headline1-font-family);
   font-size:      var(--typography-rules-headline1-font-size);
@@ -105,7 +105,7 @@
 }
 
 .description {
-  margin: 0 0 var(--spacing-xl);
+  margin: 0 0 var(--spacing-lg);
   max-width: 42ch;
   font-family:    var(--typography-rules-paragraph4-font-family);
   font-size:      var(--typography-rules-paragraph4-font-size);
@@ -119,5 +119,5 @@
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
-  gap: var(--spacing-sm);
+  gap: var(--spacing-xs);
 }

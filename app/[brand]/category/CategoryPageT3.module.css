@@ -12,8 +12,8 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--spacing-lg);
-  padding: var(--spacing-xl) var(--layout-page-margin);
+  gap: var(--spacing-md);
+  padding: var(--spacing-lg) var(--layout-page-margin);
   text-align: center;
   background-color: var(--colors-background);
 }
@@ -22,8 +22,8 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: var(--spacing-lg);
-  padding: var(--spacing-xl) var(--layout-page-margin);
+  gap: var(--spacing-md);
+  padding: var(--spacing-lg) var(--layout-page-margin);
   background-color: var(--colors-background);
 }
 
@@ -38,7 +38,7 @@
 .heroTextOal {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-sm);
+  gap: var(--spacing-xs);
   text-align: left;
 }
 
@@ -75,7 +75,7 @@
 .categoryContainerOal {
   display: flex;
   flex-direction: row;
-  gap: var(--spacing-xs);
+  gap: var(--spacing-xxs);
   overflow-x: auto;
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
@@ -89,7 +89,7 @@
     display: flex;
     flex-wrap: wrap;
     overflow: visible;
-    gap: var(--spacing-xs);
+    gap: var(--spacing-xxs);
     padding-bottom: 0;
   }
 }
@@ -97,7 +97,7 @@
 .categoryContainerDefault {
   display: flex;
   flex-direction: row;
-  gap: var(--spacing-xs);
+  gap: var(--spacing-xxs);
   justify-content: center;
   overflow-x: auto;
   scrollbar-width: none;
@@ -110,13 +110,13 @@
 .categoryItem {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-xxs);
+  gap: var(--spacing-xxxs);
   flex-shrink: 0;
   align-items: flex-start;
 }
 
 .categoryContainerOal .categoryItem {
-  min-width: calc(46vw - var(--spacing-lg));
+  min-width: calc(46vw - var(--spacing-md));
 }
 
 @media (min-width: 768px) {
@@ -219,8 +219,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--spacing-md);
-  padding: var(--spacing-lg) var(--layout-page-margin);
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md) var(--layout-page-margin);
   max-width: var(--layout-max-width);
   margin: 0 auto;
 }
@@ -228,7 +228,7 @@
 .materialPills {
   display: flex;
   align-items: center;
-  gap: var(--spacing-xs);
+  gap: var(--spacing-xxs);
   margin: 0;
   padding: 0;
   list-style: none;
@@ -238,8 +238,8 @@
 .pill {
   display: inline-flex;
   align-items: center;
-  gap: var(--spacing-xs);
-  padding: var(--spacing-xxs) var(--spacing-sm);
+  gap: var(--spacing-xxs);
+  padding: var(--spacing-xxxs) var(--spacing-xs);
   background: transparent;
   border: 1px solid var(--border-color);
   border-radius: var(--radius-full);
@@ -274,7 +274,7 @@
   display: flex;
   flex-direction: row-reverse;
   align-items: center;
-  gap: var(--spacing-md);
+  gap: var(--spacing-sm);
   width: 100%;
   justify-content: space-between;
 }
@@ -306,18 +306,18 @@
 
 /* ── Products section ─────────────────────────────────────────────────────── */
 .productsSection {
-  padding: 0 var(--layout-page-margin) var(--spacing-lg);
+  padding: 0 var(--layout-page-margin) var(--spacing-md);
 }
 
 /* ── Responsive — mobile filter bar tweaks ───────────────────────────────── */
 @media (max-width: 768px) {
   .filterBarInner {
     flex-wrap: wrap;
-    padding: var(--spacing-sm) var(--spacing-md);
+    padding: var(--spacing-xs) var(--spacing-sm);
   }
 
   .productsSection {
-    padding: 0 0 var(--spacing-md);
+    padding: 0 0 var(--spacing-sm);
   }
 }
 
@@ -326,13 +326,13 @@
 .productsGridT2 {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-xxs);
+  gap: var(--spacing-xxxs);
 }
 
 .rhythmGroup {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: var(--spacing-xxs);
+  gap: var(--spacing-xxxs);
 }
 
 /* ── T3: Marketing banner — full-bleed editorial image, no product metadata ──
@@ -374,8 +374,8 @@
   bottom: 0;
   left: 0;
   margin: 0;
-  padding-bottom: var(--spacing-xl);
-  padding-left: var(--spacing-xl);
+  padding-bottom: var(--spacing-lg);
+  padding-left: var(--spacing-lg);
   font-family:    var(--typography-rules-headline2-font-family);
   font-size:      var(--typography-rules-headline2-font-size);
   line-height:    var(--typography-rules-headline2-line-height);
@@ -413,19 +413,19 @@
   .bannerHeadline {
     font-size: 3.2rem;
     line-height: 3.2rem;
-    padding-bottom: var(--spacing-md);
-    padding-left: var(--spacing-md);
+    padding-bottom: var(--spacing-sm);
+    padding-left: var(--spacing-sm);
   }
 }
 
 @media (min-width: 1440px) {
   .productsGridT2 {
-    gap: var(--spacing-xs);
+    gap: var(--spacing-xxs);
   }
 
   .rhythmGroup {
     grid-template-columns: repeat(4, 1fr);
-    gap: var(--spacing-xs);
+    gap: var(--spacing-xxs);
   }
 
   /* On desktop the card fills its 2-row grid allocation via CSS grid stretch */
@@ -501,7 +501,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--spacing-md) var(--layout-page-margin);
+  padding: var(--spacing-sm) var(--layout-page-margin);
   border-bottom: var(--border-width) solid var(--border-color);
   flex-shrink: 0;
 }
@@ -534,22 +534,22 @@
 .filterPanelBody {
   flex: 1;
   overflow-y: auto;
-  padding: var(--spacing-lg) var(--layout-page-margin);
+  padding: var(--spacing-md) var(--layout-page-margin);
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-xl);
+  gap: var(--spacing-lg);
 }
 
 .filterSection {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-md);
+  gap: var(--spacing-sm);
 }
 
 .filterSortHeader {
   display: flex;
   align-items: center;
-  gap: var(--spacing-xxs);
+  gap: var(--spacing-xxxs);
   width: 100%;
   background: none;
   border: none;
@@ -586,8 +586,8 @@
 .sortOption {
   display: flex;
   align-items: center;
-  gap: var(--spacing-sm);
-  padding: var(--spacing-xxs) 0;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xxxs) 0;
   cursor: pointer;
 }
 
@@ -611,8 +611,8 @@
 .materialItem {
   display: flex;
   align-items: center;
-  gap: var(--spacing-sm);
-  padding: var(--spacing-xxs) 0;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xxxs) 0;
   cursor: pointer;
   background: none;
   border: none;

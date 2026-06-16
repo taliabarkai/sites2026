@@ -1,6 +1,6 @@
 'use client'
 
-import React, { createContext, useCallback, useContext, useState } from 'react'
+import React, { createContext, useCallback, useContext, useEffect, useState } from 'react'
 
 export interface SelectedOption {
   label: string
@@ -40,9 +40,33 @@ interface CartContextValue {
 
 const CartContext = createContext<CartContextValue | null>(null)
 
+const STORAGE_KEY = 'tg_cart_items'
+
+function loadCart(): CartItem[] {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY)
+    return raw ? (JSON.parse(raw) as CartItem[]) : []
+  } catch {
+    return []
+  }
+}
+
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([])
   const [isOpen, setIsOpen] = useState(false)
+
+  // Hydrate from localStorage once on mount
+  useEffect(() => {
+    const saved = loadCart()
+    if (saved.length > 0) setItems(saved)
+  }, [])
+
+  // Persist to localStorage whenever items change
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(items))
+    } catch { /* ignore quota errors */ }
+  }, [items])
 
   const addItem = useCallback((item: CartItem) => {
     setItems(prev => [...prev, item])

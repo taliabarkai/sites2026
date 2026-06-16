@@ -13,8 +13,8 @@
 .categoryGrid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: var(--spacing-xxs);
-  padding: var(--spacing-xxs);
+  gap: var(--spacing-xxxs);
+  padding: var(--spacing-xxxs);
 }
 
 @media (min-width: 1440px) {
@@ -45,7 +45,7 @@
   position: absolute;
   bottom: 0;
   left: 0;
-  padding: var(--spacing-md);
+  padding: var(--spacing-sm);
   font-family:    var(--typography-rules-headline8-font-family);
   font-size:      var(--typography-rules-headline8-font-size);
   line-height:    var(--typography-rules-headline8-line-height);
@@ -58,14 +58,14 @@
 /* ── Best sellers carousel ─────────────────────────────────────────────── */
 
 .bestSellers {
-  padding: var(--spacing-lg) 0;
+  padding: var(--spacing-md) 0;
   background: var(--colors-background);
 }
 
 .bestSellersHeader {
   padding-left: var(--layout-page-margin);
   padding-right: var(--layout-page-margin);
-  padding-bottom: var(--spacing-md);
+  padding-bottom: var(--spacing-sm);
 }
 
 .bestSellersTitle {
@@ -81,7 +81,7 @@
 
 .carouselTrack {
   display: flex;
-  gap: var(--spacing-xxs);
+  gap: var(--spacing-xxxs);
   overflow-x: auto;
   scroll-snap-type: x mandatory;
   -webkit-overflow-scrolling: touch;
@@ -111,15 +111,19 @@
   display: none; /* mobile: hidden */
 }
 
-@media (min-width: 1440px) {
+@media (min-width: 768px) {
   .bestSellers {
     overflow: hidden;
-    padding-right: var(--layout-page-margin);
+  }
+
+  /* On desktop the track has no right padding — cards fill to the viewport edge */
+  .carouselTrack {
+    padding-right: 0;
   }
 
   .carouselCard {
-    /* subtract 2 page margins + 3 gaps so exactly 4 cards fit */
-    flex: 0 0 calc((100% - var(--layout-page-margin) * 2 - var(--spacing-xxs) * 3) / 4);
+    /* Left padding only: (100% - left-margin - 3 gaps) / 4 */
+    flex: 0 0 calc((100% - var(--layout-page-margin) - var(--spacing-xxxs) * 3) / 4);
   }
 
   .carouselArrow {
@@ -129,9 +133,9 @@
     position: absolute;
     top: 40%;
     transform: translateY(-50%);
-    width: 48px;
-    height: 48px;
-    background: #000;
+    width: 32px;
+    height: 32px;
+    background: var(--colors-text);
     border: none;
     cursor: pointer;
     opacity: 0;
@@ -145,6 +149,7 @@
     pointer-events: auto;
   }
 
+  /* Arrows sit at the left/right edge of the product card area */
   .carouselArrowPrev { left: var(--layout-page-margin); transform: translateY(-50%) scaleX(-1); }
   .carouselArrowNext { right: 0; }
 }
@@ -152,14 +157,14 @@
 /* ── Promo image carousel ──────────────────────────────────────────────── */
 
 .promoCarousel {
-  padding: var(--spacing-xl) 0;
+  padding: var(--spacing-lg) 0;
 }
 
 /* Mobile: vertical single-column stack */
 .promoCarouselTrack {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-xxs);
+  gap: var(--spacing-xxxs);
   padding: 0 var(--layout-page-margin);
 }
 
@@ -206,12 +211,12 @@
   position: absolute;
   bottom: 0;
   left: 0;
-  padding: var(--spacing-md);
+  padding: var(--spacing-sm);
 }
 
 .promoCarouselCardOnImage .promoCarouselTitle {
   color: var(--colors-text);
-  margin: 0 0 var(--spacing-xxs);
+  margin: 0 0 var(--spacing-xxxs);
 }
 
 .promoCarouselCardOnImage .promoCarouselCta {
@@ -222,7 +227,7 @@
 /* ────────────────────────────────────────────────────────────────────────── */
 
 .promoCarouselTitle {
-  margin: var(--spacing-xs) 0 0;
+  margin: var(--spacing-xxs) 0 0;
   font-family:    var(--typography-rules-headline3-font-family);
   font-size:      var(--typography-rules-headline3-font-size);
   line-height:    var(--typography-rules-headline3-line-height);
@@ -234,7 +239,7 @@
 
 .promoCarouselCta {
   display: block;
-  padding: var(--spacing-xs) 0;
+  padding: var(--spacing-xxs) 0;
   font-family:    var(--typography-rules-headline8-font-family);
   font-size:      var(--typography-rules-headline8-font-size);
   line-height:    var(--typography-rules-headline8-line-height);
@@ -249,7 +254,7 @@
 @media (min-width: 1440px) {
   .promoCarousel {
     overflow: visible;
-    padding: var(--spacing-xl) var(--layout-page-margin);
+    padding: var(--spacing-lg) var(--layout-page-margin);
   }
 
   .promoCarouselOnImage {

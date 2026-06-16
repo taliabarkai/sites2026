@@ -15,28 +15,28 @@
 }
 
 .nav {
-  /* padding: var(--spacing-md); */
+  /* padding: var(--spacing-sm); */
   margin: var(--layout-page-margin);
 }
 
 .lower {
   display: flex;
   justify-content: center;
-  padding: var(--spacing-md);
+  padding: var(--spacing-sm);
   /* border-top: 1px solid var(--border-color); */
 }
 
 .payments {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--spacing-sm);
+  gap: var(--spacing-xs);
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
 .paymentBadge {
-  padding: var(--spacing-xs) var(--spacing-sm);
+  padding: var(--spacing-xxs) var(--spacing-xs);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-sm);
   font-family:    var(--typography-rules-disclaimer1-font-family);
@@ -71,7 +71,7 @@
   .newsletter {
     order: 0;
     position: sticky;
-    top: var(--spacing-xl);
+    top: var(--spacing-lg);
   }
 
   .nav {
@@ -83,6 +83,6 @@
     justify-content: left;
     max-width: var(--layout-max-width);
     margin: 0 auto;
-    padding: var(--spacing-lg) var(--layout-page-margin);
+    padding: var(--spacing-md) var(--layout-page-margin);
   }
 }
