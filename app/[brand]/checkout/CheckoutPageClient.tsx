@@ -35,6 +35,7 @@ interface BrandIcons {
   LockIcon:      React.ComponentType<IconProps>
   CouponIcon:    React.ComponentType<IconProps>
   XIcon:         React.ComponentType<IconProps>
+  TrashCanIcon:  React.ComponentType<IconProps>
 }
 
 const BRAND_ICONS: Record<string, BrandIcons> = {
@@ -81,14 +82,15 @@ const UPSELL_PRODUCTS: UpsellProduct[] = [
 // ─── Checkout Gift Options ─────────────────────────────────────────────────────
 
 interface CheckoutGiftOption {
-  id:          string
-  name:        string
-  description: string
-  price:       number
-  image:       string
+  id:             string
+  name:           string
+  description:    string
+  price:          number
+  originalPrice?: number
+  image:          string
 }
 
-const CHECKOUT_GIFT_OPTIONS: CheckoutGiftOption[] = [
+const DEFAULT_GIFT_OPTIONS: CheckoutGiftOption[] = [
   {
     id:          'classic-gift-set',
     name:        'Classic Gift Set',
@@ -96,10 +98,20 @@ const CHECKOUT_GIFT_OPTIONS: CheckoutGiftOption[] = [
     price:       400,
     image:       'https://cdn.oakandluna.com/digital-asset/product/gift-box-25.jpg',
   },
+]
+
+const TGR_GIFT_OPTIONS: CheckoutGiftOption[] = [
   {
-    id:          'luxury-gift-bag',
-    name:        'Luxury Gift Bag',
+    id:          'classic-gift-box',
+    name:        'Classic Gift Box',
     description: 'Includes: Gift bag, gift box and a custom note',
+    price:       400,
+    image:       'https://cdn.oakandluna.com/digital-asset/product/gift-box-25.jpg',
+  },
+  {
+    id:          'personalized-gift-box',
+    name:        'Personalized Gift Box',
+    description: 'Includes: Gift bag, gift box, fabric pouch and a custom note',
     price:       700,
     image:       'https://cdn.oakandluna.com/digital-asset/product/gift-box-25.jpg',
   },
@@ -518,6 +530,77 @@ function OrderSummary({ items, icons, showDetails, subtotal = 0, selectedShippin
   )
 }
 
+// ─── Gift Checkbox Row ────────────────────────────────────────────────────────
+
+interface GiftCheckRowProps {
+  image:          string
+  name:           string
+  description?:   string
+  price?:         string
+  originalPrice?: string
+  saved:          boolean
+  onClick:        () => void
+  onRemove?:      () => void
+  onEdit?:        () => void
+  removeIcon?:    React.ReactNode
+  isSubOption?:   boolean
+}
+
+function GiftCheckRow({ image, name, description, price, originalPrice, saved, onClick, onRemove, onEdit, removeIcon, isSubOption = false }: GiftCheckRowProps) {
+  if (saved) {
+    return (
+      <div className={`${styles.giftCheckRow} ${styles.giftCheckRowSaved} ${isSubOption ? styles.giftCheckRowSub : ''}`}>
+        <img src={image} alt={name} className={styles.giftCheckThumb} />
+        <div className={styles.giftCheckInfo}>
+          <span className={styles.giftCheckName}>{name}</span>
+          {(originalPrice || price) && (
+            <div className={styles.giftSavedPrices}>
+              {originalPrice && <span className={styles.giftSavedPriceOriginal}>{originalPrice}</span>}
+              {price         && <span className={styles.giftSavedPriceSelling}>{price}</span>}
+            </div>
+          )}
+        </div>
+        <div className={styles.giftSavedActions}>
+          {onRemove && (
+            <button type="button" className={styles.giftSavedRemove} onClick={onRemove} aria-label="Remove gift">
+              {removeIcon}
+            </button>
+          )}
+          {onEdit && (
+            <button type="button" className={styles.giftSavedEdit} onClick={onEdit}>
+              Edit
+            </button>
+          )}
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div
+      className={`${styles.giftCheckRow} ${isSubOption ? styles.giftCheckRowSub : ''}`}
+      onClick={onClick}
+      role="button"
+      tabIndex={0}
+      onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && onClick()}
+    >
+      <img src={image} alt={name} className={styles.giftCheckThumb} />
+      <div className={styles.giftCheckInfo}>
+        <span className={styles.giftCheckName}>{name}</span>
+        {description && <span className={styles.giftCheckDesc}>{description}</span>}
+        {price       && <span className={styles.giftCheckPrice}>{price}</span>}
+      </div>
+      <button
+        type="button"
+        className={styles.giftAddBtn}
+        onClick={e => { e.stopPropagation(); onClick() }}
+      >
+        Add
+      </button>
+    </div>
+  )
+}
+
 // ─── Page Inner ────────────────────────────────────────────────────────────────
 
 function CheckoutPageInner() {
@@ -532,6 +615,9 @@ function CheckoutPageInner() {
   }
 
   const { items, subtotal } = useCart()
+
+  const isTgr          = brand === 'tgr'
+  const brandGiftOptions = isTgr ? TGR_GIFT_OPTIONS : DEFAULT_GIFT_OPTIONS
 
   // ── Step state machine ──────────────────────────────────────────────────────
   // Steps: 1=Contact & Delivery, 2=Shipping Method, 3=Gift Options, 4=Payment
@@ -622,10 +708,16 @@ function CheckoutPageInner() {
   const [mobileSummaryOpen, setMobileSummaryOpen] = useState(false)
 
   // ── Gift options modal (floating cart flow) ─────────────────────────────────
-  const [giftModalItemId, setGiftModalItemId] = useState<string | null>(null)
+  const [giftModalItemId,   setGiftModalItemId]   = useState<string | null>(null)
+  const [giftModalOptionId, setGiftModalOptionId] = useState<string | null>(null)
+
+  const openGiftModal = (itemId: string, optionId: string) => {
+    setGiftModalOptionId(optionId)
+    setGiftModalItemId(itemId)
+  }
 
   // ── Gift options — step 3 ───────────────────────────────────────────────────
-  const [itemGiftSelections, setItemGiftSelections] = useState<Record<string, string | null>>({})
+  const [itemGiftSelections, setItemGiftSelections] = useState<Record<string, string[]>>({})
   const [expandedGiftItemId, setExpandedGiftItemId] = useState<string | null>(null)
 
   const eligibleGiftItems = items.filter(item =>
@@ -633,13 +725,21 @@ function CheckoutPageInner() {
   )
 
   const selectGiftForItem = (itemId: string, optionId: string) => {
+    setItemGiftSelections(prev => {
+      const current = prev[itemId] ?? []
+      if (current.includes(optionId)) return prev
+      return { ...prev, [itemId]: [...current, optionId] }
+    })
+  }
+
+  const deselectGiftForItem = (itemId: string, optionId: string) => {
     setItemGiftSelections(prev => ({
       ...prev,
-      [itemId]: prev[itemId] === optionId ? null : optionId,
+      [itemId]: (prev[itemId] ?? []).filter(id => id !== optionId),
     }))
   }
 
-  const anyGiftSelected = Object.values(itemGiftSelections).some(Boolean)
+  const anyGiftSelected = Object.values(itemGiftSelections).some(arr => arr.length > 0)
 
   // ── Form state ──────────────────────────────────────────────────────────────
 
@@ -739,7 +839,7 @@ function CheckoutPageInner() {
       </div>
     </div>
   )
-  const giftSelectedCount = Object.values(itemGiftSelections).filter(Boolean).length
+  const giftSelectedCount = Object.values(itemGiftSelections).filter(arr => arr.length > 0).length
   const step3Summary = anyGiftSelected ? (
     <div className={styles.completedGroup}>
       <div className={styles.completedSection}>
@@ -747,7 +847,10 @@ function CheckoutPageInner() {
         <span className={styles.completedValue}>
           {eligibleGiftItems.length > 1
             ? `Gift added to ${giftSelectedCount} of ${eligibleGiftItems.length} items`
-            : CHECKOUT_GIFT_OPTIONS.find(o => o.id === itemGiftSelections[eligibleGiftItems[0]?.id ?? ''])?.name ?? ''}
+            : (itemGiftSelections[eligibleGiftItems[0]?.id ?? ''] ?? [])
+                .map(id => brandGiftOptions.find(o => o.id === id)?.name ?? '')
+                .filter(Boolean)
+                .join(', ')}
         </span>
       </div>
     </div>
@@ -766,7 +869,6 @@ function CheckoutPageInner() {
   const summaryProps = {
     items, icons,
     taxAmount,
-    onOpenGiftModal: (itemId: string) => setGiftModalItemId(itemId),
   }
 
   return (
@@ -1006,95 +1108,108 @@ function CheckoutPageInner() {
                 icon={<icons.GiftIcon size={32} />}
                 editLabel={anyGiftSelected ? 'Edit' : 'Add'}
               >
-                {eligibleGiftItems.length <= 1 ? (
-                  /* ── Single item: flat list of cards (unchanged layout) ── */
-                  <div className={styles.checkoutGiftOptions}>
-                    {CHECKOUT_GIFT_OPTIONS.map(option => {
-                      const itemId = eligibleGiftItems[0]?.id ?? ''
-                      const isSelected = itemGiftSelections[itemId] === option.id
-                      return (
-                        <div key={option.id} className={`${styles.checkoutGiftCard} ${isSelected ? styles.checkoutGiftCardSelected : ''}`}>
-                          <div className={styles.checkoutGiftImageWrap}>
-                            <img src={option.image} alt={option.name} className={styles.checkoutGiftImage} loading="lazy" />
+                {/* Gift options — brand-aware checkbox row layout */}
+                <div className={styles.giftRowList}>
+                  {isTgr ? (
+                    eligibleGiftItems.length === 1 ? (
+                      /* TGR, 1 item — show both gift option rows; each independently selectable */
+                      brandGiftOptions.map(option => {
+                        const itemId  = eligibleGiftItems[0]?.id ?? ''
+                        const isSaved = (itemGiftSelections[itemId] ?? []).includes(option.id)
+                        return (
+                          <GiftCheckRow
+                            key={option.id}
+                            image={option.image}
+                            name={option.name}
+                            description={option.description}
+                            price={formatPrice(option.price)}
+                            saved={isSaved}
+                            onClick={() => openGiftModal(itemId, option.id)}
+                            onRemove={() => deselectGiftForItem(itemId, option.id)}
+                            onEdit={() => openGiftModal(itemId, option.id)}
+                            removeIcon={<icons.TrashCanIcon size={16} />}
+                          />
+                        )
+                      })
+                    ) : (
+                      /* TGR, 2+ items — item rows that expand inline to reveal options */
+                      eligibleGiftItems.map(item => {
+                        const isExpanded = expandedGiftItemId === item.id
+                        return (
+                          <div key={item.id} className={styles.giftItemExpandRow}>
+                            <GiftCheckRow
+                              image={item.image}
+                              name={item.name}
+                              saved={false}
+                              onClick={() => setExpandedGiftItemId(isExpanded ? null : item.id)}
+                            />
+                            {isExpanded && (
+                              <div className={styles.giftSubOptions}>
+                                {brandGiftOptions.map(option => {
+                                  const isSaved = (itemGiftSelections[item.id] ?? []).includes(option.id)
+                                  return (
+                                    <GiftCheckRow
+                                      key={option.id}
+                                      image={option.image}
+                                      name={option.name}
+                                      description={option.description}
+                                      price={formatPrice(option.price)}
+                                      saved={isSaved}
+                                      onClick={() => openGiftModal(item.id, option.id)}
+                                      onRemove={() => deselectGiftForItem(item.id, option.id)}
+                                      onEdit={() => openGiftModal(item.id, option.id)}
+                                      removeIcon={<icons.TrashCanIcon size={16} />}
+                                      isSubOption
+                                    />
+                                  )
+                                })}
+                              </div>
+                            )}
                           </div>
-                          <div className={styles.checkoutGiftInfo}>
-                            <span className={styles.checkoutGiftName}>{option.name}</span>
-                            <span className={styles.checkoutGiftDesc}>{option.description}</span>
-                            <span className={styles.checkoutGiftPrice}>{formatPrice(option.price)}</span>
-                          </div>
-                          <Button
-                            variant="upsell-primary"
-                            className={styles.checkoutGiftAddBtn}
-                            onClick={() => selectGiftForItem(itemId, option.id)}
-                          >
-                            {isSelected ? 'Added' : 'Add'}
-                          </Button>
-                        </div>
-                      )
-                    })}
-                  </div>
-                ) : (
-                  /* ── Multiple items: per-item accordion ── */
-                  <div className={styles.giftItemAccordion}>
-                    {eligibleGiftItems.map(item => {
-                      const selectedGiftId = itemGiftSelections[item.id] ?? null
-                      const isExpanded = expandedGiftItemId === item.id
-                      const hasGift = selectedGiftId !== null
-                      const variantText = item.selectedOptions?.map(o => o.value).join(' · ') ?? ''
-                      return (
-                        <div key={item.id} className={styles.giftItemRow}>
-                          <button
-                            type="button"
-                            className={styles.giftItemHeader}
-                            onClick={() => setExpandedGiftItemId(isExpanded ? null : item.id)}
-                            aria-expanded={isExpanded}
-                          >
-                            <img src={item.image} alt={item.name} className={styles.giftItemThumb} />
-                            <div className={styles.giftItemInfo}>
-                              <span className={styles.giftItemName}>{item.name}</span>
-                            </div>
-                            <div className={styles.giftItemHeaderRight}>
-                              {hasGift && <span className={styles.giftAddedBadge}>Gift added</span>}
-                              <span className={isExpanded ? styles.chevronOpen : styles.chevronClosed} aria-hidden="true">
-                                <ChevronIcon size={24} />
-                              </span>
-                            </div>
-                          </button>
-                          <div className={`${styles.giftItemBody} ${isExpanded ? styles.giftItemBodyOpen : ''}`} aria-hidden={!isExpanded}>
-                            <div className={styles.checkoutGiftOptions}>
-                              {CHECKOUT_GIFT_OPTIONS.map(option => {
-                                const isSelected = selectedGiftId === option.id
-                                return (
-                                  <div key={option.id} className={`${styles.checkoutGiftCard} ${isSelected ? styles.checkoutGiftCardSelected : ''}`}>
-                                    <div className={styles.checkoutGiftImageWrap}>
-                                      <img src={option.image} alt={option.name} className={styles.checkoutGiftImage} loading="lazy" />
-                                    </div>
-                                    <div className={styles.checkoutGiftInfo}>
-                                      <span className={styles.checkoutGiftName}>{option.name}</span>
-                                      <span className={styles.checkoutGiftDesc}>{option.description}</span>
-                                      <span className={styles.checkoutGiftPrice}>{formatPrice(option.price)}</span>
-                                    </div>
-                                    <Button
-                                      variant="upsell-primary"
-                                      className={styles.checkoutGiftAddBtn}
-                                      onClick={() => selectGiftForItem(item.id, option.id)}
-                                    >
-                                      {isSelected ? 'Added' : 'Add'}
-                                    </Button>
-                                  </div>
-                                )
-                              })}
-                            </div>
-                            <div className={styles.packingSlipNote}>
-                              <LockIcon size={14} />
-                              <span>Prices won&apos;t appear on the packing slip</span>
-                            </div>
-                          </div>
-                        </div>
-                      )
-                    })}
-                  </div>
-                )}
+                        )
+                      })
+                    )
+                  ) : (
+                    eligibleGiftItems.length === 1 ? (
+                      /* Non-TGR, 1 item — show the single gift option row */
+                      (() => {
+                        const itemId  = eligibleGiftItems[0]?.id ?? ''
+                        const isSaved = (itemGiftSelections[itemId] ?? []).length > 0
+                        return (
+                          <GiftCheckRow
+                            image={brandGiftOptions[0].image}
+                            name={brandGiftOptions[0].name}
+                            description={brandGiftOptions[0].description}
+                            price={formatPrice(brandGiftOptions[0].price)}
+                            saved={isSaved}
+                            onClick={() => openGiftModal(itemId, brandGiftOptions[0].id)}
+                            onRemove={() => deselectGiftForItem(itemId, brandGiftOptions[0].id)}
+                            onEdit={() => openGiftModal(itemId, brandGiftOptions[0].id)}
+                            removeIcon={<icons.TrashCanIcon size={16} />}
+                          />
+                        )
+                      })()
+                    ) : (
+                      /* Non-TGR, 2+ items — one row per cart item */
+                      eligibleGiftItems.map(item => {
+                        const isSaved = (itemGiftSelections[item.id] ?? []).length > 0
+                        return (
+                          <GiftCheckRow
+                            key={item.id}
+                            image={item.image}
+                            name={item.name}
+                            saved={isSaved}
+                            onClick={() => openGiftModal(item.id, brandGiftOptions[0].id)}
+                            onRemove={() => deselectGiftForItem(item.id, brandGiftOptions[0].id)}
+                            onEdit={() => openGiftModal(item.id, brandGiftOptions[0].id)}
+                            removeIcon={<icons.TrashCanIcon size={16} />}
+                          />
+                        )
+                      })
+                    )
+                  )}
+                </div>
+
 
                 <div className={styles.stepContinueRow}>
                   <Button variant="primary" className={styles.continueBtn} onClick={() => animateAndComplete(3)}>
@@ -1404,8 +1519,12 @@ function CheckoutPageInner() {
 
       {giftModalItemId !== null && (
         <GiftOptionsModal
-          onClose={() => setGiftModalItemId(null)}
-          onAddToCart={(_gift: SavedGift) => setGiftModalItemId(null)}
+          onClose={() => { setGiftModalItemId(null); setGiftModalOptionId(null) }}
+          onAddToCart={(_gift: SavedGift) => {
+            if (giftModalItemId && giftModalOptionId) selectGiftForItem(giftModalItemId, giftModalOptionId)
+            setGiftModalItemId(null)
+            setGiftModalOptionId(null)
+          }}
           onGenerateGiftNote={async () => 'Wishing you a wonderful day filled with joy!'}
         />
       )}

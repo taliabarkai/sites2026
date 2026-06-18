@@ -2319,6 +2319,232 @@
   border-top: var(--border-width) solid var(--border-color);
 }
 
+/* ─── Gift Options: checkbox row layout (redesign) ──────────────────────────── */
+
+.giftRowList {
+  display: flex;
+  flex-direction: column;
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  margin-bottom: var(--spacing-sm);
+}
+
+.giftCheckRow {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xs);
+  cursor: pointer;
+  border-bottom: var(--border-width) solid var(--border-color);
+  transition: background var(--transition-fast);
+  user-select: none;
+  background: var(--colors-background);
+}
+
+.giftCheckRow:last-child {
+  border-bottom: none;
+}
+
+.giftCheckRow:hover {
+  background: var(--colors-surface-primary);
+}
+
+.giftCheckRowSub {
+  background: var(--colors-surface-primary);
+  padding-left: var(--spacing-md);
+}
+
+.giftCheckRowSub:hover {
+  background: var(--colors-surface-secondary, var(--colors-surface-primary));
+}
+
+.giftCheckbox {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  border-radius: var(--radius-sm);
+  border: var(--border-width) solid var(--border-color);
+  background: var(--colors-background);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color var(--transition-fast), background var(--transition-fast);
+}
+
+.giftCheckboxChecked {
+  border-color: var(--colors-text);
+  background: var(--colors-text);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 10' fill='none'%3E%3Cpath d='M1 5l3.5 4L11 1' stroke='white' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 10px 8px;
+}
+
+.giftCheckThumb {
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+  background: var(--colors-surface-primary);
+}
+
+.giftCheckInfo {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.giftCheckName {
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  font-weight:    var(--typography-rules-text1-font-weight, normal);
+  color: var(--colors-text);
+}
+
+.giftCheckDesc {
+  font-family:    var(--typography-rules-text3-font-family);
+  font-size:      var(--typography-rules-text3-font-size);
+  line-height:    var(--typography-rules-text3-line-height);
+  color: var(--colors-text-secondary);
+}
+
+.giftCheckPrice {
+  font-family:    var(--typography-rules-text2-font-family);
+  font-size:      var(--typography-rules-text2-font-size);
+  font-weight:    var(--typography-rules-text2-font-weight, normal);
+  line-height:    var(--typography-rules-text2-line-height);
+  color: var(--colors-text);
+}
+
+/* Add / Added button (replaces checkbox) */
+
+.giftAddBtn {
+  flex-shrink: 0;
+  background:     var(--buttons-upsell-primary-background);
+  color:          var(--buttons-upsell-primary-text);
+  border:         var(--border-width) solid var(--buttons-upsell-primary-border-color);
+  border-radius:  var(--buttons-upsell-primary-border-radius);
+  padding:        var(--buttons-upsell-primary-padding);
+  min-height:     var(--buttons-upsell-primary-min-height);
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  font-weight:    var(--typography-rules-text1-font-weight, normal);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
+}
+
+/* Saved state — replaces Add button once "Add To Bag" is clicked */
+
+.giftCheckRowSaved {
+  cursor: default;
+  align-items: flex-start;
+}
+
+.giftCheckRowSaved:hover {
+  background: var(--colors-background);
+}
+
+.giftSavedPrices {
+  display: flex;
+  align-items: baseline;
+  gap: var(--spacing-xxs);
+  flex-wrap: wrap;
+}
+
+.giftSavedPriceOriginal {
+  font-family:     var(--typography-rules-text1-font-family);
+  font-size:       var(--typography-rules-text1-font-size);
+  line-height:     var(--typography-rules-text1-line-height);
+  font-weight:     var(--typography-rules-text1-font-weight, normal);
+  color:           var(--colors-text-secondary);
+  text-decoration: line-through;
+}
+
+.giftSavedPriceSelling {
+  font-family:  var(--typography-rules-text2-font-family);
+  font-size:    var(--typography-rules-text2-font-size);
+  font-weight:  var(--typography-rules-text2-font-weight, normal);
+  line-height:  var(--typography-rules-text2-line-height);
+  color:        var(--colors-price-selling, var(--colors-text));
+}
+
+.giftSavedActions {
+  display:         flex;
+  flex-direction:  column;
+  align-items:     center;
+  gap:             var(--spacing-xxs);
+  flex-shrink:     0;
+  padding-top:     2px;
+}
+
+.giftSavedRemove {
+  display:    flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border:     none;
+  padding:    0;
+  cursor:     pointer;
+  color:      var(--colors-text-secondary);
+  transition: color var(--transition-fast);
+}
+
+.giftSavedRemove:hover {
+  color: var(--colors-text);
+}
+
+.giftSavedEdit {
+  background:      transparent;
+  border:          none;
+  padding:         0;
+  cursor:          pointer;
+  color:           var(--colors-text);
+  text-decoration: underline;
+  font-family:     var(--typography-rules-text3-font-family);
+  font-size:       var(--typography-rules-text3-font-size);
+  line-height:     var(--typography-rules-text3-line-height);
+  font-weight:     var(--typography-rules-text3-font-weight, normal);
+  white-space:     nowrap;
+}
+
+/* TGR 2+ items: wrapper that holds item row + expanded sub-options */
+.giftItemExpandRow {
+  display: flex;
+  flex-direction: column;
+  border-bottom: var(--border-width) solid var(--border-color);
+}
+
+.giftItemExpandRow:last-child {
+  border-bottom: none;
+}
+
+.giftItemExpandRow > .giftCheckRow {
+  border-bottom: none;
+}
+
+/* Sub-options container (TGR 2+ items, expanded) */
+.giftSubOptions {
+  display: flex;
+  flex-direction: column;
+  border-top: var(--border-width) solid var(--border-color);
+}
+
+.giftSubOptions .giftCheckRow {
+  border-bottom: var(--border-width) solid var(--border-color);
+}
+
+.giftSubOptions .giftCheckRow:last-child {
+  border-bottom: none;
+}
+
 /* ─── Payment: Secure badge ──────────────────────────────────────────────────── */
 
 .secureBadge {
