@@ -758,7 +758,7 @@ function ProductForm({ brand, product, icons, onAddToBag }: ProductFormProps) {
 
 // ─── Page inner ───────────────────────────────────────────────────────────────
 
-function ProductDetailPageInner({ productId }: { productId: number }) {
+function ProductDetailPageInner({ productId, previewId }: { productId: number; previewId?: string }) {
   const pathname = usePathname()
   const router = useRouter()
   const brand = getBrandFromPathname(pathname)
@@ -827,6 +827,8 @@ function ProductDetailPageInner({ productId }: { productId: number }) {
               brand={brand}
               product={product}
               icons={icons}
+              items={items}
+              previewId={previewId}
               addItem={addItem}
               openCart={openCart}
             />
@@ -861,6 +863,6 @@ function ProductDetailPageInner({ productId }: { productId: number }) {
 
 // ─── Export ───────────────────────────────────────────────────────────────────
 
-export default function ProductDetailPageClient({ productId }: { productId: number }) {
-  return <ProductDetailPageInner productId={productId} />
+export default function ProductDetailPageClient({ productId, previewId }: { productId: number; previewId?: string }) {
+  return <ProductDetailPageInner productId={productId} previewId={previewId} />
 }

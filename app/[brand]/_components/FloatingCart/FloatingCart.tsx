@@ -42,14 +42,20 @@ interface CartItemRowProps {
   brand: BrandKey
   onRemove: (id: string) => void
   onEdit: (id: string) => void
+  onNavigate: () => void
   onGenerateGiftNote: () => Promise<string>
   DropdownIcon: React.ComponentType<{ size?: number }>
 }
 
-function CartItemRow({ item, brand, onRemove, onEdit, DropdownIcon }: CartItemRowProps) {
+function CartItemRow({ item, brand, onRemove, onEdit, onNavigate, DropdownIcon }: CartItemRowProps) {
   const [detailsOpen, setDetailsOpen] = useState(false)
   const [confirmRemove, setConfirmRemove] = useState(false)
   const hasOptions = item.selectedOptions && item.selectedOptions.length > 0
+
+  // Custom canvas items deep-link to the PDP with the saved preview restored inline
+  const itemHref = item.canvasConfig
+    ? `/${brand}/product/${item.canvasConfig.productId}?preview=${item.id}`
+    : `/${brand}/product`
 
   const handleRemoveConfirm = () => {
     onRemove(item.id)
@@ -59,7 +65,7 @@ function CartItemRow({ item, brand, onRemove, onEdit, DropdownIcon }: CartItemRo
     <article className={styles.item}>
       <p className={styles.deliveryGuarantee}>Guaranteed to arrive by Christmas</p>
       <div className={styles.itemMain}>
-        <Link href={`/${brand}/product`} className={styles.itemImageWrap} tabIndex={-1} aria-hidden="true">
+        <Link href={itemHref} className={styles.itemImageWrap} onClick={onNavigate}>
           <img
             src={item.image}
             alt={item.name}
@@ -68,7 +74,7 @@ function CartItemRow({ item, brand, onRemove, onEdit, DropdownIcon }: CartItemRo
         </Link>
 
         <div className={styles.itemBody}>
-          <p className={styles.itemName}>{item.name}</p>
+          <Link href={itemHref} className={styles.itemName} onClick={onNavigate}>{item.name}</Link>
 
           <div className={styles.itemPriceRow}>
             {item.originalPrice != null && (
@@ -231,6 +237,7 @@ export function FloatingCart({
                 brand={brand}
                 onRemove={onRemoveItem}
                 onEdit={onEditItem}
+                onNavigate={onClose}
                 onGenerateGiftNote={onGenerateGiftNote}
                 DropdownIcon={icons.DropdownIcon}
               />

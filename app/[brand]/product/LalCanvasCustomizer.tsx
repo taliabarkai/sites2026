@@ -29,6 +29,8 @@ interface LalCanvasCustomizerProps {
   brand: string
   product: ProductItem
   icons: CustomizerIcons
+  items: CartItem[]
+  previewId?: string
   addItem: (item: CartItem) => void
   openCart: () => void
 }
@@ -180,7 +182,7 @@ async function composeFramedImage(opts: ComposeOpts): Promise<string> {
 }
 
 // ─── Main component ───────────────────────────────────────────────────────────
-export function LalCanvasCustomizer({ brand, product, icons, addItem, openCart }: LalCanvasCustomizerProps) {
+export function LalCanvasCustomizer({ brand, product, icons, items, previewId, addItem, openCart }: LalCanvasCustomizerProps) {
   const {
     ChevronIcon, StarIcon, FileUploadIcon, XIcon, ShippingIcon, GiftIcon,
     MapPinIcon, PersonIcon, ClipboardCopyIcon, RevisionsIcon, AiSparkleIcon,
@@ -199,13 +201,26 @@ export function LalCanvasCustomizer({ brand, product, icons, addItem, openCart }
   const [previewGenerated, setPreviewGenerated] = useState(false)
   const [previewExpanded, setPreviewExpanded]   = useState(true)
 
-  const fileInputRef = useRef<HTMLInputElement>(null)
-  const sectionRef   = useRef<HTMLElement>(null)
+  const fileInputRef  = useRef<HTMLInputElement>(null)
+  const sectionRef    = useRef<HTMLElement>(null)
+  const restoredIdRef = useRef<string | null>(null)
 
-  // Revoke object URLs to avoid leaks
+  // Restore a saved canvas from the cart (?preview=<itemId>) so the preview shows inline
   useEffect(() => {
-    return () => { if (photoUrl) URL.revokeObjectURL(photoUrl) }
-  }, [photoUrl])
+    if (!previewId || restoredIdRef.current === previewId) return
+    const cfg = items.find(i => i.id === previewId)?.canvasConfig
+    if (!cfg) return
+    restoredIdRef.current = previewId
+    setPhotoUrl(cfg.photo)
+    setPhotoName(cfg.photoName)
+    setFrameKey(cfg.frameKey)
+    setSizeKey(cfg.sizeKey)
+    setPersOn(cfg.persOn)
+    setLine1(cfg.line1)
+    setLine2(cfg.line2)
+    setPreviewGenerated(true)
+    setPreviewExpanded(true)
+  }, [previewId, items])
 
   const selectedSize  = SIZES.find(s => s.key === sizeKey) ?? SIZES[0]
   const selectedFrame = FRAME_COLORS.find(f => f.key === frameKey) ?? FRAME_COLORS[0]
@@ -214,15 +229,18 @@ export function LalCanvasCustomizer({ brand, product, icons, addItem, openCart }
   const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
-    if (photoUrl) URL.revokeObjectURL(photoUrl)
-    setPhotoUrl(URL.createObjectURL(file))
-    setPhotoName(file.name)
-    setPhotoError(false)
-    setPreviewGenerated(false) // new photo → previous preview is stale
+    // Read as a data URL so the photo survives navigation/restore from the cart
+    const reader = new FileReader()
+    reader.onload = () => {
+      setPhotoUrl(typeof reader.result === 'string' ? reader.result : null)
+      setPhotoName(file.name)
+      setPhotoError(false)
+      setPreviewGenerated(false) // new photo → previous preview is stale
+    }
+    reader.readAsDataURL(file)
   }
 
   const handleRemovePhoto = () => {
-    if (photoUrl) URL.revokeObjectURL(photoUrl)
     setPhotoUrl(null)
     setPhotoName('')
     setPreviewGenerated(false)
@@ -272,6 +290,9 @@ export function LalCanvasCustomizer({ brand, product, icons, addItem, openCart }
       image,
       isPersonalized: l1.length > 0 || l2.length > 0,
       selectedOptions,
+      canvasConfig: photoUrl
+        ? { productId: product.id, photo: photoUrl, photoName, frameKey, sizeKey, persOn, line1: l1, line2: l2 }
+        : undefined,
     })
     setModalOpen(false)
     openCart()

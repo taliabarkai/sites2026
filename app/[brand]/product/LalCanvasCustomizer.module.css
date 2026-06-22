@@ -224,6 +224,10 @@
   transition: border-color var(--transition-fast);
 }
 
+.frameSwatch:not(.frameSwatchActive):hover {
+  box-shadow: 0 0 0 1px var(--colors-text);
+}
+
 .frameSwatchActive {
   border-color: var(--colors-text);
 }
@@ -262,9 +266,13 @@
   transition: background var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
 }
 
+.sizePill:hover {
+  border-color: var(--colors-text);
+}
+
 .sizePillActive {
-  background: var(--colors-text);
-  color: var(--colors-text-inverse);
+  background: var(--colors-surface-primary);
+  color: var(--colors-text);
   border-color: var(--colors-text);
 }
 

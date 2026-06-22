@@ -16,6 +16,17 @@ export interface GiftPackaging {
   originalPrice?: number
 }
 
+export interface CanvasConfig {
+  productId: number
+  photo: string      // original uploaded photo as a data URL (survives navigation)
+  photoName: string
+  frameKey: string
+  sizeKey: string
+  persOn: boolean
+  line1: string
+  line2: string
+}
+
 export interface CartItem {
   id: string
   name: string
@@ -25,6 +36,7 @@ export interface CartItem {
   isPersonalized: boolean
   selectedOptions?: SelectedOption[]
   giftPackaging?: GiftPackaging
+  canvasConfig?: CanvasConfig   // LAL custom canvas — lets the PDP restore the preview
 }
 
 interface CartContextValue {
