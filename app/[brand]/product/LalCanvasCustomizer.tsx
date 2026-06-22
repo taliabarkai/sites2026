@@ -321,7 +321,7 @@ export function LalCanvasCustomizer({ brand, product, icons, items, previewId, a
         <div className={pdp.productTitlePriceGroup}>
           <h1 className={pdp.productTitle}>{product.name}</h1>
           <div className={pdp.priceRow}>
-            <span className={pdp.priceCurrent}>{formatPrice(currentPrice)}</span>
+            <span className={pdp.priceCurrent} style={{ color: 'var(--colors-text)' }}>{formatPrice(currentPrice)}</span>
           </div>
         </div>
 
