@@ -28,6 +28,7 @@ import {
 import type { MaterialSwatch } from '../_config/products'
 import { getBrandProducts } from '../../../data/products/getBrandProducts'
 import type { ProductItem } from '../../../data/products'
+import { LalCanvasCustomizer } from './LalCanvasCustomizer'
 import styles from './ProductDetailPage.module.css'
 
 const BRAND_ICONS = {
@@ -820,13 +821,23 @@ function ProductDetailPageInner({ productId }: { productId: number }) {
               : <DesktopGallery images={images} name={product.name} />
           }
 
-          {/* Right / main: product form */}
-          <ProductForm
-            brand={brand}
-            product={product}
-            icons={icons}
-            onAddToBag={handleAddToBag}
-          />
+          {/* Right / main: product form — LAL canvas customizer, else jewelry form */}
+          {brand === 'lal' ? (
+            <LalCanvasCustomizer
+              brand={brand}
+              product={product}
+              icons={icons}
+              addItem={addItem}
+              openCart={openCart}
+            />
+          ) : (
+            <ProductForm
+              brand={brand}
+              product={product}
+              icons={icons}
+              onAddToBag={handleAddToBag}
+            />
+          )}
         </div>
 
         <ProductCarousel brand={brand} title="Best Sellers" ArrowIcon={icons.ArrowIcon} />

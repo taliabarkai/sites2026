@@ -76,6 +76,12 @@ html {
   --white-gold-14k:        #E7E7E7;
   --rose-gold-plating-18k: #F1D4CE;
   --rose-gold-14k:         #F1D4CE;
+
+  /* ── Frame colors (LAL wall-art frame swatches — universal attribute) ── */
+  --frame-color-black:  #111111;
+  --frame-color-white:  #ffffff;
+  --frame-color-walnut: #6b3a2a;
+  --frame-color-gold:   #c9a84c;
 }
 
 @import '../styles/typography-tokens.css';
