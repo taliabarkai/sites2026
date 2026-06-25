@@ -366,16 +366,16 @@ export function LalCanvasCustomizer({ brand, product, icons, items, previewId, a
             onClick={e => { e.preventDefault(); document.getElementById('reviews')?.scrollIntoView({ behavior: 'smooth', block: 'start' }) }}
           >{LAL_REVIEW_COUNT} Reviews</a>
         </div>
-      </div>
 
-      {/* Unlimited Revisions info card */}
-      <div className={styles.revisionsCard}>
-        <span className={styles.revisionsIcon} aria-hidden="true"><RevisionsGlyph size={24} /></span>
-        <div className={styles.revisionsBody}>
-          <p className={styles.revisionsTitle}>Unlimited Revisions Included</p>
-          <p className={styles.revisionsText}>
-            Receive your personalized preview by email within 48 hours and enjoy unlimited revisions until it&apos;s just right.
-          </p>
+        {/* Unlimited Revisions info card — above the header divider */}
+        <div className={styles.revisionsCard}>
+          <span className={styles.revisionsIcon} aria-hidden="true"><RevisionsGlyph size={24} /></span>
+          <div className={styles.revisionsBody}>
+            <p className={styles.revisionsTitle}>Unlimited Revisions Included</p>
+            <p className={styles.revisionsText}>
+              Receive your personalized preview by email within 48 hours and enjoy unlimited revisions until it&apos;s just right.
+            </p>
+          </div>
         </div>
       </div>
 

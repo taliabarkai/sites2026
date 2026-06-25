@@ -83,6 +83,14 @@
     margin: 0 auto;
     padding-right: var(--spacing-4xl);
   }
+
+  /* LAL: gallery sizes to the image (never squished); the form sits right beside
+     it, with a trailing flexible track absorbing the leftover space on the right. */
+  [data-theme="lal"] .layout {
+    grid-template-columns: auto minmax(380px, 620px) 1fr;
+    padding-right: var(--spacing-xl);
+    align-items: start;
+  }
 }
 
 /* ── Desktop 2×2 image grid (non-OAL brands) ─────────────────────────────── */
@@ -183,8 +191,13 @@
     flex-direction: row;
     gap: 8px;
     align-items: flex-start;
-    padding-top: var(--layout-page-margin);
+    padding-top: var(--spacing-md);
     padding-left: var(--layout-page-margin);
+    /* Sticky while scrolling the taller right column; releases at the carousel.
+       Clear the sticky header (topline + nav); the 24px top padding keeps a gap. */
+    position: sticky;
+    top: calc(var(--layout-header-height) + var(--topline-height));
+    align-self: start;
   }
 }
 
@@ -221,9 +234,12 @@
 }
 
 .lalMainCell {
-  flex: 1;
   position: relative;
   overflow: hidden;
+  /* Size by viewport height; width follows the 1:1 ratio so the gallery always
+     keeps its square aspect and never gets squished by the column width. */
+  height: calc(100dvh - 160px);
+  max-height: 940px;
   aspect-ratio: 1 / 1;
   background-color: var(--colors-card-image-bg);
 }
@@ -326,6 +342,11 @@
   gap: var(--spacing-sm);
   padding-block: var(--spacing-sm);
   border-bottom: var(--border-width) solid var(--border-color);
+}
+
+/* LAL: space between the header divider and the Add photo step */
+[data-theme="lal"] .productHeader {
+  margin-bottom: var(--spacing-md);
 }
 
 .productTitlePriceGroup {
@@ -615,7 +636,7 @@
 /* ── Product carousel (Best Sellers on PDP) ──────────────────────────────── */
 
 .pdpCarousel {
-  padding: var(--spacing-md) 0;
+  padding: var(--spacing-lg) 0;
   background: var(--colors-background);
 }
 

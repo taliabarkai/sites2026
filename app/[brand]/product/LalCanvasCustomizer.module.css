@@ -5,8 +5,6 @@
   padding: var(--spacing-sm);
   background: var(--colors-surface-secondary);
   border-radius: var(--radius-sm);
-  margin-top: var(--spacing-md);
-  margin-bottom: var(--spacing-md);
 }
 
 .revisionsIcon {
