@@ -228,6 +228,24 @@
   background-color: var(--colors-card-image-bg);
 }
 
+/* Live Preview ribbon — lime tag, top-left of the gallery image */
+.livePreviewRibbon {
+  position: absolute;
+  top: var(--spacing-sm);
+  left: var(--spacing-sm);
+  z-index: var(--z-raised);
+  padding: var(--spacing-xxs) var(--spacing-sm);
+  background: var(--colors-brand-default-primary);
+  color: var(--colors-text);
+  text-transform: uppercase;
+  border-radius: var(--ribbon-border-radius, var(--radius-sm));
+  font-family:    var(--typography-rules-ribbons1-font-family, var(--font-family-main-bold));
+  font-size:      var(--typography-rules-ribbons1-font-size);
+  line-height:    var(--typography-rules-ribbons1-line-height);
+  font-weight:    var(--typography-rules-ribbons1-font-weight, 700);
+  letter-spacing: var(--typography-rules-ribbons1-letter-spacing, 0.04em);
+}
+
 [data-theme="oal"] .desktopGridCell {
   aspect-ratio: 4/5;
 }

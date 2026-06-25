@@ -33,6 +33,7 @@ interface LalCanvasCustomizerProps {
   previewId?: string
   addItem: (item: CartItem) => void
   openCart: () => void
+  onLivePreviewChange?: (image: string | null) => void
 }
 
 // ─── Data ───────────────────────────────────────────────────────────────────
@@ -45,14 +46,15 @@ const FRAME_COLORS: FrameColor[] = [
   { key: 'gold',   label: 'Gold',   color: 'var(--frame-color-gold)'   },
 ]
 
-interface SizeOption { key: string; priceInCents: number }
+interface SizeOption { key: string; priceInCents: number; scale: number }
 
+// XL renders at full size; each smaller size shrinks the preview by 6%.
 const SIZES: SizeOption[] = [
-  { key: 'XS', priceInCents: 7500  },
-  { key: 'S',  priceInCents: 9500  },
-  { key: 'M',  priceInCents: 12000 },
-  { key: 'L',  priceInCents: 15000 },
-  { key: 'XL', priceInCents: 19000 },
+  { key: 'XS', priceInCents: 7500,  scale: 0.76 },
+  { key: 'S',  priceInCents: 9500,  scale: 0.82 },
+  { key: 'M',  priceInCents: 12000, scale: 0.88 },
+  { key: 'L',  priceInCents: 15000, scale: 0.94 },
+  { key: 'XL', priceInCents: 19000, scale: 1.0  },
 ]
 
 const ACCEPTED_TYPES = '.jpg,.jpeg,.png,.webp'
@@ -100,6 +102,7 @@ interface ComposeOpts {
   bgColor: string
   line1: string
   line2: string
+  scale?: number   // frame+photo scale within the fixed grey canvas (XL = 1)
 }
 
 async function composeFramedImage(opts: ComposeOpts): Promise<string> {
@@ -114,8 +117,11 @@ async function composeFramedImage(opts: ComposeOpts): Promise<string> {
   ctx.fillStyle = opts.bgColor || '#f5f5f5'
   ctx.fillRect(0, 0, SIZE, SIZE)
 
-  // Frame (portrait, centered)
-  const outerW = 500, outerH = 640, border = 22
+  // Frame (portrait, centered) — outerH leaves room for the personalization text
+  // inside the white mat so it never spills onto the colored frame. The grey canvas
+  // (SIZE) stays fixed; only the frame + photo scale with the selected size.
+  const scale = opts.scale ?? 1
+  const outerW = 500 * scale, outerH = 720 * scale, border = 22 * scale
   const fx = (SIZE - outerW) / 2
   const fy = (SIZE - outerH) / 2
   ctx.save()
@@ -139,7 +145,7 @@ async function composeFramedImage(opts: ComposeOpts): Promise<string> {
   ctx.restore()
 
   // Photo (3:4, cover)
-  const pad = 26
+  const pad = 26 * scale
   const ibx = mx + pad, iby = my + pad
   const ibw = mw - pad * 2, ibh = ibw * 4 / 3
   try {
@@ -153,28 +159,28 @@ async function composeFramedImage(opts: ComposeOpts): Promise<string> {
   ctx.translate(ibx + ibw / 2, iby + ibh / 2)
   ctx.rotate((-35 * Math.PI) / 180)
   ctx.fillStyle = 'rgba(255,255,255,0.55)'
-  ctx.font = '700 15px Poppins, system-ui, sans-serif'
+  ctx.font = `700 ${15 * scale}px Poppins, system-ui, sans-serif`
   ctx.textAlign = 'center'
   ctx.textBaseline = 'middle'
-  for (let gy = -ibh; gy <= ibh; gy += 90) {
-    for (let gx = -ibw; gx <= ibw; gx += 210) {
+  for (let gy = -ibh; gy <= ibh; gy += 90 * scale) {
+    for (let gx = -ibw; gx <= ibw; gx += 210 * scale) {
       ctx.fillText('© LIME & LOU PREVIEW', gx, gy)
     }
   }
   ctx.restore()
 
   // Personalization lines below the photo
-  let ty = iby + ibh + 38
+  let ty = iby + ibh + 38 * scale
   ctx.textAlign = 'center'
   if (opts.line1) {
     ctx.fillStyle = '#111111'
-    ctx.font = '600 17px Poppins, system-ui, sans-serif'
+    ctx.font = `600 ${17 * scale}px Poppins, system-ui, sans-serif`
     ctx.fillText(opts.line1.toUpperCase(), mx + mw / 2, ty)
-    ty += 26
+    ty += 26 * scale
   }
   if (opts.line2) {
     ctx.fillStyle = '#888888'
-    ctx.font = '400 13px Poppins, system-ui, sans-serif'
+    ctx.font = `400 ${13 * scale}px Poppins, system-ui, sans-serif`
     ctx.fillText(opts.line2, mx + mw / 2, ty)
   }
 
@@ -182,10 +188,10 @@ async function composeFramedImage(opts: ComposeOpts): Promise<string> {
 }
 
 // ─── Main component ───────────────────────────────────────────────────────────
-export function LalCanvasCustomizer({ brand, product, icons, items, previewId, addItem, openCart }: LalCanvasCustomizerProps) {
+export function LalCanvasCustomizer({ brand, product, icons, items, previewId, addItem, openCart, onLivePreviewChange }: LalCanvasCustomizerProps) {
   const {
-    ChevronIcon, StarIcon, FileUploadIcon, XIcon, ShippingIcon, GiftIcon,
-    MapPinIcon, PersonIcon, ClipboardCopyIcon, RevisionsIcon, AiSparkleIcon,
+    ChevronIcon, StarIcon, FileUploadIcon, XIcon, ShippingIcon,
+    MapPinIcon, PersonIcon, ClipboardCopyIcon, RevisionsIcon,
   } = icons
   const RevisionsGlyph = RevisionsIcon ?? ClipboardCopyIcon
 
@@ -193,13 +199,11 @@ export function LalCanvasCustomizer({ brand, product, icons, items, previewId, a
   const [photoName, setPhotoName] = useState<string>('')
   const [frameKey, setFrameKey]   = useState<string>('black')
   const [sizeKey, setSizeKey]     = useState<string>('XS')
-  const [persOn, setPersOn]       = useState(false)
   const [line1, setLine1]         = useState('')
   const [line2, setLine2]         = useState('')
   const [photoError, setPhotoError] = useState(false)
   const [modalOpen, setModalOpen] = useState(false)
   const [previewGenerated, setPreviewGenerated] = useState(false)
-  const [previewExpanded, setPreviewExpanded]   = useState(true)
 
   const fileInputRef  = useRef<HTMLInputElement>(null)
   const sectionRef    = useRef<HTMLElement>(null)
@@ -215,12 +219,35 @@ export function LalCanvasCustomizer({ brand, product, icons, items, previewId, a
     setPhotoName(cfg.photoName)
     setFrameKey(cfg.frameKey)
     setSizeKey(cfg.sizeKey)
-    setPersOn(cfg.persOn)
     setLine1(cfg.line1)
     setLine2(cfg.line2)
     setPreviewGenerated(true)
-    setPreviewExpanded(true)
   }, [previewId, items])
+
+  // Recompose the framed canvas for the gallery "Live Preview" whenever inputs change
+  useEffect(() => {
+    if (!previewGenerated || !photoUrl) {
+      onLivePreviewChange?.(null)
+      return
+    }
+    let cancelled = false
+    ;(async () => {
+      const cs = sectionRef.current ? getComputedStyle(sectionRef.current) : null
+      const sz = SIZES.find(s => s.key === sizeKey) ?? SIZES[0]
+      const image = await composeFramedImage({
+        photoUrl,
+        frameColor: cs?.getPropertyValue(`--frame-color-${frameKey}`).trim() || '#111111',
+        matColor:   cs?.getPropertyValue('--colors-background').trim() || '#ffffff',
+        bgColor:    cs?.getPropertyValue('--colors-surface-primary').trim() || '#f5f5f5',
+        line1: line1.trim(),
+        line2: line2.trim(),
+        scale: sz.scale,
+      })
+      if (!cancelled) onLivePreviewChange?.(image)
+    })()
+    return () => { cancelled = true }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [previewGenerated, photoUrl, frameKey, line1, line2, sizeKey])
 
   const selectedSize  = SIZES.find(s => s.key === sizeKey) ?? SIZES[0]
   const selectedFrame = FRAME_COLORS.find(f => f.key === frameKey) ?? FRAME_COLORS[0]
@@ -256,8 +283,8 @@ export function LalCanvasCustomizer({ brand, product, icons, items, previewId, a
   }
 
   const handleAddToBag = async () => {
-    const l1 = persOn ? line1.trim() : ''
-    const l2 = persOn ? line2.trim() : ''
+    const l1 = line1.trim()
+    const l2 = line2.trim()
     const selectedOptions = [
       { label: 'Frame', value: selectedFrame.label },
       { label: 'Size', value: selectedSize.key },
@@ -291,7 +318,7 @@ export function LalCanvasCustomizer({ brand, product, icons, items, previewId, a
       isPersonalized: l1.length > 0 || l2.length > 0,
       selectedOptions,
       canvasConfig: photoUrl
-        ? { productId: product.id, photo: photoUrl, photoName, frameKey, sizeKey, persOn, line1: l1, line2: l2 }
+        ? { productId: product.id, photo: photoUrl, photoName, frameKey, sizeKey, persOn: true, line1: l1, line2: l2 }
         : undefined,
     })
     setModalOpen(false)
@@ -300,8 +327,7 @@ export function LalCanvasCustomizer({ brand, product, icons, items, previewId, a
 
   const handleContinueShopping = () => {
     setModalOpen(false)
-    setPreviewGenerated(true)  // persist the generated preview on the PDP
-    setPreviewExpanded(false)  // collapsed by default
+    setPreviewGenerated(true)  // persist the generated preview → shows in the gallery
   }
 
   const filledStars = Math.round(LAL_RATING)
@@ -353,9 +379,9 @@ export function LalCanvasCustomizer({ brand, product, icons, items, previewId, a
         </div>
       </div>
 
-      {/* Step 1 — Add photo */}
+      {/* Add photo */}
       <div className={styles.step}>
-        <p className={styles.stepLabel}>1. Add photo</p>
+        <p className={styles.stepLabel}>Add photo</p>
         <div className={`${styles.uploadCard} ${photoError ? styles.uploadCardError : ''}`}>
           <button
             type="button"
@@ -395,10 +421,10 @@ export function LalCanvasCustomizer({ brand, product, icons, items, previewId, a
         {photoError && <p className={styles.fieldError}>Please upload a photo to continue.</p>}
       </div>
 
-      {/* Step 2 — Select frame */}
+      {/* Select frame */}
       <div className={styles.step}>
         <p className={styles.stepLabel}>
-          2. Select frame &ndash; <span className={styles.stepValue}>{selectedFrame.label}</span>
+          Select frame &ndash; <span className={styles.stepValue}>{selectedFrame.label}</span>
         </p>
         <div className={styles.frameSwatchRow}>
           {FRAME_COLORS.map(f => {
@@ -423,10 +449,10 @@ export function LalCanvasCustomizer({ brand, product, icons, items, previewId, a
         </div>
       </div>
 
-      {/* Step 3 — Choose size */}
+      {/* Choose size */}
       <div className={styles.step}>
         <div className={styles.stepHeaderRow}>
-          <p className={styles.stepLabel}>3. Choose size</p>
+          <p className={styles.stepLabel}>Choose size</p>
           <button type="button" className={styles.sizeGuideLink}>Size guide</button>
         </div>
         <div className={styles.sizeRow}>
@@ -447,97 +473,33 @@ export function LalCanvasCustomizer({ brand, product, icons, items, previewId, a
         </div>
       </div>
 
-      {/* Step 4 — Personalization */}
-      <div className={`${styles.step} ${styles.stepLast}`}>
-        <button
-          type="button"
-          className={styles.persToggle}
-          aria-pressed={persOn}
-          onClick={() => { setPersOn(v => !v); setPreviewGenerated(false) }}
-        >
-          <span className={`${styles.persCheckbox} ${persOn ? styles.persCheckboxOn : ''}`} aria-hidden="true">
-            {persOn && <icons.CheckmarkIcon size={20} />}
-          </span>
-          <span className={styles.persLabel}>Add free personalization</span>
-        </button>
-
-        {persOn && (
-          <div className={styles.persFields}>
-            <div className={styles.persField}>
-              <label className={styles.persFieldLabel} htmlFor="lal-line1">
-                First Line <span className={styles.persOptional}>(optional)</span>
-              </label>
-              <input
-                id="lal-line1"
-                type="text"
-                value={line1}
-                onChange={e => { setLine1(e.target.value); setPreviewGenerated(false) }}
-                placeholder="e.g. Claudia & Johnny"
-                autoComplete="off"
-                className={styles.persInput}
-              />
-            </div>
-            <div className={styles.persField}>
-              <label className={styles.persFieldLabel} htmlFor="lal-line2">
-                Second Line <span className={styles.persOptional}>(optional)</span>
-              </label>
-              <input
-                id="lal-line2"
-                type="text"
-                value={line2}
-                onChange={e => { setLine2(e.target.value); setPreviewGenerated(false) }}
-                placeholder="e.g. Luckiest kids on earth right now"
-                autoComplete="off"
-                className={styles.persInput}
-              />
-            </div>
-          </div>
-        )}
+      {/* First Line */}
+      <div className={styles.step}>
+        <p className={styles.stepLabel}>First Line</p>
+        <input
+          id="lal-line1"
+          type="text"
+          value={line1}
+          onChange={e => setLine1(e.target.value)}
+          placeholder="e.g. Claudia & Johnny"
+          autoComplete="off"
+          className={styles.persInput}
+        />
       </div>
 
-      {/* Saved AI preview — appears after generation, expand/collapse */}
-      {previewGenerated && photoUrl && (
-        <div className={styles.savedPreview}>
-          <button
-            type="button"
-            className={styles.savedPreviewHeader}
-            aria-expanded={previewExpanded}
-            onClick={() => setPreviewExpanded(v => !v)}
-          >
-            <span className={styles.savedPreviewTitle}>Your Preview</span>
-            <span
-              className={`${styles.savedPreviewChevron} ${previewExpanded ? styles.savedPreviewChevronOpen : ''}`}
-              aria-hidden="true"
-            >
-              <ChevronIcon size={24} />
-            </span>
-          </button>
-          {previewExpanded && (
-            <div className={styles.savedPreviewBody}>
-              <button
-                type="button"
-                className={styles.savedPreviewFrame}
-                aria-label="Open preview"
-                onClick={() => setModalOpen(true)}
-              >
-                <FramePreview
-                  photoUrl={photoUrl}
-                  frameColor={selectedFrame.color}
-                  frameHasBorder={!!selectedFrame.hasBorder}
-                  line1={persOn ? line1.trim() : ''}
-                  line2={persOn ? line2.trim() : ''}
-                  blurred={false}
-                />
-              </button>
-              {AiSparkleIcon && (
-                <span className={styles.savedPreviewSparkle} aria-hidden="true">
-                  <AiSparkleIcon size={32} />
-                </span>
-              )}
-            </div>
-          )}
-        </div>
-      )}
+      {/* Second Line */}
+      <div className={`${styles.step} ${styles.stepLast}`}>
+        <p className={styles.stepLabel}>Second Line</p>
+        <input
+          id="lal-line2"
+          type="text"
+          value={line2}
+          onChange={e => setLine2(e.target.value)}
+          placeholder="e.g. Luckiest kids on earth right now"
+          autoComplete="off"
+          className={styles.persInput}
+        />
+      </div>
 
       {/* Subtotal + CTA */}
       <div className={styles.subtotalRow}>
@@ -555,10 +517,10 @@ export function LalCanvasCustomizer({ brand, product, icons, items, previewId, a
       {/* Trust badges */}
       <ul className={styles.trustBadges} aria-label="Trust badges">
         {[
-          { Icon: MapPinIcon,   text: 'American-Made' },
-          { Icon: ShippingIcon, text: 'Free Shipping on all orders' },
-          { Icon: GiftIcon,     text: 'Gift note available in cart' },
-          { Icon: PersonIcon,   text: 'Made by real artists' },
+          { Icon: RevisionsGlyph, text: 'Free Unlimited Revisions' },
+          { Icon: PersonIcon,     text: 'Made by real artists' },
+          { Icon: ShippingIcon,   text: 'Free Shipping On All Orders' },
+          { Icon: MapPinIcon,     text: 'American-Made' },
         ].map(({ Icon, text }) => (
           <li key={text} className={styles.trustItem}>
             <span className={styles.trustIcon} aria-hidden="true"><Icon size={24} /></span>
@@ -572,8 +534,8 @@ export function LalCanvasCustomizer({ brand, product, icons, items, previewId, a
           photoUrl={photoUrl!}
           frameColor={selectedFrame.color}
           frameHasBorder={!!selectedFrame.hasBorder}
-          line1={persOn ? line1.trim() : ''}
-          line2={persOn ? line2.trim() : ''}
+          line1={line1.trim()}
+          line2={line2.trim()}
           icons={icons}
           initialReady={previewGenerated}
           onClose={() => setModalOpen(false)}
@@ -616,7 +578,7 @@ function FramePreview({ photoUrl, frameColor, frameHasBorder, line1, line2, blur
             </div>
           )}
         </div>
-        {!blurred && (line1 || line2) && (
+        {(line1 || line2) && (
           <div className={styles.framePersonalization}>
             {line1 && <span className={styles.framePersLine1}>{line1}</span>}
             {line2 && <span className={styles.framePersLine2}>{line2}</span>}

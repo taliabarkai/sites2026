@@ -591,6 +591,11 @@
   padding: 0 var(--spacing-md) var(--spacing-lg);
 }
 
+/* 32px above the Add to Bag button (gap 16 + margin 16) */
+.contentSection .customizeBtn {
+  margin-top: var(--spacing-sm);
+}
+
 @media (min-width: 768px) {
   .previewSection,
   .contentSection {
@@ -652,7 +657,7 @@
   background-image:
     repeating-linear-gradient(0deg,  rgba(0, 0, 0, 0.025) 0, rgba(0, 0, 0, 0.025) 1px, transparent 1px, transparent 3px),
     repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.025) 0, rgba(0, 0, 0, 0.025) 1px, transparent 1px, transparent 3px);
-  padding: var(--spacing-sm) var(--spacing-sm) var(--spacing-md);
+  padding: var(--spacing-sm) var(--spacing-sm) var(--spacing-lg);
 }
 
 .frameImageBox {
@@ -760,7 +765,7 @@
 
 /* Heading */
 .modalHeading {
-  margin: 0;
+  margin: var(--spacing-sm) 0 0;  /* + content-section gap (16) = 32 below the badge */
   text-align: center;
   text-transform: uppercase;
   color: var(--colors-text);

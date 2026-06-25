@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef, useCallback, useEffect } from 'react'
 import { notFound, usePathname, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import * as oalIcons from '@/src/components/icons/oal'
@@ -398,9 +398,10 @@ function ReviewsSection({
 
 // ─── Mobile swipeable gallery ─────────────────────────────────────────────────
 
-function MobileGallery({ images }: { images: string[] }) {
+function MobileGallery({ images, livePreview }: { images: string[]; livePreview?: string | null }) {
   const [activeIdx, setActiveIdx] = useState(0)
   const trackRef = useRef<HTMLDivElement>(null)
+  const allImages = livePreview ? [livePreview, ...images] : images
 
   const onScroll = useCallback(() => {
     const el = trackRef.current
@@ -412,8 +413,9 @@ function MobileGallery({ images }: { images: string[] }) {
   return (
     <div className={styles.mobileGallery}>
       <div ref={trackRef} className={styles.galleryTrack} onScroll={onScroll}>
-        {images.map((src, i) => (
+        {allImages.map((src, i) => (
           <div key={i} className={styles.gallerySlide}>
+            {livePreview && i === 0 && <span className={styles.livePreviewRibbon}>Live Preview</span>}
             <img
               src={src}
               alt=""
@@ -423,12 +425,12 @@ function MobileGallery({ images }: { images: string[] }) {
           </div>
         ))}
       </div>
-      {images.length > 1 && (
+      {allImages.length > 1 && (
         <div className={styles.progressTrack} aria-hidden="true">
           <div
             className={styles.progressBar}
             style={{
-              width: `${100 / images.length}%`,
+              width: `${100 / allImages.length}%`,
               transform: `translateX(${activeIdx * 100}%)`,
             }}
           />
@@ -460,13 +462,24 @@ function DesktopGallery({ images, name }: { images: string[]; name: string }) {
 
 // ─── OAL: sticky-left hero + vertical scroll right ────────────────────────────
 
-function LALDesktopGallery({ images, name }: { images: string[]; name: string }) {
+function LALDesktopGallery({ images, name, livePreview }: { images: string[]; name: string; livePreview?: string | null }) {
   const [activeIdx, setActiveIdx] = useState(0)
+  const hadPreview = useRef(false)
+  const allImages = livePreview ? [livePreview, ...images] : images
+
+  // Jump to the live preview the first time it appears
+  useEffect(() => {
+    if (livePreview && !hadPreview.current) { setActiveIdx(0); hadPreview.current = true }
+    if (!livePreview) hadPreview.current = false
+  }, [livePreview])
+
+  const showRibbon = !!livePreview && activeIdx === 0
+
   return (
     <div className={styles.lalGallery}>
       {/* Thumbnails — left column */}
       <div className={styles.lalThumbCol}>
-        {images.map((src, i) => (
+        {allImages.map((src, i) => (
           <button
             key={i}
             type="button"
@@ -480,7 +493,8 @@ function LALDesktopGallery({ images, name }: { images: string[]; name: string })
       </div>
       {/* Main image — right */}
       <div className={styles.lalMainCell}>
-        <img src={images[activeIdx]} alt={name} className={styles.oalGalleryImage} loading="eager" />
+        {showRibbon && <span className={styles.livePreviewRibbon}>Live Preview</span>}
+        <img src={allImages[activeIdx]} alt={name} className={styles.oalGalleryImage} loading="eager" />
       </div>
     </div>
   )
@@ -778,6 +792,7 @@ function ProductDetailPageInner({ productId, previewId }: { productId: number; p
     : [product.image]
   const { items, isOpen, subtotal, closeCart, removeItem, addItem, openCart } = useCart()
   const icons = BRAND_ICONS[brand]
+  const [livePreview, setLivePreview] = useState<string | null>(null)
 
   const handleAddToBag = (
     swatchKey: MaterialSwatch['key'],
@@ -809,13 +824,13 @@ function ProductDetailPageInner({ productId, previewId }: { productId: number; p
 
       <main id="main-content">
         {/* Mobile gallery — hidden on desktop */}
-        <MobileGallery images={images} />
+        <MobileGallery images={images} livePreview={livePreview} />
 
         {/* Two-column layout on desktop, single column on mobile */}
         <div className={styles.layout}>
           {/* Left: gallery — LAL: thumbnails left; OAL/TGR: sticky+scroll; others: 2×2 grid */}
           {brand === 'lal'
-            ? <LALDesktopGallery images={images} name={product.name} />
+            ? <LALDesktopGallery images={images} name={product.name} livePreview={livePreview} />
             : (brand === 'oal' || brand === 'tgr')
               ? <OALDesktopGallery images={images} name={product.name} />
               : <DesktopGallery images={images} name={product.name} />
@@ -831,6 +846,7 @@ function ProductDetailPageInner({ productId, previewId }: { productId: number; p
               previewId={previewId}
               addItem={addItem}
               openCart={openCart}
+              onLivePreviewChange={setLivePreview}
             />
           ) : (
             <ProductForm
