@@ -14,7 +14,7 @@ import { Footer } from './_components/Footer'
 import { Header } from './_components/Header'
 import { Hero } from './_components/Hero'
 import { FloatingCart } from './_components/FloatingCart'
-import { ProductCard } from './_components/ProductCard'
+import { ProductCard, toQuickAddProduct } from './_components/ProductCard'
 import { DEFAULT_PRODUCT_SWATCHES } from './_config/products'
 import { getBrandProducts } from '../../data/products/getBrandProducts'
 import styles from './HomePage.module.css'
@@ -126,6 +126,7 @@ function HomePageInner() {
                     defaultImage={p.image}
                     hoverImage={p.hoverImage}
                     href={`/${brand}${p.href}`}
+                    quickAddProduct={toQuickAddProduct(p)}
                     swatches={brand !== 'lal' ? DEFAULT_PRODUCT_SWATCHES : undefined}
                   />
                 </div>

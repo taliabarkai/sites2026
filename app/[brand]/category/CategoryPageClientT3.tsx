@@ -6,7 +6,7 @@ import { useCart } from '../_context/CartContext'
 import { Footer } from '../_components/Footer'
 import { Header } from '../_components/Header'
 import { FloatingCart } from '../_components/FloatingCart'
-import { ProductCard } from '../_components/ProductCard'
+import { ProductCard, toQuickAddProduct } from '../_components/ProductCard'
 import { getBrandFromPathname } from '../_config/brands'
 import { prefixFooterColumns, prefixNavLinks, withBrandPrefix } from '../_config/brandPaths'
 import {
@@ -22,6 +22,7 @@ import { FilterChips } from '../_components/FilterChips'
 import type { ProductItem } from '../../../data/products'
 import { CategoryHero } from '../_components/CategoryHero'
 import { getSeoCategoryVariant } from '../../../data/seoCategories/variantConfig'
+import { tgrRatingProps } from './tgrProductRatings'
 import { HotspotImage } from '../_components/HotspotImage'
 import type { HotspotPinData } from '../_components/HotspotImage'
 import type { QuickAddProduct } from '../_components/QuickAddPanel'
@@ -431,7 +432,10 @@ function CategoryPageInnerT3() {
   }
 
   const icons = BRAND_ICONS[brand]
-  const { FilterIcon, XIcon, ChevronIcon, CheckmarkIcon } = icons
+  const { FilterIcon, XIcon, ChevronIcon, CheckmarkIcon, StarIcon } = icons
+
+  // TGR only: derive star-rating props for a product card
+  const ratingProps = (p: ProductItem) => tgrRatingProps(brand, p, StarIcon)
 
   const [activeMaterials, setActiveMaterials] = useState<Set<MaterialKey>>(new Set())
   const toggleMaterial = (key: MaterialKey) => {
@@ -484,7 +488,9 @@ function CategoryPageInnerT3() {
                         defaultImage={p.image}
                         hoverImage={p.hoverImage}
                         href={`/${brand}${p.href}`}
+                        quickAddProduct={toQuickAddProduct(p)}
                         swatches={brand !== 'lal' ? DEFAULT_PRODUCT_SWATCHES : undefined}
+                        {...ratingProps(p)}
                       />
                     ))}
                     {group.trailingFeatured && (
@@ -516,7 +522,9 @@ function CategoryPageInnerT3() {
                         defaultImage={p.image}
                         hoverImage={p.hoverImage}
                         href={`/${brand}${p.href}`}
+                        quickAddProduct={toQuickAddProduct(p)}
                         swatches={brand !== 'lal' ? DEFAULT_PRODUCT_SWATCHES : undefined}
+                        {...ratingProps(p)}
                       />
                     ))}
                   </div>
@@ -541,7 +549,9 @@ function CategoryPageInnerT3() {
                         defaultImage={p.image}
                         hoverImage={p.hoverImage}
                         href={`/${brand}${p.href}`}
+                        quickAddProduct={toQuickAddProduct(p)}
                         swatches={brand !== 'lal' ? DEFAULT_PRODUCT_SWATCHES : undefined}
+                        {...ratingProps(p)}
                       />
                     ))}
                   </div>
@@ -566,7 +576,9 @@ function CategoryPageInnerT3() {
                       defaultImage={p.image}
                       hoverImage={p.hoverImage}
                       href={`/${brand}${p.href}`}
+                      quickAddProduct={toQuickAddProduct(p)}
                       swatches={brand !== 'lal' ? DEFAULT_PRODUCT_SWATCHES : undefined}
+                      {...ratingProps(p)}
                     />
                   ))}
                 </div>

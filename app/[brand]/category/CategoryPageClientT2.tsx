@@ -6,8 +6,9 @@ import { useCart } from '../_context/CartContext'
 import { Footer } from '../_components/Footer'
 import { Header } from '../_components/Header'
 import { FloatingCart } from '../_components/FloatingCart'
-import { ProductCard } from '../_components/ProductCard'
+import { ProductCard, toQuickAddProduct } from '../_components/ProductCard'
 import { getBrandFromPathname } from '../_config/brands'
+import { tgrRatingProps } from './tgrProductRatings'
 import { prefixFooterColumns, prefixNavLinks, withBrandPrefix } from '../_config/brandPaths'
 import {
   DEFAULT_FOOTER_COLUMNS,
@@ -327,7 +328,7 @@ function CategoryPageInnerT2() {
   }
 
   const icons = BRAND_ICONS[brand]
-  const { FilterIcon, XIcon, ChevronIcon, CheckmarkIcon } = icons
+  const { FilterIcon, XIcon, ChevronIcon, CheckmarkIcon, StarIcon } = icons
 
   const [activeMaterials, setActiveMaterials] = useState<Set<MaterialKey>>(new Set())
   const toggleMaterial = (key: MaterialKey) => {
@@ -380,7 +381,9 @@ function CategoryPageInnerT2() {
                         defaultImage={p.image}
                         hoverImage={p.hoverImage}
                         href={`/${brand}${p.href}`}
+                        quickAddProduct={toQuickAddProduct(p)}
                         swatches={brand !== 'lal' ? DEFAULT_PRODUCT_SWATCHES : undefined}
+                        {...tgrRatingProps(brand, p, StarIcon)}
                       />
                     ))}
                   </div>
@@ -405,7 +408,9 @@ function CategoryPageInnerT2() {
                         defaultImage={p.image}
                         hoverImage={p.hoverImage}
                         href={`/${brand}${p.href}`}
+                        quickAddProduct={toQuickAddProduct(p)}
                         swatches={brand !== 'lal' ? DEFAULT_PRODUCT_SWATCHES : undefined}
+                        {...tgrRatingProps(brand, p, StarIcon)}
                       />
                     ))}
                   </div>
@@ -430,7 +435,9 @@ function CategoryPageInnerT2() {
                       defaultImage={p.image}
                       hoverImage={p.hoverImage}
                       href={`/${brand}${p.href}`}
+                      quickAddProduct={toQuickAddProduct(p)}
                       swatches={brand !== 'lal' ? DEFAULT_PRODUCT_SWATCHES : undefined}
+                      {...tgrRatingProps(brand, p, StarIcon)}
                     />
                   ))}
                 </div>

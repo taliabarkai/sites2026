@@ -14,7 +14,7 @@ import { Footer } from '../_components/Footer'
 import { FloatingCart } from '../_components/FloatingCart'
 import { Button } from '../_components/Button'
 import { FilterChips } from '../_components/FilterChips'
-import { ProductCard } from '../_components/ProductCard'
+import { ProductCard, toQuickAddProduct } from '../_components/ProductCard'
 import { getBrandFromPathname } from '../_config/brands'
 import { prefixFooterColumns, prefixNavLinks, withBrandPrefix } from '../_config/brandPaths'
 import { DEFAULT_FOOTER_COLUMNS, DEFAULT_NAV_LINKS, DEFAULT_TOPLINE } from '../_config/siteContent'
@@ -80,6 +80,7 @@ function ProductCarousel({
                 defaultImage={p.image}
                 hoverImage={p.hoverImage}
                 href={`/${brand}${p.href}`}
+                quickAddProduct={toQuickAddProduct(p)}
                 swatches={brand !== 'lal' ? DEFAULT_PRODUCT_SWATCHES : undefined}
               />
             </div>

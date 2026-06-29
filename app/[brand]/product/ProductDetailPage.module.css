@@ -279,8 +279,14 @@
 .formPanel {
   display: flex;
   flex-direction: column;
-  gap: 0;
+  gap: var(--spacing-md);
   padding: 0 var(--layout-page-margin);
+}
+
+/* LAL drives its own section spacing (canvas customizer flow) — keep it flush
+   so the LAL PDP design is unchanged. */
+[data-theme="lal"] .formPanel {
+  gap: 0;
 }
 
 @media (min-width: 1024px) {
