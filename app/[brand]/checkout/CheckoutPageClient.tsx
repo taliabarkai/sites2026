@@ -539,6 +539,7 @@ interface GiftCheckRowProps {
   price?:         string
   originalPrice?: string
   saved:          boolean
+  message?:       string
   onClick:        () => void
   onRemove?:      () => void
   onEdit?:        () => void
@@ -546,7 +547,7 @@ interface GiftCheckRowProps {
   isSubOption?:   boolean
 }
 
-function GiftCheckRow({ image, name, description, price, originalPrice, saved, onClick, onRemove, onEdit, removeIcon, isSubOption = false }: GiftCheckRowProps) {
+function GiftCheckRow({ image, name, description, price, originalPrice, saved, message, onClick, onRemove, onEdit, removeIcon, isSubOption = false }: GiftCheckRowProps) {
   if (saved) {
     return (
       <div className={`${styles.giftCheckRow} ${styles.giftCheckRowSaved} ${isSubOption ? styles.giftCheckRowSub : ''}`}>
@@ -558,6 +559,9 @@ function GiftCheckRow({ image, name, description, price, originalPrice, saved, o
               {originalPrice && <span className={styles.giftSavedPriceOriginal}>{originalPrice}</span>}
               {price         && <span className={styles.giftSavedPriceSelling}>{price}</span>}
             </div>
+          )}
+          {message && message.trim() !== '' && (
+            <p className={styles.giftSavedNote}>&ldquo;{message}&rdquo;</p>
           )}
         </div>
         <div className={styles.giftSavedActions}>
@@ -619,14 +623,20 @@ function CheckoutPageInner() {
   const isTgr          = brand === 'tgr'
   const brandGiftOptions = isTgr ? TGR_GIFT_OPTIONS : DEFAULT_GIFT_OPTIONS
 
+  // ── Layout version toggle (presentation/demo only) ──────────────────────────
+  // v1: accordion — one step open at a time, gated by Continue buttons.
+  // v2: flat — all 4 sections expanded at once, no Continue gating.
+  const [version, setVersion] = useState<'v1' | 'v2'>('v1')
+
   // ── Step state machine ──────────────────────────────────────────────────────
   // Steps: 1=Contact & Delivery, 2=Shipping Method, 3=Gift Options, 4=Payment
   // Steps 2 and 3 activate simultaneously when step 1 is completed.
   const [activeSteps,    setActiveSteps]    = useState<Set<number>>(new Set([1]))
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set())
 
-  const isActive    = (s: number) => activeSteps.has(s)
-  const isCompleted = (s: number) => completedSteps.has(s)
+  // In v2 every step is expanded and nothing is shown as "completed" (collapsed).
+  const isActive    = (s: number) => version === 'v2' || activeSteps.has(s)
+  const isCompleted = (s: number) => version === 'v2' ? false : completedSteps.has(s)
 
   const editStep = (step: number) => {
     if (step === 2) {
@@ -718,7 +728,14 @@ function CheckoutPageInner() {
 
   // ── Gift options — step 3 ───────────────────────────────────────────────────
   const [itemGiftSelections, setItemGiftSelections] = useState<Record<string, string[]>>({})
+  // Custom gift note per selection, keyed by `${itemId}::${optionId}`
+  const [itemGiftNotes, setItemGiftNotes] = useState<Record<string, string>>({})
   const [expandedGiftItemId, setExpandedGiftItemId] = useState<string | null>(null)
+
+  const giftNoteKey  = (itemId: string, optionId: string) => `${itemId}::${optionId}`
+  const getGiftNote  = (itemId: string, optionId: string) => itemGiftNotes[giftNoteKey(itemId, optionId)]
+  const saveGiftNote = (itemId: string, optionId: string, note: string) =>
+    setItemGiftNotes(prev => ({ ...prev, [giftNoteKey(itemId, optionId)]: note }))
 
   const eligibleGiftItems = items.filter(item =>
     !item.name.toLowerCase().includes('warranty')
@@ -737,6 +754,11 @@ function CheckoutPageInner() {
       ...prev,
       [itemId]: (prev[itemId] ?? []).filter(id => id !== optionId),
     }))
+    setItemGiftNotes(prev => {
+      const next = { ...prev }
+      delete next[giftNoteKey(itemId, optionId)]
+      return next
+    })
   }
 
   const anyGiftSelected = Object.values(itemGiftSelections).some(arr => arr.length > 0)
@@ -873,6 +895,21 @@ function CheckoutPageInner() {
 
   return (
     <div className={styles.page}>
+      {/* Layout version switcher — presentation/demo only */}
+      <div className={styles.versionToggle} role="group" aria-label="Checkout layout version">
+        {(['v1', 'v2'] as const).map(v => (
+          <button
+            key={v}
+            type="button"
+            className={`${styles.versionToggleBtn} ${version === v ? styles.versionToggleBtnActive : ''}`}
+            onClick={() => setVersion(v)}
+            aria-pressed={version === v}
+          >
+            {v.toUpperCase()}
+          </button>
+        ))}
+      </div>
+
       <div className={styles.checkoutHeaderWrap} data-sticky-top>
         <Header variant="white" brand={brand} navLinks={navLinks} topline={topline} />
       </div>
@@ -1042,11 +1079,13 @@ function CheckoutPageInner() {
                   </div>
                 </div>
 
-                <div className={styles.stepContinueRow}>
-                  <Button variant="primary" className={styles.continueBtn} disabled={!step1Valid} onClick={() => animateAndComplete(1)}>
-                    Continue
-                  </Button>
-                </div>
+                {version === 'v1' && (
+                  <div className={styles.stepContinueRow}>
+                    <Button variant="primary" className={styles.continueBtn} disabled={!step1Valid} onClick={() => animateAndComplete(1)}>
+                      Continue
+                    </Button>
+                  </div>
+                )}
               </AccordionStep>
 
               {/* ── Step 2: Shipping Method ── */}
@@ -1124,10 +1163,11 @@ function CheckoutPageInner() {
                             description={option.description}
                             price={formatPrice(option.price)}
                             saved={isSaved}
+                            message={getGiftNote(itemId, option.id)}
                             onClick={() => openGiftModal(itemId, option.id)}
                             onRemove={() => deselectGiftForItem(itemId, option.id)}
                             onEdit={() => openGiftModal(itemId, option.id)}
-                            removeIcon={<icons.TrashCanIcon size={16} />}
+                            removeIcon={<icons.TrashCanIcon size={24} />}
                           />
                         )
                       })
@@ -1155,10 +1195,11 @@ function CheckoutPageInner() {
                                       description={option.description}
                                       price={formatPrice(option.price)}
                                       saved={isSaved}
+                                      message={getGiftNote(item.id, option.id)}
                                       onClick={() => openGiftModal(item.id, option.id)}
                                       onRemove={() => deselectGiftForItem(item.id, option.id)}
                                       onEdit={() => openGiftModal(item.id, option.id)}
-                                      removeIcon={<icons.TrashCanIcon size={16} />}
+                                      removeIcon={<icons.TrashCanIcon size={24} />}
                                       isSubOption
                                     />
                                   )
@@ -1182,10 +1223,11 @@ function CheckoutPageInner() {
                             description={brandGiftOptions[0].description}
                             price={formatPrice(brandGiftOptions[0].price)}
                             saved={isSaved}
+                            message={getGiftNote(itemId, brandGiftOptions[0].id)}
                             onClick={() => openGiftModal(itemId, brandGiftOptions[0].id)}
                             onRemove={() => deselectGiftForItem(itemId, brandGiftOptions[0].id)}
                             onEdit={() => openGiftModal(itemId, brandGiftOptions[0].id)}
-                            removeIcon={<icons.TrashCanIcon size={16} />}
+                            removeIcon={<icons.TrashCanIcon size={24} />}
                           />
                         )
                       })()
@@ -1199,10 +1241,11 @@ function CheckoutPageInner() {
                             image={item.image}
                             name={item.name}
                             saved={isSaved}
+                            message={getGiftNote(item.id, brandGiftOptions[0].id)}
                             onClick={() => openGiftModal(item.id, brandGiftOptions[0].id)}
                             onRemove={() => deselectGiftForItem(item.id, brandGiftOptions[0].id)}
                             onEdit={() => openGiftModal(item.id, brandGiftOptions[0].id)}
-                            removeIcon={<icons.TrashCanIcon size={16} />}
+                            removeIcon={<icons.TrashCanIcon size={24} />}
                           />
                         )
                       })
@@ -1211,11 +1254,13 @@ function CheckoutPageInner() {
                 </div>
 
 
-                <div className={styles.stepContinueRow}>
-                  <Button variant="primary" className={styles.continueBtn} onClick={() => animateAndComplete(3)}>
-                    Continue
-                  </Button>
-                </div>
+                {version === 'v1' && (
+                  <div className={styles.stepContinueRow}>
+                    <Button variant="primary" className={styles.continueBtn} onClick={() => animateAndComplete(3)}>
+                      Continue
+                    </Button>
+                  </div>
+                )}
               </AccordionStep>
 
               {/* ── Step 4: Payment ── */}
@@ -1520,8 +1565,11 @@ function CheckoutPageInner() {
       {giftModalItemId !== null && (
         <GiftOptionsModal
           onClose={() => { setGiftModalItemId(null); setGiftModalOptionId(null) }}
-          onAddToCart={(_gift: SavedGift) => {
-            if (giftModalItemId && giftModalOptionId) selectGiftForItem(giftModalItemId, giftModalOptionId)
+          onAddToCart={(gift: SavedGift) => {
+            if (giftModalItemId && giftModalOptionId) {
+              selectGiftForItem(giftModalItemId, giftModalOptionId)
+              saveGiftNote(giftModalItemId, giftModalOptionId, gift.note)
+            }
             setGiftModalItemId(null)
             setGiftModalOptionId(null)
           }}

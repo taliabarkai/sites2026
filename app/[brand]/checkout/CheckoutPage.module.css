@@ -2387,6 +2387,7 @@
   object-fit: cover;
   border-radius: var(--radius-sm);
   flex-shrink: 0;
+  align-self: center;
   background: var(--colors-surface-primary);
 }
 
@@ -2445,11 +2446,26 @@
 
 .giftCheckRowSaved {
   cursor: default;
-  align-items: flex-start;
+  align-items: stretch;
 }
 
 .giftCheckRowSaved:hover {
   background: var(--colors-background);
+}
+
+.giftCheckRowSaved .giftCheckInfo {
+  justify-content: center;
+}
+
+.giftSavedNote {
+  margin: 0;
+  font-family:    var(--typography-rules-text3-font-family);
+  font-size:      var(--typography-rules-text3-font-size);
+  line-height:    var(--typography-rules-text3-line-height);
+  letter-spacing: var(--typography-rules-text3-letter-spacing, normal);
+  color: var(--colors-text-secondary);
+  font-style: italic;
+  overflow-wrap: anywhere;
 }
 
 .giftSavedPrices {
@@ -2479,10 +2495,11 @@
 .giftSavedActions {
   display:         flex;
   flex-direction:  column;
-  align-items:     center;
-  gap:             var(--spacing-xxs);
+  align-items:     flex-end;
+  justify-content: space-between;
+  gap:             var(--spacing-xs);
   flex-shrink:     0;
-  padding-top:     2px;
+  align-self:      stretch;
 }
 
 .giftSavedRemove {
@@ -2492,6 +2509,7 @@
   background: transparent;
   border:     none;
   padding:    0;
+  line-height: 0;
   cursor:     pointer;
   color:      var(--colors-text-secondary);
   transition: color var(--transition-fast);
@@ -2720,4 +2738,41 @@
   .paymentPerks {
     display: none;
   }
+}
+
+/* ── Version switcher (V1 / V2) — presentation/demo only ──────────────────── */
+.versionToggle {
+  position: fixed;
+  top: var(--spacing-sm);
+  right: var(--spacing-sm);
+  z-index: var(--z-toast);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xxxs);
+  padding: var(--spacing-xxxs);
+  background: var(--colors-surface-secondary);
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--radius-full);
+  box-shadow: var(--shadow-md);
+}
+
+.versionToggleBtn {
+  appearance: none;
+  border: none;
+  background: transparent;
+  color: var(--colors-text-secondary);
+  cursor: pointer;
+  padding: var(--spacing-xxs) var(--spacing-sm);
+  border-radius: var(--radius-full);
+  font-family:    var(--typography-rules-text3-font-family);
+  font-size:      var(--typography-rules-text3-font-size);
+  line-height:    var(--typography-rules-text3-line-height);
+  font-weight:    var(--typography-rules-text4-font-weight, 600);
+  letter-spacing: var(--typography-rules-text3-letter-spacing, normal);
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.versionToggleBtnActive {
+  background: var(--colors-text);
+  color: var(--colors-text-inverse);
 }
