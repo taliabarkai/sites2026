@@ -593,10 +593,10 @@ function FramePreview({ photoUrl, frameColor, frameHasBorder, line1, line2, blur
 const GENERATION_MS = 20000
 
 const PROGRESS_MESSAGES = [
-  { until: 25,  text: 'Analyzing your image...' },
-  { until: 50,  text: 'Mixing a one-of-a-kind watercolor palette...' },
-  { until: 75,  text: 'Adding fine artistic details...' },
-  { until: 100, text: 'Finalizing your preview...' },
+  { until: 25,  text: 'ANALYZING YOUR IMAGE...' },
+  { until: 50,  text: 'MIXING A ONE-OF-A-KIND WATERCOLOR PALETTE...' },
+  { until: 75,  text: 'ADDING FINE ARTISTIC DETAILS...' },
+  { until: 100, text: 'FINALIZING YOUR PREVIEW...' },
 ]
 
 function messageForProgress(pct: number): string {
@@ -604,11 +604,12 @@ function messageForProgress(pct: number): string {
 }
 
 // Step labels for the segmented progress bar — one per 25% phase.
+// Kept distinct from the headline copy so the two lines never echo each other.
 const STEP_LABELS = [
-  'Analyzing your photo',
-  'Painting the washes',
-  'Adding fine details',
-  'Finalizing artwork',
+  'Reading colors, light & composition',
+  'Blending your custom pigments',
+  'Layering brushstrokes & texture',
+  'Polishing the final touches',
 ]
 
 // Absolute positions + staggered delays for the floating background dots.
@@ -736,9 +737,12 @@ function CanvasPreviewModal({
   const isReady = phase === 'ready'
 
   // Segmented progress: 4 phases of 25% each.
-  const phaseIndex = Math.min(3, Math.floor(progress / 25))
   const segmentFill = (i: number) =>
     Math.max(0, Math.min(1, (progress - i * 25) / 25)) * 100
+
+  // Step label lags the headline by ~10% so the two lines never change at the
+  // same moment — the headline swaps first, then the label swaps in between.
+  const stepLabelIndex = Math.min(3, Math.max(0, Math.floor((progress - 10) / 25)))
 
   // Crossfaded headline copy.
   const headline = useCrossfadeText(messageForProgress(progress))
@@ -802,7 +806,7 @@ function CanvasPreviewModal({
 
         {/* Heading */}
         {isReady ? (
-          <h2 className={styles.modalHeading}>Your Watercolor Preview Is Ready!</h2>
+          <h2 className={styles.modalHeading}>YOUR WATERCOLOR PREVIEW IS READY!</h2>
         ) : (
           <h2 className={`${styles.modalHeading} ${styles.fadeText}${headline.visible ? '' : ` ${styles.fadeTextHidden}`}`}>
             {headline.text}
@@ -812,6 +816,12 @@ function CanvasPreviewModal({
         {/* Segmented step progress (loading only) */}
         {!isReady && (
           <div className={styles.progressBlock}>
+            <span
+              className={styles.progressPct}
+              onClick={handleSkip}
+              style={{ cursor: 'pointer' }}
+              title="Skip generation (prototype)"
+            >{progress}%</span>
             <div
               className={styles.segBar}
               role="progressbar"
@@ -828,15 +838,7 @@ function CanvasPreviewModal({
                 </div>
               ))}
             </div>
-            <div className={styles.progressRow}>
-              <span className={styles.progressStepLabel}>{STEP_LABELS[phaseIndex]}</span>
-              <span
-                className={styles.progressPct}
-                onClick={handleSkip}
-                style={{ cursor: 'pointer' }}
-                title="Skip generation (prototype)"
-              >{progress}%</span>
-            </div>
+            <span className={styles.progressStepLabel}>{STEP_LABELS[stepLabelIndex]}</span>
           </div>
         )}
 

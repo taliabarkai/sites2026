@@ -801,13 +801,12 @@
 .modalHeading {
   margin: var(--spacing-sm) 0 0;  /* + content-section gap (16) = 32 below the badge */
   text-align: center;
-  text-transform: uppercase;
   color: var(--colors-text);
-  font-family:    var(--typography-rules-headline2-font-family);
-  font-size:      var(--typography-rules-headline2-font-size);
-  line-height:    var(--typography-rules-headline2-line-height);
-  font-weight:    var(--typography-rules-headline2-font-weight, 700);
-  letter-spacing: var(--typography-rules-headline2-letter-spacing, normal);
+  font-family:    var(--typography-rules-paragraph3-font-family);
+  font-size:      var(--typography-rules-paragraph3-font-size);
+  line-height:    var(--typography-rules-paragraph3-line-height);
+  font-weight:    var(--typography-rules-paragraph3-font-weight, normal);
+  letter-spacing: var(--typography-rules-paragraph3-letter-spacing, normal);
 }
 
 /* Shared text crossfade — fade out 300ms, (100ms pause handled in JS), fade in 300ms */
@@ -848,20 +847,13 @@
   transition: width 0.2s linear;
 }
 
-.progressRow {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-}
-
 .progressStepLabel {
   margin: 0;
   font-family: var(--font-family-main-regular);
   font-size: 13px;
   font-weight: 400;
   color: var(--colors-text);
-  text-align: left;
+  text-align: center;
 }
 
 .progressPct {
@@ -870,6 +862,7 @@
   font-family: var(--font-family-main-bold);
   font-size: 16px;
   font-weight: 700;
+  text-align: center;
 }
 
 /* Disclaimer */
