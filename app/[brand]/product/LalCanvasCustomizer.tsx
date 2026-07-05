@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import Link from 'next/link'
 import type { CartItem } from '../_context/CartContext'
 import type { ProductItem } from '../../../data/products'
@@ -593,14 +593,58 @@ function FramePreview({ photoUrl, frameColor, frameHasBorder, line1, line2, blur
 const GENERATION_MS = 20000
 
 const PROGRESS_MESSAGES = [
-  { until: 25,  text: 'Analyzing your image…' },
-  { until: 50,  text: 'Applying watercolor style…' },
-  { until: 75,  text: 'Adding artistic details…' },
-  { until: 100, text: 'Finalizing your preview…' },
+  { until: 25,  text: 'Analyzing your image...' },
+  { until: 50,  text: 'Mixing a one-of-a-kind watercolor palette...' },
+  { until: 75,  text: 'Adding fine artistic details...' },
+  { until: 100, text: 'Finalizing your preview...' },
 ]
 
 function messageForProgress(pct: number): string {
   return (PROGRESS_MESSAGES.find(m => pct < m.until) ?? PROGRESS_MESSAGES[PROGRESS_MESSAGES.length - 1]).text
+}
+
+// Step labels for the segmented progress bar — one per 25% phase.
+const STEP_LABELS = [
+  'Analyzing your photo',
+  'Painting the washes',
+  'Adding fine details',
+  'Finalizing artwork',
+]
+
+// Absolute positions + staggered delays for the floating background dots.
+// All share the 1.8s base rhythm; delays offset them so the modal breathes as one.
+const FLOAT_DOTS: Array<CSSProperties> = [
+  { top: '9%',    left: '6%',   animationDelay: '0s'    },
+  { top: '20%',   right: '7%',  animationDelay: '-0.3s' },
+  { top: '47%',   left: '3%',   animationDelay: '-0.6s' },
+  { bottom: '24%', right: '5%', animationDelay: '-0.9s' },
+  { bottom: '9%',  left: '11%', animationDelay: '-1.2s' },
+  { bottom: '14%', right: '13%', animationDelay: '-1.5s' },
+]
+
+/**
+ * Crossfades a text value: fade out the old text over 300ms, pause 100ms, then
+ * swap and fade in the new text over 300ms. Returns the text to display plus a
+ * `visible` flag driving the opacity transition. Shared by the headline and the
+ * secondary trust message so both swap with identical timing.
+ */
+function useCrossfadeText(value: string): { text: string; visible: boolean } {
+  const [text, setText]       = useState(value)
+  const [visible, setVisible] = useState(true)
+  const prevRef = useRef(value)
+
+  useEffect(() => {
+    if (value === prevRef.current) return
+    prevRef.current = value
+    setVisible(false)                 // fade out (300ms)
+    const t = setTimeout(() => {      // 300ms out + 100ms pause
+      setText(value)
+      setVisible(true)                // fade in (300ms)
+    }, 400)
+    return () => clearTimeout(t)
+  }, [value])
+
+  return { text, visible }
 }
 
 interface CanvasPreviewModalProps {
@@ -691,6 +735,14 @@ function CanvasPreviewModal({
 
   const isReady = phase === 'ready'
 
+  // Segmented progress: 4 phases of 25% each.
+  const phaseIndex = Math.min(3, Math.floor(progress / 25))
+  const segmentFill = (i: number) =>
+    Math.max(0, Math.min(1, (progress - i * 25) / 25)) * 100
+
+  // Crossfaded headline copy.
+  const headline = useCrossfadeText(messageForProgress(progress))
+
   return (
     <div
       className={styles.overlay}
@@ -712,6 +764,14 @@ function CanvasPreviewModal({
 
         {/* Top / left — framed canvas preview */}
         <div className={styles.previewSection}>
+          {/* Floating background dots — behind the frame, pulse in place */}
+          {!isReady && (
+            <div className={styles.floatDots} aria-hidden="true">
+              {FLOAT_DOTS.map((pos, i) => (
+                <span key={i} className={styles.floatDot} style={pos} />
+              ))}
+            </div>
+          )}
           <div className={styles.previewWrap}>
             <FramePreview
               photoUrl={photoUrl}
@@ -733,7 +793,10 @@ function CanvasPreviewModal({
               <CheckmarkIcon size={14} /> Unlimited Revisions Included
             </span>
           ) : (
-            <span className={`${styles.statusBadge} ${styles.statusBadgeLoading}`}>Generating…</span>
+            <span className={`${styles.statusBadge} ${styles.statusBadgeLoading}`}>
+              <span className={styles.statusBadgeDot} aria-hidden="true">●</span>
+              Creating Your Artwork
+            </span>
           )}
         </div>
 
@@ -741,36 +804,40 @@ function CanvasPreviewModal({
         {isReady ? (
           <h2 className={styles.modalHeading}>Your Watercolor Preview Is Ready!</h2>
         ) : (
-          <h2 key={messageForProgress(progress)} className={`${styles.modalHeading} ${styles.modalHeadingFade}`}>
-            {messageForProgress(progress)}
+          <h2 className={`${styles.modalHeading} ${styles.fadeText}${headline.visible ? '' : ` ${styles.fadeTextHidden}`}`}>
+            {headline.text}
           </h2>
         )}
 
-        {/* Progress (loading only) */}
+        {/* Segmented step progress (loading only) */}
         {!isReady && (
-          <>
-            <p
-              className={styles.progressPct}
-              onClick={handleSkip}
-              style={{ cursor: 'pointer' }}
-              title="Skip generation (prototype)"
-            >{progress}%</p>
+          <div className={styles.progressBlock}>
             <div
-              className={styles.progressTrack}
+              className={styles.segBar}
+              role="progressbar"
+              aria-valuenow={progress}
+              aria-valuemin={0}
+              aria-valuemax={100}
               onClick={handleSkip}
               style={{ cursor: 'pointer' }}
               title="Skip generation (prototype)"
             >
-              <div
-                className={styles.progressFill}
-                role="progressbar"
-                aria-valuenow={progress}
-                aria-valuemin={0}
-                aria-valuemax={100}
-                style={{ width: `${progress}%` }}
-              />
+              {[0, 1, 2, 3].map(i => (
+                <div key={i} className={styles.segTrack}>
+                  <div className={styles.segFill} style={{ width: `${segmentFill(i)}%` }} />
+                </div>
+              ))}
             </div>
-          </>
+            <div className={styles.progressRow}>
+              <span className={styles.progressStepLabel}>{STEP_LABELS[phaseIndex]}</span>
+              <span
+                className={styles.progressPct}
+                onClick={handleSkip}
+                style={{ cursor: 'pointer' }}
+                title="Skip generation (prototype)"
+              >{progress}%</span>
+            </div>
+          </div>
         )}
 
         {/* Disclaimer */}

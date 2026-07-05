@@ -569,6 +569,7 @@
 
 /* Top (mobile) / left (desktop) — preview, on the grey primary surface */
 .previewSection {
+  position: relative;
   width: 100%;
   display: flex;
   align-items: center;
@@ -578,12 +579,34 @@
   border-radius: var(--radius-panel) var(--radius-panel) 0 0;
 }
 
+/* Floating background dots — scattered around the frame, pulsing in place */
+.floatDots {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.floatDot {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--colors-brand-default-primary);
+  animation: floatDotPulse 1.8s ease-in-out infinite;   /* shared 1.8s rhythm */
+}
+
+@keyframes floatDotPulse {
+  0%, 100% { transform: scale(0.6); opacity: 0.3; }
+  50%      { transform: scale(1.2); opacity: 1;   }
+}
+
 /* Bottom (mobile) / right (desktop) — badge, heading, progress, CTAs (white) */
 .contentSection {
   width: 100%;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: stretch;
   justify-content: center;
   gap: var(--spacing-sm);
   padding: 0 var(--spacing-md) var(--spacing-lg);
@@ -628,6 +651,8 @@
 
 /* Framed preview */
 .previewWrap {
+  position: relative;
+  z-index: 1;                 /* above the floating dots */
   width: 100%;
   display: flex;
   justify-content: center;
@@ -752,13 +777,24 @@
   letter-spacing: 0.04em;
 }
 
+/* Loading badge: lime pill, black text — the badge itself stays solid,
+   only the bullet dot pulses. */
 .statusBadgeLoading {
-  animation: badgePulse 1.8s ease-in-out infinite;
+  background: var(--colors-brand-default-primary);
+  border-color: var(--colors-brand-default-primary);
+  color: #000000;
+  border-radius: 0;
 }
 
-@keyframes badgePulse {
-  0%, 100% { opacity: 0.6; }
-  50%      { opacity: 1; }
+.statusBadgeDot {
+  font-size: 0.7em;
+  line-height: 1;
+  animation: dotPulse 1.8s ease-in-out infinite;   /* shared 1.8s rhythm */
+}
+
+@keyframes dotPulse {
+  0%, 100% { opacity: 1;   }
+  50%      { opacity: 0.2; }
 }
 
 /* Heading */
@@ -774,44 +810,71 @@
   letter-spacing: var(--typography-rules-headline2-letter-spacing, normal);
 }
 
-.modalHeadingFade {
-  animation: headingFade 400ms ease;
+/* Shared text crossfade — fade out 300ms, (100ms pause handled in JS), fade in 300ms */
+.fadeText {
+  transition: opacity 300ms ease;
 }
 
-@keyframes headingFade {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+.fadeTextHidden {
+  opacity: 0;
 }
 
-/* Progress */
-.progressPct {
-  margin: 0;
-  text-align: center;
-  color: var(--colors-text);
-  font-family: var(--font-family-main-bold);
-  font-size: 16px;
-  font-weight: 700;
-}
-
-.progressTrack {
+/* Progress block: segmented bar + label/percentage row + trust message */
+.progressBlock {
   width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xxs);
+}
+
+.segBar {
+  display: flex;
+  gap: 4px;
+  width: 100%;
+}
+
+.segTrack {
+  flex: 1;
   height: 6px;
   border-radius: 3px;
-  background: var(--colors-surface-disabled);
+  background: #D9D9D9;
   overflow: hidden;
 }
 
-.progressFill {
+.segFill {
   height: 100%;
   border-radius: 3px;
   background: var(--colors-brand-default-primary);
   transition: width 0.2s linear;
 }
 
+.progressRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.progressStepLabel {
+  margin: 0;
+  font-family: var(--font-family-main-regular);
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--colors-text);
+  text-align: left;
+}
+
+.progressPct {
+  margin: 0;
+  color: var(--colors-text);
+  font-family: var(--font-family-main-bold);
+  font-size: 16px;
+  font-weight: 700;
+}
+
 /* Disclaimer */
 .disclaimer {
   margin: 0;
-  max-width: 360px;
   text-align: center;
   color: var(--colors-text);
   font-family: var(--typography-rules-text3-font-family);
@@ -842,6 +905,7 @@
 
 /* Continue shopping link */
 .continueLink {
+  align-self: center;   /* stays centered below the full-width Add to Bag */
   background: none;
   border: none;
   padding: 0;
