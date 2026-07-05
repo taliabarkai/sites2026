@@ -427,6 +427,22 @@
   color: var(--border-color);
 }
 
+/* LAL: lime-filled stars with a black outline; empty stars solid black. */
+[data-theme="lal"] .starFilled {
+  color: var(--colors-brand-default-primary);
+}
+
+[data-theme="lal"] .starEmpty {
+  color: var(--colors-text);
+}
+
+[data-theme="lal"] .starFilled svg path,
+[data-theme="lal"] .starEmpty svg path {
+  stroke: var(--colors-text);
+  stroke-width: 1.5px;
+  paint-order: stroke;
+}
+
 .ratingValue {
   font-family:    var(--typography-rules-text1-font-family);
   font-size:      var(--typography-rules-text1-font-size);
