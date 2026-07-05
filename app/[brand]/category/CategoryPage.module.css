@@ -287,7 +287,8 @@
 @media (min-width: 1440px) {
   .productsGrid {
     grid-template-columns: repeat(4, 1fr); /* desktop: 4 columns */
-    gap: var(--spacing-xxs);
+    column-gap: var(--spacing-xxs);
+    row-gap: var(--spacing-lg); /* 32px between rows on desktop */
   }
 }
 

@@ -74,7 +74,6 @@ function StarRating({
           )
         })}
       </span>
-      <span className={styles.ratingValue}>{rating.toFixed(1)}</span>
       {reviewCount != null && (
         <span className={styles.ratingCount}>({reviewCount.toLocaleString()})</span>
       )}

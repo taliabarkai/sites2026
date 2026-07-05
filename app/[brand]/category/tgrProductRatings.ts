@@ -16,8 +16,8 @@ type TgrRatingProps =
   | Record<string, never>
 
 /**
- * Returns the review-star props for a ProductCard — but only for the TGR
- * brand. For every other brand it returns an empty object, so the rating
+ * Returns the review-star props for a ProductCard — only for the TGR and LAL
+ * brands. For every other brand it returns an empty object, so the rating
  * row is omitted. Spread the result onto `<ProductCard {...} />`.
  */
 export function tgrRatingProps(
@@ -25,7 +25,7 @@ export function tgrRatingProps(
   product: ProductItem,
   StarIcon: StarIconType,
 ): TgrRatingProps {
-  if (brand !== 'tgr') return {}
+  if (brand !== 'tgr' && brand !== 'lal') return {}
   return {
     rating: TGR_RATINGS[product.id % TGR_RATINGS.length]!,
     reviewCount: TGR_REVIEW_COUNTS[product.id % TGR_REVIEW_COUNTS.length]!,
