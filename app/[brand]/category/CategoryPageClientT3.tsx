@@ -66,7 +66,7 @@ const DEFAULT_PRODUCT_SWATCHES = [
 
 type RhythmGroup =
   | { type: 'A'; cards: ProductItem[]; featured: ProductItem }
-  | { type: 'B'; cards: ProductItem[]; trailingFeatured?: ProductItem }
+  | { type: 'B'; cards: ProductItem[] }
   | { type: 'C'; cards: ProductItem[]; featured: ProductItem }
   | { type: 'D'; cards: ProductItem[]; featured: ProductItem }
 
@@ -92,13 +92,6 @@ function buildRhythmGroups(allProducts: ProductItem[], featuredProducts: Product
     if (cards.length === 0) break
     groups.push({ type: 'B', cards })
     pi += cards.length
-  }
-
-  // Append 1-slot banner as the trailing item in the last B group so it
-  // auto-places into the next available grid cell (not a new row)
-  const lastB = groups.slice().reverse().find(g => g.type === 'B')
-  if (lastB && lastB.type === 'B') {
-    lastB.trailingFeatured = featuredProducts[0]
   }
 
   return groups
@@ -222,14 +215,17 @@ function FeaturedCard({
   product,
   swatches: _swatches,
   slotClassName,
+  disableHotspots = false,
 }: {
   product: ProductItem
   swatches?: string[]
   slotClassName: string
+  /** Render as a plain image + headline banner (no hotspot pins). */
+  disableHotspots?: boolean
 }) {
   const config = TILE_CONFIGS[product.id] ?? TILE_CONFIGS[1]!
 
-  if (config.type === 'hotspot') {
+  if (config.type === 'hotspot' && !disableHotspots) {
     return (
       <article className={`${styles.featuredCard} ${slotClassName}`}>
         <HotspotImage
@@ -493,13 +489,6 @@ function CategoryPageInnerT3() {
                         {...ratingProps(p)}
                       />
                     ))}
-                    {group.trailingFeatured && (
-                      <FeaturedCard
-                        product={group.trailingFeatured}
-                        swatches={brand !== 'lal' ? DEFAULT_PRODUCT_SWATCHES : undefined}
-                        slotClassName={styles.featuredCardSingle}
-                      />
-                    )}
                   </div>
                 )
               }
@@ -539,6 +528,7 @@ function CategoryPageInnerT3() {
                       product={group.featured}
                       swatches={brand !== 'lal' ? DEFAULT_PRODUCT_SWATCHES : undefined}
                       slotClassName={styles.featuredCardWide}
+                      disableHotspots
                     />
                     {group.cards.map((p) => (
                       <ProductCard
