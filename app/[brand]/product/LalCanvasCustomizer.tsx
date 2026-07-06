@@ -797,21 +797,21 @@ function CanvasPreviewModal({
               line2={line2}
               blurred={!isReady}
             />
-            {/* Loading overlays — confined to the canvas: 40% black tint, lime
-                dots streaming upward, and the lime loader centered on top. */}
-            {!isReady && (
-              <>
-                <div className={styles.imageOverlay} aria-hidden="true" />
-                <div className={styles.floatDots} aria-hidden="true">
-                  {FLOAT_DOTS.map((pos, i) => (
-                    <span key={i} className={styles.floatDot} style={pos} />
-                  ))}
-                </div>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={lalLoader.src} alt="" className={styles.loaderGif} aria-hidden="true" />
-              </>
-            )}
           </div>
+          {/* Loading overlays — cover the entire preview section: 40% black tint,
+              lime dots streaming upward, and the lime loader centered on top. */}
+          {!isReady && (
+            <>
+              <div className={styles.imageOverlay} aria-hidden="true" />
+              <div className={styles.floatDots} aria-hidden="true">
+                {FLOAT_DOTS.map((pos, i) => (
+                  <span key={i} className={styles.floatDot} style={pos} />
+                ))}
+              </div>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={lalLoader.src} alt="" className={styles.loaderGif} aria-hidden="true" />
+            </>
+          )}
         </div>
 
         {/* Bottom / right — badge, heading, progress, CTAs */}

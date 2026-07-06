@@ -585,7 +585,7 @@
 .floatDots {
   position: absolute;
   inset: 0;
-  z-index: 2;                 /* above the 40% black overlay so the dots show */
+  z-index: 3;                 /* above the 40% black overlay so the dots show */
   overflow: hidden;
   pointer-events: none;
 }
@@ -649,6 +649,7 @@
   position: absolute;
   top: var(--spacing-sm);
   right: var(--spacing-sm);
+  z-index: 5;                 /* above the loading overlay/dots/loader */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -659,6 +660,13 @@
   border: none;
   cursor: pointer;
   color: var(--colors-text);
+}
+
+/* Mobile: the close button sits over the darkened preview — render it white. */
+@media (max-width: 767px) {
+  .modalClose {
+    color: var(--colors-text-inverse);
+  }
 }
 
 /* Framed preview */
@@ -810,12 +818,12 @@
   50%      { opacity: 0.2; }
 }
 
-/* Loading: 40% black overlay confined to the canvas area */
+/* Loading: 40% black overlay across the entire preview section */
 .imageOverlay {
   position: absolute;
   inset: 0;
   background: rgba(0, 0, 0, 0.4);
-  z-index: 1;
+  z-index: 2;
   pointer-events: none;
 }
 
@@ -828,7 +836,7 @@
   width: 80px;
   height: 80px;
   object-fit: contain;
-  z-index: 3;
+  z-index: 4;
   pointer-events: none;
 }
 
