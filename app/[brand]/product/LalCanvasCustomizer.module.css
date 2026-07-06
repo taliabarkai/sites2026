@@ -580,25 +580,35 @@
 }
 
 /* Floating background dots — scattered around the frame, pulsing in place */
+/* Confined to the canvas; overflow-hidden clips the dots as they stream out
+   the top so they stay within the frame area. */
 .floatDots {
   position: absolute;
   inset: 0;
-  z-index: 0;
+  z-index: 2;                 /* above the 40% black overlay so the dots show */
+  overflow: hidden;
   pointer-events: none;
 }
 
 .floatDot {
   position: absolute;
-  width: 8px;
-  height: 8px;
+  bottom: 0;                  /* start at the base of the canvas */
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
   background: var(--colors-brand-default-primary);
-  animation: floatDotPulse 1.8s ease-in-out infinite;   /* shared 1.8s rhythm */
+  animation-name: floatDotRise;
+  animation-timing-function: ease-in;
+  animation-iteration-count: infinite;
+  /* animation-duration + delay + left set per-dot inline */
 }
 
-@keyframes floatDotPulse {
-  0%, 100% { transform: scale(0.6); opacity: 0.3; }
-  50%      { transform: scale(1.2); opacity: 1;   }
+/* Rise from the bottom of the canvas to the top, fading in then out. */
+@keyframes floatDotRise {
+  0%   { transform: translateY(0)      scale(0.7); opacity: 0; }
+  15%  {                                            opacity: 1; }
+  85%  {                                            opacity: 1; }
+  100% { transform: translateY(-360px) scale(1.1); opacity: 0; }
 }
 
 /* Bottom (mobile) / right (desktop) — badge, heading, progress, CTAs (white) */
@@ -704,7 +714,7 @@
 
 @keyframes imagePulse {
   0%, 100% { opacity: 1; }
-  50%      { opacity: 0.4; }
+  50%      { opacity: 0.15; }
 }
 
 .frameImageReady {
@@ -777,24 +787,40 @@
   letter-spacing: 0.04em;
 }
 
-/* Loading badge: lime pill, black text — the badge itself stays solid,
-   only the bullet dot pulses. */
-.statusBadgeLoading {
-  background: var(--colors-brand-default-primary);
-  border-color: var(--colors-brand-default-primary);
-  color: #000000;
-  border-radius: 0;
-}
-
+/* Loading badge reuses the base badge look (white bg, black border); only the
+   bullet dot pulses, in the lime brand color. */
 .statusBadgeDot {
   font-size: 0.7em;
   line-height: 1;
+  color: var(--colors-brand-default-primary);
   animation: dotPulse 1.8s ease-in-out infinite;   /* shared 1.8s rhythm */
 }
 
 @keyframes dotPulse {
   0%, 100% { opacity: 1;   }
   50%      { opacity: 0.2; }
+}
+
+/* Loading: 40% black overlay confined to the canvas area */
+.imageOverlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Lime & Lou animated loader — centered on top of the overlay + dots */
+.loaderGif {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+  z-index: 3;
+  pointer-events: none;
 }
 
 /* Heading */
@@ -853,16 +879,6 @@
   font-size: 13px;
   font-weight: 400;
   color: var(--colors-text);
-  text-align: center;
-}
-
-.progressPct {
-  margin: 0 0 var(--spacing-xs);   /* extra gap between the percentage and the bar */
-  color: var(--colors-text);
-  font-family: var(--font-family-main-bold);
-  font-size: 16px;
-  line-height: 1;
-  font-weight: 700;
   text-align: center;
 }
 

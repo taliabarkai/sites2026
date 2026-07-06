@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import Link from 'next/link'
 import type { CartItem } from '../_context/CartContext'
 import type { ProductItem } from '../../../data/products'
+import lalLoader from '@/src/assets/icons/lal/LAL.gif'
 import pdp from './ProductDetailPage.module.css'
 import styles from './LalCanvasCustomizer.module.css'
 
@@ -603,24 +604,29 @@ function messageForProgress(pct: number): string {
   return (PROGRESS_MESSAGES.find(m => pct < m.until) ?? PROGRESS_MESSAGES[PROGRESS_MESSAGES.length - 1]).text
 }
 
-// Step labels for the segmented progress bar — one per 25% phase.
-// Kept distinct from the headline copy so the two lines never echo each other.
+// Secondary step messages — a longer list so this line changes more often than
+// the headline. Kept distinct from the headline copy so they never echo.
 const STEP_LABELS = [
   'Reading colors, light & composition',
+  'Studying tones & contrast',
   'Blending your custom pigments',
+  'Mixing washes & gradients',
   'Layering brushstrokes & texture',
+  'Softening edges & shadows',
+  'Adding finishing highlights',
   'Polishing the final touches',
 ]
 
-// Absolute positions + staggered delays for the floating background dots.
-// All share the 1.8s base rhythm; delays offset them so the modal breathes as one.
+// Horizontal position + staggered delays/durations for the rising dots.
+// Each dot starts at the bottom of the canvas and floats upward like a water
+// stream; varied durations & delays keep the flow natural rather than uniform.
 const FLOAT_DOTS: Array<CSSProperties> = [
-  { top: '9%',    left: '6%',   animationDelay: '0s'    },
-  { top: '20%',   right: '7%',  animationDelay: '-0.3s' },
-  { top: '47%',   left: '3%',   animationDelay: '-0.6s' },
-  { bottom: '24%', right: '5%', animationDelay: '-0.9s' },
-  { bottom: '9%',  left: '11%', animationDelay: '-1.2s' },
-  { bottom: '14%', right: '13%', animationDelay: '-1.5s' },
+  { left: '14%', animationDelay: '0s',    animationDuration: '3.2s' },
+  { left: '30%', animationDelay: '-1.4s', animationDuration: '4.0s' },
+  { left: '46%', animationDelay: '-0.6s', animationDuration: '3.0s' },
+  { left: '60%', animationDelay: '-2.2s', animationDuration: '4.4s' },
+  { left: '74%', animationDelay: '-1.0s', animationDuration: '3.6s' },
+  { left: '86%', animationDelay: '-2.8s', animationDuration: '3.9s' },
 ]
 
 /**
@@ -740,12 +746,17 @@ function CanvasPreviewModal({
   const segmentFill = (i: number) =>
     Math.max(0, Math.min(1, (progress - i * 25) / 25)) * 100
 
-  // Step label lags the headline by ~10% so the two lines never change at the
-  // same moment — the headline swaps first, then the label swaps in between.
-  const stepLabelIndex = Math.min(3, Math.max(0, Math.floor((progress - 10) / 25)))
+  // Step label changes on finer buckets (once per ~1/N of progress) so it swaps
+  // more often than the headline; the small offset keeps the two lines from
+  // ever changing on the same tick.
+  const stepLabelIndex = Math.min(
+    STEP_LABELS.length - 1,
+    Math.max(0, Math.floor((progress - 6) / (100 / STEP_LABELS.length))),
+  )
 
-  // Crossfaded headline copy.
-  const headline = useCrossfadeText(messageForProgress(progress))
+  // Crossfaded copy — headline + step label swap on the same fade timing.
+  const headline  = useCrossfadeText(messageForProgress(progress))
+  const stepLabel = useCrossfadeText(STEP_LABELS[stepLabelIndex])
 
   return (
     <div
@@ -768,14 +779,6 @@ function CanvasPreviewModal({
 
         {/* Top / left — framed canvas preview */}
         <div className={styles.previewSection}>
-          {/* Floating background dots — behind the frame, pulse in place */}
-          {!isReady && (
-            <div className={styles.floatDots} aria-hidden="true">
-              {FLOAT_DOTS.map((pos, i) => (
-                <span key={i} className={styles.floatDot} style={pos} />
-              ))}
-            </div>
-          )}
           <div className={styles.previewWrap}>
             <FramePreview
               photoUrl={photoUrl}
@@ -785,6 +788,20 @@ function CanvasPreviewModal({
               line2={line2}
               blurred={!isReady}
             />
+            {/* Loading overlays — confined to the canvas: 40% black tint, lime
+                dots streaming upward, and the lime loader centered on top. */}
+            {!isReady && (
+              <>
+                <div className={styles.imageOverlay} aria-hidden="true" />
+                <div className={styles.floatDots} aria-hidden="true">
+                  {FLOAT_DOTS.map((pos, i) => (
+                    <span key={i} className={styles.floatDot} style={pos} />
+                  ))}
+                </div>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={lalLoader.src} alt="" className={styles.loaderGif} aria-hidden="true" />
+              </>
+            )}
           </div>
         </div>
 
@@ -797,7 +814,7 @@ function CanvasPreviewModal({
               <CheckmarkIcon size={14} /> Unlimited Revisions Included
             </span>
           ) : (
-            <span className={`${styles.statusBadge} ${styles.statusBadgeLoading}`}>
+            <span className={styles.statusBadge}>
               <span className={styles.statusBadgeDot} aria-hidden="true">●</span>
               Creating Your Artwork
             </span>
@@ -816,12 +833,6 @@ function CanvasPreviewModal({
         {/* Segmented step progress (loading only) */}
         {!isReady && (
           <div className={styles.progressBlock}>
-            <span
-              className={styles.progressPct}
-              onClick={handleSkip}
-              style={{ cursor: 'pointer' }}
-              title="Skip generation (prototype)"
-            >{progress}%</span>
             <div
               className={styles.segBar}
               role="progressbar"
@@ -838,7 +849,7 @@ function CanvasPreviewModal({
                 </div>
               ))}
             </div>
-            <span className={styles.progressStepLabel}>{STEP_LABELS[stepLabelIndex]}</span>
+            <span className={`${styles.progressStepLabel} ${styles.fadeText}${stepLabel.visible ? '' : ` ${styles.fadeTextHidden}`}`}>{stepLabel.text}</span>
           </div>
         )}
 
