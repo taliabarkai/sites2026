@@ -603,12 +603,14 @@
   /* animation-duration + delay + left set per-dot inline */
 }
 
-/* Rise from the bottom of the canvas to the top, fading in then out. */
+/* Rise from the bottom of the canvas all the way to the top, fading in then
+   out. The long travel + overflow-hidden keeps bubbles spread over the full
+   canvas height; per-dot sizes are preserved (no scaling). */
 @keyframes floatDotRise {
-  0%   { transform: translateY(0)      scale(0.7); opacity: 0; }
-  15%  {                                            opacity: 1; }
-  85%  {                                            opacity: 1; }
-  100% { transform: translateY(-360px) scale(1.1); opacity: 0; }
+  0%   { transform: translateY(0);      opacity: 0; }
+  10%  {                                opacity: 1; }
+  90%  {                                opacity: 1; }
+  100% { transform: translateY(-880px); opacity: 0; }
 }
 
 /* Bottom (mobile) / right (desktop) — badge, heading, progress, CTAs (white) */
@@ -672,6 +674,13 @@
   width: 70%;
   padding: var(--spacing-xs);
   box-shadow: var(--shadow-md);
+  transition: filter 0.6s ease;
+}
+
+/* Loading: blur the whole framed canvas — frame edges, mat texture and the
+   personalization text — so no crisp edges show through the overlay. */
+.frameMockLoading {
+  filter: blur(8px);
 }
 
 @media (min-width: 768px) {
@@ -792,7 +801,7 @@
 .statusBadgeDot {
   font-size: 0.7em;
   line-height: 1;
-  color: var(--colors-brand-default-primary);
+  color: var(--colors-text);
   animation: dotPulse 1.8s ease-in-out infinite;   /* shared 1.8s rhythm */
 }
 

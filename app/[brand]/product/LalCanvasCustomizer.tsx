@@ -561,7 +561,7 @@ interface FramePreviewProps {
 function FramePreview({ photoUrl, frameColor, frameHasBorder, line1, line2, blurred }: FramePreviewProps) {
   return (
     <div
-      className={`${styles.frameMock} ${frameHasBorder ? styles.frameMockBordered : ''}`}
+      className={`${styles.frameMock} ${frameHasBorder ? styles.frameMockBordered : ''}${blurred ? ` ${styles.frameMockLoading}` : ''}`}
       style={{ backgroundColor: frameColor }}
     >
       <div className={styles.frameMat}>
@@ -617,16 +617,25 @@ const STEP_LABELS = [
   'Polishing the final touches',
 ]
 
-// Horizontal position + staggered delays/durations for the rising dots.
+// Horizontal position, size + staggered delays/durations for the rising dots.
 // Each dot starts at the bottom of the canvas and floats upward like a water
-// stream; varied durations & delays keep the flow natural rather than uniform.
+// stream. Sizes vary (6–14px) and the wide delay spread keeps bubbles present
+// across the whole canvas height at any moment rather than only near the bottom.
 const FLOAT_DOTS: Array<CSSProperties> = [
-  { left: '14%', animationDelay: '0s',    animationDuration: '3.2s' },
-  { left: '30%', animationDelay: '-1.4s', animationDuration: '4.0s' },
-  { left: '46%', animationDelay: '-0.6s', animationDuration: '3.0s' },
-  { left: '60%', animationDelay: '-2.2s', animationDuration: '4.4s' },
-  { left: '74%', animationDelay: '-1.0s', animationDuration: '3.6s' },
-  { left: '86%', animationDelay: '-2.8s', animationDuration: '3.9s' },
+  { left: '6%',  width: '8px',  height: '8px',  animationDelay: '0s',    animationDuration: '4.2s' },
+  { left: '14%', width: '12px', height: '12px', animationDelay: '-2.4s', animationDuration: '5.0s' },
+  { left: '22%', width: '6px',  height: '6px',  animationDelay: '-1.1s', animationDuration: '3.6s' },
+  { left: '30%', width: '10px', height: '10px', animationDelay: '-3.3s', animationDuration: '4.6s' },
+  { left: '38%', width: '14px', height: '14px', animationDelay: '-0.7s', animationDuration: '5.4s' },
+  { left: '46%', width: '7px',  height: '7px',  animationDelay: '-2.9s', animationDuration: '3.9s' },
+  { left: '52%', width: '11px', height: '11px', animationDelay: '-1.8s', animationDuration: '4.8s' },
+  { left: '60%', width: '9px',  height: '9px',  animationDelay: '-4.0s', animationDuration: '4.3s' },
+  { left: '68%', width: '13px', height: '13px', animationDelay: '-0.4s', animationDuration: '5.2s' },
+  { left: '76%', width: '6px',  height: '6px',  animationDelay: '-3.6s', animationDuration: '3.7s' },
+  { left: '84%', width: '10px', height: '10px', animationDelay: '-1.5s', animationDuration: '4.5s' },
+  { left: '92%', width: '8px',  height: '8px',  animationDelay: '-2.1s', animationDuration: '4.0s' },
+  { left: '18%', width: '9px',  height: '9px',  animationDelay: '-4.4s', animationDuration: '5.6s' },
+  { left: '72%', width: '12px', height: '12px', animationDelay: '-3.0s', animationDuration: '4.9s' },
 ]
 
 /**
