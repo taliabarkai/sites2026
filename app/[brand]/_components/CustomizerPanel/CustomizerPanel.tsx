@@ -19,6 +19,8 @@ interface CustomizerPanelProps {
   fitContent?: boolean
   /** When true, the close button is a plain white X (no circular background) for dark content. */
   closeOnDark?: boolean
+  /** When false, clicking the backdrop / pressing Escape won't close the sheet (default true). */
+  dismissible?: boolean
   children: React.ReactNode
 }
 
@@ -32,7 +34,7 @@ interface CustomizerPanelProps {
  * side-by-side layout and simply never set `open` on desktop.
  */
 export function CustomizerPanel({
-  open, onClose, preview, footer, closeIcon, ariaLabel = 'Customize', scrollResetKey, fitContent, closeOnDark, children,
+  open, onClose, preview, footer, closeIcon, ariaLabel = 'Customize', scrollResetKey, fitContent, closeOnDark, dismissible = true, children,
 }: CustomizerPanelProps) {
   const bodyRef = useRef<HTMLDivElement>(null)
 
@@ -49,17 +51,17 @@ export function CustomizerPanel({
     bodyRef.current?.scrollTo({ top: 0 })
   }, [scrollResetKey])
 
-  // Escape to close
+  // Escape to close (only when dismissible)
   useEffect(() => {
-    if (!open) return
+    if (!open || !dismissible) return
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
     document.addEventListener('keydown', onKey)
     return () => document.removeEventListener('keydown', onKey)
-  }, [open, onClose])
+  }, [open, dismissible, onClose])
 
   return (
     <div className={`${styles.root} ${open ? styles.rootOpen : ''}`} aria-hidden={!open}>
-      <div className={styles.backdrop} onClick={onClose} />
+      <div className={styles.backdrop} onClick={dismissible ? onClose : undefined} />
       <div className={`${styles.panel} ${open ? styles.panelOpen : ''} ${fitContent ? styles.panelFit : ''}`} role="dialog" aria-modal="true" aria-label={ariaLabel}>
         <button type="button" className={`${styles.close} ${closeOnDark ? styles.closeOnDark : ''}`} aria-label="Close" onClick={onClose}>
           {closeIcon ?? (
