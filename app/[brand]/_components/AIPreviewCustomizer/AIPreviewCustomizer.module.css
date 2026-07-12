@@ -1,0 +1,1006 @@
+/* AIPreviewCustomizer — Pop Your Memories. Semantic tokens only so it themes
+   automatically across all 5 brands. */
+
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+  padding: 0 var(--layout-page-margin);
+}
+
+@media (min-width: 768px) {
+  /* Mirror the shared LAL PDP layout: gallery sizes to its (square) content,
+     the controls column sits flush beside it, a trailing track absorbs the rest. */
+  .wrap {
+    display: grid;
+    grid-template-columns: auto minmax(380px, 620px) 1fr;
+    column-gap: var(--spacing-xl);
+    align-items: start;
+    max-width: var(--layout-max-width);
+    margin: 0 auto;
+    padding: 0 var(--spacing-xl) 0 var(--layout-page-margin);
+  }
+}
+
+.stageCol {
+  position: relative;
+  min-width: 0;
+}
+
+@media (min-width: 768px) {
+  .stageCol {
+    position: sticky;
+    top: calc(var(--layout-header-height) + var(--topline-height));
+    padding-top: var(--spacing-md);
+    align-self: start;
+  }
+}
+
+.controlsCol {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  min-width: 0;
+}
+
+/* The shared product header carries its own bottom margin; the controls column
+   already spaces children via `gap`, so drop it here to avoid double spacing. */
+.controlsCol .aiHeader {
+  margin-bottom: 0;
+}
+
+/* ── Gallery / preview stage (matches the shared LAL gallery sizing) ───────── */
+.gallery {
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.galleryThumbs {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 90px;
+  flex-shrink: 0;
+}
+
+.galleryThumb {
+  position: relative;
+  width: 90px;
+  height: 90px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background-color: var(--colors-card-image-bg);
+  cursor: pointer;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.galleryThumb img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.galleryThumbActive {
+  border-color: var(--colors-text);
+  box-shadow: inset 0 0 0 2px var(--colors-background);
+}
+
+/* Square main cell sized by viewport height — identical to the other LAL PDPs. */
+.galleryMain {
+  position: relative;
+  overflow: hidden;
+  height: calc(100dvh - 160px);
+  max-height: 940px;
+  aspect-ratio: 1 / 1;
+  background-color: var(--colors-card-image-bg);
+}
+
+/* Mobile: single full-width image gallery — no thumbnail rail. */
+@media (max-width: 767px) {
+  .galleryThumbs {
+    display: none;
+  }
+  .galleryMain {
+    width: 100%;
+    height: auto;
+    max-height: none;
+  }
+}
+
+.galleryImg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Mobile slide-in panel: framed preview shown as a fixed-height square at the top
+   (explicit height so it doesn't collapse inside the panel's flex preview area). */
+.panelPreview {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.panelPreview .galleryMain {
+  height: 42vh;
+  width: auto;
+  max-height: none;
+}
+
+/* Mobile panel step content — gap between the stepper and the active step's fields. */
+.panelSteps {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+/* While generating on mobile: the loading canvas is the only thing shown, filling
+   the panel body (no footer CTA, no step content). */
+.panelLoading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100%;
+}
+
+.panelLoading .galleryMain {
+  width: 100%;
+  height: auto;
+  max-height: none;
+}
+
+/* ── Framed preview stage ─────────────────────────────────────────────────── */
+.stageInner {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.frameMock {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  transition: filter 0.6s ease;
+}
+
+/* Blur the whole framed canvas while generating (overlays sit on top, unblurred). */
+.frameMockLoading {
+  filter: blur(8px);
+}
+
+/* ── Generating loader (ported from the watercolor popup) ─────────────────── */
+.imageOverlay {
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-raised);
+  background: rgba(0, 0, 0, 0.4);
+  pointer-events: none;
+}
+
+.floatDots {
+  position: absolute;
+  inset: 0;
+  z-index: calc(var(--z-raised) + 1);
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.floatDot {
+  position: absolute;
+  bottom: 0;
+  width: 10px;
+  height: 10px;
+  border-radius: var(--radius-full);
+  background: var(--colors-brand-default-primary);
+  animation-name: floatDotRise;
+  animation-timing-function: ease-in;
+  animation-iteration-count: infinite;
+}
+
+@keyframes floatDotRise {
+  0%   { transform: translateY(0);      opacity: 0; }
+  10%  { opacity: 1; }
+  90%  { opacity: 1; }
+  100% { transform: translateY(-880px); opacity: 0; }
+}
+
+.loaderGif {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: calc(var(--z-raised) + 2);
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+/* ── Loading progress section (right column / mobile panel body) ──────────── */
+.loadingSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-sm);
+  text-align: center;
+  padding: var(--spacing-sm) 0;
+}
+
+.loadingCaption {
+  margin: 0;
+  color: var(--colors-text);
+  font-family: var(--typography-rules-text2-font-family);
+  font-size: var(--typography-rules-text2-font-size);
+  font-weight: var(--typography-rules-text2-font-weight, 600);
+}
+
+.loadingBar {
+  display: flex;
+  gap: 6px;
+  width: 100%;
+}
+
+.loadingTrack {
+  flex: 1 1 0;
+  height: 4px;
+  border-radius: var(--radius-full);
+  background: var(--colors-surface-primary);
+  overflow: hidden;
+}
+
+.loadingFill {
+  height: 100%;
+  background: var(--colors-brand-default-primary);
+  transition: width 120ms linear;
+}
+
+.loadingNote {
+  margin: 0;
+  color: var(--colors-text-secondary);
+  font-family: var(--typography-rules-disclaimer1-font-family, var(--font-family-main-regular));
+  font-size: var(--typography-rules-disclaimer1-font-size, 1.2rem);
+  line-height: 1.5;
+}
+
+.window {
+  position: absolute;
+  background: var(--colors-background);
+  overflow: hidden;
+}
+
+/* Artwork fills the whole opening; personalization text overlays it (below). */
+.artworkBox {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.artwork {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: filter var(--transition-base);
+}
+
+.artworkBlur {
+  filter: blur(10px);
+}
+
+.watermark {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  place-items: center;
+  transform: rotate(-32deg) scale(1.3);
+  pointer-events: none;
+}
+
+.watermarkText {
+  font-family: var(--font-family-main-bold);
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  color: rgba(255, 255, 255, 0.55);
+  white-space: nowrap;
+}
+
+.textOverlay {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: var(--z-raised);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: var(--spacing-lg) var(--spacing-sm) var(--spacing-sm);
+  text-align: center;
+  /* Fade so the text stays legible over the artwork without pushing it up */
+  background: linear-gradient(to top, var(--colors-background) 35%, transparent);
+}
+
+.textLine1 {
+  color: var(--colors-text);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-family: var(--typography-rules-text3-font-family);
+  font-size: var(--typography-rules-text3-font-size);
+  font-weight: var(--typography-rules-text3-font-weight, 600);
+}
+
+.textLine2 {
+  color: var(--colors-text-secondary);
+  font-family: var(--typography-rules-caption1-font-family, var(--typography-rules-text3-font-family));
+  font-size: var(--typography-rules-caption1-font-size, var(--typography-rules-text3-font-size));
+}
+
+.liveBadge {
+  position: absolute;
+  top: var(--spacing-sm);
+  left: var(--spacing-sm);
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  background: var(--colors-brand-default-primary);
+  color: var(--colors-text);
+  font-family: var(--typography-rules-ribbons1-font-family, var(--font-family-main-bold));
+  font-size: 1.1rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* ── Generation overlay ───────────────────────────────────────────────────── */
+.genOverlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-lg);
+  background: rgba(0, 0, 0, 0.45);
+  text-align: center;
+}
+
+.genPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: var(--radius-full);
+  background: var(--colors-background);
+  color: var(--colors-text);
+  font-family: var(--font-family-main-bold);
+  font-size: 1.15rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.genPillDot {
+  color: var(--colors-brand-default-primary);
+  font-size: 0.8rem;
+  animation: genPulse 1.4s ease-in-out infinite;
+}
+
+@keyframes genPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+.genHeading {
+  margin: 0;
+  color: var(--colors-text-inverse);
+  font-family: var(--font-family-main-bold);
+  font-size: clamp(2rem, 3.4vw, 2.8rem);
+  line-height: 1.1;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* Centered loading content overlaid on the blurred canvas */
+.genContent {
+  position: absolute;
+  inset: 0;
+  z-index: calc(var(--z-raised) + 3);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-lg);
+  text-align: center;
+  pointer-events: none;
+}
+
+.genLoaderImg {
+  width: 84px;
+  height: 84px;
+  object-fit: contain;
+}
+
+/* Continuous lime spinner — lime from the first frame, always spinning. */
+.genSpinner {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-full);
+  border: 4px solid rgba(255, 255, 255, 0.35);
+  border-top-color: var(--colors-brand-default-primary);
+  animation: spin 0.9s linear infinite;
+}
+
+.genNoteWhite {
+  margin: 0;
+  max-width: 34ch;
+  color: var(--colors-text-inverse);
+  opacity: 0.92;
+  font-family: var(--typography-rules-text1-font-family, var(--font-family-main-regular));
+  font-size: var(--typography-rules-text1-font-size);
+  line-height: 1.5;
+}
+
+.segBar {
+  display: flex;
+  gap: 6px;
+  width: min(70%, 260px);
+}
+
+.segTrack {
+  flex: 1 1 0;
+  height: 4px;
+  border-radius: var(--radius-full);
+  background: rgba(255, 255, 255, 0.3);
+  overflow: hidden;
+}
+
+/* Cumulative left→right fill: segment 1 fills and stays, then 2, 3, 4; loops. */
+.segFill {
+  width: 0;
+  height: 100%;
+  background: var(--colors-brand-default-primary);
+}
+
+/* One-time fill across the full 20s generation — 5s per bar — then holds full.
+   Keyframe name lives in the shorthand so CSS Modules scopes it correctly. */
+.segTrack:nth-child(1) .segFill { animation: segFill1 20s linear forwards; }
+.segTrack:nth-child(2) .segFill { animation: segFill2 20s linear forwards; }
+.segTrack:nth-child(3) .segFill { animation: segFill3 20s linear forwards; }
+.segTrack:nth-child(4) .segFill { animation: segFill4 20s linear forwards; }
+
+@keyframes segFill1 { 0% { width: 0; } 25% { width: 100%; } 100% { width: 100%; } }
+@keyframes segFill2 { 0%, 25% { width: 0; } 50% { width: 100%; } 100% { width: 100%; } }
+@keyframes segFill3 { 0%, 50% { width: 0; } 75% { width: 100%; } 100% { width: 100%; } }
+@keyframes segFill4 { 0%, 75% { width: 0; } 100% { width: 100%; } }
+
+.genCaption {
+  color: var(--colors-text-inverse);
+  font-family: var(--font-family-main-regular);
+  font-size: 1.3rem;
+  opacity: 0.9;
+}
+
+.retryBtn {
+  margin-top: var(--spacing-xs);
+  padding: 10px 20px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: var(--colors-brand-default-primary);
+  color: var(--colors-text);
+  font-family: var(--font-family-main-bold);
+  font-size: 1.3rem;
+  cursor: pointer;
+}
+
+/* ── Preview controls (below the stage) ───────────────────────────────────── */
+.previewControls {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.genNote {
+  margin: 0;
+  color: var(--colors-text);
+  font-family: var(--typography-rules-text1-font-family, var(--font-family-main-regular));
+  font-size: var(--typography-rules-text1-font-size);
+  line-height: 1.5;
+  text-align: center;
+}
+
+.regenLink {
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--colors-text);
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.regenLink:disabled {
+  color: var(--colors-text-disabled);
+  cursor: not-allowed;
+}
+
+.regenDisabledNote {
+  color: var(--colors-text-disabled);
+}
+
+.changePhotoBtn {
+  align-self: flex-start;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--colors-text);
+  font-family: var(--typography-rules-text1-font-family);
+  font-size: var(--typography-rules-text1-font-size);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.changePhotoBtn:disabled {
+  color: var(--colors-text-disabled);
+  cursor: not-allowed;
+  text-decoration: none;
+}
+
+/* ── Upload box ───────────────────────────────────────────────────────────── */
+.uploadStep {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xxs);
+}
+
+.uploadLabel {
+  margin: 0;
+  color: var(--colors-text);
+  font-family: var(--typography-rules-text2-font-family);
+  font-size: var(--typography-rules-text2-font-size);
+  font-weight: var(--typography-rules-text2-font-weight, 600);
+}
+
+/* Matches the watercolor PDP "Add photo" card exactly. */
+.uploadCard {
+  position: relative;
+  width: 100%;
+  padding: var(--spacing-sm);
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--radius-sm);
+  background: var(--colors-background);
+  transition: border-color var(--transition-fast);
+}
+
+.uploadCard:hover {
+  border-color: var(--form-field-border-color-hover, var(--colors-text));
+}
+
+.uploadCardDrag {
+  border-color: var(--colors-text);
+}
+
+.uploadCardError {
+  border-color: var(--colors-error);
+}
+
+.uploadTrigger {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  width: 100%;
+  padding: 0 var(--spacing-xl) 0 0;
+  border: none;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+}
+
+.uploadRemove {
+  position: absolute;
+  top: var(--spacing-xs);
+  right: var(--spacing-xs);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  background: var(--colors-background);
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--radius-full);
+  color: var(--colors-text);
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: border-color var(--transition-fast);
+}
+
+.uploadRemove:hover {
+  border-color: var(--colors-text);
+}
+
+.uploadIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  flex-shrink: 0;
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--radius-sm);
+  background: var(--colors-background);
+  color: var(--colors-text);
+}
+
+.uploadThumb {
+  width: 60px;
+  height: 60px;
+  flex-shrink: 0;
+  border-radius: var(--radius-sm);
+  object-fit: cover;
+}
+
+.uploadCopy {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.uploadTitle {
+  color: var(--colors-text);
+  font-family: var(--typography-rules-text2-font-family);
+  font-size: var(--typography-rules-text2-font-size);
+  font-weight: var(--typography-rules-text2-font-weight, 600);
+}
+
+.uploadSub {
+  color: var(--colors-text-secondary);
+  font-family: var(--typography-rules-text3-font-family);
+  font-size: var(--typography-rules-text3-font-size);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hiddenInput {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  border: 0;
+}
+
+.fieldError {
+  margin: 0;
+  color: var(--colors-error);
+  font-family: var(--typography-rules-text3-font-family);
+  font-size: var(--typography-rules-text3-font-size);
+}
+
+/* ── Desktop steps container ──────────────────────────────────────────────── */
+.desktopSteps {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+/* ── Stepper ──────────────────────────────────────────────────────────────── */
+.stepper {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.step {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: 10px;
+  align-items: center;
+  padding: var(--spacing-sm);
+  background: var(--colors-surface-primary);
+  border: none;
+  border-bottom: 2px solid transparent;
+  text-align: left;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.step:disabled {
+  cursor: not-allowed;
+}
+
+.stepperLocked .step {
+  opacity: 0.55;
+}
+
+.stepActive {
+  background: var(--colors-background);
+  border-bottom-color: var(--colors-brand-default-primary);
+}
+
+.stepNum {
+  grid-row: 1 / span 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--colors-text-secondary);
+  color: var(--colors-text-secondary);
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.stepActive .stepNum {
+  background: var(--colors-brand-default-primary);
+  border-color: var(--colors-brand-default-primary);
+  color: var(--colors-text);
+}
+
+.stepTitle {
+  grid-column: 2;
+  color: var(--colors-text);
+  font-family: var(--typography-rules-text2-font-family);
+  font-size: var(--typography-rules-text2-font-size);
+  font-weight: var(--typography-rules-text2-font-weight, 600);
+}
+
+.stepSub {
+  grid-column: 2;
+  color: var(--colors-text-secondary);
+  font-size: 1.15rem;
+}
+
+.lockHint {
+  margin: 0;
+  color: var(--colors-text-disabled);
+  font-family: var(--typography-rules-text2-font-family);
+  font-size: var(--typography-rules-text2-font-size);
+  text-align: center;
+}
+
+/* ── Step fields ──────────────────────────────────────────────────────────── */
+.stepPanel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xxs);
+}
+
+.label {
+  color: var(--colors-text);
+  font-family: var(--typography-rules-text2-font-family);
+  font-size: var(--typography-rules-text2-font-size);
+  font-weight: var(--typography-rules-text2-font-weight, 600);
+}
+
+.labelValue {
+  color: var(--colors-text-secondary);
+  font-weight: 400;
+}
+
+.labelRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.input {
+  width: 100%;
+  min-height: var(--field-min-height);
+  padding: 0 14px;
+  color: var(--colors-text);
+  background: var(--form-field-background);
+  border: 1px solid var(--form-field-border-color);
+  border-radius: var(--form-field-border-radius, var(--radius-sm));
+  font-family: var(--typography-rules-text1-font-family);
+  font-size: var(--typography-rules-text1-font-size);
+  outline: none;
+  transition: border-color var(--transition-fast);
+}
+
+.input::placeholder {
+  color: var(--form-input-placeholder);
+}
+
+.input:focus {
+  border-color: var(--form-field-border-color-hover, var(--border-strong));
+}
+
+.backBtn {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--colors-text);
+  font-family: var(--typography-rules-text2-font-family);
+  font-size: var(--typography-rules-text2-font-size);
+  font-weight: var(--typography-rules-text2-font-weight, 600);
+  cursor: pointer;
+}
+
+.backChevron {
+  transform: rotate(180deg);
+}
+
+.swatches {
+  display: flex;
+  gap: var(--spacing-sm);
+}
+
+.swatch {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-full);
+  background: var(--swatch-color, #ccc);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: box-shadow var(--transition-fast);
+}
+
+.swatchLight {
+  box-shadow: inset 0 0 0 1px var(--border-color);
+}
+
+.swatch:not(.swatchSelected):hover {
+  box-shadow: 0 0 0 1px var(--border-strong);
+}
+
+.swatchSelected {
+  box-shadow: 0 0 0 2px var(--colors-background), 0 0 0 3.5px var(--colors-text);
+}
+
+.sizeRow {
+  display: flex;
+  gap: var(--spacing-xs);
+  flex-wrap: wrap;
+}
+
+.sizePill {
+  min-width: 48px;
+  padding: 10px 12px;
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--radius-sm);
+  background: var(--colors-background);
+  color: var(--colors-text);
+  font-family: var(--typography-rules-text2-font-family);
+  font-size: var(--typography-rules-text2-font-size);
+  cursor: pointer;
+  transition: border-color var(--transition-fast);
+}
+
+.sizePillActive {
+  border-color: var(--colors-text);
+  border-width: 2px;
+}
+
+.sizeGuideLink {
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--colors-text-secondary);
+  font-size: 1.2rem;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* ── Subtotal + CTA ───────────────────────────────────────────────────────── */
+.subtotalRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.subtotalLabel,
+.subtotalPrice {
+  color: var(--colors-text);
+  font-family: var(--typography-rules-paragraph4-font-family);
+  font-size: var(--typography-rules-paragraph4-font-size);
+  line-height: var(--typography-rules-paragraph4-line-height);
+  font-weight: var(--typography-rules-paragraph4-font-weight, normal);
+}
+
+.ctaButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-xs);
+  width: 100%;
+  min-height: 50px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: var(--colors-brand-default-primary);
+  color: var(--colors-text);
+  font-family: var(--font-family-main-bold);
+  font-size: 1.4rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: opacity var(--transition-fast);
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border-radius: var(--radius-full);
+  border: 2px solid var(--colors-text);
+  border-top-color: transparent;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.ctaButton:hover {
+  opacity: 0.88;
+}
+
+.ctaButton:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* Full-width only — the shared Button (secondary) provides the visual styling. */
+.resumeBtn {
+  width: 100%;
+}
+
+/* ── Trust badges ─────────────────────────────────────────────────────────── */
+.trustBadges {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.trustItem {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.trustIcon {
+  display: flex;
+  flex-shrink: 0;
+  color: var(--colors-text);
+}
+
+.trustText {
+  color: var(--colors-text);
+  font-family: var(--typography-rules-text1-font-family);
+  font-size: var(--typography-rules-text1-font-size);
+  line-height: var(--typography-rules-text1-line-height);
+}

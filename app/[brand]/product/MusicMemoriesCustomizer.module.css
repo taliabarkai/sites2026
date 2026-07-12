@@ -1,0 +1,677 @@
+/* Music Memories customizer — ported from limeandlou/live-preview.css.
+   Colors/typography remapped to LAL semantic design-system variables.
+   Layout values kept faithful to the static original. */
+
+.customizer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md, 16px);
+  font-family: var(--font-family-main-regular);
+  color: var(--colors-text);
+}
+
+/* ── Fields ─────────────────────────────────────────────────────────────── */
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--colors-text);
+  letter-spacing: 0.01em;
+}
+
+.labelValue {
+  font-weight: 400;
+  color: var(--colors-text-secondary);
+}
+
+.labelHint {
+  font-weight: 400;
+  font-size: 12px;
+  color: var(--colors-text-secondary);
+}
+
+.labelRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sizeGuideLink {
+  font-size: 12px;
+  color: var(--colors-text-secondary);
+  text-decoration: underline;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.input {
+  width: 100%;
+  min-height: var(--field-min-height, 48px);
+  padding: 0 14px;
+  font-size: 14px;
+  font-family: inherit;
+  color: var(--colors-text);
+  background: var(--form-field-background);
+  border: 1px solid var(--form-field-border-color);
+  border-radius: var(--radius-sm, 4px);
+  outline: none;
+  transition: border-color var(--transition-fast, 150ms ease);
+}
+
+.input::placeholder {
+  color: var(--form-input-placeholder);
+}
+
+.input:focus {
+  border-color: var(--border-strong);
+}
+
+.select {
+  composes: input;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill='%23666' d='M1.41 0L6 4.58 10.59 0 12 1.41l-6 6-6-6L1.41 0z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  cursor: pointer;
+}
+
+/* ── Song combobox ──────────────────────────────────────────────────────── */
+
+.songCombo {
+  position: relative;
+}
+
+.songComboField {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.songComboField .input {
+  padding-right: 64px;
+}
+
+.songComboClear,
+.songComboToggle {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--colors-text-secondary);
+}
+
+.songComboClear { right: 34px; font-size: 18px; line-height: 1; }
+.songComboToggle { right: 8px; }
+
+.songComboChevron {
+  transition: transform var(--transition-fast, 150ms ease);
+}
+
+.songComboChevronOpen {
+  transform: rotate(180deg);
+}
+
+.songComboList {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 30;
+  max-height: 240px;
+  overflow-y: auto;
+  margin: 0;
+  padding: 4px 0;
+  list-style: none;
+  background: var(--colors-background);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm, 4px);
+  box-shadow: var(--shadow-md, 0 8px 24px rgba(0, 0, 0, 0.12));
+}
+
+.songComboOption {
+  padding: 10px 14px;
+  font-size: 14px;
+  cursor: pointer;
+  color: var(--colors-text);
+}
+
+.songComboOption:hover,
+.songComboOptionActive {
+  background: var(--colors-surface-secondary);
+}
+
+.songComboEmpty {
+  padding: 10px 14px;
+  font-size: 13px;
+  color: var(--colors-text-secondary);
+}
+
+/* ── Tabs / flow ────────────────────────────────────────────────────────── */
+
+.flowCard {
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md, 8px);
+  background: var(--colors-background);
+  overflow: hidden;
+}
+
+.tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.tab {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: 10px;
+  align-items: center;
+  padding: 14px 16px;
+  background: var(--colors-surface-primary);
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+}
+
+.tabActive {
+  background: var(--colors-background);
+  border-bottom-color: var(--colors-brand-default-primary);
+}
+
+.tabStep {
+  grid-row: 1 / span 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-full, 50%);
+  border: 1px solid var(--colors-text-secondary);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--colors-text-secondary);
+}
+
+.tabActive .tabStep {
+  background: var(--colors-brand-default-primary);
+  border-color: var(--colors-brand-default-primary);
+  color: var(--colors-text);
+}
+
+.tabTitle {
+  grid-column: 2;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--colors-text-secondary);
+}
+
+.tabActive .tabTitle {
+  color: var(--colors-text);
+}
+
+.tabSub {
+  grid-column: 2;
+  font-size: 12px;
+  color: var(--colors-text-secondary);
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md, 16px);
+  padding: 16px;
+}
+
+/* Outer back link — returns from the flow to the song-select state */
+.flowBack {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--colors-text);
+  cursor: pointer;
+  font-family: inherit;
+}
+
+/* ── Swatches ───────────────────────────────────────────────────────────── */
+
+.swatches {
+  display: flex;
+  gap: 12px;
+}
+
+.swatch {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-full, 50%);
+  border: none;
+  background: var(--swatch-color, #ccc);
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+  transition: box-shadow var(--transition-fast, 150ms ease);
+}
+
+.swatchLight {
+  border: 1px solid var(--border-color);
+}
+
+.swatch:not(.swatchSelected):hover {
+  box-shadow: 0 0 0 1px var(--border-strong), inset 0 0 0 2.5px var(--colors-surface-primary);
+}
+
+.swatchSelected {
+  box-shadow: 0 0 0 2px var(--colors-surface-primary), 0 0 0 3.5px var(--colors-text);
+}
+
+/* ── Frame material dropdown ────────────────────────────────────────────── */
+
+.frameDropdown {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.frameTrigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-height: var(--field-min-height, 48px);
+  padding: 6px 14px;
+  background: var(--form-field-background);
+  border: 1px solid var(--form-field-border-color);
+  border-radius: var(--radius-sm, 4px);
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.frameTriggerInner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.frameThumb {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-sm, 4px);
+  object-fit: cover;
+}
+
+.frameValue {
+  font-size: 14px;
+  color: var(--colors-text);
+}
+
+.frameList {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 30;
+  margin: 0;
+  padding: 4px 0;
+  list-style: none;
+  background: var(--colors-background);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm, 4px);
+  box-shadow: var(--shadow-md, 0 8px 24px rgba(0, 0, 0, 0.12));
+}
+
+.frameOption {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 14px;
+  cursor: pointer;
+}
+
+.frameOption:hover,
+.frameOptionSelected {
+  background: var(--colors-surface-secondary);
+}
+
+.frameOptionMain {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.frameName {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--colors-text);
+}
+
+.frameDelta {
+  font-size: 12px;
+  color: var(--colors-text-secondary);
+}
+
+.framePrice {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--colors-text);
+}
+
+/* ── Upsell ─────────────────────────────────────────────────────────────── */
+
+.upsell {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.upsellEyebrow {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--colors-text-secondary);
+}
+
+.upsellCard {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md, 8px);
+  cursor: pointer;
+  background: var(--colors-surface-primary);
+  transition: border-color var(--transition-fast, 150ms ease);
+}
+
+.upsellCardChecked {
+  border-color: var(--border-strong);
+}
+
+.upsellInput {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.upsellRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.upsellThumb img {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-sm, 4px);
+  object-fit: cover;
+  display: block;
+}
+
+.upsellBody {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.upsellBadge {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--colors-brand-default-primary);
+}
+
+.upsellTitle {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--colors-text);
+}
+
+.upsellPrices {
+  display: flex;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.upsellPriceWas {
+  text-decoration: line-through;
+  color: var(--colors-text-secondary);
+}
+
+.upsellPriceNow {
+  font-weight: 700;
+  color: var(--colors-text);
+}
+
+.upsellCheckbox {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm, 4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--colors-surface-primary);
+}
+
+.upsellCheckboxChecked {
+  background: var(--colors-text);
+  border-color: var(--colors-text);
+}
+
+.upsellCheckboxChecked::after {
+  content: '✓';
+  color: var(--colors-text-inverse);
+  font-size: 13px;
+  line-height: 1;
+}
+
+/* ── Summary (saved state) ──────────────────────────────────────────────── */
+
+.summary {
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md, 8px);
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: var(--colors-surface-secondary);
+}
+
+.summaryHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.summaryTitle {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--colors-text);
+}
+
+.summaryEdit {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 13px;
+  text-decoration: underline;
+  color: var(--colors-text-secondary);
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.summaryList {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.summaryRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 13px;
+}
+
+.summaryTerm {
+  color: var(--colors-text-secondary);
+}
+
+.summaryValue {
+  color: var(--colors-text);
+  font-weight: 500;
+  text-align: right;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 60%;
+}
+
+/* ── Subtotal + CTA ─────────────────────────────────────────────────────── */
+
+.subtotalRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.subtotalLabel,
+.subtotalPrice {
+  font-family:    var(--typography-rules-paragraph4-font-family);
+  font-size:      var(--typography-rules-paragraph4-font-size);
+  line-height:    var(--typography-rules-paragraph4-line-height);
+  letter-spacing: var(--typography-rules-paragraph4-letter-spacing, normal);
+  text-transform: var(--typography-rules-paragraph4-text-transform, none);
+  font-weight:    var(--typography-rules-paragraph4-font-weight, normal);
+  color: var(--colors-text);
+}
+
+.ctaButton {
+  width: 100%;
+  height: 50px;
+  background: var(--colors-brand-default-primary);
+  border: none;
+  border-radius: var(--radius-sm, 4px);
+  font-family: inherit;
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  color: var(--colors-text);
+  cursor: pointer;
+  transition: opacity var(--transition-fast, 150ms ease);
+}
+
+.ctaButton:hover {
+  opacity: 0.88;
+}
+
+.ctaButton:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* ── Trust badges (USPs below the CTA) ──────────────────────────────────── */
+
+.trustBadges {
+  list-style: none;
+  margin: var(--spacing-md) 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.trustItem {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.trustIcon {
+  display: flex;
+  flex-shrink: 0;
+  color: var(--colors-text);
+}
+
+.trustText {
+  color: var(--colors-text);
+  font-family: var(--typography-rules-text1-font-family);
+  font-size:   var(--typography-rules-text1-font-size);
+  line-height: var(--typography-rules-text1-line-height);
+}
+
+/* ── Live preview (inline, mobile flow) ─────────────────────────────────── */
+
+.inlinePreview {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .inlinePreview {
+    display: flex;
+    justify-content: center;
+    padding: 8px 0 4px;
+  }
+
+  .inlinePreviewImg {
+    width: min(72vw, 300px);
+    height: auto;
+    display: block;
+  }
+}
+
+/* Offscreen host used only to serialize the SVG for the gallery */
+.serializerHost {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* Mobile slide-in panel preview (framed mockup at the top of the sheet) */
+.panelPreviewImg {
+  max-height: 42vh;
+  max-width: 72vw;
+  width: auto;
+  height: auto;
+  display: block;
+}
+
+.panelPreviewPlaceholder {
+  width: 60vw;
+  aspect-ratio: 3 / 4;
+  max-height: 42vh;
+  border-radius: var(--radius-sm);
+  background: var(--colors-surface-primary);
+}

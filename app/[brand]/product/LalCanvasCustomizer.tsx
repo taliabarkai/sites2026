@@ -5,6 +5,7 @@ import Link from 'next/link'
 import type { CartItem } from '../_context/CartContext'
 import type { ProductItem } from '../../../data/products'
 import lalLoader from '@/src/assets/icons/lal/LAL.gif'
+import { RevisionsNotice } from '../_components/RevisionsNotice'
 import pdp from './ProductDetailPage.module.css'
 import styles from './LalCanvasCustomizer.module.css'
 
@@ -46,6 +47,19 @@ const FRAME_COLORS: FrameColor[] = [
   { key: 'walnut', label: 'Walnut', color: 'var(--frame-color-walnut)' },
   { key: 'gold',   label: 'Gold',   color: 'var(--frame-color-gold)'   },
 ]
+
+// Photoreal frame mockups used in the AI preview — the selected frame color
+// swaps this background and the artwork sits in the mockup's grey opening.
+// walnut → dark wood, gold → light wood (closest available tones).
+const FRAME_IMAGES: Record<string, string> = {
+  black:  '/images/lal/frame-colors/Black.jpg',
+  white:  '/images/lal/frame-colors/White.jpg',
+  walnut: '/images/lal/frame-colors/DarkWood.jpg',
+  gold:   '/images/lal/frame-colors/LightWood.jpg',
+}
+
+// Grey canvas window inside the (square) frame mockups, as fractions of the image.
+const CANVAS_WINDOW = { x: 0.2065, y: 0.1135, w: 0.584, h: 0.774 }
 
 interface SizeOption { key: string; priceInCents: number; scale: number }
 
@@ -98,57 +112,52 @@ function drawImageCover(
 
 interface ComposeOpts {
   photoUrl: string
-  frameColor: string
-  matColor: string
-  bgColor: string
+  frameKey: string
   line1: string
   line2: string
-  scale?: number   // frame+photo scale within the fixed grey canvas (XL = 1)
 }
 
+// Draws the selected frame mockup, then lays the photo + watermark +
+// personalization into the mockup's grey opening (CANVAS_WINDOW).
 async function composeFramedImage(opts: ComposeOpts): Promise<string> {
-  const SIZE = 800
+  const SIZE = 1000
   const canvas = document.createElement('canvas')
   canvas.width = SIZE
   canvas.height = SIZE
   const ctx = canvas.getContext('2d')
   if (!ctx) return opts.photoUrl
 
-  // Grey canvas background (square)
-  ctx.fillStyle = opts.bgColor || '#f5f5f5'
-  ctx.fillRect(0, 0, SIZE, SIZE)
+  // Frame mockup background
+  const frameSrc = FRAME_IMAGES[opts.frameKey] ?? FRAME_IMAGES.black
+  try {
+    const frameImg = await loadImage(frameSrc)
+    ctx.drawImage(frameImg, 0, 0, SIZE, SIZE)
+  } catch {
+    ctx.fillStyle = '#f5f5f5'
+    ctx.fillRect(0, 0, SIZE, SIZE)
+  }
 
-  // Frame (portrait, centered) — outerH leaves room for the personalization text
-  // inside the white mat so it never spills onto the colored frame. The grey canvas
-  // (SIZE) stays fixed; only the frame + photo scale with the selected size.
-  const scale = opts.scale ?? 1
-  const outerW = 500 * scale, outerH = 720 * scale, border = 22 * scale
-  const fx = (SIZE - outerW) / 2
-  const fy = (SIZE - outerH) / 2
-  ctx.save()
-  ctx.shadowColor = 'rgba(0,0,0,0.18)'
-  ctx.shadowBlur = 30
-  ctx.shadowOffsetY = 12
-  ctx.fillStyle = opts.frameColor || '#111111'
-  ctx.fillRect(fx, fy, outerW, outerH)
-  ctx.restore()
-
-  // White mat + subtle canvas texture
-  const mx = fx + border, my = fy + border
-  const mw = outerW - border * 2, mh = outerH - border * 2
-  ctx.fillStyle = opts.matColor || '#ffffff'
-  ctx.fillRect(mx, my, mw, mh)
+  // Grey opening → white canvas mat + subtle woven texture
+  const wx = CANVAS_WINDOW.x * SIZE
+  const wy = CANVAS_WINDOW.y * SIZE
+  const ww = CANVAS_WINDOW.w * SIZE
+  const wh = CANVAS_WINDOW.h * SIZE
+  ctx.fillStyle = '#ffffff'
+  ctx.fillRect(wx, wy, ww, wh)
   ctx.save()
   ctx.strokeStyle = 'rgba(0,0,0,0.025)'
   ctx.lineWidth = 1
-  for (let gx = mx; gx < mx + mw; gx += 3) { ctx.beginPath(); ctx.moveTo(gx, my); ctx.lineTo(gx, my + mh); ctx.stroke() }
-  for (let gy = my; gy < my + mh; gy += 3) { ctx.beginPath(); ctx.moveTo(mx, gy); ctx.lineTo(mx + mw, gy); ctx.stroke() }
+  for (let gx = wx; gx < wx + ww; gx += 3) { ctx.beginPath(); ctx.moveTo(gx, wy); ctx.lineTo(gx, wy + wh); ctx.stroke() }
+  for (let gy = wy; gy < wy + wh; gy += 3) { ctx.beginPath(); ctx.moveTo(wx, gy); ctx.lineTo(wx + ww, gy); ctx.stroke() }
   ctx.restore()
 
-  // Photo (3:4, cover)
-  const pad = 26 * scale
-  const ibx = mx + pad, iby = my + pad
-  const ibw = mw - pad * 2, ibh = ibw * 4 / 3
+  // Photo (cover) — leaves room at the bottom for the personalization text
+  const pad = ww * 0.07
+  const hasText = !!(opts.line1 || opts.line2)
+  const textReserve = hasText ? wh * 0.15 : pad
+  const ibx = wx + pad, iby = wy + pad
+  const ibw = ww - pad * 2
+  const ibh = wh - pad - textReserve
   try {
     const img = await loadImage(opts.photoUrl)
     drawImageCover(ctx, img, ibx, iby, ibw, ibh)
@@ -160,32 +169,33 @@ async function composeFramedImage(opts: ComposeOpts): Promise<string> {
   ctx.translate(ibx + ibw / 2, iby + ibh / 2)
   ctx.rotate((-35 * Math.PI) / 180)
   ctx.fillStyle = 'rgba(255,255,255,0.55)'
-  ctx.font = `700 ${15 * scale}px Poppins, system-ui, sans-serif`
+  ctx.font = `700 ${ww * 0.03}px Poppins, system-ui, sans-serif`
   ctx.textAlign = 'center'
   ctx.textBaseline = 'middle'
-  for (let gy = -ibh; gy <= ibh; gy += 90 * scale) {
-    for (let gx = -ibw; gx <= ibw; gx += 210 * scale) {
+  for (let gy = -ibh; gy <= ibh; gy += ww * 0.14) {
+    for (let gx = -ibw; gx <= ibw; gx += ww * 0.34) {
       ctx.fillText('© LIME & LOU PREVIEW', gx, gy)
     }
   }
   ctx.restore()
 
   // Personalization lines below the photo
-  let ty = iby + ibh + 38 * scale
+  let ty = iby + ibh + ww * 0.06
   ctx.textAlign = 'center'
+  ctx.textBaseline = 'alphabetic'
   if (opts.line1) {
     ctx.fillStyle = '#111111'
-    ctx.font = `600 ${17 * scale}px Poppins, system-ui, sans-serif`
-    ctx.fillText(opts.line1.toUpperCase(), mx + mw / 2, ty)
-    ty += 26 * scale
+    ctx.font = `600 ${ww * 0.05}px Poppins, system-ui, sans-serif`
+    ctx.fillText(opts.line1.toUpperCase(), wx + ww / 2, ty)
+    ty += ww * 0.055
   }
   if (opts.line2) {
     ctx.fillStyle = '#888888'
-    ctx.font = `400 ${13 * scale}px Poppins, system-ui, sans-serif`
-    ctx.fillText(opts.line2, mx + mw / 2, ty)
+    ctx.font = `400 ${ww * 0.038}px Poppins, system-ui, sans-serif`
+    ctx.fillText(opts.line2, wx + ww / 2, ty)
   }
 
-  return canvas.toDataURL('image/png')
+  return canvas.toDataURL('image/jpeg', 0.9)
 }
 
 // ─── Main component ───────────────────────────────────────────────────────────
@@ -233,16 +243,11 @@ export function LalCanvasCustomizer({ brand, product, icons, items, previewId, a
     }
     let cancelled = false
     ;(async () => {
-      const cs = sectionRef.current ? getComputedStyle(sectionRef.current) : null
-      const sz = SIZES.find(s => s.key === sizeKey) ?? SIZES[0]
       const image = await composeFramedImage({
         photoUrl,
-        frameColor: cs?.getPropertyValue(`--frame-color-${frameKey}`).trim() || '#111111',
-        matColor:   cs?.getPropertyValue('--colors-background').trim() || '#ffffff',
-        bgColor:    cs?.getPropertyValue('--colors-surface-primary').trim() || '#f5f5f5',
+        frameKey,
         line1: line1.trim(),
         line2: line2.trim(),
-        scale: sz.scale,
       })
       if (!cancelled) onLivePreviewChange?.(image)
     })()
@@ -298,15 +303,7 @@ export function LalCanvasCustomizer({ brand, product, icons, items, previewId, a
     let image = photoUrl ?? product.image
     if (photoUrl) {
       try {
-        const cs = sectionRef.current ? getComputedStyle(sectionRef.current) : null
-        image = await composeFramedImage({
-          photoUrl,
-          frameColor: cs?.getPropertyValue(`--frame-color-${frameKey}`).trim() || '#111111',
-          matColor:   cs?.getPropertyValue('--colors-background').trim() || '#ffffff',
-          bgColor:    cs?.getPropertyValue('--colors-surface-primary').trim() || '#f5f5f5',
-          line1: l1,
-          line2: l2,
-        })
+        image = await composeFramedImage({ photoUrl, frameKey, line1: l1, line2: l2 })
       } catch { /* keep the raw photo on failure */ }
     }
 
@@ -369,15 +366,7 @@ export function LalCanvasCustomizer({ brand, product, icons, items, previewId, a
         </div>
 
         {/* Unlimited Revisions info card — above the header divider */}
-        <div className={styles.revisionsCard}>
-          <span className={styles.revisionsIcon} aria-hidden="true"><RevisionsGlyph size={24} /></span>
-          <div className={styles.revisionsBody}>
-            <p className={styles.revisionsTitle}>Unlimited Revisions Included</p>
-            <p className={styles.revisionsText}>
-              Receive your personalized preview by email within 48 hours and enjoy unlimited revisions until it&apos;s just right.
-            </p>
-          </div>
-        </div>
+        <RevisionsNotice icon={<RevisionsGlyph size={24} />} />
       </div>
 
       {/* Add photo */}
@@ -533,8 +522,7 @@ export function LalCanvasCustomizer({ brand, product, icons, items, previewId, a
       {modalOpen && (
         <CanvasPreviewModal
           photoUrl={photoUrl!}
-          frameColor={selectedFrame.color}
-          frameHasBorder={!!selectedFrame.hasBorder}
+          frameKey={frameKey}
           line1={line1.trim()}
           line2={line2.trim()}
           icons={icons}
@@ -551,40 +539,51 @@ export function LalCanvasCustomizer({ brand, product, icons, items, previewId, a
 // ─── Framed canvas preview (shared by modal + saved PDP section) ───────────────
 interface FramePreviewProps {
   photoUrl: string
-  frameColor: string
-  frameHasBorder: boolean
+  frameKey: string
   line1: string
   line2: string
   blurred: boolean
 }
 
-function FramePreview({ photoUrl, frameColor, frameHasBorder, line1, line2, blurred }: FramePreviewProps) {
+function FramePreview({ photoUrl, frameKey, line1, line2, blurred }: FramePreviewProps) {
+  const frameImage = FRAME_IMAGES[frameKey] ?? FRAME_IMAGES.black
   return (
     <div
-      className={`${styles.frameMock} ${frameHasBorder ? styles.frameMockBordered : ''}${blurred ? ` ${styles.frameMockLoading}` : ''}`}
-      style={{ backgroundColor: frameColor }}
+      className={`${styles.frameMock}${blurred ? ` ${styles.frameMockLoading}` : ''}`}
+      style={{ backgroundImage: `url(${frameImage})` }}
     >
-      <div className={styles.frameMat}>
-        <div className={styles.frameImageBox}>
-          <img
-            src={photoUrl}
-            alt="Your custom canvas preview"
-            className={`${styles.frameImage} ${blurred ? styles.frameImageLoading : styles.frameImageReady}`}
-          />
-          {!blurred && (
-            <div className={styles.watermark} aria-hidden="true">
-              {Array.from({ length: 4 }).map((_, i) => (
-                <span key={i} className={styles.watermarkText}>© LIME &amp; LOU PREVIEW</span>
-              ))}
+      {/* Artwork sits inside the mockup's grey opening */}
+      <div
+        className={styles.frameWindow}
+        style={{
+          left:   `${CANVAS_WINDOW.x * 100}%`,
+          top:    `${CANVAS_WINDOW.y * 100}%`,
+          width:  `${CANVAS_WINDOW.w * 100}%`,
+          height: `${CANVAS_WINDOW.h * 100}%`,
+        }}
+      >
+        <div className={styles.frameMat}>
+          <div className={styles.frameImageBox}>
+            <img
+              src={photoUrl}
+              alt="Your custom canvas preview"
+              className={`${styles.frameImage} ${blurred ? styles.frameImageLoading : styles.frameImageReady}`}
+            />
+            {!blurred && (
+              <div className={styles.watermark} aria-hidden="true">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <span key={i} className={styles.watermarkText}>© LIME &amp; LOU PREVIEW</span>
+                ))}
+              </div>
+            )}
+          </div>
+          {(line1 || line2) && (
+            <div className={styles.framePersonalization}>
+              {line1 && <span className={styles.framePersLine1}>{line1}</span>}
+              {line2 && <span className={styles.framePersLine2}>{line2}</span>}
             </div>
           )}
         </div>
-        {(line1 || line2) && (
-          <div className={styles.framePersonalization}>
-            {line1 && <span className={styles.framePersLine1}>{line1}</span>}
-            {line2 && <span className={styles.framePersLine2}>{line2}</span>}
-          </div>
-        )}
       </div>
     </div>
   )
@@ -665,8 +664,7 @@ function useCrossfadeText(value: string): { text: string; visible: boolean } {
 
 interface CanvasPreviewModalProps {
   photoUrl: string
-  frameColor: string
-  frameHasBorder: boolean
+  frameKey: string
   line1: string
   line2: string
   icons: CustomizerIcons
@@ -677,7 +675,7 @@ interface CanvasPreviewModalProps {
 }
 
 function CanvasPreviewModal({
-  photoUrl, frameColor, frameHasBorder, line1, line2, icons, initialReady = false,
+  photoUrl, frameKey, line1, line2, icons, initialReady = false,
   onClose, onAddToBag, onContinueShopping,
 }: CanvasPreviewModalProps) {
   const { XIcon, CheckmarkIcon } = icons
@@ -791,8 +789,7 @@ function CanvasPreviewModal({
           <div className={styles.previewWrap}>
             <FramePreview
               photoUrl={photoUrl}
-              frameColor={frameColor}
-              frameHasBorder={frameHasBorder}
+              frameKey={frameKey}
               line1={line1}
               line2={line2}
               blurred={!isReady}

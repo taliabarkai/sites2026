@@ -678,10 +678,14 @@
   justify-content: center;
 }
 
+/* Photoreal frame mockup — square scene (frame on a wall) as the background. */
 .frameMock {
-  width: 70%;
-  padding: var(--spacing-xs);
-  box-shadow: var(--shadow-md);
+  position: relative;
+  width: 78%;
+  aspect-ratio: 1 / 1;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
   transition: filter 0.6s ease;
 }
 
@@ -697,28 +701,35 @@
   }
 }
 
-.frameMockBordered {
-  box-shadow: inset 0 0 0 1px var(--border-color), var(--shadow-md);
+/* The mockup's grey opening — artwork is laid inside it (position set inline). */
+.frameWindow {
+  position: absolute;
 }
 
 .frameMat {
+  position: absolute;
+  inset: 0;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
   background-color: var(--colors-background);
   /* Subtle woven-canvas texture so a white frame stays distinguishable from the canvas */
   background-image:
     repeating-linear-gradient(0deg,  rgba(0, 0, 0, 0.025) 0, rgba(0, 0, 0, 0.025) 1px, transparent 1px, transparent 3px),
     repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.025) 0, rgba(0, 0, 0, 0.025) 1px, transparent 1px, transparent 3px);
-  padding: var(--spacing-sm) var(--spacing-sm) var(--spacing-lg);
+  padding: 6% 6% 8%;
 }
 
 .frameImageBox {
   position: relative;
+  flex: 1 1 auto;
   overflow: hidden;
 }
 
 .frameImage {
   display: block;
   width: 100%;
-  aspect-ratio: 3 / 4;
+  height: 100%;
   object-fit: cover;
   filter: blur(12px);
   transition: filter 0.8s ease;
@@ -758,6 +769,7 @@
 }
 
 .framePersonalization {
+  flex: 0 0 auto;
   display: flex;
   flex-direction: column;
   align-items: center;

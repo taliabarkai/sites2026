@@ -427,13 +427,13 @@
   color: var(--border-color);
 }
 
-/* LAL: lime-filled stars with a black outline; empty stars solid black. */
+/* LAL: black-filled stars; empty stars are a black outline only. */
 [data-theme="lal"] .starFilled {
-  color: var(--colors-brand-default-primary);
+  color: var(--colors-text);
 }
 
 [data-theme="lal"] .starEmpty {
-  color: var(--colors-text);
+  color: transparent;
 }
 
 [data-theme="lal"] .starFilled svg path,

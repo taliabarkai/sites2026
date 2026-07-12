@@ -1,0 +1,38 @@
+.card {
+  display: flex;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-sm);
+  background: var(--colors-surface-secondary);
+  border-radius: var(--radius-sm);
+}
+
+.icon {
+  flex-shrink: 0;
+  color: var(--colors-text);
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xxxs);
+}
+
+.title {
+  margin: 0;
+  color: var(--colors-text);
+  font-family:    var(--typography-rules-text2-font-family);
+  font-size:      var(--typography-rules-text2-font-size);
+  line-height:    var(--typography-rules-text2-line-height);
+  font-weight:    var(--typography-rules-text2-font-weight, 600);
+  letter-spacing: var(--typography-rules-text2-letter-spacing, normal);
+}
+
+.text {
+  margin: 0;
+  color: var(--colors-text);
+  font-family:    var(--typography-rules-text3-font-family);
+  font-size:      var(--typography-rules-text3-font-size);
+  line-height:    var(--typography-rules-text3-line-height);
+  font-weight:    var(--typography-rules-text3-font-weight, normal);
+  letter-spacing: var(--typography-rules-text3-letter-spacing, normal);
+}

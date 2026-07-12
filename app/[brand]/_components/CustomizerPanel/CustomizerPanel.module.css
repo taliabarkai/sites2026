@@ -1,0 +1,100 @@
+/* Shared mobile customizer sheet. Desktop hides it entirely — callers keep the
+   side-by-side layout and never set `open` on desktop. */
+
+.root {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .root {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-modal);
+    /* Non-interactive until open so the PDP underneath stays usable */
+    pointer-events: none;
+  }
+
+  .rootOpen {
+    pointer-events: auto;
+  }
+
+  .backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    opacity: 0;
+    transition: opacity var(--transition-base);
+  }
+
+  .rootOpen .backdrop {
+    opacity: 1;
+  }
+
+  /* Always in DOM; the transform drives show/hide so children never unmount
+     and state is preserved across open/close. */
+  .panel {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background: var(--colors-background);
+    border-radius: var(--radius-panel) var(--radius-panel) 0 0;
+    transform: translateY(100%);
+    transition: transform var(--transition-base);
+    overflow: hidden;
+  }
+
+  .panelOpen {
+    transform: translateY(0);
+  }
+}
+
+.close {
+  position: absolute;
+  top: var(--spacing-sm);
+  right: var(--spacing-sm);
+  z-index: var(--z-raised);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: var(--radius-full);
+  background: var(--colors-background);
+  color: var(--colors-text);
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+}
+
+/* Preview area — roughly half the viewport, fixed at the top of the sheet */
+.previewArea {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-sm);
+  background: var(--colors-surface-primary);
+  max-height: 48vh;
+  overflow: hidden;
+}
+
+/* Scrollable step content */
+.body {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: var(--spacing-md) var(--spacing-sm);
+}
+
+/* Sticky primary CTA */
+.footer {
+  flex: 0 0 auto;
+  padding: var(--spacing-sm) var(--spacing-md) calc(var(--spacing-md) + env(safe-area-inset-bottom, 0px));
+  border-top: var(--border-width) solid var(--border-color);
+  background: var(--colors-background);
+}

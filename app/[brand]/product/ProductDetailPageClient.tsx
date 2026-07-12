@@ -29,6 +29,15 @@ import type { MaterialSwatch } from '../_config/products'
 import { getBrandProducts } from '../../../data/products/getBrandProducts'
 import type { ProductItem } from '../../../data/products'
 import { LalCanvasCustomizer } from './LalCanvasCustomizer'
+import { MusicMemoriesCustomizer } from './MusicMemoriesCustomizer'
+import { AIPreviewCustomizer } from '../_components/AIPreviewCustomizer'
+
+// LAL products that use the song-based Music Memories customizer
+// (Custom Canvas, Acrylic Wall Art, Metal Wall Art, Square Custom Canvas)
+const MUSIC_MEMORIES_PRODUCT_IDS = new Set([1, 16, 17, 19])
+
+// LAL products that use the AI-preview customizer (Pop Your Memories)
+const AI_PREVIEW_PRODUCT_IDS = new Set([2])
 import styles from './ProductDetailPage.module.css'
 
 const BRAND_ICONS = {
@@ -793,6 +802,7 @@ function ProductDetailPageInner({ productId, previewId }: { productId: number; p
     : [product.image]
   const { items, isOpen, subtotal, closeCart, removeItem, addItem, openCart } = useCart()
   const icons = BRAND_ICONS[brand]
+
   const [livePreview, setLivePreview] = useState<string | null>(null)
 
   const handleAddToBag = (
@@ -824,6 +834,17 @@ function ProductDetailPageInner({ productId, previewId }: { productId: number; p
       <Header variant="white" brand={brand} navLinks={navLinks} topline={topline} />
 
       <main id="main-content">
+        {brand === 'lal' && AI_PREVIEW_PRODUCT_IDS.has(product.id) ? (
+          /* Pop Your Memories — AI-preview customizer owns its own preview + layout */
+          <AIPreviewCustomizer
+            brand={brand}
+            product={product}
+            icons={icons}
+            addItem={addItem}
+            openCart={openCart}
+          />
+        ) : (
+        <>
         {/* Mobile gallery — hidden on desktop */}
         <MobileGallery images={images} livePreview={livePreview} />
 
@@ -837,8 +858,17 @@ function ProductDetailPageInner({ productId, previewId }: { productId: number; p
               : <DesktopGallery images={images} name={product.name} />
           }
 
-          {/* Right / main: product form — LAL canvas customizer, else jewelry form */}
-          {brand === 'lal' ? (
+          {/* Right / main: product form — LAL music memories / canvas customizer, else jewelry form */}
+          {brand === 'lal' && MUSIC_MEMORIES_PRODUCT_IDS.has(product.id) ? (
+            <MusicMemoriesCustomizer
+              brand={brand}
+              product={product}
+              icons={icons}
+              addItem={addItem}
+              openCart={openCart}
+              onLivePreviewChange={setLivePreview}
+            />
+          ) : brand === 'lal' ? (
             <LalCanvasCustomizer
               brand={brand}
               product={product}
@@ -858,6 +888,8 @@ function ProductDetailPageInner({ productId, previewId }: { productId: number; p
             />
           )}
         </div>
+        </>
+        )}
 
         <ProductCarousel brand={brand} title="Best Sellers" ArrowIcon={icons.ArrowIcon} />
         <ReviewsSection ChevronIcon={icons.ChevronIcon} StarIcon={icons.StarIcon} XIcon={icons.XIcon} CheckmarkIcon={icons.CheckmarkIcon} />
