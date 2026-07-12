@@ -399,8 +399,10 @@ export function AIPreviewCustomizer({ brand, product, icons, addItem, openCart }
   )
 
   // ── Preview stage (frame mockup + artwork, or the idle gallery) ──
-  const renderPreviewStage = () => {
-    const showFrame = genState !== 'idle'
+  // galleryOnly keeps the product gallery regardless of generation state — used by
+  // the PDP stage column on mobile (AI generation there happens only in the panel).
+  const renderPreviewStage = (galleryOnly = false) => {
+    const showFrame = !galleryOnly && genState !== 'idle'
     const artSrc = isReady ? (previewUrl ?? photoUrl ?? '') : (photoUrl ?? '')
 
     return (
@@ -710,9 +712,10 @@ export function AIPreviewCustomizer({ brand, product, icons, addItem, openCart }
   // ── Layout ──
   return (
     <section className={styles.wrap} aria-label="Product options">
-      {/* Left: preview stage (desktop) / gallery top (mobile) */}
+      {/* Left: preview stage on desktop. On mobile it stays the product gallery —
+          AI generation/preview happens in the slide-in panel instead. */}
       <div className={styles.stageCol}>
-        {renderPreviewStage()}
+        {renderPreviewStage(isMobile)}
       </div>
 
       {/* Right: controls */}
