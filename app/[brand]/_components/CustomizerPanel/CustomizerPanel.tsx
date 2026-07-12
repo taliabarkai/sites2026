@@ -15,6 +15,10 @@ interface CustomizerPanelProps {
   ariaLabel?: string
   /** When this value changes, the scrollable body resets to the top (e.g. step change). */
   scrollResetKey?: string | number
+  /** When true, the sheet hugs its content instead of filling the viewport. */
+  fitContent?: boolean
+  /** When true, the close button is a plain white X (no circular background) for dark content. */
+  closeOnDark?: boolean
   children: React.ReactNode
 }
 
@@ -28,7 +32,7 @@ interface CustomizerPanelProps {
  * side-by-side layout and simply never set `open` on desktop.
  */
 export function CustomizerPanel({
-  open, onClose, preview, footer, closeIcon, ariaLabel = 'Customize', scrollResetKey, children,
+  open, onClose, preview, footer, closeIcon, ariaLabel = 'Customize', scrollResetKey, fitContent, closeOnDark, children,
 }: CustomizerPanelProps) {
   const bodyRef = useRef<HTMLDivElement>(null)
 
@@ -56,8 +60,8 @@ export function CustomizerPanel({
   return (
     <div className={`${styles.root} ${open ? styles.rootOpen : ''}`} aria-hidden={!open}>
       <div className={styles.backdrop} onClick={onClose} />
-      <div className={`${styles.panel} ${open ? styles.panelOpen : ''}`} role="dialog" aria-modal="true" aria-label={ariaLabel}>
-        <button type="button" className={styles.close} aria-label="Close" onClick={onClose}>
+      <div className={`${styles.panel} ${open ? styles.panelOpen : ''} ${fitContent ? styles.panelFit : ''}`} role="dialog" aria-modal="true" aria-label={ariaLabel}>
+        <button type="button" className={`${styles.close} ${closeOnDark ? styles.closeOnDark : ''}`} aria-label="Close" onClick={onClose}>
           {closeIcon ?? (
             <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none">
               <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />

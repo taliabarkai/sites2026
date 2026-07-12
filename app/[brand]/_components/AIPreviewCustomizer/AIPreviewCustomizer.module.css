@@ -146,13 +146,8 @@
 
 /* While generating on mobile: the loading canvas is the only thing shown, filling
    the panel body (no footer CTA, no step content). */
-.panelLoading {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 100%;
-}
-
+/* Loading canvas fills the panel body width (respecting the body's 16px side
+   padding) rather than overflowing it. */
 .panelLoading .galleryMain {
   width: 100%;
   height: auto;

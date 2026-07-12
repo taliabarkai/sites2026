@@ -51,6 +51,12 @@
   .panelOpen {
     transform: translateY(0);
   }
+
+  /* Hug content instead of filling the viewport (e.g. the loading state) */
+  .panelFit {
+    height: auto;
+    max-height: 100%;
+  }
 }
 
 .close {
@@ -69,6 +75,13 @@
   color: var(--colors-text);
   box-shadow: var(--shadow-sm);
   cursor: pointer;
+}
+
+/* Plain white X over dark content (e.g. the loading canvas) */
+.closeOnDark {
+  background: transparent;
+  box-shadow: none;
+  color: var(--colors-text-inverse);
 }
 
 /* Preview area — roughly half the viewport, fixed at the top of the sheet */

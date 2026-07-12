@@ -752,6 +752,8 @@ export function AIPreviewCustomizer({ brand, product, icons, addItem, openCart }
           onClose={() => setPanelOpen(false)}
           ariaLabel="Personalize your canvas"
           closeIcon={XIcon ? <XIcon size={20} /> : undefined}
+          fitContent={!isReady}
+          closeOnDark={!isReady}
           scrollResetKey={`${genState}-${step}`}
           preview={isReady ? <div className={styles.panelPreview}>{renderPreviewStage()}</div> : undefined}
         >
