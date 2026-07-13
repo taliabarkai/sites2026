@@ -527,26 +527,43 @@ export function MusicMemoriesCustomizer({ brand, product, icons, addItem, openCa
     </div>
   )
 
-  {/* Song title + artist — shown on the main screen and in the personalize step.
-     (Song combo hidden for now, no lyrics API — may return later.) */}
-  const songArtistFields = (
-    <>
-      <div className={styles.field}>
-        <label className={styles.label} htmlFor="mm-song-title">Pick your song and we&apos;ll add the lyrics</label>
-        <input type="text" id="mm-song-title" className={styles.input} placeholder="e.g. Yellow"
-          value={songTitle} onChange={e => setSongTitle(e.target.value)} />
+  // Song title drives the record's center title. (Song combo hidden for now — no lyrics API.)
+  const songTitleField = (
+    <div className={styles.field}>
+      <label className={styles.label} htmlFor="mm-song-title">Pick your song</label>
+      <input type="text" id="mm-song-title" className={styles.input} placeholder="e.g. Yellow"
+        value={songTitle} onChange={e => setSongTitle(e.target.value)} />
+    </div>
+  )
+
+  const artistField = (
+    <div className={styles.field}>
+      <label className={styles.label} htmlFor="mm-artist">Name the artist</label>
+      <input type="text" id="mm-artist" className={styles.input} placeholder="e.g. Coldplay"
+        value={artist} onChange={e => setArtist(e.target.value)} />
+    </div>
+  )
+
+  const centerColorField = (
+    <div className={styles.field}>
+      <span className={styles.label}>
+        Color of the center — <span className={styles.labelValue}>{CENTER_COLORS.find(c => c.value === centerColor)?.label}</span>{' '}
+        {centerColor === 'purple' && <span className={styles.labelHint}>(Most Popular)</span>}
+      </span>
+      <div className={styles.swatches} role="group" aria-label="Center color">
+        {CENTER_COLORS.map(c => (
+          <button key={c.value} type="button" aria-label={c.label}
+            className={`${styles.swatch} ${centerColor === c.value ? styles.swatchSelected : ''}`}
+            style={{ ['--swatch-color' as string]: c.hex }} onClick={() => setCenterColor(c.value)} />
+        ))}
       </div>
-      <div className={styles.field}>
-        <label className={styles.label} htmlFor="mm-artist">Name the artist</label>
-        <input type="text" id="mm-artist" className={styles.input} placeholder="e.g. Coldplay"
-          value={artist} onChange={e => setArtist(e.target.value)} />
-      </div>
-    </>
+    </div>
   )
 
   const mmPersonalizeInner = (
     <>
-      {songArtistFields}
+      {songTitleField}
+      {artistField}
       <div className={styles.field}>
         <label className={styles.label} htmlFor="mm-memory">What&apos;s the occasion?</label>
         <input type="text" id="mm-memory" className={styles.input} placeholder="e.g. Our Wedding Song"
@@ -557,37 +574,14 @@ export function MusicMemoriesCustomizer({ brand, product, icons, addItem, openCa
         <input type="text" id="mm-names" className={styles.input} placeholder="e.g. Alex & Max, 10.10.2021"
           value={names} onChange={e => setNames(e.target.value)} />
       </div>
+      {centerColorField}
     </>
   )
 
   const mmCustomizeInner = (
     <>
-      <div className={styles.field}>
-        <span className={styles.label}>
-          Color of the center — <span className={styles.labelValue}>{CENTER_COLORS.find(c => c.value === centerColor)?.label}</span>{' '}
-          {centerColor === 'purple' && <span className={styles.labelHint}>(Most Popular)</span>}
-        </span>
-        <div className={styles.swatches} role="group" aria-label="Center color">
-          {CENTER_COLORS.map(c => (
-            <button key={c.value} type="button" aria-label={c.label}
-              className={`${styles.swatch} ${centerColor === c.value ? styles.swatchSelected : ''}`}
-              style={{ ['--swatch-color' as string]: c.hex }} onClick={() => setCenterColor(c.value)} />
-          ))}
-        </div>
-      </div>
-
-      <div className={styles.field}>
-        <div className={styles.labelRow}>
-          <span className={styles.label}>Choose size</span>
-          <button type="button" className={styles.sizeGuideLink}>Size guide</button>
-        </div>
-        <select className={styles.select} aria-label="Product size" value={size} onChange={e => setSize(e.target.value)}>
-          {SIZE_OPTIONS.map(s => (<option key={s.value} value={s.value}>{s.label}</option>))}
-        </select>
-      </div>
-
       <div className={styles.frameDropdown}>
-        <span className={styles.label}>Frame material</span>
+        <span className={styles.label}>Material</span>
         <button type="button" className={styles.frameTrigger} aria-expanded={frameListOpen} aria-haspopup="listbox"
           onClick={() => setFrameListOpen(o => !o)}>
           <span className={styles.frameTriggerInner}>
@@ -617,6 +611,16 @@ export function MusicMemoriesCustomizer({ brand, product, icons, addItem, openCa
             })}
           </ul>
         )}
+      </div>
+
+      <div className={styles.field}>
+        <div className={styles.labelRow}>
+          <span className={styles.label}>Choose size</span>
+          <button type="button" className={styles.sizeGuideLink}>Size guide</button>
+        </div>
+        <select className={styles.select} aria-label="Product size" value={size} onChange={e => setSize(e.target.value)}>
+          {SIZE_OPTIONS.map(s => (<option key={s.value} value={s.value}>{s.label}</option>))}
+        </select>
       </div>
 
       {isCanvas && (
@@ -702,7 +706,8 @@ export function MusicMemoriesCustomizer({ brand, product, icons, addItem, openCa
         {/* ── Default state: song + artist fields, then Personalize CTA ── */}
         {phase === 'default' && (
           <>
-            {songArtistFields}
+            {songTitleField}
+            {artistField}
             <button type="button" className={styles.ctaButton} onClick={() => { setPhase('flow'); setTab('personalize') }}>
               Personalize yours
             </button>
