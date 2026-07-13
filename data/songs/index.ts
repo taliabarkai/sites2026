@@ -1,34 +1,33 @@
-// Ported mechanically from limeandlou/songs-catalog.js — do not hand-edit lyric text.
+// Song catalog for the Music Memories customizer. No lyrics are stored — the
+// record rings show placeholder copy (see RING_COPY in MusicMemoriesCustomizer),
+// and only the center title is personalized per song.
 export interface SongEntry {
   id: string
   label: string
   center: string[]
-  lyrics: string
 }
 
-export const DEFAULT_LYRICS = 'Our love is unbreakable, nothing can tear it down. We will stand strong together, always be around. Through the good times and the bad we will never lose our way. Side by side forever, in the light of every day. When the world feels heavy you are my quiet place. Every moment with you, time cannot erase. '
-
 export const SONG_CATALOG: SongEntry[] = [
-  { id: 'coldplay-yellow', label: 'Yellow – Coldplay', center: ['YELLOW'], lyrics: 'Look at the stars, look how they shine for you, and everything you do. Yeah they were all yellow. I came along, I wrote a song for you, and all the things you do. And it was called Yellow. So then I took my turn, oh what a thing to have done, and it was all yellow.' },
-  { id: 'bruno-just-the-way', label: 'Just the Way You Are – Bruno Mars', center: ['JUST THE', 'WAY YOU ARE'], lyrics: 'When I see your face, there is not a thing that I would change, cause you are amazing just the way you are. And when you smile, the whole world stops and stares for a while, cause girl you are amazing just the way you are.' },
-  { id: 'adele-someone', label: 'Someone Like You – Adele', center: ['SOMEONE', 'LIKE YOU'], lyrics: 'I heard that you are settled down, that you found a girl and you are married now. I heard that your dreams came true, guess she gave you things I did not give to you. Never mind I will find someone like you, I wish nothing but the best for you too.' },
-  { id: 'gaga-shallow', label: 'Shallow – Lady Gaga', center: ['SHALLOW'], lyrics: 'Tell me something girl, are you happy in this modern world, or do you need more, is there something else you are searching for. I am off the deep end, watch as I dive in, I will never meet the ground, crash through the surface where they cannot hurt us.' },
-  { id: 'rhcp-californication', label: 'Californication – Red Hot Chili Peppers', center: ['CALIFORNI', 'CATION'], lyrics: 'Psychic spies from China try to steal your mind elation, and little girls from Sweden dream of silver screen quotation. And if you want these kind of dreams it is Californication. It is understood that Hollywood sells Californication.' },
-  { id: 'beatles-hey-jude', label: 'Hey Jude – The Beatles', center: ['HEY JUDE'], lyrics: 'Hey Jude do not make it bad, take a sad song and make it better. Remember to let her into your heart, then you can start to make it better. Hey Jude do not be afraid, you were made to go out and get her. The minute you let her under your skin, then you begin to make it better.' },
-  { id: 'swift-love-story', label: 'Love Story – Taylor Swift', center: ['LOVE', 'STORY'], lyrics: 'We were both young when I first saw you, I close my eyes and the flashback starts. I am standing there on a balcony in summer air. See the lights, see the party, see the ball gowns, see you make your way through the crowd and say hello. It is a love story baby just say yes.' },
-  { id: 'edsheeran-perfect', label: 'Perfect – Ed Sheeran', center: ['PERFECT'], lyrics: 'I found a love for me, darling just dive right in and follow my lead. Well I found a girl beautiful and sweet, I never knew you were the someone waiting for me. Cause we were just kids when we fell in love, not knowing what it was, I will not give you up this time.' },
-  { id: 'queen-rhapsody', label: 'Bohemian Rhapsody – Queen', center: ['BOHEMIAN', 'RHAPSODY'], lyrics: 'Is this the real life, is this just fantasy, caught in a landslide no escape from reality. Open your eyes, look up to the skies and see. I am just a poor boy I need no sympathy, because I am easy come easy go, little high little low.' },
-  { id: 'billie-ocean-eyes', label: 'Ocean Eyes – Billie Eilish', center: ['OCEAN', 'EYES'], lyrics: 'I have been watching you for some time, cannot stop staring at those ocean eyes. Burning cities and napalm skies, fifteen flares inside those ocean eyes. Those ocean eyes. No fair, you really know how to make me cry when you give me those ocean eyes.' },
-  { id: 'beyonce-halo', label: 'Halo – Beyoncé', center: ['HALO'], lyrics: 'Remember those walls I built, well baby they are tumbling down, and they did not even put up a fight, they did not even make a sound. I found a way to let you in but I never really had a doubt. Standing in the light of your halo I got my angel now.' },
-  { id: 'u2-with-or-without', label: 'With or Without You – U2', center: ['WITH OR', 'WITHOUT YOU'], lyrics: 'See the stone set in your eyes, see the thorn twist in your side. I wait for you, sleight of hand and twist of fate, on a bed of nails she makes me wait. And I wait without you, with or without you, with or without you. Through the storm we reach the shore.' },
-  { id: 'imaginedragons-believer', label: 'Believer – Imagine Dragons', center: ['BELIEVER'], lyrics: 'First things first I am say all the words inside my head, I am fired up and tired of the way that things have been. Second thing second, do not you tell me what you think that I can be, I am the one at the sail I am the master of my sea.' },
-  { id: 'maroon5-sugar', label: 'Sugar – Maroon 5', center: ['SUGAR'], lyrics: 'I am hurting baby I am broken down, I need your loving loving I need it now. When I am without you I am something weak, you got me begging begging I am on my knees. I do not want to be needing your love, I just want to be deep in your love.' },
-  { id: 'rihanna-diamonds', label: 'Diamonds – Rihanna', center: ['DIAMONDS'], lyrics: 'Shine bright like a diamond, shine bright like a diamond. Find light in the beautiful sea, I choose to be happy. You and I you and I, we are like diamonds in the sky. You are a shooting star I see, a vision of ecstasy.' },
-  { id: 'elton-your-song', label: 'Your Song – Elton John', center: ['YOUR SONG'], lyrics: 'It is a little bit funny this feeling inside, I am not one of those who can easily hide. I do not have much money but boy if I did, I would buy a big house where we both could live. If I was a sculptor but then again no, or a man who makes potions in a traveling show.' },
-  { id: 'fleetwood-dreams', label: 'Dreams – Fleetwood Mac', center: ['DREAMS'], lyrics: 'Now here you go again you say you want your freedom, well who am I to keep you down. It is only right that you should play the way you feel it, but listen carefully to the sound of your loneliness like a heartbeat drives you mad.' },
-  { id: 'nirvana-come-as-you-are', label: 'Come As You Are – Nirvana', center: ['COME AS YOU', 'ARE'], lyrics: 'Come as you are, as you were, as I want you to be. As a friend, as a friend, as an old enemy. Take your time, hurry up, the choice is yours do not be late. Take a rest as a friend, as an old memoria, memoria, memoria.' },
-  { id: 'dualipa-levitating', label: 'Levitating – Dua Lipa', center: ['LEVITATING'], lyrics: 'If you want to run away with me I know a galaxy and I can take you for a ride. I had a premonition that we fell into a rhythm where the music do not stop for life. Glitter in the sky glitter in my eyes, shining just the way I like. You want me I want you baby, my sugar boo I am levitating.' },
-  { id: 'oasis-wonderwall', label: 'Wonderwall – Oasis', center: ['WONDER', 'WALL'], lyrics: 'Today is gonna be the day that they are gonna throw it back to you, by now you should have somehow realized what you gotta do. I do not believe that anybody feels the way I do about you now. Backbeat the word is on the street that the fire in your heart is out.' }
+  { id: 'coldplay-yellow', label: 'Yellow – Coldplay', center: ['YELLOW'] },
+  { id: 'bruno-just-the-way', label: 'Just the Way You Are – Bruno Mars', center: ['JUST THE', 'WAY YOU ARE'] },
+  { id: 'adele-someone', label: 'Someone Like You – Adele', center: ['SOMEONE', 'LIKE YOU'] },
+  { id: 'gaga-shallow', label: 'Shallow – Lady Gaga', center: ['SHALLOW'] },
+  { id: 'rhcp-californication', label: 'Californication – Red Hot Chili Peppers', center: ['CALIFORNI', 'CATION'] },
+  { id: 'beatles-hey-jude', label: 'Hey Jude – The Beatles', center: ['HEY JUDE'] },
+  { id: 'swift-love-story', label: 'Love Story – Taylor Swift', center: ['LOVE', 'STORY'] },
+  { id: 'edsheeran-perfect', label: 'Perfect – Ed Sheeran', center: ['PERFECT'] },
+  { id: 'queen-rhapsody', label: 'Bohemian Rhapsody – Queen', center: ['BOHEMIAN', 'RHAPSODY'] },
+  { id: 'billie-ocean-eyes', label: 'Ocean Eyes – Billie Eilish', center: ['OCEAN', 'EYES'] },
+  { id: 'beyonce-halo', label: 'Halo – Beyoncé', center: ['HALO'] },
+  { id: 'u2-with-or-without', label: 'With or Without You – U2', center: ['WITH OR', 'WITHOUT YOU'] },
+  { id: 'imaginedragons-believer', label: 'Believer – Imagine Dragons', center: ['BELIEVER'] },
+  { id: 'maroon5-sugar', label: 'Sugar – Maroon 5', center: ['SUGAR'] },
+  { id: 'rihanna-diamonds', label: 'Diamonds – Rihanna', center: ['DIAMONDS'] },
+  { id: 'elton-your-song', label: 'Your Song – Elton John', center: ['YOUR SONG'] },
+  { id: 'fleetwood-dreams', label: 'Dreams – Fleetwood Mac', center: ['DREAMS'] },
+  { id: 'nirvana-come-as-you-are', label: 'Come As You Are – Nirvana', center: ['COME AS YOU', 'ARE'] },
+  { id: 'dualipa-levitating', label: 'Levitating – Dua Lipa', center: ['LEVITATING'] },
+  { id: 'oasis-wonderwall', label: 'Wonderwall – Oasis', center: ['WONDER', 'WALL'] },
 ]
 
 export function getSongById(id: string): SongEntry | undefined {

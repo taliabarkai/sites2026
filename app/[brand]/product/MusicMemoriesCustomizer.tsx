@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import type { CartItem } from '../_context/CartContext'
 import type { ProductItem } from '../../../data/products'
-import { SONG_CATALOG, DEFAULT_LYRICS, getSongById, type SongEntry } from '../../../data/songs'
+import { SONG_CATALOG, getSongById } from '../../../data/songs'
 import { CustomizerPanel, useIsMobile } from '../_components/CustomizerPanel'
 import pdp from './ProductDetailPage.module.css'
 import styles from './MusicMemoriesCustomizer.module.css'
@@ -87,14 +87,8 @@ const SLIPMAT = {
   image: '/images/lal/music-memories/slipmat-upsell.png',
 }
 
-const LYRIC_RINGS = [
-  { r: 101, fontSize: 5.6, minChars: 4500 },
-  { r: 92, fontSize: 5.3, minChars: 4000 },
-  { r: 83, fontSize: 5, minChars: 3500 },
-  { r: 74, fontSize: 4.75, minChars: 3000 },
-  { r: 65, fontSize: 4.5, minChars: 2600 },
-  { r: 56, fontSize: 4.25, minChars: 2200 },
-]
+// Placeholder shown on the record groove (no lyrics API). Edit here to change the copy.
+const RING_COPY = 'YOUR SONG LYRICS WILL APPEAR HERE'
 
 const LAL_RATING = 4.9
 const LAL_REVIEW_COUNT = 1024
@@ -110,22 +104,32 @@ function defaultFrameForProduct(product: ProductItem): FrameType {
   return 'canvas'
 }
 
-// ─── Preview text helpers (ported from live-preview.js) ─────────────────────
-
-function expandLyricText(text: string, minLen: number): string {
-  const t = (text || '').replace(/\s+/g, ' ').trim()
-  if (!t) return ''
-  let out = t
-  while (out.length < minLen) out += ' · ' + t
-  return out
+// ─── Spiral groove path ─────────────────────────────────────────────────────
+// One continuous spiral (like a record groove) so the placeholder text flows
+// without the wedge seam that concentric rings create.
+function buildSpiralPath(
+  cx: number, cy: number,
+  rOuter: number, rInner: number,
+  turns: number, stepsPerTurn = 120,
+): { d: string; length: number } {
+  const totalSteps = Math.round(turns * stepsPerTurn)
+  let d = ''
+  let length = 0
+  let px = 0, py = 0
+  for (let i = 0; i <= totalSteps; i++) {
+    const t = i / totalSteps
+    const angle = turns * 2 * Math.PI * t - Math.PI / 2 // start at 12 o'clock
+    const r = rOuter - (rOuter - rInner) * t
+    const x = cx + r * Math.cos(angle)
+    const y = cy + r * Math.sin(angle)
+    d += (i === 0 ? 'M' : 'L') + x.toFixed(2) + ',' + y.toFixed(2)
+    if (i > 0) length += Math.hypot(x - px, y - py)
+    px = x; py = y
+  }
+  return { d, length }
 }
 
-function buildLyricRingText(lyrics: string, ringIndex: number, minChars: number): string {
-  const len = Math.max(lyrics.length, 1)
-  const start = Math.floor((ringIndex * 97 + lyrics.length * 0.07) % len)
-  const chunk = lyrics.slice(start) + ' ' + lyrics + ' '
-  return expandLyricText(chunk, minChars)
-}
+const SPIRAL_FONT_SIZE = 5
 
 function buildCenterTitleLines(center: string[] | null): string[] {
   const def = ['PICK YOUR', 'SONG TITLE']
@@ -161,15 +165,14 @@ function buildCenterTitleLines(center: string[] | null): string[] {
 
 interface VinylPreviewProps {
   idSuffix: string
-  song: SongEntry | null
+  songTitle: string
   memory: string
   names: string
   centerHex: string
 }
 
-function VinylPreviewSvg({ idSuffix, song, memory, names, centerHex }: VinylPreviewProps) {
-  const lyrics = (song?.lyrics?.trim() || DEFAULT_LYRICS).replace(/\s+/g, ' ').trim()
-  const titleLines = buildCenterTitleLines(song?.center ?? null)
+function VinylPreviewSvg({ idSuffix, songTitle, memory, names, centerHex }: VinylPreviewProps) {
+  const titleLines = buildCenterTitleLines(songTitle.trim() ? [songTitle] : null)
 
   // Center title layout (ported from layoutPreviewCenterTitle)
   const cy = 232
@@ -177,6 +180,15 @@ function VinylPreviewSvg({ idSuffix, song, memory, names, centerHex }: VinylPrev
   const lh = 14
   const n = titleLines.length
   const firstY = n === 1 ? cy + fs * 0.32 : n === 2 ? cy - lh / 2 + fs * 0.2 : cy - lh + fs * 0.18
+
+  // One continuous spiral groove matching the old ring band (r 101 → 54, 7 turns).
+  const spiralId = `mm-spiral-${idSuffix}`
+  const spiral = buildSpiralPath(200, 232, 101, 54, 7)
+  const phrase = `${RING_COPY} · `
+  const approxCharWidth = SPIRAL_FONT_SIZE * 0.62
+  const targetChars = Math.ceil((spiral.length / approxCharWidth) * 1.15) // slight overfill
+  let spiralText = ''
+  while (spiralText.length < targetChars) spiralText += phrase
 
   // Explicit width/height (2.5× the viewBox) gives a crisp raster when composited.
   return (
@@ -190,37 +202,20 @@ function VinylPreviewSvg({ idSuffix, song, memory, names, centerHex }: VinylPrev
       aria-label="Live personalization preview"
     >
       <defs>
-        {LYRIC_RINGS.map((ring, i) => (
-          <path
-            key={i}
-            id={`mm-lyric-r${i}-${idSuffix}`}
-            fill="none"
-            d={`M200,${232 - ring.r} A${ring.r},${ring.r} 0 1 1 199.9,${232 - ring.r}`}
-          />
-        ))}
+        <path id={spiralId} fill="none" d={spiral.d} />
       </defs>
       {/* Printed canvas surface — fills the frame opening */}
       <rect x="0" y="0" width="400" height="540" fill="#FAF9F6" />
-      <g transform="translate(0,6)">
+      {/* Record scaled up (~1.3×) around its center to match the product artwork size */}
+      <g transform="translate(200 238) scale(1.3) translate(-200 -232)">
         <circle cx="200" cy="232" r="112" fill="#0d0d0d" />
         <circle cx="200" cy="232" r="104" fill="#121212" stroke="rgba(255,255,255,0.04)" strokeWidth="0.6" />
         <circle cx="200" cy="232" r="96" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="0.5" />
         <circle cx="200" cy="232" r="88" fill="none" stroke="rgba(255,255,255,0.04)" strokeWidth="0.5" />
         <circle cx="200" cy="232" r="80" fill="none" stroke="rgba(255,255,255,0.035)" strokeWidth="0.5" />
-        {LYRIC_RINGS.map((ring, i) => (
-          <text
-            key={i}
-            fill="#FFFFFF"
-            fontFamily="Georgia,serif"
-            fontSize={ring.fontSize}
-            fontWeight="400"
-            letterSpacing="0.05em"
-          >
-            <textPath href={`#mm-lyric-r${i}-${idSuffix}`} startOffset="0%">
-              {buildLyricRingText(lyrics, i, ring.minChars)}
-            </textPath>
-          </text>
-        ))}
+        <text fill="#FFFFFF" fontFamily="Georgia,serif" fontSize={SPIRAL_FONT_SIZE} letterSpacing="0.04em">
+          <textPath href={`#${spiralId}`}>{spiralText}</textPath>
+        </text>
         <circle cx="200" cy="232" r="48" fill={centerHex} />
         <text x="200" y={firstY} textAnchor="middle" fill="#FFFFFF" fontFamily="'EB Garamond', Garamond, serif" fontSize={fs} fontWeight="700" letterSpacing="0.06em">
           {titleLines.map((line, li) => (
@@ -376,17 +371,17 @@ export function MusicMemoriesCustomizer({ brand, product, icons, addItem, openCa
 
   const [phase, setPhase] = useState<Phase>('default')
   const [tab, setTab] = useState<Tab>('personalize')
-  const [songId, setSongId] = useState('')
+  const [songTitle, setSongTitle] = useState('')
+  const [artist, setArtist] = useState('')
   const [memory, setMemory] = useState('')
   const [names, setNames] = useState('')
-  const [centerColor, setCenterColor] = useState<string>('purple')
+  const [centerColor, setCenterColor] = useState<string>('orange')
   const [size, setSize] = useState('12x16')
   const [frameType, setFrameType] = useState<FrameType>(() => defaultFrameForProduct(product))
-  const [frameColor, setFrameColor] = useState('white')
+  const [frameColor, setFrameColor] = useState('black')
   const [frameListOpen, setFrameListOpen] = useState(false)
   const [slipmat, setSlipmat] = useState(false)
 
-  const song = songId ? getSongById(songId) ?? null : null
   const isCanvas = frameType === 'canvas'
   const centerHex = CENTER_COLORS.find(c => c.value === centerColor)?.hex ?? CENTER_COLORS[0].hex
 
@@ -422,7 +417,7 @@ export function MusicMemoriesCustomizer({ brand, product, icons, addItem, openCa
       })
       .catch(() => { /* leave the previous preview on failure */ })
     return () => { cancelled = true }
-  }, [phase, songId, memory, names, centerColor, frameSrc, onLivePreviewChange])
+  }, [phase, songTitle, memory, names, centerColor, frameSrc, onLivePreviewChange])
 
   useEffect(() => () => onLivePreviewChange?.(null), [onLivePreviewChange])
 
@@ -431,7 +426,8 @@ export function MusicMemoriesCustomizer({ brand, product, icons, addItem, openCa
     const image = previewImage ?? product.image
 
     const selectedOptions = [
-      { label: 'Song', value: song?.label ?? '—' },
+      { label: 'Song', value: songTitle.trim() || '—' },
+      { label: 'Artist', value: artist.trim() || '—' },
       { label: 'Memory', value: memory.trim() || '—' },
       { label: 'Names/Date', value: names.trim() || '—' },
       { label: 'Color', value: CENTER_COLORS.find(c => c.value === centerColor)?.label ?? '—' },
@@ -531,12 +527,26 @@ export function MusicMemoriesCustomizer({ brand, product, icons, addItem, openCa
     </div>
   )
 
-  const mmPersonalizeInner = (
+  {/* Song title + artist — shown on the main screen and in the personalize step.
+     (Song combo hidden for now, no lyrics API — may return later.) */}
+  const songArtistFields = (
     <>
       <div className={styles.field}>
-        <label className={styles.label} htmlFor="mm-song">Choose your song</label>
-        <SongCombo id="mm-song" songId={songId} onSelect={setSongId} onClear={() => setSongId('')} />
+        <label className={styles.label} htmlFor="mm-song-title">Pick your song and we&apos;ll add the lyrics</label>
+        <input type="text" id="mm-song-title" className={styles.input} placeholder="e.g. Yellow"
+          value={songTitle} onChange={e => setSongTitle(e.target.value)} />
       </div>
+      <div className={styles.field}>
+        <label className={styles.label} htmlFor="mm-artist">Name the artist</label>
+        <input type="text" id="mm-artist" className={styles.input} placeholder="e.g. Coldplay"
+          value={artist} onChange={e => setArtist(e.target.value)} />
+      </div>
+    </>
+  )
+
+  const mmPersonalizeInner = (
+    <>
+      {songArtistFields}
       <div className={styles.field}>
         <label className={styles.label} htmlFor="mm-memory">What&apos;s the occasion?</label>
         <input type="text" id="mm-memory" className={styles.input} placeholder="e.g. Our Wedding Song"
@@ -635,7 +645,7 @@ export function MusicMemoriesCustomizer({ brand, product, icons, addItem, openCa
   ) : (
     <>
       {subtotalRow}
-      <button type="button" className={styles.ctaButton} onClick={handleAddToBag} disabled={!songId}>
+      <button type="button" className={styles.ctaButton} onClick={handleAddToBag} disabled={!songTitle.trim()}>
         Add to bag
       </button>
     </>
@@ -647,7 +657,7 @@ export function MusicMemoriesCustomizer({ brand, product, icons, addItem, openCa
       <div className={styles.serializerHost} ref={serializerRef} aria-hidden="true">
         <VinylPreviewSvg
           idSuffix="ser"
-          song={song}
+          songTitle={songTitle}
           memory={memory}
           names={names}
           centerHex={centerHex}
@@ -689,13 +699,10 @@ export function MusicMemoriesCustomizer({ brand, product, icons, addItem, openCa
       </div>
 
       <div className={styles.customizer}>
-        {/* ── Default state: song search + Personalize CTA ── */}
+        {/* ── Default state: song + artist fields, then Personalize CTA ── */}
         {phase === 'default' && (
           <>
-            <div className={styles.field}>
-              <label className={styles.label} htmlFor="mm-song-pre">Choose your song</label>
-              <SongCombo id="mm-song-pre" songId={songId} onSelect={setSongId} onClear={() => setSongId('')} />
-            </div>
+            {songArtistFields}
             <button type="button" className={styles.ctaButton} onClick={() => { setPhase('flow'); setTab('personalize') }}>
               Personalize yours
             </button>
@@ -733,7 +740,8 @@ export function MusicMemoriesCustomizer({ brand, product, icons, addItem, openCa
               </div>
               <dl className={styles.summaryList}>
                 {[
-                  ['Song', song?.label ?? '—'],
+                  ['Song', songTitle.trim() || '—'],
+                  ['Artist', artist.trim() || '—'],
                   ['Memory', memory.trim() || '—'],
                   ['Names/Date', names.trim() || '—'],
                   ['Color', CENTER_COLORS.find(c => c.value === centerColor)?.label ?? '—'],
