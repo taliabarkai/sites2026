@@ -176,6 +176,15 @@
   border-bottom: 1px solid var(--border-color);
 }
 
+/* Mobile: the tabs aren't wrapped in .flowCard, so give them their own box. */
+@media (max-width: 767px) {
+  .tabs {
+    border: var(--border-width) solid var(--border-color);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+  }
+}
+
 .tab {
   display: grid;
   grid-template-columns: auto 1fr;
@@ -236,7 +245,20 @@
   display: flex;
   flex-direction: column;
   gap: var(--spacing-md, 16px);
-  padding: 16px;
+}
+
+/* Desktop only — no padding on mobile (the slide-in panel body provides it). */
+@media (min-width: 768px) {
+  .panel {
+    padding: 16px;
+  }
+}
+
+/* Mobile: gap between the stepper tabs and the first field inside the panel. */
+@media (max-width: 767px) {
+  .panel {
+    padding-top: var(--spacing-md);
+  }
 }
 
 /* Outer back link — returns from the flow to the song-select state */

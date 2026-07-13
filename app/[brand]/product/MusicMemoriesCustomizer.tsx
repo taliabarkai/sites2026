@@ -791,10 +791,10 @@ export function MusicMemoriesCustomizer({ brand, product, icons, addItem, openCa
           preview={previewImage
             ? <img src={previewImage} alt="" className={styles.panelPreviewImg} />
             : <div className={styles.panelPreviewPlaceholder} aria-hidden="true" />}
-          footer={mmFooter}
         >
           {mmTabs}
-          <div className={styles.panel} role="tabpanel">{mmActiveInner}</div>
+          {/* CTA flows inline below the last field (not a sticky footer) */}
+          <div className={styles.panel} role="tabpanel">{mmActiveInner}{mmFooter}</div>
         </CustomizerPanel>
       )}
     </section>
