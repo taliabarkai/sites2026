@@ -613,16 +613,6 @@ export function MusicMemoriesCustomizer({ brand, product, icons, addItem, openCa
         )}
       </div>
 
-      <div className={styles.field}>
-        <div className={styles.labelRow}>
-          <span className={styles.label}>Choose size</span>
-          <button type="button" className={styles.sizeGuideLink}>Size guide</button>
-        </div>
-        <select className={styles.select} aria-label="Product size" value={size} onChange={e => setSize(e.target.value)}>
-          {SIZE_OPTIONS.map(s => (<option key={s.value} value={s.value}>{s.label}</option>))}
-        </select>
-      </div>
-
       {isCanvas && (
         <div className={styles.field}>
           <span className={styles.label}>
@@ -637,6 +627,16 @@ export function MusicMemoriesCustomizer({ brand, product, icons, addItem, openCa
           </div>
         </div>
       )}
+
+      <div className={styles.field}>
+        <div className={styles.labelRow}>
+          <span className={styles.label}>Choose size</span>
+          <button type="button" className={styles.sizeGuideLink}>Size guide</button>
+        </div>
+        <select className={styles.select} aria-label="Product size" value={size} onChange={e => setSize(e.target.value)}>
+          {SIZE_OPTIONS.map(s => (<option key={s.value} value={s.value}>{s.label}</option>))}
+        </select>
+      </div>
     </>
   )
 
