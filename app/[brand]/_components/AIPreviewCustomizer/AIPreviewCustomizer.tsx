@@ -495,13 +495,13 @@ export function AIPreviewCustomizer({ brand, product, icons, addItem, openCart }
 
   // ── Stepper ──
   const renderStepper = () => (
-    <div className={`${styles.stepper} ${unlocked ? '' : styles.stepperLocked}`} role="tablist">
+    <div className={styles.stepper} role="tablist">
       <button
         type="button"
         role="tab"
         aria-selected={step === 1}
         disabled={!unlocked}
-        className={`${styles.step} ${step === 1 && unlocked ? styles.stepActive : ''}`}
+        className={`${styles.step} ${step === 1 ? styles.stepActive : ''}`}
         onClick={() => unlocked && setStep(1)}
       >
         <span className={styles.stepNum}>1</span>
@@ -513,7 +513,7 @@ export function AIPreviewCustomizer({ brand, product, icons, addItem, openCart }
         role="tab"
         aria-selected={step === 2}
         disabled={!unlocked}
-        className={`${styles.step} ${step === 2 && unlocked ? styles.stepActive : ''}`}
+        className={`${styles.step} ${step === 2 ? styles.stepActive : ''}`}
         onClick={() => unlocked && setStep(2)}
       >
         <span className={styles.stepNum}>2</span>
@@ -731,29 +731,29 @@ export function AIPreviewCustomizer({ brand, product, icons, addItem, openCart }
         {trustBadges}
       </div>
 
-      {/* Mobile customizer panel */}
+      {/* Mobile customizer panel — same layout throughout: preview on top, tabs,
+          then the loader (generating) or the step fields + CTA (ready). */}
       {isMobile && (
         <CustomizerPanel
           open={panelOpen}
           onClose={() => setPanelOpen(false)}
           ariaLabel="Personalize your canvas"
           closeIcon={XIcon ? <XIcon size={20} /> : undefined}
-          fitContent={!isReady}
-          closeOnDark={!isReady}
           dismissible={isReady}
           scrollResetKey={`${genState}-${step}`}
-          preview={isReady ? <div className={styles.panelPreview}>{renderPreviewStage()}</div> : undefined}
+          preview={<div className={styles.panelPreview}>{renderPreviewStage()}</div>}
         >
-          {isReady
-            ? (
-              <div className={styles.panelSteps}>
-                {stepsContent}
+          <div className={styles.panelSteps}>
+            {renderStepper()}
+            {isReady ? (
+              <>
+                {step === 1 ? step1Fields : step2Fields}
                 {/* CTA flows inline after the last field (not a sticky footer) */}
                 {step === 2 && subtotalRow}
                 {primaryCta}
-              </div>
-            )
-            : <div className={styles.panelLoading}>{renderPreviewStage()}</div>}
+              </>
+            ) : loadingCta}
+          </div>
         </CustomizerPanel>
       )}
     </section>
