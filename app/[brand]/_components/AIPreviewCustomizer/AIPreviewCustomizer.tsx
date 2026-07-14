@@ -39,8 +39,8 @@ interface FrameColor { key: string; label: string; color: string; light?: boolea
 const FRAME_COLORS: FrameColor[] = [
   { key: 'black', label: 'Black', color: 'var(--frame-color-black)' },
   { key: 'white', label: 'White', color: 'var(--frame-color-white)', light: true },
-  { key: 'brown', label: 'Brown', color: 'var(--frame-color-walnut)' },
-  { key: 'gold',  label: 'Gold',  color: 'var(--frame-color-gold)' },
+  { key: 'brown', label: 'Dark Wood', color: 'var(--frame-color-walnut)' },
+  { key: 'gold',  label: 'Light Wood', color: 'var(--frame-color-gold)' },
 ]
 
 // Frame mockup photos keyed to the frame color.
