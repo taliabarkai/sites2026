@@ -47,8 +47,8 @@ const SIZE_CANVAS_PRICE_CENTS: Record<string, number> = {
 
 const FRAME_PREMIUM_CENTS: Record<FrameType, number> = { canvas: 0, metal: 7500, acrylic: 11500 }
 
-// Photoreal frame mockups — the selected frame color swaps the background image.
-// Non-canvas frame types fall back to the white mockup.
+// Photoreal frame mockups. Canvas swaps by frame color; Metal/Acrylic have their
+// own mockup regardless of color.
 const FRAME_COLOR_IMAGES: Record<string, string> = {
   white:        '/images/lal/frame-colors/White.jpg',
   black:        '/images/lal/frame-colors/Black.jpg',
@@ -56,9 +56,20 @@ const FRAME_COLOR_IMAGES: Record<string, string> = {
   'wood-dark':  '/images/lal/frame-colors/DarkWood.jpg',
 }
 
-// Grey canvas window inside the (square) frame mockups, as fractions of the image.
+const FRAME_MATERIAL_IMAGES: Partial<Record<FrameType, string>> = {
+  metal:   '/images/lal/frame-colors/Metal.jpg',
+  acrylic: '/images/lal/frame-colors/Acrylic.jpg',
+}
+
+// Grey canvas window inside the (square) framed mockups, as fractions of the image.
 // Measured from the assets so the artwork lands exactly inside the frame opening.
 const CANVAS_WINDOW = { x: 0.2065, y: 0.1135, w: 0.584, h: 0.774 }
+
+// Metal / Acrylic are frameless prints — the artwork fills (nearly) the whole panel.
+const FRAME_WINDOWS: Partial<Record<FrameType, typeof CANVAS_WINDOW>> = {
+  metal:   { x: 0.174, y: 0.059, w: 0.649, h: 0.874 },
+  acrylic: { x: 0.174, y: 0.059, w: 0.649, h: 0.874 },
+}
 
 const CENTER_COLORS = [
   { value: 'purple', label: 'Purple', hex: '#A46C93', hint: '(Most Popular)' },
@@ -245,7 +256,7 @@ function loadImage(src: string): Promise<HTMLImageElement> {
   })
 }
 
-async function composeFramedPreview(frameSrc: string, artworkSvg: SVGSVGElement): Promise<string | null> {
+async function composeFramedPreview(frameSrc: string, artworkSvg: SVGSVGElement, win = CANVAS_WINDOW): Promise<string | null> {
   const frameImg = await loadImage(frameSrc)
   const artSrc = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(new XMLSerializer().serializeToString(artworkSvg))}`
   const artImg = await loadImage(artSrc)
@@ -258,14 +269,9 @@ async function composeFramedPreview(frameSrc: string, artworkSvg: SVGSVGElement)
   const ctx = canvas.getContext('2d')
   if (!ctx) return null
 
-  // Frame photo first (its opening is opaque grey), then the artwork laid into
-  // the measured grey window so it sits inside the frame opening.
+  // Frame photo first, then the artwork laid into the mockup's print window.
   ctx.drawImage(frameImg, 0, 0, W, H)
-  const rx = CANVAS_WINDOW.x * W
-  const ry = CANVAS_WINDOW.y * H
-  const rw = CANVAS_WINDOW.w * W
-  const rh = CANVAS_WINDOW.h * H
-  ctx.drawImage(artImg, rx, ry, rw, rh)
+  ctx.drawImage(artImg, win.x * W, win.y * H, win.w * W, win.h * H)
   return canvas.toDataURL('image/jpeg', 0.86)
 }
 
@@ -391,8 +397,11 @@ export function MusicMemoriesCustomizer({ brand, product, icons, addItem, openCa
   const currentPrice = priceForFrame(frameType, size)
   const subtotal = currentPrice + (slipmat ? SLIPMAT.priceCents : 0)
 
-  // Frame mockup image for the selected frame color (non-canvas → white mockup).
-  const frameSrc = FRAME_COLOR_IMAGES[isCanvas ? frameColor : 'white'] ?? FRAME_COLOR_IMAGES.white
+  // Frame mockup image + print window for the selected material/color.
+  const frameSrc = isCanvas
+    ? (FRAME_COLOR_IMAGES[frameColor] ?? FRAME_COLOR_IMAGES.white)
+    : (FRAME_MATERIAL_IMAGES[frameType] ?? FRAME_COLOR_IMAGES.white)
+  const frameWindow = FRAME_WINDOWS[frameType] ?? CANVAS_WINDOW
 
   // ── Live preview → gallery ─────────────────────────────────────────────────
   // Composite the framed mockup (frame photo + artwork inside the opening) and
@@ -409,7 +418,7 @@ export function MusicMemoriesCustomizer({ brand, product, icons, addItem, openCa
     const svg = serializerRef.current?.querySelector('svg')
     if (!svg) return
     let cancelled = false
-    composeFramedPreview(frameSrc, svg as SVGSVGElement)
+    composeFramedPreview(frameSrc, svg as SVGSVGElement, frameWindow)
       .then(img => {
         if (cancelled || !img) return
         setPreviewImage(img)
@@ -595,7 +604,6 @@ export function MusicMemoriesCustomizer({ brand, product, icons, addItem, openCa
         {frameListOpen && (
           <ul className={styles.frameList} role="listbox">
             {FRAME_TYPES.map(f => {
-              const premium = FRAME_PREMIUM_CENTS[f.value]
               return (
                 <li key={f.value} role="option" aria-selected={f.value === frameType}
                   className={`${styles.frameOption} ${f.value === frameType ? styles.frameOptionSelected : ''}`}
@@ -603,7 +611,6 @@ export function MusicMemoriesCustomizer({ brand, product, icons, addItem, openCa
                   <img className={styles.frameThumb} src={f.thumb} alt="" width={40} height={40} />
                   <span className={styles.frameOptionMain}>
                     <span className={styles.frameName}>{f.label}</span>
-                    <span className={styles.frameDelta}>{premium === 0 ? 'Included' : `+${formatPrice(premium)}`}</span>
                   </span>
                   <span className={styles.framePrice}>{formatPrice(priceForFrame(f.value, size))}</span>
                 </li>
@@ -709,7 +716,7 @@ export function MusicMemoriesCustomizer({ brand, product, icons, addItem, openCa
             {songTitleField}
             {artistField}
             <button type="button" className={styles.ctaButton} onClick={() => { setPhase('flow'); setTab('personalize') }}>
-              Personalize yours
+              See how it looks
             </button>
           </>
         )}

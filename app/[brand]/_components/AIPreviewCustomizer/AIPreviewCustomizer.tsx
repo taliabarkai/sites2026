@@ -213,7 +213,6 @@ export function AIPreviewCustomizer({ brand, product, icons, addItem, openCart }
   const [photoUrl, setPhotoUrl] = useState<string | null>(null)
   const [photoName, setPhotoName] = useState('')
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
-  const [regenUsed, setRegenUsed] = useState(false)
   const [uploadError, setUploadError] = useState(false)
   const [dragOver, setDragOver] = useState(false)
 
@@ -292,7 +291,6 @@ export function AIPreviewCustomizer({ brand, product, icons, addItem, openCart }
     setPhotoUrl(dataUrl)
     setPhotoName(file.name)
     setPreviewUrl(null)
-    setRegenUsed(false)
     setStep(1)
     if (autoGenerate) {
       if (isMobile) setPanelOpen(true)
@@ -318,7 +316,6 @@ export function AIPreviewCustomizer({ brand, product, icons, addItem, openCart }
     setPhotoUrl(null)
     setPhotoName('')
     setPreviewUrl(null)
-    setRegenUsed(false)
     setGenState('idle')
     setPanelOpen(false)
     if (fileInputRef.current) fileInputRef.current.value = ''
@@ -328,12 +325,6 @@ export function AIPreviewCustomizer({ brand, product, icons, addItem, openCart }
     if (!fileRef.current || !photoUrl) { setUploadError(true); return }
     if (isMobile) setPanelOpen(true)
     runGeneration(fileRef.current, 'generating')
-  }
-
-  const handleRegenerate = () => {
-    if (!isReady || regenUsed || !fileRef.current) return
-    setRegenUsed(true)
-    runGeneration(fileRef.current, 'regenerating')
   }
 
   const handleRetry = () => {
@@ -468,6 +459,11 @@ export function AIPreviewCustomizer({ brand, product, icons, addItem, openCart }
 
                 {isReady && <span className={styles.liveBadge}>Live Preview</span>}
 
+                {/* Disclaimer overlaid at the bottom of the ready preview */}
+                {isReady && (
+                  <p className={styles.readyNote}>Note: The final artwork may differ slightly from the AI-generated preview.</p>
+                )}
+
                 {/* Generating overlay — blurred canvas + rising lime dots + centered content */}
                 {isBusy && (
                   <>
@@ -497,18 +493,6 @@ export function AIPreviewCustomizer({ brand, product, icons, addItem, openCart }
     )
   }
 
-  // Disclaimer + regenerate — shown under the uploaded image in Step 1 (right side)
-  const previewNote = (
-    <p className={styles.genNote}>
-      Note: The final artwork may differ slightly from the AI-generated preview.{' '}
-      {regenUsed
-        ? <span className={styles.regenDisabledNote}>Preview regenerated — upload a new photo to try again.</span>
-        : <>If needed, you may{' '}
-            <button type="button" className={styles.regenLink} disabled={!isReady} onClick={handleRegenerate}>regenerate</button>{' '}
-            your preview once.</>}
-    </p>
-  )
-
   // ── Stepper ──
   const renderStepper = () => (
     <div className={`${styles.stepper} ${unlocked ? '' : styles.stepperLocked}`} role="tablist">
@@ -522,7 +506,7 @@ export function AIPreviewCustomizer({ brand, product, icons, addItem, openCart }
       >
         <span className={styles.stepNum}>1</span>
         <span className={styles.stepTitle}>Personalize</span>
-        <span className={styles.stepSub}>Names &amp; date</span>
+        <span className={styles.stepSub}>Photo &amp; text</span>
       </button>
       <button
         type="button"
@@ -587,7 +571,6 @@ export function AIPreviewCustomizer({ brand, product, icons, addItem, openCart }
         <input id="ai-line2" type="text" className={styles.input} autoComplete="off"
           placeholder="e.g. Luckiest kids on earth right now" value={line2} onChange={e => setLine2(e.target.value)} />
       </div>
-      {previewNote}
     </div>
   )
 
@@ -728,7 +711,7 @@ export function AIPreviewCustomizer({ brand, product, icons, addItem, openCart }
           /* Idle → "Personalize yours"; generating → disabled "Loading…" CTA (progress lives under the gallery). */
           isBusy
             ? loadingCta
-            : <button type="button" className={styles.ctaButton} onClick={handlePersonalize}>Create yours</button>
+            : <button type="button" className={styles.ctaButton} onClick={handlePersonalize}>See how it looks</button>
         ) : isMobile ? (
           /* Mobile: steps live in the slide-in panel; PDP shows a resume CTA */
           !panelOpen && (

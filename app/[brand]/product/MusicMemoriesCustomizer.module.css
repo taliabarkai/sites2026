@@ -368,13 +368,19 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 8px 14px;
+  padding: 10px 14px;
   cursor: pointer;
 }
 
+/* Divider between rows */
+.frameOption:not(:last-child) {
+  border-bottom: var(--border-width) solid var(--border-color);
+}
+
+/* Grey highlight for the selected (and hovered) row */
 .frameOption:hover,
 .frameOptionSelected {
-  background: var(--colors-surface-secondary);
+  background: var(--colors-surface-primary);
 }
 
 .frameOptionMain {
@@ -383,21 +389,31 @@
   flex: 1;
 }
 
-.frameName {
-  font-size: 14px;
-  font-weight: 600;
+/* Default rows use text1; the selected row uses text2 (below). */
+.frameName,
+.framePrice {
   color: var(--colors-text);
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  font-weight:    var(--typography-rules-text1-font-weight, normal);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+}
+
+.frameOptionSelected .frameName,
+.frameOptionSelected .framePrice {
+  font-family:    var(--typography-rules-text2-font-family);
+  font-size:      var(--typography-rules-text2-font-size);
+  line-height:    var(--typography-rules-text2-line-height);
+  font-weight:    var(--typography-rules-text2-font-weight, 600);
+  letter-spacing: var(--typography-rules-text2-letter-spacing, normal);
 }
 
 .frameDelta {
-  font-size: 12px;
   color: var(--colors-text-secondary);
-}
-
-.framePrice {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--colors-text);
+  font-family: var(--typography-rules-text3-font-family);
+  font-size:   var(--typography-rules-text3-font-size);
+  line-height: var(--typography-rules-text3-line-height);
 }
 
 /* ── Upsell ─────────────────────────────────────────────────────────────── */

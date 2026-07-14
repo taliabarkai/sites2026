@@ -358,6 +358,23 @@
   letter-spacing: 0.04em;
 }
 
+/* Disclaimer overlaid at the bottom of the ready preview (12px bottom padding).
+   Sits on the light-grey wall below the frame, so black text with no overlay. */
+.readyNote {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  margin: 0;
+  padding: var(--spacing-sm) var(--spacing-md) 12px;
+  text-align: center;
+  color: var(--colors-text);
+  font-family: var(--typography-rules-disclaimer1-font-family, var(--font-family-main-regular));
+  font-size: var(--typography-rules-disclaimer1-font-size, 1.2rem);
+  line-height: 1.4;
+  pointer-events: none;
+}
+
 /* ── Generation overlay ───────────────────────────────────────────────────── */
 .genOverlay {
   position: absolute;
