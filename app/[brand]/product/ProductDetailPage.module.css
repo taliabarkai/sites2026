@@ -111,6 +111,16 @@
   display: none;
 }
 
+/* The OAL gallery is shorter than the selections column — keep it sticky so it
+   stays in view while the taller right column scrolls, releasing at its end. */
+@media (min-width: 1024px) {
+  .oalGallery {
+    position: sticky;
+    top: var(--sticky-top);
+    align-self: start;
+  }
+}
+
 /* 1024–1439px: bounded container — gallery AR caps height, right col scrolls */
 @media (min-width: 1024px) and (max-width: 1439px) {
   .oalGallery {

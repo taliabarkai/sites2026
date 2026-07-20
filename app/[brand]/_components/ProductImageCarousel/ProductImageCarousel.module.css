@@ -1,0 +1,85 @@
+/* Horizontally scrollable, snapping image carousel with a progress bar.
+   Root is always visible; callers pass a className to hide it responsively. */
+.carousel {
+  position: relative;
+}
+
+.track {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.track::-webkit-scrollbar {
+  display: none;
+}
+
+.slide {
+  flex: 0 0 100%;
+  scroll-snap-align: start;
+  position: relative;
+  aspect-ratio: 1; /* square for all brands */
+  overflow: hidden;
+  background-color: var(--colors-card-image-bg);
+}
+
+/* Peek variant — slides shrink so the next image sneaks in on the right */
+.peek .track {
+  gap: var(--spacing-xxxs);
+}
+
+/* Show 1.75 images across the width — one full slide + ~75% peek of the next */
+.peek .slide {
+  flex-basis: calc(100% / 1.75);
+}
+
+/* OAL: 4/5 portrait */
+[data-theme="oal"] .slide {
+  aspect-ratio: 4 / 5;
+}
+
+.image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.progressTrack {
+  position: relative;
+  width: 100%;
+  height: 2px;
+  background: var(--border-color);
+  overflow: hidden;
+}
+
+.progressBar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background: var(--colors-text);
+  transition: transform var(--transition-base);
+}
+
+.livePreviewRibbon {
+  position: absolute;
+  top: var(--spacing-sm);
+  left: var(--spacing-sm);
+  z-index: var(--z-raised);
+  padding: var(--spacing-xxs) var(--spacing-sm);
+  background: var(--colors-brand-default-primary);
+  color: var(--colors-text);
+  text-transform: uppercase;
+  border-radius: var(--ribbon-border-radius, var(--radius-sm));
+  font-family:    var(--typography-rules-ribbons1-font-family, var(--font-family-main-bold));
+  font-size:      var(--typography-rules-ribbons1-font-size);
+  line-height:    var(--typography-rules-ribbons1-line-height);
+  font-weight:    var(--typography-rules-ribbons1-font-weight, 700);
+  letter-spacing: var(--typography-rules-ribbons1-letter-spacing, 0.04em);
+}

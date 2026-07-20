@@ -51,10 +51,12 @@ export function Header({
   const isScrolled = useHeaderScroll()
   const isCheckout = pathname.includes('/checkout')
   const [menuOpen, setMenuOpen] = useState(false)
+  // Which dropdown is expanded in the mobile drawer (by label).
+  const [openDropdown, setOpenDropdown] = useState<string | null>(null)
   const isSolid = variant === 'white' || isScrolled
 
   const icons = BRAND_ICONS[brandSegment]
-  const { HamburgerIcon, XIcon, MagnifyingGlassIcon, PersonIcon, ShoppingBagIcon } = icons
+  const { HamburgerIcon, XIcon, MagnifyingGlassIcon, PersonIcon, ShoppingBagIcon, ChevronIcon } = icons
 
   useEffect(() => {
     document.body.style.overflow = menuOpen ? 'hidden' : ''
@@ -114,8 +116,24 @@ export function Header({
             <nav className={styles.desktopNav} aria-label="Primary">
               <ul className={styles.navList}>
                 {navLinks.filter(link => !link.desktopHidden).map((link) => (
-                  <li key={link.href}>
-                    {link.highlight ? (
+                  <li key={link.href} className={link.children ? styles.navItemHasSub : undefined}>
+                    {link.children ? (
+                      <>
+                        <button type="button" className={`${styles.navLink} ${styles.navTrigger}`} aria-haspopup="true">
+                          {link.label}
+                          <span className={styles.navCaret} aria-hidden="true"><ChevronIcon size={16} /></span>
+                        </button>
+                        <ul className={styles.subMenu}>
+                          {link.children.map((child) => (
+                            <li key={child.href}>
+                              <Link href={child.href} className={styles.subMenuLink}>
+                                {child.label}
+                              </Link>
+                            </li>
+                          ))}
+                        </ul>
+                      </>
+                    ) : link.highlight ? (
                       <Button
                         href={link.href}
                         variant="primary"
@@ -145,7 +163,7 @@ export function Header({
                 type="button"
                 className={styles.cartButton}
                 aria-label={`Cart${items.length > 0 ? ` (${items.length})` : ''}`}
-                onClick={openCart}
+                onClick={() => openCart()}
               >
                 <ShoppingBagIcon />
                 {items.length > 0 && (
@@ -180,7 +198,41 @@ export function Header({
             <ul className={styles.drawerList}>
               {navLinks.map((link) => (
                 <li key={link.href}>
-                  {link.highlight ? (
+                  {link.children ? (
+                    <>
+                      <button
+                        type="button"
+                        className={`${styles.drawerLink} ${styles.drawerTrigger}`}
+                        aria-expanded={openDropdown === link.label}
+                        onClick={() =>
+                          setOpenDropdown((cur) => (cur === link.label ? null : link.label))
+                        }
+                      >
+                        {link.label}
+                        <span
+                          className={`${styles.drawerCaret} ${openDropdown === link.label ? styles.drawerCaretOpen : ''}`}
+                          aria-hidden="true"
+                        >
+                          <ChevronIcon size={18} />
+                        </span>
+                      </button>
+                      {openDropdown === link.label && (
+                        <ul className={styles.drawerSubList}>
+                          {link.children.map((child) => (
+                            <li key={child.href}>
+                              <Link
+                                href={child.href}
+                                className={styles.drawerSubLink}
+                                onClick={() => setMenuOpen(false)}
+                              >
+                                {child.label}
+                              </Link>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </>
+                  ) : link.highlight ? (
                     <Button
                       href={link.href}
                       variant="primary"

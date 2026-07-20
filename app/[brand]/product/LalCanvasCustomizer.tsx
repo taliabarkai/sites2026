@@ -6,6 +6,8 @@ import type { CartItem } from '../_context/CartContext'
 import type { ProductItem } from '../../../data/products'
 import lalLoader from '@/src/assets/icons/lal/LAL.gif'
 import { RevisionsNotice } from '../_components/RevisionsNotice'
+import { useNestedItems } from '../_components/NestedItems/useNestedItems'
+import type { QuickAddProduct } from '../_components/QuickAddPanel'
 import pdp from './ProductDetailPage.module.css'
 import styles from './LalCanvasCustomizer.module.css'
 
@@ -33,8 +35,9 @@ interface LalCanvasCustomizerProps {
   icons: CustomizerIcons
   items: CartItem[]
   previewId?: string
+  nestedItems?: QuickAddProduct[]
   addItem: (item: CartItem) => void
-  openCart: () => void
+  openCart: (added?: boolean) => void
   onLivePreviewChange?: (image: string | null) => void
 }
 
@@ -199,12 +202,15 @@ async function composeFramedImage(opts: ComposeOpts): Promise<string> {
 }
 
 // ─── Main component ───────────────────────────────────────────────────────────
-export function LalCanvasCustomizer({ brand, product, icons, items, previewId, addItem, openCart, onLivePreviewChange }: LalCanvasCustomizerProps) {
+export function LalCanvasCustomizer({ brand, product, icons, items, previewId, nestedItems = [], addItem, openCart, onLivePreviewChange }: LalCanvasCustomizerProps) {
   const {
     ChevronIcon, StarIcon, FileUploadIcon, XIcon, ShippingIcon,
     MapPinIcon, PersonIcon, ClipboardCopyIcon, RevisionsIcon,
   } = icons
   const RevisionsGlyph = RevisionsIcon ?? ClipboardCopyIcon
+
+  // Nested Items — companion products staged above the Subtotal.
+  const nested = useNestedItems(brand, nestedItems)
 
   const [photoUrl, setPhotoUrl]   = useState<string | null>(null)
   const [photoName, setPhotoName] = useState<string>('')
@@ -319,8 +325,11 @@ export function LalCanvasCustomizer({ brand, product, icons, items, previewId, a
         ? { productId: product.id, photo: photoUrl, photoName, frameKey, sizeKey, persOn: true, line1: l1, line2: l2 }
         : undefined,
     })
+    // Add any staged nested items alongside the main product.
+    nested.stagedItems.forEach((it) => addItem(it))
+    nested.clear()
     setModalOpen(false)
-    openCart()
+    openCart(true)
   }
 
   const handleContinueShopping = () => {
@@ -491,17 +500,22 @@ export function LalCanvasCustomizer({ brand, product, icons, items, previewId, a
         />
       </div>
 
+      {/* Nested Items — companion products, directly above the Subtotal */}
+      {nested.ui}
+
       {/* Subtotal + CTA */}
       <div className={styles.subtotalRow}>
         <span className={styles.subtotalLabel}>Subtotal:</span>
-        <span className={styles.subtotalValue}>{formatPrice(currentPrice)}</span>
+        <span className={styles.subtotalValue}>{formatPrice(currentPrice + nested.nestedTotal)}</span>
       </div>
       <button
         type="button"
         className={styles.customizeBtn}
         onClick={previewGenerated ? handleAddToBag : handleCustomize}
       >
-        {previewGenerated ? 'Add to Bag' : 'Customize Now'}
+        {previewGenerated
+          ? (nested.stagedCount === 0 ? 'Add to Bag' : `Add ${1 + nested.stagedCount} Items to bag`)
+          : 'Customize Now'}
       </button>
 
       {/* Trust badges */}

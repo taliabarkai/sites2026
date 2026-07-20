@@ -7,6 +7,8 @@ import type { ProductItem } from '../../../../data/products'
 import { Button } from '../Button'
 import { CustomizerPanel, useIsMobile } from '../CustomizerPanel'
 import { RevisionsNotice } from '../RevisionsNotice'
+import { useNestedItems } from '../NestedItems/useNestedItems'
+import type { QuickAddProduct } from '../QuickAddPanel'
 import { generateWatercolorPreview, fileToDataUrl } from './generateWatercolorPreview'
 import lalLoader from '@/src/assets/icons/lal/LAL.gif'
 import pdp from '../../product/ProductDetailPage.module.css'
@@ -27,8 +29,9 @@ interface AIPreviewCustomizerProps {
   brand: string
   product: ProductItem
   icons: CustomizerIcons
+  nestedItems?: QuickAddProduct[]
   addItem: (item: CartItem) => void
-  openCart: () => void
+  openCart: (added?: boolean) => void
 }
 
 type GenState = 'idle' | 'generating' | 'ready' | 'regenerating' | 'error'
@@ -198,9 +201,12 @@ async function composeFramedThumb(frameSrc: string, artSrc: string, line1: strin
 }
 
 // ─── Component ─────────────────────────────────────────────────────────────────
-export function AIPreviewCustomizer({ brand, product, icons, addItem, openCart }: AIPreviewCustomizerProps) {
+export function AIPreviewCustomizer({ brand, product, icons, nestedItems = [], addItem, openCart }: AIPreviewCustomizerProps) {
   const { ChevronIcon, StarIcon, FileUploadIcon, XIcon } = icons
   const RevisionsGlyph = icons.RevisionsIcon ?? icons.ClipboardCopyIcon
+
+  // Nested Items — companion products staged above the Subtotal.
+  const nested = useNestedItems(brand, nestedItems)
   const PersonIcon = icons.PersonIcon
   const ShippingIcon = icons.ShippingIcon
   const MapPinIcon = icons.MapPinIcon
@@ -363,8 +369,11 @@ export function AIPreviewCustomizer({ brand, product, icons, addItem, openCart }
         ? { productId: product.id, photo: photoUrl, photoName, frameKey: frameColor, sizeKey, persOn: l1.length > 0 || l2.length > 0, line1: l1, line2: l2 }
         : undefined,
     })
+    // Add any staged nested items alongside the main product.
+    nested.stagedItems.forEach((it) => addItem(it))
+    nested.clear()
     setPanelOpen(false)
-    openCart()
+    openCart(true)
   }
 
   const filledStars = Math.round(LAL_RATING)
@@ -616,10 +625,14 @@ export function AIPreviewCustomizer({ brand, product, icons, addItem, openCart }
   )
 
   const subtotalRow = (
-    <div className={styles.subtotalRow}>
-      <span className={styles.subtotalLabel}>Subtotal:</span>
-      <span className={styles.subtotalPrice}>{formatPrice(currentPrice)}</span>
-    </div>
+    <>
+      {/* Nested Items — companion products, directly above the Subtotal */}
+      {nested.ui}
+      <div className={styles.subtotalRow}>
+        <span className={styles.subtotalLabel}>Subtotal:</span>
+        <span className={styles.subtotalPrice}>{formatPrice(currentPrice + nested.nestedTotal)}</span>
+      </div>
+    </>
   )
 
   const primaryCta = step === 1

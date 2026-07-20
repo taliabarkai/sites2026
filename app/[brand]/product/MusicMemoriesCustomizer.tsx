@@ -6,6 +6,8 @@ import type { CartItem } from '../_context/CartContext'
 import type { ProductItem } from '../../../data/products'
 import { SONG_CATALOG, getSongById } from '../../../data/songs'
 import { CustomizerPanel, useIsMobile } from '../_components/CustomizerPanel'
+import { useNestedItems } from '../_components/NestedItems/useNestedItems'
+import type { QuickAddProduct } from '../_components/QuickAddPanel'
 import pdp from './ProductDetailPage.module.css'
 import styles from './MusicMemoriesCustomizer.module.css'
 
@@ -22,8 +24,9 @@ interface MusicMemoriesCustomizerProps {
   brand: string
   product: ProductItem
   icons: CustomizerIcons
+  nestedItems?: QuickAddProduct[]
   addItem: (item: CartItem) => void
-  openCart: () => void
+  openCart: (added?: boolean) => void
   onLivePreviewChange?: (image: string | null) => void
 }
 
@@ -370,10 +373,13 @@ function SongCombo({ id, songId, onSelect, onClear }: SongComboProps) {
 
 // ─── Main component ──────────────────────────────────────────────────────────
 
-export function MusicMemoriesCustomizer({ brand, product, icons, addItem, openCart, onLivePreviewChange }: MusicMemoriesCustomizerProps) {
+export function MusicMemoriesCustomizer({ brand, product, icons, nestedItems = [], addItem, openCart, onLivePreviewChange }: MusicMemoriesCustomizerProps) {
   const { ChevronIcon, StarIcon, XIcon, PersonIcon, ShippingIcon, MapPinIcon, RevisionsIcon, ClipboardCopyIcon } = icons
   const RevisionsGlyph = RevisionsIcon ?? ClipboardCopyIcon
   const isMobile = useIsMobile()
+
+  // Nested Items — companion products staged above the Subtotal.
+  const nested = useNestedItems(brand, nestedItems)
 
   const [phase, setPhase] = useState<Phase>('default')
   const [tab, setTab] = useState<Tab>('personalize')
@@ -395,7 +401,7 @@ export function MusicMemoriesCustomizer({ brand, product, icons, addItem, openCa
   const priceForFrame = (frame: FrameType, sz: string) =>
     (SIZE_CANVAS_PRICE_CENTS[sz] ?? SIZE_CANVAS_PRICE_CENTS['12x16']) + FRAME_PREMIUM_CENTS[frame]
   const currentPrice = priceForFrame(frameType, size)
-  const subtotal = currentPrice + (slipmat ? SLIPMAT.priceCents : 0)
+  const subtotal = currentPrice + (slipmat ? SLIPMAT.priceCents : 0) + nested.nestedTotal
 
   // Frame mockup image + print window for the selected material/color.
   const frameSrc = isCanvas
@@ -467,8 +473,11 @@ export function MusicMemoriesCustomizer({ brand, product, icons, addItem, openCa
       })
     }
 
+    // Add any staged nested items alongside the main product.
+    nested.stagedItems.forEach((it) => addItem(it))
+    nested.clear()
     setPhase('saved')
-    openCart()
+    openCart(true)
   }
 
   const filledStars = Math.round(LAL_RATING)
@@ -506,10 +515,14 @@ export function MusicMemoriesCustomizer({ brand, product, icons, addItem, openCa
   )
 
   const subtotalRow = (
-    <div className={styles.subtotalRow}>
-      <span className={styles.subtotalLabel}>Subtotal:</span>
-      <strong className={styles.subtotalPrice}>{formatPrice(subtotal)}</strong>
-    </div>
+    <>
+      {/* Nested Items — companion products, directly above the Subtotal */}
+      {nested.ui}
+      <div className={styles.subtotalRow}>
+        <span className={styles.subtotalLabel}>Subtotal:</span>
+        <strong className={styles.subtotalPrice}>{formatPrice(subtotal)}</strong>
+      </div>
+    </>
   )
 
   // ── Flow pieces shared by the desktop inline card + the mobile slide-in panel ──

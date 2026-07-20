@@ -37,6 +37,14 @@
   transform: translateY(0);
 }
 
+/* No image on mobile — hug the content, capped at 90dvh, then scroll internally */
+@media (max-width: 767px) {
+  .panelHugMobile {
+    height: auto;
+    max-height: 90dvh;
+  }
+}
+
 /* Desktop: slides in from right — matches FloatingCart */
 @media (min-width: 768px) {
   .panel {
@@ -44,12 +52,11 @@
     right: 0;
     bottom: auto;
     left: auto;
-    /* 600px image + 500px form = 1100px */
-    width: min(1100px, 100vw);
+    /* 500px image + 420px form = 920px */
+    width: min(920px, 100vw);
     height: 100vh;
     border-radius: var(--radius-panel) 0 0 var(--radius-panel);
     transform: translateX(100%);
-    flex-direction: row;
   }
 
   .panelOpen {
@@ -67,42 +74,52 @@
   }
 }
 
-/* ── Close button — absolute, top-right of panel ─────────────────────────── */
+/* ── Body — desktop left image column + right content column ───────────────── */
+.panelBody {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+@media (min-width: 768px) {
+  .panelBody {
+    flex-direction: row;
+  }
+}
+
+/* ── Close button — plain X, absolute top-right of the panel ──────────────── */
 .closeBtn {
   position: absolute;
-  top: var(--spacing-sm);
-  right: var(--spacing-sm);
+  top: var(--spacing-md);
+  right: var(--spacing-md);
   z-index: 2;
-  width: 36px;
-  height: 36px;
-  border-radius: var(--radius-full);
-  background: var(--colors-background);
+  width: var(--spacing-md);
+  height: var(--spacing-md);
+  padding: 0;
+  border: none;
+  background: none;
   color: var(--colors-text);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 14px;
-  transition: border-color var(--transition-fast);
+  font-size: 18px;
+  line-height: 1;
+  transition: opacity var(--transition-fast);
 }
 
 .closeBtn:hover {
-  border-color: var(--colors-text);
+  opacity: 0.6;
 }
 
-/* ── Mobile drag handle ───────────────────────────────────────────────────── */
-.dragHandle {
-  display: block;
-  width: 32px;
-  height: 4px;
-  border-radius: var(--radius-full);
-  background: var(--border-color);
-  margin: var(--spacing-xs) auto var(--spacing-xxs);
-  flex-shrink: 0;
-}
-
+/* Align the close button with the larger desktop content padding */
 @media (min-width: 768px) {
-  .dragHandle { display: none; }
+  .closeBtn {
+    top: var(--spacing-lg);
+    right: var(--spacing-lg);
+  }
 }
 
 /* ── Desktop: left image column ───────────────────────────────────────────── */
@@ -114,10 +131,12 @@
   .desktopImage {
     display: flex;
     flex-direction: column;
-    flex: 0 0 600px;
-    width: 600px;
+    gap: var(--spacing-xxxs);
+    flex: 0 0 500px;
+    width: 500px;
     overflow-y: auto;
     overflow-x: hidden;
+    overscroll-behavior: contain;
     scrollbar-width: none;
     align-self: stretch;
   }
@@ -130,9 +149,14 @@
     display: block;
     width: 100%;
     flex-shrink: 0;
-    aspect-ratio: 4 / 5;
+    aspect-ratio: 1 / 1; /* default: square for all brands */
     object-fit: cover;
     object-position: center;
+  }
+
+  /* OAL: 4/5 portrait */
+  [data-theme="oal"] .desktopImageEl {
+    aspect-ratio: 4 / 5;
   }
 }
 
@@ -147,8 +171,8 @@
   .rightCol {
     display: flex;
     flex-direction: column;
-    flex: 0 0 500px;
-    width: 500px;
+    flex: 0 0 420px;
+    width: 420px;
     overflow: hidden;
   }
 }
@@ -157,15 +181,16 @@
 .scrollArea {
   flex: 1;
   overflow-y: auto;
-  padding: 0 var(--spacing-md) var(--spacing-md);
-  padding-top: var(--spacing-xxl);
+  overscroll-behavior: contain;
+  /* 16px horizontal on mobile, aligned with the header */
+  padding: var(--spacing-md) var(--spacing-sm);
   scrollbar-width: thin;
 }
 
 @media (min-width: 768px) {
-  /* Align content from the top — title sits near the close button */
+  /* Larger padding on desktop (aligned with the footer) */
   .scrollArea {
-    padding-top: var(--spacing-lg);
+    padding: var(--spacing-lg);
   }
 }
 
@@ -183,6 +208,12 @@
   letter-spacing: var(--typography-rules-headline4-letter-spacing, normal);
   text-transform: var(--typography-rules-headline4-text-transform, none);
   color: var(--colors-text);
+}
+
+/* The title sits in the top row next to the absolute close button.
+   Reserve the X's footprint (inset + width) plus a 16px gap so text never overlaps. */
+.title {
+  padding-right: calc(var(--spacing-md) * 2);
 }
 
 /* Price — matches PDP .priceRow / .priceOriginal / .priceCurrent */
@@ -217,6 +248,7 @@
   display: flex;
   align-items: center;
   gap: var(--spacing-xxs);
+  padding-top: var(--spacing-xxxs);
 }
 
 .stars {
@@ -255,6 +287,28 @@
   color: var(--colors-text-secondary);
 }
 
+/* Hide the gallery on mobile only (opt-in per product) */
+@media (max-width: 767px) {
+  .hideOnMobile {
+    display: none;
+  }
+}
+
+/* ── ≤4-image carousel variant — spacing below the shared carousel ────────── */
+.panelCarousel {
+  margin-bottom: var(--spacing-md);
+  /* Full-bleed past the scrollArea's padding so the gallery runs edge to edge */
+  margin-left: calc(-1 * var(--spacing-sm));
+  margin-right: calc(-1 * var(--spacing-sm));
+}
+
+@media (min-width: 768px) {
+  .panelCarousel {
+    margin-left: calc(-1 * var(--spacing-lg));
+    margin-right: calc(-1 * var(--spacing-lg));
+  }
+}
+
 /* ── Single inline image — single-image products (both breakpoints) ───────── */
 .singleImage {
   width: 100%;
@@ -283,6 +337,8 @@
   overflow-x: auto;
   scrollbar-width: none;
   margin-bottom: var(--spacing-md);
+  /* Bleed past the scrollArea's right padding so the 2nd image peeks to the edge */
+  margin-right: calc(-1 * var(--spacing-sm));
 }
 
 .gallery::-webkit-scrollbar { display: none; }
@@ -293,7 +349,9 @@
 
 .galleryThumb {
   flex-shrink: 0;
-  width: 180px;
+  /* One full image + ~75% of the next across the visible (full-bleed) width.
+     Visible width = 100vw − left padding; 1 + 0.75 = 1.75 images fit. */
+  width: calc((100vw - var(--spacing-sm)) / 1.75);
   overflow: hidden;
   background: var(--colors-card-image-bg);
   cursor: pointer;
@@ -367,6 +425,7 @@
   min-width: 56px;
   padding: var(--spacing-xxxs) var(--spacing-xs);
   border: 1px solid var(--border-color);
+  border-radius: var(--form-field-border-radius, 0);
   background: var(--colors-background);
   color: var(--colors-text);
   font-family: var(--typography-rules-text1-font-family);
@@ -400,6 +459,20 @@
 
 .textInput:focus { border-color: var(--form-field-border-color-hover); }
 
+/* Validation — empty required name field */
+.textInputError,
+.textInputError:focus {
+  border-color: var(--colors-error);
+}
+
+.errorMsg {
+  margin: var(--spacing-xxxs) 0 0;
+  font-family: var(--typography-rules-text3-font-family);
+  font-size:   var(--typography-rules-text3-font-size);
+  line-height: var(--typography-rules-text3-line-height);
+  color: var(--colors-error);
+}
+
 .charCount {
   position: absolute;
   right: var(--spacing-xs);
@@ -415,22 +488,39 @@
 .select {
   width: 100%;
   appearance: none;
-  padding: var(--spacing-xxs) var(--spacing-xs);
+  /* leave room on the right for the chevron */
+  padding: var(--spacing-xxs) var(--spacing-xl) var(--spacing-xxs) var(--spacing-xs);
   border: 1px solid var(--form-field-border-color);
+  border-radius: var(--form-field-border-radius, 0);
   background: var(--form-field-background);
   color: var(--colors-text);
   font-family: var(--typography-rules-text1-font-family);
   font-size:   var(--typography-rules-text1-font-size);
+  min-height: var(--field-min-height, 44px);
   cursor: pointer;
   outline: none;
 }
 
+.select:focus { border-color: var(--form-field-border-color-hover); }
+
+/* Custom dropdown chevron — theme icon, rotated to point down */
+.selectArrow {
+  position: absolute;
+  top: 50%;
+  right: var(--spacing-xs);
+  transform: translateY(-50%) rotate(90deg);
+  color: var(--colors-text);
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+}
+
 /* ── Footer — sticky at bottom of right column ────────────────────────────── */
+/* Flows inline below the last selection (not pinned to the bottom).
+   Horizontal padding comes from the scrollArea; a top margin separates it
+   from the options above. */
 .footer {
-  flex-shrink: 0;
-  padding: var(--spacing-md);
-  border-top: var(--border-width) solid var(--border-color);
-  background: var(--colors-background);
+  margin-top: var(--spacing-md);
   display: flex;
   flex-direction: column;
   gap: var(--spacing-xs);

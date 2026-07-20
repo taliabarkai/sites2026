@@ -22,6 +22,7 @@ export function prefixNavLinks(brand: string, links: NavLink[]): NavLink[] {
   return links.map((link) => ({
     ...link,
     href: withBrandPrefix(brand, link.href),
+    children: link.children ? prefixNavLinks(brand, link.children) : undefined,
   }))
 }
 

@@ -9,12 +9,17 @@ import * as tgrIcons from '@/src/components/icons/tgr'
 import * as lalIcons from '@/src/components/icons/lal'
 import * as ibIcons from '@/src/components/icons/ib'
 import { useCart } from '../_context/CartContext'
+import type { CartItem } from '../_context/CartContext'
 import { Header } from '../_components/Header'
 import { Footer } from '../_components/Footer'
 import { FloatingCart } from '../_components/FloatingCart'
 import { Button } from '../_components/Button'
 import { FilterChips } from '../_components/FilterChips'
 import { ProductCard, toQuickAddProduct } from '../_components/ProductCard'
+import { QuickAddPanel } from '../_components/QuickAddPanel'
+import type { QuickAddProduct } from '../_components/QuickAddPanel'
+import { NestedItems, nestedItemKey } from '../_components/NestedItems'
+import { ProductImageCarousel } from '../_components/ProductImageCarousel'
 import { getBrandFromPathname } from '../_config/brands'
 import { prefixFooterColumns, prefixNavLinks, withBrandPrefix } from '../_config/brandPaths'
 import { DEFAULT_FOOTER_COLUMNS, DEFAULT_NAV_LINKS, DEFAULT_TOPLINE } from '../_config/siteContent'
@@ -408,46 +413,9 @@ function ReviewsSection({
 
 // ─── Mobile swipeable gallery ─────────────────────────────────────────────────
 
+/** Mobile PDP image gallery — the shared carousel, hidden on desktop via CSS. */
 function MobileGallery({ images, livePreview }: { images: string[]; livePreview?: string | null }) {
-  const [activeIdx, setActiveIdx] = useState(0)
-  const trackRef = useRef<HTMLDivElement>(null)
-  const allImages = livePreview ? [livePreview, ...images] : images
-
-  const onScroll = useCallback(() => {
-    const el = trackRef.current
-    if (!el) return
-    const idx = Math.round(el.scrollLeft / el.clientWidth)
-    setActiveIdx(idx)
-  }, [])
-
-  return (
-    <div className={styles.mobileGallery}>
-      <div ref={trackRef} className={styles.galleryTrack} onScroll={onScroll}>
-        {allImages.map((src, i) => (
-          <div key={i} className={styles.gallerySlide}>
-            {livePreview && i === 0 && <span className={styles.livePreviewRibbon}>Live Preview</span>}
-            <img
-              src={src}
-              alt=""
-              className={styles.galleryImage}
-              loading={i === 0 ? 'eager' : 'lazy'}
-            />
-          </div>
-        ))}
-      </div>
-      {allImages.length > 1 && (
-        <div className={styles.progressTrack} aria-hidden="true">
-          <div
-            className={styles.progressBar}
-            style={{
-              width: `${100 / allImages.length}%`,
-              transform: `translateX(${activeIdx * 100}%)`,
-            }}
-          />
-        </div>
-      )}
-    </div>
-  )
+  return <ProductImageCarousel images={images} livePreview={livePreview} className={styles.mobileGallery} />
 }
 
 // ─── Desktop 2×2 static grid (non-OAL) ───────────────────────────────────────
@@ -655,10 +623,17 @@ interface ProductFormProps {
   brand: string
   product: ProductItem
   icons: (typeof BRAND_ICONS)[keyof typeof BRAND_ICONS]
-  onAddToBag: (selectedSwatchKey: MaterialSwatch['key'], engravedText: string, chainLength: string) => void
+  /** Companion / add-on products shown in the Nested Items section. */
+  nestedItems?: QuickAddProduct[]
+  onAddToBag: (
+    selectedSwatchKey: MaterialSwatch['key'],
+    engravedText: string,
+    chainLength: string,
+    nestedCartItems: CartItem[],
+  ) => void
 }
 
-function ProductForm({ brand, product, icons, onAddToBag }: ProductFormProps) {
+function ProductForm({ brand, product, icons, nestedItems = [], onAddToBag }: ProductFormProps) {
   const [selectedSwatchKey, setSelectedSwatchKey] = useState<MaterialSwatch['key']>(
     product.defaultSwatchKey ?? 'vermeil'
   )
@@ -666,8 +641,44 @@ function ProductForm({ brand, product, icons, onAddToBag }: ProductFormProps) {
   const [chainLength, setChainLength] = useState(DEFAULT_CHAIN_LENGTH)
   const { DropdownIcon, StarIcon, ShippingIcon, ReturnIcon, WarrantyIcon, GiftIcon, ChevronIcon } = icons
 
+  // ── Nested Items — staged companion products + quick-add panel state ──────
+  // `staged` maps a nested item's key → its fully configured cart item.
+  const [staged, setStaged] = useState<Record<string, CartItem>>({})
+  const [panelItem, setPanelItem] = useState<QuickAddProduct | null>(null)
+  const [panelOpen, setPanelOpen] = useState(false)
+
+  const checkedKeys = new Set(Object.keys(staged))
+  const stagedItems = Object.values(staged)
+  const stagedCount = stagedItems.length
+  const nestedTotal = stagedItems.reduce((sum, it) => sum + it.price, 0)
+
+  const handleToggle = (item: QuickAddProduct, checked: boolean) => {
+    if (checked) {
+      // Selecting opens the quick-add panel to configure the companion product.
+      setPanelItem(item)
+      setPanelOpen(true)
+    } else {
+      // Unchecking removes it directly — no panel.
+      const key = nestedItemKey(item)
+      setStaged((prev) => {
+        const next = { ...prev }
+        delete next[key]
+        return next
+      })
+    }
+  }
+
   const selectedSwatch = MATERIAL_SWATCHES.find((s) => s.key === selectedSwatchKey)!
   const currentPrice = (product.priceInCents ?? 0) + selectedSwatch.priceOffset
+  const subtotalValue = currentPrice + nestedTotal
+  // N = 1 (main product) + staged nested items.
+  const ctaLabel = stagedCount === 0 ? 'Add to Bag' : `Add ${1 + stagedCount} Items to bag`
+
+  const handleMainAdd = () => {
+    onAddToBag(selectedSwatchKey, engravedText, chainLength, stagedItems)
+    setStaged({})
+  }
+
   return (
     <section className={styles.formPanel} aria-label="Product options">
       {/* Header group: breadcrumb / title+price / stars */}
@@ -754,19 +765,27 @@ function ProductForm({ brand, product, icons, onAddToBag }: ProductFormProps) {
         </div>
       </div>
 
+      {/* Nested Items — companion products, directly above the Subtotal */}
+      <NestedItems
+        brand={brand}
+        items={nestedItems}
+        checkedKeys={checkedKeys}
+        onToggle={handleToggle}
+      />
+
       {/* Subtotal */}
       <div className={styles.subtotalRow}>
         <span className={styles.subtotalLabel}>Subtotal</span>
-        <span className={styles.subtotalValue}>{formatPrice(currentPrice)}</span>
+        <span className={styles.subtotalValue}>{formatPrice(subtotalValue)}</span>
       </div>
 
       {/* CTA */}
       <Button
         variant="add-to-cart"
         className={styles.addToBagBtn}
-        onClick={() => onAddToBag(selectedSwatchKey, engravedText, chainLength)}
+        onClick={handleMainAdd}
       >
-        Add to Bag
+        {ctaLabel}
       </Button>
 
       {/* Trust badges */}
@@ -775,6 +794,22 @@ function ProductForm({ brand, product, icons, onAddToBag }: ProductFormProps) {
         ReturnIcon={ReturnIcon}
         WarrantyIcon={WarrantyIcon}
         GiftIcon={GiftIcon}
+      />
+
+      {/* Quick-add panel — reused to configure a nested item; CTA reads "Add" and
+          the completed item is staged (not dropped straight into the bag). */}
+      <QuickAddPanel
+        isOpen={panelOpen}
+        product={panelItem}
+        onClose={() => setPanelOpen(false)}
+        ctaLabel="Add"
+        showViewDetails={false}
+        onAdd={(cartItem) => {
+          if (panelItem) {
+            const key = nestedItemKey(panelItem)
+            setStaged((prev) => ({ ...prev, [key]: cartItem }))
+          }
+        }}
       />
     </section>
   )
@@ -805,10 +840,18 @@ function ProductDetailPageInner({ productId, previewId }: { productId: number; p
 
   const [livePreview, setLivePreview] = useState<string | null>(null)
 
+  // Companion product for the Nested Items section — one other catalog item
+  // shaped for the quick-add panel (reuses the category-page adapter).
+  const nestedItems: QuickAddProduct[] = getBrandProducts(brand)
+    .filter((p) => p.id !== product.id)
+    .slice(0, 1)
+    .map(toQuickAddProduct)
+
   const handleAddToBag = (
     swatchKey: MaterialSwatch['key'],
     engravedText: string,
-    chainLength: string
+    chainLength: string,
+    nestedCartItems: CartItem[] = []
   ) => {
     const swatch = MATERIAL_SWATCHES.find((s) => s.key === swatchKey)!
     const price = (product.priceInCents ?? 0) + swatch.priceOffset
@@ -826,7 +869,9 @@ function ProductDetailPageInner({ productId, previewId }: { productId: number; p
       isPersonalized: engravedText.trim().length > 0,
       selectedOptions,
     })
-    openCart()
+    // Add any staged nested items alongside the main product.
+    nestedCartItems.forEach((item) => addItem(item))
+    openCart(true)
   }
 
   return (
@@ -840,6 +885,7 @@ function ProductDetailPageInner({ productId, previewId }: { productId: number; p
             brand={brand}
             product={product}
             icons={icons}
+            nestedItems={nestedItems}
             addItem={addItem}
             openCart={openCart}
           />
@@ -850,10 +896,10 @@ function ProductDetailPageInner({ productId, previewId }: { productId: number; p
 
         {/* Two-column layout on desktop, single column on mobile */}
         <div className={styles.layout}>
-          {/* Left: gallery — LAL: thumbnails left; OAL/TGR: sticky+scroll; others: 2×2 grid */}
+          {/* Left: gallery — LAL: thumbnails left; OAL: sticky+scroll; TGR/others: 2×2 grid */}
           {brand === 'lal'
             ? <LALDesktopGallery images={images} name={product.name} livePreview={livePreview} />
-            : (brand === 'oal' || brand === 'tgr')
+            : brand === 'oal'
               ? <OALDesktopGallery images={images} name={product.name} />
               : <DesktopGallery images={images} name={product.name} />
           }
@@ -864,6 +910,7 @@ function ProductDetailPageInner({ productId, previewId }: { productId: number; p
               brand={brand}
               product={product}
               icons={icons}
+              nestedItems={nestedItems}
               addItem={addItem}
               openCart={openCart}
               onLivePreviewChange={setLivePreview}
@@ -875,6 +922,7 @@ function ProductDetailPageInner({ productId, previewId }: { productId: number; p
               icons={icons}
               items={items}
               previewId={previewId}
+              nestedItems={nestedItems}
               addItem={addItem}
               openCart={openCart}
               onLivePreviewChange={setLivePreview}
@@ -884,6 +932,7 @@ function ProductDetailPageInner({ productId, previewId }: { productId: number; p
               brand={brand}
               product={product}
               icons={icons}
+              nestedItems={nestedItems}
               onAddToBag={handleAddToBag}
             />
           )}

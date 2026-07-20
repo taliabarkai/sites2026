@@ -3,6 +3,8 @@ export interface NavLink {
   href: string
   highlight?: boolean
   desktopHidden?: boolean
+  /** Sub-links shown in a dropdown (desktop hover / mobile expand). */
+  children?: NavLink[]
 }
 
 export interface FooterLink {
@@ -31,7 +33,14 @@ export const DEFAULT_NAV_LINKS: NavLink[] = [
   { label: 'New In', href: '/category/t4' },
   { label: 'Shop the Look', href: '/category/t3' },
   { label: 'Sale', href: '/category/t5' },
-  { label: 'Design System', href: '/styleguide', desktopHidden: true },
+  {
+    label: 'Design References',
+    href: '#',
+    children: [
+      { label: 'Panel Examples', href: '/panel-examples' },
+      { label: 'Design Systems', href: '/styleguide' },
+    ],
+  },
 ]
 
 export const DEFAULT_FOOTER_COLUMNS: FooterColumn[] = [

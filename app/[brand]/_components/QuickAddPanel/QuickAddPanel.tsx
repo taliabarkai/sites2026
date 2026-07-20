@@ -1,12 +1,24 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import { usePathname } from 'next/navigation'
 import { useCart } from '../../_context/CartContext'
 import { getBrandFromPathname } from '../../_config/brands'
 import { Button } from '../Button'
+import { ProductImageCarousel } from '../ProductImageCarousel'
+import * as oalIcons from '@/src/components/icons/oal'
+import * as mnnIcons from '@/src/components/icons/mnn'
+import * as tgrIcons from '@/src/components/icons/tgr'
+import * as lalIcons from '@/src/components/icons/lal'
+import * as ibIcons  from '@/src/components/icons/ib'
 import styles from './QuickAddPanel.module.css'
 import type { CartItem } from '../../_context/CartContext'
+
+// Brand-scoped icons — resolved at runtime per the icon rules (never hardcode a brand).
+const BRAND_ICONS = {
+  oal: oalIcons, mnn: mnnIcons, tgr: tgrIcons, lal: lalIcons, ib: ibIcons,
+} as const
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -28,6 +40,8 @@ export interface QuickAddProduct {
   images: { src: string; alt: string }[]
   pdpUrl: string          // relative path, e.g. /product/24
   options: QuickAddOption[]
+  /** Hide the panel's image gallery on mobile (images still show on desktop). */
+  hideGalleryOnMobile?: boolean
 }
 
 export interface QuickAddPanelProps {
@@ -35,6 +49,16 @@ export interface QuickAddPanelProps {
   onClose: () => void
   product: QuickAddProduct | null
   closeButtonRef?: React.RefObject<HTMLButtonElement | null>
+  /** Primary CTA label. Defaults to "Add to Bag". */
+  ctaLabel?: string
+  /**
+   * When provided, replaces the default "add to cart + open cart" behavior with
+   * this callback (used by Nested Items to stage a companion product instead of
+   * dropping it straight into the bag). Receives the fully configured cart item.
+   */
+  onAdd?: (item: CartItem) => void
+  /** Show the "View Full Details" link. Hidden for nested items (bound to the main product). */
+  showViewDetails?: boolean
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -45,10 +69,12 @@ function fmt(cents: number, currency = '$'): string {
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-export function QuickAddPanel({ isOpen, onClose, product, closeButtonRef }: QuickAddPanelProps) {
+export function QuickAddPanel({ isOpen, onClose, product, closeButtonRef, ctaLabel = 'Add to Bag', onAdd, showViewDetails = true }: QuickAddPanelProps) {
   const { addItem, openCart } = useCart()
   const pathname = usePathname()
   const brand = getBrandFromPathname(pathname)
+  // Brand icons the panel needs (star rating + select chevron).
+  const { StarIcon, ChevronIcon } = BRAND_ICONS[brand as keyof typeof BRAND_ICONS] ?? BRAND_ICONS.oal
 
   const internalCloseRef = useRef<HTMLButtonElement>(null)
   const closeRef = closeButtonRef ?? internalCloseRef
@@ -57,12 +83,49 @@ export function QuickAddPanel({ isOpen, onClose, product, closeButtonRef }: Quic
   const [imageIdx, setImageIdx] = useState(0)
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null)
 
+  // Number-of-names selector + one engraving field per name (each independently
+  // controlled). `showNameErrors` surfaces per-field "required" errors after a
+  // blocked Add attempt.
+  const [nameCount, setNameCount] = useState(1)
+  const [names, setNames] = useState<string[]>([''])
+  const [showNameErrors, setShowNameErrors] = useState(false)
+
+  // Grow/shrink the names list live, preserving the values that remain.
+  const handleNameCountChange = (n: number) => {
+    setNameCount(n)
+    setNames(prev => {
+      const next = prev.slice(0, n)
+      while (next.length < n) next.push('')
+      return next
+    })
+    setShowNameErrors(false)
+  }
+
+  // Portal to the themed root (the [data-theme] wrapper) so the panel escapes any
+  // inner stacking context that traps it under the site header, WHILE keeping the
+  // brand CSS variables (typography/colors/buttons are scoped to [data-theme]).
+  const anchorRef = useRef<HTMLSpanElement>(null)
+  const [portalTarget, setPortalTarget] = useState<HTMLElement | null>(null)
+  useEffect(() => {
+    const themed = anchorRef.current?.closest('[data-theme]') as HTMLElement | null
+    setPortalTarget(themed ?? document.body)
+  }, [])
+
   // Focus the close button when panel opens
   useEffect(() => {
     if (isOpen) {
       setTimeout(() => closeRef.current?.focus(), 50)
     }
   }, [isOpen, closeRef])
+
+  // Lock background page scroll while the panel is open — only the panel's own
+  // scroll areas (image column + content) scroll. Matches FloatingCart.
+  useEffect(() => {
+    if (!isOpen) return
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => { document.body.style.overflow = prev }
+  }, [isOpen])
 
   // Reset state when product changes — pre-select first value of each option
   useEffect(() => {
@@ -79,6 +142,9 @@ export function QuickAddPanel({ isOpen, onClose, product, closeButtonRef }: Quic
     }
     setImageIdx(0)
     setLightboxSrc(null)
+    setNameCount(1)
+    setNames([''])
+    setShowNameErrors(false)
   }, [product?.title])
 
   // Escape key closes panel
@@ -107,15 +173,59 @@ export function QuickAddPanel({ isOpen, onClose, product, closeButtonRef }: Quic
 
   const pdpHref = product ? `/${brand}${product.pdpUrl}` : '#'
 
-  // Single-image products drop the desktop left column and show the image inline,
-  // stacked below the title — the panel collapses to a single column.
-  const isSingleImage = product ? product.images.length === 1 : false
+  // Gallery layout switches on image count:
+  //  • ≤ 4 images → single column with a horizontal image carousel above the options
+  //  • > 4 images → the default two-column layout (image column left, options right)
+  const useCarousel = product ? product.images.length <= 4 : false
+  const carouselSrcs = product ? product.images.map((im) => im.src) : []
+  // Optionally hide the gallery on mobile (images still render on desktop).
+  const hideGalleryOnMobile = product?.hideGalleryOnMobile ?? false
+
+  // Title + price + review — rendered above the gallery for multi-image products,
+  // below the inline image for single-image products.
+  const headerJsx = product && (
+    <div className={styles.header}>
+      <h2 className={styles.title}>{product.title}</h2>
+      <div className={styles.priceRow}>
+        {product.salePrice && (
+          <span className={styles.priceOriginal}>{fmt(product.salePrice, product.currency)}</span>
+        )}
+        <span className={styles.price}>{fmt(totalPrice, product.currency)}</span>
+      </div>
+      {product.rating != null && (
+        <div className={styles.rating}>
+          <div className={styles.stars} aria-label={`${product.rating} out of 5 stars`}>
+            {[1,2,3,4,5].map(i => (
+              <span key={i} className={i <= Math.round(product.rating ?? 0) ? styles.starFilled : styles.starEmpty} aria-hidden="true">
+                <StarIcon size={16} />
+              </span>
+            ))}
+          </div>
+          <span className={styles.ratingValue}>{product.rating}</span>
+          <span className={styles.reviewCount}>({product.reviewCount?.toLocaleString()} reviews)</span>
+        </div>
+      )}
+    </div>
+  )
 
   const handleAddToBag = () => {
     if (!product) return
+
+    // Validation — every visible name field is required. Block Add and surface
+    // per-field errors if any are empty.
+    const trimmedNames = names.map(n => n.trim())
+    if (trimmedNames.some(n => n === '')) {
+      setShowNameErrors(true)
+      return
+    }
+
+    // The dynamic name fields replace the product's own text-input engraving.
     const selectedOptionsList = product.options
+      .filter(opt => opt.type !== 'text-input')
       .map(opt => ({ label: opt.name, value: selectedOptions[opt.name] ?? '' }))
       .filter(o => o.value)
+
+    const nameOptions = trimmedNames.map((n, i) => ({ label: `Name ${i + 1}`, value: n }))
 
     const cartItem: CartItem = {
       id: `quickadd-${product.title.replace(/\s+/g, '-').toLowerCase()}-${Date.now()}`,
@@ -123,17 +233,176 @@ export function QuickAddPanel({ isOpen, onClose, product, closeButtonRef }: Quic
       price: totalPrice,
       originalPrice: product.salePrice ? product.price : undefined,
       image: product.images[0]?.src ?? '',
-      isPersonalized: product.options.some(
-        o => o.type === 'text-input' && selectedOptions[o.name]?.trim()
-      ),
-      selectedOptions: selectedOptionsList,
+      isPersonalized: true,
+      selectedOptions: [...selectedOptionsList, ...nameOptions],
+    }
+    // Nested Items path: hand the configured item back to the caller to stage,
+    // without touching the cart or opening the floating cart.
+    if (onAdd) {
+      onAdd(cartItem)
+      onClose()
+      return
     }
     addItem(cartItem)
     onClose()
     openCart(true)
   }
 
-  return (
+  // Renders a single product option (swatch / pills / text-input / dropdown).
+  const renderOption = (opt: QuickAddOption) => (
+    <div key={opt.name} className={styles.optionGroup}>
+      {opt.type === 'swatch' && (
+        <>
+          <p className={styles.optionLabel}>
+            {opt.name}
+            {selectedOptions[opt.name] && (
+              <span className={styles.optionValue}>
+                {' '}— {opt.values?.find(v => v.value === selectedOptions[opt.name])?.label}
+              </span>
+            )}
+          </p>
+          <div className={styles.swatches}>
+            {opt.values?.map(v => (
+              <button
+                key={v.value}
+                type="button"
+                aria-label={v.label}
+                aria-pressed={selectedOptions[opt.name] === v.value}
+                className={`${styles.swatch} ${selectedOptions[opt.name] === v.value ? styles.swatchSelected : ''}`}
+                style={{ background: v.color ?? 'var(--colors-surface-secondary)' }}
+                onClick={() => select(opt.name, v.value)}
+              />
+            ))}
+          </div>
+        </>
+      )}
+
+      {opt.type === 'pills' && (
+        <>
+          <p className={styles.optionLabel}>Select {opt.name}</p>
+          <div className={styles.pills}>
+            {opt.values?.map(v => (
+              <button
+                key={v.value}
+                type="button"
+                aria-pressed={selectedOptions[opt.name] === v.value}
+                className={`${styles.pill} ${selectedOptions[opt.name] === v.value ? styles.pillSelected : ''}`}
+                onClick={() => select(opt.name, v.value)}
+              >
+                {v.label}
+              </button>
+            ))}
+          </div>
+        </>
+      )}
+
+      {opt.type === 'text-input' && (
+        <>
+          <label className={styles.optionLabel} htmlFor={`qa-${opt.name}`}>
+            {opt.name}
+          </label>
+          <div className={styles.inputWrap}>
+            <input
+              id={`qa-${opt.name}`}
+              type="text"
+              value={selectedOptions[opt.name] ?? ''}
+              maxLength={opt.maxLength}
+              placeholder={opt.placeholder ?? ''}
+              className={styles.textInput}
+              onChange={e => select(opt.name, e.target.value)}
+            />
+            {opt.maxLength && (
+              <span className={styles.charCount}>
+                {(selectedOptions[opt.name] ?? '').length}/{opt.maxLength}
+              </span>
+            )}
+          </div>
+        </>
+      )}
+
+      {opt.type === 'dropdown' && (
+        <>
+          <label className={styles.optionLabel} htmlFor={`qa-${opt.name}`}>
+            {opt.name}
+          </label>
+          <div className={styles.selectWrap}>
+            <select
+              id={`qa-${opt.name}`}
+              value={selectedOptions[opt.name] ?? ''}
+              className={styles.select}
+              onChange={e => select(opt.name, e.target.value)}
+            >
+              <option value="">Select…</option>
+              {opt.values?.map(v => (
+                <option key={v.value} value={v.value}>{v.label}</option>
+              ))}
+            </select>
+            <span className={styles.selectArrow} aria-hidden="true">
+              <ChevronIcon size={20} />
+            </span>
+          </div>
+        </>
+      )}
+    </div>
+  )
+
+  // Number-of-names dropdown + one required engraving field per name. Placed
+  // directly below the Metal (swatch) selector, above the remaining options.
+  const namesSection = product && (
+    <>
+      <div className={styles.optionGroup}>
+        <label className={styles.optionLabel} htmlFor="qa-name-count">Select number of names</label>
+        <div className={styles.selectWrap}>
+          <select
+            id="qa-name-count"
+            className={styles.select}
+            value={nameCount}
+            onChange={e => handleNameCountChange(Number(e.target.value))}
+          >
+            {[1, 2, 3, 4].map(n => (
+              <option key={n} value={n}>{n}</option>
+            ))}
+          </select>
+          <span className={styles.selectArrow} aria-hidden="true">
+            <ChevronIcon size={20} />
+          </span>
+        </div>
+      </div>
+
+      {names.map((name, i) => {
+        const err = showNameErrors && name.trim() === ''
+        return (
+          <div key={`name-${i}`} className={styles.optionGroup}>
+            <label className={styles.optionLabel} htmlFor={`qa-name-${i}`}>Name {i + 1}</label>
+            <div className={styles.inputWrap}>
+              <input
+                id={`qa-name-${i}`}
+                type="text"
+                value={name}
+                maxLength={12}
+                placeholder={`Name ${i + 1}`}
+                className={`${styles.textInput} ${err ? styles.textInputError : ''}`}
+                aria-invalid={err || undefined}
+                aria-describedby={err ? `qa-name-${i}-error` : undefined}
+                onChange={e => {
+                  const v = e.target.value
+                  setNames(prev => prev.map((val, idx) => (idx === i ? v : val)))
+                }}
+              />
+              <span className={styles.charCount}>{name.length}/12</span>
+            </div>
+            {err && (
+              <p id={`qa-name-${i}-error`} className={styles.errorMsg}>
+                Please enter Name {i + 1}.
+              </p>
+            )}
+          </div>
+        )
+      })}
+    </>
+  )
+
+  const tree = (
     <>
       {/* Backdrop */}
       <div
@@ -144,29 +413,12 @@ export function QuickAddPanel({ isOpen, onClose, product, closeButtonRef }: Quic
 
       {/* Panel */}
       <div
-        className={`${styles.panel} ${isOpen ? styles.panelOpen : ''} ${isSingleImage ? styles.panelSingle : ''}`}
+        className={`${styles.panel} ${isOpen ? styles.panelOpen : ''} ${useCarousel ? styles.panelSingle : ''} ${hideGalleryOnMobile ? styles.panelHugMobile : ''}`}
         role="dialog"
         aria-modal="true"
-        aria-label="Quick add"
+        aria-label="Add to Bag"
       >
-        {/* Desktop: left column — all images stacked, vertically scrollable.
-            Skipped for single-image products (shown inline in the right column instead). */}
-        {product && product.images.length > 1 && (
-          <div className={styles.desktopImage} aria-hidden="true">
-            {product.images.map((img, i) => (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                key={i}
-                src={img.src}
-                alt={img.alt}
-                className={styles.desktopImageEl}
-                loading={i === 0 ? 'eager' : 'lazy'}
-              />
-            ))}
-          </div>
-        )}
-
-        {/* Close button — absolute, top-right */}
+        {/* Close button — plain X, absolute top-right of the panel */}
         <button
           ref={closeRef}
           type="button"
@@ -177,176 +429,86 @@ export function QuickAddPanel({ isOpen, onClose, product, closeButtonRef }: Quic
           ✕
         </button>
 
-        {/* Right column: scrollable content + sticky footer */}
-        {product && <div className={styles.rightCol}><div className={styles.scrollArea}>
-          {/* Mobile drag handle */}
-          <div className={styles.dragHandle} aria-hidden="true" />
-
-          {/* Title + price */}
-          <div className={styles.header}>
-            <h2 className={styles.title}>{product.title}</h2>
-            <div className={styles.priceRow}>
-              {product.salePrice && (
-                <span className={styles.priceOriginal}>{fmt(product.salePrice, product.currency)}</span>
-              )}
-              <span className={styles.price}>{fmt(totalPrice, product.currency)}</span>
-            </div>
-            {product.rating != null && (
-              <div className={styles.rating}>
-                <div className={styles.stars} aria-label={`${product.rating} out of 5 stars`}>
-                  {[1,2,3,4,5].map(i => (
-                    <span key={i} className={i <= Math.round(product.rating ?? 0) ? styles.starFilled : styles.starEmpty} aria-hidden="true">★</span>
-                  ))}
-                </div>
-                <span className={styles.ratingValue}>{product.rating}</span>
-                <span className={styles.reviewCount}>({product.reviewCount?.toLocaleString()} reviews)</span>
-              </div>
-            )}
-          </div>
-
-          {/* Single-image product — one large image stacked below the title,
-              on desktop and mobile alike (no left column, no thumbnail gallery) */}
-          {isSingleImage && (
-            <div className={styles.singleImage}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={product.images[0].src}
-                alt={product.images[0].alt}
-                className={styles.singleImageEl}
-                loading="eager"
-              />
-            </div>
-          )}
-
-          {/* Mini image gallery — multi-image products only */}
-          {product.images.length > 1 && (
-            <div className={styles.gallery}>
+        {/* Body — desktop left image column + right content column */}
+        <div className={styles.panelBody}>
+          {/* Desktop: left column — all images stacked, vertically scrollable.
+              Only for products with > 4 images (the ≤4 variant uses the carousel). */}
+          {product && !useCarousel && (
+            <div className={styles.desktopImage} aria-hidden="true">
               {product.images.map((img, i) => (
-                <button
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
                   key={i}
-                  type="button"
-                  className={`${styles.galleryThumb} ${i === imageIdx ? styles.galleryThumbActive : ''}`}
-                  onClick={() => { setImageIdx(i); setLightboxSrc(img.src) }}
-                  aria-label={`View larger image of ${img.alt}`}
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={img.src} alt={img.alt} className={styles.galleryImg} loading="lazy" />
-                </button>
+                  src={img.src}
+                  alt={img.alt}
+                  className={styles.desktopImageEl}
+                  loading={i === 0 ? 'eager' : 'lazy'}
+                />
               ))}
             </div>
           )}
 
-          {/* Options */}
-          <div className={styles.options}>
-            {product.options.map(opt => (
-              <div key={opt.name} className={styles.optionGroup}>
-                {opt.type === 'swatch' && (
-                  <>
-                    <p className={styles.optionLabel}>
-                      {opt.name}
-                      {selectedOptions[opt.name] && (
-                        <span className={styles.optionValue}>
-                          {' '}— {opt.values?.find(v => v.value === selectedOptions[opt.name])?.label}
-                        </span>
-                      )}
-                    </p>
-                    <div className={styles.swatches}>
-                      {opt.values?.map(v => (
-                        <button
-                          key={v.value}
-                          type="button"
-                          aria-label={v.label}
-                          aria-pressed={selectedOptions[opt.name] === v.value}
-                          className={`${styles.swatch} ${selectedOptions[opt.name] === v.value ? styles.swatchSelected : ''}`}
-                          style={{ background: v.color ?? 'var(--colors-surface-secondary)' }}
-                          onClick={() => select(opt.name, v.value)}
-                        />
-                      ))}
-                    </div>
-                  </>
-                )}
+          {/* Right column: scrollable content + sticky footer */}
+          {product && <div className={styles.rightCol}><div className={styles.scrollArea}>
+            {/* Title + price + review — always first */}
+            {headerJsx}
 
-                {opt.type === 'pills' && (
-                  <>
-                    <p className={styles.optionLabel}>Select {opt.name}</p>
-                    <div className={styles.pills}>
-                      {opt.values?.map(v => (
-                        <button
-                          key={v.value}
-                          type="button"
-                          aria-pressed={selectedOptions[opt.name] === v.value}
-                          className={`${styles.pill} ${selectedOptions[opt.name] === v.value ? styles.pillSelected : ''}`}
-                          onClick={() => select(opt.name, v.value)}
-                        >
-                          {v.label}
-                        </button>
-                      ))}
-                    </div>
-                  </>
-                )}
+            {/* ≤ 4 images — horizontal image carousel above the options (shared
+                PDP carousel), shown at every breakpoint. */}
+            {useCarousel && (
+              <ProductImageCarousel
+                images={carouselSrcs}
+                peek
+                showProgress={false}
+                className={`${styles.panelCarousel} ${hideGalleryOnMobile ? styles.hideOnMobile : ''}`}
+              />
+            )}
 
-                {opt.type === 'text-input' && (
-                  <>
-                    <label className={styles.optionLabel} htmlFor={`qa-${opt.name}`}>
-                      {opt.name}
-                    </label>
-                    <div className={styles.inputWrap}>
-                      <input
-                        id={`qa-${opt.name}`}
-                        type="text"
-                        value={selectedOptions[opt.name] ?? ''}
-                        maxLength={opt.maxLength}
-                        placeholder={opt.placeholder ?? ''}
-                        className={styles.textInput}
-                        onChange={e => select(opt.name, e.target.value)}
-                      />
-                      {opt.maxLength && (
-                        <span className={styles.charCount}>
-                          {(selectedOptions[opt.name] ?? '').length}/{opt.maxLength}
-                        </span>
-                      )}
-                    </div>
-                  </>
-                )}
-
-                {opt.type === 'dropdown' && (
-                  <>
-                    <label className={styles.optionLabel} htmlFor={`qa-${opt.name}`}>
-                      {opt.name}
-                    </label>
-                    <div className={styles.selectWrap}>
-                      <select
-                        id={`qa-${opt.name}`}
-                        value={selectedOptions[opt.name] ?? ''}
-                        className={styles.select}
-                        onChange={e => select(opt.name, e.target.value)}
-                      >
-                        <option value="">Select…</option>
-                        {opt.values?.map(v => (
-                          <option key={v.value} value={v.value}>{v.label}</option>
-                        ))}
-                      </select>
-                    </div>
-                  </>
-                )}
+            {/* > 4 images — mobile thumbnail gallery (desktop uses the left column) */}
+            {!useCarousel && (
+              <div className={`${styles.gallery} ${hideGalleryOnMobile ? styles.hideOnMobile : ''}`}>
+                {product.images.map((img, i) => (
+                  <button
+                    key={i}
+                    type="button"
+                    className={`${styles.galleryThumb} ${i === imageIdx ? styles.galleryThumbActive : ''}`}
+                    onClick={() => { setImageIdx(i); setLightboxSrc(img.src) }}
+                    aria-label={`View larger image of ${img.alt}`}
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={img.src} alt={img.alt} className={styles.galleryImg} loading="lazy" />
+                  </button>
+                ))}
               </div>
-            ))}
-          </div>
-        </div>
+            )}
 
-        {/* Sticky footer — ADD TO BAG + VIEW FULL DETAILS, no subtotal row */}
-        <div className={styles.footer}>
-          <Button
-            variant="add-to-cart"
-            className={styles.addToBagBtn}
-            onClick={handleAddToBag}
-          >
-            Add to Bag
-          </Button>
-          <a href={pdpHref} className={styles.viewDetails} onClick={onClose}>
-            View Full Details
-          </a>
+          {/* Options — swatch(es) → number-of-names + name fields → the rest.
+              (The product's own text-input engraving is replaced by the name fields.) */}
+          <div className={styles.options}>
+            {product.options.filter(o => o.type === 'swatch').map(renderOption)}
+            {namesSection}
+            {product.options
+              .filter(o => o.type !== 'swatch' && o.type !== 'text-input')
+              .map(renderOption)}
+          </div>
+
+          {/* Footer — flows inline below the last selection (not pinned to the bottom) */}
+          <div className={styles.footer}>
+            <Button
+              variant="add-to-cart"
+              className={styles.addToBagBtn}
+              onClick={handleAddToBag}
+            >
+              {ctaLabel}
+            </Button>
+            {showViewDetails && (
+              <a href={pdpHref} className={styles.viewDetails} onClick={onClose}>
+                View Full Details
+              </a>
+            )}
+          </div>
         </div></div>}
+        </div>
       </div>
 
       {/* Mobile image lightbox */}
@@ -375,6 +537,14 @@ export function QuickAddPanel({ isOpen, onClose, product, closeButtonRef }: Quic
           </button>
         </div>
       )}
+    </>
+  )
+
+  return (
+    <>
+      {/* Anchor stays in place so we can resolve the themed [data-theme] root */}
+      <span ref={anchorRef} aria-hidden="true" style={{ display: 'none' }} />
+      {portalTarget && createPortal(tree, portalTarget)}
     </>
   )
 }
