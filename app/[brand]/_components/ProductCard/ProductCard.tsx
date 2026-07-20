@@ -104,7 +104,9 @@ export function ProductCard({
   // Mirrors the hotspot drawer's trigger: local open state + <QuickAddPanel>.
   const [quickAddOpen, setQuickAddOpen] = useState(false)
 
-  const classes = [styles.card, className].filter(Boolean).join(' ')
+  // Only enable the hover crossfade when a second image exists — otherwise the
+  // single image would fade to the empty card background on hover.
+  const classes = [styles.card, hoverImage && styles.hasHover, className].filter(Boolean).join(' ')
 
   return (
     <article className={classes}>

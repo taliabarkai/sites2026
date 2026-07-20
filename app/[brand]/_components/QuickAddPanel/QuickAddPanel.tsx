@@ -107,6 +107,10 @@ export function QuickAddPanel({ isOpen, onClose, product, closeButtonRef }: Quic
 
   const pdpHref = product ? `/${brand}${product.pdpUrl}` : '#'
 
+  // Single-image products drop the desktop left column and show the image inline,
+  // stacked below the title — the panel collapses to a single column.
+  const isSingleImage = product ? product.images.length === 1 : false
+
   const handleAddToBag = () => {
     if (!product) return
     const selectedOptionsList = product.options
@@ -126,7 +130,7 @@ export function QuickAddPanel({ isOpen, onClose, product, closeButtonRef }: Quic
     }
     addItem(cartItem)
     onClose()
-    openCart()
+    openCart(true)
   }
 
   return (
@@ -140,13 +144,14 @@ export function QuickAddPanel({ isOpen, onClose, product, closeButtonRef }: Quic
 
       {/* Panel */}
       <div
-        className={`${styles.panel} ${isOpen ? styles.panelOpen : ''}`}
+        className={`${styles.panel} ${isOpen ? styles.panelOpen : ''} ${isSingleImage ? styles.panelSingle : ''}`}
         role="dialog"
         aria-modal="true"
         aria-label="Quick add"
       >
-        {/* Desktop: left column — all images stacked, vertically scrollable */}
-        {product && product.images.length > 0 && (
+        {/* Desktop: left column — all images stacked, vertically scrollable.
+            Skipped for single-image products (shown inline in the right column instead). */}
+        {product && product.images.length > 1 && (
           <div className={styles.desktopImage} aria-hidden="true">
             {product.images.map((img, i) => (
               // eslint-disable-next-line @next/next/no-img-element
@@ -199,8 +204,22 @@ export function QuickAddPanel({ isOpen, onClose, product, closeButtonRef }: Quic
             )}
           </div>
 
-          {/* Mini image gallery */}
-          {product.images.length > 0 && (
+          {/* Single-image product — one large image stacked below the title,
+              on desktop and mobile alike (no left column, no thumbnail gallery) */}
+          {isSingleImage && (
+            <div className={styles.singleImage}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={product.images[0].src}
+                alt={product.images[0].alt}
+                className={styles.singleImageEl}
+                loading="eager"
+              />
+            </div>
+          )}
+
+          {/* Mini image gallery — multi-image products only */}
+          {product.images.length > 1 && (
             <div className={styles.gallery}>
               {product.images.map((img, i) => (
                 <button

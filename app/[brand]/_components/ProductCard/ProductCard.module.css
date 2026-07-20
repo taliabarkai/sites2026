@@ -45,10 +45,11 @@
 .imageDefault { opacity: 1; }
 .imageHover   { opacity: 0; }
 
-/* Hover crossfade — desktop only (≥768px). No transform / no zoom. */
+/* Hover crossfade — desktop only (≥768px), and only when a hover image exists.
+   No transform / no zoom. */
 @media (min-width: 768px) {
-  .card:hover .imageDefault { opacity: 0; }
-  .card:hover .imageHover   { opacity: 1; }
+  .hasHover:hover .imageDefault { opacity: 0; }
+  .hasHover:hover .imageHover   { opacity: 1; }
 }
 
 .info {

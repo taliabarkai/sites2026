@@ -55,6 +55,16 @@
   .panelOpen {
     transform: translateX(0);
   }
+
+  /* Single-image variant — no left column, panel collapses to one column */
+  .panelSingle {
+    width: min(600px, 100vw);
+  }
+
+  .panelSingle .rightCol {
+    flex: 1 1 auto;
+    width: 100%;
+  }
 }
 
 /* ── Close button — absolute, top-right of panel ─────────────────────────── */
@@ -153,12 +163,8 @@
 }
 
 @media (min-width: 768px) {
+  /* Align content from the top — title sits near the close button */
   .scrollArea {
-    padding-top: calc(var(--spacing-xxl) + var(--spacing-lg));
-  }
-
-  /* Title top padding — desktop only to clear the close button */
-  .title {
     padding-top: var(--spacing-lg);
   }
 }
@@ -247,6 +253,27 @@
   font-weight:    var(--typography-rules-text1-font-weight, normal);
   letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
   color: var(--colors-text-secondary);
+}
+
+/* ── Single inline image — single-image products (both breakpoints) ───────── */
+.singleImage {
+  width: 100%;
+  overflow: hidden;
+  background: var(--colors-card-image-bg);
+  margin-bottom: var(--spacing-md);
+}
+
+.singleImageEl {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1 / 1; /* default: square for all brands */
+  object-fit: cover;
+  object-position: center;
+}
+
+/* OAL: 4/5 portrait */
+[data-theme="oal"] .singleImageEl {
+  aspect-ratio: 4 / 5;
 }
 
 /* ── Mini image gallery — mobile only ────────────────────────────────────── */
