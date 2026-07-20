@@ -42,8 +42,10 @@ export interface CartItem {
 interface CartContextValue {
   items: CartItem[]
   isOpen: boolean
+  /** True when the cart was opened by adding an item (shows the "Successfully added" line). */
+  justAdded: boolean
   subtotal: number
-  openCart: () => void
+  openCart: (added?: boolean) => void
   closeCart: () => void
   addItem: (item: CartItem) => void
   removeItem: (id: string) => void
@@ -66,6 +68,7 @@ function loadCart(): CartItem[] {
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([])
   const [isOpen, setIsOpen] = useState(false)
+  const [justAdded, setJustAdded] = useState(false)
 
   // Hydrate from localStorage once on mount
   useEffect(() => {
@@ -98,9 +101,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     <CartContext.Provider value={{
       items,
       isOpen,
+      justAdded,
       subtotal,
-      openCart: () => setIsOpen(true),
-      closeCart: () => setIsOpen(false),
+      openCart: (added = false) => { setIsOpen(true); setJustAdded(added) },
+      closeCart: () => { setIsOpen(false); setJustAdded(false) },
       addItem,
       removeItem,
       updateGiftPackaging,
@@ -113,6 +117,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 const CART_NOOP: CartContextValue = {
   items: [],
   isOpen: false,
+  justAdded: false,
   subtotal: 0,
   openCart: () => {},
   closeCart: () => {},
