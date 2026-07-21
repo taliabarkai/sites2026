@@ -357,6 +357,8 @@ export function FloatingCart({
           </div>
 
           <div className={styles.carePlanScroll}>
+            <h3 className={styles.carePlanHeading}>Add Warranty</h3>
+
             {/* Selectable card (nested-item design) — checkbox toggles the plan */}
             <div className={styles.carePlanTop}>
               <button
@@ -393,8 +395,6 @@ export function FloatingCart({
                 restoring &amp; preserving the beauty of your jewelry as well as benefit from free
                 returns and more.
               </p>
-
-              <h3 className={styles.carePlanHeading}>Benefits</h3>
 
               <div className={styles.carePlanBenefit}>
                 <h4 className={styles.carePlanBenefitTitle}>Free Returns</h4>

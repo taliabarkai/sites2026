@@ -651,8 +651,10 @@
   color: var(--colors-text-secondary);
 }
 
+/* "Add Warranty" heading — above the card; aligns with the section side padding */
 .carePlanHeading {
-  margin: var(--spacing-xs) 0 0;
+  margin: 0;
+  padding: var(--spacing-md) var(--spacing-sm) 0;
   font-family:    var(--typography-rules-headline6-font-family);
   font-size:      var(--typography-rules-headline6-font-size);
   line-height:    var(--typography-rules-headline6-line-height);
@@ -660,6 +662,11 @@
   letter-spacing: var(--typography-rules-headline6-letter-spacing, normal);
   text-transform: var(--typography-rules-headline6-text-transform, none);
   color: var(--colors-text);
+}
+
+/* The card wrapper's own top padding is redundant now the heading sits above it */
+.carePlanHeading + .carePlanTop {
+  padding-top: var(--spacing-xs);
 }
 
 .carePlanBenefit {
@@ -694,6 +701,7 @@
 /* Desktop — wider 24px side padding for the care-plan sections */
 @media (min-width: 1024px) {
   .carePlanHeader,
+  .carePlanHeading,
   .carePlanTop,
   .carePlanBody {
     padding-left: var(--spacing-md);
