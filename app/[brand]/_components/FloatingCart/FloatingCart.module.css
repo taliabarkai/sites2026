@@ -533,19 +533,40 @@
   overscroll-behavior: contain;
 }
 
-/* Two-column header: image (180px) left, title + price right */
+/* Padded wrapper for the selectable card */
 .carePlanTop {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-md);
   padding: var(--spacing-md) var(--spacing-sm);
+}
+
+/* Selectable card — nested-item design: image left, title/price, checkbox top-right */
+.carePlanCard {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+  padding: 0;
+  text-align: left;
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--colors-background);
+  color: var(--colors-text);
+  cursor: pointer;
+  transition: border-color var(--transition-fast);
+}
+
+.carePlanCard:hover {
+  border-color: var(--colors-text);
 }
 
 /* Brand image tint (same token as the category product cards). The badge PNG has
    an opaque white background, so multiply-blend it over the tint to color it. */
 .carePlanImageWrap {
   flex-shrink: 0;
-  width: 180px;
+  width: 150px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   background-color: var(--colors-card-image-bg);
   isolation: isolate;
 }
@@ -558,10 +579,15 @@
 }
 
 .carePlanTopInfo {
+  flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
+  justify-content: center;
   gap: var(--spacing-xs);
-  min-width: 0;
+  padding: var(--spacing-md);
+  /* clear the absolute checkbox in the top-right corner */
+  padding-right: calc(var(--spacing-md) * 2);
 }
 
 .carePlanTitle {
@@ -579,6 +605,30 @@
   font-size:      var(--typography-rules-text1-font-size);
   line-height:    var(--typography-rules-text1-line-height);
   color: var(--colors-text);
+}
+
+/* Checkbox — top-right corner, matches the nested-item card */
+.carePlanCheckbox {
+  position: absolute;
+  top: var(--spacing-xs);
+  right: var(--spacing-xs);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--spacing-md);
+  height: var(--spacing-md);
+  color: var(--colors-text);
+}
+
+.carePlanChecked {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--spacing-sm);
+  height: var(--spacing-sm);
+  border-radius: var(--radius-full);
+  background: var(--colors-text);
+  color: var(--colors-text-inverse);
 }
 
 .carePlanBody {
@@ -641,22 +691,11 @@
   color: var(--colors-text-secondary);
 }
 
-.carePlanFooter {
-  flex-shrink: 0;
-  padding: var(--spacing-sm);
-  border-top: 1px solid var(--border-color);
-}
-
-.carePlanAddBtn {
-  width: 100%;
-}
-
 /* Desktop — wider 24px side padding for the care-plan sections */
 @media (min-width: 1024px) {
   .carePlanHeader,
   .carePlanTop,
-  .carePlanBody,
-  .carePlanFooter {
+  .carePlanBody {
     padding-left: var(--spacing-md);
     padding-right: var(--spacing-md);
   }
