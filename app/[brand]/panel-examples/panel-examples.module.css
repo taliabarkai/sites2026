@@ -76,6 +76,24 @@
   }
 }
 
+/* Labelled product-card example */
+.cardExample {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.cardLabel {
+  margin: 0;
+  font-family:    var(--typography-rules-headline6-font-family);
+  font-size:      var(--typography-rules-headline6-font-size);
+  line-height:    var(--typography-rules-headline6-line-height);
+  font-weight:    var(--typography-rules-headline6-font-weight, normal);
+  letter-spacing: var(--typography-rules-headline6-letter-spacing, normal);
+  text-transform: var(--typography-rules-headline6-text-transform, none);
+  color: var(--colors-text);
+}
+
 /* Constrain the nested-item cards to a readable width; space the sections apart */
 .nestedWrap {
   max-width: 520px;

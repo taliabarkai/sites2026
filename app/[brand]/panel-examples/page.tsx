@@ -42,7 +42,10 @@ export default function PanelExamplesPage() {
 
   // One product with ≤4 gallery images (carousel variant) and one with >4 (default).
   const fourImageProduct = withImageCount(catalog[0], imgPool, 4)
-  const sixImageProduct  = withImageCount(catalog[1], imgPool, 6)
+  // Same product, but its panel hides the image gallery entirely (options only).
+  const noGalleryProduct: QuickAddProduct = { ...fourImageProduct, hideGallery: true }
+  // Hidden for now — restore alongside the commented card/nested section below.
+  // const sixImageProduct  = withImageCount(catalog[1], imgPool, 6)
 
   // A nested item whose panel hides its gallery on mobile and shows 3 images on desktop.
   const noMobileImageProduct: QuickAddProduct = {
@@ -52,9 +55,10 @@ export default function PanelExamplesPage() {
 
   // Nested items open the same shared panel — one section each, the section title
   // naming the variant (so each is identifiable) while the card keeps the plain name.
-  const nestedCarousel  = useNestedItems(brand, [fourImageProduct],    'Carousel 4 images')
-  const nestedTwoColumn = useNestedItems(brand, [sixImageProduct],     '2 Columns 6 imgs')
-  const nestedNoMobile  = useNestedItems(brand, [noMobileImageProduct], 'No image on mobile with carousel on Desktop')
+  const nestedCarousel  = useNestedItems(brand, [fourImageProduct],    'With Gallery')
+  // Hidden for now — restore to demo the two-column (>4 images) variant.
+  // const nestedTwoColumn = useNestedItems(brand, [sixImageProduct],     '2 Columns 6 imgs')
+  const nestedNoMobile  = useNestedItems(brand, [noMobileImageProduct], 'Without gallery for mobile only')
 
   return (
     <div className={styles.page}>
@@ -74,19 +78,35 @@ export default function PanelExamplesPage() {
         <section className={styles.section} aria-labelledby="pe-cards">
           <h2 id="pe-cards" className={styles.sectionTitle}>Product Card</h2>
           <p className={styles.sectionNote}>
-            Hover a card and tap the quick-add icon. Left card has 4 images (carousel
-            variant); right card has 6 images (two-column variant).
+            Hover a card and tap the quick-add icon. Both open the shared panel — one with
+            the image gallery, one with the gallery hidden (options only).
           </p>
           <div className={styles.cardGrid}>
-            <ProductCard
-              name={fourImageProduct.title}
-              price={money(fourImageProduct.price)}
-              originalPrice={fourImageProduct.salePrice ? money(fourImageProduct.salePrice) : undefined}
-              defaultImage={fourImageProduct.images[0]?.src ?? ''}
-              hoverImage={fourImageProduct.images[1]?.src}
-              href="#"
-              quickAddProduct={fourImageProduct}
-            />
+            <div className={styles.cardExample}>
+              <h3 className={styles.cardLabel}>With Gallery</h3>
+              <ProductCard
+                name={fourImageProduct.title}
+                price={money(fourImageProduct.price)}
+                originalPrice={fourImageProduct.salePrice ? money(fourImageProduct.salePrice) : undefined}
+                defaultImage={fourImageProduct.images[0]?.src ?? ''}
+                hoverImage={fourImageProduct.images[1]?.src}
+                href="#"
+                quickAddProduct={fourImageProduct}
+              />
+            </div>
+            <div className={styles.cardExample}>
+              <h3 className={styles.cardLabel}>Without Gallery</h3>
+              <ProductCard
+                name={noGalleryProduct.title}
+                price={money(noGalleryProduct.price)}
+                originalPrice={noGalleryProduct.salePrice ? money(noGalleryProduct.salePrice) : undefined}
+                defaultImage={noGalleryProduct.images[0]?.src ?? ''}
+                hoverImage={noGalleryProduct.images[1]?.src}
+                href="#"
+                quickAddProduct={noGalleryProduct}
+              />
+            </div>
+            {/* Hidden for now — the 6-image (two-column) product card. Restore to demo the >4 variant.
             <ProductCard
               name={sixImageProduct.title}
               price={money(sixImageProduct.price)}
@@ -96,6 +116,7 @@ export default function PanelExamplesPage() {
               href="#"
               quickAddProduct={sixImageProduct}
             />
+            */}
           </div>
         </section>
 
@@ -108,7 +129,9 @@ export default function PanelExamplesPage() {
           </p>
           <div className={styles.nestedWrap}>
             {nestedCarousel.ui}
+            {/* Hidden for now — the two-column (6 images) nested section. Restore to demo the >4 variant.
             {nestedTwoColumn.ui}
+            */}
             {nestedNoMobile.ui}
           </div>
         </section>
