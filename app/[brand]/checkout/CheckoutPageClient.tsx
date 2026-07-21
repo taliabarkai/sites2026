@@ -12,7 +12,7 @@ import type { IconProps } from '@/src/components/icons/Icon'
 import type { CartItem } from '../_context/CartContext'
 import { Button } from '../_components/Button'
 import { Header } from '../_components/Header'
-import { useCart } from '../_context/CartContext'
+import { useCart, WARRANTY_CENTS } from '../_context/CartContext'
 import { getBrandFromPathname } from '../_config/brands'
 import { prefixNavLinks, withBrandPrefix } from '../_config/brandPaths'
 import { DEFAULT_NAV_LINKS, DEFAULT_TOPLINE } from '../_config/siteContent'
@@ -325,6 +325,18 @@ function CheckoutItemRow({ item, icons, showGuarantee, onAddGift }: CheckoutItem
 
         </div>{/* end itemContent */}
       </div>
+
+      {/* Warranty add-on — single line below the item when the plan is selected
+          (read-only on checkout: no remove control) */}
+      {item.warranty && (
+        <div className={styles.warrantyRow}>
+          <span className={styles.warrantyLabel}>
+            <span className={styles.warrantyPlus} aria-hidden="true">+</span>
+            5-Year Protection Plan
+          </span>
+          <span className={styles.warrantyPrice}>{formatPrice(WARRANTY_CENTS)}</span>
+        </div>
+      )}
     </article>
   )
 }
@@ -1324,6 +1336,29 @@ function CheckoutPageInner() {
                   <div className={styles.fieldGroup}>
                     <div className={styles.paymentOptions} role="radiogroup" aria-label="Payment method">
 
+                      {/* Apply Store Credit — first, above the payment methods */}
+                      <div className={styles.storeCreditOptionRow}>
+                        <button
+                          type="button"
+                          className={styles.storeCreditOptionBtn}
+                          onClick={() => setApplyStoreCredit(prev => !prev)}
+                          aria-expanded={applyStoreCredit}
+                        >
+                          <span className={`${styles.storeCreditChevron} ${applyStoreCredit ? styles.storeCreditChevronOpen : ''}`}>
+                            <ChevronIcon size={16} />
+                          </span>
+                          <span className={styles.paymentOptionName}>Apply Store Credit</span>
+                        </button>
+                        {applyStoreCredit && (
+                          <div className={styles.storeCreditExpandedRow}>
+                            <div className={styles.storeCreditInput}>
+                              <input type="text" placeholder="Please enter code" value={storeCreditCode} onChange={e => setStoreCreditCode(e.target.value)} className={styles.input} aria-label="Store credit code" />
+                            </div>
+                            <Button variant="primary" className={styles.applyButton}>Apply</Button>
+                          </div>
+                        )}
+                      </div>
+
                       {/* Credit Card — expandable fields when selected */}
                       <div className={styles.paymentOptionGroup}>
                         <label className={`${styles.paymentOption} ${paymentMethod === 'credit-card' ? styles.paymentOptionSelected : ''}`} onClick={e => { e.preventDefault(); setPaymentMethod(paymentMethod === 'credit-card' ? null : 'credit-card') }}>
@@ -1365,29 +1400,6 @@ function CheckoutPageInner() {
                         <span className={styles.paymentOptionName}>ApplePay</span>
                         <span className={styles.paymentOptionIcons}><img src="/images/payment/ApplePay.svg" alt="Apple Pay" height={24} /></span>
                       </label>
-
-                      {/* Apply Store Credit — expandable row */}
-                      <div className={styles.storeCreditOptionRow}>
-                        <button
-                          type="button"
-                          className={styles.storeCreditOptionBtn}
-                          onClick={() => setApplyStoreCredit(prev => !prev)}
-                          aria-expanded={applyStoreCredit}
-                        >
-                          <span className={`${styles.storeCreditChevron} ${applyStoreCredit ? styles.storeCreditChevronOpen : ''}`}>
-                            <ChevronIcon size={16} />
-                          </span>
-                          <span className={styles.paymentOptionName}>Apply Store Credit</span>
-                        </button>
-                        {applyStoreCredit && (
-                          <div className={styles.storeCreditExpandedRow}>
-                            <div className={styles.storeCreditInput}>
-                              <input type="text" placeholder="Please enter code" value={storeCreditCode} onChange={e => setStoreCreditCode(e.target.value)} className={styles.input} aria-label="Store credit code" />
-                            </div>
-                            <Button variant="primary" className={styles.applyButton}>Apply</Button>
-                          </div>
-                        )}
-                      </div>
 
                     </div>
                   </div>

@@ -37,7 +37,12 @@ export interface CartItem {
   selectedOptions?: SelectedOption[]
   giftPackaging?: GiftPackaging
   canvasConfig?: CanvasConfig   // LAL custom canvas — lets the PDP restore the preview
+  isCompanion?: boolean         // added as a nested/companion product (not a standalone main item)
+  warranty?: boolean            // 5-year protection plan selected for this item
 }
+
+/** Flat price of the optional 5-year protection plan (cents). */
+export const WARRANTY_CENTS = 1500
 
 interface CartContextValue {
   items: CartItem[]
@@ -50,6 +55,8 @@ interface CartContextValue {
   addItem: (item: CartItem) => void
   removeItem: (id: string) => void
   updateGiftPackaging: (id: string, gift: GiftPackaging | undefined) => void
+  /** Toggle the 5-year protection plan for a cart item. */
+  toggleWarranty: (id: string) => void
 }
 
 const CartContext = createContext<CartContextValue | null>(null)
@@ -95,7 +102,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setItems(prev => prev.map(item => item.id === id ? { ...item, giftPackaging: gift } : item))
   }, [])
 
-  const subtotal = items.reduce((sum, item) => sum + item.price, 0)
+  const toggleWarranty = useCallback((id: string) => {
+    setItems(prev => prev.map(item => item.id === id ? { ...item, warranty: !item.warranty } : item))
+  }, [])
+
+  const subtotal = items.reduce((sum, item) => sum + item.price + (item.warranty ? WARRANTY_CENTS : 0), 0)
 
   return (
     <CartContext.Provider value={{
@@ -108,6 +119,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       addItem,
       removeItem,
       updateGiftPackaging,
+      toggleWarranty,
     }}>
       {children}
     </CartContext.Provider>
@@ -124,6 +136,7 @@ const CART_NOOP: CartContextValue = {
   addItem: () => {},
   removeItem: () => {},
   updateGiftPackaging: () => {},
+  toggleWarranty: () => {},
 }
 
 export function useCart() {

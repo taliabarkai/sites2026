@@ -12,6 +12,7 @@ import { getBrandFromPathname } from '../../_config/brands'
 import type { BrandKey } from '../../_config/brands'
 import { Button } from '../Button'
 import type { CartItem } from '../../_context/CartContext'
+import { useCart, WARRANTY_CENTS } from '../../_context/CartContext'
 import styles from './FloatingCart.module.css'
 
 const BRAND_ICONS = {
@@ -21,6 +22,12 @@ const BRAND_ICONS = {
   lal: lalIcons,
   ib: ibIcons,
 } as const
+
+/** Brand-specific hero image for the 5-year protection plan details panel. */
+const CARE_PLAN_IMAGES: Partial<Record<BrandKey, string>> = {
+  tgr: 'https://cdn.theograce.co.uk/digital-asset/product/jewelry-care-plan--21.jpg',
+  oal: 'https://cdn.oakandluna.com/digital-asset/product/jewelry-care-plan-24.jpg',
+}
 
 export interface FloatingCartProps {
   isOpen: boolean
@@ -39,18 +46,26 @@ function formatPrice(cents: number) {
 
 interface CartItemRowProps {
   item: CartItem
+  /** Show the delivery-guarantee line (only the 2nd standalone main item). */
+  showGuarantee: boolean
   brand: BrandKey
   onRemove: (id: string) => void
   onEdit: (id: string) => void
   onNavigate: () => void
   onGenerateGiftNote: () => Promise<string>
   DropdownIcon: React.ComponentType<{ size?: number }>
+  /** Whether the 5-year protection plan is selected for this item. */
+  hasPlan: boolean
+  onTogglePlan: () => void
+  /** Open the protection-plan details sub-panel for this item. */
+  onOpenCarePlan: () => void
 }
 
-function CartItemRow({ item, brand, onRemove, onEdit, onNavigate, DropdownIcon }: CartItemRowProps) {
+function CartItemRow({ item, showGuarantee, brand, onRemove, onEdit, onNavigate, DropdownIcon, hasPlan, onTogglePlan, onOpenCarePlan }: CartItemRowProps) {
   const [detailsOpen, setDetailsOpen] = useState(false)
   const [confirmRemove, setConfirmRemove] = useState(false)
   const hasOptions = item.selectedOptions && item.selectedOptions.length > 0
+  const { CheckboxIcon, CheckmarkIcon } = BRAND_ICONS[brand]
 
   // Custom canvas items deep-link to the PDP with the saved preview restored inline
   const itemHref = item.canvasConfig
@@ -63,7 +78,10 @@ function CartItemRow({ item, brand, onRemove, onEdit, onNavigate, DropdownIcon }
 
   return (
     <article className={styles.item}>
-      <p className={styles.deliveryGuarantee}>Guaranteed to arrive by Christmas</p>
+      {/* Delivery guarantee — only on the 2nd standalone main item (companions excluded) */}
+      {showGuarantee && (
+        <p className={styles.deliveryGuarantee}>Guaranteed to arrive by Christmas</p>
+      )}
       <div className={styles.itemMain}>
         <Link href={itemHref} className={styles.itemImageWrap} onClick={onNavigate}>
           <img
@@ -136,6 +154,30 @@ function CartItemRow({ item, brand, onRemove, onEdit, onNavigate, DropdownIcon }
         </div>
       </div>
 
+      {/* Per-item 5-year protection plan — toggling adjusts the cart subtotal */}
+      <div className={styles.protectionRow}>
+        <button
+          type="button"
+          role="checkbox"
+          aria-checked={hasPlan}
+          className={styles.protectionToggle}
+          onClick={onTogglePlan}
+        >
+          <span className={styles.protectionCheckbox} aria-hidden="true">
+            {hasPlan ? (
+              <span className={styles.protectionChecked}>
+                <CheckmarkIcon size={12} />
+              </span>
+            ) : (
+              <CheckboxIcon size={24} />
+            )}
+          </span>
+          <span className={styles.protectionLabel}>Add a 5-Year Protection Plan for $15</span>
+        </button>
+        <button type="button" className={styles.protectionDetails} onClick={onOpenCarePlan}>
+          Details
+        </button>
+      </div>
     </article>
   )
 }
@@ -153,8 +195,28 @@ export function FloatingCart({
   const pathname = usePathname()
   const brand = getBrandFromPathname(pathname)
   const icons = BRAND_ICONS[brand]
-  const { XIcon } = icons
+  const { XIcon, CheckmarkIcon, ChevronIcon } = icons
+  const { justAdded, toggleWarranty } = useCart()
   const panelRef = useRef<HTMLDivElement>(null)
+
+  // Protection-plan details sub-panel — holds the id of the item whose "Details"
+  // was tapped (null = closed). Slides over the cart content.
+  const [carePlanItemId, setCarePlanItemId] = useState<string | null>(null)
+  const carePlanImage = CARE_PLAN_IMAGES[brand]
+  const handleAddCarePlan = () => {
+    const target = items.find(it => it.id === carePlanItemId)
+    if (target && !target.warranty) toggleWarranty(target.id)
+    setCarePlanItemId(null)
+  }
+
+  // The delivery guarantee shows on the 2nd standalone MAIN item only — companion
+  // (nested) items don't count toward that position.
+  let mainCount = 0
+  const showGuaranteeFor = items.map(it => {
+    if (it.isCompanion) return false
+    mainCount += 1
+    return mainCount === 2
+  })
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
@@ -221,6 +283,15 @@ export function FloatingCart({
           </button>
         </div>
 
+        {justAdded && items.length > 0 && (
+          <div className={styles.addedBanner}>
+            <span className={styles.addedCheck} aria-hidden="true">
+              <CheckmarkIcon size={24} />
+            </span>
+            <span className={styles.addedText}>Successfully added to bag!</span>
+          </div>
+        )}
+
         <div className={styles.itemsList}>
           {items.length === 0 ? (
             <div className={styles.empty}>
@@ -230,16 +301,20 @@ export function FloatingCart({
               </Button>
             </div>
           ) : (
-            items.map(item => (
+            items.map((item, index) => (
               <CartItemRow
                 key={item.id}
                 item={item}
+                showGuarantee={showGuaranteeFor[index]}
                 brand={brand}
                 onRemove={onRemoveItem}
                 onEdit={onEditItem}
                 onNavigate={onClose}
                 onGenerateGiftNote={onGenerateGiftNote}
                 DropdownIcon={icons.DropdownIcon}
+                hasPlan={!!item.warranty}
+                onTogglePlan={() => toggleWarranty(item.id)}
+                onOpenCarePlan={() => setCarePlanItemId(item.id)}
               />
             ))
           )}
@@ -262,6 +337,76 @@ export function FloatingCart({
             </Button>
           </div>
         )}
+
+        {/* Protection-plan details — slides over the cart content */}
+        <div
+          className={`${styles.carePlan} ${carePlanItemId ? styles.carePlanOpen : ''}`}
+          role="dialog"
+          aria-label="5-Year Jewelry Protection Plan"
+          aria-hidden={!carePlanItemId}
+        >
+          <div className={styles.carePlanHeader}>
+            <button type="button" className={styles.carePlanBack} onClick={() => setCarePlanItemId(null)}>
+              <span className={styles.carePlanBackIcon} aria-hidden="true"><ChevronIcon size={20} /></span>
+              Back
+            </button>
+          </div>
+
+          <div className={styles.carePlanScroll}>
+            {/* Two-column header — image (180px) left, title + price right */}
+            <div className={styles.carePlanTop}>
+              {carePlanImage && (
+                <span className={styles.carePlanImageWrap}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={carePlanImage} alt="5-Year Jewelry Protection Plan" className={styles.carePlanImage} />
+                </span>
+              )}
+              <div className={styles.carePlanTopInfo}>
+                <h3 className={styles.carePlanTitle}>5-Year Jewelry Protection Plan</h3>
+                <span className={styles.carePlanPrice}>{formatPrice(WARRANTY_CENTS)}</span>
+              </div>
+            </div>
+
+            <div className={styles.carePlanBody}>
+              <p className={styles.carePlanIntro}>
+                Our 5-Year Jewelry Protection Plan allows you to enjoy exclusive services, such as
+                restoring &amp; preserving the beauty of your jewelry as well as benefit from free
+                returns and more.
+              </p>
+
+              <h3 className={styles.carePlanHeading}>Benefits</h3>
+
+              <div className={styles.carePlanBenefit}>
+                <h4 className={styles.carePlanBenefitTitle}>Free Returns</h4>
+                <p className={styles.carePlanText}>
+                  We cover return shipping for resizing, damage, or replacement purposes.
+                </p>
+              </div>
+
+              <div className={styles.carePlanBenefit}>
+                <h4 className={styles.carePlanBenefitTitle}>Replacements of damaged jewelry</h4>
+                <ul className={styles.carePlanList}>
+                  <li>Chain &amp; clasp replacement</li>
+                  <li>Replacement of missing stones &amp; diamonds</li>
+                  <li>Manufacturing issues, such as breakage or tarnishing</li>
+                </ul>
+              </div>
+
+              <div className={styles.carePlanBenefit}>
+                <h4 className={styles.carePlanBenefitTitle}>Free Resizing</h4>
+                <p className={styles.carePlanText}>
+                  We offer resizing services to ensure the ideal fit.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className={styles.carePlanFooter}>
+            <Button variant="add-to-cart" className={styles.carePlanAddBtn} onClick={handleAddCarePlan}>
+              Add
+            </Button>
+          </div>
+        </div>
       </div>
     </>
   )

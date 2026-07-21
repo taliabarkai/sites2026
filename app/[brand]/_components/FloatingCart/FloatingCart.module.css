@@ -35,6 +35,30 @@
   transform: translateX(0);
 }
 
+/* Mobile: a centered pop-up with a 16px margin instead of a right slide-in drawer. */
+@media (max-width: 767px) {
+  .panel {
+    top: 16px;
+    right: 16px;
+    bottom: 16px;
+    left: 16px;
+    width: auto;
+    max-width: none;
+    height: auto;
+    border-radius: var(--radius-panel);
+    transform: scale(0.96);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--transition-base), transform var(--transition-base);
+  }
+
+  .panelOpen {
+    transform: scale(1);
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
 .header {
   display: flex;
   align-items: center;
@@ -82,6 +106,32 @@
   cursor: pointer;
   outline: none;
   -webkit-tap-highlight-color: transparent;
+}
+
+.addedBanner {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-sm);
+  border-bottom: 1px solid var(--border-color);
+  flex-shrink: 0;
+}
+
+.addedCheck {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--colors-success);
+  flex-shrink: 0;
+}
+
+.addedText {
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  font-weight:    var(--typography-rules-text1-font-weight, normal);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+  color: var(--colors-text);
 }
 
 .itemsList {
@@ -362,6 +412,256 @@
   padding: var(--spacing-sm) var(--spacing-md);
   }
 }
+/* ── Per-item 5-year protection plan add-on row (below the item image) ─────── */
+.protectionRow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+  /* The parent .item is a flex column with a 16px gap; offset it so the space
+     above this row nets 12px. */
+  margin-top: calc(var(--spacing-xs) - var(--spacing-sm));
+}
+
+.protectionToggle {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xxs);
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  text-align: left;
+  color: var(--colors-text);
+}
+
+.protectionCheckbox {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--spacing-md);
+  height: var(--spacing-md);
+  color: var(--colors-text);
+}
+
+/* Checked — filled circle with an inverse checkmark (matches the panel checkbox) */
+.protectionChecked {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--spacing-sm);
+  height: var(--spacing-sm);
+  border-radius: var(--radius-full);
+  background: var(--colors-text);
+  color: var(--colors-text-inverse);
+}
+
+.protectionLabel {
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  font-weight:    var(--typography-rules-text1-font-weight, normal);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+  color: var(--colors-text);
+}
+
+/* "Details" link — same underlined style as Edit/Remove */
+.protectionDetails {
+  flex-shrink: 0;
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  font-weight:    var(--typography-rules-text1-font-weight, normal);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+  color: var(--colors-text);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* ── Protection-plan details — slide-over within the cart panel ───────────── */
+.carePlan {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  background: var(--colors-background);
+  border-radius: inherit;
+  transform: translateX(100%);
+  transition: transform var(--transition-base);
+}
+
+.carePlanOpen {
+  transform: translateX(0);
+}
+
+.carePlanHeader {
+  flex-shrink: 0;
+  padding: var(--spacing-sm);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.carePlanBack {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xxs);
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--colors-text);
+  cursor: pointer;
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+}
+
+.carePlanBackIcon {
+  display: inline-flex;
+  align-items: center;
+  transform: rotate(180deg); /* point left */
+}
+
+.carePlanScroll {
+  flex: 1;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+/* Two-column header: image (180px) left, title + price right */
+.carePlanTop {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md) var(--spacing-sm);
+}
+
+/* Brand image tint (same token as the category product cards). The badge PNG has
+   an opaque white background, so multiply-blend it over the tint to color it. */
+.carePlanImageWrap {
+  flex-shrink: 0;
+  width: 180px;
+  background-color: var(--colors-card-image-bg);
+  isolation: isolate;
+}
+
+.carePlanImage {
+  display: block;
+  width: 100%;
+  height: auto;
+  mix-blend-mode: multiply;
+}
+
+.carePlanTopInfo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  min-width: 0;
+}
+
+.carePlanTitle {
+  margin: 0;
+  font-family:    var(--typography-rules-text2-font-family);
+  font-size:      var(--typography-rules-text2-font-size);
+  line-height:    var(--typography-rules-text2-line-height);
+  font-weight:    var(--typography-rules-text2-font-weight, 600);
+  letter-spacing: var(--typography-rules-text2-letter-spacing, normal);
+  color: var(--colors-text);
+}
+
+.carePlanPrice {
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  color: var(--colors-text);
+}
+
+.carePlanBody {
+  padding: 0 var(--spacing-sm) var(--spacing-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.carePlanIntro,
+.carePlanText {
+  margin: 0;
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  color: var(--colors-text);
+}
+
+.carePlanText {
+  color: var(--colors-text-secondary);
+}
+
+.carePlanHeading {
+  margin: var(--spacing-xs) 0 0;
+  font-family:    var(--typography-rules-headline6-font-family);
+  font-size:      var(--typography-rules-headline6-font-size);
+  line-height:    var(--typography-rules-headline6-line-height);
+  font-weight:    var(--typography-rules-headline6-font-weight, normal);
+  letter-spacing: var(--typography-rules-headline6-letter-spacing, normal);
+  text-transform: var(--typography-rules-headline6-text-transform, none);
+  color: var(--colors-text);
+}
+
+.carePlanBenefit {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xxs);
+}
+
+.carePlanBenefitTitle {
+  margin: 0;
+  font-family:    var(--typography-rules-text2-font-family);
+  font-size:      var(--typography-rules-text2-font-size);
+  line-height:    var(--typography-rules-text2-line-height);
+  font-weight:    var(--typography-rules-text2-font-weight, 600);
+  letter-spacing: var(--typography-rules-text2-letter-spacing, normal);
+  color: var(--colors-text);
+}
+
+.carePlanList {
+  margin: 0;
+  padding-left: var(--spacing-sm);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xxxs);
+  list-style: disc;
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  color: var(--colors-text-secondary);
+}
+
+.carePlanFooter {
+  flex-shrink: 0;
+  padding: var(--spacing-sm);
+  border-top: 1px solid var(--border-color);
+}
+
+.carePlanAddBtn {
+  width: 100%;
+}
+
+/* Desktop — wider 24px side padding for the care-plan sections */
+@media (min-width: 1024px) {
+  .carePlanHeader,
+  .carePlanTop,
+  .carePlanBody,
+  .carePlanFooter {
+    padding-left: var(--spacing-md);
+    padding-right: var(--spacing-md);
+  }
+}
+
 /* Subtotal + Tax wrapper. Inner gap is 4px smaller than the footer's gap
    (sm 12px → xs 8px) so the two rows feel grouped. */
 .totals {

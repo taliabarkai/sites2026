@@ -1567,6 +1567,44 @@
   gap: var(--spacing-md);
 }
 
+/* Warranty add-on — single line below the item */
+.warrantyRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-sm);
+}
+
+.warrantyLabel {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xxs);
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  font-weight:    var(--typography-rules-text1-font-weight, normal);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+  color: var(--colors-text);
+}
+
+/* "+" marker — default black, 24px */
+.warrantyPlus {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  line-height: 1;
+  color: var(--colors-text);
+}
+
+.warrantyPrice {
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  color: var(--colors-text);
+}
+
 .deliveryGuarantee {
   display: flex;
   align-items: center;

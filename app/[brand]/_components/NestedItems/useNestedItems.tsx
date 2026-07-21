@@ -69,7 +69,8 @@ export function useNestedItems(brand: string, items: QuickAddProduct[], title?: 
         onAdd={(cartItem) => {
           if (panelItem) {
             const key = nestedItemKey(panelItem)
-            setStaged((prev) => ({ ...prev, [key]: cartItem }))
+            // Mark as a companion so it doesn't count as a standalone main item.
+            setStaged((prev) => ({ ...prev, [key]: { ...cartItem, isCompanion: true } }))
           }
         }}
       />

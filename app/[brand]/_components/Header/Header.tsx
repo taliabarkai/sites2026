@@ -47,7 +47,7 @@ export function Header({
   const brandSegment = resolveBrand(brand ?? getBrandFromPathname(pathname))
   const logoHref = getBrandHomePath(brandSegment)
 
-  const { items, openCart } = useCart()
+  const { items, openCart, closeCart } = useCart()
   const isScrolled = useHeaderScroll()
   const isCheckout = pathname.includes('/checkout')
   const [menuOpen, setMenuOpen] = useState(false)
@@ -73,7 +73,7 @@ export function Header({
       <header className={wrapperClass}>
         <div className={`${styles.shell} ${styles.solid}`}>
           <div className={styles.checkoutBarInner}>
-            <Link href={logoHref} className={styles.checkoutLogo} aria-label="Home">
+            <Link href={logoHref} className={styles.checkoutLogo} aria-label="Home" onClick={() => closeCart()}>
               <SiteLogo brand={brandSegment} priority />
             </Link>
           </div>
