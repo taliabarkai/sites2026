@@ -207,13 +207,12 @@ export function FloatingCart({
   const carePlanImage = CARE_PLAN_IMAGES[brand]
   // Whether the plan is already selected for the item the details panel is showing.
   const carePlanSelected = !!items.find(it => it.id === carePlanItemId)?.warranty
-  // Toggle the plan for that item. Selecting closes the panel — the cart row's
-  // checkbox is now checked. Removing stays put so the button flips back to "Select".
+  // Toggle the plan for that item and close the panel — either way the cart row's
+  // checkbox reflects the new state.
   const handleToggleCarePlan = () => {
     if (!carePlanItemId) return
-    const willSelect = !carePlanSelected
     toggleWarranty(carePlanItemId)
-    if (willSelect) setCarePlanItemId(null)
+    setCarePlanItemId(null)
   }
 
   // The delivery guarantee shows on the 2nd standalone MAIN item only — companion
