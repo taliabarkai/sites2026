@@ -172,7 +172,9 @@ function CartItemRow({ item, showGuarantee, brand, onRemove, onEdit, onNavigate,
               <CheckboxIcon size={24} />
             )}
           </span>
-          <span className={styles.protectionLabel}>Add a 5-Year Protection Plan for $15</span>
+          <span className={styles.protectionLabel}>
+            Add a 5-Year Jewelry Protection Plan for <span className={styles.protectionPrice}>$15</span>
+          </span>
         </button>
         <button type="button" className={styles.protectionDetails} onClick={onOpenCarePlan}>
           Details
@@ -195,7 +197,7 @@ export function FloatingCart({
   const pathname = usePathname()
   const brand = getBrandFromPathname(pathname)
   const icons = BRAND_ICONS[brand]
-  const { XIcon, CheckmarkIcon, CheckboxIcon, ChevronIcon } = icons
+  const { XIcon, CheckmarkIcon, ChevronIcon } = icons
   const { justAdded, toggleWarranty } = useCart()
   const panelRef = useRef<HTMLDivElement>(null)
 
@@ -205,7 +207,8 @@ export function FloatingCart({
   const carePlanImage = CARE_PLAN_IMAGES[brand]
   // Whether the plan is already selected for the item the details panel is showing.
   const carePlanSelected = !!items.find(it => it.id === carePlanItemId)?.warranty
-  // Toggle the plan for that item; close the panel when it becomes selected.
+  // Toggle the plan for that item. Selecting closes the panel — the cart row's
+  // checkbox is now checked. Removing stays put so the button flips back to "Select".
   const handleToggleCarePlan = () => {
     if (!carePlanItemId) return
     const willSelect = !carePlanSelected
@@ -359,16 +362,9 @@ export function FloatingCart({
           <div className={styles.carePlanScroll}>
             <h3 className={styles.carePlanHeading}>Add Warranty</h3>
 
-            {/* Selectable card (nested-item design) — checkbox toggles the plan */}
+            {/* Plan summary — image, title, price. Selection lives in the pinned footer button. */}
             <div className={styles.carePlanTop}>
-              <button
-                type="button"
-                role="checkbox"
-                aria-checked={carePlanSelected}
-                aria-label={`${carePlanSelected ? 'Remove' : 'Add'} the 5-Year Jewelry Protection Plan`}
-                className={styles.carePlanCard}
-                onClick={handleToggleCarePlan}
-              >
+              <div className={styles.carePlanCard}>
                 <span className={styles.carePlanImageWrap}>
                   {carePlanImage && (
                     // eslint-disable-next-line @next/next/no-img-element
@@ -379,14 +375,7 @@ export function FloatingCart({
                   <span className={styles.carePlanTitle}>5-Year Jewelry Protection Plan</span>
                   <span className={styles.carePlanPrice}>{formatPrice(WARRANTY_CENTS)}</span>
                 </span>
-                <span className={styles.carePlanCheckbox} aria-hidden="true">
-                  {carePlanSelected ? (
-                    <span className={styles.carePlanChecked}><CheckmarkIcon size={12} /></span>
-                  ) : (
-                    <CheckboxIcon size={24} />
-                  )}
-                </span>
-              </button>
+              </div>
             </div>
 
             <div className={styles.carePlanBody}>
@@ -419,6 +408,18 @@ export function FloatingCart({
                 </p>
               </div>
             </div>
+          </div>
+
+          {/* Pinned select/deselect action */}
+          <div className={styles.carePlanFooter}>
+            <Button
+              variant="primary"
+              className={styles.carePlanSelectBtn}
+              aria-pressed={carePlanSelected}
+              onClick={handleToggleCarePlan}
+            >
+              {carePlanSelected ? 'Remove Item' : 'Add to bag'}
+            </Button>
           </div>
         </div>
       </div>
