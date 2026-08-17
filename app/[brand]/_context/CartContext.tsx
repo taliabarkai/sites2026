@@ -34,6 +34,8 @@ export interface CartItem {
   originalPrice?: number
   image: string
   isPersonalized: boolean
+  rating?: number               // average review score (0–5) — shown under the cart price
+  reviewCount?: number          // total reviews, shown next to the stars
   selectedOptions?: SelectedOption[]
   giftPackaging?: GiftPackaging
   canvasConfig?: CanvasConfig   // LAL custom canvas — lets the PDP restore the preview

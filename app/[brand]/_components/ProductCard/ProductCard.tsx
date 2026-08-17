@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation'
 import { getBrandFromPathname } from '../../_config/brands'
 import { QuickAddPanel } from '../QuickAddPanel'
 import type { QuickAddProduct } from '../QuickAddPanel'
+import { StarRating } from '../StarRating'
 import * as oalIcons from '@/src/components/icons/oal'
 import * as mnnIcons from '@/src/components/icons/mnn'
 import * as tgrIcons from '@/src/components/icons/tgr'
@@ -40,45 +41,6 @@ export interface ProductCardProps {
   /** When provided, a Quick-Add cart button overlays the image corner and
    *  opens the shared hotspot Quick-Add drawer with this product's data. */
   quickAddProduct?: QuickAddProduct
-}
-
-/** Renders 5 stars, supporting half (or any fractional) fill. The empty
- *  portion shows in grey (`--border-color`); the filled portion overlays it. */
-function StarRating({
-  rating,
-  reviewCount,
-  StarIcon,
-}: {
-  rating: number
-  reviewCount?: number
-  StarIcon: ComponentType<{ size?: number }>
-}) {
-  // Snap to the nearest half so partial ratings render as clean half stars
-  const rounded = Math.round(rating * 2) / 2
-  return (
-    <div className={styles.rating}>
-      <span className={styles.stars} aria-label={`${rating} out of 5 stars`}>
-        {[0, 1, 2, 3, 4].map((i) => {
-          const fillPx = Math.max(0, Math.min(1, rounded - i)) * 16
-          return (
-            <span key={i} className={styles.star}>
-              <span className={styles.starEmpty}>
-                <StarIcon size={16} />
-              </span>
-              {fillPx > 0 && (
-                <span className={styles.starFilled} style={{ width: `${fillPx}px` }}>
-                  <StarIcon size={16} />
-                </span>
-              )}
-            </span>
-          )
-        })}
-      </span>
-      {reviewCount != null && (
-        <span className={styles.ratingCount}>({reviewCount.toLocaleString()})</span>
-      )}
-    </div>
-  )
 }
 
 export function ProductCard({

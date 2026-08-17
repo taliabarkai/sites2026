@@ -364,6 +364,8 @@ export function AIPreviewCustomizer({ brand, product, icons, nestedItems = [], a
       price: currentPrice,
       image,
       isPersonalized: l1.length > 0 || l2.length > 0,
+      rating: LAL_RATING,
+      reviewCount: LAL_REVIEW_COUNT,
       selectedOptions,
       canvasConfig: photoUrl
         ? { productId: product.id, photo: photoUrl, photoName, frameKey: frameColor, sizeKey, persOn: l1.length > 0 || l2.length > 0, line1: l1, line2: l2 }

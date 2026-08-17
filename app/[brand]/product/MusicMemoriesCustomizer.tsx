@@ -459,6 +459,8 @@ export function MusicMemoriesCustomizer({ brand, product, icons, nestedItems = [
       price: currentPrice,
       image,
       isPersonalized: true,
+      rating: LAL_RATING,
+      reviewCount: LAL_REVIEW_COUNT,
       selectedOptions,
     })
 

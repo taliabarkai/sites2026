@@ -320,6 +320,8 @@ export function LalCanvasCustomizer({ brand, product, icons, items, previewId, n
       originalPrice: undefined,
       image,
       isPersonalized: l1.length > 0 || l2.length > 0,
+      rating: LAL_RATING,
+      reviewCount: LAL_REVIEW_COUNT,
       selectedOptions,
       canvasConfig: photoUrl
         ? { productId: product.id, photo: photoUrl, photoName, frameKey, sizeKey, persOn: true, line1: l1, line2: l2 }

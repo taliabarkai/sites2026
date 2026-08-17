@@ -24,6 +24,8 @@ const DEMO_PRODUCT = {
   price: 55000,
   image: 'https://cdn.oakandluna.com/digital-asset/product/the-statement-one-carat-diamond-necklace-gold-1.jpg',
   isPersonalized: false,
+  rating: 4.8,
+  reviewCount: 214,
 }
 
 export function Hero({

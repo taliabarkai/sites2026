@@ -176,19 +176,21 @@ export function QuickAddPanel({ isOpen, onClose, product, closeButtonRef, ctaLab
   const pdpHref = product ? `/${brand}${product.pdpUrl}` : '#'
 
   // Gallery layout switches on image count:
-  //  • ≤ 4 images → single column with a horizontal image carousel above the options
-  //  • > 4 images → the default two-column layout (image column left, options right)
+  //  • 1 image     → single column with one full-width image above the options
+  //  • 2–4 images  → single column with a horizontal image carousel above the options
+  //  • > 4 images  → the default two-column layout (image column left, options right)
   // Optionally hide the gallery entirely (options-only panel).
   const hideGallery = product?.hideGallery ?? false
-  const useCarousel = product ? product.images.length <= 4 : false
+  const isSingleImage = product ? product.images.length === 1 : false
+  const useCarousel = product ? product.images.length > 1 && product.images.length <= 4 : false
   const carouselSrcs = product ? product.images.map((im) => im.src) : []
   // Optionally hide the gallery on mobile (images still render on desktop).
   const hideGalleryOnMobile = product?.hideGalleryOnMobile ?? false
-  // Single-column layout whenever there's no left image column (carousel or no gallery).
-  const singleColumn = useCarousel || hideGallery
+  // Single-column layout whenever there's no left image column.
+  const singleColumn = useCarousel || isSingleImage || hideGallery
 
-  // Title + price + review — rendered above the gallery for multi-image products,
-  // below the inline image for single-image products.
+  // Title + price + review — pinned at the top of the right column (outside the
+  // scroll area) so it stays visible while the gallery and options scroll under it.
   const headerJsx = product && (
     <div className={styles.header}>
       <h2 className={styles.title}>{product.title}</h2>
@@ -240,6 +242,8 @@ export function QuickAddPanel({ isOpen, onClose, product, closeButtonRef, ctaLab
       originalPrice: product.salePrice ? product.price : undefined,
       image: product.images[0]?.src ?? '',
       isPersonalized: true,
+      rating: product.rating,
+      reviewCount: product.reviewCount,
       selectedOptions: [...selectedOptionsList, ...nameOptions],
     }
     // Nested Items path: hand the configured item back to the caller to stage,
@@ -438,8 +442,9 @@ export function QuickAddPanel({ isOpen, onClose, product, closeButtonRef, ctaLab
         {/* Body — desktop left image column + right content column */}
         <div className={styles.panelBody}>
           {/* Desktop: left column — all images stacked, vertically scrollable.
-              Only for products with > 4 images (the ≤4 variant uses the carousel). */}
-          {product && !useCarousel && !hideGallery && (
+              Only for products with > 4 images (1 image and the 2–4 carousel
+              variant both render inline in the right column). */}
+          {product && !useCarousel && !isSingleImage && !hideGallery && (
             <div className={styles.desktopImage} aria-hidden="true">
               {product.images.map((img, i) => (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -455,11 +460,26 @@ export function QuickAddPanel({ isOpen, onClose, product, closeButtonRef, ctaLab
           )}
 
           {/* Right column: scrollable content + sticky footer */}
-          {product && <div className={styles.rightCol}><div className={styles.scrollArea}>
-            {/* Title + price + review — always first */}
+          {product && <div className={styles.rightCol}>
+            {/* Title + price + review — sticky above the scroll area */}
             {headerJsx}
 
-            {/* ≤ 4 images — horizontal image carousel above the options (shared
+            <div className={styles.scrollArea}>
+            {/* 1 image — one full-width image stacked below the title, on
+                desktop and mobile alike (no carousel, no thumbnail gallery). */}
+            {isSingleImage && !hideGallery && (
+              <div className={`${styles.singleImage} ${hideGalleryOnMobile ? styles.hideOnMobile : ''}`}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={product.images[0].src}
+                  alt={product.images[0].alt}
+                  className={styles.singleImageEl}
+                  loading="eager"
+                />
+              </div>
+            )}
+
+            {/* 2–4 images — horizontal image carousel above the options (shared
                 PDP carousel), shown at every breakpoint. */}
             {useCarousel && !hideGallery && (
               <ProductImageCarousel
@@ -471,7 +491,7 @@ export function QuickAddPanel({ isOpen, onClose, product, closeButtonRef, ctaLab
             )}
 
             {/* > 4 images — mobile thumbnail gallery (desktop uses the left column) */}
-            {!useCarousel && !hideGallery && (
+            {!useCarousel && !isSingleImage && !hideGallery && (
               <div className={`${styles.gallery} ${hideGalleryOnMobile ? styles.hideOnMobile : ''}`}>
                 {product.images.map((img, i) => (
                   <button

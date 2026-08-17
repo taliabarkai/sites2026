@@ -11,6 +11,8 @@ import * as ibIcons from '@/src/components/icons/ib'
 import { getBrandFromPathname } from '../../_config/brands'
 import type { BrandKey } from '../../_config/brands'
 import { Button } from '../Button'
+import { StarRating } from '../StarRating'
+import { getBrandProducts } from '../../../../data/products/getBrandProducts'
 import type { CartItem } from '../../_context/CartContext'
 import { useCart, WARRANTY_CENTS } from '../../_context/CartContext'
 import styles from './FloatingCart.module.css'
@@ -44,6 +46,18 @@ function formatPrice(cents: number) {
   return `$${(cents / 100).toFixed(2)}`
 }
 
+/**
+ * Review score for a cart row. Items added since ratings were stored on the cart
+ * carry their own values; older items (persisted in localStorage before that, or
+ * added by flows without a rating in scope) fall back to a name lookup in the
+ * brand catalog so the stars still render.
+ */
+function itemRating(item: CartItem, brand: BrandKey): { rating?: number; reviewCount?: number } {
+  if (item.rating != null) return { rating: item.rating, reviewCount: item.reviewCount }
+  const match = getBrandProducts(brand).find(p => p.name === item.name)
+  return { rating: match?.rating, reviewCount: match?.reviewCount }
+}
+
 interface CartItemRowProps {
   item: CartItem
   /** Show the delivery-guarantee line (only the 2nd standalone main item). */
@@ -59,13 +73,21 @@ interface CartItemRowProps {
   onTogglePlan: () => void
   /** Open the protection-plan details sub-panel for this item. */
   onOpenCarePlan: () => void
+  /**
+   * Prototype layout switch — true renders the review stars above the product
+   * name (sharing the price row), false renders them below the name. Clicking
+   * the stars flips it for every row so both designs can be shown live.
+   */
+  ratingAbove: boolean
+  onToggleRatingPosition: () => void
 }
 
-function CartItemRow({ item, showGuarantee, brand, onRemove, onEdit, onNavigate, DropdownIcon, hasPlan, onTogglePlan, onOpenCarePlan }: CartItemRowProps) {
+function CartItemRow({ item, showGuarantee, brand, onRemove, onEdit, onNavigate, DropdownIcon, hasPlan, onTogglePlan, onOpenCarePlan, ratingAbove, onToggleRatingPosition }: CartItemRowProps) {
   const [detailsOpen, setDetailsOpen] = useState(false)
   const [confirmRemove, setConfirmRemove] = useState(false)
   const hasOptions = item.selectedOptions && item.selectedOptions.length > 0
   const { CheckboxIcon, CheckmarkIcon } = BRAND_ICONS[brand]
+  const { rating, reviewCount } = itemRating(item, brand)
 
   // Custom canvas items deep-link to the PDP with the saved preview restored inline
   const itemHref = item.canvasConfig
@@ -75,6 +97,40 @@ function CartItemRow({ item, showGuarantee, brand, onRemove, onEdit, onNavigate,
   const handleRemoveConfirm = () => {
     onRemove(item.id)
   }
+
+  // ── Prototype: two review-star placements, toggled by clicking the stars ──
+  const priceRow = (
+    <div className={styles.itemPriceRow}>
+      {item.originalPrice != null && (
+        <span className={styles.itemOriginalPrice}>{formatPrice(item.originalPrice)}</span>
+      )}
+      <span className={styles.itemPrice}>{formatPrice(item.price)}</span>
+    </div>
+  )
+
+  // Stars come from the same shared component the category card uses; the
+  // wrapping button is the presentation-only layout switch.
+  const stars = rating != null && (
+    <button
+      type="button"
+      className={styles.ratingToggle}
+      onClick={onToggleRatingPosition}
+      title={`Review stars ${ratingAbove ? 'above' : 'below'} the product name — click to switch`}
+      aria-label="Switch the review stars between above and below the product name"
+    >
+      <StarRating rating={rating} reviewCount={reviewCount} />
+    </button>
+  )
+
+  const productName = (inRow: boolean) => (
+    <Link
+      href={itemHref}
+      className={`${styles.itemName} ${inRow ? styles.itemNameInRow : ''}`}
+      onClick={onNavigate}
+    >
+      {item.name}
+    </Link>
+  )
 
   return (
     <article className={styles.item}>
@@ -92,14 +148,25 @@ function CartItemRow({ item, showGuarantee, brand, onRemove, onEdit, onNavigate,
         </Link>
 
         <div className={styles.itemBody}>
-          <Link href={itemHref} className={styles.itemName} onClick={onNavigate}>{item.name}</Link>
-
-          <div className={styles.itemPriceRow}>
-            {item.originalPrice != null && (
-              <span className={styles.itemOriginalPrice}>{formatPrice(item.originalPrice)}</span>
-            )}
-            <span className={styles.itemPrice}>{formatPrice(item.price)}</span>
-          </div>
+          {/* The price always sits at the row's right edge; the stars swap between
+              sharing that row (above the name) and sitting under the name. */}
+          {ratingAbove ? (
+            <>
+              <div className={`${styles.itemTopRow} ${styles.itemTopRowStars}`}>
+                {stars}
+                {priceRow}
+              </div>
+              {productName(false)}
+            </>
+          ) : (
+            <>
+              <div className={styles.itemTopRow}>
+                {productName(true)}
+                {priceRow}
+              </div>
+              {stars}
+            </>
+          )}
 
           {hasOptions && (
             <div className={styles.detailsBlock}>
@@ -204,6 +271,11 @@ export function FloatingCart({
   // Protection-plan details sub-panel — holds the id of the item whose "Details"
   // was tapped (null = closed). Slides over the cart content.
   const [carePlanItemId, setCarePlanItemId] = useState<string | null>(null)
+
+  // Prototype presentation switch — which of the two review-star placements is
+  // showing. Clicking any row's stars flips every row at once so the two designs
+  // can be compared live during a review.
+  const [ratingAbove, setRatingAbove] = useState(true)
   const carePlanImage = CARE_PLAN_IMAGES[brand]
   // Whether the plan is already selected for the item the details panel is showing.
   const carePlanSelected = !!items.find(it => it.id === carePlanItemId)?.warranty
@@ -321,6 +393,8 @@ export function FloatingCart({
                 hasPlan={!!item.warranty}
                 onTogglePlan={() => toggleWarranty(item.id)}
                 onOpenCarePlan={() => setCarePlanItemId(item.id)}
+                ratingAbove={ratingAbove}
+                onToggleRatingPosition={() => setRatingAbove(a => !a)}
               />
             ))
           )}

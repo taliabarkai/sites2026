@@ -233,8 +233,41 @@
   min-width: 0;
 }
 
+/* Review stars + price on one row, above the product name. The price is pushed
+   right with margin-auto (not space-between) so it still hugs the right edge on
+   items that have no rating and leave the row's left side empty. */
+.itemTopRow {
+  display: flex;
+  /* Name variant: a wrapping name keeps the price on its first line */
+  align-items: flex-start;
+  gap: var(--spacing-sm);
+  /* Drops the row 8px so it never sits flush with the image top edge —
+     applies to both variants (stars row or name + price row). */
+  padding-top: var(--spacing-xxs);
+}
+
+/* Stars variant — both children are single-line, so centre them */
+.itemTopRowStars {
+  align-items: center;
+}
+
+/* Prototype layout switch — the stars are clickable to move them above/below
+   the product name. Bare button so only the cursor hints at the interaction. */
+.ratingToggle {
+  display: block;
+  padding: 0;
+  border: none;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+}
+
 .itemName {
   display: block;
+  min-width: 0;
+  /* Keep the name clear of the price column above it — it wraps before
+     reaching the right edge instead of running under the price. */
+  padding-right: var(--spacing-xxl);
   font-family:    var(--typography-rules-text1-font-family);
   font-size:      var(--typography-rules-text1-font-size);
   line-height:    var(--typography-rules-text1-line-height);
@@ -245,10 +278,22 @@
   text-decoration: none;
 }
 
+/* Name variant used when it shares the top row with the price (stars below):
+   it takes the free space, and the price column already reserves its own. */
+.itemNameInRow {
+  flex: 1 1 auto;
+  padding-right: 0;
+}
+
 .itemPriceRow {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   gap: var(--spacing-xs);
+  /* Right-aligned in the top row, never shrunk, never wraps mid-price */
+  margin-left: auto;
+  flex: 0 0 auto;
+  white-space: nowrap;
 }
 
 .itemOriginalPrice {
@@ -307,13 +352,14 @@
   gap: var(--spacing-xxs);
 }
 
+/* Option labels match their values — regular weight, primary text colour */
 .optionKey {
-  font-family:    var(--typography-rules-text2-font-family);
-  font-size:      var(--typography-rules-text2-font-size);
-  line-height:    var(--typography-rules-text2-line-height);
-  font-weight:    var(--typography-rules-text2-font-weight, 600);
-  letter-spacing: var(--typography-rules-text2-letter-spacing, normal);
-  color: var(--colors-text-secondary);
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  font-weight:    var(--typography-rules-text1-font-weight, normal);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+  color: var(--colors-text);
 }
 
 .optionValue {

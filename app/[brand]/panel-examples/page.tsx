@@ -34,6 +34,7 @@ export default function PanelExamplesPage() {
     ...DEFAULT_TOPLINE,
     helpHref:  withBrandPrefix(brand, DEFAULT_TOPLINE.helpHref),
     trackHref: withBrandPrefix(brand, DEFAULT_TOPLINE.trackHref),
+    contactHref: withBrandPrefix(brand, DEFAULT_TOPLINE.contactHref),
   }
 
   // Realistic placeholder products drawn from the brand catalog.
@@ -44,6 +45,13 @@ export default function PanelExamplesPage() {
   const fourImageProduct = withImageCount(catalog[0], imgPool, 4)
   // Same product, but its panel hides the image gallery entirely (options only).
   const noGalleryProduct: QuickAddProduct = { ...fourImageProduct, hideGallery: true }
+  // A different product whose panel shows a single full-width image (no carousel),
+  // using its own primary image rather than the shared pool.
+  const singleImageBase = toQuickAddProduct(catalog[1] ?? catalog[0])
+  const singleImageProduct: QuickAddProduct = {
+    ...singleImageBase,
+    images: singleImageBase.images.slice(0, 1),
+  }
   // Hidden for now — restore alongside the commented card/nested section below.
   // const sixImageProduct  = withImageCount(catalog[1], imgPool, 6)
 
@@ -70,7 +78,8 @@ export default function PanelExamplesPage() {
           <p className={styles.intro}>
             A standalone showcase of the slide-in panel. Both the product card and the
             nested item below open the same shared panel — the gallery layout switches on
-            image count: a carousel for 4 or fewer images, the two-column layout for more.
+            image count: a single full-width image for one image, a carousel for 2–4, and
+            the two-column layout for more.
           </p>
         </header>
 
@@ -78,8 +87,9 @@ export default function PanelExamplesPage() {
         <section className={styles.section} aria-labelledby="pe-cards">
           <h2 id="pe-cards" className={styles.sectionTitle}>Product Card</h2>
           <p className={styles.sectionNote}>
-            Hover a card and tap the quick-add icon. Both open the shared panel — one with
-            the image gallery, one with the gallery hidden (options only).
+            Hover a card and tap the quick-add icon. All three open the shared panel — one
+            with the 4-image gallery, one with the gallery hidden (options only), and one
+            with a single full-width image.
           </p>
           <div className={styles.cardGrid}>
             <div className={styles.cardExample}>
@@ -104,6 +114,17 @@ export default function PanelExamplesPage() {
                 hoverImage={noGalleryProduct.images[1]?.src}
                 href="#"
                 quickAddProduct={noGalleryProduct}
+              />
+            </div>
+            <div className={styles.cardExample}>
+              <h3 className={styles.cardLabel}>Single Image</h3>
+              <ProductCard
+                name={singleImageProduct.title}
+                price={money(singleImageProduct.price)}
+                originalPrice={singleImageProduct.salePrice ? money(singleImageProduct.salePrice) : undefined}
+                defaultImage={singleImageProduct.images[0]?.src ?? ''}
+                href="#"
+                quickAddProduct={singleImageProduct}
               />
             </div>
             {/* Hidden for now — the 6-image (two-column) product card. Restore to demo the >4 variant.

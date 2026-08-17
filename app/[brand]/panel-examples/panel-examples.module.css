@@ -76,6 +76,12 @@
   }
 }
 
+@media (min-width: 1024px) {
+  .cardGrid {
+    grid-template-columns: repeat(3, minmax(0, 400px));
+  }
+}
+
 /* Labelled product-card example */
 .cardExample {
   display: flex;

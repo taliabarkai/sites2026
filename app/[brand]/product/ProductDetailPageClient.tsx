@@ -827,6 +827,7 @@ function ProductDetailPageInner({ productId, previewId }: { productId: number; p
     ...DEFAULT_TOPLINE,
     helpHref:  withBrandPrefix(brand, DEFAULT_TOPLINE.helpHref),
     trackHref: withBrandPrefix(brand, DEFAULT_TOPLINE.trackHref),
+    contactHref: withBrandPrefix(brand, DEFAULT_TOPLINE.contactHref),
   }
 
   const product = getBrandProducts(brand).find((p) => p.id === productId)
@@ -867,6 +868,8 @@ function ProductDetailPageInner({ productId, previewId }: { productId: number; p
       originalPrice: undefined,
       image: product.image,
       isPersonalized: engravedText.trim().length > 0,
+      rating: product.rating,
+      reviewCount: product.reviewCount,
       selectedOptions,
     })
     // Add any staged nested items alongside the main product.

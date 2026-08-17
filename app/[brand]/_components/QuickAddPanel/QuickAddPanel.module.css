@@ -180,23 +180,36 @@
 /* ── Scrollable content area ──────────────────────────────────────────────── */
 .scrollArea {
   flex: 1;
+  min-height: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
-  /* 16px horizontal on mobile, aligned with the header */
-  padding: var(--spacing-md) var(--spacing-sm);
+  /* 16px horizontal on mobile, aligned with the header.
+     No top padding — the sticky header above owns that spacing. */
+  padding: 0 var(--spacing-sm) var(--spacing-md);
   scrollbar-width: thin;
 }
 
 @media (min-width: 768px) {
   /* Larger padding on desktop (aligned with the footer) */
   .scrollArea {
-    padding: var(--spacing-lg);
+    padding: 0 var(--spacing-lg) var(--spacing-lg);
   }
 }
 
 /* ── Header: title + price + stars ───────────────────────────────────────── */
+/* Pinned at the top of the right column — sits outside .scrollArea so the
+   gallery and options scroll beneath it. Carries the top padding the scroll
+   area used to have, keeping the X button aligned with the title. */
 .header {
-  margin-bottom: var(--spacing-sm);
+  flex: 0 0 auto;
+  background: var(--colors-background);
+  padding: var(--spacing-md) var(--spacing-sm) var(--spacing-sm);
+}
+
+@media (min-width: 768px) {
+  .header {
+    padding: var(--spacing-lg) var(--spacing-lg) var(--spacing-sm);
+  }
 }
 
 .title {
