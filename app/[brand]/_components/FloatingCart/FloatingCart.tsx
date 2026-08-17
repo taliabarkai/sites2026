@@ -273,9 +273,9 @@ export function FloatingCart({
   const [carePlanItemId, setCarePlanItemId] = useState<string | null>(null)
 
   // Prototype presentation switch — which of the two review-star placements is
-  // showing. Clicking any row's stars flips every row at once so the two designs
-  // can be compared live during a review.
-  const [ratingAbove, setRatingAbove] = useState(true)
+  // showing. Defaults to stars below the product name; clicking any row's stars
+  // flips every row at once so the two designs can be compared live.
+  const [ratingAbove, setRatingAbove] = useState(false)
   const carePlanImage = CARE_PLAN_IMAGES[brand]
   // Whether the plan is already selected for the item the details panel is showing.
   const carePlanSelected = !!items.find(it => it.id === carePlanItemId)?.warranty
