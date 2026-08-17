@@ -897,12 +897,12 @@
   --typography-rules-headline3-line-height:    36px;
 
   --typography-rules-headline4-font-family:    var(--font-family-secondary-regular);
-  --typography-rules-headline4-font-size:      24px;
-  --typography-rules-headline4-line-height:    28px;
+  --typography-rules-headline4-font-size:      20px;
+  --typography-rules-headline4-line-height:    24px;
 
   --typography-rules-headline5-font-family:    var(--font-family-main-light);
-  --typography-rules-headline5-font-size:      20px;
-  --typography-rules-headline5-line-height:    28px;
+  --typography-rules-headline5-font-size:      18px;
+  --typography-rules-headline5-line-height:    24px;
   --typography-rules-headline5-font-weight:    300;
 
   --typography-rules-headline6-font-family:    var(--font-family-secondary-regular);
@@ -932,8 +932,8 @@
   --typography-rules-headline11-line-height:   28px;
 
   --typography-rules-headline12-font-family:   var(--font-family-main-regular);
-  --typography-rules-headline12-font-size:     20px;
-  --typography-rules-headline12-line-height:   28px;
+  --typography-rules-headline12-font-size:     18px;
+  --typography-rules-headline12-line-height:   24px;
 
   --typography-rules-text1-font-family:        var(--font-family-main-regular);
   --typography-rules-text1-font-size:          14px;
