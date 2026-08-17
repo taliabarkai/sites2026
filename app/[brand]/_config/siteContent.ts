@@ -22,8 +22,10 @@ export const DEFAULT_TOPLINE = {
   promoCenter: 'Free Shipping on All Orders',
   helpLabel: 'Need help?',
   trackLabel: 'Track My Order',
+  contactLabel: 'Contact Us',
   helpHref: '/help',
   trackHref: '/track-order',
+  contactHref: '/contact-us',
 }
 
 export const DEFAULT_NAV_LINKS: NavLink[] = [
@@ -49,6 +51,7 @@ export const DEFAULT_FOOTER_COLUMNS: FooterColumn[] = [
     links: [
       { label: 'Help Center', href: '/help' },
       { label: 'Track My Order', href: '/track-order' },
+      { label: 'Contact Us', href: '/contact-us' },
       { label: 'Shipping Information', href: '/shipping' },
       { label: 'Payment Policy', href: '/payment-policy' },
       { label: 'Jewelry Care', href: '/jewelry-care' },

@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import styles from './Topline.module.css'
 
 export interface ToplineProps {
@@ -7,8 +8,10 @@ export interface ToplineProps {
   promoCenter?: string
   helpLabel?: string
   trackLabel?: string
+  contactLabel?: string
   helpHref?: string
   trackHref?: string
+  contactHref?: string
 }
 
 export function Topline({
@@ -16,8 +19,10 @@ export function Topline({
   promoCenter = 'Free Shipping on All Orders',
   helpLabel = 'Need help?',
   trackLabel = 'Track My Order',
+  contactLabel = 'Contact Us',
   helpHref = '/help',
   trackHref = '/track-order',
+  contactHref = '/contact-us',
 }: ToplineProps) {
   return (
     <div className={styles.bar} role="region" aria-label="Announcement">
@@ -25,13 +30,17 @@ export function Topline({
         <p className={styles.promo}>{promoLeft}</p>
         <p className={styles.center}>{promoCenter}</p>
         <div className={styles.utilities}>
-          <a href={helpHref} className={styles.utilityLink}>
+          <Link href={helpHref} className={styles.utilityLink}>
             {helpLabel}
-          </a>
+          </Link>
           <span className={styles.divider} aria-hidden />
-          <a href={trackHref} className={styles.utilityLink}>
+          <Link href={trackHref} className={styles.utilityLink}>
             {trackLabel}
-          </a>
+          </Link>
+          <span className={styles.divider} aria-hidden />
+          <Link href={contactHref} className={styles.utilityLink}>
+            {contactLabel}
+          </Link>
         </div>
       </div>
     </div>

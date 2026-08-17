@@ -21,6 +21,7 @@ function StyleguidePageContent() {
     ...DEFAULT_TOPLINE,
     helpHref: withBrandPrefix(brand, DEFAULT_TOPLINE.helpHref),
     trackHref: withBrandPrefix(brand, DEFAULT_TOPLINE.trackHref),
+    contactHref: withBrandPrefix(brand, DEFAULT_TOPLINE.contactHref),
   }
 
   return (
