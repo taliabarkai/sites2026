@@ -80,14 +80,30 @@ interface CartItemRowProps {
    */
   ratingAbove: boolean
   onToggleRatingPosition: () => void
+  /**
+   * Prototype presentation switch for the protection-plan add-on:
+   *  • 'v1' — the checkbox row ("Add a 5-Year… for $15" + Details link)
+   *  • 'v2' — the nested-item card (80px image, circle selector, View Details)
+   * Driven by the V1/V2 toggle in the cart header.
+   */
+  planVariant: PlanVariant
 }
 
-function CartItemRow({ item, showGuarantee, brand, onRemove, onEdit, onNavigate, DropdownIcon, hasPlan, onTogglePlan, onOpenCarePlan, ratingAbove, onToggleRatingPosition }: CartItemRowProps) {
+/** The two protection-plan add-on designs being presented. */
+export type PlanVariant = 'v1' | 'v2'
+
+/** Plan copy — shared by both variants so they can't drift apart. */
+const PLAN_TITLE = '5-Year Jewelry Protection Plan'
+/** Whole-dollar plan price ("$15"), matching the nested-item card price style. */
+const PLAN_PRICE = `$${(WARRANTY_CENTS / 100).toFixed(0)}`
+
+function CartItemRow({ item, showGuarantee, brand, onRemove, onEdit, onNavigate, DropdownIcon, hasPlan, onTogglePlan, onOpenCarePlan, ratingAbove, onToggleRatingPosition, planVariant }: CartItemRowProps) {
   const [detailsOpen, setDetailsOpen] = useState(false)
   const [confirmRemove, setConfirmRemove] = useState(false)
   const hasOptions = item.selectedOptions && item.selectedOptions.length > 0
   const { CheckboxIcon, CheckmarkIcon } = BRAND_ICONS[brand]
   const { rating, reviewCount } = itemRating(item, brand)
+  const planImage = CARE_PLAN_IMAGES[brand]
 
   // Custom canvas items deep-link to the PDP with the saved preview restored inline
   const itemHref = item.canvasConfig
@@ -221,32 +237,78 @@ function CartItemRow({ item, showGuarantee, brand, onRemove, onEdit, onNavigate,
         </div>
       </div>
 
-      {/* Per-item 5-year protection plan — toggling adjusts the cart subtotal */}
-      <div className={styles.protectionRow}>
-        <button
-          type="button"
-          role="checkbox"
-          aria-checked={hasPlan}
-          className={styles.protectionToggle}
-          onClick={onTogglePlan}
-        >
-          <span className={styles.protectionCheckbox} aria-hidden="true">
+      {/* Per-item 5-year protection plan — toggling adjusts the cart subtotal.
+          Two designs, swapped live by the header's V1/V2 toggle. */}
+      {planVariant === 'v1' ? (
+        /* V1 — checkbox row */
+        <div className={styles.protectionRow}>
+          <button
+            type="button"
+            role="checkbox"
+            aria-checked={hasPlan}
+            className={styles.protectionToggle}
+            onClick={onTogglePlan}
+          >
+            <span className={styles.protectionCheckbox} aria-hidden="true">
+              {hasPlan ? (
+                <span className={styles.protectionChecked}>
+                  <CheckmarkIcon size={12} />
+                </span>
+              ) : (
+                <CheckboxIcon size={24} />
+              )}
+            </span>
+            <span className={styles.protectionLabel}>
+              Add a {PLAN_TITLE} for <span className={styles.protectionPrice}>{PLAN_PRICE}</span>
+            </span>
+          </button>
+          <button type="button" className={styles.protectionDetails} onClick={onOpenCarePlan}>
+            Details
+          </button>
+        </div>
+      ) : (
+        /* V2 — nested-item card: 80px image, circle selector top-right,
+           name + price stacked, View Details anchored bottom-right. The card
+           face is a stretched button so the whole card selects the plan while
+           View Details stays independently clickable. */
+        <div className={`${styles.planCard} ${hasPlan ? styles.planCardSelected : ''}`}>
+          <button
+            type="button"
+            role="checkbox"
+            aria-checked={hasPlan}
+            aria-label={`${hasPlan ? 'Remove' : 'Add'} the ${PLAN_TITLE}`}
+            className={styles.planCardFace}
+            onClick={onTogglePlan}
+          />
+
+          <span className={styles.planMedia}>
+            {planImage && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={planImage} alt={PLAN_TITLE} className={styles.planImage} loading="lazy" />
+            )}
+          </span>
+
+          <span className={styles.planInfo}>
+            <span className={styles.planName}>{PLAN_TITLE}</span>
+            <span className={styles.planPrice}>{PLAN_PRICE}</span>
+          </span>
+
+          {/* Circle selection indicator — top-right corner */}
+          <span className={styles.planCheckbox} aria-hidden="true">
             {hasPlan ? (
-              <span className={styles.protectionChecked}>
+              <span className={styles.planChecked}>
                 <CheckmarkIcon size={12} />
               </span>
             ) : (
               <CheckboxIcon size={24} />
             )}
           </span>
-          <span className={styles.protectionLabel}>
-            Add a 5-Year Jewelry Protection Plan for <span className={styles.protectionPrice}>$15</span>
-          </span>
-        </button>
-        <button type="button" className={styles.protectionDetails} onClick={onOpenCarePlan}>
-          Details
-        </button>
-      </div>
+
+          <button type="button" className={styles.planDetails} onClick={onOpenCarePlan}>
+            View Details
+          </button>
+        </div>
+      )}
     </article>
   )
 }
@@ -276,6 +338,11 @@ export function FloatingCart({
   // showing. Defaults to stars below the product name; clicking any row's stars
   // flips every row at once so the two designs can be compared live.
   const [ratingAbove, setRatingAbove] = useState(false)
+
+  // Prototype presentation switch for the protection-plan add-on design. The
+  // V1/V2 control in the header swaps it in place — no reload, no scroll jump,
+  // and the cart's scroll position and plan selections are preserved.
+  const [planVariant, setPlanVariant] = useState<PlanVariant>('v1')
   const carePlanImage = CARE_PLAN_IMAGES[brand]
   // Whether the plan is already selected for the item the details panel is showing.
   const carePlanSelected = !!items.find(it => it.id === carePlanItemId)?.warranty
@@ -351,14 +418,37 @@ export function FloatingCart({
           <h2 className={styles.title}>
             My Bag {items.length > 0 && <span className={styles.count}>({items.length})</span>}
           </h2>
-          <button
-            type="button"
-            className={styles.closeBtn}
-            aria-label="Close cart"
-            onClick={onClose}
-          >
-            <XIcon size={24} />
-          </button>
+
+          <div className={styles.headerActions}>
+            {/* Presentation-only: swaps the protection-plan add-on design in place */}
+            <div
+              className={styles.variantToggle}
+              role="group"
+              aria-label="Protection plan add-on design"
+            >
+              {(['v1', 'v2'] as PlanVariant[]).map(v => (
+                <button
+                  key={v}
+                  type="button"
+                  aria-pressed={planVariant === v}
+                  className={`${styles.variantBtn} ${planVariant === v ? styles.variantBtnActive : ''}`}
+                  title={v === 'v1' ? 'Protection plan as a checkbox row' : 'Protection plan as a card'}
+                  onClick={() => setPlanVariant(v)}
+                >
+                  {v.toUpperCase()}
+                </button>
+              ))}
+            </div>
+
+            <button
+              type="button"
+              className={styles.closeBtn}
+              aria-label="Close cart"
+              onClick={onClose}
+            >
+              <XIcon size={24} />
+            </button>
+          </div>
         </div>
 
         {justAdded && items.length > 0 && (
@@ -395,6 +485,7 @@ export function FloatingCart({
                 onOpenCarePlan={() => setCarePlanItemId(item.id)}
                 ratingAbove={ratingAbove}
                 onToggleRatingPosition={() => setRatingAbove(a => !a)}
+                planVariant={planVariant}
               />
             ))
           )}

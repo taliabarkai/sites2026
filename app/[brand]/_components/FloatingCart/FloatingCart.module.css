@@ -93,6 +93,40 @@
   text-transform: var(--typography-rules-headline4-text-transform, none);
 }
 
+/* ── Header actions: prototype V1/V2 switch + close ───────────────────────── */
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+/* Presentation-only segmented control — swaps the protection-plan add-on design */
+.variantToggle {
+  display: inline-flex;
+  align-items: center;
+  overflow: hidden;
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--radius-full);
+}
+
+.variantBtn {
+  padding: var(--spacing-xxxs) var(--spacing-xs);
+  border: none;
+  background: transparent;
+  color: var(--colors-text-secondary);
+  font-family:    var(--typography-rules-text3-font-family);
+  font-size:      var(--typography-rules-text3-font-size);
+  line-height:    var(--typography-rules-text3-line-height);
+  letter-spacing: var(--typography-rules-text3-letter-spacing, normal);
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.variantBtnActive {
+  background: var(--colors-text);
+  color: var(--colors-text-inverse);
+}
+
 .closeBtn {
   display: flex;
   align-items: center;
@@ -537,6 +571,144 @@
   cursor: pointer;
   text-decoration: underline;
   text-underline-offset: 3px;
+}
+
+/* ── V2 protection plan: nested-item card ─────────────────────────────────── */
+/* Same design as <NestedItems> (image flush left on the card image background,
+   circle selector top-right, name + price stacked) with an 80px image, so the
+   card height follows the image instead of the original 140px. */
+.planCard {
+  position: relative;
+  display: flex;
+  align-items: center;
+  /* Full width of the item row — .item aligns its children to flex-start */
+  width: 100%;
+  gap: var(--spacing-sm);
+  overflow: hidden;
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: var(--colors-background);
+  color: var(--colors-text);
+  transition: border-color var(--transition-fast);
+  /* The parent .item is a flex column with a 16px gap; offset it so the space
+     above this card nets 12px — same offset the V1 row uses. */
+  margin-top: calc(var(--spacing-xs) - var(--spacing-sm));
+}
+
+.planCard:hover,
+.planCardSelected {
+  border-color: var(--colors-text);
+}
+
+/* Card face — stretched button so the whole card selects the plan. It comes
+   first in the DOM, so the later-positioned selector and View Details paint
+   above it without needing a z-index (which would also lift them above the
+   care-plan slide-over that covers the cart). */
+.planCardFace {
+  position: absolute;
+  inset: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+/* Image — flush left/top/bottom, defines the card height. Carries the same
+   brand image tint as the PDP gallery; the badge PNG has an opaque white
+   background, so multiply-blend it over the tint to pick the colour up. */
+.planMedia {
+  flex-shrink: 0;
+  width: 80px;
+  height: 80px;
+  background-color: var(--colors-card-image-bg);
+  isolation: isolate;
+}
+
+.planImage {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  mix-blend-mode: multiply;
+}
+
+/* Name + price — stacked to the right of the image */
+.planInfo {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xxxs);
+  /* Clear of the absolute circle selector in the top-right corner */
+  padding-right: calc(var(--spacing-md) * 2);
+}
+
+.planName {
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  font-weight:    var(--typography-rules-text1-font-weight, normal);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+  color: var(--colors-text);
+}
+
+.planPrice {
+  font-family:    var(--typography-rules-text2-font-family);
+  font-size:      var(--typography-rules-text2-font-size);
+  line-height:    var(--typography-rules-text2-line-height);
+  font-weight:    var(--typography-rules-text2-font-weight, 600);
+  letter-spacing: var(--typography-rules-text2-letter-spacing, normal);
+  color: var(--colors-price-selling);
+}
+
+/* Circle selection indicator — top-right corner, 12px inset */
+.planCheckbox {
+  position: absolute;
+  top: var(--spacing-xs);
+  right: var(--spacing-xs);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--spacing-md);
+  height: var(--spacing-md);
+  color: var(--colors-text);
+  pointer-events: none;
+}
+
+/* Selected — filled circle with an inverse checkmark, sized to the ring */
+.planChecked {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--spacing-sm);
+  height: var(--spacing-sm);
+  border-radius: var(--radius-full);
+  background: var(--colors-text);
+  color: var(--colors-text-inverse);
+}
+
+/* View Details — bottom-right of the card, opposite the selector, so the
+   left column keeps the reference layout at the reduced height */
+.planDetails {
+  position: absolute;
+  bottom: var(--spacing-xs);
+  right: var(--spacing-xs);
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--colors-text);
+  font-family:    var(--typography-rules-text3-font-family);
+  font-size:      var(--typography-rules-text3-font-size);
+  line-height:    var(--typography-rules-text3-line-height);
+  letter-spacing: var(--typography-rules-text3-letter-spacing, normal);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.planDetails:hover {
+  color: var(--colors-text-secondary);
 }
 
 /* ── Protection-plan details — slide-over within the cart panel ───────────── */
