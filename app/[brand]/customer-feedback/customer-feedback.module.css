@@ -23,6 +23,14 @@
   box-sizing: border-box;
 }
 
+/* Desktop: more air above the title and below the page header */
+@media (min-width: 768px) {
+  .container {
+    padding-top: var(--spacing-xl);
+    gap: var(--spacing-xl);
+  }
+}
+
 /* ─── Page header ─────────────────────────────────────────────────────────── */
 
 .pageHeader {
@@ -570,6 +578,158 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+}
+
+/* ─── Success screen ──────────────────────────────────────────────────────── */
+
+/* Check badge + title, centred at the top of the card */
+.success {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+/* "Thanks for your feedback" — larger than the step-card headings */
+.successTitle {
+  margin: 0;
+  text-align: center;
+  color: var(--colors-text);
+  font-family:    var(--typography-rules-headline3-font-family);
+  font-size:      var(--typography-rules-headline3-font-size);
+  line-height:    var(--typography-rules-headline3-line-height);
+  font-weight:    var(--typography-rules-headline3-font-weight, normal);
+  letter-spacing: var(--typography-rules-headline3-letter-spacing, normal);
+  text-transform: var(--typography-rules-headline3-text-transform, none);
+}
+
+.successCheck {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--spacing-xl);
+  height: var(--spacing-xl);
+  border-radius: var(--radius-full);
+  background: var(--colors-text);
+  color: var(--colors-text-inverse);
+}
+
+/* No top padding — the card's own gap is the only space above the intro, so
+   the description sits close under the title */
+.successBody {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+@media (min-width: 768px) {
+  .successBody {
+    gap: var(--spacing-lg);
+  }
+}
+
+.successIntro {
+  margin: 0;
+  max-width: 46ch;
+  text-align: center;
+  color: var(--colors-text);
+  font-family:    var(--typography-rules-paragraph4-font-family);
+  font-size:      var(--typography-rules-paragraph4-font-size);
+  line-height:    var(--typography-rules-paragraph4-line-height);
+  font-weight:    var(--typography-rules-paragraph4-font-weight, normal);
+  letter-spacing: var(--typography-rules-paragraph4-letter-spacing, normal);
+}
+
+/* "20% Off / Your next order" — the reward, stacked and centred */
+.offer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-xxxs);
+}
+
+.offerAmount {
+  margin: 0;
+  text-align: center;
+  color: var(--colors-text);
+  font-family:    var(--typography-rules-headline1-font-family);
+  font-size:      var(--typography-rules-headline1-font-size);
+  line-height:    var(--typography-rules-headline1-line-height);
+  font-weight:    var(--typography-rules-headline1-font-weight, normal);
+  letter-spacing: var(--typography-rules-headline1-letter-spacing, normal);
+  text-transform: var(--typography-rules-headline1-text-transform, none);
+}
+
+.offerLabel {
+  margin: 0;
+  text-align: center;
+  color: var(--colors-text);
+  font-family:    var(--typography-rules-headline4-font-family);
+  font-size:      var(--typography-rules-headline4-font-size);
+  line-height:    var(--typography-rules-headline4-line-height);
+  font-weight:    var(--typography-rules-headline4-font-weight, normal);
+  letter-spacing: var(--typography-rules-headline4-letter-spacing, normal);
+  text-transform: var(--typography-rules-headline4-text-transform, none);
+}
+
+/* Code + its copied confirmation, kept together so the empty status line
+   doesn't open a full section gap */
+.codeGroup {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-xxs);
+}
+
+/* Dashed coupon box — click anywhere on it to copy */
+.code {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xs) var(--spacing-md);
+  border: var(--border-width) dashed var(--border-strong, var(--border-color));
+  background: none;
+  color: var(--colors-text);
+  cursor: pointer;
+  transition: border-color var(--transition-fast);
+}
+
+.code:hover {
+  border-color: var(--colors-text);
+}
+
+.codeValue {
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  font-weight:    var(--typography-rules-text1-font-weight, normal);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+}
+
+.codeIcon {
+  display: flex;
+  align-items: center;
+}
+
+.codeStatus {
+  margin: 0;
+  text-align: center;
+  color: var(--colors-text-secondary);
+  font-family:    var(--typography-rules-caption1-font-family);
+  font-size:      var(--typography-rules-caption1-font-size);
+  line-height:    var(--typography-rules-caption1-line-height);
+  letter-spacing: var(--typography-rules-caption1-letter-spacing, normal);
+}
+
+.successCta {
+  width: 100%;
+  max-width: 320px;
+}
+
+/* Fine print under the CTA */
+.successNote {
+  text-align: center;
 }
 
 /* ─── Submit ──────────────────────────────────────────────────────────────── */

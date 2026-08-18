@@ -143,10 +143,14 @@ const EMPTY_FEEDBACK: ProductFeedback = { rating: 0, recommend: null, review: ''
 const REVIEW_PLACEHOLDER = 'What did you love? What could be better?'
 const COMMENTS_PLACEHOLDER = 'Anything else you would like us to know?'
 
+/** Thank-you reward shown on the success screen. */
+const DISCOUNT_AMOUNT = '20% Off'
+const DISCOUNT_CODE = 'THANKU20'
+
 export default function CustomerFeedbackPage() {
   const pathname = usePathname()
   const brand = getBrandFromPathname(pathname)
-  const { StarIcon, FileUploadIcon, XIcon } = BRAND_ICONS[brand]
+  const { StarIcon, FileUploadIcon, XIcon, CheckmarkIcon, ClipboardCopyIcon } = BRAND_ICONS[brand]
 
   const navLinks = prefixNavLinks(brand, DEFAULT_NAV_LINKS)
   const footerColumns = prefixFooterColumns(brand, DEFAULT_FOOTER_COLUMNS)
@@ -166,6 +170,7 @@ export default function CustomerFeedbackPage() {
   const [comments, setComments] = useState('')
   const [score, setScore] = useState<number | null>(null)
   const [submitted, setSubmitted] = useState(false)
+  const [copied, setCopied] = useState(false)
 
   const feedbackFor = (id: number): ProductFeedback => productFeedback[id] ?? EMPTY_FEEDBACK
 
@@ -204,6 +209,19 @@ export default function CustomerFeedbackPage() {
     // once one is available (e.g. `await fetch('/api/feedback', { method: 'POST', … })`).
     console.log('[customer-feedback] submit', payload)
     setSubmitted(true)
+    // The success screen replaces the form in place, so bring it into view.
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  async function copyCode() {
+    try {
+      await navigator.clipboard.writeText(DISCOUNT_CODE)
+      setCopied(true)
+    } catch {
+      // Clipboard blocked (permissions, or a non-secure context) — the code is
+      // still on screen for the shopper to copy by hand.
+      setCopied(false)
+    }
   }
 
   return (
@@ -212,230 +230,274 @@ export default function CustomerFeedbackPage() {
 
       <main id="main-content" className={styles.main}>
         <div className={styles.container}>
-          <header className={styles.pageHeader}>
-            <h1 className={styles.pageTitle}>Customer Feedback</h1>
-            <p className={styles.pageSubtitle}>
-              Leave a review and earn a thank-you discount for your next order. Takes about 2 minutes.
-            </p>
-          </header>
+          {submitted ? (
+            /* ── Success screen — replaces the form once submitted ────────── */
+            <section className={styles.card} aria-labelledby="cf-success-heading">
+              <div className={styles.success}>
+                <span className={styles.successCheck} aria-hidden="true">
+                  <CheckmarkIcon size={24} />
+                </span>
+                <h2 id="cf-success-heading" className={styles.successTitle}>
+                  Thanks for your feedback
+                </h2>
+              </div>
 
-          <form className={styles.form} onSubmit={handleSubmit}>
-            {/* ── Step 1 — rate each product ─────────────────────────────── */}
-            <section className={styles.card} aria-labelledby="cf-step1-heading">
-              <p className={styles.stepLabel}>Step 1 of 3</p>
-              <h2 id="cf-step1-heading" className={styles.cardTitle}>
-                How would you rate your jewelry?
-              </h2>
+              <div className={styles.successBody}>
+                <p className={styles.successIntro}>
+                  Your review helps other jewelry lovers shop with confidence, and we’ve
+                  sent your 20% off code to your inbox too.
+                </p>
 
-              <div className={styles.products}>
-                {products.map((product) => {
-                  const answers = feedbackFor(product.id)
-                  const nameId = `cf-product-${product.id}-name`
-                  const recommendId = `cf-product-${product.id}-recommend`
-                  const reviewId = `cf-product-${product.id}-review`
-                  const photosId = `cf-product-${product.id}-photos`
+                <div className={styles.offer}>
+                  <p className={styles.offerAmount}>{DISCOUNT_AMOUNT}</p>
+                  <p className={styles.offerLabel}>Your next order</p>
+                </div>
 
-                  return (
-                    <div key={product.id} className={styles.product}>
-                      <div className={styles.productTop}>
-                        <span className={styles.productMedia}>
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img
-                            src={product.image}
-                            alt={product.name}
-                            className={styles.productImage}
-                            loading="lazy"
-                          />
-                        </span>
+                <div className={styles.codeGroup}>
+                  <button type="button" className={styles.code} onClick={copyCode}>
+                    <span className={styles.codeValue}>{DISCOUNT_CODE}</span>
+                    <span className={styles.codeIcon} aria-hidden="true">
+                      <ClipboardCopyIcon size={20} />
+                    </span>
+                    <span className={styles.srOnly}>Copy discount code</span>
+                  </button>
+                  <p className={styles.codeStatus} role="status">
+                    {copied ? 'Code copied' : ''}
+                  </p>
+                </div>
 
-                        <div className={styles.productInfo}>
-                          <p id={nameId} className={styles.productName}>{product.name}</p>
-                          {/* Stars and their hint: stacked on mobile, side by side on desktop */}
-                          <div className={styles.ratingRow}>
-                            <StarInput
-                              value={answers.rating}
-                              onChange={(rating) => updateProduct(product.id, { rating })}
-                              labelledBy={nameId}
-                              StarIcon={StarIcon}
+                <Button href={`/${brand}`} variant="primary" className={styles.successCta}>
+                  Continue Shopping
+                </Button>
+
+                <p className={`${styles.hint} ${styles.successNote}`}>
+                  If you added photos, they’ll appear on the product page once reviewed.
+                </p>
+              </div>
+            </section>
+          ) : (
+            <>
+            <header className={styles.pageHeader}>
+              <h1 className={styles.pageTitle}>Customer Feedback</h1>
+              <p className={styles.pageSubtitle}>
+                Leave a review and earn a thank-you discount for your next order. Takes about 2 minutes.
+              </p>
+            </header>
+
+            <form className={styles.form} onSubmit={handleSubmit}>
+              {/* ── Step 1 — rate each product ─────────────────────────────── */}
+              <section className={styles.card} aria-labelledby="cf-step1-heading">
+                <p className={styles.stepLabel}>Step 1 of 3</p>
+                <h2 id="cf-step1-heading" className={styles.cardTitle}>
+                  How would you rate your jewelry?
+                </h2>
+
+                <div className={styles.products}>
+                  {products.map((product) => {
+                    const answers = feedbackFor(product.id)
+                    const nameId = `cf-product-${product.id}-name`
+                    const recommendId = `cf-product-${product.id}-recommend`
+                    const reviewId = `cf-product-${product.id}-review`
+                    const photosId = `cf-product-${product.id}-photos`
+
+                    return (
+                      <div key={product.id} className={styles.product}>
+                        <div className={styles.productTop}>
+                          <span className={styles.productMedia}>
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={product.image}
+                              alt={product.name}
+                              className={styles.productImage}
+                              loading="lazy"
                             />
-                            <p className={styles.hint}>
-                              {answers.rating > 0
-                                ? `${answers.rating} of 5`
-                                : 'Tap to rate'}
-                            </p>
+                          </span>
+
+                          <div className={styles.productInfo}>
+                            <p id={nameId} className={styles.productName}>{product.name}</p>
+                            {/* Stars and their hint: stacked on mobile, side by side on desktop */}
+                            <div className={styles.ratingRow}>
+                              <StarInput
+                                value={answers.rating}
+                                onChange={(rating) => updateProduct(product.id, { rating })}
+                                labelledBy={nameId}
+                                StarIcon={StarIcon}
+                              />
+                              <p className={styles.hint}>
+                                {answers.rating > 0
+                                  ? `${answers.rating} of 5`
+                                  : 'Tap to rate'}
+                              </p>
+                            </div>
                           </div>
                         </div>
-                      </div>
 
-                      <div className={styles.recommendRow}>
-                        <span id={recommendId} className={styles.fieldLabel}>
-                          Would you recommend it?
-                        </span>
-                        <YesNo
-                          value={answers.recommend}
-                          onChange={(recommend) => updateProduct(product.id, { recommend })}
-                          labelledBy={recommendId}
-                        />
-                      </div>
+                        <div className={styles.recommendRow}>
+                          <span id={recommendId} className={styles.fieldLabel}>
+                            Would you recommend it?
+                          </span>
+                          <YesNo
+                            value={answers.recommend}
+                            onChange={(recommend) => updateProduct(product.id, { recommend })}
+                            labelledBy={recommendId}
+                          />
+                        </div>
 
-                      <div className={styles.fieldGroup}>
-                        <label htmlFor={reviewId} className={styles.fieldLabel}>
-                          Your review:
-                        </label>
-                        <textarea
-                          id={reviewId}
-                          className={styles.textarea}
-                          rows={3}
-                          placeholder={REVIEW_PLACEHOLDER}
-                          value={answers.review}
-                          onChange={(event) => updateProduct(product.id, { review: event.target.value })}
-                        />
-                      </div>
-
-                      {/* Optional photo upload — the whole box is the file picker */}
-                      <div className={styles.upload}>
-                        <p className={styles.uploadTitle}>
-                          Add photos <span className={styles.uploadOptional}>(optional)</span>
-                        </p>
-                        <p className={styles.hint}>Show other shoppers how it looks in real life.</p>
-
-                        {/* One input drives both states — the empty-state box and
-                            the "add another" tile are both labels pointing at it. */}
-                        <input
-                          id={photosId}
-                          type="file"
-                          accept="image/*"
-                          multiple
-                          className={styles.uploadInput}
-                          onChange={(event) => {
-                            addPhotos(product.id, event.target.files)
-                            // Allow re-picking the same file after a removal
-                            event.target.value = ''
-                          }}
-                        />
-
-                        {answers.photos.length === 0 ? (
-                          /* Empty state — the wide upload box */
-                          <label className={styles.uploadBox} htmlFor={photosId}>
-                            <span className={styles.uploadTile} aria-hidden="true">
-                              <FileUploadIcon size={24} />
-                            </span>
-                            <span className={styles.uploadCopy}>
-                              <span className={styles.uploadCta}>Upload your photos</span>
-                              <span className={styles.hint}>Select images from your device</span>
-                            </span>
+                        <div className={styles.fieldGroup}>
+                          <label htmlFor={reviewId} className={styles.fieldLabel}>
+                            Your review:
                           </label>
-                        ) : (
-                          /* With photos — thumbnails, then a square tile to add more.
-                             Removing the last photo restores the box above. */
-                          <ul className={styles.thumbs}>
-                            {answers.photos.map((photo) => (
-                              <li key={photo.url} className={styles.thumb}>
-                                {/* eslint-disable-next-line @next/next/no-img-element */}
-                                <img src={photo.url} alt={photo.name} className={styles.thumbImage} />
-                                <button
-                                  type="button"
-                                  className={styles.thumbRemove}
-                                  aria-label={`Remove ${photo.name}`}
-                                  onClick={() => removePhoto(product.id, photo.url)}
-                                >
-                                  <XIcon size={12} />
-                                </button>
-                              </li>
-                            ))}
-                            <li>
-                              <label className={styles.thumbAdd} htmlFor={photosId}>
+                          <textarea
+                            id={reviewId}
+                            className={styles.textarea}
+                            rows={3}
+                            placeholder={REVIEW_PLACEHOLDER}
+                            value={answers.review}
+                            onChange={(event) => updateProduct(product.id, { review: event.target.value })}
+                          />
+                        </div>
+
+                        {/* Optional photo upload — the whole box is the file picker */}
+                        <div className={styles.upload}>
+                          <p className={styles.uploadTitle}>
+                            Add photos <span className={styles.uploadOptional}>(optional)</span>
+                          </p>
+                          <p className={styles.hint}>Show other shoppers how it looks in real life.</p>
+
+                          {/* One input drives both states — the empty-state box and
+                              the "add another" tile are both labels pointing at it. */}
+                          <input
+                            id={photosId}
+                            type="file"
+                            accept="image/*"
+                            multiple
+                            className={styles.uploadInput}
+                            onChange={(event) => {
+                              addPhotos(product.id, event.target.files)
+                              // Allow re-picking the same file after a removal
+                              event.target.value = ''
+                            }}
+                          />
+
+                          {answers.photos.length === 0 ? (
+                            /* Empty state — the wide upload box */
+                            <label className={styles.uploadBox} htmlFor={photosId}>
+                              <span className={styles.uploadTile} aria-hidden="true">
                                 <FileUploadIcon size={24} />
-                                <span className={styles.srOnly}>Add another photo</span>
-                              </label>
-                            </li>
-                          </ul>
-                        )}
+                              </span>
+                              <span className={styles.uploadCopy}>
+                                <span className={styles.uploadCta}>Upload your photos</span>
+                                <span className={styles.hint}>Select images from your device</span>
+                              </span>
+                            </label>
+                          ) : (
+                            /* With photos — thumbnails, then a square tile to add more.
+                               Removing the last photo restores the box above. */
+                            <ul className={styles.thumbs}>
+                              {answers.photos.map((photo) => (
+                                <li key={photo.url} className={styles.thumb}>
+                                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                                  <img src={photo.url} alt={photo.name} className={styles.thumbImage} />
+                                  <button
+                                    type="button"
+                                    className={styles.thumbRemove}
+                                    aria-label={`Remove ${photo.name}`}
+                                    onClick={() => removePhoto(product.id, photo.url)}
+                                  >
+                                    <XIcon size={12} />
+                                  </button>
+                                </li>
+                              ))}
+                              <li>
+                                <label className={styles.thumbAdd} htmlFor={photosId}>
+                                  <FileUploadIcon size={24} />
+                                  <span className={styles.srOnly}>Add another photo</span>
+                                </label>
+                              </li>
+                            </ul>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  )
-                })}
-              </div>
-            </section>
-
-            {/* ── Step 2 — rate the experience ───────────────────────────── */}
-            <section className={styles.card} aria-labelledby="cf-step2-heading">
-              <p className={styles.stepLabel}>Step 2 of 3</p>
-              <h2 id="cf-step2-heading" className={styles.cardTitle}>Rate your experience</h2>
-
-              <div className={styles.experienceList}>
-                {EXPERIENCE_ROWS.map((row) => {
-                  const rowId = `cf-experience-${row.id}`
-                  return (
-                    <div key={row.id} className={styles.experienceRow}>
-                      <span id={rowId} className={styles.fieldLabel}>{row.label}</span>
-                      <StarInput
-                        value={experience[row.id] ?? 0}
-                        onChange={(rating) => setExperience((prev) => ({ ...prev, [row.id]: rating }))}
-                        labelledBy={rowId}
-                        StarIcon={StarIcon}
-                      />
-                    </div>
-                  )
-                })}
-              </div>
-
-              <div className={styles.fieldGroup}>
-                <label htmlFor="cf-comments" className={styles.fieldLabel}>
-                  Additional comments:
-                </label>
-                <textarea
-                  id="cf-comments"
-                  className={styles.textarea}
-                  rows={3}
-                  placeholder={COMMENTS_PLACEHOLDER}
-                  value={comments}
-                  onChange={(event) => setComments(event.target.value)}
-                />
-              </div>
-            </section>
-
-            {/* ── Step 3 — recommendation score + submit ─────────────────── */}
-            <section className={styles.card} aria-labelledby="cf-step3-heading">
-              <p className={styles.stepLabel}>Step 3 of 3</p>
-              <h2 id="cf-step3-heading" className={styles.cardTitle}>
-                How likely are you to recommend us to a friend?
-              </h2>
-
-              <div className={styles.scale}>
-                <div className={styles.scaleRow} role="radiogroup" aria-labelledby="cf-step3-heading">
-                  {SCORES.map((value) => (
-                    <button
-                      key={value}
-                      type="button"
-                      role="radio"
-                      aria-checked={score === value}
-                      tabIndex={score === value || (score === null && value === 0) ? 0 : -1}
-                      className={`${styles.choice} ${styles.scaleBtn} ${score === value ? styles.choiceSelected : ''}`}
-                      onClick={() => setScore(value)}
-                    >
-                      {value}
-                    </button>
-                  ))}
+                    )
+                  })}
                 </div>
-                <div className={styles.scaleLegend}>
-                  <span className={styles.hint}>Not Likely</span>
-                  <span className={styles.hint}>Very Likely</span>
-                </div>
-              </div>
+              </section>
 
-              <div className={styles.submitRow}>
-                <Button type="submit" variant="primary" className={styles.submitBtn}>
-                  Submit
-                </Button>
-                {submitted && (
-                  <p className={styles.submitNote} role="status">
-                    Thanks for sharing — your feedback has been recorded.
-                  </p>
-                )}
-              </div>
-            </section>
-          </form>
+              {/* ── Step 2 — rate the experience ───────────────────────────── */}
+              <section className={styles.card} aria-labelledby="cf-step2-heading">
+                <p className={styles.stepLabel}>Step 2 of 3</p>
+                <h2 id="cf-step2-heading" className={styles.cardTitle}>Rate your experience</h2>
+
+                <div className={styles.experienceList}>
+                  {EXPERIENCE_ROWS.map((row) => {
+                    const rowId = `cf-experience-${row.id}`
+                    return (
+                      <div key={row.id} className={styles.experienceRow}>
+                        <span id={rowId} className={styles.fieldLabel}>{row.label}</span>
+                        <StarInput
+                          value={experience[row.id] ?? 0}
+                          onChange={(rating) => setExperience((prev) => ({ ...prev, [row.id]: rating }))}
+                          labelledBy={rowId}
+                          StarIcon={StarIcon}
+                        />
+                      </div>
+                    )
+                  })}
+                </div>
+
+                <div className={styles.fieldGroup}>
+                  <label htmlFor="cf-comments" className={styles.fieldLabel}>
+                    Additional comments:
+                  </label>
+                  <textarea
+                    id="cf-comments"
+                    className={styles.textarea}
+                    rows={3}
+                    placeholder={COMMENTS_PLACEHOLDER}
+                    value={comments}
+                    onChange={(event) => setComments(event.target.value)}
+                  />
+                </div>
+              </section>
+
+              {/* ── Step 3 — recommendation score + submit ─────────────────── */}
+              <section className={styles.card} aria-labelledby="cf-step3-heading">
+                <p className={styles.stepLabel}>Step 3 of 3</p>
+                <h2 id="cf-step3-heading" className={styles.cardTitle}>
+                  How likely are you to recommend us to a friend?
+                </h2>
+
+                <div className={styles.scale}>
+                  <div className={styles.scaleRow} role="radiogroup" aria-labelledby="cf-step3-heading">
+                    {SCORES.map((value) => (
+                      <button
+                        key={value}
+                        type="button"
+                        role="radio"
+                        aria-checked={score === value}
+                        tabIndex={score === value || (score === null && value === 0) ? 0 : -1}
+                        className={`${styles.choice} ${styles.scaleBtn} ${score === value ? styles.choiceSelected : ''}`}
+                        onClick={() => setScore(value)}
+                      >
+                        {value}
+                      </button>
+                    ))}
+                  </div>
+                  <div className={styles.scaleLegend}>
+                    <span className={styles.hint}>Not Likely</span>
+                    <span className={styles.hint}>Very Likely</span>
+                  </div>
+                </div>
+
+                <div className={styles.submitRow}>
+                  <Button type="submit" variant="primary" className={styles.submitBtn}>
+                    Submit
+                  </Button>
+                </div>
+              </section>
+            </form>
+            </>
+          )}
         </div>
       </main>
 
