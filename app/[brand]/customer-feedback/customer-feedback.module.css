@@ -1,0 +1,518 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: var(--colors-background);
+}
+
+/* Tinted band behind the whole flow — cards sit on top of it */
+.main {
+  flex: 1;
+  width: 100%;
+  background: var(--colors-surface-primary);
+}
+
+.container {
+  width: 100%;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: var(--spacing-lg) var(--layout-page-margin) var(--spacing-xxl);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+  box-sizing: border-box;
+}
+
+/* ─── Page header ─────────────────────────────────────────────────────────── */
+
+.pageHeader {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xxs);
+  text-align: center;
+}
+
+.pageTitle {
+  margin: 0;
+  color: var(--colors-text);
+  font-family:    var(--typography-rules-headline2-font-family);
+  font-size:      var(--typography-rules-headline2-font-size);
+  line-height:    var(--typography-rules-headline2-line-height);
+  font-weight:    var(--typography-rules-headline2-font-weight, normal);
+  letter-spacing: var(--typography-rules-headline2-letter-spacing, normal);
+  text-transform: var(--typography-rules-headline2-text-transform, none);
+}
+
+.pageSubtitle {
+  margin: 0;
+  color: var(--colors-text);
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  font-weight:    var(--typography-rules-text1-font-weight, normal);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+}
+
+/* ─── Step cards ──────────────────────────────────────────────────────────── */
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md) var(--spacing-sm);
+  background: var(--colors-background);
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--radius-md);
+}
+
+@media (min-width: 768px) {
+  .card {
+    padding: var(--spacing-lg);
+  }
+}
+
+/* "STEP 1 OF 3" — small uppercase label, centred above the card heading */
+.stepLabel {
+  margin: 0;
+  text-align: center;
+  color: var(--colors-text-secondary);
+  font-family:    var(--typography-rules-headline8-font-family);
+  font-size:      var(--typography-rules-headline8-font-size);
+  line-height:    var(--typography-rules-headline8-line-height);
+  font-weight:    var(--typography-rules-headline8-font-weight, normal);
+  letter-spacing: var(--typography-rules-headline8-letter-spacing, normal);
+  text-transform: var(--typography-rules-headline8-text-transform, none);
+}
+
+/* The step label and its heading read as one block */
+.stepLabel + .cardTitle {
+  margin-top: calc(-1 * var(--spacing-xs));
+}
+
+.cardTitle {
+  margin: 0;
+  text-align: center;
+  color: var(--colors-text);
+  font-family:    var(--typography-rules-headline4-font-family);
+  font-size:      var(--typography-rules-headline4-font-size);
+  line-height:    var(--typography-rules-headline4-line-height);
+  font-weight:    var(--typography-rules-headline4-font-weight, normal);
+  letter-spacing: var(--typography-rules-headline4-letter-spacing, normal);
+  text-transform: var(--typography-rules-headline4-text-transform, none);
+}
+
+/* ─── Step 1: products ────────────────────────────────────────────────────── */
+
+/* Products stay further apart than the blocks inside one product, so each
+   product still reads as its own group */
+.products {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xl);
+}
+
+/* 24px between a product's blocks: image row, photos, recommend, review */
+.product {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+/* Name / stars / hint sit centred against the full height of the image */
+.productTop {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+/* Brand image tint, as on the product cards and the PDP gallery */
+.productMedia {
+  flex-shrink: 0;
+  width: 140px;
+  height: 140px;
+  overflow: hidden;
+  background-color: var(--colors-card-image-bg);
+}
+
+.productImage {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.productInfo {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xxs);
+}
+
+.productName {
+  margin: 0;
+  color: var(--colors-text);
+  font-family:    var(--typography-rules-paragraph3-font-family);
+  font-size:      var(--typography-rules-paragraph3-font-size);
+  line-height:    var(--typography-rules-paragraph3-line-height);
+  font-weight:    var(--typography-rules-paragraph3-font-weight, normal);
+  letter-spacing: var(--typography-rules-paragraph3-letter-spacing, normal);
+  text-transform: var(--typography-rules-paragraph3-text-transform, none);
+}
+
+/* "Tap to rate" / "Not Likely" style helper text */
+.hint {
+  margin: 0;
+  color: var(--colors-text-secondary);
+  font-family:    var(--typography-rules-caption1-font-family);
+  font-size:      var(--typography-rules-caption1-font-size);
+  line-height:    var(--typography-rules-caption1-line-height);
+  font-weight:    var(--typography-rules-caption1-font-weight, normal);
+  letter-spacing: var(--typography-rules-caption1-letter-spacing, normal);
+}
+
+/* ─── Photo upload ────────────────────────────────────────────────────────── */
+
+/* 4px between the "Add photos" title and its helper line; the box and the
+   thumbnails add their own margin on top of this to keep their wider spacing. */
+.upload {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xxxs);
+}
+
+.uploadTitle {
+  margin: 0;
+  color: var(--colors-text);
+  font-family:    var(--typography-rules-text2-font-family);
+  font-size:      var(--typography-rules-text2-font-size);
+  line-height:    var(--typography-rules-text2-line-height);
+  font-weight:    var(--typography-rules-text2-font-weight, normal);
+  letter-spacing: var(--typography-rules-text2-letter-spacing, normal);
+  text-transform: var(--typography-rules-text2-text-transform, none);
+}
+
+/* "(optional)" sits inline with the title — same scale, muted */
+.uploadOptional {
+  color: var(--colors-text-secondary);
+  font-family:    var(--typography-rules-text2-font-family);
+  font-size:      var(--typography-rules-text2-font-size);
+  font-weight:    var(--typography-rules-text2-font-weight, normal);
+  letter-spacing: var(--typography-rules-text2-letter-spacing, normal);
+}
+
+/* The whole box is the file picker — a label wrapping a hidden input */
+.uploadBox {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-xxs);
+  padding: var(--spacing-xs);
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--form-field-border-radius, 0);
+  background: var(--colors-background);
+  cursor: pointer;
+  transition: border-color var(--transition-fast);
+}
+
+.uploadBox:hover,
+.uploadBox:focus-within {
+  border-color: var(--colors-text);
+}
+
+.uploadTile {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 72px;
+  height: 72px;
+  background: var(--colors-surface-primary);
+  color: var(--colors-text);
+}
+
+.uploadCopy {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xxxs);
+  min-width: 0;
+}
+
+.uploadCta {
+  color: var(--colors-text);
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  font-weight:    var(--typography-rules-text1-font-weight, normal);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+}
+
+/* Kept in the layout (not display:none) so it stays keyboard-focusable */
+.uploadInput {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Attached photo previews */
+.thumbs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xxs);
+  margin: var(--spacing-xs) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.thumb {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  overflow: hidden;
+  background-color: var(--colors-card-image-bg);
+  border: var(--border-width) solid var(--border-color);
+}
+
+.thumbImage {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.thumbRemove {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--spacing-sm);
+  height: var(--spacing-sm);
+  padding: 0;
+  border: none;
+  background: var(--colors-text);
+  color: var(--colors-text-inverse);
+  cursor: pointer;
+  font-family: var(--typography-rules-caption1-font-family);
+  font-size:   var(--typography-rules-caption1-font-size);
+  line-height: 1;
+}
+
+/* ─── Star rating input ───────────────────────────────────────────────────── */
+
+.stars {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xxxs);
+}
+
+.star {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--spacing-md);
+  height: var(--spacing-md);
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--border-color);
+  cursor: pointer;
+  transition: color var(--transition-fast);
+}
+
+.star svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.starOn {
+  color: var(--colors-star-filled, var(--colors-text));
+}
+
+/* LAL: unrated stars are solid mid-grey (no outline); rated ones fill black */
+[data-theme="lal"] .star {
+  color: var(--colors-text-secondary);
+}
+
+/* ─── Yes / No ────────────────────────────────────────────────────────────── */
+
+/* Label on top, Yes/No beneath it — stacked, not a label/control row */
+.recommendRow {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--spacing-xxs);
+}
+
+/* Shared selection-button look — used by Yes/No and the 0–5 scale, so both
+   controls read as the same UI. Only sizing and typography differ below. */
+.choice {
+  min-height: var(--field-min-height, 44px);
+  background: var(--colors-background);
+  color: var(--colors-text);
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--form-field-border-radius, 0);
+  cursor: pointer;
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  font-weight:    var(--typography-rules-text1-font-weight, normal);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+  text-transform: var(--typography-rules-text1-text-transform, none);
+  transition: background var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.choice:hover {
+  border-color: var(--colors-text);
+}
+
+.choiceSelected {
+  background: var(--colors-text);
+  border-color: var(--colors-text);
+  color: var(--colors-text-inverse);
+}
+
+.yesNo {
+  display: flex;
+  gap: var(--spacing-xxs);
+}
+
+/* Box styling and typography come from .choice — only the width differs */
+.yesNoBtn {
+  min-width: 72px;
+  padding: var(--spacing-xxs) var(--spacing-sm);
+}
+
+/* ─── Fields ──────────────────────────────────────────────────────────────── */
+
+.fieldGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xxs);
+}
+
+.fieldLabel {
+  color: var(--colors-text);
+  font-family:    var(--typography-rules-text2-font-family);
+  font-size:      var(--typography-rules-text2-font-size);
+  line-height:    var(--typography-rules-text2-line-height);
+  font-weight:    var(--typography-rules-text2-font-weight, normal);
+  letter-spacing: var(--typography-rules-text2-letter-spacing, normal);
+  text-transform: var(--typography-rules-text2-text-transform, none);
+}
+
+.textarea {
+  width: 100%;
+  padding: var(--spacing-xs);
+  background: var(--form-field-background);
+  color: var(--colors-text);
+  border: var(--border-width) solid var(--form-field-border-color);
+  border-radius: var(--form-field-border-radius, 0);
+  outline: none;
+  resize: vertical;
+  box-sizing: border-box;
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+  transition: border-color var(--transition-fast);
+}
+
+.textarea:hover {
+  border-color: var(--form-field-border-color-hover);
+}
+
+.textarea:focus {
+  border-color: var(--form-field-border-color-hover);
+}
+
+.textarea::placeholder {
+  color: var(--form-input-placeholder);
+}
+
+/* ─── Step 2: experience rows ─────────────────────────────────────────────── */
+
+.experienceList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.experienceRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-sm);
+}
+
+/* ─── Step 3: recommendation scale ────────────────────────────────────────── */
+
+.scale {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xxs);
+}
+
+.scaleRow {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: var(--spacing-xxxs);
+}
+
+@media (min-width: 768px) {
+  /* Desktop: the scale hugs the centre instead of spanning the card */
+  .scaleRow,
+  .scaleLegend {
+    width: 100%;
+    max-width: 340px;
+    margin: 0 auto;
+  }
+}
+
+/* Box styling and typography come from .choice — only the padding differs */
+.scaleBtn {
+  padding: var(--spacing-xxs) 0;
+}
+
+.scaleLegend {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* ─── Submit ──────────────────────────────────────────────────────────────── */
+
+.submitRow {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+/* Full width on narrow screens, capped and centred once there's room */
+.submitBtn {
+  width: 100%;
+  max-width: 320px;
+}
+
+.submitNote {
+  margin: 0;
+  text-align: center;
+  color: var(--colors-success);
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+}

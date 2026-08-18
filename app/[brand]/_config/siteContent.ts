@@ -52,6 +52,7 @@ export const DEFAULT_FOOTER_COLUMNS: FooterColumn[] = [
       { label: 'Help Center', href: '/help' },
       { label: 'Track My Order', href: '/track-order' },
       { label: 'Contact Us', href: '/contact-us' },
+      { label: 'Customer Feedback', href: '/customer-feedback' },
       { label: 'Shipping Information', href: '/shipping' },
       { label: 'Payment Policy', href: '/payment-policy' },
       { label: 'Jewelry Care', href: '/jewelry-care' },
