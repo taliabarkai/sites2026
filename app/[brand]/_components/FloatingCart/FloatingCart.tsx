@@ -525,8 +525,6 @@ export function FloatingCart({
           </div>
 
           <div className={styles.carePlanScroll}>
-            <h3 className={styles.carePlanHeading}>Add Warranty</h3>
-
             {/* Plan summary — image, title, price. Selection lives in the pinned footer button. */}
             <div className={styles.carePlanTop}>
               <div className={styles.carePlanCard}>
