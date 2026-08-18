@@ -46,11 +46,12 @@
 .pageSubtitle {
   margin: 0;
   color: var(--colors-text);
-  font-family:    var(--typography-rules-text1-font-family);
-  font-size:      var(--typography-rules-text1-font-size);
-  line-height:    var(--typography-rules-text1-line-height);
-  font-weight:    var(--typography-rules-text1-font-weight, normal);
-  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+  font-family:    var(--typography-rules-paragraph4-font-family);
+  font-size:      var(--typography-rules-paragraph4-font-size);
+  line-height:    var(--typography-rules-paragraph4-line-height);
+  font-weight:    var(--typography-rules-paragraph4-font-weight, normal);
+  letter-spacing: var(--typography-rules-paragraph4-letter-spacing, normal);
+  text-transform: var(--typography-rules-paragraph4-text-transform, none);
 }
 
 /* ─── Step cards ──────────────────────────────────────────────────────────── */
