@@ -6,6 +6,7 @@ import { Header } from '../_components/Header'
 import { Footer } from '../_components/Footer'
 import { Button } from '../_components/Button'
 import { getBrandFromPathname } from '../_config/brands'
+import type { BrandKey } from '../_config/brands'
 import { prefixFooterColumns, prefixNavLinks, withBrandPrefix } from '../_config/brandPaths'
 import { DEFAULT_FOOTER_COLUMNS, DEFAULT_NAV_LINKS, DEFAULT_TOPLINE } from '../_config/siteContent'
 import { getBrandProducts } from '../../../data/products/getBrandProducts'
@@ -143,9 +144,17 @@ const EMPTY_FEEDBACK: ProductFeedback = { rating: 0, recommend: null, review: ''
 const REVIEW_PLACEHOLDER = 'What did you love? What could be better?'
 const COMMENTS_PLACEHOLDER = 'Anything else you would like us to know?'
 
-/** Thank-you reward shown on the success screen. */
-const DISCOUNT_AMOUNT = '20% Off'
-const DISCOUNT_CODE = 'THANKU20'
+/**
+ * Thank-you reward shown on the success screen — percent off the next order,
+ * per brand. IB and MNN have no figure of their own yet, so they use OAL's 20%.
+ */
+const DISCOUNT_PERCENT: Record<BrandKey, number> = {
+  oal: 20,
+  tgr: 25,
+  lal: 30,
+  ib:  20,
+  mnn: 20,
+}
 
 export default function CustomerFeedbackPage() {
   const pathname = usePathname()
@@ -164,6 +173,11 @@ export default function CustomerFeedbackPage() {
   // Stand-in for a real order: OAL shows a single-item order, the other brands
   // show a two-item one (which puts a divider between the two products).
   const products = getBrandProducts(brand).slice(0, brand === 'oal' ? 1 : 2)
+
+  // Reward copy, all derived from the brand's percentage
+  const discountPercent = DISCOUNT_PERCENT[brand]
+  const discountAmount = `${discountPercent}% Off`
+  const discountCode = `THANKU${discountPercent}`
 
   const [productFeedback, setProductFeedback] = useState<Record<number, ProductFeedback>>({})
   const [experience, setExperience] = useState<Record<string, number>>({})
@@ -215,7 +229,7 @@ export default function CustomerFeedbackPage() {
 
   async function copyCode() {
     try {
-      await navigator.clipboard.writeText(DISCOUNT_CODE)
+      await navigator.clipboard.writeText(discountCode)
       setCopied(true)
     } catch {
       // Clipboard blocked (permissions, or a non-secure context) — the code is
@@ -245,17 +259,17 @@ export default function CustomerFeedbackPage() {
               <div className={styles.successBody}>
                 <p className={styles.successIntro}>
                   Your review helps other jewelry lovers shop with confidence, and we’ve
-                  sent your 20% off code to your inbox too.
+                  sent your {discountPercent}% off code to your inbox too.
                 </p>
 
                 <div className={styles.offer}>
-                  <p className={styles.offerAmount}>{DISCOUNT_AMOUNT}</p>
+                  <p className={styles.offerAmount}>{discountAmount}</p>
                   <p className={styles.offerLabel}>Your next order</p>
                 </div>
 
                 <div className={styles.codeGroup}>
                   <button type="button" className={styles.code} onClick={copyCode}>
-                    <span className={styles.codeValue}>{DISCOUNT_CODE}</span>
+                    <span className={styles.codeValue}>{discountCode}</span>
                     <span className={styles.codeIcon} aria-hidden="true">
                       <ClipboardCopyIcon size={20} />
                     </span>
