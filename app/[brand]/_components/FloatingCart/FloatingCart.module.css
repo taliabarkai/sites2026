@@ -274,7 +274,8 @@
   display: flex;
   /* Name variant: a wrapping name keeps the price on its first line */
   align-items: flex-start;
-  gap: var(--spacing-sm);
+  /* 32px so the name wraps well clear of the price column */
+  gap: var(--spacing-lg);
   /* Drops the row 8px so it never sits flush with the image top edge —
      applies to both variants (stars row or name + price row). */
   padding-top: var(--spacing-xxs);
@@ -633,33 +634,16 @@
   mix-blend-mode: multiply;
 }
 
-/* Name + price — stacked to the right of the image */
+/* V1's label with the Details link stacked on the row below it */
 .planInfo {
   flex: 1;
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-xxxs);
+  align-items: flex-start;
+  gap: var(--spacing-xxs);
   /* Clear of the absolute circle selector in the top-right corner */
   padding-right: calc(var(--spacing-md) * 2);
-}
-
-.planName {
-  font-family:    var(--typography-rules-text1-font-family);
-  font-size:      var(--typography-rules-text1-font-size);
-  line-height:    var(--typography-rules-text1-line-height);
-  font-weight:    var(--typography-rules-text1-font-weight, normal);
-  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
-  color: var(--colors-text);
-}
-
-.planPrice {
-  font-family:    var(--typography-rules-text2-font-family);
-  font-size:      var(--typography-rules-text2-font-size);
-  line-height:    var(--typography-rules-text2-line-height);
-  font-weight:    var(--typography-rules-text2-font-weight, 600);
-  letter-spacing: var(--typography-rules-text2-letter-spacing, normal);
-  color: var(--colors-price-selling);
 }
 
 /* Circle selection indicator — top-right corner, 12px inset */
@@ -688,20 +672,19 @@
   color: var(--colors-text-inverse);
 }
 
-/* View Details — bottom-right of the card, opposite the selector, so the
-   left column keeps the reference layout at the reduced height */
+/* Details — on the row below the label, same underlined style as V1's link */
 .planDetails {
-  position: absolute;
-  bottom: var(--spacing-xs);
-  right: var(--spacing-xs);
+  position: relative;
+  flex-shrink: 0;
   padding: 0;
   border: none;
   background: none;
   color: var(--colors-text);
-  font-family:    var(--typography-rules-text3-font-family);
-  font-size:      var(--typography-rules-text3-font-size);
-  line-height:    var(--typography-rules-text3-line-height);
-  letter-spacing: var(--typography-rules-text3-letter-spacing, normal);
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  font-weight:    var(--typography-rules-text1-font-weight, normal);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
   cursor: pointer;
   text-decoration: underline;
   text-underline-offset: 3px;

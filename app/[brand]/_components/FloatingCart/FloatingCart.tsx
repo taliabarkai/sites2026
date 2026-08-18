@@ -83,7 +83,7 @@ interface CartItemRowProps {
   /**
    * Prototype presentation switch for the protection-plan add-on:
    *  • 'v1' — the checkbox row ("Add a 5-Year… for $15" + Details link)
-   *  • 'v2' — the nested-item card (80px image, circle selector, View Details)
+   *  • 'v2' — the nested-item card (80px image, circle selector, same label)
    * Driven by the V1/V2 toggle in the cart header.
    */
   planVariant: PlanVariant
@@ -267,10 +267,10 @@ function CartItemRow({ item, showGuarantee, brand, onRemove, onEdit, onNavigate,
           </button>
         </div>
       ) : (
-        /* V2 — nested-item card: 80px image, circle selector top-right,
-           name + price stacked, View Details anchored bottom-right. The card
-           face is a stretched button so the whole card selects the plan while
-           View Details stays independently clickable. */
+        /* V2 — nested-item card: 80px image, circle selector top-right, V1's
+           "Add a … for $15" label with the Details link inline beside it. The
+           card face is a stretched button so the whole card selects the plan
+           while Details stays independently clickable. */
         <div className={`${styles.planCard} ${hasPlan ? styles.planCardSelected : ''}`}>
           <button
             type="button"
@@ -288,9 +288,14 @@ function CartItemRow({ item, showGuarantee, brand, onRemove, onEdit, onNavigate,
             )}
           </span>
 
+          {/* Same label as V1, with the Details link on the row below it */}
           <span className={styles.planInfo}>
-            <span className={styles.planName}>{PLAN_TITLE}</span>
-            <span className={styles.planPrice}>{PLAN_PRICE}</span>
+            <span className={styles.protectionLabel}>
+              Add a {PLAN_TITLE} for <span className={styles.protectionPrice}>{PLAN_PRICE}</span>
+            </span>
+            <button type="button" className={styles.planDetails} onClick={onOpenCarePlan}>
+              Details
+            </button>
           </span>
 
           {/* Circle selection indicator — top-right corner */}
@@ -303,10 +308,6 @@ function CartItemRow({ item, showGuarantee, brand, onRemove, onEdit, onNavigate,
               <CheckboxIcon size={24} />
             )}
           </span>
-
-          <button type="button" className={styles.planDetails} onClick={onOpenCarePlan}>
-            View Details
-          </button>
         </div>
       )}
     </article>
