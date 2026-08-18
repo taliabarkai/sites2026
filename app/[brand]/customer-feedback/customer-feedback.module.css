@@ -700,11 +700,12 @@
 }
 
 .codeValue {
-  font-family:    var(--typography-rules-text1-font-family);
-  font-size:      var(--typography-rules-text1-font-size);
-  line-height:    var(--typography-rules-text1-line-height);
-  font-weight:    var(--typography-rules-text1-font-weight, normal);
-  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+  font-family:    var(--typography-rules-paragraph3-font-family);
+  font-size:      var(--typography-rules-paragraph3-font-size);
+  line-height:    var(--typography-rules-paragraph3-line-height);
+  font-weight:    var(--typography-rules-paragraph3-font-weight, normal);
+  letter-spacing: var(--typography-rules-paragraph3-letter-spacing, normal);
+  text-transform: var(--typography-rules-paragraph3-text-transform, none);
 }
 
 .codeIcon {
@@ -727,9 +728,18 @@
   max-width: 320px;
 }
 
-/* Fine print under the CTA */
+/* Fine print under the CTA — primary text colour, and pulled up so the space
+   below the button nets 16px whatever the section gap is */
 .successNote {
   text-align: center;
+  color: var(--colors-text);
+  margin-top: calc(var(--spacing-sm) - var(--spacing-md));
+}
+
+@media (min-width: 768px) {
+  .successNote {
+    margin-top: calc(var(--spacing-sm) - var(--spacing-lg));
+  }
 }
 
 /* ─── Submit ──────────────────────────────────────────────────────────────── */
