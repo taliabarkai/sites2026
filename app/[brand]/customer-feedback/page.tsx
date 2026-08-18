@@ -141,11 +141,12 @@ interface ProductFeedback {
 const EMPTY_FEEDBACK: ProductFeedback = { rating: 0, recommend: null, review: '', photos: [] }
 
 const REVIEW_PLACEHOLDER = 'What did you love? What could be better?'
+const COMMENTS_PLACEHOLDER = 'Anything else you would like us to know?'
 
 export default function CustomerFeedbackPage() {
   const pathname = usePathname()
   const brand = getBrandFromPathname(pathname)
-  const { StarIcon, FileUploadIcon } = BRAND_ICONS[brand]
+  const { StarIcon, FileUploadIcon, XIcon } = BRAND_ICONS[brand]
 
   const navLinks = prefixNavLinks(brand, DEFAULT_NAV_LINKS)
   const footerColumns = prefixFooterColumns(brand, DEFAULT_FOOTER_COLUMNS)
@@ -156,8 +157,9 @@ export default function CustomerFeedbackPage() {
     contactHref: withBrandPrefix(brand, DEFAULT_TOPLINE.contactHref),
   }
 
-  // Stand-in for a real order: the first two products of the brand catalog.
-  const products = getBrandProducts(brand).slice(0, 2)
+  // Stand-in for a real order: OAL shows a single-item order, the other brands
+  // show a two-item one (which puts a divider between the two products).
+  const products = getBrandProducts(brand).slice(0, brand === 'oal' ? 1 : 2)
 
   const [productFeedback, setProductFeedback] = useState<Record<number, ProductFeedback>>({})
   const [experience, setExperience] = useState<Record<string, number>>({})
@@ -248,67 +250,21 @@ export default function CustomerFeedbackPage() {
 
                         <div className={styles.productInfo}>
                           <p id={nameId} className={styles.productName}>{product.name}</p>
-                          <StarInput
-                            value={answers.rating}
-                            onChange={(rating) => updateProduct(product.id, { rating })}
-                            labelledBy={nameId}
-                            StarIcon={StarIcon}
-                          />
-                          <p className={styles.hint}>
-                            {answers.rating > 0
-                              ? `${answers.rating} of 5`
-                              : 'Tap to rate'}
-                          </p>
+                          {/* Stars and their hint: stacked on mobile, side by side on desktop */}
+                          <div className={styles.ratingRow}>
+                            <StarInput
+                              value={answers.rating}
+                              onChange={(rating) => updateProduct(product.id, { rating })}
+                              labelledBy={nameId}
+                              StarIcon={StarIcon}
+                            />
+                            <p className={styles.hint}>
+                              {answers.rating > 0
+                                ? `${answers.rating} of 5`
+                                : 'Tap to rate'}
+                            </p>
+                          </div>
                         </div>
-                      </div>
-
-                      {/* Optional photo upload — the whole box is the file picker */}
-                      <div className={styles.upload}>
-                        <p className={styles.uploadTitle}>
-                          Add photos <span className={styles.uploadOptional}>(optional)</span>
-                        </p>
-                        <p className={styles.hint}>Show other shoppers how it looks in real life.</p>
-
-                        <label className={styles.uploadBox} htmlFor={photosId}>
-                          <span className={styles.uploadTile} aria-hidden="true">
-                            <FileUploadIcon size={24} />
-                          </span>
-                          <span className={styles.uploadCopy}>
-                            <span className={styles.uploadCta}>Upload your photos</span>
-                            <span className={styles.hint}>Select images from your device</span>
-                          </span>
-                          <input
-                            id={photosId}
-                            type="file"
-                            accept="image/*"
-                            multiple
-                            className={styles.uploadInput}
-                            onChange={(event) => {
-                              addPhotos(product.id, event.target.files)
-                              // Allow re-picking the same file after a removal
-                              event.target.value = ''
-                            }}
-                          />
-                        </label>
-
-                        {answers.photos.length > 0 && (
-                          <ul className={styles.thumbs}>
-                            {answers.photos.map((photo) => (
-                              <li key={photo.url} className={styles.thumb}>
-                                {/* eslint-disable-next-line @next/next/no-img-element */}
-                                <img src={photo.url} alt={photo.name} className={styles.thumbImage} />
-                                <button
-                                  type="button"
-                                  className={styles.thumbRemove}
-                                  aria-label={`Remove ${photo.name}`}
-                                  onClick={() => removePhoto(product.id, photo.url)}
-                                >
-                                  ✕
-                                </button>
-                              </li>
-                            ))}
-                          </ul>
-                        )}
                       </div>
 
                       <div className={styles.recommendRow}>
@@ -334,6 +290,67 @@ export default function CustomerFeedbackPage() {
                           value={answers.review}
                           onChange={(event) => updateProduct(product.id, { review: event.target.value })}
                         />
+                      </div>
+
+                      {/* Optional photo upload — the whole box is the file picker */}
+                      <div className={styles.upload}>
+                        <p className={styles.uploadTitle}>
+                          Add photos <span className={styles.uploadOptional}>(optional)</span>
+                        </p>
+                        <p className={styles.hint}>Show other shoppers how it looks in real life.</p>
+
+                        {/* One input drives both states — the empty-state box and
+                            the "add another" tile are both labels pointing at it. */}
+                        <input
+                          id={photosId}
+                          type="file"
+                          accept="image/*"
+                          multiple
+                          className={styles.uploadInput}
+                          onChange={(event) => {
+                            addPhotos(product.id, event.target.files)
+                            // Allow re-picking the same file after a removal
+                            event.target.value = ''
+                          }}
+                        />
+
+                        {answers.photos.length === 0 ? (
+                          /* Empty state — the wide upload box */
+                          <label className={styles.uploadBox} htmlFor={photosId}>
+                            <span className={styles.uploadTile} aria-hidden="true">
+                              <FileUploadIcon size={24} />
+                            </span>
+                            <span className={styles.uploadCopy}>
+                              <span className={styles.uploadCta}>Upload your photos</span>
+                              <span className={styles.hint}>Select images from your device</span>
+                            </span>
+                          </label>
+                        ) : (
+                          /* With photos — thumbnails, then a square tile to add more.
+                             Removing the last photo restores the box above. */
+                          <ul className={styles.thumbs}>
+                            {answers.photos.map((photo) => (
+                              <li key={photo.url} className={styles.thumb}>
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img src={photo.url} alt={photo.name} className={styles.thumbImage} />
+                                <button
+                                  type="button"
+                                  className={styles.thumbRemove}
+                                  aria-label={`Remove ${photo.name}`}
+                                  onClick={() => removePhoto(product.id, photo.url)}
+                                >
+                                  <XIcon size={12} />
+                                </button>
+                              </li>
+                            ))}
+                            <li>
+                              <label className={styles.thumbAdd} htmlFor={photosId}>
+                                <FileUploadIcon size={24} />
+                                <span className={styles.srOnly}>Add another photo</span>
+                              </label>
+                            </li>
+                          </ul>
+                        )}
                       </div>
                     </div>
                   )
@@ -371,6 +388,7 @@ export default function CustomerFeedbackPage() {
                   id="cf-comments"
                   className={styles.textarea}
                   rows={3}
+                  placeholder={COMMENTS_PLACEHOLDER}
                   value={comments}
                   onChange={(event) => setComments(event.target.value)}
                 />

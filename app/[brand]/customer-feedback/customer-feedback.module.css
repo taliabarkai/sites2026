@@ -61,13 +61,13 @@
   gap: var(--spacing-md);
 }
 
+/* No border — the card is separated from the band by its background alone */
 .card {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-md);
   padding: var(--spacing-md) var(--spacing-sm);
   background: var(--colors-background);
-  border: var(--border-width) solid var(--border-color);
   border-radius: var(--radius-md);
 }
 
@@ -77,17 +77,17 @@
   }
 }
 
-/* "STEP 1 OF 3" — small uppercase label, centred above the card heading */
+/* "Step 1 of 3" — centred above the card heading */
 .stepLabel {
   margin: 0;
   text-align: center;
   color: var(--colors-text-secondary);
-  font-family:    var(--typography-rules-headline8-font-family);
-  font-size:      var(--typography-rules-headline8-font-size);
-  line-height:    var(--typography-rules-headline8-line-height);
-  font-weight:    var(--typography-rules-headline8-font-weight, normal);
-  letter-spacing: var(--typography-rules-headline8-letter-spacing, normal);
-  text-transform: var(--typography-rules-headline8-text-transform, none);
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  font-weight:    var(--typography-rules-text1-font-weight, normal);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+  text-transform: var(--typography-rules-text1-text-transform, none);
 }
 
 /* The step label and its heading read as one block */
@@ -109,12 +109,10 @@
 
 /* ─── Step 1: products ────────────────────────────────────────────────────── */
 
-/* Products stay further apart than the blocks inside one product, so each
-   product still reads as its own group */
 .products {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-xl);
+  gap: var(--spacing-md);
 }
 
 /* 24px between a product's blocks: image row, photos, recommend, review */
@@ -122,6 +120,14 @@
   display: flex;
   flex-direction: column;
   gap: var(--spacing-md);
+}
+
+/* Divider between products — only drawn when a second one follows, so a
+   single-item order shows no rule. The .products gap sits above the line and
+   this padding below it, keeping the rule centred in the break. */
+.product + .product {
+  padding-top: var(--spacing-md);
+  border-top: var(--border-width) solid var(--border-color);
 }
 
 /* Name / stars / hint sit centred against the full height of the image */
@@ -138,6 +144,13 @@
   height: 140px;
   overflow: hidden;
   background-color: var(--colors-card-image-bg);
+}
+
+@media (min-width: 768px) {
+  .productMedia {
+    width: 180px;
+    height: 180px;
+  }
 }
 
 .productImage {
@@ -165,6 +178,21 @@
   font-weight:    var(--typography-rules-paragraph3-font-weight, normal);
   letter-spacing: var(--typography-rules-paragraph3-letter-spacing, normal);
   text-transform: var(--typography-rules-paragraph3-text-transform, none);
+}
+
+/* Stars + "Tap to rate": stacked on mobile, hint beside the stars on desktop */
+.ratingRow {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xxs);
+}
+
+@media (min-width: 768px) {
+  .ratingRow {
+    flex-direction: row;
+    align-items: center;
+    gap: var(--spacing-xs);
+  }
 }
 
 /* "Tap to rate" / "Not Likely" style helper text */
@@ -199,13 +227,16 @@
   text-transform: var(--typography-rules-text2-text-transform, none);
 }
 
-/* "(optional)" sits inline with the title — same scale, muted */
+/* "(optional)" sits inline with the title — lighter than it, and muted.
+   The margin widens the single markup space to about two. */
 .uploadOptional {
+  margin-left: var(--spacing-xxxs);
   color: var(--colors-text-secondary);
-  font-family:    var(--typography-rules-text2-font-family);
-  font-size:      var(--typography-rules-text2-font-size);
-  font-weight:    var(--typography-rules-text2-font-weight, normal);
-  letter-spacing: var(--typography-rules-text2-letter-spacing, normal);
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  font-weight:    var(--typography-rules-text1-font-weight, normal);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
 }
 
 /* The whole box is the file picker — a label wrapping a hidden input */
@@ -222,8 +253,14 @@
   transition: border-color var(--transition-fast);
 }
 
-.uploadBox:hover,
-.uploadBox:focus-within {
+.uploadBox:hover {
+  border-color: var(--colors-text);
+}
+
+/* The file input sits just before both pickers, so keyboard focus on it can
+   light up whichever one is currently showing. */
+.uploadInput:focus-visible + .uploadBox,
+.uploadInput:focus-visible + .thumbs .thumbAdd {
   border-color: var(--colors-text);
 }
 
@@ -254,6 +291,19 @@
   letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
 }
 
+/* Visible to assistive tech only */
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 /* Kept in the layout (not display:none) so it stays keyboard-focusable */
 .uploadInput {
   position: absolute;
@@ -263,21 +313,21 @@
   pointer-events: none;
 }
 
-/* Attached photo previews */
+/* Attached photo previews — shown instead of the upload box, with a square
+   tile at the end for adding more */
 .thumbs {
   display: flex;
   flex-wrap: wrap;
   gap: var(--spacing-xxs);
-  margin: var(--spacing-xs) 0 0;
+  margin: var(--spacing-xxs) 0 0;
   padding: 0;
   list-style: none;
 }
 
 .thumb {
   position: relative;
-  width: 64px;
-  height: 64px;
-  overflow: hidden;
+  width: 72px;
+  height: 72px;
   background-color: var(--colors-card-image-bg);
   border: var(--border-width) solid var(--border-color);
 }
@@ -290,23 +340,46 @@
   object-position: center;
 }
 
+/* Remove control — X in a white circle, overlapping the top-right corner */
 .thumbRemove {
   position: absolute;
-  top: 0;
-  right: 0;
+  top: calc(-1 * var(--spacing-xxxs));
+  right: calc(-1 * var(--spacing-xxxs));
   display: flex;
   align-items: center;
   justify-content: center;
-  width: var(--spacing-sm);
-  height: var(--spacing-sm);
+  width: var(--spacing-md);
+  height: var(--spacing-md);
   padding: 0;
-  border: none;
-  background: var(--colors-text);
-  color: var(--colors-text-inverse);
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--radius-full);
+  background: var(--colors-background);
+  color: var(--colors-text);
+  box-shadow: var(--shadow-sm);
   cursor: pointer;
-  font-family: var(--typography-rules-caption1-font-family);
-  font-size:   var(--typography-rules-caption1-font-size);
-  line-height: 1;
+  transition: border-color var(--transition-fast);
+}
+
+.thumbRemove:hover {
+  border-color: var(--colors-text);
+}
+
+/* "Add another" tile — the upload square on its own */
+.thumbAdd {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 72px;
+  height: 72px;
+  background: var(--colors-surface-primary);
+  color: var(--colors-text);
+  border: var(--border-width) solid var(--border-color);
+  cursor: pointer;
+  transition: border-color var(--transition-fast);
+}
+
+.thumbAdd:hover {
+  border-color: var(--colors-text);
 }
 
 /* ─── Star rating input ───────────────────────────────────────────────────── */
@@ -341,9 +414,15 @@
   color: var(--colors-star-filled, var(--colors-text));
 }
 
-/* LAL: unrated stars are solid mid-grey (no outline); rated ones fill black */
+/* LAL: unrated stars are solid mid-grey (no outline). The paired .starOn rule
+   needs the same [data-theme] specificity, or the grey above wins and the
+   hover/selected state never shows. */
 [data-theme="lal"] .star {
   color: var(--colors-text-secondary);
+}
+
+[data-theme="lal"] .starOn {
+  color: var(--colors-star-filled, var(--colors-text));
 }
 
 /* ─── Yes / No ────────────────────────────────────────────────────────────── */
