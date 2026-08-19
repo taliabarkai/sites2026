@@ -12,6 +12,12 @@ export interface ToplineProps {
   helpHref?: string
   trackHref?: string
   contactHref?: string
+  /**
+   * Optional control rendered as the first utility link, before "Need help?".
+   * Used by the homepage to toggle the desktop highlights bar during reviews.
+   */
+  actionLabel?: string
+  onAction?: () => void
 }
 
 export function Topline({
@@ -23,6 +29,8 @@ export function Topline({
   helpHref = '/help',
   trackHref = '/track-order',
   contactHref = '/contact-us',
+  actionLabel,
+  onAction,
 }: ToplineProps) {
   return (
     <div className={styles.bar} role="region" aria-label="Announcement">
@@ -30,6 +38,18 @@ export function Topline({
         <p className={styles.promo}>{promoLeft}</p>
         <p className={styles.center}>{promoCenter}</p>
         <div className={styles.utilities}>
+          {actionLabel && onAction && (
+            <>
+              <button
+                type="button"
+                className={`${styles.utilityLink} ${styles.utilityButton}`}
+                onClick={onAction}
+              >
+                {actionLabel}
+              </button>
+              <span className={styles.divider} aria-hidden />
+            </>
+          )}
           <Link href={helpHref} className={styles.utilityLink}>
             {helpLabel}
           </Link>

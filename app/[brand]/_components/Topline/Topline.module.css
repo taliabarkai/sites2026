@@ -47,6 +47,19 @@
   opacity: 0.85;
 }
 
+/* Button reset so the optional action reads exactly like the links beside it */
+.utilityButton {
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
 .divider {
   width: 1px;
   height: 16px;

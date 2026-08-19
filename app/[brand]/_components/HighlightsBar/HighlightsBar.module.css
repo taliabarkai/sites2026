@@ -5,10 +5,56 @@
   background: var(--colors-background);
 }
 
-/* From md up the homepage's category grid covers the same ground */
+/* From md up the homepage's category grid covers the same ground, so the bar is
+   hidden unless a consumer opts in with `showOnDesktop` (the homepage's
+   Show/Hide Highlights Bar control), which switches it to a large-circle
+   carousel. */
 @media (min-width: 768px) {
   .bar {
     display: none;
+  }
+
+  .barDesktop {
+    display: block;
+    padding: var(--spacing-md) 0;
+  }
+
+  /* Full width — the row starts at the page margin and runs to the screen edge */
+  .barDesktop .track {
+    padding: 0 var(--layout-page-margin);
+    gap: var(--spacing-sm);
+    scroll-padding-left: var(--layout-page-margin);
+  }
+
+  /* Brands with 5 highlights or fewer don't fill the row, so centre them */
+  .barDesktopCentered .track {
+    justify-content: center;
+  }
+
+  /* 5.5 circles visible; the rest scroll horizontally. The subtracted gaps are
+     the 5 that fall between those 5.5 items. */
+  .barDesktop .item {
+    flex: 0 0 calc((100% - 5 * var(--spacing-sm)) / 5.5);
+  }
+
+  /* Circles scale with the item instead of the fixed mobile 80px */
+  .barDesktop .link {
+    width: 100%;
+    gap: var(--spacing-xs);
+  }
+
+  .barDesktop .ring {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1;
+  }
+
+  .barDesktop .label {
+    font-family:    var(--typography-rules-text1-font-family);
+    font-size:      var(--typography-rules-text1-font-size);
+    line-height:    var(--typography-rules-text1-line-height);
+    font-weight:    var(--typography-rules-text1-font-weight, normal);
+    letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
   }
 }
 
@@ -52,13 +98,14 @@
   color: var(--colors-text);
 }
 
-/* Just the circular image — no ring */
+/* Just the circular image — no ring. 50% rather than --radius-full because TGR
+   and MNN cap that token at 100px, which squircles the larger desktop circles. */
 .ring {
   display: block;
   width: 80px;
   height: 80px;
   box-sizing: border-box;
-  border-radius: var(--radius-full);
+  border-radius: 50%;
   overflow: hidden;
 }
 
@@ -71,7 +118,7 @@
   display: block;
   width: 100%;
   height: 100%;
-  border-radius: var(--radius-full);
+  border-radius: 50%;
   object-fit: cover;
   object-position: center;
   background-color: var(--colors-card-image-bg);

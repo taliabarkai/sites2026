@@ -28,10 +28,10 @@ const LAL_HIGHLIGHTS: HighlightContent[] = [
 ]
 
 /**
- * Shared by Theo Grace, Israel Blessing and MYKA — a mix of collection and
- * category shortcuts on TGR imagery.
+ * Israel Blessing and MYKA — a mix of collection and category shortcuts on
+ * TGR imagery.
  */
-const TGR_HIGHLIGHTS: HighlightContent[] = [
+const SHARED_HIGHLIGHTS: HighlightContent[] = [
   { label: 'New Arrivals',            image: 'https://cdn.theograce.com/digital-asset/banners/category_promo1_saltwater.jpg' },
   { label: 'Nicky Hilton’s Favorites', image: 'https://cdn.theograce.com/digital-asset/banners/2506_Charmed_Collection_Landing_Page_IMG03.jpg' },
   { label: 'Earrings',                image: 'https://cdn.theograce.com/digital-asset/banners/04-%20Rings%20and%20Earrings.jpg?w=640' },
@@ -41,11 +41,21 @@ const TGR_HIGHLIGHTS: HighlightContent[] = [
   { label: 'Accessories',             image: 'https://cdn.theograce.com/digital-asset/product/secret-garden-bag-charm-6.jpg' },
 ]
 
+/**
+ * Theo Grace — the same set padded to 8 by repeating from the top, since TGR
+ * also shows the bar on desktop (5.5 circles wide) and needs the extra entry
+ * to fill the row.
+ */
+const TGR_HIGHLIGHTS: HighlightContent[] = [
+  ...SHARED_HIGHLIGHTS,
+  SHARED_HIGHLIGHTS[0],
+]
+
 /** Highlights per brand. */
 export const BRAND_HIGHLIGHTS: Record<BrandKey, HighlightContent[]> = {
   oal: OAL_HIGHLIGHTS,
   lal: LAL_HIGHLIGHTS,
   tgr: TGR_HIGHLIGHTS,
-  ib:  TGR_HIGHLIGHTS,
-  mnn: TGR_HIGHLIGHTS,
+  ib:  SHARED_HIGHLIGHTS,
+  mnn: SHARED_HIGHLIGHTS,
 }

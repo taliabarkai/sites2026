@@ -1,7 +1,7 @@
 'use client'
 
 import { useParams } from 'next/navigation'
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
 import {
   DEFAULT_FOOTER_COLUMNS,
   DEFAULT_HERO,
@@ -54,14 +54,24 @@ function HomePageInner() {
     },
   }
 
+  // Presentation control: the highlights bar is mobile-only by default, and the
+  // topline link below reveals it on desktop for reviews.
+  const [showHighlightsDesktop, setShowHighlightsDesktop] = useState(false)
+
   const topline = {
     ...DEFAULT_TOPLINE,
     helpHref: withBrandPrefix(brand, DEFAULT_TOPLINE.helpHref),
     trackHref: withBrandPrefix(brand, DEFAULT_TOPLINE.trackHref),
     contactHref: withBrandPrefix(brand, DEFAULT_TOPLINE.contactHref),
+    actionLabel: `${showHighlightsDesktop ? 'Hide' : 'Show'} Highlights Bar`,
+    onAction: () => setShowHighlightsDesktop(value => !value),
   }
 
-  const transparentHeader = brand === 'oal'
+  // OAL's hero slides up behind a transparent header — but only when nothing
+  // sits between them. With the highlights bar shown on desktop it would cover
+  // the bar's lower half, so the overlap is dropped while it is visible.
+  // (Below md the same is handled in Hero.module.css, where the bar is always on.)
+  const transparentHeader = brand === 'oal' && !showHighlightsDesktop
 
   const bestSellers = getBrandProducts(brand).slice(0, 8)
   const { ArrowIcon } = BRAND_ICONS[brand]
@@ -108,7 +118,7 @@ function HomePageInner() {
       />
       <main id="main-content">
         {/* Mobile-only story-style highlights — between the header and the hero */}
-        <HighlightsBar items={HIGHLIGHTS} />
+        <HighlightsBar items={HIGHLIGHTS} showOnDesktop={showHighlightsDesktop} />
 
         <Hero {...hero} transparentHeader={transparentHeader} />
 
