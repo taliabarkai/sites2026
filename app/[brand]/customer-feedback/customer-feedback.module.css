@@ -391,6 +391,51 @@
   border-color: var(--colors-text);
 }
 
+/* Photo consent — checkbox row under the upload area, same checkbox treatment
+   as the cart's protection-plan row */
+.consent {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xxs);
+  margin-top: var(--spacing-xs);
+  padding: 0;
+  border: none;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+  color: var(--colors-text);
+}
+
+.consentBox {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--spacing-md);
+  height: var(--spacing-md);
+  color: var(--colors-text);
+}
+
+.consentChecked {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--spacing-sm);
+  height: var(--spacing-sm);
+  border-radius: var(--radius-full);
+  background: var(--colors-text);
+  color: var(--colors-text-inverse);
+}
+
+.consentLabel {
+  font-family:    var(--typography-rules-text3-font-family);
+  font-size:      var(--typography-rules-text3-font-size);
+  line-height:    var(--typography-rules-text3-line-height);
+  font-weight:    var(--typography-rules-text3-font-weight, normal);
+  letter-spacing: var(--typography-rules-text3-letter-spacing, normal);
+  color: var(--colors-text);
+}
+
 /* ─── Star rating input ───────────────────────────────────────────────────── */
 
 .stars {
@@ -530,22 +575,7 @@
   color: var(--form-input-placeholder);
 }
 
-/* ─── Step 2: experience rows ─────────────────────────────────────────────── */
-
-.experienceList {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-xs);
-}
-
-.experienceRow {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--spacing-sm);
-}
-
-/* ─── Step 3: recommendation scale ────────────────────────────────────────── */
+/* ─── Step 2: recommendation scale ────────────────────────────────────────── */
 
 .scale {
   display: flex;
@@ -553,6 +583,7 @@
   gap: var(--spacing-xxs);
 }
 
+/* 11 cells for the 0–10 scale — six per row on mobile so they stay tappable */
 .scaleRow {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
@@ -560,11 +591,15 @@
 }
 
 @media (min-width: 768px) {
-  /* Desktop: the scale hugs the centre instead of spanning the card */
+  /* Desktop: the whole scale sits on one row, centred in the card */
+  .scaleRow {
+    grid-template-columns: repeat(11, 1fr);
+  }
+
   .scaleRow,
   .scaleLegend {
     width: 100%;
-    max-width: 340px;
+    max-width: 560px;
     margin: 0 auto;
   }
 }

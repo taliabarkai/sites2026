@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation'
 import { Header } from '../_components/Header'
 import { Footer } from '../_components/Footer'
 import { Button } from '../_components/Button'
-import { getBrandFromPathname } from '../_config/brands'
+import { getBrandFromPathname, getBrandMeta } from '../_config/brands'
 import type { BrandKey } from '../_config/brands'
 import { prefixFooterColumns, prefixNavLinks, withBrandPrefix } from '../_config/brandPaths'
 import { DEFAULT_FOOTER_COLUMNS, DEFAULT_NAV_LINKS, DEFAULT_TOPLINE } from '../_config/siteContent'
@@ -22,14 +22,8 @@ const BRAND_ICONS = {
   oal: oalIcons, mnn: mnnIcons, tgr: tgrIcons, lal: lalIcons, ib: ibIcons,
 } as const
 
-/** Experience rows in step 2. */
-const EXPERIENCE_ROWS = [
-  { id: 'shipping', label: 'Shipping' },
-  { id: 'service', label: 'Customer Service' },
-] as const
-
-/** Recommendation scale in step 3. */
-const SCORES = [0, 1, 2, 3, 4, 5] as const
+/** Recommendation scale in step 2 — the standard 0–10 NPS range. */
+const SCORES = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const
 
 // ─── Star rating input ────────────────────────────────────────────────────────
 
@@ -137,12 +131,19 @@ interface ProductFeedback {
   recommend: 'yes' | 'no' | null
   review: string
   photos: UploadedPhoto[]
+  /** Consent to reuse the uploaded photos on site and in marketing. */
+  photoConsent: boolean
 }
 
-const EMPTY_FEEDBACK: ProductFeedback = { rating: 0, recommend: null, review: '', photos: [] }
+const EMPTY_FEEDBACK: ProductFeedback = {
+  rating: 0,
+  recommend: null,
+  review: '',
+  photos: [],
+  photoConsent: false,
+}
 
 const REVIEW_PLACEHOLDER = 'What did you love? What could be better?'
-const COMMENTS_PLACEHOLDER = 'Anything else you would like us to know?'
 
 /**
  * Thank-you reward shown on the success screen — percent off the next order,
@@ -159,7 +160,7 @@ const DISCOUNT_PERCENT: Record<BrandKey, number> = {
 export default function CustomerFeedbackPage() {
   const pathname = usePathname()
   const brand = getBrandFromPathname(pathname)
-  const { StarIcon, FileUploadIcon, XIcon, CheckmarkIcon, ClipboardCopyIcon } = BRAND_ICONS[brand]
+  const { StarIcon, FileUploadIcon, XIcon, CheckmarkIcon, CheckboxIcon, ClipboardCopyIcon } = BRAND_ICONS[brand]
 
   const navLinks = prefixNavLinks(brand, DEFAULT_NAV_LINKS)
   const footerColumns = prefixFooterColumns(brand, DEFAULT_FOOTER_COLUMNS)
@@ -173,6 +174,7 @@ export default function CustomerFeedbackPage() {
   // Stand-in for a real order: OAL shows a single-item order, the other brands
   // show a two-item one (which puts a divider between the two products).
   const products = getBrandProducts(brand).slice(0, brand === 'oal' ? 1 : 2)
+  const brandName = getBrandMeta(brand).label
 
   // Reward copy, all derived from the brand's percentage
   const discountPercent = DISCOUNT_PERCENT[brand]
@@ -180,8 +182,6 @@ export default function CustomerFeedbackPage() {
   const discountCode = `THANKU${discountPercent}`
 
   const [productFeedback, setProductFeedback] = useState<Record<number, ProductFeedback>>({})
-  const [experience, setExperience] = useState<Record<string, number>>({})
-  const [comments, setComments] = useState('')
   const [score, setScore] = useState<number | null>(null)
   const [submitted, setSubmitted] = useState(false)
   const [copied, setCopied] = useState(false)
@@ -215,8 +215,6 @@ export default function CustomerFeedbackPage() {
         const { photos, ...answers } = feedbackFor(product.id)
         return { id: product.id, ...answers, photos: photos.map((photo) => photo.name) }
       }),
-      experience,
-      comments,
       score,
     }
     // TODO: no feedback endpoint exists in this project yet — POST the payload
@@ -301,7 +299,7 @@ export default function CustomerFeedbackPage() {
             <form className={styles.form} onSubmit={handleSubmit}>
               {/* ── Step 1 — rate each product ─────────────────────────────── */}
               <section className={styles.card} aria-labelledby="cf-step1-heading">
-                <p className={styles.stepLabel}>Step 1 of 3</p>
+                <p className={styles.stepLabel}>Step 1 of 2</p>
                 <h2 id="cf-step1-heading" className={styles.cardTitle}>
                   How would you rate your jewelry?
                 </h2>
@@ -359,7 +357,9 @@ export default function CustomerFeedbackPage() {
 
                         <div className={styles.fieldGroup}>
                           <label htmlFor={reviewId} className={styles.fieldLabel}>
-                            Your review:
+                            We&apos;d love to hear about your experience with {brandName}. Tell us
+                            what you loved, how it fits, how it looks in real life, or anything
+                            you think the other customers would find helpful.
                           </label>
                           <textarea
                             id={reviewId}
@@ -430,6 +430,29 @@ export default function CustomerFeedbackPage() {
                               </li>
                             </ul>
                           )}
+
+                          {/* Consent to reuse the uploaded photos */}
+                          <button
+                            type="button"
+                            role="checkbox"
+                            aria-checked={answers.photoConsent}
+                            className={styles.consent}
+                            onClick={() => updateProduct(product.id, { photoConsent: !answers.photoConsent })}
+                          >
+                            <span className={styles.consentBox} aria-hidden="true">
+                              {answers.photoConsent ? (
+                                <span className={styles.consentChecked}>
+                                  <CheckmarkIcon size={12} />
+                                </span>
+                              ) : (
+                                <CheckboxIcon size={24} />
+                              )}
+                            </span>
+                            <span className={styles.consentLabel}>
+                              I agree to let {brandName} use the photos I upload on this website
+                              and in marketing materials.
+                            </span>
+                          </button>
                         </div>
                       </div>
                     )
@@ -437,52 +460,15 @@ export default function CustomerFeedbackPage() {
                 </div>
               </section>
 
-              {/* ── Step 2 — rate the experience ───────────────────────────── */}
+              {/* ── Step 2 — recommendation score + submit ─────────────────── */}
               <section className={styles.card} aria-labelledby="cf-step2-heading">
-                <p className={styles.stepLabel}>Step 2 of 3</p>
-                <h2 id="cf-step2-heading" className={styles.cardTitle}>Rate your experience</h2>
-
-                <div className={styles.experienceList}>
-                  {EXPERIENCE_ROWS.map((row) => {
-                    const rowId = `cf-experience-${row.id}`
-                    return (
-                      <div key={row.id} className={styles.experienceRow}>
-                        <span id={rowId} className={styles.fieldLabel}>{row.label}</span>
-                        <StarInput
-                          value={experience[row.id] ?? 0}
-                          onChange={(rating) => setExperience((prev) => ({ ...prev, [row.id]: rating }))}
-                          labelledBy={rowId}
-                          StarIcon={StarIcon}
-                        />
-                      </div>
-                    )
-                  })}
-                </div>
-
-                <div className={styles.fieldGroup}>
-                  <label htmlFor="cf-comments" className={styles.fieldLabel}>
-                    Additional comments:
-                  </label>
-                  <textarea
-                    id="cf-comments"
-                    className={styles.textarea}
-                    rows={3}
-                    placeholder={COMMENTS_PLACEHOLDER}
-                    value={comments}
-                    onChange={(event) => setComments(event.target.value)}
-                  />
-                </div>
-              </section>
-
-              {/* ── Step 3 — recommendation score + submit ─────────────────── */}
-              <section className={styles.card} aria-labelledby="cf-step3-heading">
-                <p className={styles.stepLabel}>Step 3 of 3</p>
-                <h2 id="cf-step3-heading" className={styles.cardTitle}>
+                <p className={styles.stepLabel}>Step 2 of 2</p>
+                <h2 id="cf-step2-heading" className={styles.cardTitle}>
                   How likely are you to recommend us to a friend?
                 </h2>
 
                 <div className={styles.scale}>
-                  <div className={styles.scaleRow} role="radiogroup" aria-labelledby="cf-step3-heading">
+                  <div className={styles.scaleRow} role="radiogroup" aria-labelledby="cf-step2-heading">
                     {SCORES.map((value) => (
                       <button
                         key={value}

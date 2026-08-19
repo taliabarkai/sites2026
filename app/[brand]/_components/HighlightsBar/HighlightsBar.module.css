@@ -26,15 +26,15 @@
     scroll-padding-left: var(--layout-page-margin);
   }
 
-  /* Brands with 5 highlights or fewer don't fill the row, so centre them */
+  /* Brands with 6 highlights or fewer don't fill the row, so centre them */
   .barDesktopCentered .track {
     justify-content: center;
   }
 
-  /* 5.5 circles visible; the rest scroll horizontally. The subtracted gaps are
-     the 5 that fall between those 5.5 items. */
+  /* 6.5 circles visible; the rest scroll horizontally. The subtracted gaps are
+     the 6 that fall between those 6.5 items. */
   .barDesktop .item {
-    flex: 0 0 calc((100% - 5 * var(--spacing-sm)) / 5.5);
+    flex: 0 0 calc((100% - 6 * var(--spacing-sm)) / 6.5);
   }
 
   /* Circles scale with the item instead of the fixed mobile 80px */

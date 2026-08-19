@@ -15,7 +15,7 @@ export interface HighlightsBarProps {
   ariaLabel?: string
   /**
    * Also show the bar from the `md` breakpoint up, as a large-circle carousel
-   * with 5.5 circles in view. Off by default — the homepage drives it from the
+   * with 6.5 circles in view. Off by default — the homepage drives it from the
    * topline's Show/Hide Highlights Bar control.
    */
   showOnDesktop?: boolean
@@ -31,10 +31,10 @@ export interface HighlightsBarProps {
 export function HighlightsBar({ items, ariaLabel = 'Shop by highlight', showOnDesktop = false, className }: HighlightsBarProps) {
   if (items.length === 0) return null
 
-  // Fewer items than the 5.5 that fit on desktop: centre the row rather than
+  // Fewer items than the 6.5 that fit on desktop: centre the row rather than
   // leaving a gap on the right. Only safe when nothing overflows, since
   // centring a scroller's content puts its start out of reach.
-  const centerOnDesktop = items.length <= 5
+  const centerOnDesktop = items.length <= 6
 
   return (
     <nav
