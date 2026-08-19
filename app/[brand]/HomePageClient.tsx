@@ -9,10 +9,12 @@ import {
   DEFAULT_TOPLINE,
 } from './_config/siteContent'
 import { prefixFooterColumns, prefixNavLinks, withBrandPrefix } from './_config/brandPaths'
+import { BRAND_HIGHLIGHTS } from './_config/highlights'
 import { useCart } from './_context/CartContext'
 import { Footer } from './_components/Footer'
 import { Header } from './_components/Header'
 import { Hero } from './_components/Hero'
+import { HighlightsBar } from './_components/HighlightsBar'
 import { FloatingCart } from './_components/FloatingCart'
 import { ProductCard, toQuickAddProduct } from './_components/ProductCard'
 import { DEFAULT_PRODUCT_SWATCHES } from './_config/products'
@@ -83,6 +85,13 @@ function HomePageInner() {
     { label: 'Rings',     href: `/${brand}/category`, image: 'https://cdn.oakandluna.com/digital-asset/banners/RINGS-banner_HP_OAL.jpg' },
   ]
 
+  // Mobile highlights bar — per-brand story-style shortcuts, all pointing at
+  // the category page.
+  const HIGHLIGHTS = BRAND_HIGHLIGHTS[brand].map(item => ({
+    ...item,
+    href: `/${brand}/category`,
+  }))
+
   const PROMO_TILES = [
     { title: 'The Summer Centerpiece', label: 'Shop Now', href: `/${brand}/category`, image: 'https://cdn.oakandluna.com/digital-asset/banners/Summer-shop-gradient.jpg?w=1920' },
     { title: 'His New Daily Anchor',   label: 'Shop Now', href: `/${brand}/category`, image: 'https://cdn.oakandluna.com/digital-asset/banners/oal-box1-Hexagon-F_Day.jpg?w=1920' },
@@ -98,6 +107,9 @@ function HomePageInner() {
         topline={topline}
       />
       <main id="main-content">
+        {/* Mobile-only story-style highlights — between the header and the hero */}
+        <HighlightsBar items={HIGHLIGHTS} />
+
         <Hero {...hero} transparentHeader={transparentHeader} />
 
         {/* 4-up category grid */}

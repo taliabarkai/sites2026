@@ -13,6 +13,14 @@
   margin-top: calc(-1 * (var(--layout-header-height) + var(--topline-height, 0px)));
 }
 
+/* Mobile: the homepage's highlights bar sits between the header and the hero,
+   so there is nothing for the hero to slide up behind. */
+@media (max-width: 767px) {
+  .heroTransparent {
+    margin-top: 0;
+  }
+}
+
 /* ── Parallax background layer ────────────────────────────────────────────── */
 .bg {
   position: absolute;

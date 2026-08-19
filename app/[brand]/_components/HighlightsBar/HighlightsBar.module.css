@@ -1,0 +1,94 @@
+/* ── Highlights bar — mobile only ─────────────────────────────────────────── */
+.bar {
+  width: 100%;
+  padding: var(--spacing-sm) 0;
+  background: var(--colors-background);
+}
+
+/* From md up the homepage's category grid covers the same ground */
+@media (min-width: 768px) {
+  .bar {
+    display: none;
+  }
+}
+
+/* Horizontal snap scroller. Side padding keeps the first circle clear of the
+   screen edge while the rest scroll past it; scroll-padding keeps that inset
+   when a snap lands an item at the start. */
+.track {
+  display: flex;
+  /* Top-aligned so a two-line label doesn't shift its circle out of line */
+  align-items: flex-start;
+  gap: var(--spacing-xxxs);
+  margin: 0;
+  padding: 0 var(--spacing-xxs);
+  scroll-padding-left: var(--spacing-xxs);
+  list-style: none;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.track::-webkit-scrollbar {
+  display: none;
+}
+
+.item {
+  flex: 0 0 auto;
+  scroll-snap-align: start;
+}
+
+/* Wider than the circle so short labels sit on one line; the 80px image stays
+   centred inside it and longer labels wrap. */
+.link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-xxs);
+  width: 100px;
+  text-decoration: none;
+  color: var(--colors-text);
+}
+
+/* Just the circular image — no ring */
+.ring {
+  display: block;
+  width: 80px;
+  height: 80px;
+  box-sizing: border-box;
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.link:hover .image,
+.link:focus-visible .image {
+  opacity: 0.85;
+}
+
+.image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: var(--radius-full);
+  object-fit: cover;
+  object-position: center;
+  background-color: var(--colors-card-image-bg);
+  transition: opacity var(--transition-fast);
+}
+
+/* Short labels fit on one line; longer ones wrap inside the 100px item rather
+   than running over the neighbouring circle. */
+.label {
+  width: 100%;
+  text-align: center;
+  overflow-wrap: break-word;
+  color: var(--colors-text);
+  font-family:    var(--typography-rules-text3-font-family);
+  font-size:      var(--typography-rules-text3-font-size);
+  line-height:    var(--typography-rules-text3-line-height);
+  font-weight:    var(--typography-rules-text3-font-weight, normal);
+  letter-spacing: var(--typography-rules-text3-letter-spacing, normal);
+  text-transform: var(--typography-rules-text3-text-transform, none);
+}
