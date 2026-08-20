@@ -1,0 +1,180 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: var(--colors-background);
+}
+
+.main {
+  flex: 1;
+  width: 100%;
+  background: var(--colors-surface-primary);
+}
+
+.container {
+  width: 100%;
+  max-width: var(--layout-content-width);
+  margin: 0 auto;
+  padding: var(--spacing-lg) var(--layout-page-margin) var(--spacing-xxl);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+  box-sizing: border-box;
+}
+
+@media (min-width: 768px) {
+  .container {
+    padding-top: var(--spacing-xl);
+    gap: var(--spacing-xl);
+  }
+}
+
+/* ─── Page header ─────────────────────────────────────────────────────────── */
+
+.pageHeader {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.pageTitle {
+  margin: 0;
+  color: var(--colors-text);
+  font-family:    var(--typography-rules-headline2-font-family);
+  font-size:      var(--typography-rules-headline2-font-size);
+  line-height:    var(--typography-rules-headline2-line-height);
+  font-weight:    var(--typography-rules-headline2-font-weight, normal);
+  letter-spacing: var(--typography-rules-headline2-letter-spacing, normal);
+  text-transform: var(--typography-rules-headline2-text-transform, none);
+}
+
+.intro {
+  margin: 0;
+  max-width: 70ch;
+  color: var(--colors-text-secondary);
+  font-family:    var(--typography-rules-paragraph4-font-family);
+  font-size:      var(--typography-rules-paragraph4-font-size);
+  line-height:    var(--typography-rules-paragraph4-line-height);
+  font-weight:    var(--typography-rules-paragraph4-font-weight, normal);
+  letter-spacing: var(--typography-rules-paragraph4-letter-spacing, normal);
+}
+
+/* ─── Variation cards ─────────────────────────────────────────────────────── */
+
+/* Mobile-first: stacked, then three across so the variants sit side by side */
+.variants {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--spacing-md);
+}
+
+@media (min-width: 768px) {
+  .variants {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xxs);
+  padding: var(--spacing-md);
+  background: var(--colors-background);
+  border-radius: var(--radius-md);
+}
+
+/* The example itself sits on the same tint the bar uses on the homepage */
+.example {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  min-height: 180px;
+  padding: var(--spacing-md);
+  margin-bottom: var(--spacing-xxs);
+  background: var(--colors-surface-primary);
+  border-radius: var(--radius-sm);
+}
+
+/* One highlight: circle with its treatment underneath */
+.item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-xxs);
+  width: 100px;
+  text-align: center;
+}
+
+/* 50% rather than --radius-full: TGR and MNN cap that token at 100px */
+.circle {
+  display: block;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: center;
+  background-color: var(--colors-card-image-bg);
+}
+
+/* ─── Label treatments ────────────────────────────────────────────────────── */
+
+.labelText3 {
+  color: var(--colors-text);
+  font-family:    var(--typography-rules-text3-font-family);
+  font-size:      var(--typography-rules-text3-font-size);
+  line-height:    var(--typography-rules-text3-line-height);
+  font-weight:    var(--typography-rules-text3-font-weight, normal);
+  letter-spacing: var(--typography-rules-text3-letter-spacing, normal);
+  text-transform: var(--typography-rules-text3-text-transform, none);
+}
+
+.labelText4 {
+  color: var(--colors-text);
+  font-family:    var(--typography-rules-text4-font-family);
+  font-size:      var(--typography-rules-text4-font-size);
+  line-height:    var(--typography-rules-text4-line-height);
+  font-weight:    var(--typography-rules-text4-font-weight, normal);
+  letter-spacing: var(--typography-rules-text4-letter-spacing, normal);
+  text-transform: var(--typography-rules-text4-text-transform, none);
+}
+
+/* Links-1 typography, underlined instead of boxed */
+.buttonLink {
+  display: inline-block;
+  color: var(--colors-text);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  font-family:    var(--typography-rules-links1-font-family);
+  font-size:      var(--typography-rules-links1-font-size);
+  line-height:    var(--typography-rules-links1-line-height);
+  font-weight:    var(--typography-rules-links1-font-weight, normal);
+  letter-spacing: var(--typography-rules-links1-letter-spacing, normal);
+  text-transform: var(--typography-rules-links1-text-transform, none);
+  transition: opacity var(--transition-fast);
+}
+
+.buttonLink:hover {
+  opacity: 0.7;
+}
+
+/* ─── Captions ────────────────────────────────────────────────────────────── */
+
+.caption {
+  margin: 0;
+  color: var(--colors-text);
+  font-family:    var(--typography-rules-text2-font-family);
+  font-size:      var(--typography-rules-text2-font-size);
+  line-height:    var(--typography-rules-text2-line-height);
+  font-weight:    var(--typography-rules-text2-font-weight, normal);
+  letter-spacing: var(--typography-rules-text2-letter-spacing, normal);
+}
+
+.note {
+  margin: 0;
+  color: var(--colors-text-secondary);
+  font-family:    var(--typography-rules-caption1-font-family);
+  font-size:      var(--typography-rules-caption1-font-size);
+  line-height:    var(--typography-rules-caption1-line-height);
+  font-weight:    var(--typography-rules-caption1-font-weight, normal);
+  letter-spacing: var(--typography-rules-caption1-letter-spacing, normal);
+}

@@ -2,7 +2,7 @@
 .bar {
   width: 100%;
   padding: var(--spacing-sm) 0;
-  background: var(--colors-background);
+  background: var(--colors-surface-primary);
 }
 
 /* From md up the homepage's category grid covers the same ground, so the bar is

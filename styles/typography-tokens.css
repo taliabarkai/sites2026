@@ -168,7 +168,7 @@
 
   /* Links */
   --typography-rules-links1-font-family:      var(--font-family-main-bold);
-  --typography-rules-links1-font-size:        12px;
+  --typography-rules-links1-font-size:        14px;
   --typography-rules-links1-line-height:      18px;
 
   /* Buttons */
@@ -399,8 +399,8 @@
 
   /* Links */
   --typography-rules-links1-font-family:       var(--font-family-main-regular);
-  --typography-rules-links1-font-size:         12px;
-  --typography-rules-links1-line-height:       16px;
+  --typography-rules-links1-font-size:         14px;
+  --typography-rules-links1-line-height:       18px;
   --typography-rules-links1-font-weight:       400;
 
   /* Buttons */
@@ -460,8 +460,6 @@
     --typography-rules-paragraph1-line-height: 25px;
     --typography-rules-paragraph2-font-size:   20px;
     --typography-rules-paragraph2-line-height: 25px;
-    --typography-rules-links1-font-size:       14px;
-    --typography-rules-links1-line-height:     18px;
     --typography-rules-button2-font-size:      14px;
     --typography-rules-button2-line-height:    18px;
     --typography-rules-disclaimer1-font-size:  16px;
@@ -621,7 +619,7 @@
   --typography-rules-paragraph4-line-height:   24px;
 
   --typography-rules-links1-font-family:       var(--font-family-main-bold);
-  --typography-rules-links1-font-size:         12px;
+  --typography-rules-links1-font-size:         14px;
   --typography-rules-links1-line-height:       18px;
 
   --typography-rules-button1-font-family:      var(--font-family-main-bold);
@@ -820,7 +818,7 @@
   --typography-rules-paragraph4-line-height:   24px;
 
   --typography-rules-links1-font-family:       var(--font-family-main-regular);
-  --typography-rules-links1-font-size:         12px;
+  --typography-rules-links1-font-size:         14px;
   --typography-rules-links1-line-height:       18px;
 
   --typography-rules-button1-font-family:      var(--font-family-main-regular);
@@ -1003,7 +1001,7 @@
   --typography-rules-paragraph4-line-height:   22px;
 
   --typography-rules-links1-font-family:       var(--font-family-main-bold);
-  --typography-rules-links1-font-size:         12px;
+  --typography-rules-links1-font-size:         14px;
   --typography-rules-links1-line-height:       18px;
   --typography-rules-links1-font-weight:       600;
 

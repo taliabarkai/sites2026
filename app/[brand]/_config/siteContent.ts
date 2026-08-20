@@ -40,6 +40,7 @@ export const DEFAULT_NAV_LINKS: NavLink[] = [
     href: '#',
     children: [
       { label: 'Panel Examples', href: '/panel-examples' },
+      { label: 'Highlights Bar', href: '/highlights-examples' },
       { label: 'Design Systems', href: '/styleguide' },
     ],
   },
