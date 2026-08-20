@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState, type ComponentType } from 'react'
 import { createPortal } from 'react-dom'
+import { useIsMobile } from '../CustomizerPanel'
 import styles from './ReviewPhotoLightbox.module.css'
 
 /**
@@ -62,7 +63,10 @@ export function ReviewPhotoLightbox({
   CheckmarkIcon,
 }: ReviewPhotoLightboxProps) {
   const isOpen = index !== null && photos.length > 0
+  const isMobile = useIsMobile()
   const dialogRef = useRef<HTMLDivElement>(null)
+  // Mobile swipes the whole photo list; this ref drives and reads that scroller.
+  const trackRef = useRef<HTMLDivElement>(null)
   // Portal into the [data-theme] wrapper rather than <body>: the brand tokens
   // (typography, radii, surfaces) are scoped to that element, so a lightbox
   // rendered outside it loses every var and falls back to browser defaults.
@@ -134,6 +138,17 @@ export function ReviewPhotoLightbox({
     return () => node.removeEventListener('keydown', onKeyDown)
   }, [isOpen])
 
+  // Scroll the swipe track to the open photo (thumbnail taps, or opening at N).
+  useEffect(() => {
+    if (!isOpen || !isMobile || index === null) return
+    const track = trackRef.current
+    if (!track) return
+    const target = index * track.clientWidth
+    if (Math.abs(track.scrollLeft - target) > 4) {
+      track.scrollTo({ left: target, behavior: 'auto' })
+    }
+  }, [isOpen, isMobile, index])
+
   // Lock the page behind the lightbox.
   useEffect(() => {
     if (!isOpen) return
@@ -169,7 +184,7 @@ export function ReviewPhotoLightbox({
             aria-label={`Customer reviews with photos, ${counter}`}
           >
             {/* Back (only from the grid) left, title centred, close right */}
-            <div className={styles.header}>
+            <div className={`${styles.header} ${onBack ? '' : styles.headerNoBack}`}>
               {onBack ? (
                 <button
                   type="button"
@@ -179,9 +194,7 @@ export function ReviewPhotoLightbox({
                 >
                   <span className={styles.backIcon} aria-hidden="true"><ArrowIcon size={24} /></span>
                 </button>
-              ) : (
-                <span aria-hidden="true" />
-              )}
+              ) : null}
 
               <p className={styles.headerTitle}>
                 Customer reviews with photos <span className={styles.headerCount}>({counter})</span>
@@ -216,30 +229,55 @@ export function ReviewPhotoLightbox({
               </ul>
             ) : (
             <div className={styles.body}>
-              {/* On mobile the arrows flank the photo in this row; on desktop
-                  they become circles on the backdrop outside the modal. */}
-              <div className={styles.photoPane}>
-                <button
-                  type="button"
-                  className={`${styles.nav} ${styles.navPrev}`}
-                  aria-label="Previous photo"
-                  onClick={() => step(-1)}
+              {isMobile ? (
+                /* Swipe across every photo — the review below follows whichever
+                   one you land on, so crossing into another review swaps it. */
+                <div
+                  ref={trackRef}
+                  className={styles.swipeTrack}
+                  onScroll={event => {
+                    const track = event.currentTarget
+                    const next = Math.round(track.scrollLeft / track.clientWidth)
+                    if (next !== index && next >= 0 && next < photos.length) onIndexChange(next)
+                  }}
                 >
-                  <span className={styles.navIconPrev} aria-hidden="true"><ArrowIcon size={24} /></span>
-                </button>
+                  {photos.map((item, i) => (
+                    <div key={`${item.src}-${i}`} className={styles.swipeSlide}>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={item.src}
+                        alt={`Photo from ${item.name}'s review`}
+                        className={styles.photo}
+                        loading={i === index ? 'eager' : 'lazy'}
+                      />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                /* Desktop: one photo, arrows on the backdrop outside the modal */
+                <div className={styles.photoPane}>
+                  <button
+                    type="button"
+                    className={`${styles.nav} ${styles.navPrev}`}
+                    aria-label="Previous photo"
+                    onClick={() => step(-1)}
+                  >
+                    <span className={styles.navIconPrev} aria-hidden="true"><ArrowIcon size={24} /></span>
+                  </button>
 
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={photo.src} alt={alt} className={styles.photo} />
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={photo.src} alt={alt} className={styles.photo} />
 
-                <button
-                  type="button"
-                  className={`${styles.nav} ${styles.navNext}`}
-                  aria-label="Next photo"
-                  onClick={() => step(1)}
-                >
-                  <span aria-hidden="true"><ArrowIcon size={24} /></span>
-                </button>
-              </div>
+                  <button
+                    type="button"
+                    className={`${styles.nav} ${styles.navNext}`}
+                    aria-label="Next photo"
+                    onClick={() => step(1)}
+                  >
+                    <span aria-hidden="true"><ArrowIcon size={24} /></span>
+                  </button>
+                </div>
+              )}
 
               <div className={styles.infoPane}>
                 <div className={styles.reviewer}>
@@ -269,23 +307,32 @@ export function ReviewPhotoLightbox({
 
                 <p className={styles.reviewText}>{photo.body}</p>
 
-                {/* This review's own photos — swapping one changes the photo only */}
-                {showReviewThumbs && (
-                  <ul className={styles.reviewThumbs} aria-label="More photos from this review">
-                    {photo.reviewPhotos.map((src, i) => (
-                      <li key={`${src}-${i}`}>
-                        <button
-                          type="button"
-                          className={`${styles.reviewThumb} ${i === activeInReview ? styles.reviewThumbActive : ''}`}
-                          aria-current={i === activeInReview}
-                          aria-label={`Photo ${i + 1} of ${photo.reviewPhotos.length} from ${photo.name}'s review`}
-                          onClick={() => onIndexChange(photo.reviewStart + i)}
-                        >
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img src={src} alt="" className={styles.reviewThumbImg} />
-                        </button>
-                      </li>
-                    ))}
+                {/* Mobile rails every photo, so swiping and tapping share one
+                    list; desktop lists just this review's, when it has more
+                    than one. */}
+                {(isMobile ? photos.length > 1 : showReviewThumbs) && (
+                  <ul
+                    className={styles.reviewThumbs}
+                    aria-label={isMobile ? 'All review photos' : 'More photos from this review'}
+                  >
+                    {(isMobile ? photos.map(item => item.src) : photo.reviewPhotos).map((src, i) => {
+                      const target = isMobile ? i : photo.reviewStart + i
+                      const active = isMobile ? i === index : i === activeInReview
+                      return (
+                        <li key={`${src}-${i}`}>
+                          <button
+                            type="button"
+                            className={`${styles.reviewThumb} ${active ? styles.reviewThumbActive : ''}`}
+                            aria-current={active}
+                            aria-label={`Show photo ${i + 1}`}
+                            onClick={() => onIndexChange(target)}
+                          >
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={src} alt="" className={styles.reviewThumbImg} />
+                          </button>
+                        </li>
+                      )
+                    })}
                   </ul>
                 )}
               </div>

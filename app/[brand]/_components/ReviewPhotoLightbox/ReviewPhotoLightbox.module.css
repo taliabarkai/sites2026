@@ -36,6 +36,15 @@
   flex-shrink: 0;
 }
 
+/* Without Back there is no left slot, so the title starts at the edge */
+.headerNoBack {
+  grid-template-columns: 1fr var(--spacing-md);
+}
+
+.headerNoBack .headerTitle {
+  text-align: left;
+}
+
 /* Back to the "View All" grid — icon only */
 .back {
   display: flex;
@@ -109,7 +118,33 @@
   padding: 0 var(--spacing-sm) var(--spacing-lg);
 }
 
-/* Mobile: arrow, photo, arrow on one row — the photo narrows to fit between */
+/* Mobile: swipe through every photo — one slide per photo, snapping */
+.swipeTrack {
+  display: flex;
+  width: 100%;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.swipeTrack::-webkit-scrollbar {
+  display: none;
+}
+
+.swipeSlide {
+  flex: 0 0 100%;
+  scroll-snap-align: start;
+  min-width: 0;
+}
+
+/* The slide is a block, so the photo needs its width explicitly */
+.swipeSlide .photo {
+  width: 100%;
+}
+
+/* Desktop only: arrow, photo, arrow on one row */
 .photoPane {
   position: relative;
   display: flex;
@@ -256,11 +291,23 @@
 .reviewThumbs {
   order: -1;
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: var(--spacing-xxs);
   margin: 0;
   padding: 0;
   list-style: none;
+  /* The mobile rail holds every photo, so it scrolls sideways */
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+}
+
+.reviewThumbs::-webkit-scrollbar {
+  display: none;
+}
+
+.reviewThumbs > li {
+  flex: 0 0 auto;
 }
 
 .reviewThumb {
@@ -393,6 +440,8 @@
 
   .reviewThumbs {
     order: 0;
+    flex-wrap: wrap;
+    overflow-x: visible;
   }
 
   /* Info panel carries the brand surface tint, matched to the photo height */
