@@ -38,7 +38,7 @@
 
   /* Text */
   --colors-text:           var(--ib-navy);
-  --colors-text-secondary: var(--ib-mid-grey);
+  --colors-text-secondary: var(--ib-slate);
   --colors-text-inverse:   var(--ib-white);
   --colors-text-disabled:  var(--ib-off-white);
 

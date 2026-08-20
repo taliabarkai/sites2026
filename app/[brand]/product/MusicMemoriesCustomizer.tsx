@@ -104,8 +104,6 @@ const SLIPMAT = {
 // Placeholder shown on the record groove (no lyrics API). Edit here to change the copy.
 const RING_COPY = 'YOUR SONG LYRICS WILL APPEAR HERE'
 
-const LAL_RATING = 4.9
-const LAL_REVIEW_COUNT = 1024
 
 function formatPrice(cents: number): string {
   return `$${(cents / 100).toFixed(0)}`
@@ -374,6 +372,11 @@ function SongCombo({ id, songId, onSelect, onClear }: SongComboProps) {
 // ─── Main component ──────────────────────────────────────────────────────────
 
 export function MusicMemoriesCustomizer({ brand, product, icons, nestedItems = [], addItem, openCart, onLivePreviewChange }: MusicMemoriesCustomizerProps) {
+  // Rating shown beside the price — same numbers the category card and the
+  // PDP reviews section read from the product registry.
+  const productRating = product.rating ?? 0
+  const productReviewCount = product.reviewCount ?? 0
+
   const { ChevronIcon, StarIcon, XIcon, PersonIcon, ShippingIcon, MapPinIcon, RevisionsIcon, ClipboardCopyIcon } = icons
   const RevisionsGlyph = RevisionsIcon ?? ClipboardCopyIcon
   const isMobile = useIsMobile()
@@ -459,8 +462,8 @@ export function MusicMemoriesCustomizer({ brand, product, icons, nestedItems = [
       price: currentPrice,
       image,
       isPersonalized: true,
-      rating: LAL_RATING,
-      reviewCount: LAL_REVIEW_COUNT,
+      rating: productRating,
+      reviewCount: productReviewCount,
       selectedOptions,
     })
 
@@ -482,7 +485,7 @@ export function MusicMemoriesCustomizer({ brand, product, icons, nestedItems = [
     openCart(true)
   }
 
-  const filledStars = Math.round(LAL_RATING)
+  const filledStars = Math.round(productRating)
 
   const upsellCard = (idSuffix: string) => (
     <div className={styles.upsell}>
@@ -708,19 +711,19 @@ export function MusicMemoriesCustomizer({ brand, product, icons, nestedItems = [
         </div>
 
         <div className={pdp.ratingRow}>
-          <div className={pdp.stars} aria-label={`${LAL_RATING} out of 5 stars`}>
+          <div className={pdp.stars} aria-label={`${productRating} out of 5 stars`}>
             {[1, 2, 3, 4, 5].map(i => (
               <span key={i} className={i <= filledStars ? pdp.starFilled : pdp.starEmpty}>
                 <StarIcon size={20} />
               </span>
             ))}
           </div>
-          <span className={pdp.ratingValue}>{LAL_RATING}</span>
+          <span className={pdp.ratingValue}>{productRating}</span>
           <a
             href="#reviews"
             className={pdp.ratingCount}
             onClick={e => { e.preventDefault(); document.getElementById('reviews')?.scrollIntoView({ behavior: 'smooth', block: 'start' }) }}
-          >{LAL_REVIEW_COUNT} Reviews</a>
+          >{productReviewCount} Reviews</a>
         </div>
       </div>
 

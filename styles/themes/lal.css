@@ -34,7 +34,7 @@
 
   /* Text */
   --colors-text:           var(--lal-black);
-  --colors-text-secondary: var(--lal-mid-grey);
+  --colors-text-secondary: var(--lal-slate);
   --colors-text-inverse:   var(--lal-white);
   --colors-text-disabled:  var(--lal-light-grey);
 

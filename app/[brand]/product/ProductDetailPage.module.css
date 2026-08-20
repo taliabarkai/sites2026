@@ -434,23 +434,12 @@
 }
 
 .starEmpty {
-  color: var(--border-color);
+  color: var(--colors-text-secondary);
 }
 
 /* LAL: black-filled stars; empty stars are a black outline only. */
 [data-theme="lal"] .starFilled {
   color: var(--colors-text);
-}
-
-[data-theme="lal"] .starEmpty {
-  color: transparent;
-}
-
-[data-theme="lal"] .starFilled svg path,
-[data-theme="lal"] .starEmpty svg path {
-  stroke: var(--colors-text);
-  stroke-width: 1.5px;
-  paint-order: stroke;
 }
 
 .ratingValue {
@@ -1270,8 +1259,12 @@
 /* ── Reviews: photos flow ─────────────────────────────────────────────────── */
 
 /* Left group wraps so the mobile Sort chip can drop to its own row */
+/* Wraps its chips, and must be allowed to shrink — with flex-shrink: 0 the
+   group keeps its max-content width and pushes past the screen edge. */
 .reviewsFilterLeft {
   flex-wrap: wrap;
+  flex-shrink: 1;
+  min-width: 0;
 }
 
 /* Mobile: Filter by Ratings + With photos share row one, Sort takes row two */
@@ -1299,6 +1292,40 @@
   flex-direction: column;
   gap: var(--spacing-xs);
   margin-bottom: var(--spacing-lg);
+}
+
+/* Strip heading row — title left, "View All" right */
+.reviewsPhotoStripHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--spacing-sm);
+}
+
+.reviewsPhotoViewAll {
+  flex-shrink: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--colors-text);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  font-weight:    var(--typography-rules-text1-font-weight, normal);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+  transition: opacity var(--transition-fast);
+}
+
+.reviewsPhotoViewAll:hover {
+  opacity: 0.7;
+}
+
+.reviewsPhotoViewAll:focus-visible {
+  outline: 2px solid var(--colors-text);
+  outline-offset: 2px;
 }
 
 .reviewsPhotoStripTitle {
@@ -1376,6 +1403,8 @@
 @media (min-width: 768px) {
   .reviewCardBodyRow {
     flex-direction: row;
+    /* Wider gap once the photos sit beside the text rather than under it */
+    gap: var(--spacing-lg);
   }
 }
 

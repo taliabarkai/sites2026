@@ -277,7 +277,7 @@
 }
 
 .starEmpty {
-  color: var(--border-color);
+  color: var(--colors-text-secondary);
   font-size: 16px;
   line-height: 1;
 }

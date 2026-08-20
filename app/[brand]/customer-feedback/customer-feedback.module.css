@@ -453,7 +453,7 @@
   padding: 0;
   border: none;
   background: none;
-  color: var(--border-color);
+  color: var(--colors-text-secondary);
   cursor: pointer;
   transition: color var(--transition-fast);
 }
@@ -468,13 +468,7 @@
   color: var(--colors-star-filled, var(--colors-text));
 }
 
-/* LAL: unrated stars are solid mid-grey (no outline). The paired .starOn rule
-   needs the same [data-theme] specificity, or the grey above wins and the
-   hover/selected state never shows. */
-[data-theme="lal"] .star {
-  color: var(--colors-text-secondary);
-}
-
+/* LAL fills in black; the unrated grey above is shared with every brand. */
 [data-theme="lal"] .starOn {
   color: var(--colors-star-filled, var(--colors-text));
 }

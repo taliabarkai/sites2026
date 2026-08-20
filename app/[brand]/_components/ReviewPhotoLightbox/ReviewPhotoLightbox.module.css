@@ -25,18 +25,50 @@
   background: var(--colors-background);
 }
 
-/* ── Header ───────────────────────────────────────────────────────────────── */
+/* ── Header: back left, title centred, close right ────────────────────────── */
+/* Three tracks so the title stays centred whether or not Back is present. */
 .header {
-  display: flex;
+  display: grid;
+  grid-template-columns: var(--spacing-md) 1fr var(--spacing-md);
   align-items: center;
-  justify-content: space-between;
   gap: var(--spacing-sm);
   padding: var(--spacing-sm);
   flex-shrink: 0;
 }
 
+/* Back to the "View All" grid — icon only */
+.back {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--spacing-md);
+  height: var(--spacing-md);
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--colors-text);
+  cursor: pointer;
+  transition: opacity var(--transition-fast);
+}
+
+.back:hover {
+  opacity: 0.7;
+}
+
+.back:focus-visible {
+  outline: 2px solid var(--colors-text);
+  outline-offset: 2px;
+}
+
+/* The arrow points right by default */
+.backIcon {
+  display: flex;
+  transform: rotate(180deg);
+}
+
 .headerTitle {
   margin: 0;
+  text-align: center;
   color: var(--colors-text);
   font-family:    var(--typography-rules-text1-font-family);
   font-size:      var(--typography-rules-text1-font-size);
@@ -206,7 +238,7 @@
 }
 
 .starFilled { color: var(--colors-star-filled, var(--colors-text)); }
-.starEmpty  { color: var(--border-color); }
+.starEmpty  { color: var(--colors-text-secondary); }
 
 .reviewText {
   margin: 0;
@@ -256,6 +288,49 @@
   background-color: var(--colors-card-image-bg);
 }
 
+/* ── "View All" gallery ───────────────────────────────────────────────────── */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--spacing-xxs);
+  margin: 0;
+  padding: 0 var(--spacing-sm) var(--spacing-lg);
+  list-style: none;
+  overflow-y: auto;
+}
+
+.gridItem {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: none;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+/* Square in the gallery; only the single-photo view uses the 4:5 portrait */
+.gridImg {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  object-position: center;
+  background-color: var(--colors-card-image-bg);
+  border-radius: var(--radius-sm);
+  transition: opacity var(--transition-fast);
+}
+
+.gridItem:hover .gridImg {
+  opacity: 0.85;
+}
+
+.gridItem:focus-visible {
+  outline: 2px solid var(--colors-text);
+  outline-offset: 2px;
+}
+
 /* ── Desktop: centred modal on a dimmed backdrop ──────────────────────────── */
 @media (min-width: 768px) {
   /* Black 40% dim, matching the other modal overlays in the project */
@@ -281,6 +356,12 @@
 
   .header {
     padding: var(--spacing-sm) var(--spacing-md);
+  }
+
+  /* Four across, inset to match the single-photo view */
+  .grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    padding: 0 var(--spacing-md) var(--spacing-md);
   }
 
   /* Photo left, info right, inset 24px from the modal edges */
@@ -336,6 +417,12 @@
     background: var(--colors-background);
     box-shadow: var(--shadow-sm);
     transition: opacity var(--transition-fast);
+  }
+
+  /* 32px arrow inside the circle (the component renders it at 24) */
+  .nav svg {
+    width: 32px;
+    height: 32px;
   }
 
   .nav:hover { opacity: 0.85; }

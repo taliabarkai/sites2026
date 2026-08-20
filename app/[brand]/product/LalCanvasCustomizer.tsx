@@ -78,8 +78,6 @@ const SIZES: SizeOption[] = [
 const ACCEPTED_TYPES = '.jpg,.jpeg,.png,.webp'
 
 // LAL products carry no rating data — show a consistent canvas rating.
-const LAL_RATING = 4.8
-const LAL_REVIEW_COUNT = 27
 
 function formatPrice(cents: number): string {
   return `$${(cents / 100).toFixed(0)}`
@@ -203,6 +201,11 @@ async function composeFramedImage(opts: ComposeOpts): Promise<string> {
 
 // ─── Main component ───────────────────────────────────────────────────────────
 export function LalCanvasCustomizer({ brand, product, icons, items, previewId, nestedItems = [], addItem, openCart, onLivePreviewChange }: LalCanvasCustomizerProps) {
+  // Rating shown beside the price — same numbers the category card and the
+  // PDP reviews section read from the product registry.
+  const productRating = product.rating ?? 0
+  const productReviewCount = product.reviewCount ?? 0
+
   const {
     ChevronIcon, StarIcon, FileUploadIcon, XIcon, ShippingIcon,
     MapPinIcon, PersonIcon, ClipboardCopyIcon, RevisionsIcon,
@@ -320,8 +323,8 @@ export function LalCanvasCustomizer({ brand, product, icons, items, previewId, n
       originalPrice: undefined,
       image,
       isPersonalized: l1.length > 0 || l2.length > 0,
-      rating: LAL_RATING,
-      reviewCount: LAL_REVIEW_COUNT,
+      rating: productRating,
+      reviewCount: productReviewCount,
       selectedOptions,
       canvasConfig: photoUrl
         ? { productId: product.id, photo: photoUrl, photoName, frameKey, sizeKey, persOn: true, line1: l1, line2: l2 }
@@ -339,7 +342,7 @@ export function LalCanvasCustomizer({ brand, product, icons, items, previewId, n
     setPreviewGenerated(true)  // persist the generated preview → shows in the gallery
   }
 
-  const filledStars = Math.round(LAL_RATING)
+  const filledStars = Math.round(productRating)
 
   return (
     <section ref={sectionRef} className={pdp.formPanel} aria-label="Product options">
@@ -361,19 +364,19 @@ export function LalCanvasCustomizer({ brand, product, icons, items, previewId, n
         </div>
 
         <div className={pdp.ratingRow}>
-          <div className={pdp.stars} aria-label={`${LAL_RATING} out of 5 stars`}>
+          <div className={pdp.stars} aria-label={`${productRating} out of 5 stars`}>
             {[1, 2, 3, 4, 5].map(i => (
               <span key={i} className={i <= filledStars ? pdp.starFilled : pdp.starEmpty}>
                 <StarIcon size={20} />
               </span>
             ))}
           </div>
-          <span className={pdp.ratingValue}>{LAL_RATING}</span>
+          <span className={pdp.ratingValue}>{productRating}</span>
           <a
             href="#reviews"
             className={pdp.ratingCount}
             onClick={e => { e.preventDefault(); document.getElementById('reviews')?.scrollIntoView({ behavior: 'smooth', block: 'start' }) }}
-          >{LAL_REVIEW_COUNT} Reviews</a>
+          >{productReviewCount} Reviews</a>
         </div>
 
         {/* Unlimited Revisions info card — above the header divider */}

@@ -34,6 +34,7 @@ import {
 } from '../_config/products'
 import type { MaterialSwatch } from '../_config/products'
 import { getBrandProducts } from '../../../data/products/getBrandProducts'
+import { getReviewSummary } from '../../../data/products/reviewSummary'
 import type { ProductItem } from '../../../data/products'
 import { LalCanvasCustomizer } from './LalCanvasCustomizer'
 import { MusicMemoriesCustomizer } from './MusicMemoriesCustomizer'
@@ -151,15 +152,6 @@ const RP = {
 }
 
 const REVIEWS_DATA = {
-  rating: 4.8,
-  total: 65,
-  breakdown: [
-    { label: '5 Stars', value: '5', count: 246, pct: 75, reviewCount: 34 },
-    { label: '4 Stars', value: '4', count: 128, pct: 40, reviewCount: 17 },
-    { label: '3 Stars', value: '3', count: 65,  pct: 20, reviewCount:  9 },
-    { label: '2 Stars', value: '2', count: 37,  pct: 12, reviewCount:  5 },
-    { label: '1 Star',  value: '1', count: 2,   pct: 1,  reviewCount:  1 },
-  ],
   items: [
     { initials: 'A', name: 'Alexandra S.',  location: 'Texas, United States',      dateLabel: 'May 2025', dateMs: 1746057600000, rating: 5, body: 'Absolutely stunning — the quality exceeded my expectations. Arrived beautifully packaged and looks exactly as pictured.' },
     { initials: 'M', name: 'Maria T.',      location: 'London, United Kingdom',    dateLabel: 'Apr 2025', dateMs: 1743379200000, rating: 4, body: 'Really happy with this purchase. The craftsmanship is excellent and it feels very premium. Would definitely order again.' },
@@ -197,6 +189,8 @@ function ReviewsSection({
   CameraIcon,
   ArrowIcon,
   productId,
+  productRating,
+  productReviewCount,
 }: {
   ChevronIcon: React.ComponentType<{ size?: number }>
   StarIcon: React.ComponentType<{ size?: number }>
@@ -205,6 +199,8 @@ function ReviewsSection({
   CameraIcon: React.ComponentType<{ size?: number }>
   ArrowIcon: React.ComponentType<{ size?: number }>
   productId: number
+  productRating: number
+  productReviewCount: number
 }) {
   const [ratingOpen, setRatingOpen] = useState(false)
   const [sortOpen, setSortOpen]     = useState(false)
@@ -215,6 +211,14 @@ function ReviewsSection({
   // "With photos" filter, and the open photo in the site-wide photo list.
   const [photosOnly, setPhotosOnly]           = useState(false)
   const [lightboxIndex, setLightboxIndex]     = useState<number | null>(null)
+  // 'grid' opens the lightbox as a gallery of every photo ("View All").
+  const [lightboxMode, setLightboxMode]       = useState<'single' | 'grid'>('single')
+  // True while the open photo was reached through the "View All" grid, so the
+  // lightbox can offer a way back to it.
+  const [cameFromGrid, setCameFromGrid]       = useState(false)
+
+  // Score, total and bar breakdown all derive from the product's own numbers.
+  const summary = getReviewSummary(productRating, productReviewCount)
 
   const sortLabel = SORT_OPTIONS_REVIEWS.find(o => o.value === selectedSort)?.label ?? 'Newest Rating'
 
@@ -229,10 +233,10 @@ function ReviewsSection({
   const closeAll = () => { setRatingOpen(false); setSortOpen(false) }
 
   const visibleCount = selectedRatings.size === 0
-    ? REVIEWS_DATA.total
-    : REVIEWS_DATA.breakdown
+    ? summary.total
+    : summary.breakdown
         .filter(b => selectedRatings.has(b.value))
-        .reduce((sum, b) => sum + b.reviewCount, 0)
+        .reduce((sum, b) => sum + b.count, 0)
 
   // Some products keep only the first few photos; the rest show the full set.
   let photoBudget = FEW_PHOTO_PRODUCT_IDS.has(productId) ? FEW_PHOTO_LIMIT : Infinity
@@ -299,23 +303,23 @@ function ReviewsSection({
         {/* Score block */}
         <div className={styles.reviewsScoreBlock}>
           <h2 className={styles.reviewsTitle}>Reviews</h2>
-          <p className={styles.reviewsScore}>{REVIEWS_DATA.rating}</p>
-          <div className={styles.reviewsStars} aria-label={`${REVIEWS_DATA.rating} out of 5 stars`}>
+          <p className={styles.reviewsScore}>{summary.rating}</p>
+          <div className={styles.reviewsStars} aria-label={`${summary.rating} out of 5 stars`}>
             {[1,2,3,4,5].map(i => (
               <span
                 key={i}
-                className={i <= Math.round(REVIEWS_DATA.rating) ? styles.starFilled : styles.starEmpty}
+                className={i <= Math.round(summary.rating) ? styles.starFilled : styles.starEmpty}
               >
                 <StarIcon size={32} />
               </span>
             ))}
           </div>
-          <p className={styles.reviewsBasedOn}>Based on {REVIEWS_DATA.total} global reviews</p>
+          <p className={styles.reviewsBasedOn}>Based on {summary.total} global reviews</p>
         </div>
 
         {/* Bar breakdown — clicking a row applies that rating filter */}
         <div className={styles.reviewsBars} aria-label="Rating breakdown">
-          {REVIEWS_DATA.breakdown.map(row => (
+          {summary.breakdown.map(row => (
             <button
               key={row.label}
               type="button"
@@ -472,7 +476,16 @@ function ReviewsSection({
       {/* Customer photos strip — every photo across all reviews */}
       {allPhotos.length > 0 && (
         <div className={styles.reviewsPhotoStrip}>
-          <h3 className={styles.reviewsPhotoStripTitle}>Customer reviews with photos</h3>
+          <div className={styles.reviewsPhotoStripHead}>
+            <h3 className={styles.reviewsPhotoStripTitle}>Customer reviews with photos</h3>
+            <button
+              type="button"
+              className={styles.reviewsPhotoViewAll}
+              onClick={() => { setLightboxMode('grid'); setCameFromGrid(true); setLightboxIndex(0) }}
+            >
+              View All
+            </button>
+          </div>
           <ul className={styles.reviewsPhotoTrack}>
             {allPhotos.map((photo, i) => (
               <li key={`${photo.src}-${i}`} className={styles.reviewsPhotoItem}>
@@ -480,7 +493,7 @@ function ReviewsSection({
                   type="button"
                   className={styles.reviewsPhotoBtn}
                   aria-label={`Open photo from ${photo.name}'s review`}
-                  onClick={() => setLightboxIndex(i)}
+                  onClick={() => { setLightboxMode('single'); setCameFromGrid(false); setLightboxIndex(i) }}
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
@@ -543,7 +556,7 @@ function ReviewsSection({
                         type="button"
                         className={styles.reviewCardThumb}
                         aria-label={`Open photo ${i + 1} from ${review.name}'s review`}
-                        onClick={() => setLightboxIndex(start + i)}
+                        onClick={() => { setLightboxMode('single'); setCameFromGrid(false); setLightboxIndex(start + i) }}
                       >
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
@@ -561,7 +574,7 @@ function ReviewsSection({
                         type="button"
                         className={styles.reviewCardThumbMore}
                         aria-label={`Open all ${photos.length} photos from ${review.name}'s review`}
-                        onClick={() => setLightboxIndex(start + shown.length)}
+                        onClick={() => { setLightboxMode('single'); setCameFromGrid(false); setLightboxIndex(start + shown.length) }}
                       >
                         +{extra}
                       </button>
@@ -591,7 +604,10 @@ function ReviewsSection({
         photos={allPhotos}
         index={lightboxIndex}
         onIndexChange={setLightboxIndex}
-        onClose={() => setLightboxIndex(null)}
+        onClose={() => { setLightboxIndex(null); setCameFromGrid(false) }}
+        mode={lightboxMode}
+        onSelectPhoto={(i) => { setLightboxMode('single'); setLightboxIndex(i) }}
+        onBack={cameFromGrid && lightboxMode === 'single' ? () => setLightboxMode('grid') : undefined}
         StarIcon={StarIcon}
         ArrowIcon={ArrowIcon}
         XIcon={XIcon}
@@ -1142,6 +1158,8 @@ function ProductDetailPageInner({ productId, previewId }: { productId: number; p
           CameraIcon={icons.CameraIcon}
           ArrowIcon={icons.ArrowIcon}
           productId={product.id}
+          productRating={product.rating ?? 0}
+          productReviewCount={product.reviewCount ?? 0}
         />
       </main>
 

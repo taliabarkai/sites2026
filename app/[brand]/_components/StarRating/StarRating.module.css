@@ -21,7 +21,7 @@
 
 .starEmpty {
   display: block;
-  color: var(--border-color);
+  color: var(--colors-text-secondary);
 }
 
 .starFilled {
@@ -41,20 +41,9 @@
   height: 16px;
 }
 
-/* LAL: black-filled stars; empty stars are a black outline only. */
+/* LAL fills in black; the empty grey above is shared with every brand. */
 [data-theme="lal"] .starFilled {
   color: var(--colors-text);
-}
-
-[data-theme="lal"] .starEmpty {
-  color: transparent;
-}
-
-[data-theme="lal"] .starFilled svg path,
-[data-theme="lal"] .starEmpty svg path {
-  stroke: var(--colors-text);
-  stroke-width: 1.5px;
-  paint-order: stroke;
 }
 
 .ratingCount {

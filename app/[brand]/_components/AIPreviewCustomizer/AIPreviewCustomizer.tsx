@@ -97,8 +97,6 @@ const FLOAT_DOTS: CSSProperties[] = [
   { left: '72%', width: '12px', height: '12px', animationDelay: '-3.0s', animationDuration: '4.9s' },
 ]
 
-const LAL_RATING = 4.7
-const LAL_REVIEW_COUNT = 256
 
 function formatPrice(cents: number): string {
   return `$${(cents / 100).toFixed(0)}`
@@ -202,6 +200,11 @@ async function composeFramedThumb(frameSrc: string, artSrc: string, line1: strin
 
 // ─── Component ─────────────────────────────────────────────────────────────────
 export function AIPreviewCustomizer({ brand, product, icons, nestedItems = [], addItem, openCart }: AIPreviewCustomizerProps) {
+  // Rating shown beside the price — same numbers the category card and the
+  // PDP reviews section read from the product registry.
+  const productRating = product.rating ?? 0
+  const productReviewCount = product.reviewCount ?? 0
+
   const { ChevronIcon, StarIcon, FileUploadIcon, XIcon } = icons
   const RevisionsGlyph = icons.RevisionsIcon ?? icons.ClipboardCopyIcon
 
@@ -364,8 +367,8 @@ export function AIPreviewCustomizer({ brand, product, icons, nestedItems = [], a
       price: currentPrice,
       image,
       isPersonalized: l1.length > 0 || l2.length > 0,
-      rating: LAL_RATING,
-      reviewCount: LAL_REVIEW_COUNT,
+      rating: productRating,
+      reviewCount: productReviewCount,
       selectedOptions,
       canvasConfig: photoUrl
         ? { productId: product.id, photo: photoUrl, photoName, frameKey: frameColor, sizeKey, persOn: l1.length > 0 || l2.length > 0, line1: l1, line2: l2 }
@@ -378,7 +381,7 @@ export function AIPreviewCustomizer({ brand, product, icons, nestedItems = [], a
     openCart(true)
   }
 
-  const filledStars = Math.round(LAL_RATING)
+  const filledStars = Math.round(productRating)
 
   // Generating heading (rotates with progress); the bar animates continuously in CSS.
   const genHeading = (GEN_HEADINGS.find(h => progress < h.until) ?? GEN_HEADINGS[GEN_HEADINGS.length - 1]).text
@@ -674,15 +677,15 @@ export function AIPreviewCustomizer({ brand, product, icons, nestedItems = [], a
           </div>
         </div>
         <div className={pdp.ratingRow}>
-          <div className={pdp.stars} aria-label={`${LAL_RATING} out of 5 stars`}>
+          <div className={pdp.stars} aria-label={`${productRating} out of 5 stars`}>
             {[1, 2, 3, 4, 5].map(i => (
               <span key={i} className={i <= filledStars ? pdp.starFilled : pdp.starEmpty}><StarIcon size={20} /></span>
             ))}
           </div>
-          <span className={pdp.ratingValue}>{LAL_RATING}</span>
+          <span className={pdp.ratingValue}>{productRating}</span>
           <a href="#reviews" className={pdp.ratingCount}
             onClick={e => { e.preventDefault(); document.getElementById('reviews')?.scrollIntoView({ behavior: 'smooth', block: 'start' }) }}
-          >{LAL_REVIEW_COUNT} Reviews</a>
+          >{productReviewCount} Reviews</a>
         </div>
 
         {/* Shared Unlimited Revisions info card (same component as Watercolor Dream) */}

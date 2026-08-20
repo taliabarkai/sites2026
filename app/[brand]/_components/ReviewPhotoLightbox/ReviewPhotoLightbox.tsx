@@ -30,6 +30,18 @@ export interface ReviewPhotoLightboxProps {
   index: number | null
   onIndexChange: (index: number) => void
   onClose: () => void
+  /**
+   * 'single' shows one photo beside its review; 'grid' shows every photo as a
+   * gallery (opened from the strip's "View All"). Picking one switches to
+   * 'single' via onSelectPhoto.
+   */
+  mode?: 'single' | 'grid'
+  onSelectPhoto?: (index: number) => void
+  /**
+   * Provided only when this photo was opened from the "View All" grid — renders
+   * a Back control in the header that returns to it.
+   */
+  onBack?: () => void
   StarIcon: ComponentType<{ size?: number }>
   ArrowIcon: ComponentType<{ size?: number }>
   XIcon: ComponentType<{ size?: number }>
@@ -41,6 +53,9 @@ export function ReviewPhotoLightbox({
   index,
   onIndexChange,
   onClose,
+  mode = 'single',
+  onSelectPhoto,
+  onBack,
   StarIcon,
   ArrowIcon,
   XIcon,
@@ -134,7 +149,9 @@ export function ReviewPhotoLightbox({
   const photo = photos[index]
   const activeInReview = index - photo.reviewStart
   const showReviewThumbs = photo.reviewPhotos.length > 1
-  const counter = `${index + 1} of ${photos.length}`
+  const isGrid = mode === 'grid'
+  // Grid mode counts the whole gallery; single mode says where you are in it.
+  const counter = isGrid ? `${photos.length}` : `${index + 1} of ${photos.length}`
   const alt = `Photo from ${photo.name}'s review`
 
   return (
@@ -151,15 +168,53 @@ export function ReviewPhotoLightbox({
             aria-modal="true"
             aria-label={`Customer reviews with photos, ${counter}`}
           >
+            {/* Back (only from the grid) left, title centred, close right */}
             <div className={styles.header}>
+              {onBack ? (
+                <button
+                  type="button"
+                  className={styles.back}
+                  aria-label="Back to all photos"
+                  onClick={onBack}
+                >
+                  <span className={styles.backIcon} aria-hidden="true"><ArrowIcon size={24} /></span>
+                </button>
+              ) : (
+                <span aria-hidden="true" />
+              )}
+
               <p className={styles.headerTitle}>
                 Customer reviews with photos <span className={styles.headerCount}>({counter})</span>
               </p>
+
               <button ref={closeRef} type="button" className={styles.close} aria-label="Close" onClick={onClose}>
                 <XIcon size={24} />
               </button>
             </div>
 
+            {isGrid ? (
+              /* "View All" — every photo as a gallery; picking one opens it */
+              <ul className={styles.grid}>
+                {photos.map((item, i) => (
+                  <li key={`${item.src}-${i}`}>
+                    <button
+                      type="button"
+                      className={styles.gridItem}
+                      aria-label={`Open photo from ${item.name}'s review`}
+                      onClick={() => onSelectPhoto?.(i)}
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={item.src}
+                        alt={`Photo from ${item.name}'s review`}
+                        className={styles.gridImg}
+                        loading="lazy"
+                      />
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            ) : (
             <div className={styles.body}>
               {/* On mobile the arrows flank the photo in this row; on desktop
                   they become circles on the backdrop outside the modal. */}
@@ -235,6 +290,7 @@ export function ReviewPhotoLightbox({
                 )}
               </div>
             </div>
+            )}
           </div>
         </div>,
         portalTarget,
