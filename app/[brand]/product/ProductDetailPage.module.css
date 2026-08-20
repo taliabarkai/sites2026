@@ -1266,3 +1266,182 @@
   letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
   color: var(--colors-text);
 }
+
+/* ── Reviews: photos flow ─────────────────────────────────────────────────── */
+
+/* Left group wraps so the mobile Sort chip can drop to its own row */
+.reviewsFilterLeft {
+  flex-wrap: wrap;
+}
+
+/* Mobile: Filter by Ratings + With photos share row one, Sort takes row two */
+@media (max-width: 767px) {
+  .reviewsSortMobile {
+    flex-basis: 100%;
+  }
+}
+
+/* Active state for the photos pill */
+.reviewsFilterChipActive {
+  border-color: var(--colors-text);
+  background: var(--colors-text);
+  color: var(--colors-text-inverse);
+}
+
+.reviewsChipIcon {
+  display: inline-flex;
+  align-items: center;
+}
+
+/* Photo strip above the review list */
+.reviewsPhotoStrip {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  margin-bottom: var(--spacing-lg);
+}
+
+.reviewsPhotoStripTitle {
+  margin: 0;
+  color: var(--colors-text);
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  font-weight:    var(--typography-rules-text1-font-weight, normal);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+}
+
+.reviewsPhotoTrack {
+  display: flex;
+  gap: var(--spacing-xxs);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+}
+
+.reviewsPhotoTrack::-webkit-scrollbar {
+  display: none;
+}
+
+.reviewsPhotoItem {
+  flex: 0 0 auto;
+}
+
+/* Landscape thumbnails, rounded */
+.reviewsPhotoBtn {
+  display: block;
+  width: 96px;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: none;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+@media (min-width: 768px) {
+  .reviewsPhotoBtn {
+    width: 128px;
+  }
+}
+
+.reviewsPhotoImg {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  object-position: center;
+  background-color: var(--colors-card-image-bg);
+  border-radius: var(--radius-sm);
+  transition: opacity var(--transition-fast);
+}
+
+.reviewsPhotoBtn:hover .reviewsPhotoImg {
+  opacity: 0.85;
+}
+
+/* Per-review thumbnails under the review text */
+ /* Mobile: photos stack under the review text. Desktop puts them in a column
+   on the right (see the min-width rule below). */
+.reviewCardBodyRow {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--spacing-sm);
+}
+
+@media (min-width: 768px) {
+  .reviewCardBodyRow {
+    flex-direction: row;
+  }
+}
+
+.reviewCardBodyRow .reviewCardBody {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.reviewCardThumbs {
+  display: flex;
+  flex-wrap: nowrap;
+  flex-shrink: 0;
+  gap: var(--spacing-xxs);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.reviewCardThumb {
+  display: block;
+  width: 72px;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: none;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.reviewCardThumbImg {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  object-position: center;
+  background-color: var(--colors-card-image-bg);
+  border-radius: var(--radius-sm);
+}
+
+/* "+N" tile — a plain bordered tile, not an overlay on a photo */
+.reviewCardThumbMore {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 72px;
+  aspect-ratio: 1 / 1;
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--radius-sm);
+  background: var(--colors-background);
+  color: var(--colors-text);
+  cursor: pointer;
+  font-family:    var(--typography-rules-text2-font-family);
+  font-size:      var(--typography-rules-text2-font-size);
+  line-height:    var(--typography-rules-text2-line-height);
+  font-weight:    var(--typography-rules-text2-font-weight, normal);
+  transition: border-color var(--transition-fast);
+}
+
+.reviewCardThumbMore:hover {
+  border-color: var(--colors-text);
+}
+
+/* Visible focus for every photo affordance */
+.reviewsPhotoBtn:focus-visible,
+.reviewCardThumb:focus-visible,
+.reviewCardThumbMore:focus-visible {
+  outline: 2px solid var(--colors-text);
+  outline-offset: 2px;
+}

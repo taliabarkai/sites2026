@@ -1,0 +1,359 @@
+/* ── Root ─────────────────────────────────────────────────────────────────── */
+.root {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-modal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Mobile: plain white, no dim behind it */
+.backdrop {
+  position: absolute;
+  inset: 0;
+  background: var(--colors-background);
+}
+
+.dialog {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  background: var(--colors-background);
+}
+
+/* ── Header ───────────────────────────────────────────────────────────────── */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm);
+  flex-shrink: 0;
+}
+
+.headerTitle {
+  margin: 0;
+  color: var(--colors-text);
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  font-weight:    var(--typography-rules-text1-font-weight, normal);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+}
+
+/* Same scale as the title, in the muted text colour */
+.headerCount {
+  color: var(--colors-text-secondary);
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  font-weight:    var(--typography-rules-text1-font-weight, normal);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+}
+
+.close {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--spacing-md);
+  height: var(--spacing-md);
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--colors-text);
+  cursor: pointer;
+}
+
+/* ── Body: photo above info on mobile ─────────────────────────────────────── */
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  padding: 0 var(--spacing-sm) var(--spacing-lg);
+}
+
+/* Mobile: arrow, photo, arrow on one row — the photo narrows to fit between */
+.photoPane {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xxs);
+  width: 100%;
+}
+
+/* 4:5 portrait crop */
+.photo {
+  display: block;
+  flex: 1 1 auto;
+  min-width: 0;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  object-position: center;
+  background-color: var(--colors-card-image-bg);
+  border-radius: var(--radius-sm);
+}
+
+/* ── Prev / next — beside the photo on mobile ─────────────────────────────── */
+.nav {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--spacing-lg);
+  height: var(--spacing-lg);
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--colors-text);
+  cursor: pointer;
+}
+
+/* The icon points right by default; flip it for "previous" */
+.navIconPrev {
+  display: flex;
+  transform: rotate(180deg);
+}
+
+/* ── Info ─────────────────────────────────────────────────────────────────── */
+.infoPane {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.reviewer {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+/* Same avatar + verified badge as the PDP review cards */
+.avatarWrap {
+  position: relative;
+  flex-shrink: 0;
+  display: block;
+  width: 40px;
+  height: 40px;
+}
+
+.avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: var(--border-width) solid var(--colors-text);
+  border-radius: var(--radius-full);
+  background: var(--colors-background);
+  color: var(--colors-text);
+  font-family:    var(--typography-rules-text2-font-family);
+  font-size:      var(--typography-rules-text2-font-size);
+  font-weight:    var(--typography-rules-text2-font-weight);
+}
+
+.avatarBadge {
+  position: absolute;
+  right: -2px;
+  bottom: -2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: var(--radius-full);
+  background: var(--colors-text);
+  border: 2px solid var(--colors-background);
+  color: var(--colors-text-inverse);
+  line-height: 1;
+}
+
+.avatarBadge svg {
+  display: block;
+}
+
+.reviewerText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.reviewerName {
+  color: var(--colors-text);
+  font-family:    var(--typography-rules-text2-font-family);
+  font-size:      var(--typography-rules-text2-font-size);
+  line-height:    var(--typography-rules-text2-line-height);
+  font-weight:    var(--typography-rules-text2-font-weight, normal);
+  letter-spacing: var(--typography-rules-text2-letter-spacing, normal);
+}
+
+.reviewerMeta {
+  color: var(--colors-text-secondary);
+  font-family:    var(--typography-rules-text3-font-family);
+  font-size:      var(--typography-rules-text3-font-size);
+  line-height:    var(--typography-rules-text3-line-height);
+  letter-spacing: var(--typography-rules-text3-letter-spacing, normal);
+}
+
+.stars {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.starFilled { color: var(--colors-star-filled, var(--colors-text)); }
+.starEmpty  { color: var(--border-color); }
+
+.reviewText {
+  margin: 0;
+  color: var(--colors-text);
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  font-weight:    var(--typography-rules-text1-font-weight, normal);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+}
+
+/* ── This review's own photos ─────────────────────────────────────────────── */
+/* Mobile: pulled to the top of the info column so they sit right under the
+   photo. Desktop puts them back below the review text. */
+.reviewThumbs {
+  order: -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xxs);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.reviewThumb {
+  display: block;
+  width: 64px;
+  height: 64px;
+  padding: 2px;
+  border: var(--border-width) solid transparent;
+  border-radius: var(--radius-sm);
+  background: none;
+  cursor: pointer;
+}
+
+.reviewThumbActive {
+  border-color: var(--colors-text);
+}
+
+.reviewThumbImg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: var(--radius-sm);
+  object-fit: cover;
+  object-position: center;
+  background-color: var(--colors-card-image-bg);
+}
+
+/* ── Desktop: centred modal on a dimmed backdrop ──────────────────────────── */
+@media (min-width: 768px) {
+  /* Black 40% dim, matching the other modal overlays in the project */
+  .backdrop {
+    background: rgba(0, 0, 0, 0.4);
+  }
+
+  /* Shared by the dialog and the nav buttons, so the arrows can sit a fixed
+     24px outside the modal instead of at the viewport edge. */
+  .root {
+    --lightbox-width: min(1040px, calc(100vw - 2 * var(--spacing-xxxl)));
+    --lightbox-nav-size: var(--spacing-xl);
+  }
+
+  .dialog {
+    width: var(--lightbox-width);
+    height: auto;
+    max-height: calc(100vh - 2 * var(--spacing-xl));
+    overflow: hidden;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-md);
+  }
+
+  .header {
+    padding: var(--spacing-sm) var(--spacing-md);
+  }
+
+  /* Photo left, info right, inset 24px from the modal edges */
+  .body {
+    flex-direction: row;
+    gap: 0;
+    padding: 0 var(--spacing-md) var(--spacing-md);
+    min-height: 0;
+  }
+
+  /* The pane owns the 4:5 box, so the modal hugs the photo and the body's
+     bottom padding stays visible. align-self keeps flex stretch from
+     overriding that height when the info column is shorter. */
+  .photoPane {
+    display: block;
+    flex: 1 1 50%;
+    align-self: start;
+    aspect-ratio: 4 / 5;
+    max-height: calc(100vh - 2 * var(--spacing-xl) - var(--spacing-xxl));
+  }
+
+  /* Fills the pane exactly — the pane, not the image, sets the height */
+  .photo {
+    width: 100%;
+    height: 100%;
+    aspect-ratio: auto;
+    border-radius: 0;
+  }
+
+  .reviewThumbs {
+    order: 0;
+  }
+
+  /* Info panel carries the brand surface tint, matched to the photo height */
+  .infoPane {
+    flex: 1 1 50%;
+    align-self: stretch;
+    justify-content: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-xl);
+    overflow-y: auto;
+    background: var(--colors-surface-primary);
+  }
+
+  /* Nav buttons become circles on the backdrop, 24px clear of the modal */
+  .nav {
+    position: fixed;
+    top: 50%;
+    transform: translateY(-50%);
+    width: var(--lightbox-nav-size);
+    height: var(--lightbox-nav-size);
+    border-radius: 50%;
+    background: var(--colors-background);
+    box-shadow: var(--shadow-sm);
+    transition: opacity var(--transition-fast);
+  }
+
+  .nav:hover { opacity: 0.85; }
+
+  .navPrev {
+    left: calc(50vw - var(--lightbox-width) / 2 - var(--spacing-md) - var(--lightbox-nav-size));
+  }
+
+  .navNext {
+    left: calc(50vw + var(--lightbox-width) / 2 + var(--spacing-md));
+    right: auto;
+  }
+}
+
+/* ── Focus states ─────────────────────────────────────────────────────────── */
+.close:focus-visible,
+.nav:focus-visible,
+.reviewThumb:focus-visible {
+  outline: 2px solid var(--colors-text);
+  outline-offset: 2px;
+}

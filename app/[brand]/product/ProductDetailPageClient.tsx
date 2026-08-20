@@ -20,6 +20,8 @@ import { QuickAddPanel } from '../_components/QuickAddPanel'
 import type { QuickAddProduct } from '../_components/QuickAddPanel'
 import { NestedItems, nestedItemKey } from '../_components/NestedItems'
 import { ProductImageCarousel } from '../_components/ProductImageCarousel'
+import { ReviewPhotoLightbox } from '../_components/ReviewPhotoLightbox'
+import type { ReviewPhoto } from '../_components/ReviewPhotoLightbox'
 import { getBrandFromPathname } from '../_config/brands'
 import { prefixFooterColumns, prefixNavLinks, withBrandPrefix } from '../_config/brandPaths'
 import { DEFAULT_FOOTER_COLUMNS, DEFAULT_NAV_LINKS, DEFAULT_TOPLINE } from '../_config/siteContent'
@@ -121,6 +123,33 @@ function ProductCarousel({
 
 // ─── Reviews section ──────────────────────────────────────────────────────────
 
+/** Review cards shown at a time — Load More reveals another page of them. */
+const REVIEWS_PAGE_SIZE = 4
+
+/**
+ * Products whose reviews carry only a handful of photos, so the sparse version
+ * of the photo strip can be seen alongside the busy one. Everything else shows
+ * the full set.
+ */
+const FEW_PHOTO_PRODUCT_IDS = new Set([2, 4, 6])
+const FEW_PHOTO_LIMIT = 4
+
+/** Sample customer photos — reused across the demo reviews below. */
+const RP = {
+  couple:    'https://cdn.limeandlou.com/digital-asset/category-banners/FOR_FAMILY.png',
+  pet:       'https://cdn.limeandlou.com/digital-asset/category-banners/FOR_PET.png',
+  portrait:  'https://cdn.theograce.com/digital-asset/banners/2506_Charmed_Collection_Landing_Page_IMG03.jpg',
+  necklace:  'https://cdn.theograce.com/digital-asset/banners/02-%20Necklaces.jpg',
+  bracelet:  'https://cdn.theograce.com/digital-asset/banners/03-%20Bracelets.jpg',
+  rings:     'https://cdn.theograce.com/digital-asset/banners/04-%20Rings%20and%20Earrings.jpg',
+  seaside:   'https://cdn.theograce.com/digital-asset/banners/category_promo1_saltwater.jpg',
+  earrings:  'https://cdn.oakandluna.com/digital-asset/banners/oal-carousel_earrings_july26.jpg',
+  layered:   'https://cdn.oakandluna.com/digital-asset/banners/oal-carousel_necklace_july26.jpg',
+  bag:       'https://cdn.oakandluna.com/digital-asset/banners/oal-carousel_bags_july26.jpg',
+  stack:     'https://cdn.oakandluna.com/digital-asset/banners/oal-carousel_bracelet_july26.jpg',
+  summer:    'https://cdn.oakandluna.com/digital-asset/banners/Summer-shop-gradient.jpg',
+}
+
 const REVIEWS_DATA = {
   rating: 4.8,
   total: 65,
@@ -135,13 +164,13 @@ const REVIEWS_DATA = {
     { initials: 'A', name: 'Alexandra S.',  location: 'Texas, United States',      dateLabel: 'May 2025', dateMs: 1746057600000, rating: 5, body: 'Absolutely stunning — the quality exceeded my expectations. Arrived beautifully packaged and looks exactly as pictured.' },
     { initials: 'M', name: 'Maria T.',      location: 'London, United Kingdom',    dateLabel: 'Apr 2025', dateMs: 1743379200000, rating: 4, body: 'Really happy with this purchase. The craftsmanship is excellent and it feels very premium. Would definitely order again.' },
     { initials: 'J', name: 'Jessica R.',    location: 'Sydney, Australia',         dateLabel: 'Mar 2025', dateMs: 1740787200000, rating: 5, body: 'Great gift for my sister — she loved the personal touch. Delivery was fast and the packaging was lovely.' },
-    { initials: 'S', name: 'Sofia K.',      location: 'Berlin, Germany',           dateLabel: 'Feb 2025', dateMs: 1738368000000, rating: 4, body: 'Beautiful piece. The engraving is crisp and the metal feels solid. Very pleased with the result.' },
-    { initials: 'L', name: 'Laura B.',      location: 'Paris, France',             dateLabel: 'Jan 2025', dateMs: 1735689600000, rating: 3, body: 'Nice product overall but shipping took longer than expected. The quality is good once it arrived.' },
-    { initials: 'R', name: 'Rachel M.',     location: 'New York, United States',   dateLabel: 'Dec 2024', dateMs: 1733011200000, rating: 5, body: 'Perfect in every way. The engraving looks gorgeous and the metal quality is excellent. Highly recommend.' },
-    { initials: 'D', name: 'Diana P.',      location: 'Toronto, Canada',           dateLabel: 'Nov 2024', dateMs: 1730419200000, rating: 2, body: 'The item itself is fine but the clasp feels a bit flimsy. Customer service was helpful though.' },
-    { initials: 'K', name: 'Karen W.',      location: 'Amsterdam, Netherlands',    dateLabel: 'Oct 2024', dateMs: 1727740800000, rating: 5, body: 'Incredibly well made. I have been wearing it every day and it still looks brand new. Amazing quality.' },
+    { initials: 'S', name: 'Sofia K.',      location: 'Berlin, Germany',           dateLabel: 'Feb 2025', dateMs: 1738368000000, rating: 4, body: 'Beautiful piece. The engraving is crisp and the metal feels solid. Very pleased with the result.' , photos: [RP.couple, RP.portrait, RP.necklace] },
+    { initials: 'L', name: 'Laura B.',      location: 'Paris, France',             dateLabel: 'Jan 2025', dateMs: 1735689600000, rating: 3, body: 'Nice product overall but shipping took longer than expected. The quality is good once it arrived.' , photos: [RP.pet] },
+    { initials: 'R', name: 'Rachel M.',     location: 'New York, United States',   dateLabel: 'Dec 2024', dateMs: 1733011200000, rating: 5, body: 'Perfect in every way. The engraving looks gorgeous and the metal quality is excellent. Highly recommend.' , photos: [RP.seaside, RP.summer] },
+    { initials: 'D', name: 'Diana P.',      location: 'Toronto, Canada',           dateLabel: 'Nov 2024', dateMs: 1730419200000, rating: 2, body: 'The item itself is fine but the clasp feels a bit flimsy. Customer service was helpful though.' , photos: [RP.rings, RP.earrings, RP.layered, RP.stack] },
+    { initials: 'K', name: 'Karen W.',      location: 'Amsterdam, Netherlands',    dateLabel: 'Oct 2024', dateMs: 1727740800000, rating: 5, body: 'Incredibly well made. I have been wearing it every day and it still looks brand new. Amazing quality.' , photos: [RP.bracelet] },
     { initials: 'N', name: 'Natalie F.',    location: 'Melbourne, Australia',      dateLabel: 'Sep 2024', dateMs: 1725148800000, rating: 1, body: 'Unfortunately the sizing was not right for me and the return process was quite difficult.' },
-    { initials: 'C', name: 'Claire H.',     location: 'Dublin, Ireland',           dateLabel: 'Aug 2024', dateMs: 1722470400000, rating: 4, body: 'Really elegant design. Bought as an anniversary gift and my partner absolutely loved it.' },
+    { initials: 'C', name: 'Claire H.',     location: 'Dublin, Ireland',           dateLabel: 'Aug 2024', dateMs: 1722470400000, rating: 4, body: 'Really elegant design. Bought as an anniversary gift and my partner absolutely loved it.' , photos: [RP.bag, RP.couple] },
   ],
 }
 
@@ -165,16 +194,27 @@ function ReviewsSection({
   StarIcon,
   XIcon,
   CheckmarkIcon,
+  CameraIcon,
+  ArrowIcon,
+  productId,
 }: {
   ChevronIcon: React.ComponentType<{ size?: number }>
   StarIcon: React.ComponentType<{ size?: number }>
   XIcon: React.ComponentType<{ size?: number }>
   CheckmarkIcon: React.ComponentType<{ size?: number }>
+  CameraIcon: React.ComponentType<{ size?: number }>
+  ArrowIcon: React.ComponentType<{ size?: number }>
+  productId: number
 }) {
   const [ratingOpen, setRatingOpen] = useState(false)
   const [sortOpen, setSortOpen]     = useState(false)
   const [selectedRatings, setSelectedRatings] = useState<Set<string>>(new Set())
   const [selectedSort, setSelectedSort]       = useState('newest')
+  // Four reviews on screen to start; Load More reveals another four.
+  const [shownReviews, setShownReviews]       = useState(REVIEWS_PAGE_SIZE)
+  // "With photos" filter, and the open photo in the site-wide photo list.
+  const [photosOnly, setPhotosOnly]           = useState(false)
+  const [lightboxIndex, setLightboxIndex]     = useState<number | null>(null)
 
   const sortLabel = SORT_OPTIONS_REVIEWS.find(o => o.value === selectedSort)?.label ?? 'Newest Rating'
 
@@ -194,7 +234,54 @@ function ReviewsSection({
         .filter(b => selectedRatings.has(b.value))
         .reduce((sum, b) => sum + b.reviewCount, 0)
 
-  const filteredReviews = REVIEWS_DATA.items
+  // Some products keep only the first few photos; the rest show the full set.
+  let photoBudget = FEW_PHOTO_PRODUCT_IDS.has(productId) ? FEW_PHOTO_LIMIT : Infinity
+  const reviewItems = REVIEWS_DATA.items.map(review => {
+    const photos = review.photos ?? []
+    if (photos.length === 0 || photoBudget <= 0) return { ...review, photos: undefined }
+    const kept = photos.slice(0, photoBudget)
+    photoBudget -= kept.length
+    return { ...review, photos: kept }
+  })
+
+  // Every photo across every review, ordered by review, so the lightbox arrows
+  // walk one review's photos before moving to the next.
+  const allPhotos: ReviewPhoto[] = []
+  reviewItems.forEach(review => {
+    const photos = review.photos ?? []
+    const reviewStart = allPhotos.length
+    photos.forEach(src => {
+      allPhotos.push({
+        src,
+        reviewStart,
+        reviewPhotos: photos,
+        initials: review.initials,
+        name: review.name,
+        location: review.location,
+        dateLabel: review.dateLabel,
+        rating: review.rating,
+        body: review.body,
+      })
+    })
+  })
+
+  // Where each review's photos start, so a review's thumbnails can open the
+  // lightbox at the right point in the global list.
+  const photoStartByName = new Map<string, number>()
+  allPhotos.forEach(photo => {
+    if (!photoStartByName.has(photo.name)) photoStartByName.set(photo.name, photo.reviewStart)
+  })
+
+  const reviewsWithPhotos = reviewItems.filter(r => (r.photos?.length ?? 0) > 0).length
+
+  const togglePhotosOnly = () => {
+    setPhotosOnly(value => !value)
+    setShownReviews(REVIEWS_PAGE_SIZE)
+    closeAll()
+  }
+
+  const filteredReviews = reviewItems
+    .filter(r => !photosOnly || (r.photos?.length ?? 0) > 0)
     .filter(r => selectedRatings.size === 0 || selectedRatings.has(String(r.rating)))
     .sort((a, b) => {
       if (selectedSort === 'oldest')  return a.dateMs - b.dateMs
@@ -202,6 +289,8 @@ function ReviewsSection({
       if (selectedSort === 'lowest')  return a.rating - b.rating
       return b.dateMs - a.dateMs // newest (default)
     })
+
+  const visibleReviews = filteredReviews.slice(0, shownReviews)
 
   return (
     <section id="reviews" className={styles.reviews} aria-label="Customer reviews">
@@ -279,6 +368,19 @@ function ReviewsSection({
               </div>
             )}
           </div>
+
+          {/* Photos filter — sits next to the ratings chip on both breakpoints */}
+          {reviewsWithPhotos > 0 && (
+            <button
+              type="button"
+              className={`${styles.reviewsFilterChip} ${photosOnly ? styles.reviewsFilterChipActive : ''}`}
+              aria-pressed={photosOnly}
+              onClick={togglePhotosOnly}
+            >
+              <span className={styles.reviewsChipIcon} aria-hidden="true"><CameraIcon size={20} /></span>
+              With photos ({reviewsWithPhotos})
+            </button>
+          )}
 
           {/* Active chips — inline on desktop, hidden on mobile */}
           {selectedRatings.size > 0 && (
@@ -367,9 +469,36 @@ function ReviewsSection({
       )}
       </div>
 
+      {/* Customer photos strip — every photo across all reviews */}
+      {allPhotos.length > 0 && (
+        <div className={styles.reviewsPhotoStrip}>
+          <h3 className={styles.reviewsPhotoStripTitle}>Customer reviews with photos</h3>
+          <ul className={styles.reviewsPhotoTrack}>
+            {allPhotos.map((photo, i) => (
+              <li key={`${photo.src}-${i}`} className={styles.reviewsPhotoItem}>
+                <button
+                  type="button"
+                  className={styles.reviewsPhotoBtn}
+                  aria-label={`Open photo from ${photo.name}'s review`}
+                  onClick={() => setLightboxIndex(i)}
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={photo.src}
+                    alt={`Photo from ${photo.name}'s review`}
+                    className={styles.reviewsPhotoImg}
+                    loading="lazy"
+                  />
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
       {/* Review cards */}
       <div className={styles.reviewsGrid}>
-        {filteredReviews.map((review, i) => (
+        {visibleReviews.map((review, i) => (
           <article key={i} className={styles.reviewCard}>
             <div className={styles.reviewCardHeader}>
               <div className={styles.reviewCardMeta}>
@@ -396,17 +525,78 @@ function ReviewsSection({
               ))}
             </div>
 
+            <div className={styles.reviewCardBodyRow}>
             <p className={styles.reviewCardBody}>{review.body}</p>
+
+            {/* Photos sit in a right-hand column: two thumbs, then a bordered
+                "+N" tile standing in for the rest. */}
+            {(review.photos?.length ?? 0) > 0 && (() => {
+              const photos = review.photos ?? []
+              const start = photoStartByName.get(review.name) ?? 0
+              const shown = photos.slice(0, 2)
+              const extra = photos.length - shown.length
+              return (
+                <ul className={styles.reviewCardThumbs}>
+                  {shown.map((src, i) => (
+                    <li key={`${src}-${i}`}>
+                      <button
+                        type="button"
+                        className={styles.reviewCardThumb}
+                        aria-label={`Open photo ${i + 1} from ${review.name}'s review`}
+                        onClick={() => setLightboxIndex(start + i)}
+                      >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={src}
+                          alt={`Photo from ${review.name}'s review`}
+                          className={styles.reviewCardThumbImg}
+                          loading="lazy"
+                        />
+                      </button>
+                    </li>
+                  ))}
+                  {extra > 0 && (
+                    <li>
+                      <button
+                        type="button"
+                        className={styles.reviewCardThumbMore}
+                        aria-label={`Open all ${photos.length} photos from ${review.name}'s review`}
+                        onClick={() => setLightboxIndex(start + shown.length)}
+                      >
+                        +{extra}
+                      </button>
+                    </li>
+                  )}
+                </ul>
+              )
+            })()}
+            </div>
           </article>
         ))}
       </div>
 
-      {/* Load more — hidden when filtered results fit on one page */}
-      {filteredReviews.length >= 10 && (
+      {/* Load more — hidden once every filtered review is on screen */}
+      {filteredReviews.length > shownReviews && (
         <div className={styles.reviewsLoadMore}>
-          <Button variant="secondary">Load More Reviews</Button>
+          <Button
+            variant="secondary"
+            onClick={() => setShownReviews(count => count + REVIEWS_PAGE_SIZE)}
+          >
+            Load More Reviews
+          </Button>
         </div>
       )}
+
+      <ReviewPhotoLightbox
+        photos={allPhotos}
+        index={lightboxIndex}
+        onIndexChange={setLightboxIndex}
+        onClose={() => setLightboxIndex(null)}
+        StarIcon={StarIcon}
+        ArrowIcon={ArrowIcon}
+        XIcon={XIcon}
+        CheckmarkIcon={CheckmarkIcon}
+      />
     </section>
   )
 }
@@ -944,7 +1134,15 @@ function ProductDetailPageInner({ productId, previewId }: { productId: number; p
         )}
 
         <ProductCarousel brand={brand} title="Best Sellers" ArrowIcon={icons.ArrowIcon} />
-        <ReviewsSection ChevronIcon={icons.ChevronIcon} StarIcon={icons.StarIcon} XIcon={icons.XIcon} CheckmarkIcon={icons.CheckmarkIcon} />
+        <ReviewsSection
+          ChevronIcon={icons.ChevronIcon}
+          StarIcon={icons.StarIcon}
+          XIcon={icons.XIcon}
+          CheckmarkIcon={icons.CheckmarkIcon}
+          CameraIcon={icons.CameraIcon}
+          ArrowIcon={icons.ArrowIcon}
+          productId={product.id}
+        />
       </main>
 
       <Footer columns={footerColumns} />
