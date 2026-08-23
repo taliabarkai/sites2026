@@ -11,7 +11,18 @@ import { prefixFooterColumns, prefixNavLinks, withBrandPrefix } from '../_config
 import { DEFAULT_FOOTER_COLUMNS, DEFAULT_NAV_LINKS, DEFAULT_TOPLINE } from '../_config/siteContent'
 import { getBrandProducts } from '../../../data/products/getBrandProducts'
 import type { ProductItem } from '../../../data/products'
+import { tgrRatingProps } from '../category/tgrProductRatings'
+import * as oalIcons from '@/src/components/icons/oal'
+import * as mnnIcons from '@/src/components/icons/mnn'
+import * as tgrIcons from '@/src/components/icons/tgr'
+import * as lalIcons from '@/src/components/icons/lal'
+import * as ibIcons  from '@/src/components/icons/ib'
 import styles from './panel-examples.module.css'
+
+// Brand-scoped icons — resolved at runtime per the icon rules (never hardcode a brand).
+const BRAND_ICONS = {
+  oal: oalIcons, mnn: mnnIcons, tgr: tgrIcons, lal: lalIcons, ib: ibIcons,
+} as const
 
 // Format integer cents as a whole-dollar string, e.g. 12500 → "$125"
 function money(cents: number): string {
@@ -38,6 +49,7 @@ export default function PanelExamplesPage() {
   }
 
   // Realistic placeholder products drawn from the brand catalog.
+  const { StarIcon } = BRAND_ICONS[brand]
   const catalog = getBrandProducts(brand)
   const imgPool = catalog.map((p) => ({ src: p.image, alt: p.name })).filter((i) => i.src)
 
@@ -52,6 +64,12 @@ export default function PanelExamplesPage() {
     ...singleImageBase,
     images: singleImageBase.images.slice(0, 1),
   }
+  // A gallery panel with the review stars omitted (no rating data).
+  const noReviewsProduct: QuickAddProduct = {
+    ...withImageCount(catalog[3] ?? catalog[0], imgPool, 4),
+    rating: undefined,
+    reviewCount: undefined,
+  }
   // Hidden for now — restore alongside the commented card/nested section below.
   // const sixImageProduct  = withImageCount(catalog[1], imgPool, 6)
 
@@ -60,6 +78,11 @@ export default function PanelExamplesPage() {
     ...withImageCount(catalog[2], imgPool, 3),
     hideGalleryOnMobile: true,
   }
+
+  // Card review stars — TGR and LAL only, from the same helper the category
+  // page uses, so the numbers match the rest of the site.
+  const galleryStars = tgrRatingProps(brand, catalog[0], StarIcon)
+  const singleStars  = tgrRatingProps(brand, catalog[1] ?? catalog[0], StarIcon)
 
   // Nested items open the same shared panel — one section each, the section title
   // naming the variant (so each is identifiable) while the card keeps the plain name.
@@ -87,9 +110,10 @@ export default function PanelExamplesPage() {
         <section className={styles.section} aria-labelledby="pe-cards">
           <h2 id="pe-cards" className={styles.sectionTitle}>Product Card</h2>
           <p className={styles.sectionNote}>
-            Hover a card and tap the quick-add icon. All three open the shared panel — one
-            with the 4-image gallery, one with the gallery hidden (options only), and one
-            with a single full-width image.
+            Hover a card and tap the quick-add icon. Each opens the shared panel — with the
+            4-image gallery, with the gallery hidden (options only), with a single full-width
+            image, and a 4-image gallery with the panel&apos;s review stars hidden.
+            The cards themselves show review stars on TGR and LAL only.
           </p>
           <div className={styles.cardGrid}>
             <div className={styles.cardExample}>
@@ -102,6 +126,7 @@ export default function PanelExamplesPage() {
                 hoverImage={fourImageProduct.images[1]?.src}
                 href="#"
                 quickAddProduct={fourImageProduct}
+                {...galleryStars}
               />
             </div>
             <div className={styles.cardExample}>
@@ -114,6 +139,7 @@ export default function PanelExamplesPage() {
                 hoverImage={noGalleryProduct.images[1]?.src}
                 href="#"
                 quickAddProduct={noGalleryProduct}
+                {...galleryStars}
               />
             </div>
             <div className={styles.cardExample}>
@@ -125,6 +151,19 @@ export default function PanelExamplesPage() {
                 defaultImage={singleImageProduct.images[0]?.src ?? ''}
                 href="#"
                 quickAddProduct={singleImageProduct}
+                {...singleStars}
+              />
+            </div>
+            <div className={styles.cardExample}>
+              <h3 className={styles.cardLabel}>With Gallery, No Reviews</h3>
+              <ProductCard
+                name={noReviewsProduct.title}
+                price={money(noReviewsProduct.price)}
+                originalPrice={noReviewsProduct.salePrice ? money(noReviewsProduct.salePrice) : undefined}
+                defaultImage={noReviewsProduct.images[0]?.src ?? ''}
+                hoverImage={noReviewsProduct.images[1]?.src}
+                href="#"
+                quickAddProduct={noReviewsProduct}
               />
             </div>
             {/* Hidden for now — the 6-image (two-column) product card. Restore to demo the >4 variant.
