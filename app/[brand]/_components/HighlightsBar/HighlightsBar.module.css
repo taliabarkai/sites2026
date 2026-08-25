@@ -7,8 +7,7 @@
 
 /* From md up the homepage's category grid covers the same ground, so the bar is
    hidden unless a consumer opts in with `showOnDesktop` (the homepage's
-   Show/Hide Highlights Bar control), which switches it to a large-circle
-   carousel. */
+   Show/Hide Highlights Bar control), which lays it out as a static row of 8. */
 @media (min-width: 768px) {
   .bar {
     display: none;
@@ -19,22 +18,26 @@
     padding: var(--spacing-md) 0;
   }
 
-  /* Full width — the row starts at the page margin and runs to the screen edge */
+  /* Full width — the row runs from page margin to page margin. Nothing is cut
+     off at either end, so there is nothing left to scroll to: the mobile
+     scroller's overflow and snapping are switched back off here. */
   .barDesktop .track {
     padding: 0 var(--layout-page-margin);
     gap: var(--spacing-sm);
-    scroll-padding-left: var(--layout-page-margin);
-  }
-
-  /* Brands with 6 highlights or fewer don't fill the row, so centre them */
-  .barDesktopCentered .track {
+    row-gap: var(--spacing-md);
+    flex-wrap: wrap;
     justify-content: center;
+    overflow-x: visible;
+    scroll-padding-left: 0;
+    scroll-snap-type: none;
   }
 
-  /* 6.5 circles visible; the rest scroll horizontally. The subtracted gaps are
-     the 6 that fall between those 6.5 items. */
+  /* Exactly 8 across. The subtracted gaps are the 7 that fall between them.
+     A brand with fewer than 8 keeps this circle size and centres in the row;
+     a brand with more wraps onto a second row rather than scrolling sideways. */
   .barDesktop .item {
-    flex: 0 0 calc((100% - 6 * var(--spacing-sm)) / 6.5);
+    flex: 0 0 calc((100% - 7 * var(--spacing-sm)) / 8);
+    scroll-snap-align: none;
   }
 
   /* Circles scale with the item instead of the fixed mobile 80px */

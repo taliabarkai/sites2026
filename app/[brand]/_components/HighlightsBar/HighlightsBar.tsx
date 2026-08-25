@@ -14,9 +14,9 @@ export interface HighlightsBarProps {
   /** Labels the scroll region for assistive tech. Defaults to "Shop by highlight". */
   ariaLabel?: string
   /**
-   * Also show the bar from the `md` breakpoint up, as a large-circle carousel
-   * with 6.5 circles in view. Off by default — the homepage drives it from the
-   * topline's Show/Hide Highlights Bar control.
+   * Also show the bar from the `md` breakpoint up, as a static row of 8 large
+   * circles that fits the page width without scrolling. Off by default — the
+   * homepage drives it from the topline's Show/Hide Highlights Bar control.
    */
   showOnDesktop?: boolean
   className?: string
@@ -26,22 +26,17 @@ export interface HighlightsBarProps {
  * Mobile-only highlights bar — a horizontally scrolling row of circular
  * category shortcuts in the shape of Instagram story highlights. Hidden from
  * the `md` breakpoint up, where the homepage's category grid covers the same
- * ground. Each circle is a plain link to a category page.
+ * ground, unless `showOnDesktop` lays it out there as a static 8-across row.
+ * Each circle is a plain link to a category page.
  */
 export function HighlightsBar({ items, ariaLabel = 'Shop by highlight', showOnDesktop = false, className }: HighlightsBarProps) {
   if (items.length === 0) return null
-
-  // Fewer items than the 6.5 that fit on desktop: centre the row rather than
-  // leaving a gap on the right. Only safe when nothing overflows, since
-  // centring a scroller's content puts its start out of reach.
-  const centerOnDesktop = items.length <= 6
 
   return (
     <nav
       className={[
         styles.bar,
         showOnDesktop && styles.barDesktop,
-        showOnDesktop && centerOnDesktop && styles.barDesktopCentered,
         className,
       ]
         .filter(Boolean)

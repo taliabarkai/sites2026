@@ -43,8 +43,8 @@ const SHARED_HIGHLIGHTS: HighlightContent[] = [
 
 /**
  * Theo Grace — the same set padded to 8 by repeating from the top, since TGR
- * also shows the bar on desktop (5.5 circles wide) and needs the extra entry
- * to fill the row.
+ * also shows the bar on desktop, where the row is 8 circles wide, and needs the
+ * extra entry to fill it.
  */
 const TGR_HIGHLIGHTS: HighlightContent[] = [
   ...SHARED_HIGHLIGHTS,
