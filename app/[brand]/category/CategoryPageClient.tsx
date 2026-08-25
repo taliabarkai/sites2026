@@ -17,8 +17,10 @@ import {
 } from '../_config/siteContent'
 import { DEFAULT_PRODUCT_SWATCHES } from '../_config/products'
 import { getBrandProducts } from '../../../data/products/getBrandProducts'
+import { BRAND_HIGHLIGHTS } from '../_config/highlights'
+import { CategoryBanner } from '../_components/CategoryBanner'
 import { CategoryHero } from '../_components/CategoryHero'
-import { getSeoCategoryVariant } from '../../../data/seoCategories/variantConfig'
+import { HighlightsBar } from '../_components/HighlightsBar'
 import { Button } from '../_components/Button'
 import { FilterChips } from '../_components/FilterChips'
 import * as oalIcons from '@/src/components/icons/oal'
@@ -255,6 +257,13 @@ function CategoryPageInner() {
     contactHref: withBrandPrefix(brand, DEFAULT_TOPLINE.contactHref),
   }
 
+  // Story-style shortcuts, same source as the homepage's bar; every circle
+  // points back at the category page.
+  const highlights = BRAND_HIGHLIGHTS[brand].map((item) => ({
+    ...item,
+    href: `/${brand}/category`,
+  }))
+
   const icons = BRAND_ICONS[brand]
   const { FilterIcon, XIcon, ChevronIcon, CheckmarkIcon, StarIcon } = icons
 
@@ -280,7 +289,13 @@ function CategoryPageInner() {
       <Header variant="white" brand={brand} navLinks={navLinks} topline={topline} sticky={false} />
 
       <main id="main-content">
-        <CategoryHero brand={brand} variant={getSeoCategoryVariant(brand)} title="Best Sellers" />
+        <HighlightsBar items={highlights} showOnDesktop />
+
+        <CategoryBanner />
+
+        {/* Text-only pills rather than the image cards — the banner above
+            already carries the imagery for this page. */}
+        <CategoryHero brand={brand} variant="text-only" title="Best Sellers" />
 
         <FilterBar
           itemCount={getBrandProducts(brand).length}
