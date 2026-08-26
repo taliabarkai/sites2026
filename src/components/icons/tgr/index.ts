@@ -1,3 +1,8 @@
+export { EarnPointsIcon } from './EarnPointsIcon'
+export { FreeGiftsIcon } from './FreeGiftsIcon'
+export { KeyIcon } from './KeyIcon'
+export { SmsIcon } from './SmsIcon'
+export { TrackOrderIcon } from './TrackOrderIcon'
 import { emit } from 'node:process'
 
 export { AiMagicIcon } from './AiMagicIcon'
