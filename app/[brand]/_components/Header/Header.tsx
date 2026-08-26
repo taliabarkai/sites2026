@@ -49,7 +49,10 @@ export function Header({
 
   const { items, openCart, closeCart } = useCart()
   const isScrolled = useHeaderScroll()
-  const isCheckout = pathname.includes('/checkout')
+  /* The confirmation page sits after the funnel rather than inside it, so it
+     keeps the full header — nav, search, cart, theme switcher — instead of
+     the logo-only checkout bar. */
+  const isCheckout = pathname.includes('/checkout') && !pathname.includes('/checkout/confirmation')
   const [menuOpen, setMenuOpen] = useState(false)
   // Which dropdown is expanded in the mobile drawer (by label).
   const [openDropdown, setOpenDropdown] = useState<string | null>(null)

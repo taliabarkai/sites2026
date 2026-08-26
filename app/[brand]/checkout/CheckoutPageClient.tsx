@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useState } from 'react'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import * as oalIcons from '@/src/components/icons/oal'
 import * as mnnIcons from '@/src/components/icons/mnn'
 import * as tgrIcons from '@/src/components/icons/tgr'
@@ -13,6 +13,7 @@ import type { CartItem } from '../_context/CartContext'
 import { Button } from '../_components/Button'
 import { Header } from '../_components/Header'
 import { useCart, WARRANTY_CENTS } from '../_context/CartContext'
+import { createPlacedOrder, savePlacedOrder } from '../_context/placedOrder'
 import { getBrandFromPathname } from '../_config/brands'
 import { prefixNavLinks, withBrandPrefix } from '../_config/brandPaths'
 import { DEFAULT_NAV_LINKS, DEFAULT_TOPLINE } from '../_config/siteContent'
@@ -44,6 +45,25 @@ const BRAND_ICONS: Record<string, BrandIcons> = {
   tgr: tgrIcons,
   lal: lalIcons,
   ib:  ibIcons,
+}
+
+/**
+ * What the Apple Pay payment sheet hands back on authorization.
+ *
+ * Express checkout runs before the shopper has typed anything, so in production
+ * the contact and shipping details come off the ApplePayPaymentAuthorizedEvent
+ * rather than the form. There is no merchant session here yet, so this stands in
+ * for that response — anything the shopper *has* already typed wins over it.
+ */
+const APPLE_PAY_SHEET = {
+  firstName: 'John',
+  lastName:  'Doe',
+  email:     'johndoe@gmail.com',
+  phone:     '(516)-123-9476',
+  line1:     '123 Main Street',
+  city:      'Port Washington',
+  state:     'NY',
+  zip:       '11050',
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -622,6 +642,7 @@ function GiftCheckRow({ image, name, description, price, originalPrice, saved, m
 function CheckoutPageInner() {
   const pathname = usePathname()
   const brand    = getBrandFromPathname(pathname)
+  const router   = useRouter()
   const icons    = BRAND_ICONS[brand]
   const navLinks = prefixNavLinks(brand, DEFAULT_NAV_LINKS)
   const topline  = {
@@ -838,6 +859,47 @@ function CheckoutPageInner() {
   const taxAmount      = isCompleted(1) ? Math.round(subtotal * 0.08) : null
   const orderTotal     = subtotal + shippingCost - discountAmount + (taxAmount ?? 0)
 
+  /**
+   * Express Apple Pay authorized. Folds the cart and whatever the shopper has
+   * filled in into an order, stashes it for the confirmation page, and goes
+   * there. Tax is normally only priced once the address is known; express skips
+   * that step, so it is computed on the same 8% basis here.
+   */
+  const handleApplePaySuccess = () => {
+    // Nothing to pay for — leave the shopper on checkout rather than sending
+    // them to a confirmation page with no order behind it.
+    if (items.length === 0) return
+
+    const orderTax = taxAmount ?? Math.round(subtotal * 0.08)
+
+    savePlacedOrder(createPlacedOrder({
+      items,
+      customer: {
+        firstName: firstName.trim() || APPLE_PAY_SHEET.firstName,
+        lastName:  lastName.trim()  || APPLE_PAY_SHEET.lastName,
+        email:     email.trim()     || APPLE_PAY_SHEET.email,
+        phone:     phone.trim()     || APPLE_PAY_SHEET.phone,
+      },
+      address: {
+        line1: [streetAddress.trim() || APPLE_PAY_SHEET.line1, aptSuite.trim()].filter(Boolean).join(', '),
+        city:  city.trim()      || APPLE_PAY_SHEET.city,
+        state: addrState.trim() || APPLE_PAY_SHEET.state,
+        zip:   zipCode.trim()   || APPLE_PAY_SHEET.zip,
+      },
+      shipping: selectedShipping,
+      paymentLabel: 'Apple Pay',
+      totals: {
+        subtotal,
+        shipping: shippingCost,
+        promoDiscount: discountAmount,
+        tax: orderTax,
+        total: subtotal + shippingCost - discountAmount + orderTax,
+      },
+    }))
+
+    router.push(`/${brand}/checkout/confirmation`)
+  }
+
   const step1Valid = email.trim() !== '' && firstName.trim() !== '' && lastName.trim() !== ''
     && streetAddress.trim() !== '' && city.trim() !== '' && addrState.trim() !== '' && zipCode.trim() !== ''
 
@@ -991,7 +1053,7 @@ function CheckoutPageInner() {
                   <section className={styles.expressCheckout}>
                     <p className={styles.expressTitle}>Express Checkout</p>
                     <div className={styles.expressButtons}>
-                      <button type="button" className={styles.expressBtn} aria-label="Pay with Apple Pay">
+                      <button type="button" className={styles.expressBtn} aria-label="Pay with Apple Pay" onClick={handleApplePaySuccess}>
                         <img src="/images/payment/ApplePay.svg" alt="Apple Pay" height={20} style={{ filter: 'invert(1)' }} />
                       </button>
                     </div>

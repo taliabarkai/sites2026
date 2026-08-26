@@ -115,3 +115,27 @@ export const SOCIAL_LINKS = [
 ]
 
 export const PAYMENT_METHODS = ['Visa', 'Mastercard', 'Amex', 'PayPal', 'Apple Pay']
+
+/**
+ * Trustpilot standing, shown by the confirmation page's review prompt.
+ *
+ * There is no Trustpilot feed in the project yet, so this is the one place the
+ * score lives — swap it for the live API response when that exists rather than
+ * repeating the number in a component.
+ */
+export const TRUSTPILOT = {
+  score: 4.5,
+  outOf: 5,
+  reviewUrl: 'https://www.trustpilot.com',
+}
+
+/**
+ * SMS signup prompt on the order confirmation page. Shared across brands for
+ * now — when the per-brand copy lands, this becomes a Record<BrandKey, …> map
+ * the way BRAND_HIGHLIGHTS already is.
+ */
+export const SMS_SIGNUP = {
+  title: 'Join our SMS squad',
+  body: 'for first dibs on free gifts, exclusive offers & more.',
+  cta: 'Sign me up for SMS',
+}

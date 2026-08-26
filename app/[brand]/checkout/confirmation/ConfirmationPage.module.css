@@ -1,0 +1,782 @@
+/* ── Page shell ───────────────────────────────────────────────────────────── */
+.page {
+  background-color: var(--colors-background);
+  color: var(--colors-text);
+  font-family: var(--typography-rules-text1-font-family);
+  min-height: 100vh;
+}
+
+/* No side padding on mobile — it sits on the cards instead, so their dividers
+   run the full width of the screen while the content stays inset. */
+.main {
+  padding: var(--spacing-md) 0 var(--spacing-xxl);
+}
+
+/* Holds the header/footer in place while the order is read out of session
+   storage, so the page doesn't flash a bare shell before redirecting. */
+.pending {
+  min-height: 50vh;
+}
+
+/* ── Layout ───────────────────────────────────────────────────────────────── */
+
+/* Mobile is one ordered flow: Order Summary and Share the Love are interleaved
+   between the left column's sections rather than following them. The two column
+   wrappers collapse with `display: contents` so every block becomes a direct
+   flex child here and `order` below can sequence them. */
+.layout {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.mainColumn,
+.sideColumn {
+  display: contents;
+}
+
+.blockHeader   { order: 1; }
+.blockSms      { order: 2; }
+.blockDetails  { order: 3; }
+.blockSummary  { order: 4; }
+.blockKeyClub  { order: 5; }
+.blockUpdates  { order: 6; }
+.blockShare    { order: 7; }
+.blockContinue { order: 8; }
+
+@media (min-width: 1024px) {
+  /* Two columns, ~65/35. Each wrapper stacks its own blocks again, so the
+     order above lines up with the DOM and stops mattering. */
+  .layout {
+    display: grid;
+    grid-template-columns: minmax(0, 65fr) minmax(0, 35fr);
+    align-items: start;
+    gap: var(--spacing-md);
+    max-width: 1280px;
+    margin: 0 auto;
+  }
+
+  .mainColumn,
+  .sideColumn {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+  }
+}
+
+/* ── Card ─────────────────────────────────────────────────────────────────── */
+
+/* Mobile keeps sections open, separated by a rule; from lg up each becomes its
+   own bordered card, as in the desktop design. */
+.card {
+  padding: var(--spacing-lg) var(--spacing-md);
+  border-bottom: var(--border-width, 1px) solid var(--border-color);
+}
+
+/* Not a .card — the banner carries its own border and tint — but it still
+   needs the rule under it that separates it from Order Details on mobile. */
+.blockSms {
+  padding: var(--spacing-md) var(--spacing-md);
+  border-bottom: var(--border-width, 1px) solid var(--border-color);
+}
+
+.blockContinue {
+  padding: var(--spacing-lg) var(--spacing-md);
+  text-align: center;
+}
+
+@media (min-width: 1024px) {
+  /* Cards become bordered boxes, so the page margin goes back on main */
+  .main {
+    padding: var(--spacing-md) var(--layout-page-margin) var(--spacing-xxl);
+  }
+
+  .card {
+    padding: var(--spacing-lg);
+    border: var(--border-width, 1px) solid var(--border-color);
+    border-radius: var(--radius-md);
+  }
+
+  .blockSms {
+    padding: 0;
+    border-bottom: none;
+  }
+
+  .blockContinue {
+    padding: 0;
+    text-align: left;
+  }
+}
+
+/* ── Typography ───────────────────────────────────────────────────────────── */
+.title {
+  margin: 0 0 var(--spacing-xs) 0;
+  font-family:    var(--typography-rules-headline4-font-family);
+  font-size:      var(--typography-rules-headline4-font-size);
+  line-height:    var(--typography-rules-headline4-line-height);
+  font-weight:    var(--typography-rules-headline4-font-weight, normal);
+  letter-spacing: var(--typography-rules-headline4-letter-spacing, normal);
+  text-transform: var(--typography-rules-headline4-text-transform, none);
+  color: var(--colors-text);
+}
+
+/* No bottom margin: every section that follows the title with content sets its
+   own spacing, so a margin here would stack on top of the parent's flex gap. */
+.sectionTitle {
+  margin: 0;
+  font-family:    var(--typography-rules-headline4-font-family);
+  font-size:      var(--typography-rules-headline4-font-size);
+  line-height:    var(--typography-rules-headline4-line-height);
+  font-weight:    var(--typography-rules-headline4-font-weight, normal);
+  letter-spacing: var(--typography-rules-headline4-letter-spacing, normal);
+  text-transform: var(--typography-rules-headline4-text-transform, none);
+  color: var(--colors-text);
+}
+
+.lede,
+.meta,
+.detailLine,
+.helpLine,
+.keyClubCopy,
+.shareCopy {
+  margin: 0;
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  font-weight:    var(--typography-rules-text1-font-weight, normal);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+  color: var(--colors-text);
+}
+
+.lede {
+  margin-bottom: var(--spacing-sm);
+}
+
+/* Order number and delivery date sit as consecutive lines, spaced apart */
+.blockHeader .meta + .meta {
+  margin-top: var(--spacing-xxs);
+}
+
+/* Order number and delivery date: label in paragraph4, value in paragraph3 */
+.metaLabel {
+  font-family:    var(--typography-rules-paragraph4-font-family);
+  font-size:      var(--typography-rules-paragraph4-font-size);
+  line-height:    var(--typography-rules-paragraph4-line-height);
+  font-weight:    var(--typography-rules-paragraph4-font-weight, normal);
+  letter-spacing: var(--typography-rules-paragraph4-letter-spacing, normal);
+}
+
+.metaValue {
+  font-family:    var(--typography-rules-paragraph3-font-family);
+  font-size:      var(--typography-rules-paragraph3-font-size);
+  line-height:    var(--typography-rules-paragraph3-line-height);
+  font-weight:    var(--typography-rules-paragraph3-font-weight, normal);
+  letter-spacing: var(--typography-rules-paragraph3-letter-spacing, normal);
+}
+
+.inlineLink,
+.continueLink {
+  color: var(--colors-text);
+  text-decoration: underline;
+  font-family:    var(--typography-rules-links1-font-family);
+  font-size:      var(--typography-rules-links1-font-size);
+  line-height:    var(--typography-rules-links1-line-height);
+  font-weight:    var(--typography-rules-links1-font-weight, normal);
+  letter-spacing: var(--typography-rules-links1-letter-spacing, normal);
+}
+
+.inlineLink:hover,
+.continueLink:hover {
+  opacity: 0.7;
+}
+
+/* ── A. Confirmation header ───────────────────────────────────────────────── */
+/* Centred on mobile, as the design shows; left-aligned once there is room */
+.blockHeader {
+  text-align: center;
+}
+
+@media (min-width: 768px) {
+  .blockHeader {
+    text-align: left;
+  }
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  margin-bottom: var(--spacing-xs);
+  border-radius: 50%;
+  background: var(--colors-text);
+  color: var(--colors-text-inverse);
+}
+
+@media (min-width: 1024px) {
+  /* Badge sits beside the headline rather than above it */
+  .blockHeader {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    column-gap: var(--spacing-xs);
+  }
+
+  .badge {
+    margin-bottom: 0;
+    grid-row: 1;
+  }
+
+  .title,
+  .lede,
+  .blockHeader .meta {
+    grid-column: 2;
+  }
+}
+
+/* ── B. SMS signup banner ─────────────────────────────────────────────────── */
+/* Mobile: two rows — icon beside the copy, then the button spanning both
+   columns underneath. The banner keeps its own left alignment inside the
+   otherwise centred header. */
+.sms {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  column-gap: var(--spacing-xs);
+  row-gap: var(--spacing-sm);
+  padding: var(--spacing-md);
+  border-radius: var(--radius-md);
+  background: var(--colors-surface-secondary);
+  text-align: left;
+}
+
+.smsIcon {
+  display: inline-flex;
+  color: var(--colors-text);
+}
+
+.smsCopy {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xxxs);
+  margin: 0;
+}
+
+/* Row one — the hook */
+.smsTitle {
+  margin: 0;
+  font-family:    var(--typography-rules-headline4-font-family);
+  font-size:      var(--typography-rules-headline4-font-size);
+  line-height:    var(--typography-rules-headline4-line-height);
+  font-weight:    var(--typography-rules-headline4-font-weight, normal);
+  letter-spacing: var(--typography-rules-headline4-letter-spacing, normal);
+  text-transform: var(--typography-rules-headline4-text-transform, none);
+  color: var(--colors-text);
+}
+
+/* Row two — same weight as the rest of the body copy */
+.smsBody {
+  margin: 0;
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  font-weight:    var(--typography-rules-text1-font-weight, normal);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+  color: var(--colors-text);
+}
+
+/* Its own row, spanning icon and copy */
+.smsButton {
+  grid-column: 1 / -1;
+  width: 100%;
+}
+
+@media (min-width: 768px) {
+  /* One row from md up: icon, copy, then the button on the right */
+  .sms {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: var(--spacing-sm);
+  }
+
+  .smsCopy {
+    flex: 1;
+  }
+
+  .smsButton {
+    width: auto;
+    flex: 0 0 auto;
+  }
+}
+
+/* ── C. Order details ─────────────────────────────────────────────────────── */
+.detailsGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-sm);
+}
+
+@media (min-width: 768px) {
+  .detailsGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.detailsCol {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.detailHeading {
+  margin: 0 0 var(--spacing-xxxs) 0;
+  font-family: var(--font-family-main-bold);
+  font-size:   var(--typography-rules-text1-font-size);
+  line-height: var(--typography-rules-text1-line-height);
+  font-weight: var(--font-weight-bold, 600);
+  color: var(--colors-text);
+}
+
+.helpLine {
+  margin-top: var(--spacing-md);
+}
+
+/* ── D. Order summary ─────────────────────────────────────────────────────── */
+.summaryHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--spacing-xs);
+}
+
+.itemCount {
+  margin: 0;
+  font-family: var(--typography-rules-text3-font-family);
+  font-size:   var(--typography-rules-text3-font-size);
+  line-height: var(--typography-rules-text3-line-height);
+  color: var(--colors-text-secondary);
+}
+
+.itemList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  margin: var(--spacing-md) 0 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.itemTop {
+  display: flex;
+  /* Name and price sit centred against the 100px thumbnail */
+  align-items: center;
+  /* 8px wider than the xs step, which has no token of its own */
+  gap: calc(var(--spacing-xs) + var(--spacing-xxs));
+}
+
+.itemImage {
+  flex: 0 0 auto;
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  background-color: var(--colors-card-image-bg);
+}
+
+.itemInfo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xxxs);
+}
+
+.itemName {
+  margin: 0;
+  font-family: var(--typography-rules-text1-font-family);
+  font-size:   var(--typography-rules-text1-font-size);
+  line-height: var(--typography-rules-text1-line-height);
+  color: var(--colors-text);
+}
+
+.itemPrice {
+  margin: 0;
+  font-family: var(--font-family-main-bold);
+  font-size:   var(--typography-rules-text1-font-size);
+  font-weight: var(--font-weight-bold, 600);
+  color: var(--colors-price-selling, var(--colors-text));
+}
+
+/* Spec rows vary per product, so this is a plain two-column list of whatever
+   attributes the item carries. */
+.attributes {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: var(--spacing-sm);
+  row-gap: var(--spacing-xxxs);
+  margin: 0;
+}
+
+.attributeRow {
+  display: contents;
+}
+
+/* text2 is the bold body rule, so it carries the weight itself */
+.attributeLabel {
+  margin: 0;
+  font-family:    var(--typography-rules-text2-font-family);
+  font-size:      var(--typography-rules-text2-font-size);
+  line-height:    var(--typography-rules-text2-line-height);
+  font-weight:    var(--typography-rules-text2-font-weight, normal);
+  letter-spacing: var(--typography-rules-text2-letter-spacing, normal);
+  color: var(--colors-text);
+}
+
+.attributeValue {
+  margin: 0;
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  font-weight:    var(--typography-rules-text1-font-weight, normal);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+  color: var(--colors-text);
+}
+
+.totals {
+  margin: var(--spacing-md) 0 0 0;
+  padding-top: var(--spacing-sm);
+  border-top: var(--border-width, 1px) solid var(--border-color);
+}
+
+.totalRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-sm);
+  margin: 0 0 var(--spacing-xxxs) 0;
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  font-weight:    var(--typography-rules-text1-font-weight, normal);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+  color: var(--colors-text);
+}
+
+.totalRow dt,
+.totalRow dd {
+  margin: 0;
+}
+
+.discount {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xxxs);
+}
+
+.grandTotal {
+  margin-top: var(--spacing-xs);
+  padding-top: var(--spacing-xs);
+  border-top: var(--border-width, 1px) solid var(--border-color);
+  font-family:    var(--typography-rules-paragraph3-font-family);
+  font-size:      var(--typography-rules-paragraph3-font-size);
+  line-height:    var(--typography-rules-paragraph3-line-height);
+  font-weight:    var(--typography-rules-paragraph3-font-weight, normal);
+  letter-spacing: var(--typography-rules-paragraph3-letter-spacing, normal);
+}
+
+/* ── E. Join the Key Club ─────────────────────────────────────────────────── */
+/* Mobile runs title → perks → button → unlock line, all centred. The perks sit
+   between the title and the button, so keyClubMain collapses and the four parts
+   are sequenced here as siblings. */
+.blockKeyClub {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-sm);
+  text-align: center;
+}
+
+.keyClubMain {
+  display: contents;
+}
+
+.blockKeyClub .sectionTitle { order: 1; }
+.perks                      { order: 2; }
+.keyClubButton              { order: 3; }
+.keyClubCopy                { order: 4; }
+
+/* text2 is the bold body rule */
+.keyClubBalance {
+  font-family: var(--typography-rules-text2-font-family);
+  font-weight: var(--typography-rules-text2-font-weight, normal);
+}
+
+.keyClubButton {
+  width: auto;
+}
+
+/* Always a horizontal row, at every width */
+.perks {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  gap: var(--spacing-xs);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.perk {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-xxs);
+  text-align: center;
+}
+
+.perkIcon {
+  display: inline-flex;
+  color: var(--loyalty-perk-icon, var(--colors-text));
+}
+
+.perkLabel {
+  font-family: var(--typography-rules-text3-font-family);
+  font-size:   var(--typography-rules-text3-font-size);
+  line-height: var(--typography-rules-text3-line-height);
+  color: var(--colors-text);
+}
+
+@media (min-width: 1024px) {
+  .blockKeyClub {
+    flex-direction: row;
+    align-items: center;
+    gap: var(--spacing-lg);
+    text-align: left;
+  }
+
+  .keyClubMain {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-xs);
+  }
+
+  /* keyClubMain is a box again here, so the parts follow the markup: title,
+     unlock line, button. Without this reset the mobile sequence would put the
+     button above the copy. */
+  .blockKeyClub .sectionTitle,
+  .perks,
+  .keyClubButton,
+  .keyClubCopy {
+    order: 0;
+  }
+
+  .perks {
+    flex: 0 1 auto;
+    gap: var(--spacing-md);
+  }
+}
+
+/* ── F. Order updates ─────────────────────────────────────────────────────── */
+
+/* Vertical on mobile: circles run down the left with the connecting line
+   between them, labels alongside. */
+/* Plain block section — no flex gap to lean on, so the line under the title
+   spaces itself. */
+.blockUpdates .meta {
+  margin-top: var(--spacing-xxs);
+}
+
+/* The date itself carries the emphasis — text2 is the bold body rule */
+.updatesDate {
+  font-family:    var(--typography-rules-text2-font-family);
+  font-size:      var(--typography-rules-text2-font-size);
+  line-height:    var(--typography-rules-text2-line-height);
+  font-weight:    var(--typography-rules-text2-font-weight, normal);
+  letter-spacing: var(--typography-rules-text2-letter-spacing, normal);
+}
+
+.stepper {
+  display: flex;
+  flex-direction: column;
+  margin: var(--spacing-md) 0 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.step {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-xs);
+  padding-bottom: var(--spacing-md);
+}
+
+.step:last-child {
+  padding-bottom: 0;
+}
+
+/* The connector belongs to the step below the one it starts from, so it fills
+   only once that step has been reached. */
+.step:not(:last-child)::before {
+  content: '';
+  position: absolute;
+  top: 18px;
+  left: 8px;
+  bottom: -2px;
+  width: 1px;
+  background: var(--border-color);
+}
+
+.step:not(:last-child).stepReached::before {
+  background: var(--colors-text);
+}
+
+/* Positioned so it paints above the connector — an absolutely positioned
+   ::before otherwise draws over in-flow siblings, showing the line through the
+   empty circles. */
+.stepCircle {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: var(--border-width, 1px) solid var(--border-color);
+  background: var(--colors-background);
+}
+
+.stepReached .stepCircle {
+  border-color: var(--colors-text);
+  background: var(--colors-text);
+  color: var(--colors-text-inverse);
+}
+
+.stepLabel {
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  font-weight:    var(--typography-rules-text1-font-weight, normal);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+  color: var(--colors-text);
+}
+
+/* The step the order is actually on, keyed off the same state the markup
+   already exposes to assistive tech. text2 is the bold body rule. */
+.step[aria-current='step'] .stepLabel {
+  font-family:    var(--typography-rules-text2-font-family);
+  font-size:      var(--typography-rules-text2-font-size);
+  line-height:    var(--typography-rules-text2-line-height);
+  font-weight:    var(--typography-rules-text2-font-weight, normal);
+  letter-spacing: var(--typography-rules-text2-letter-spacing, normal);
+}
+
+@media (min-width: 1024px) {
+  /* Horizontal from lg up: circles in a row, labels underneath */
+  .stepper {
+    flex-direction: row;
+  }
+
+  .step {
+    flex: 1;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-xxs);
+    padding-bottom: 0;
+    text-align: center;
+  }
+
+  /* The ends sit flush with the section rather than inset by half a column, so
+     the track spans the full width. They take half a column each: with the
+     middles centred in full columns and the ends hard against the edges, the
+     circles land on even quarters of the track — 0, 25, 50, 75, 100% — instead
+     of the wider end gaps equal columns would give. */
+  .step:first-child,
+  .step:last-child {
+    flex: 0.5;
+  }
+
+  .step:first-child {
+    align-items: flex-start;
+    text-align: left;
+  }
+
+  .step:last-child {
+    align-items: flex-end;
+    text-align: right;
+  }
+
+  /* Half-width columns are tight for these two, and both overflow into the gap
+     beside them rather than over a neighbour. */
+  .step:first-child .stepLabel,
+  .step:last-child .stepLabel {
+    white-space: nowrap;
+  }
+
+  /* Runs from this circle across to the next one */
+  .step:not(:last-child)::before {
+    inset: auto;
+    top: 8px;
+    left: 50%;
+    right: -50%;
+    bottom: auto;
+    width: auto;
+    height: 1px;
+  }
+
+  /* Both ends start/finish at their circle's centre — 9px in from the edge,
+     being half of the 18px circle — rather than at the column's centre. */
+  /* Reaches a full column-width across, since this box is only half of one */
+  .step:first-child::before {
+    left: 9px;
+    right: -100%;
+  }
+
+  /* Stops at the last circle's centre, half a column past this box's edge */
+  .step:nth-last-child(2)::before {
+    right: calc(-50% + 9px);
+  }
+}
+
+/* ── G. Share the love ────────────────────────────────────────────────────── */
+.blockShare {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-xs);
+  text-align: center;
+}
+
+.shareButton {
+  width: 100%;
+}
+
+@media (min-width: 1024px) {
+  .blockShare {
+    background: var(--share-panel-background);
+    padding: var(--spacing-2xl) var(--spacing-lg);
+  }
+
+  .shareButton {
+    width: auto;
+    min-width: 220px;
+  }
+}
+
+.trustpilot {
+  display: block;
+  width: 100%;
+  max-width: 256px;
+  height: auto;
+  margin-top: var(--spacing-xs);
+}
