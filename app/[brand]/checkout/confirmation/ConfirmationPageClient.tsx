@@ -273,7 +273,7 @@ export function ConfirmationPageClient() {
           const PerkIcon = perkIcons[perk.icon]
           return (
             <li key={perk.label} className={styles.perk}>
-              <span className={styles.perkIcon} aria-hidden="true"><PerkIcon size={36} /></span>
+              <span className={styles.perkIcon} aria-hidden="true"><PerkIcon size={48} /></span>
               <span className={styles.perkLabel}>{perk.label}</span>
             </li>
           )
