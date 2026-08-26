@@ -71,6 +71,7 @@
   /* Typography — font families */
   --font-family-main-regular:      'Roboto', sans-serif;
   --font-family-main-bold:         'Roboto', sans-serif;
+  --font-weight-bold:       600;
   --font-family-main-light:        'Roboto', sans-serif;
   --font-family-secondary-regular: 'Bebas Neue', sans-serif;
   --font-family-tertiary-regular:  'Akatab', sans-serif;
@@ -111,6 +112,13 @@
   /* SEO category pills */
   --related-category-background:  var(--oal-light-grey);
   --related-category-text:        var(--colors-text);
+
+  /* Loyalty perk icons — order confirmation */
+  --loyalty-perk-icon:            var(--colors-text);
+
+  /* Share the Love panel — order confirmation */
+  --share-panel-background:       var(--colors-surface-secondary);
+
   --related-category-hover-text:  var(--colors-text-inverse);
 
   /* Form field extras */

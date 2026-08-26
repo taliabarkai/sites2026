@@ -12,6 +12,7 @@
   --tgr-neutral:     #f4f1ee;
   --tgr-baby-blue:   #bedff7;
   --tgr-alice-blue:  #e6f0f8;
+  --tgr-icon-blue:   #76a4c4;
   --tgr-border-grey: #ebebeb;
   --tgr-mid-grey:    #808080;
   --tgr-green:       #478978;
@@ -72,6 +73,7 @@
   /* Typography — font families */
   --font-family-main-regular:      'Lato', system-ui, sans-serif;
   --font-family-main-bold:         'Lato', system-ui, sans-serif;
+  --font-weight-bold:       600;
   --font-family-main-light:        'Lato', system-ui, sans-serif;
   --font-family-secondary-regular: 'Big Caslon', Georgia, serif;
 
@@ -110,6 +112,13 @@
   /* SEO category pills — white bg needs visible border (handled via --border-color token value) */
   --related-category-background:  var(--tgr-white);
   --related-category-text:        var(--colors-text);
+
+  /* Loyalty perk icons — order confirmation */
+  --loyalty-perk-icon:            var(--tgr-icon-blue);
+
+  /* Share the Love panel — order confirmation */
+  --share-panel-background:       var(--tgr-alice-blue);
+
   --related-category-hover-text:  var(--colors-text-inverse);
 
   /* Form field extras */

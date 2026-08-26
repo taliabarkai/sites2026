@@ -74,6 +74,8 @@
   /* Typography — font families */
   --font-family-main-regular: 'AnoRegular', 'Arial Narrow', sans-serif;
   --font-family-main-bold:    'AnoBold',    'Arial Narrow', sans-serif;
+  /* AnoBold carries its own weight; 600 on top of it renders badly */
+  --font-weight-bold:       normal;
   --font-family-main-light:   'AnoHalf',    'Arial Narrow', sans-serif;
   --nav-text-transform:       uppercase;
 
@@ -106,7 +108,7 @@
   --buttons-primary-padding:       1.2rem 2.8rem;
   --buttons-primary-min-height:    4.4rem;
 
-  --buttons-secondary-background:    transparent;
+  --buttons-secondary-background:    var(--mnn-white);
   --buttons-secondary-text:          var(--mnn-black);
   --buttons-secondary-border-color:  var(--mnn-black);
   --buttons-secondary-border-radius: 4px;
@@ -134,6 +136,13 @@
   /* SEO category pills — closest available light neutral; update when MNN palette expands */
   --related-category-background:  var(--mnn-oyster);
   --related-category-text:        var(--colors-text);
+
+  /* Loyalty perk icons — order confirmation */
+  --loyalty-perk-icon:            var(--colors-text);
+
+  /* Share the Love panel — order confirmation */
+  --share-panel-background:       var(--colors-surface-secondary);
+
   --related-category-hover-text:  var(--colors-text-inverse);
 
   /* Form field extras */

@@ -75,6 +75,7 @@
   /* Typography — font families */
   --font-family-main-regular: 'Assistant', system-ui, sans-serif;
   --font-family-main-bold:    'Assistant', system-ui, sans-serif;
+  --font-weight-bold:       600;
   --font-family-main-light:   'Assistant', system-ui, sans-serif;
 
   /* Layout overrides */
@@ -112,6 +113,13 @@
   /* SEO category pills */
   --related-category-background:  var(--ib-off-white); /* lightest neutral available */
   --related-category-text:        var(--colors-text);
+
+  /* Loyalty perk icons — order confirmation */
+  --loyalty-perk-icon:            var(--colors-text);
+
+  /* Share the Love panel — order confirmation */
+  --share-panel-background:       var(--colors-surface-secondary);
+
   --related-category-hover-text:  var(--colors-text-inverse);
 
   /* Form field extras */
