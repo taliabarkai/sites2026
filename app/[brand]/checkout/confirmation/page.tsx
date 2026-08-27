@@ -1,12 +1,14 @@
-import ConfirmationPageClient from './ConfirmationPageClient'
+import { redirect } from 'next/navigation'
 
 type PageProps = {
   params: Promise<{ brand: string }>
-  searchParams: Promise<Record<string, string | string[] | undefined>>
 }
 
-export default async function OrderConfirmationPage({ params, searchParams }: PageProps) {
-  await params
-  await searchParams
-  return <ConfirmationPageClient />
+/**
+ * The confirmation page moved to /[brand]/thank-you, which is the URL meant for
+ * sharing. This keeps links that were sent out before the move working.
+ */
+export default async function ConfirmationRedirect({ params }: PageProps) {
+  const { brand } = await params
+  redirect(`/${brand}/thank-you`)
 }

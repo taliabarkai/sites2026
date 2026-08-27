@@ -13,7 +13,7 @@ import type { CartItem } from '../_context/CartContext'
 import { Button } from '../_components/Button'
 import { Header } from '../_components/Header'
 import { useCart, WARRANTY_CENTS } from '../_context/CartContext'
-import { createPlacedOrder, savePlacedOrder } from '../_context/placedOrder'
+import { createPlacedOrder, savePlacedOrder, DEMO_CONTACT } from '../_context/placedOrder'
 import { getBrandFromPathname } from '../_config/brands'
 import { prefixNavLinks, withBrandPrefix } from '../_config/brandPaths'
 import { DEFAULT_NAV_LINKS, DEFAULT_TOPLINE } from '../_config/siteContent'
@@ -45,25 +45,6 @@ const BRAND_ICONS: Record<string, BrandIcons> = {
   tgr: tgrIcons,
   lal: lalIcons,
   ib:  ibIcons,
-}
-
-/**
- * What the Apple Pay payment sheet hands back on authorization.
- *
- * Express checkout runs before the shopper has typed anything, so in production
- * the contact and shipping details come off the ApplePayPaymentAuthorizedEvent
- * rather than the form. There is no merchant session here yet, so this stands in
- * for that response — anything the shopper *has* already typed wins over it.
- */
-const APPLE_PAY_SHEET = {
-  firstName: 'John',
-  lastName:  'Doe',
-  email:     'johndoe@gmail.com',
-  phone:     '(516)-123-9476',
-  line1:     '123 Main Street',
-  city:      'Port Washington',
-  state:     'NY',
-  zip:       '11050',
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -875,16 +856,16 @@ function CheckoutPageInner() {
     savePlacedOrder(createPlacedOrder({
       items,
       customer: {
-        firstName: firstName.trim() || APPLE_PAY_SHEET.firstName,
-        lastName:  lastName.trim()  || APPLE_PAY_SHEET.lastName,
-        email:     email.trim()     || APPLE_PAY_SHEET.email,
-        phone:     phone.trim()     || APPLE_PAY_SHEET.phone,
+        firstName: firstName.trim() || DEMO_CONTACT.firstName,
+        lastName:  lastName.trim()  || DEMO_CONTACT.lastName,
+        email:     email.trim()     || DEMO_CONTACT.email,
+        phone:     phone.trim()     || DEMO_CONTACT.phone,
       },
       address: {
-        line1: [streetAddress.trim() || APPLE_PAY_SHEET.line1, aptSuite.trim()].filter(Boolean).join(', '),
-        city:  city.trim()      || APPLE_PAY_SHEET.city,
-        state: addrState.trim() || APPLE_PAY_SHEET.state,
-        zip:   zipCode.trim()   || APPLE_PAY_SHEET.zip,
+        line1: [streetAddress.trim() || DEMO_CONTACT.line1, aptSuite.trim()].filter(Boolean).join(', '),
+        city:  city.trim()      || DEMO_CONTACT.city,
+        state: addrState.trim() || DEMO_CONTACT.state,
+        zip:   zipCode.trim()   || DEMO_CONTACT.zip,
       },
       shipping: selectedShipping,
       paymentLabel: 'Apple Pay',
@@ -897,7 +878,7 @@ function CheckoutPageInner() {
       },
     }))
 
-    router.push(`/${brand}/checkout/confirmation`)
+    router.push(`/${brand}/thank-you`)
   }
 
   const step1Valid = email.trim() !== '' && firstName.trim() !== '' && lastName.trim() !== ''

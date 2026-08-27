@@ -2,28 +2,28 @@
 
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
-import { usePathname, useRouter } from 'next/navigation'
+import { usePathname } from 'next/navigation'
 import * as oalIcons from '@/src/components/icons/oal'
 import * as mnnIcons from '@/src/components/icons/mnn'
 import * as tgrIcons from '@/src/components/icons/tgr'
 import * as lalIcons from '@/src/components/icons/lal'
 import * as ibIcons  from '@/src/components/icons/ib'
-import { Button } from '../../_components/Button'
-import { Header } from '../../_components/Header'
-import { Footer } from '../../_components/Footer'
-import { getBrandFromPathname } from '../../_config/brands'
-import { prefixFooterColumns, prefixNavLinks, withBrandPrefix } from '../../_config/brandPaths'
+import { Button } from '../_components/Button'
+import { Header } from '../_components/Header'
+import { Footer } from '../_components/Footer'
+import { getBrandFromPathname } from '../_config/brands'
+import { prefixFooterColumns, prefixNavLinks, withBrandPrefix } from '../_config/brandPaths'
 import {
   DEFAULT_FOOTER_COLUMNS,
   DEFAULT_NAV_LINKS,
   DEFAULT_TOPLINE,
   SMS_SIGNUP,
   TRUSTPILOT,
-} from '../../_config/siteContent'
-import { BRAND_LOYALTY } from '../../_config/loyalty'
-import type { LoyaltyPerkIcon } from '../../_config/loyalty'
-import { loadPlacedOrder } from '../../_context/placedOrder'
-import type { FulfillmentStatus, PlacedOrder } from '../../_context/placedOrder'
+} from '../_config/siteContent'
+import { BRAND_LOYALTY } from '../_config/loyalty'
+import type { LoyaltyPerkIcon } from '../_config/loyalty'
+import { createSampleOrder, loadPlacedOrder } from '../_context/placedOrder'
+import type { FulfillmentStatus, PlacedOrder } from '../_context/placedOrder'
 import styles from './ConfirmationPage.module.css'
 
 const BRAND_ICONS = {
@@ -53,7 +53,6 @@ const FULFILLMENT_STEPS: Array<{ key: FulfillmentStatus; label: string }> = [
 export function ConfirmationPageClient() {
   const pathname = usePathname()
   const brand    = getBrandFromPathname(pathname)
-  const router   = useRouter()
 
   const icons = BRAND_ICONS[brand]
   const { CheckmarkIcon, SmsIcon, DeliveryBoxIcon, GiftIcon, KeyIcon, CouponIcon } = icons
@@ -69,19 +68,15 @@ export function ConfirmationPageClient() {
     earnPoints:  tgrIcons.EarnPointsIcon,
   }
 
-  /* The order lives in session storage, so it can only be read on the client.
-     `null` covers both "not looked yet" and "nothing there"; the effect below
-     sends the second case back to checkout rather than rendering an empty page. */
+  /* The order lives in session storage, so it can only be read on the client —
+     hence the null first pass. Opening the page without one (a shared link, a
+     fresh tab) falls back to a sample order for this brand: the URL is meant to
+     be shared, so it has to stand on its own rather than redirect to checkout. */
   const [order, setOrder] = useState<PlacedOrder | null>(null)
 
   useEffect(() => {
-    const placed = loadPlacedOrder()
-    if (!placed) {
-      router.replace(`/${brand}/checkout`)
-      return
-    }
-    setOrder(placed)
-  }, [brand, router])
+    setOrder(loadPlacedOrder() ?? createSampleOrder(brand))
+  }, [brand])
 
   const navLinks      = prefixNavLinks(brand, DEFAULT_NAV_LINKS)
   const footerColumns = prefixFooterColumns(brand, DEFAULT_FOOTER_COLUMNS)

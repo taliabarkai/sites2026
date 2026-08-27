@@ -1,4 +1,5 @@
 import type { CartItem, SelectedOption } from './CartContext'
+import { getBrandProducts } from '../../../data/products/getBrandProducts'
 
 /**
  * The order handed to the confirmation page after a successful payment.
@@ -143,6 +144,8 @@ export interface CreatePlacedOrderInput {
   totals: { subtotal: number; shipping: number; promoDiscount: number; tax: number; total: number }
   /** Injectable so tests and previews aren't tied to the wall clock. */
   now?: Date
+  /** Pin the number instead of generating one — used by the sample order. */
+  orderNumber?: string
 }
 
 /**
@@ -158,6 +161,7 @@ export function createPlacedOrder({
   paymentLabel,
   totals,
   now = new Date(),
+  orderNumber = generateOrderNumber(),
 }: CreatePlacedOrderInput): PlacedOrder {
   const window = SHIPPING_WINDOWS[shipping]
   const earliest = addBusinessDays(now, window.minDays)
@@ -170,7 +174,7 @@ export function createPlacedOrder({
       phone: customer.phone,
     },
     order: {
-      orderNumber: generateOrderNumber(),
+      orderNumber,
       estDeliveryDate: formatLongDate(earliest),
     },
     items: items.map((item) => ({
@@ -193,4 +197,58 @@ export function createPlacedOrder({
     loyalty: { keysEarned: keysFor(totals.subtotal) },
     fulfillmentStatus: 'order_placed',
   }
+}
+
+// ─── Sample order ─────────────────────────────────────────────────────────────
+
+/**
+ * Stand-in shopper details. Express checkout runs before anything is typed, so
+ * in production these come off the Apple Pay payment sheet; the sample order
+ * below reuses them so a shared link reads as a real order.
+ */
+export const DEMO_CONTACT = {
+  firstName: 'John',
+  lastName:  'Doe',
+  email:     'johndoe@gmail.com',
+  phone:     '(516)-123-9476',
+  line1:     '123 Main Street',
+  city:      'Port Washington',
+  state:     'NY',
+  zip:       '11050',
+}
+
+const SAMPLE_OPTIONS: SelectedOption[] = [
+  { label: 'Material',     value: 'Gold Vermeil 18k' },
+  { label: 'Chain Length', value: '18"' },
+]
+
+/**
+ * A representative order for when the page is opened without one behind it —
+ * a shared link, or a fresh tab. Built from the brand's own catalogue so the
+ * page reads as that brand rather than showing an empty state, and pinned to a
+ * fixed order number so the same link always shows the same order.
+ */
+export function createSampleOrder(brand: string, now: Date = new Date()): PlacedOrder {
+  const items: CartItem[] = getBrandProducts(brand).slice(0, 2).map((product) => ({
+    id:             String(product.id),
+    name:           product.name,
+    price:          product.priceInCents ?? 0,
+    image:          product.image,
+    isPersonalized: false,
+    selectedOptions: SAMPLE_OPTIONS,
+  }))
+
+  const subtotal = items.reduce((sum, item) => sum + item.price, 0)
+  const tax = Math.round(subtotal * 0.08)
+
+  return createPlacedOrder({
+    items,
+    customer: DEMO_CONTACT,
+    address: DEMO_CONTACT,
+    shipping: 'free',
+    paymentLabel: 'Apple Pay',
+    totals: { subtotal, shipping: 0, promoDiscount: 0, tax, total: subtotal + tax },
+    now,
+    orderNumber: '516422457',
+  })
 }
