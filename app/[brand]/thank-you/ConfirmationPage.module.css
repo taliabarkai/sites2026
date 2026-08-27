@@ -782,3 +782,53 @@
   height: auto;
   margin-top: var(--spacing-xs);
 }
+
+/* ── Klaviyo SMS popup (placeholder) ──────────────────────────────────────── */
+
+/* Deliberately untokenised: this stands in for a third-party embed Klaviyo
+   renders and styles itself, so it shouldn't read as one of our own panels. */
+.klaviyoOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-md);
+  background: rgb(0 0 0 / 0.5);
+}
+
+.klaviyoPopup {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  padding: var(--spacing-2xl) var(--spacing-lg);
+  background: #ffffff;
+  text-align: center;
+}
+
+.klaviyoClose {
+  position: absolute;
+  top: var(--spacing-xs);
+  right: var(--spacing-xs);
+  display: inline-flex;
+  padding: var(--spacing-xxs);
+  border: none;
+  background: none;
+  color: #1e1e1e;
+  cursor: pointer;
+}
+
+.klaviyoTitle {
+  margin: 0 0 var(--spacing-xxs) 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1e1e1e;
+}
+
+.klaviyoBody {
+  margin: 0;
+  font-size: 14px;
+  line-height: 20px;
+  color: #5c5c5c;
+}

@@ -55,7 +55,7 @@ export function ConfirmationPageClient() {
   const brand    = getBrandFromPathname(pathname)
 
   const icons = BRAND_ICONS[brand]
-  const { CheckmarkIcon, SmsIcon, DeliveryBoxIcon, GiftIcon, KeyIcon, CouponIcon } = icons
+  const { CheckmarkIcon, SmsIcon, DeliveryBoxIcon, GiftIcon, KeyIcon, CouponIcon, XIcon } = icons
 
   /* Which icon each perk names. The first three come from the brand's own set;
      the rest are TGR artwork, and only TGR's programme asks for them. */
@@ -77,6 +77,18 @@ export function ConfirmationPageClient() {
   useEffect(() => {
     setOrder(loadPlacedOrder() ?? createSampleOrder(brand))
   }, [brand])
+
+  /* SMS signup opens a Klaviyo popup in production; this stands in for it. */
+  const [smsPopupOpen, setSmsPopupOpen] = useState(false)
+
+  useEffect(() => {
+    if (!smsPopupOpen) return
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setSmsPopupOpen(false)
+    }
+    document.addEventListener('keydown', handleEscape)
+    return () => document.removeEventListener('keydown', handleEscape)
+  }, [smsPopupOpen])
 
   const navLinks      = prefixNavLinks(brand, DEFAULT_NAV_LINKS)
   const footerColumns = prefixFooterColumns(brand, DEFAULT_FOOTER_COLUMNS)
@@ -133,7 +145,7 @@ export function ConfirmationPageClient() {
           <p className={styles.smsTitle}>{SMS_SIGNUP.title}</p>
           <p className={styles.smsBody}>{SMS_SIGNUP.body}</p>
         </div>
-        <Button variant="primary" className={styles.smsButton} href="#">
+        <Button variant="primary" className={styles.smsButton} onClick={() => setSmsPopupOpen(true)}>
           {SMS_SIGNUP.cta}
         </Button>
       </div>
@@ -354,6 +366,35 @@ export function ConfirmationPageClient() {
       </main>
 
       <Footer columns={footerColumns} />
+
+      {/* Stand-in for the Klaviyo SMS popup. Klaviyo renders and styles its own
+          form, so this is deliberately plain rather than themed — it marks where
+          their embed lands, nothing more. */}
+      {smsPopupOpen && (
+        <div className={styles.klaviyoOverlay} onClick={() => setSmsPopupOpen(false)}>
+          <div
+            className={styles.klaviyoPopup}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="klaviyo-popup-title"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <button
+              type="button"
+              className={styles.klaviyoClose}
+              onClick={() => setSmsPopupOpen(false)}
+              aria-label="Close"
+            >
+              <XIcon size={16} />
+            </button>
+            <p id="klaviyo-popup-title" className={styles.klaviyoTitle}>Klaviyo SMS signup popup</p>
+            <p className={styles.klaviyoBody}>
+              Placeholder. The real form is built and styled in Klaviyo, so its design
+              lives there rather than in this project.
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
