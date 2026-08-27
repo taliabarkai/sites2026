@@ -119,6 +119,61 @@
   text-underline-offset: 4px;
 }
 
+/* ── Nav artwork ──────────────────────────────────────────────────────────── */
+
+/* A flat 27px, the height the script artwork is meant to sit at — taller than
+   the caps labels it sits beside, which it needs to read at the same weight.
+   The bar is unaffected: .barInner reserves 64px with 24px of padding, leaving
+   40px. The aspect-ratio reserves the width up front, so nothing shifts while
+   it loads. */
+.navImage {
+  position: relative;
+  display: inline-block;
+  height: 27px;
+  aspect-ratio: 200 / 70;
+  /* `top` rather than `middle`: an inline-block aligned to the middle sits
+     relative to the baseline and can push the line box taller than the strut.
+     Aligned to the top, a box this exact height fills the line box without
+     growing it, so the bar's height is unchanged. */
+  vertical-align: top;
+}
+
+.navImageDefault,
+.navImageHover {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: auto;
+  /* The artwork ships as a JPEG with a baked white background. Multiplying
+     drops that white into whatever sits behind it — white against a colour is
+     a no-op — so it reads as cut out. Remove this once the transparent PNGs
+     land; it only holds up over light surfaces, which is all the nav uses. */
+  mix-blend-mode: multiply;
+  transition: opacity 150ms ease;
+}
+
+.navImageHover {
+  opacity: 0;
+}
+
+.navLinkImage:hover .navImageDefault,
+.navLinkImage:focus-visible .navImageDefault {
+  opacity: 0;
+}
+
+.navLinkImage:hover .navImageHover,
+.navLinkImage:focus-visible .navImageHover {
+  opacity: 1;
+}
+
+/* The artwork carries the hover state itself, so the text link's dim-and-
+   underline treatment would double up on it. */
+.navLinkImage:hover {
+  opacity: 1;
+  text-decoration: none;
+}
+
 /* ── Desktop nav dropdown ─────────────────────────────────────────────────── */
 .navItemHasSub {
   position: relative;

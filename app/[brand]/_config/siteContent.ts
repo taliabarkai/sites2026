@@ -3,6 +3,11 @@ export interface NavLink {
   href: string
   highlight?: boolean
   desktopHidden?: boolean
+  /**
+   * Renders the link as artwork instead of text, swapping to `hover` on
+   * hover/focus. `label` is still the accessible name.
+   */
+  image?: { default: string; hover: string }
   /** Sub-links shown in a dropdown (desktop hover / mobile expand). */
   children?: NavLink[]
 }
@@ -32,7 +37,14 @@ export const DEFAULT_NAV_LINKS: NavLink[] = [
   // { label: 'Shop All', href: '/category' },
   // { label: 'Gifts', href: '/gifts' },
   { label: 'Best Sellers', href: '/category' },
-  { label: 'New In', href: '/category/t4' },
+  {
+    label: 'New In',
+    href: '/category/t4',
+    image: {
+      default: '/images/nav/new-in-default.jpg',
+      hover:   '/images/nav/new-in-hover.jpg',
+    },
+  },
   { label: 'Shop the Look', href: '/category/t3' },
   { label: 'Sale', href: '/category/t5' },
   {

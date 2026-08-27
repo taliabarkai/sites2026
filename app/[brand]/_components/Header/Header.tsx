@@ -28,6 +28,30 @@ const BRAND_ICONS = {
 
 export type HeaderVariant = 'white' | 'transparent'
 
+/**
+ * A nav link rendered as artwork. Both states sit in the DOM stacked on top of
+ * each other and crossfade, rather than swapping `src` on hover — that would
+ * flash the first time, while the browser fetched the second image. Neither is
+ * lazy-loaded; the nav is above the fold on every page.
+ */
+function NavLinkImage({ image, label }: { image: NonNullable<NavLink['image']>; label: string }) {
+  return (
+    <span className={styles.navImage}>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={image.default} alt={label} className={styles.navImageDefault} />
+      {/* Decorative: same link, same words — the alt above already names it. */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={image.hover} alt="" aria-hidden="true" className={styles.navImageHover} />
+    </span>
+  )
+}
+
+/**
+ * Brands that fall back to the plain text label instead of a nav link's
+ * artwork. OAL is out for now, pending its own version of the artwork.
+ */
+const NAV_IMAGE_EXCLUDED: readonly string[] = ['oal']
+
 export interface HeaderProps {
   variant?: HeaderVariant
   brand?: BrandKey
@@ -50,6 +74,7 @@ export function Header({
   const { items, openCart, closeCart } = useCart()
   const isScrolled = useHeaderScroll()
   const isCheckout = pathname.includes('/checkout')
+  const showNavImages = !NAV_IMAGE_EXCLUDED.includes(brandSegment)
   const [menuOpen, setMenuOpen] = useState(false)
   // Which dropdown is expanded in the mobile drawer (by label).
   const [openDropdown, setOpenDropdown] = useState<string | null>(null)
@@ -142,8 +167,13 @@ export function Header({
                         {link.label}
                       </Button>
                     ) : (
-                      <Link href={link.href} className={styles.navLink}>
-                        {link.label}
+                      <Link
+                        href={link.href}
+                        className={`${styles.navLink} ${link.image && showNavImages ? styles.navLinkImage : ''}`}
+                      >
+                        {link.image && showNavImages
+                          ? <NavLinkImage image={link.image} label={link.label} />
+                          : link.label}
                       </Link>
                     )}
                   </li>
@@ -244,10 +274,12 @@ export function Header({
                   ) : (
                     <Link
                       href={link.href}
-                      className={styles.drawerLink}
+                      className={`${styles.drawerLink} ${link.image && showNavImages ? styles.navLinkImage : ''}`}
                       onClick={() => setMenuOpen(false)}
                     >
-                      {link.label}
+                      {link.image && showNavImages
+                        ? <NavLinkImage image={link.image} label={link.label} />
+                        : link.label}
                     </Link>
                   )}
                 </li>
