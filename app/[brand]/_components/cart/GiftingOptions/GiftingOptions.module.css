@@ -1,0 +1,969 @@
+/* ─── Gifting options — options-first layout ───────────────────────────────────
+   Brand-agnostic: every colour, font, radius and space comes from a theme token.
+   Mobile-first; md/lg only add to the base layout.                             */
+
+/* Vertical rhythm and divider match the sibling checkout steps, so this section
+   sits in the same column without a special case. */
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-lg) var(--layout-page-margin);
+  border-bottom: var(--border-width) solid var(--border-color);
+  /* Space below the divider, before the next step's title. The sibling steps get
+     this from `.accordionStep + .accordionStep`, which this <section> breaks. */
+  margin-bottom: var(--spacing-lg);
+  /* Bleed the divider edge-to-edge on narrow screens, as the sibling steps do;
+     the inline padding compensates. Reset at lg. */
+  margin-left: calc(-1 * var(--layout-page-margin));
+  margin-right: calc(-1 * var(--layout-page-margin));
+}
+
+@media (min-width: 1024px) {
+  .section {
+    padding-left: 0;
+    padding-right: 0;
+    margin-left: 0;
+    margin-right: 0;
+  }
+}
+
+.heading {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  margin: 0;
+  font-family:    var(--typography-rules-headline4-font-family);
+  font-size:      var(--typography-rules-headline4-font-size);
+  line-height:    var(--typography-rules-headline4-line-height);
+  font-weight:    var(--typography-rules-headline4-font-weight, normal);
+  letter-spacing: var(--typography-rules-headline4-letter-spacing, normal);
+  text-transform: var(--typography-rules-headline4-text-transform, none);
+  color: var(--colors-text);
+}
+
+.headingIcon {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+/* ─── Option cards ──────────────────────────────────────────────────────────── */
+
+/* Options stack vertically as full-width rows, whatever the count. */
+.optionList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.optionCard {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  width: 100%;
+  padding: var(--spacing-xs);
+  text-align: left;
+  cursor: pointer;
+  border: var(--border-width) solid transparent;
+  border-radius: var(--radius-md);
+  background: var(--colors-surface-primary);
+  font: inherit;
+  color: var(--colors-text);
+  transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+
+/* Hover reads as a strong border, not a fill change. */
+.optionCard:hover,
+.optionCard:focus-visible {
+  background: var(--colors-surface-primary);
+  border-color: var(--border-strong);
+}
+
+.optionCardPreselected {
+  border-color: var(--border-strong);
+}
+
+.optionCardImage {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  background: var(--colors-card-image-bg);
+  flex-shrink: 0;
+}
+
+.optionCardBody {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xxxs);
+}
+
+.optionCardName {
+  font-family: var(--typography-rules-text2-font-family);
+  font-size:   var(--typography-rules-text2-font-size);
+  line-height: var(--typography-rules-text2-line-height);
+  font-weight: var(--typography-rules-text2-font-weight, normal);
+  color: var(--colors-text);
+}
+
+.optionCardDescription {
+  font-family: var(--typography-rules-text3-font-family);
+  font-size:   var(--typography-rules-text3-font-size);
+  line-height: var(--typography-rules-text3-line-height);
+  color: var(--colors-text-secondary);
+}
+
+/* Add, right aligned; price now sits under the description */
+.optionCardAside {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+}
+
+.optionCardPrice {
+  font-family: var(--typography-rules-text2-font-family);
+  font-size:   var(--typography-rules-text2-font-size);
+  line-height: var(--typography-rules-text2-line-height);
+  font-weight: var(--typography-rules-text2-font-weight, normal);
+  color: var(--colors-text);
+}
+
+.optionCardAction {
+  background:    var(--buttons-upsell-primary-background);
+  color:         var(--buttons-upsell-primary-text);
+  border:        var(--border-width) solid var(--buttons-upsell-primary-border-color);
+  border-radius: var(--buttons-upsell-primary-border-radius);
+  padding:       var(--buttons-upsell-primary-padding);
+  min-height:    var(--buttons-upsell-primary-min-height);
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--typography-rules-text1-font-family);
+  font-size:   var(--typography-rules-text1-font-size);
+  line-height: var(--typography-rules-text1-line-height);
+  white-space: nowrap;
+}
+
+/* Narrow: let the copy take the width back by stacking price/Add under it */
+@media (max-width: 480px) {
+  .optionCard {
+    gap: var(--spacing-xs);
+  }
+
+  .optionCardAside {
+    gap: var(--spacing-xxs);
+  }
+}
+
+/* ─── Read-only list in the info panel ──────────────────────────────────────── */
+
+.infoList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  width: 100%;
+}
+
+.infoRow {
+  display: flex;
+  /* Copy sits centred against the image rather than starting at its top edge */
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+/* Large square, sized as a share of the panel so it holds at any width.
+   Backdrop matches the product gallery's image treatment. */
+.infoImageWrap {
+  flex: 0 0 38%;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  border-radius: var(--radius-sm);
+  background: var(--colors-card-image-bg);
+}
+
+.infoImage {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.infoBody {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.infoName {
+  font-family:    var(--typography-rules-text2-font-family);
+  font-size:      var(--typography-rules-text2-font-size);
+  line-height:    var(--typography-rules-text2-line-height);
+  font-weight:    var(--typography-rules-text2-font-weight, normal);
+  letter-spacing: var(--typography-rules-text2-letter-spacing, normal);
+  color: var(--colors-text);
+}
+
+.infoPrice {
+  font-family:    var(--typography-rules-text2-font-family);
+  font-size:      var(--typography-rules-text2-font-size);
+  line-height:    var(--typography-rules-text2-line-height);
+  font-weight:    var(--typography-rules-text2-font-weight, normal);
+  letter-spacing: var(--typography-rules-text2-letter-spacing, normal);
+  color: var(--colors-text);
+}
+
+.infoDescription {
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+  color: var(--colors-text);
+}
+
+/* ─── Populated state: every line item with its gifting status ──────────────── */
+
+.statusLine {
+  margin: 0;
+  font-family:    var(--typography-rules-text3-font-family);
+  font-size:      var(--typography-rules-text3-font-size);
+  line-height:    var(--typography-rules-text3-line-height);
+  letter-spacing: var(--typography-rules-text3-letter-spacing, normal);
+  color: var(--colors-text-secondary);
+}
+
+.itemStateList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+/* Bordered card, matching the drawer's item cards */
+.itemStateRow {
+  display: flex;
+  align-items: stretch;
+  overflow: hidden;
+  background: var(--colors-background);
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--radius-sm);
+}
+
+.itemStateThumb {
+  flex: 0 0 96px;
+  width: 96px;
+  align-self: stretch;
+  object-fit: contain;
+  background: var(--colors-card-image-bg);
+  border-right: var(--border-width) solid var(--border-color);
+}
+
+.itemStateBody {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xxxs);
+  padding: var(--spacing-xs);
+}
+
+/* Delete pinned top-right, the action bottom-right */
+.itemStateActions {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xs);
+}
+
+.itemStateRemove {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  padding: 0;
+  line-height: 0;
+  cursor: pointer;
+  color: var(--colors-text-secondary);
+  transition: color var(--transition-fast);
+}
+
+.itemStateRemove:hover {
+  color: var(--colors-text);
+}
+
+.itemStateName {
+  font-family: var(--typography-rules-text1-font-family);
+  font-size:   var(--typography-rules-text1-font-size);
+  line-height: var(--typography-rules-text1-line-height);
+  color: var(--colors-text);
+}
+
+.itemStateAssigned {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xxs);
+  font-family: var(--typography-rules-text3-font-family);
+  font-size:   var(--typography-rules-text3-font-size);
+  line-height: var(--typography-rules-text3-line-height);
+  color: var(--colors-text);
+}
+
+.itemStateCheck {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  color: var(--colors-success);
+}
+
+.itemStateMuted {
+  font-family: var(--typography-rules-text3-font-family);
+  font-size:   var(--typography-rules-text3-font-size);
+  line-height: var(--typography-rules-text3-line-height);
+  color: var(--colors-text-secondary);
+}
+
+.itemStateEdit {
+  flex: 0 0 auto;
+  margin-top: auto;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  white-space: nowrap;
+  color: var(--colors-text);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  font-family: var(--typography-rules-text1-font-family);
+  font-size:   var(--typography-rules-text1-font-size);
+  line-height: var(--typography-rules-text1-line-height);
+}
+
+.itemStateAdd {
+  flex: 0 0 auto;
+  margin-top: auto;
+  cursor: pointer;
+  white-space: nowrap;
+  background:    var(--buttons-upsell-primary-background);
+  color:         var(--buttons-upsell-primary-text);
+  border:        var(--border-width) solid var(--buttons-upsell-primary-border-color);
+  border-radius: var(--buttons-upsell-primary-border-radius);
+  padding:       var(--buttons-upsell-primary-padding);
+  min-height:    var(--buttons-upsell-primary-min-height);
+  font-family:   var(--typography-rules-text1-font-family);
+  font-size:     var(--typography-rules-text1-font-size);
+  line-height:   var(--typography-rules-text1-line-height);
+}
+
+/* Narrow: keep a full-size tap target rather than shrinking it */
+@media (max-width: 599px) {
+  .itemStateEdit,
+  .itemStateAdd {
+    min-height: var(--buttons-primary-min-height);
+    display: inline-flex;
+    align-items: center;
+  }
+}
+
+/* Packaging chooser inside the drawer */
+.packagingList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+/* ─── Gifting drawer ────────────────────────────────────────────────────────── */
+
+.drawerOverlay {
+  position: fixed;
+  inset: 0;
+  /* No scrim token exists in the theme files; matches GiftOptionsModal.module.css. */
+  background: rgba(0, 0, 0, 0.45);
+  z-index: var(--z-overlay);
+  opacity: 0;
+  transition: opacity var(--transition-base);
+}
+
+.drawerOverlayVisible {
+  opacity: 1;
+}
+
+/* Mobile-first: full screen. md+: fixed-width panel from the right. */
+.drawer {
+  position: fixed;
+  /* Sheet from the bottom, hugging its content up to most of the viewport. */
+  inset: auto 0 0 0;
+  height: auto;
+  max-height: 90dvh;
+  z-index: var(--z-modal);
+  display: flex;
+  flex-direction: column;
+  background: var(--colors-background);
+  color: var(--colors-text);
+  box-shadow: var(--shadow-md);
+  border-radius: var(--radius-panel) var(--radius-panel) 0 0;
+  transform: translateY(100%);
+  transition: transform var(--transition-base);
+}
+
+.drawerOpen {
+  transform: translateY(0);
+}
+
+@media (min-width: 768px) {
+  .drawer {
+    inset: 0 0 0 auto;
+    width: 100%;
+    max-width: 500px;
+    height: 100dvh;
+    max-height: none;
+    border-radius: var(--radius-panel) 0 0 var(--radius-panel);
+    transform: translateX(100%);
+  }
+
+  .drawerOpen {
+    transform: translateX(0);
+  }
+}
+
+/* ── Title row ── */
+
+.drawerHeader {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md) var(--spacing-sm);
+}
+
+@media (min-width: 768px) {
+  .drawerHeader {
+    padding: var(--spacing-md);
+  }
+}
+
+.drawerTitle {
+  margin: 0;
+  /* H4 scale — headline2 runs up to 72px on some brands, far too large here. */
+  font-family:    var(--typography-rules-headline4-font-family);
+  font-size:      var(--typography-rules-headline4-font-size);
+  line-height:    var(--typography-rules-headline4-line-height);
+  font-weight:    var(--typography-rules-headline4-font-weight, normal);
+  letter-spacing: var(--typography-rules-headline4-letter-spacing, normal);
+  text-transform: var(--typography-rules-headline4-text-transform, none);
+  color: var(--colors-text);
+}
+
+.drawerClose {
+  flex-shrink: 0;
+  background: transparent;
+  border: none;
+  padding: 0;
+  line-height: 0;
+  cursor: pointer;
+  color: var(--colors-text);
+  transition: opacity var(--transition-fast);
+}
+
+.drawerClose:hover {
+  opacity: 0.6;
+}
+
+/* Panel is a fixed height; step content does not stretch to fill it. */
+.drawerBody {
+  flex: 0 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  padding: 0 var(--spacing-sm);
+}
+
+@media (min-width: 768px) {
+  /* Desktop panel is full height, so the body takes the slack. */
+  .drawerBody {
+    flex: 1 1 auto;
+  }
+}
+
+/* ── Gift option block (descriptive only) ── */
+
+.optionBlock {
+  flex: 0 0 auto;
+  display: flex;
+  /* Copy sits centred against the image, not aligned to its top edge */
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.optionBlockThumb {
+  flex: 0 0 120px;
+  width: 120px;
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--colors-card-image-bg);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+/* Contained, not cropped */
+.optionBlockImage {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.optionBlockText {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.optionBlockDescription {
+  margin: 0;
+  font-family: var(--typography-rules-text1-font-family);
+  font-size:   var(--typography-rules-text1-font-size);
+  line-height: var(--typography-rules-text1-line-height);
+  color: var(--colors-text);
+}
+
+/* Sits with the option copy, matching the item card's Change affordance */
+.optionBlockChange {
+  align-self: flex-start;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: var(--colors-text);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  font-family: var(--typography-rules-text1-font-family);
+  font-size:   var(--typography-rules-text1-font-size);
+  line-height: var(--typography-rules-text1-line-height);
+}
+
+.optionBlockPrice {
+  margin: 0;
+  font-family: var(--typography-rules-text2-font-family);
+  font-size:   var(--typography-rules-text2-font-size);
+  line-height: var(--typography-rules-text2-line-height);
+  font-weight: var(--typography-rules-text2-font-weight, normal);
+  color: var(--colors-text);
+}
+
+.drawerDivider {
+  flex: 0 0 auto;
+  width: 100%;
+  height: 0;
+  margin: var(--spacing-md) 0;
+  border: 0;
+  border-top: var(--border-width) solid var(--border-color);
+}
+
+/* ── Step area ── */
+
+/* 24px rhythm between blocks, per the spacing redline */
+.stepArea {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  padding-bottom: var(--spacing-md);
+}
+
+.stepHeading {
+  margin: 0;
+  font-family:    var(--typography-rules-text2-font-family);
+  font-size:      var(--typography-rules-text2-font-size);
+  line-height:    var(--typography-rules-text2-line-height);
+  font-weight:    var(--typography-rules-text4-font-weight, 600);
+  letter-spacing: var(--typography-rules-text2-letter-spacing, normal);
+  color: var(--colors-text);
+}
+
+/* ── Item cards ── */
+
+.itemCardList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.itemCard {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+  padding: 0;
+  text-align: left;
+  font: inherit;
+  color: var(--colors-text);
+  cursor: pointer;
+  overflow: hidden;
+  background: var(--colors-background);
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--radius-sm);
+  transition: border-color var(--transition-fast);
+}
+
+.itemCard:hover,
+.itemCard:focus-visible {
+  border-color: var(--border-strong);
+}
+
+.itemCardSelected {
+  border-color: var(--border-strong);
+}
+
+.itemCardDisabled {
+  cursor: not-allowed;
+  background: var(--colors-surface-disabled);
+}
+
+.itemCardDisabled .itemCardName {
+  color: var(--colors-text-disabled);
+}
+
+.itemCardThumb {
+  flex: 0 0 96px;
+  width: 96px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--colors-card-image-bg);
+  border-right: var(--border-width) solid var(--border-color);
+}
+
+.itemCardImage {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.itemCardBody {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xxxs);
+  padding: var(--spacing-xs);
+}
+
+.itemCardName {
+  font-family: var(--typography-rules-text1-font-family);
+  font-size:   var(--typography-rules-text1-font-size);
+  line-height: var(--typography-rules-text1-line-height);
+  color: var(--colors-text);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.itemCardBadge,
+.itemCardReason {
+  font-family: var(--typography-rules-text3-font-family);
+  font-size:   var(--typography-rules-text3-font-size);
+  line-height: var(--typography-rules-text3-line-height);
+  color: var(--colors-text-secondary);
+}
+
+/* Not a separate tab stop — the card owns the interaction */
+.itemCardAction {
+  align-self: flex-end;
+  margin-top: auto;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  font-family: var(--typography-rules-text1-font-family);
+  font-size:   var(--typography-rules-text1-font-size);
+  line-height: var(--typography-rules-text1-line-height);
+  color: var(--colors-text);
+}
+
+.itemCardChosen {
+  align-items: center;
+}
+
+/* ── Gift note ── */
+
+.noteBlock {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.noteLabelRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--spacing-sm);
+}
+
+.noteLabel {
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  font-weight:    var(--typography-rules-text4-font-weight, 600);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+  color: var(--colors-text);
+}
+
+.noteAssist {
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: var(--colors-text);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  white-space: nowrap;
+  font-family: var(--typography-rules-text1-font-family);
+  font-size:   var(--typography-rules-text1-font-size);
+  line-height: var(--typography-rules-text1-line-height);
+}
+
+.noteAssist:disabled {
+  cursor: default;
+  color: var(--colors-text-disabled);
+}
+
+.noteFieldWrap {
+  position: relative;
+  display: flex;
+}
+
+.noteTextarea {
+  width: 100%;
+  resize: vertical;
+  /* Bottom padding reserves the counter's row so typed text never runs under it,
+     including at 200% zoom where the counter scales with the type token. */
+  padding: var(--spacing-xs) var(--spacing-xs) calc(var(--spacing-sm) + 1em);
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--radius-sm);
+  background: var(--colors-background);
+  color: var(--colors-text);
+  font-family: var(--typography-rules-text1-font-family);
+  font-size:   var(--typography-rules-text1-font-size);
+  line-height: var(--typography-rules-text1-line-height);
+}
+
+.noteCounter {
+  position: absolute;
+  right: var(--spacing-xs);
+  bottom: var(--spacing-xs);
+  pointer-events: none;
+  background: var(--colors-background);
+  font-family: var(--typography-rules-text3-font-family);
+  font-size:   var(--typography-rules-text3-font-size);
+  line-height: var(--typography-rules-text3-line-height);
+  color: var(--colors-text-secondary);
+}
+
+/* ── Footer ── */
+
+.drawerFooter {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm);
+  border-top: var(--border-width) solid var(--border-color);
+}
+
+@media (min-width: 768px) {
+  .drawerFooter {
+    padding: var(--spacing-md);
+  }
+
+  .drawerBody {
+    padding-inline: var(--spacing-md);
+  }
+}
+
+.drawerCancel {
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: var(--colors-text);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  font-family: var(--typography-rules-text1-font-family);
+  font-size:   var(--typography-rules-text1-font-size);
+  line-height: var(--typography-rules-text1-line-height);
+}
+
+/* The theme's primary button, so it matches every other CTA in the brand */
+.drawerPrimary {
+  background:     var(--buttons-primary-background);
+  color:          var(--buttons-primary-text);
+  border:         var(--border-width) solid var(--buttons-primary-border-color);
+  border-radius:  var(--buttons-primary-border-radius);
+  padding:        var(--buttons-primary-padding);
+  min-height:     var(--buttons-primary-min-height);
+  cursor: pointer;
+  white-space: nowrap;
+  text-transform: var(--buttons-primary-text-transform, none);
+  letter-spacing: var(--buttons-primary-letter-spacing, normal);
+  font-family:    var(--buttons-primary-font-family, var(--typography-rules-text1-font-family));
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  transition: opacity var(--transition-fast);
+}
+
+.drawerPrimary:disabled {
+  cursor: not-allowed;
+  background: var(--colors-surface-disabled);
+  border-color: var(--colors-surface-disabled);
+  color: var(--colors-text-disabled);
+}
+
+.drawerPrimary:not(:disabled):hover {
+  opacity: 0.85;
+}
+
+/* ─── Info panel chrome — mirrors QuickAddPanel (the product page's own panel) ──
+   Mobile: sheet from the bottom. md+: single-column panel from the right.     */
+
+.infoPanel {
+  position: fixed;
+  z-index: var(--z-modal);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--colors-background);
+  transition: transform var(--transition-base);
+
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: auto;
+  max-height: 90dvh;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  transform: translateY(100%);
+}
+
+.infoPanelOpen {
+  transform: translateY(0);
+}
+
+@media (min-width: 768px) {
+  .infoPanel {
+    top: 0;
+    right: 0;
+    bottom: auto;
+    left: auto;
+    width: min(600px, 100vw);
+    height: 100vh;
+    max-height: none;
+    border-radius: var(--radius-panel) 0 0 var(--radius-panel);
+    transform: translateX(100%);
+  }
+
+  .infoPanelOpen {
+    transform: translateX(0);
+  }
+}
+
+/* Plain glyph, absolute top-right — same treatment as QuickAddPanel */
+.infoClose {
+  position: absolute;
+  top: var(--spacing-md);
+  right: var(--spacing-md);
+  z-index: 2;
+  width: var(--spacing-md);
+  height: var(--spacing-md);
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--colors-text);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  line-height: 1;
+  transition: opacity var(--transition-fast);
+}
+
+.infoClose:hover {
+  opacity: 0.6;
+}
+
+.infoHeader {
+  flex: 0 0 auto;
+  background: var(--colors-background);
+  padding: var(--spacing-md) var(--spacing-sm) var(--spacing-sm);
+}
+
+.infoTitle {
+  margin: 0;
+  padding-right: calc(var(--spacing-md) * 2);
+  font-family:    var(--typography-rules-headline4-font-family);
+  font-size:      var(--typography-rules-headline4-font-size);
+  line-height:    var(--typography-rules-headline4-line-height);
+  font-weight:    var(--typography-rules-headline4-font-weight, normal);
+  letter-spacing: var(--typography-rules-headline4-letter-spacing, normal);
+  text-transform: var(--typography-rules-headline4-text-transform, none);
+  color: var(--colors-text);
+}
+
+.infoScroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 0 var(--spacing-sm) var(--spacing-md);
+  scrollbar-width: thin;
+}
+
+.infoContent {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+@media (min-width: 768px) {
+  .infoClose {
+    top: var(--spacing-lg);
+    right: var(--spacing-lg);
+  }
+
+  .infoHeader {
+    padding: var(--spacing-lg) var(--spacing-lg) var(--spacing-sm);
+  }
+
+  .infoScroll {
+    padding: 0 var(--spacing-lg) var(--spacing-lg);
+  }
+}
+
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

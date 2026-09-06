@@ -12,6 +12,7 @@ import * as lalIcons from '@/src/components/icons/lal'
 import * as ibIcons from '@/src/components/icons/ib'
 import { SiteLogo } from '../SiteLogo'
 import { ThemeSwitcher } from '../ThemeSwitcher'
+import { CartSizeToggle } from './CartSizeToggle'
 import { Topline, type ToplineProps } from '../Topline'
 import { getBrandFromPathname, getBrandHomePath, resolveBrand, type BrandKey } from '../../_config/brands'
 import { useCart } from '../../_context/CartContext'
@@ -101,6 +102,12 @@ export function Header({
             <Link href={logoHref} className={styles.checkoutLogo} aria-label="Home" onClick={() => closeCart()}>
               <SiteLogo brand={brandSegment} priority />
             </Link>
+            {/* Brand switcher — checkout keeps the logo-only bar, this sits to its right.
+                The cart-size control is demo-only and lives on checkout alone. */}
+            <div className={styles.checkoutSwitcher}>
+              <CartSizeToggle className={styles.cartSizeToggle} />
+              <ThemeSwitcher brand={brandSegment} />
+            </div>
           </div>
         </div>
       </header>

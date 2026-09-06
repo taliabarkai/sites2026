@@ -1568,6 +1568,48 @@
 }
 
 /* Warranty add-on — single line below the item */
+/* Gift packaging applied to an order-summary item */
+.summaryGiftRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-xs);
+  padding: var(--spacing-xs);
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--radius-sm);
+}
+
+.summaryGiftLabel {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xxs);
+  min-width: 0;
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+  color: var(--colors-text);
+}
+
+.summaryGiftIncludes {
+  font-weight: var(--typography-rules-text4-font-weight, 600);
+}
+
+.summaryGiftIcon {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.summaryGiftPrice {
+  flex-shrink: 0;
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  color: var(--colors-text);
+}
+
 .warrantyRow {
   display: flex;
   align-items: center;
@@ -2571,6 +2613,219 @@
   white-space:     nowrap;
 }
 
+/* ─── V2, 2+ items: gift option cards nested under each product ─────────────── */
+
+/* One block per cart item: product name header + its gift option card(s) */
+.giftItemGroup {
+  display: flex;
+  flex-direction: column;
+  border-bottom: var(--border-width) solid var(--border-color);
+  background: var(--colors-background);
+}
+
+.giftItemGroup:last-child {
+  border-bottom: none;
+}
+
+/* Product name header — static label, not a disclosure trigger */
+.giftItemHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xs);
+}
+
+.giftItemHeaderName {
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  font-weight:    var(--typography-rules-text1-font-weight, normal);
+  color: var(--colors-text);
+  min-width: 0;
+}
+
+/* Gift option card(s) for this product — left edge aligned with the product thumb */
+.giftItemCards {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  padding: 0 var(--spacing-xs) var(--spacing-xs);
+}
+
+.giftOptionCard {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-xs);
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--radius-sm);
+  background: var(--colors-surface-primary);
+}
+
+/* Gift packaging at card scale — square, matching the 1:1 brand product assets
+   so the image is shown in full rather than cropped to a landscape box. */
+.giftOptionCardImage {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+  background: var(--colors-background);
+}
+
+.giftOptionCardInfo {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xxs);
+}
+
+.giftOptionCardName {
+  font-family:    var(--typography-rules-text2-font-family);
+  font-size:      var(--typography-rules-text2-font-size);
+  line-height:    var(--typography-rules-text2-line-height);
+  font-weight:    var(--typography-rules-text2-font-weight, normal);
+  color: var(--colors-text);
+}
+
+.giftOptionCardDesc {
+  font-family:    var(--typography-rules-text3-font-family);
+  font-size:      var(--typography-rules-text3-font-size);
+  line-height:    var(--typography-rules-text3-line-height);
+  color: var(--colors-text-secondary);
+}
+
+.giftOptionCardSaved {
+  align-items: stretch;
+  border-color: var(--colors-text);
+}
+
+/* Narrow: keep the card as a row but shrink the image, so two products don't
+   turn step 3 into two full-bleed heroes. Drop the indent to buy back width. */
+@media (max-width: 600px) {
+  .giftOptionCard {
+    gap: var(--spacing-xs);
+    align-items: flex-start;
+  }
+
+  .giftOptionCardInfo {
+    gap: 2px;
+  }
+
+  .giftOptionCard .giftAddBtn {
+    align-self: center;
+  }
+
+  .giftOptionCardSaved .giftSavedActions {
+    align-self: stretch;
+  }
+}
+
+/* Product header as a disclosure (only when the brand has 2+ gift options) */
+.giftItemHeaderToggle {
+  width: 100%;
+  background: none;
+  border: none;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.giftItemHeaderToggle:hover {
+  background: var(--colors-surface-primary);
+}
+
+.giftItemChevron {
+  margin-left: auto;
+  flex-shrink: 0;
+  color: var(--colors-text-secondary);
+  /* Brand ChevronIcon points right (>) by default; rotate to face down when collapsed. */
+  transform: rotate(90deg);
+  transition: transform var(--transition-fast);
+}
+
+.giftItemChevronOpen {
+  transform: rotate(-90deg); /* face up when expanded */
+}
+
+/* ─── Gift option carousel (2+ gift options) ────────────────────────────────── */
+
+.giftCarousel {
+  display: flex;
+  gap: var(--spacing-xs);
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  padding: 0 var(--spacing-xs) var(--spacing-xs);
+  scrollbar-width: thin;
+  -webkit-overflow-scrolling: touch;
+}
+
+.giftTile {
+  flex: 0 0 180px;
+  scroll-snap-align: start;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  /* 12px all round, no border — surface colour alone separates the tile. */
+  padding: var(--spacing-xs);
+  border-radius: var(--radius-sm);
+  background: var(--colors-surface-primary);
+}
+
+/* 100px square, matching the 1:1 brand product assets */
+.giftTileImage {
+  width: 100px;
+  height: 100px;
+  align-self: center;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  background: var(--colors-background);
+}
+
+.giftTileBody {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--spacing-xxs);
+}
+
+.giftTileName {
+  font-family:    var(--typography-rules-text2-font-family);
+  font-size:      var(--typography-rules-text2-font-size);
+  line-height:    var(--typography-rules-text2-line-height);
+  font-weight:    var(--typography-rules-text2-font-weight, normal);
+  color: var(--colors-text);
+}
+
+/* Push the button to the bottom so tiles of differing name length stay aligned */
+.giftTileAddBtn {
+  margin-top: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xxs);
+}
+
+.giftTileActions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-top: auto;
+}
+
+/* Added state — inset ring rather than a border, so the default tile stays borderless */
+.giftTileSaved {
+  box-shadow: inset 0 0 0 var(--border-width) var(--colors-text);
+}
+
+@media (max-width: 600px) {
+  .giftTile {
+    flex-basis: 160px;
+  }
+}
+
 /* TGR 2+ items: wrapper that holds item row + expanded sub-options */
 .giftItemExpandRow {
   display: flex;
@@ -2651,6 +2906,8 @@
 .storeCreditOptionRow {
   display: flex;
   flex-direction: column;
+  /* Separate store credit from the payment methods below, matching .paymentOptionGroup */
+  border-bottom: var(--border-width) solid var(--border-color);
 }
 
 .storeCreditOptionBtn {
@@ -2782,7 +3039,8 @@
 .versionToggle {
   position: fixed;
   top: var(--spacing-sm);
-  right: var(--spacing-sm);
+  /* Left, not right — the header's brand switcher owns the top-right corner. */
+  left: var(--spacing-sm);
   z-index: var(--z-toast);
   display: inline-flex;
   align-items: center;

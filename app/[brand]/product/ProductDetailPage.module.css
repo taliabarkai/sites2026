@@ -1256,6 +1256,22 @@
   color: var(--colors-text);
 }
 
+.trustLink {
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  white-space: nowrap;
+  color: var(--colors-text);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  font-weight:    var(--typography-rules-text1-font-weight, normal);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+}
+
 .trustText {
   font-family:    var(--typography-rules-text1-font-family);
   font-size:      var(--typography-rules-text1-font-size);

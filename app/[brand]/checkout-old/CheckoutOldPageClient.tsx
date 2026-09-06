@@ -17,10 +17,10 @@ import { createPlacedOrder, savePlacedOrder, DEMO_CONTACT } from '../_context/pl
 import { getBrandFromPathname } from '../_config/brands'
 import { prefixNavLinks, withBrandPrefix } from '../_config/brandPaths'
 import { DEFAULT_NAV_LINKS, DEFAULT_TOPLINE } from '../_config/siteContent'
+import { GiftOptionsModal } from '../_components/FloatingCart/GiftOptionsModal'
 import { getGiftOptions } from '../_config/giftOptions'
-import { GiftingOptions } from '../_components/cart/GiftingOptions'
-import type { GiftAssignment } from '../_components/cart/GiftingOptions'
-import styles from './CheckoutPage.module.css'
+import type { SavedGift } from '../_components/FloatingCart/GiftOptionsModal'
+import styles from '../checkout/CheckoutPage.module.css'
 
 // ─── Brand icons ──────────────────────────────────────────────────────────────
 
@@ -523,6 +523,213 @@ function OrderSummary({ items, icons, showDetails, subtotal = 0, selectedShippin
   )
 }
 
+// ─── Gift Checkbox Row ────────────────────────────────────────────────────────
+
+interface GiftCheckRowProps {
+  image:          string
+  name:           string
+  description?:   string
+  price?:         string
+  originalPrice?: string
+  saved:          boolean
+  message?:       string
+  onClick:        () => void
+  onRemove?:      () => void
+  onEdit?:        () => void
+  removeIcon?:    React.ReactNode
+  isSubOption?:   boolean
+}
+
+function GiftCheckRow({ image, name, description, price, originalPrice, saved, message, onClick, onRemove, onEdit, removeIcon, isSubOption = false }: GiftCheckRowProps) {
+  if (saved) {
+    return (
+      <div className={`${styles.giftCheckRow} ${styles.giftCheckRowSaved} ${isSubOption ? styles.giftCheckRowSub : ''}`}>
+        <img src={image} alt={name} className={styles.giftCheckThumb} />
+        <div className={styles.giftCheckInfo}>
+          <span className={styles.giftCheckName}>{name}</span>
+          {(originalPrice || price) && (
+            <div className={styles.giftSavedPrices}>
+              {originalPrice && <span className={styles.giftSavedPriceOriginal}>{originalPrice}</span>}
+              {price         && <span className={styles.giftSavedPriceSelling}>{price}</span>}
+            </div>
+          )}
+          {message && message.trim() !== '' && (
+            <p className={styles.giftSavedNote}>&ldquo;{message}&rdquo;</p>
+          )}
+        </div>
+        <div className={styles.giftSavedActions}>
+          {onRemove && (
+            <button type="button" className={styles.giftSavedRemove} onClick={onRemove} aria-label="Remove gift">
+              {removeIcon}
+            </button>
+          )}
+          {onEdit && (
+            <button type="button" className={styles.giftSavedEdit} onClick={onEdit}>
+              Edit
+            </button>
+          )}
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div
+      className={`${styles.giftCheckRow} ${isSubOption ? styles.giftCheckRowSub : ''}`}
+      onClick={onClick}
+      role="button"
+      tabIndex={0}
+      onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && onClick()}
+    >
+      <img src={image} alt={name} className={styles.giftCheckThumb} />
+      <div className={styles.giftCheckInfo}>
+        <span className={styles.giftCheckName}>{name}</span>
+        {description && <span className={styles.giftCheckDesc}>{description}</span>}
+        {price       && <span className={styles.giftCheckPrice}>{price}</span>}
+      </div>
+      <button
+        type="button"
+        className={styles.giftAddBtn}
+        onClick={e => { e.stopPropagation(); onClick() }}
+      >
+        Add
+      </button>
+    </div>
+  )
+}
+
+// ─── Gift Option Card (V2, 2+ items) ──────────────────────────────────────────
+// Always-visible card nested under a product name: gift packaging shown at card
+// scale rather than as a 48px thumb, so the customer sees what they're buying
+// without opening the panel first.
+
+interface GiftOptionCardProps {
+  image:          string
+  name:           string
+  description?:   string
+  price?:         string
+  originalPrice?: string
+  saved:          boolean
+  message?:       string
+  onAdd:          () => void
+  onRemove:       () => void
+  onEdit:         () => void
+  removeIcon?:    React.ReactNode
+}
+
+function GiftOptionCard({
+  image, name, description, price, originalPrice,
+  saved, message, onAdd, onRemove, onEdit, removeIcon,
+}: GiftOptionCardProps) {
+  return (
+    <div className={`${styles.giftOptionCard} ${saved ? styles.giftOptionCardSaved : ''}`}>
+      <img src={image} alt={name} className={styles.giftOptionCardImage} />
+
+      <div className={styles.giftOptionCardInfo}>
+        <span className={styles.giftOptionCardName}>{name}</span>
+        {description && <span className={styles.giftOptionCardDesc}>{description}</span>}
+
+        {(originalPrice || price) && (
+          <div className={styles.giftSavedPrices}>
+            {originalPrice && <span className={styles.giftSavedPriceOriginal}>{originalPrice}</span>}
+            {price         && <span className={styles.giftSavedPriceSelling}>{price}</span>}
+          </div>
+        )}
+
+        {saved && message && message.trim() !== '' && (
+          <p className={styles.giftSavedNote}>&ldquo;{message}&rdquo;</p>
+        )}
+      </div>
+
+      {saved ? (
+        <div className={styles.giftSavedActions}>
+          <button type="button" className={styles.giftSavedRemove} onClick={onRemove} aria-label={`Remove ${name}`}>
+            {removeIcon}
+          </button>
+          <button type="button" className={styles.giftSavedEdit} onClick={onEdit}>
+            Edit
+          </button>
+        </div>
+      ) : (
+        <button type="button" className={styles.giftAddBtn} onClick={onAdd}>
+          Add
+        </button>
+      )}
+    </div>
+  )
+}
+
+// ─── Gift Option Tile (V2, 2+ gift options — carousel item) ───────────────────
+// Vertical card: image on top, then name, price and Add. Used when a brand has
+// more than one gift option, so the options read side by side instead of as a
+// stack of full-width rows.
+
+interface GiftOptionTileProps {
+  image:          string
+  name:           string
+  price?:         string
+  originalPrice?: string
+  saved:          boolean
+  message?:       string
+  onAdd:          () => void
+  onRemove:       () => void
+  onEdit:         () => void
+  removeIcon?:    React.ReactNode
+  addIcon?:       React.ReactNode
+}
+
+function GiftOptionTile({
+  image, name, price, originalPrice, saved, message, onAdd, onRemove, onEdit, removeIcon, addIcon,
+}: GiftOptionTileProps) {
+  return (
+    <div className={`${styles.giftTile} ${saved ? styles.giftTileSaved : ''}`}>
+      <img src={image} alt={name} className={styles.giftTileImage} />
+
+      <div className={styles.giftTileBody}>
+        <span className={styles.giftTileName}>{name}</span>
+
+        {(originalPrice || price) && (
+          <div className={styles.giftSavedPrices}>
+            {originalPrice && <span className={styles.giftSavedPriceOriginal}>{originalPrice}</span>}
+            {price         && <span className={styles.giftSavedPriceSelling}>{price}</span>}
+          </div>
+        )}
+
+        {saved && message && message.trim() !== '' && (
+          <p className={styles.giftSavedNote}>&ldquo;{message}&rdquo;</p>
+        )}
+
+        {saved ? (
+          <div className={styles.giftTileActions}>
+            <button type="button" className={styles.giftSavedEdit} onClick={onEdit}>
+              Edit
+            </button>
+            <button type="button" className={styles.giftSavedRemove} onClick={onRemove} aria-label={`Remove ${name}`}>
+              {removeIcon}
+            </button>
+          </div>
+        ) : (
+          <button type="button" className={`${styles.giftAddBtn} ${styles.giftTileAddBtn}`} onClick={onAdd}>
+            <span>Add</span>
+            {addIcon}
+          </button>
+        )}
+      </div>
+    </div>
+  )
+}
+
+type CheckoutVersion = 'v1' | 'v2'
+
+/**
+ * Switching brands is a client-side push to a different [brand] segment, which
+ * remounts this page and would reset the version toggle. Holding the last choice
+ * at module scope carries it across that remount. Kept out of state deliberately:
+ * the server and the first client render both start from the default, so there is
+ * no hydration mismatch and no flash of the wrong version.
+ */
+let lastCheckoutVersion: CheckoutVersion = 'v2'
+
 // ─── Page Inner ────────────────────────────────────────────────────────────────
 
 function CheckoutPageInner() {
@@ -543,15 +750,13 @@ function CheckoutPageInner() {
   const isTgr          = brand === 'tgr'
   const brandGiftOptions = getGiftOptions(brand)
 
+  // ── Layout version toggle (presentation/demo only) ──────────────────────────
+  // v1: accordion — one step open at a time, gated by Continue buttons.
+  // v2: flat — all 4 sections expanded at once, no Continue gating.
+  const [version, setVersion] = useState<CheckoutVersion>(() => lastCheckoutVersion)
 
-  // Gifting assignments live here (lifted out of GiftingOptions) so the order
-  // total can reflect them. One assignment per item, keyed by itemId.
-  // Warranty lines are not giftable.
-  const eligibleGiftItems = items.filter(item =>
-    !item.name.toLowerCase().includes('warranty')
-  )
-
-  const [giftAssignments, setGiftAssignments] = useState<GiftAssignment[]>([])
+  // Remember the choice for the next mount (e.g. after a brand switch).
+  useEffect(() => { lastCheckoutVersion = version }, [version])
 
   // ── Step state machine ──────────────────────────────────────────────────────
   // Steps: 1=Contact & Delivery, 2=Shipping Method, 3=Gift Options, 4=Payment
@@ -560,9 +765,8 @@ function CheckoutPageInner() {
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set())
 
   // In v2 every step is expanded and nothing is shown as "completed" (collapsed).
-  // Flat layout: every step is expanded, nothing is gated behind Continue.
-  const isActive    = (_s: number) => true
-  const isCompleted = (_s: number) => false
+  const isActive    = (s: number) => version !== 'v1' || activeSteps.has(s)
+  const isCompleted = (s: number) => version === 'v1' ? completedSteps.has(s) : false
 
   const editStep = (step: number) => {
     if (step === 2) {
@@ -643,6 +847,58 @@ function CheckoutPageInner() {
   // ── Mobile summary sheet ────────────────────────────────────────────────────
   const [mobileSummaryOpen, setMobileSummaryOpen] = useState(false)
 
+  // ── Gift options modal (floating cart flow) ─────────────────────────────────
+  const [giftModalItemId,   setGiftModalItemId]   = useState<string | null>(null)
+  const [giftModalOptionId, setGiftModalOptionId] = useState<string | null>(null)
+
+  const openGiftModal = (itemId: string, optionId: string) => {
+    setGiftModalOptionId(optionId)
+    setGiftModalItemId(itemId)
+  }
+
+  // ── Gift options — step 3 ───────────────────────────────────────────────────
+  const [itemGiftSelections, setItemGiftSelections] = useState<Record<string, string[]>>({})
+  // Custom gift note per selection, keyed by `${itemId}::${optionId}`
+  const [itemGiftNotes, setItemGiftNotes] = useState<Record<string, string>>({})
+  const [expandedGiftItemId, setExpandedGiftItemId] = useState<string | null>(null)
+  // V2 collapses per item independently, unlike V1's single-open accordion.
+  // Default: the first cart item is open, the rest collapsed. Recorded as overrides
+  // rather than seeded state so it survives the cart hydrating from localStorage.
+  const [giftItemOverrides, setGiftItemOverrides] = useState<Record<string, boolean>>({})
+  const isGiftItemOpen = (itemId: string, index: number) => giftItemOverrides[itemId] ?? index === 0
+  const toggleGiftItem = (itemId: string, index: number) =>
+    setGiftItemOverrides(prev => ({ ...prev, [itemId]: !(prev[itemId] ?? index === 0) }))
+
+  const giftNoteKey  = (itemId: string, optionId: string) => `${itemId}::${optionId}`
+  const getGiftNote  = (itemId: string, optionId: string) => itemGiftNotes[giftNoteKey(itemId, optionId)]
+  const saveGiftNote = (itemId: string, optionId: string, note: string) =>
+    setItemGiftNotes(prev => ({ ...prev, [giftNoteKey(itemId, optionId)]: note }))
+
+  const eligibleGiftItems = items.filter(item =>
+    !item.name.toLowerCase().includes('warranty')
+  )
+
+  const selectGiftForItem = (itemId: string, optionId: string) => {
+    setItemGiftSelections(prev => {
+      const current = prev[itemId] ?? []
+      if (current.includes(optionId)) return prev
+      return { ...prev, [itemId]: [...current, optionId] }
+    })
+  }
+
+  const deselectGiftForItem = (itemId: string, optionId: string) => {
+    setItemGiftSelections(prev => ({
+      ...prev,
+      [itemId]: (prev[itemId] ?? []).filter(id => id !== optionId),
+    }))
+    setItemGiftNotes(prev => {
+      const next = { ...prev }
+      delete next[giftNoteKey(itemId, optionId)]
+      return next
+    })
+  }
+
+  const anyGiftSelected = Object.values(itemGiftSelections).some(arr => arr.length > 0)
 
   // ── Form state ──────────────────────────────────────────────────────────────
 
@@ -705,8 +961,8 @@ function CheckoutPageInner() {
   const discountAmount = promoApplied ? Math.round(subtotal * 0.20) : 0
   // Gift packaging is part of the merchandise subtotal, so it sits inside the
   // taxable base rather than being tacked on after tax.
-  const giftTotal      = giftAssignments.reduce(
-    (sum, a) => sum + (brandGiftOptions.find(o => o.id === a.optionId)?.price ?? 0), 0)
+  const giftTotal      = Object.values(itemGiftSelections).reduce(
+    (sum, ids) => sum + (brandGiftOptions.find(o => o.id === ids[0])?.price ?? 0), 0)
   const giftedSubtotal = subtotal + giftTotal
   const taxAmount      = isCompleted(1) ? Math.round(giftedSubtotal * 0.08) : null
   const orderTotal     = giftedSubtotal + shippingCost - discountAmount + (taxAmount ?? 0)
@@ -788,6 +1044,22 @@ function CheckoutPageInner() {
       </div>
     </div>
   )
+  const giftSelectedCount = Object.values(itemGiftSelections).filter(arr => arr.length > 0).length
+  const step3Summary = anyGiftSelected ? (
+    <div className={styles.completedGroup}>
+      <div className={styles.completedSection}>
+        <span className={styles.completedLabel}>Gift Options</span>
+        <span className={styles.completedValue}>
+          {eligibleGiftItems.length > 1
+            ? `Gift added to ${giftSelectedCount} of ${eligibleGiftItems.length} items`
+            : (itemGiftSelections[eligibleGiftItems[0]?.id ?? ''] ?? [])
+                .map(id => brandGiftOptions.find(o => o.id === id)?.name ?? '')
+                .filter(Boolean)
+                .join(', ')}
+        </span>
+      </div>
+    </div>
+  ) : undefined
   const step4Summary = (
     <div className={styles.completedGroup}>
       <div className={styles.completedSection}>
@@ -799,11 +1071,12 @@ function CheckoutPageInner() {
     </div>
   )
 
-  // Packaging shown per item in the order summary.
+  // Packaging shown per item in the order summary. v3 reads the assignment model;
+  // v1/v2 read the per-item selections, so the summary is right in every version.
   const giftByItemId: Record<string, { name: string; price: number }> = {}
-  for (const a of giftAssignments) {
-    const opt = brandGiftOptions.find(o => o.id === a.optionId)
-    if (opt) giftByItemId[a.itemId] = { name: opt.name, price: opt.price }
+    for (const [itemId, optionIds] of Object.entries(itemGiftSelections)) {
+    const opt = brandGiftOptions.find(o => o.id === optionIds[0])
+    if (opt) giftByItemId[itemId] = { name: opt.name, price: opt.price }
   }
 
   const summaryProps = {
@@ -814,6 +1087,20 @@ function CheckoutPageInner() {
 
   return (
     <div className={styles.page}>
+      {/* Layout version switcher — presentation/demo only */}
+      <div className={styles.versionToggle} role="group" aria-label="Checkout layout version">
+        {(['v1', 'v2'] as const).map(v => (
+          <button
+            key={v}
+            type="button"
+            className={`${styles.versionToggleBtn} ${version === v ? styles.versionToggleBtnActive : ''}`}
+            onClick={() => setVersion(v)}
+            aria-pressed={version === v}
+          >
+            {v.toUpperCase()}
+          </button>
+        ))}
+      </div>
 
       <div className={styles.checkoutHeaderWrap} data-sticky-top>
         <Header variant="white" brand={brand} navLinks={navLinks} topline={topline} />
@@ -983,6 +1270,14 @@ function CheckoutPageInner() {
                     <p className={styles.sectionSubtitle}>(Delivery notifications will be sent to this number)</p>
                   </div>
                 </div>
+
+                {version === 'v1' && (
+                  <div className={styles.stepContinueRow}>
+                    <Button variant="primary" className={styles.continueBtn} disabled={!step1Valid} onClick={() => animateAndComplete(1)}>
+                      Continue
+                    </Button>
+                  </div>
+                )}
               </AccordionStep>
 
               {/* ── Step 2: Shipping Method ── */}
@@ -1033,28 +1328,206 @@ function CheckoutPageInner() {
                 </div>
               </AccordionStep>
 
-              {/* ── Step 3: Gifting — options-first section ── */}
-              <GiftingOptions
-                options={brandGiftOptions.map(o => ({
-                  id:              o.id,
-                  name:            o.name,
-                  description:     o.description,
-                  longDescription: o.longDescription,
-                  price:           o.price,
-                  imageUrl:        o.image,
-                }))}
-                items={eligibleGiftItems.map(i => ({ id: i.id, name: i.name, imageUrl: i.image }))}
-                assignments={giftAssignments}
-                onChange={setGiftAssignments}
-                icons={{
-                  GiftIcon:      icons.GiftIcon,
-                  CheckmarkIcon: icons.CheckmarkIcon,
-                  XIcon:         icons.XIcon,
-                  AiMagicIcon:   icons.AiMagicIcon,
-                  TrashCanIcon:  icons.TrashCanIcon,
-                }}
-                onGenerateNote={async () => 'Wishing you a wonderful day filled with joy!'}
-              />
+              {/* ── Step 3: Gift Options ── */}
+              <AccordionStep
+                title="Add Gifting Options"
+                stepNumber={3}
+                isActive={isActive(3)}
+                isCompleted={isCompleted(3)}
+                completedSummary={step3Summary}
+                onEdit={() => editStep(3)}
+                icon={<icons.GiftIcon size={32} />}
+                editLabel={anyGiftSelected ? 'Edit' : 'Add'}
+              >
+                {/* Gift options — brand-aware checkbox row layout */}
+                <div className={styles.giftRowList}>
+                  {eligibleGiftItems.length > 1 && version === 'v2' ? (
+                    /* V2, 2+ items — gift options always open, nested under each product name */
+                    eligibleGiftItems.map((item, index) => {
+                      // With 2+ gift options the options render as a horizontal carousel
+                      // instead of stacked rows. Either way the product is a disclosure.
+                      const isCarousel = brandGiftOptions.length > 1
+                      const isOpen     = isGiftItemOpen(item.id, index)
+
+                      return (
+                        <div key={item.id} className={styles.giftItemGroup}>
+                          <button
+                            type="button"
+                            className={`${styles.giftItemHeader} ${styles.giftItemHeaderToggle}`}
+                            aria-expanded={isOpen}
+                            onClick={() => toggleGiftItem(item.id, index)}
+                          >
+                            <img src={item.image} alt="" className={styles.giftCheckThumb} />
+                            <span className={styles.giftItemHeaderName}>{item.name}</span>
+                            <icons.ChevronIcon
+                              size={24}
+                              className={`${styles.giftItemChevron} ${isOpen ? styles.giftItemChevronOpen : ''}`}
+                            />
+                          </button>
+
+                          {isOpen && (
+                            isCarousel ? (
+                              <div className={styles.giftCarousel} role="group" aria-label={`Gift options for ${item.name}`}>
+                                {brandGiftOptions.map(option => {
+                                  const isSaved = (itemGiftSelections[item.id] ?? []).includes(option.id)
+                                  return (
+                                    <GiftOptionTile
+                                      key={option.id}
+                                      image={option.image}
+                                      name={option.name}
+                                      price={formatPrice(option.price)}
+                                      originalPrice={option.originalPrice ? formatPrice(option.originalPrice) : undefined}
+                                      saved={isSaved}
+                                      message={getGiftNote(item.id, option.id)}
+                                      onAdd={() => openGiftModal(item.id, option.id)}
+                                      onRemove={() => deselectGiftForItem(item.id, option.id)}
+                                      onEdit={() => openGiftModal(item.id, option.id)}
+                                      removeIcon={<icons.TrashCanIcon size={24} />}
+                                      addIcon={<icons.PlusMinusIcon size={24} />}
+                                    />
+                                  )
+                                })}
+                              </div>
+                            ) : (
+                              <div className={styles.giftItemCards}>
+                                {brandGiftOptions.map(option => {
+                                  const isSaved = (itemGiftSelections[item.id] ?? []).includes(option.id)
+                                  return (
+                                    <GiftOptionCard
+                                      key={option.id}
+                                      image={option.image}
+                                      name={option.name}
+                                      description={option.description}
+                                      price={formatPrice(option.price)}
+                                      originalPrice={option.originalPrice ? formatPrice(option.originalPrice) : undefined}
+                                      saved={isSaved}
+                                      message={getGiftNote(item.id, option.id)}
+                                      onAdd={() => openGiftModal(item.id, option.id)}
+                                      onRemove={() => deselectGiftForItem(item.id, option.id)}
+                                      onEdit={() => openGiftModal(item.id, option.id)}
+                                      removeIcon={<icons.TrashCanIcon size={24} />}
+                                    />
+                                  )
+                                })}
+                              </div>
+                            )
+                          )}
+                        </div>
+                      )
+                    })
+                  ) : isTgr ? (
+                    eligibleGiftItems.length === 1 ? (
+                      /* TGR, 1 item — show both gift option rows; each independently selectable */
+                      brandGiftOptions.map(option => {
+                        const itemId  = eligibleGiftItems[0]?.id ?? ''
+                        const isSaved = (itemGiftSelections[itemId] ?? []).includes(option.id)
+                        return (
+                          <GiftCheckRow
+                            key={option.id}
+                            image={option.image}
+                            name={option.name}
+                            description={option.description}
+                            price={formatPrice(option.price)}
+                            saved={isSaved}
+                            message={getGiftNote(itemId, option.id)}
+                            onClick={() => openGiftModal(itemId, option.id)}
+                            onRemove={() => deselectGiftForItem(itemId, option.id)}
+                            onEdit={() => openGiftModal(itemId, option.id)}
+                            removeIcon={<icons.TrashCanIcon size={24} />}
+                          />
+                        )
+                      })
+                    ) : (
+                      /* TGR, 2+ items — item rows that expand inline to reveal options */
+                      eligibleGiftItems.map(item => {
+                        const isExpanded = expandedGiftItemId === item.id
+                        return (
+                          <div key={item.id} className={styles.giftItemExpandRow}>
+                            <GiftCheckRow
+                              image={item.image}
+                              name={item.name}
+                              saved={false}
+                              onClick={() => setExpandedGiftItemId(isExpanded ? null : item.id)}
+                            />
+                            {isExpanded && (
+                              <div className={styles.giftSubOptions}>
+                                {brandGiftOptions.map(option => {
+                                  const isSaved = (itemGiftSelections[item.id] ?? []).includes(option.id)
+                                  return (
+                                    <GiftCheckRow
+                                      key={option.id}
+                                      image={option.image}
+                                      name={option.name}
+                                      description={option.description}
+                                      price={formatPrice(option.price)}
+                                      saved={isSaved}
+                                      message={getGiftNote(item.id, option.id)}
+                                      onClick={() => openGiftModal(item.id, option.id)}
+                                      onRemove={() => deselectGiftForItem(item.id, option.id)}
+                                      onEdit={() => openGiftModal(item.id, option.id)}
+                                      removeIcon={<icons.TrashCanIcon size={24} />}
+                                      isSubOption
+                                    />
+                                  )
+                                })}
+                              </div>
+                            )}
+                          </div>
+                        )
+                      })
+                    )
+                  ) : (
+                    eligibleGiftItems.length === 1 ? (
+                      /* Non-TGR, 1 item — show the single gift option row */
+                      (() => {
+                        const itemId  = eligibleGiftItems[0]?.id ?? ''
+                        const isSaved = (itemGiftSelections[itemId] ?? []).length > 0
+                        return (
+                          <GiftCheckRow
+                            image={brandGiftOptions[0].image}
+                            name={brandGiftOptions[0].name}
+                            description={brandGiftOptions[0].description}
+                            price={formatPrice(brandGiftOptions[0].price)}
+                            saved={isSaved}
+                            message={getGiftNote(itemId, brandGiftOptions[0].id)}
+                            onClick={() => openGiftModal(itemId, brandGiftOptions[0].id)}
+                            onRemove={() => deselectGiftForItem(itemId, brandGiftOptions[0].id)}
+                            onEdit={() => openGiftModal(itemId, brandGiftOptions[0].id)}
+                            removeIcon={<icons.TrashCanIcon size={24} />}
+                          />
+                        )
+                      })()
+                    ) : (
+                      /* Non-TGR, 2+ items — one row per cart item */
+                      eligibleGiftItems.map(item => {
+                        const isSaved = (itemGiftSelections[item.id] ?? []).length > 0
+                        return (
+                          <GiftCheckRow
+                            key={item.id}
+                            image={item.image}
+                            name={item.name}
+                            saved={isSaved}
+                            message={getGiftNote(item.id, brandGiftOptions[0].id)}
+                            onClick={() => openGiftModal(item.id, brandGiftOptions[0].id)}
+                            onRemove={() => deselectGiftForItem(item.id, brandGiftOptions[0].id)}
+                            onEdit={() => openGiftModal(item.id, brandGiftOptions[0].id)}
+                            removeIcon={<icons.TrashCanIcon size={24} />}
+                          />
+                        )
+                      })
+                    )
+                  )}
+                </div>
+
+
+                {version === 'v1' && (
+                  <div className={styles.stepContinueRow}>
+                    <Button variant="primary" className={styles.continueBtn} onClick={() => animateAndComplete(3)}>
+                      Continue
+                    </Button>
+                  </div>
+                )}
+              </AccordionStep>
 
               {/* ── Step 4: Payment ── */}
               <AccordionStep
@@ -1355,6 +1828,29 @@ function CheckoutPageInner() {
         </div>
       </main>
 
+      {giftModalItemId !== null && (() => {
+        // The panel renders whichever gift option was clicked, from brandGiftOptions.
+        const modalOption = brandGiftOptions.find(o => o.id === giftModalOptionId) ?? brandGiftOptions[0]
+        return (
+          <GiftOptionsModal
+            image={modalOption.image}
+            name={modalOption.name}
+            description={modalOption.description}
+            price={formatPrice(modalOption.price)}
+            initialNote={giftModalOptionId ? getGiftNote(giftModalItemId, giftModalOptionId) ?? '' : ''}
+            onClose={() => { setGiftModalItemId(null); setGiftModalOptionId(null) }}
+            onAddToCart={(gift: SavedGift) => {
+              if (giftModalItemId && giftModalOptionId) {
+                selectGiftForItem(giftModalItemId, giftModalOptionId)
+                saveGiftNote(giftModalItemId, giftModalOptionId, gift.note)
+              }
+              setGiftModalItemId(null)
+              setGiftModalOptionId(null)
+            }}
+            onGenerateGiftNote={async () => 'Wishing you a wonderful day filled with joy!'}
+          />
+        )
+      })()}
 
     </div>
   )
@@ -1362,6 +1858,6 @@ function CheckoutPageInner() {
 
 // ─── Export ────────────────────────────────────────────────────────────────────
 
-export default function CheckoutPageClient() {
+export default function CheckoutOldPageClient() {
   return <CheckoutPageInner />
 }

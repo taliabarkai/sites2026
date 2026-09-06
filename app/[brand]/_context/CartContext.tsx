@@ -59,6 +59,8 @@ interface CartContextValue {
   updateGiftPackaging: (id: string, gift: GiftPackaging | undefined) => void
   /** Toggle the 5-year protection plan for a cart item. */
   toggleWarranty: (id: string) => void
+  /** Replace the whole cart. Used by the checkout demo's cart-size toggle. */
+  replaceItems: (items: CartItem[]) => void
 }
 
 const CartContext = createContext<CartContextValue | null>(null)
@@ -96,6 +98,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setItems(prev => [...prev, item])
   }, [])
 
+  const replaceItems = useCallback((next: CartItem[]) => {
+    setItems(next)
+  }, [])
+
   const removeItem = useCallback((id: string) => {
     setItems(prev => prev.filter(item => item.id !== id))
   }, [])
@@ -122,6 +128,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       removeItem,
       updateGiftPackaging,
       toggleWarranty,
+      replaceItems,
     }}>
       {children}
     </CartContext.Provider>
@@ -139,6 +146,7 @@ const CART_NOOP: CartContextValue = {
   removeItem: () => {},
   updateGiftPackaging: () => {},
   toggleWarranty: () => {},
+  replaceItems: () => {},
 }
 
 export function useCart() {

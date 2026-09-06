@@ -37,6 +37,8 @@ import { getBrandProducts } from '../../../data/products/getBrandProducts'
 import { getReviewSummary } from '../../../data/products/reviewSummary'
 import type { ProductItem } from '../../../data/products'
 import { LalCanvasCustomizer } from './LalCanvasCustomizer'
+import { getGiftOptions } from '../_config/giftOptions'
+import { GiftOptionsInfoPanel } from '../_components/cart/GiftingOptions'
 import { MusicMemoriesCustomizer } from './MusicMemoriesCustomizer'
 import { AIPreviewCustomizer } from '../_components/AIPreviewCustomizer'
 
@@ -796,14 +798,17 @@ function TrustBadges({
   ReturnIcon,
   WarrantyIcon,
   GiftIcon,
+  onSeeGiftDetails,
 }: {
   ShippingIcon: React.ComponentType<{ size?: number }>
   ReturnIcon: React.ComponentType<{ size?: number }>
   WarrantyIcon: React.ComponentType<{ size?: number }>
   GiftIcon: React.ComponentType<{ size?: number }>
+  /** Opens the gift options panel. Omit to render the row without a link. */
+  onSeeGiftDetails?: () => void
 }) {
   const badges = [
-    { Icon: GiftIcon,      text: 'Gift packaging available in bag' },
+    { Icon: GiftIcon,      text: 'Gift options available at checkout', action: onSeeGiftDetails },
     { Icon: ShippingIcon,  text: 'Free shipping on all orders' },
     { Icon: ReturnIcon,    text: '60-day extended returns' },
     { Icon: WarrantyIcon,  text: '5 year warranty' },
@@ -811,12 +816,17 @@ function TrustBadges({
 
   return (
     <ul className={styles.trustBadges} aria-label="Trust badges">
-      {badges.map(({ Icon, text }) => (
+      {badges.map(({ Icon, text, action }) => (
         <li key={text} className={styles.trustItem}>
           <span className={styles.trustIcon} aria-hidden="true">
             <Icon size={24} />
           </span>
           <span className={styles.trustText}>{text}</span>
+          {action && (
+            <button type="button" className={styles.trustLink} onClick={action}>
+              See details
+            </button>
+          )}
         </li>
       ))}
     </ul>
@@ -846,6 +856,9 @@ function ProductForm({ brand, product, icons, nestedItems = [], onAddToBag }: Pr
   const [engravedText, setEngravedText] = useState('')
   const [chainLength, setChainLength] = useState(DEFAULT_CHAIN_LENGTH)
   const { DropdownIcon, StarIcon, ShippingIcon, ReturnIcon, WarrantyIcon, GiftIcon, ChevronIcon } = icons
+
+  // "See details" on the gift USP row opens a read-only packaging panel.
+  const [giftInfoOpen, setGiftInfoOpen] = useState(false)
 
   // ── Nested Items — staged companion products + quick-add panel state ──────
   // `staged` maps a nested item's key → its fully configured cart item.
@@ -1000,7 +1013,21 @@ function ProductForm({ brand, product, icons, nestedItems = [], onAddToBag }: Pr
         ReturnIcon={ReturnIcon}
         WarrantyIcon={WarrantyIcon}
         GiftIcon={GiftIcon}
+        onSeeGiftDetails={() => setGiftInfoOpen(true)}
       />
+
+      {giftInfoOpen && (
+        <GiftOptionsInfoPanel
+          options={getGiftOptions(brand).map(o => ({
+            id:          o.id,
+            name:        o.name,
+            description: o.description,
+            price:       o.price,
+            imageUrl:    o.image,
+          }))}
+          onClose={() => setGiftInfoOpen(false)}
+        />
+      )}
 
       {/* Quick-add panel — reused to configure a nested item; CTA reads "Add" and
           the completed item is staged (not dropped straight into the bag). */}

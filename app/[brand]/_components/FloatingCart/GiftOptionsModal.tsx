@@ -19,7 +19,10 @@ const BRAND_ICONS = {
   ib: ibIcons,
 } as const
 
+// Legacy fallbacks — used when the caller does not pass a gift option (e.g. CheckoutPageClientV1).
 const GIFT_IMAGE = 'https://cdn.oakandluna.com/digital-asset/product/gift-box-25.jpg'
+const GIFT_NAME  = 'Gift Packaging — Gift Bag, Gift Box, Fabric Pouch and a Custom Note'
+const GIFT_PRICE = '$7'
 
 export interface SavedGift {
   image: string
@@ -32,12 +35,28 @@ interface GiftOptionsModalProps {
   onClose: () => void
   onAddToCart: (gift: SavedGift) => void
   onGenerateGiftNote: () => Promise<string>
+  /** Gift option being configured. Omit to fall back to the legacy hardcoded copy. */
+  image?:       string
+  name?:        string
+  description?: string
+  price?:       string
+  /** Existing note, so re-opening the panel to edit keeps what was written. */
+  initialNote?: string
 }
 
 const MAX_NOTE_LENGTH = 280
 
-export function GiftOptionsModal({ onClose, onAddToCart, onGenerateGiftNote }: GiftOptionsModalProps) {
-  const [note, setNote] = useState('')
+export function GiftOptionsModal({
+  onClose,
+  onAddToCart,
+  onGenerateGiftNote,
+  image       = GIFT_IMAGE,
+  name        = GIFT_NAME,
+  description,
+  price       = GIFT_PRICE,
+  initialNote = '',
+}: GiftOptionsModalProps) {
+  const [note, setNote] = useState(initialNote)
   const [generating, setGenerating] = useState(false)
   const [open, setOpen] = useState(false)
   const panelRef = useRef<HTMLDivElement>(null)
@@ -126,16 +145,17 @@ export function GiftOptionsModal({ onClose, onAddToCart, onGenerateGiftNote }: G
         <div className={styles.scrollBody}>
           <div className={styles.productImage}>
             <img
-              src={GIFT_IMAGE}
-              alt="Gift packaging — gift bag, gift box, fabric pouch and a custom note"
+              src={image}
+              alt={name}
               className={styles.image}
             />
           </div>
 
 
           <div className={styles.body}>
-            <p className={styles.productHeading}>Gift Packaging — Gift Bag, Gift Box, Fabric Pouch and a Custom Note</p>
-            <p className={styles.price}>$7</p>
+            <p className={styles.productHeading}>{name}</p>
+            {description && <p className={styles.productDescription}>{description}</p>}
+            <p className={styles.price}>{price}</p>
 
             <div className={styles.noteRow}>
               <span className={styles.noteLabel}>Your gift note:</span>
@@ -175,12 +195,7 @@ export function GiftOptionsModal({ onClose, onAddToCart, onGenerateGiftNote }: G
           </button>
           <Button
             variant="primary"
-            onClick={() => onAddToCart({
-              image: GIFT_IMAGE,
-              name: 'Gift Packaging — Gift Bag, Gift Box, Fabric Pouch and a Custom Note',
-              price: '$7',
-              note,
-            })}
+            onClick={() => onAddToCart({ image, name, price, note })}
           >
             Add To Bag
           </Button>
