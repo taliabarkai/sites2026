@@ -25,8 +25,8 @@ interface GiftingDrawerProps {
   /** null while packaging is still being chosen (entry point 2). */
   option:         GiftOption | null
   selectedItemId: string | null
-  /** Entry points 2 and 3 fix the item — shown resolved, with no Change link. */
-  itemFixed:      boolean
+  /** Entry points 2 and 3 arrive without a packaging choice, so it stays swappable. */
+  packagingChangeable: boolean
   pickPackaging:  boolean
   note:           string
   onSelectItem:   (itemId: string) => void
@@ -39,7 +39,7 @@ interface GiftingDrawerProps {
 }
 
 export function GiftingDrawer({
-  options, items, assignments, icons, option, selectedItemId, itemFixed, pickPackaging, note,
+  options, items, assignments, icons, option, selectedItemId, packagingChangeable, pickPackaging, note,
   onSelectItem, onPickPackaging, onChangePackaging, onNoteChange, onAddToBag, onClose, onGenerateNote,
 }: GiftingDrawerProps) {
   const { XIcon } = icons
@@ -118,7 +118,12 @@ export function GiftingDrawer({
   }
 
   // ── Item cards: roving tabindex, arrows move focus, Enter/Space selects ─────
-  const selectableIndexes = items
+  // Already-wrapped items drop out of the picker; the one being worked on stays,
+  // so Edit and Change can still show and re-select it.
+  const selectableItems = items.filter(i =>
+    i.id === selectedItemId || !assignments.some(a => a.itemId === i.id))
+
+  const selectableIndexes = selectableItems
     .map((item, i) => (!option || isItemEligible(option, item.id) ? i : -1))
     .filter(i => i !== -1)
 
@@ -140,13 +145,12 @@ export function GiftingDrawer({
   }
 
   // One continuous view: choosing an item collapses the list and reveals the note.
-  const resolvedItemId = itemFixed
-    ? selectedItemId
-    : isSingleItem ? (items[0]?.id ?? null) : pendingItemId
+  const resolvedItemId = isSingleItem ? (items[0]?.id ?? null) : pendingItemId
   const resolvedItem   = items.find(i => i.id === resolvedItemId) ?? null
 
   // Options this item can actually use — ineligible ones never reach the chooser.
   const eligibleOptions = options.filter(o => !resolvedItemId || isItemEligible(o, resolvedItemId))
+
 
   const primaryDisabled = pickPackaging || !option || !resolvedItemId || note.trim().length === 0
 
@@ -155,7 +159,7 @@ export function GiftingDrawer({
     onSelectItem(itemId)
   }
 
-  const itemCard = (item: CartItem, index: number, mode: 'select' | 'chosen' | 'fixed') => {
+  const itemCard = (item: CartItem, index: number, mode: 'select' | 'chosen') => {
     const eligible = !option || isItemEligible(option, item.id)
     const existing = assignments.find(a => a.itemId === item.id)
     const existingOption = existing && options.find(o => o.id === existing.optionId)
@@ -174,7 +178,7 @@ export function GiftingDrawer({
           {!eligible && mode === 'select' && (
             <span className={styles.itemCardReason}>Not available for this piece</span>
           )}
-          {mode === 'fixed' ? null : mode === 'chosen' ? (
+          {mode === 'chosen' ? (
             <span className={styles.itemCardAction}>Change</span>
           ) : eligible ? (
             <span className={styles.itemCardAction}>{chosen ? 'Selected' : 'Select'}</span>
@@ -182,10 +186,6 @@ export function GiftingDrawer({
         </span>
       </>
     )
-
-    if (mode === 'fixed') {
-      return <div className={`${styles.itemCard} ${styles.itemCardChosen}`}>{common}</div>
-    }
 
     if (mode === 'chosen') {
       return (
@@ -290,7 +290,7 @@ export function GiftingDrawer({
                     {option.longDescription ?? option.description}
                   </p>
                   <p className={styles.optionBlockPrice}>{formatPrice(option.price)}</p>
-                  {itemFixed && (
+                  {packagingChangeable && eligibleOptions.length > 1 && (
                     <button type="button" className={styles.optionBlockChange} onClick={onChangePackaging}>
                       Change
                     </button>
@@ -308,13 +308,11 @@ export function GiftingDrawer({
             {!isSingleItem && (
               <>
                 <h3 className={styles.stepHeading} id={groupId}>Which item is this gift for?</h3>
-                {itemFixed && resolvedItem ? (
-                  <div className={styles.itemCardList}>{itemCard(resolvedItem, 0, 'fixed')}</div>
-                ) : resolvedItem ? (
+                {resolvedItem ? (
                   <div className={styles.itemCardList}>{itemCard(resolvedItem, 0, 'chosen')}</div>
                 ) : (
                   <div className={styles.itemCardList} role="radiogroup" aria-labelledby={groupId}>
-                    {items.map((item, index) => itemCard(item, index, 'select'))}
+                    {selectableItems.map((item, index) => itemCard(item, index, 'select'))}
                   </div>
                 )}
               </>

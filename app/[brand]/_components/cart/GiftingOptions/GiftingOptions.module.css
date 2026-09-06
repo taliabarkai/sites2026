@@ -248,6 +248,16 @@
 }
 
 /* Bordered card, matching the drawer's item cards */
+.itemStateRowClickable {
+  cursor: pointer;
+  transition: border-color var(--transition-fast);
+}
+
+.itemStateRowClickable:hover,
+.itemStateRowClickable:focus-visible {
+  border-color: var(--border-strong);
+}
+
 .itemStateRow {
   display: flex;
   align-items: stretch;
@@ -337,10 +347,6 @@
 .itemStateEdit {
   flex: 0 0 auto;
   margin-top: auto;
-  background: transparent;
-  border: none;
-  padding: 0;
-  cursor: pointer;
   white-space: nowrap;
   color: var(--colors-text);
   text-decoration: underline;
@@ -353,7 +359,8 @@
 .itemStateAdd {
   flex: 0 0 auto;
   margin-top: auto;
-  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
   white-space: nowrap;
   background:    var(--buttons-upsell-primary-background);
   color:         var(--buttons-upsell-primary-text);

@@ -27,8 +27,8 @@ interface DrawerState {
   /** null until packaging is chosen (entry point 2). */
   optionId:      string | null
   itemId:        string | null
-  /** Entry points 2 and 3 fix the item, so it is shown resolved with no Change. */
-  itemFixed:     boolean
+  /** Entry points 2 and 3 arrive without a packaging choice, so it stays swappable. */
+  packagingChangeable: boolean
   note:          string
   /** Showing the packaging chooser rather than the note. */
   pickPackaging: boolean
@@ -68,7 +68,7 @@ export function GiftingOptions({
     setDrawer({
       optionId:      option.id,
       itemId:        onlyItem?.id ?? null,
-      itemFixed:     false,
+      packagingChangeable: false,
       note:          onlyItem ? noteFor(onlyItem.id) : '',
       pickPackaging: false,
     })
@@ -79,7 +79,7 @@ export function GiftingOptions({
     setDrawer({
       optionId:      assignment.optionId,
       itemId:        assignment.itemId,
-      itemFixed:     true,
+      packagingChangeable: true,
       note:          assignment.note,
       pickPackaging: false,
     })
@@ -88,12 +88,19 @@ export function GiftingOptions({
   /** Entry point 2: the item is fixed, packaging is not yet chosen. */
   const handleAddGifting = (itemId: string, trigger?: HTMLElement | null) => {
     if (trigger) triggerRef.current = trigger
+
+    // With a single eligible option there is nothing to choose, so open straight
+    // on the note rather than showing a one-card picker.
+    const eligible = options.filter(o => isItemEligible(o, itemId))
+    const only = eligible.length === 1 ? eligible[0] : null
+    if (only) lastOptionIdRef.current = only.id
+
     setDrawer({
-      optionId:      null,
+      optionId:      only?.id ?? null,
       itemId,
-      itemFixed:     true,
+      packagingChangeable: true,
       note:          '',
-      pickPackaging: true,
+      pickPackaging: !only,
     })
   }
 
@@ -170,7 +177,7 @@ export function GiftingOptions({
           icons={icons}
           option={activeOption}
           selectedItemId={drawer.itemId}
-          itemFixed={drawer.itemFixed}
+          packagingChangeable={drawer.packagingChangeable}
           pickPackaging={drawer.pickPackaging}
           note={drawer.note}
           onSelectItem={handleSelectItem}

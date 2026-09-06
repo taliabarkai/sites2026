@@ -993,12 +993,6 @@ function CheckoutPageInner() {
                 isCompleted={isCompleted(2)}
                 completedSummary={step2Summary}
                 onEdit={() => editStep(2)}
-                subHeader={
-                  <div className={styles.shippingInsurance}>
-                    <span className={styles.insuranceIcon}><CheckmarkIcon size={24} /></span>
-                    <span className={styles.checkboxText}>All methods are tracked &amp; insured</span>
-                  </div>
-                }
               >
                 <div className={styles.shippingOptions} role="radiogroup" aria-label="Shipping method">
                   <label className={`${styles.shippingOption} ${selectedShipping === 'free' ? styles.shippingOptionSelected : ''}`}>

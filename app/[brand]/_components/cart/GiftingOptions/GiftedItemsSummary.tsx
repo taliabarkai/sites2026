@@ -47,8 +47,26 @@ export function GiftedItemsSummary({
           const cheapest   = eligible.reduce<GiftOption | null>(
             (lo, o) => (!lo || o.price < lo.price ? o : lo), null)
 
+          const action = option
+            ? () => onEdit(assignment!)
+            : cheapest ? () => onAddGifting(item.id) : null
+
           return (
-            <li key={item.id} className={styles.itemStateRow}>
+            <li
+              key={item.id}
+              className={`${styles.itemStateRow} ${action ? styles.itemStateRowClickable : ''}`}
+              {...(action ? {
+                role: 'button',
+                tabIndex: 0,
+                'aria-label': option
+                  ? `Edit gifting for ${item.name}`
+                  : `Add gifting to ${item.name}`,
+                onClick: action,
+                onKeyDown: (e: React.KeyboardEvent) => {
+                  if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); action() }
+                },
+              } : {})}
+            >
               {/* Once wrapped, the tile shows the packaging — the product is already
                   named in the row text, so the image can carry the new information. */}
               <img
@@ -79,28 +97,17 @@ export function GiftedItemsSummary({
                     type="button"
                     className={styles.itemStateRemove}
                     aria-label={`Remove gifting from ${item.name}`}
-                    onClick={() => onRemove(item.id)}
+                    onClick={e => { e.stopPropagation(); onRemove(item.id) }}
                   >
                     <TrashCanIcon size={24} />
                   </button>
                 )}
 
+                {/* The row itself is the control; these read as affordances only. */}
                 {option ? (
-                  <button
-                    type="button"
-                    className={styles.itemStateEdit}
-                    onClick={() => onEdit(assignment!)}
-                  >
-                    Edit<span className={styles.visuallyHidden}> gifting for {item.name}</span>
-                  </button>
+                  <span className={styles.itemStateEdit} aria-hidden="true">Edit</span>
                 ) : cheapest ? (
-                  <button
-                    type="button"
-                    className={styles.itemStateAdd}
-                    onClick={() => onAddGifting(item.id)}
-                  >
-                    Add<span className={styles.visuallyHidden}> gifting to {item.name}</span>
-                  </button>
+                  <span className={styles.itemStateAdd} aria-hidden="true">Add</span>
                 ) : null}
               </div>
             </li>
