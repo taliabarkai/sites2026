@@ -256,12 +256,14 @@ function CheckoutItemRow({ item, icons, showGuarantee, onAddGift, gift }: Checko
         <div className={styles.itemContent}>
           {showGuarantee && <p className={styles.deliveryGuarantee}>Guaranteed to arrive by Christmas</p>}
           <div className={styles.itemInfoGroup}>
-            <p className={styles.itemName}>{item.name}</p>
-            <div className={styles.itemPrices}>
-              {item.originalPrice && (
-                <span className={styles.priceOriginal}>{formatPrice(item.originalPrice)}</span>
-              )}
-              <span className={styles.priceSelling}>{formatPrice(item.price)}</span>
+            <div className={styles.itemTitleRow}>
+              <p className={styles.itemName}>{item.name}</p>
+              <div className={styles.itemPrices}>
+                {item.originalPrice && (
+                  <span className={styles.priceOriginal}>{formatPrice(item.originalPrice)}</span>
+                )}
+                <span className={styles.priceSelling}>{formatPrice(item.price)}</span>
+              </div>
             </div>
 
             {hasOptions && (
@@ -1072,6 +1074,7 @@ function CheckoutPageInner() {
                   XIcon:         icons.XIcon,
                   AiMagicIcon:   icons.AiMagicIcon,
                   TrashCanIcon:  icons.TrashCanIcon,
+                  PlusMinusIcon: icons.PlusMinusIcon,
                 }}
                 onGenerateNote={async () => 'Wishing you a wonderful day filled with joy!'}
               />

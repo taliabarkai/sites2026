@@ -1,9 +1,9 @@
 'use client'
 
-import { useId, useState } from 'react'
+import { useEffect, useId, useState } from 'react'
 import { AssignedItemRow } from './AssignedItemRow'
+import { GiftOptionCard } from './GiftOptionCard'
 import {
-  formatPrice,
   isItemEligible,
   type CartItem,
   type GiftAssignment,
@@ -34,8 +34,19 @@ interface GiftItemListProps {
 export function GiftItemList({
   items, options, assignments, icons, onAdd, onEdit, onRemove,
 }: GiftItemListProps) {
+  const { CheckmarkIcon } = icons
   // One at a time: opening an item's options closes whichever was open.
   const [expandedItemId, setExpandedItemId] = useState<string | null>(null)
+
+  // The expansion deliberately survives the panel opening, so the shopper keeps
+  // sight of which item and packaging they are configuring behind the scrim.
+  // It is only stale once the item is wrapped, because the row is replaced by
+  // the assigned card at that point.
+  useEffect(() => {
+    if (expandedItemId && assignments.some(a => a.itemId === expandedItemId)) {
+      setExpandedItemId(null)
+    }
+  }, [assignments, expandedItemId])
   const listId = useId()
 
   return (
@@ -67,7 +78,7 @@ export function GiftItemList({
         if (eligible.length === 0) {
           return (
             <li key={item.id} className={styles.itemStateGroup}>
-              <div className={styles.itemStateRow}>
+              <div className={`${styles.itemStateRow} ${styles.itemStateRowCentered}`}>
                 <img src={item.imageUrl} alt="" aria-hidden="true" className={styles.itemStateThumb} />
                 <div className={styles.itemStateBody}>
                   <span className={styles.itemStateName}>{item.name}</span>
@@ -78,73 +89,78 @@ export function GiftItemList({
           )
         }
 
-        // One option is not a choice, so skip the accordion entirely.
+        // With a single eligible option there is nothing to choose between, so
+        // the control opens the panel directly rather than expanding a list of
+        // one. Only the multi-option case behaves as a checkbox.
         const solo = eligible.length === 1 ? eligible[0] : null
 
-        const activate = (trigger: HTMLElement | null) => {
-          if (solo) onAdd(item.id, solo.id, trigger)
+        const activate = () => {
+          if (solo) onAdd(item.id, solo.id, document.activeElement as HTMLElement | null)
           else setExpandedItemId(expanded ? null : item.id)
         }
 
         return (
           <li key={item.id} className={styles.itemStateGroup}>
+            {/* The whole card stays clickable for mouse users, but keyboard
+                focus lives on the checkbox, so the row is not a tab stop and
+                never draws a focus ring of its own. */}
             <div
               className={[
                 styles.itemStateRow,
                 styles.itemStateRowClickable,
+                styles.itemStateRowCentered,
+                expanded ? styles.itemStateRowSelected : '',
                 expanded ? styles.itemStateRowExpanded : '',
               ].filter(Boolean).join(' ')}
-              role="button"
-              tabIndex={0}
-              aria-label={solo
-                ? `Add gifting to ${item.name}`
-                : `Choose gift packaging for ${item.name}`}
-              {...(solo ? {} : { 'aria-expanded': expanded, 'aria-controls': panelId })}
-              onClick={e => activate(e.currentTarget)}
-              onKeyDown={e => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault()
-                  activate(e.currentTarget as HTMLElement)
-                }
-              }}
+              onClick={activate}
             >
               <img src={item.imageUrl} alt="" aria-hidden="true" className={styles.itemStateThumb} />
               <div className={styles.itemStateBody}>
                 <span className={styles.itemStateName}>{item.name}</span>
               </div>
-              <div className={styles.itemStateActions}>
-                {/* The row itself is the control; this reads as an affordance only. */}
-                <span className={styles.itemStateSelect} aria-hidden="true">Select</span>
+              <div className={`${styles.itemStateActions} ${styles.itemStateActionsCheckbox}`}>
+                <button
+                  type="button"
+                  {...(solo
+                    // A single option is a direct route to the panel, not a
+                    // toggle, so it must not announce itself as a checkbox.
+                    ? { 'aria-haspopup': 'dialog' as const,
+                        'aria-label': `Add gift packaging to ${item.name}` }
+                    : { role: 'checkbox',
+                        'aria-checked': expanded,
+                        'aria-controls': panelId,
+                        'aria-label': `Gift wrap ${item.name}` })}
+                  className={styles.itemStateCheckbox}
+                  onClick={e => { e.stopPropagation(); activate() }}
+                >
+                  {/* The button is a 24px hit frame; the circle inside reads as
+                      20px, so the control lines up optically without shrinking
+                      the target. */}
+                  <span
+                    className={`${styles.itemStateCheckboxCircle} ${expanded ? styles.itemStateCheckboxChecked : ''}`}
+                    aria-hidden="true"
+                  >
+                    {expanded && <CheckmarkIcon size={12} />}
+                  </span>
+                </button>
               </div>
             </div>
 
             {!solo && expanded && (
               <div id={panelId} className={styles.optionsAccordion}>
-                {eligible.map(option => (
-                  <button
-                    key={option.id}
-                    type="button"
-                    className={styles.optionRow}
-                    onClick={e => {
-                      // Collapse as we hand over to the panel, so removing the
-                      // assignment later cannot leave a stale row expanded.
-                      setExpandedItemId(null)
-                      onAdd(item.id, option.id, e.currentTarget)
-                    }}
-                  >
-                    <img
-                      src={option.imageUrl}
-                      alt=""
-                      aria-hidden="true"
-                      className={styles.optionRowImage}
+                {/* The same card the single-item flow uses — here it is nested
+                    under its parent item rather than leading the section. */}
+                <div className={styles.optionList}>
+                  {eligible.map(option => (
+                    <GiftOptionCard
+                      key={option.id}
+                      option={option}
+                      icons={icons}
+                      onSelect={o => onAdd(
+                        item.id, o.id, document.activeElement as HTMLElement | null)}
                     />
-                    <span className={styles.optionRowBody}>
-                      <span className={styles.optionRowName}>{option.name}</span>
-                      <span className={styles.optionRowPrice}>{formatPrice(option.price)}</span>
-                    </span>
-                    <span className={styles.optionRowAction} aria-hidden="true">Add</span>
-                  </button>
-                ))}
+                  ))}
+                </div>
               </div>
             )}
           </li>

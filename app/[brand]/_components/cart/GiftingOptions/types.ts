@@ -61,6 +61,7 @@ export interface GiftingIcons {
   XIcon:         React.ComponentType<IconProps>
   AiMagicIcon:   React.ComponentType<IconProps>
   TrashCanIcon:  React.ComponentType<IconProps>
+  PlusMinusIcon: React.ComponentType<IconProps>
 }
 
 export function formatPrice(cents: number): string {

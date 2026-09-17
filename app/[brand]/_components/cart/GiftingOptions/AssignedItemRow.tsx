@@ -22,56 +22,56 @@ interface AssignedItemRowProps {
  * A wrapped item, in the state both flows share. Single-item and multi-item
  * render the identical row so the two can never drift apart.
  *
- * The row itself is the edit control; "Edit" reads as an affordance only. The
- * trash button is a real button and stops propagation so it cannot open the
- * panel on its way to removing the assignment.
+ * Deliberately reuses the option card's own classes — image sizing, blend
+ * overlay, colours and type are the same as the card the shopper just chose,
+ * so adding packaging changes what the row says rather than how it looks. The
+ * only additions are the remove and edit controls down the right-hand edge.
+ *
+ * Once packaging is added the card is inert: Edit and the trash icon are the
+ * only controls, so there is no whole-card hover to imply otherwise.
  */
 export function AssignedItemRow({
   item, option, assignment, icons, onEdit, onRemove,
 }: AssignedItemRowProps) {
-  const { CheckmarkIcon, TrashCanIcon } = icons
+  const { TrashCanIcon } = icons
 
   return (
-    <li
-      className={`${styles.itemStateRow} ${styles.itemStateRowClickable}`}
-      role="button"
-      tabIndex={0}
-      aria-label={`Edit gifting for ${item.name}`}
-      onClick={() => onEdit(assignment)}
-      onKeyDown={e => {
-        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onEdit(assignment) }
-      }}
-    >
-      {/* Once wrapped, the tile shows the packaging — the product is already
-          named in the row text, so the image can carry the new information. */}
-      <img
-        src={option.imageUrl}
-        alt=""
-        aria-hidden="true"
-        className={styles.itemStateThumb}
-      />
+    <li className={styles.assignedCard}>
+      <span className={styles.optionCardImageWrap}>
+        <img
+          src={option.imageUrl}
+          alt=""
+          aria-hidden="true"
+          className={styles.optionCardImage}
+        />
+      </span>
 
-      <div className={styles.itemStateBody}>
-        <span className={styles.itemStateName}>{item.name}</span>
-        <span className={styles.itemStateAssigned}>
-          <span className={styles.itemStateCheck} aria-hidden="true">
-            <CheckmarkIcon size={24} />
-          </span>
-          {option.name} · {formatPrice(option.price)}
-        </span>
-      </div>
+      <span className={styles.optionCardBody}>
+        {/* The packaging leads now that it is chosen; the piece it wraps is the
+            supporting line. */}
+        <span className={styles.optionCardName}>{option.name}</span>
+        <span className={styles.optionCardDescription}>Added for {item.name}</span>
+        <span className={styles.optionCardPrice}>{formatPrice(option.price)}</span>
+      </span>
 
-      <div className={styles.itemStateActions}>
+      <span className={styles.assignedActions}>
         <button
           type="button"
           className={styles.itemStateRemove}
           aria-label={`Remove gifting from ${item.name}`}
-          onClick={e => { e.stopPropagation(); onRemove(item.id) }}
+          onClick={() => onRemove(item.id)}
         >
           <TrashCanIcon size={24} />
         </button>
-        <span className={styles.itemStateEdit} aria-hidden="true">Edit</span>
-      </div>
+        <button
+          type="button"
+          className={styles.itemStateEdit}
+          aria-label={`Edit gifting for ${item.name}`}
+          onClick={() => onEdit(assignment)}
+        >
+          Edit
+        </button>
+      </span>
     </li>
   )
 }

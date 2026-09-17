@@ -256,9 +256,10 @@ export function GiftingDrawer({
               />
             </span>
             <div className={styles.optionBlockText}>
-              <p className={styles.optionBlockDescription}>
-                {option.longDescription ?? option.description}
-              </p>
+              {/* Name + short description, matching how the option reads in the
+                  list — not the long single-sentence form. */}
+              <p className={styles.optionBlockName}>{option.name}</p>
+              <p className={styles.optionBlockDescription}>{option.description}</p>
               <p className={styles.optionBlockPrice}>{formatPrice(option.price)}</p>
             </div>
           </div>

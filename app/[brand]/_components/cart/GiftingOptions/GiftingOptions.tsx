@@ -49,8 +49,6 @@ export function GiftingOptions({
   const [drawer, setDrawer] = useState<DrawerState | null>(null)
   // Removal is confirmed rather than immediate whenever a note would be lost.
   const [pendingRemoveId, setPendingRemoveId] = useState<string | null>(null)
-  // Soft default for the second pass.
-  const lastOptionIdRef = useRef<string | null>(null)
   // Restores focus to whatever opened the drawer.
   const triggerRef = useRef<HTMLElement | null>(null)
 
@@ -72,7 +70,6 @@ export function GiftingOptions({
 
   const openPanel = (itemId: string, optionId: string, trigger: HTMLElement | null) => {
     if (trigger) triggerRef.current = trigger
-    lastOptionIdRef.current = optionId
 
     const option   = options.find(o => o.id === optionId) ?? null
     const existing = assignments.find(a => a.itemId === itemId)
@@ -96,7 +93,6 @@ export function GiftingOptions({
   }
 
   const handleEdit = (assignment: GiftAssignment) => {
-    lastOptionIdRef.current = assignment.optionId
     triggerRef.current = document.activeElement as HTMLElement | null
     setDrawer({
       optionId: assignment.optionId,
@@ -158,8 +154,6 @@ export function GiftingOptions({
     ? options.find(o => o.id === soleAssignment.optionId) ?? null
     : null
 
-  const isSingleOption = options.length === 1
-  const preselectId    = lastOptionIdRef.current
 
   return (
     <section className={styles.section} aria-labelledby="gifting-options-heading">
@@ -167,10 +161,6 @@ export function GiftingOptions({
         3. Add Gifting Options
         <span className={styles.headingIcon} aria-hidden="true"><GiftIcon size={32} /></span>
       </h2>
-
-      <p className={styles.sectionHelp}>
-        Gifts ship without a price tag. Your receipt is emailed to you.
-      </p>
 
       {isMultiItem ? (
         <>
@@ -202,7 +192,7 @@ export function GiftingOptions({
             <GiftOptionCard
               key={option.id}
               option={option}
-              preselected={!isSingleOption && option.id === preselectId}
+              icons={icons}
               onSelect={o => handleSelectOption(o, document.activeElement as HTMLElement | null)}
             />
           ))}

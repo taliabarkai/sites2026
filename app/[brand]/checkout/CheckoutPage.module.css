@@ -1563,7 +1563,7 @@
 
 .checkoutItemRow {
   display: grid;
-  grid-template-columns: 128px 1fr;
+  grid-template-columns: 80px 1fr;
   gap: var(--spacing-md);
 }
 
@@ -1663,8 +1663,8 @@
 }
 
 .itemImageWrap {
-  width: 128px;
-  height: 128px;
+  width: 80px;
+  height: 80px;
   flex-shrink: 0;
   overflow: hidden;
   background-color: var(--product-image-background-blend);
@@ -1698,7 +1698,17 @@
   flex-direction: column;
 }
 
+/* Name and price share a line; View Details and the options list stack below. */
+.itemTitleRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--spacing-lg);
+}
+
 .itemName {
+  flex: 1 1 auto;
+  min-width: 0;
   font-family: var(--typography-rules-text1-font-family);
   font-size: var(--typography-rules-text1-font-size);
   line-height: var(--typography-rules-text1-line-height);
@@ -1706,6 +1716,7 @@
 }
 
 .itemPrices {
+  flex: 0 0 auto;
   display: flex;
   align-items: center;
   gap: var(--spacing-xxs);
