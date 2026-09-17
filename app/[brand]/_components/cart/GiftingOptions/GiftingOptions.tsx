@@ -1,13 +1,15 @@
 'use client'
 
 import { useCallback, useRef, useState } from 'react'
+import { AssignedItemRow } from './AssignedItemRow'
+import { GiftItemList } from './GiftItemList'
 import { GiftOptionCard } from './GiftOptionCard'
-import { GiftedItemsSummary } from './GiftedItemsSummary'
 import { GiftingDrawer } from './GiftingDrawer'
+import { RemoveGiftDialog } from './RemoveGiftDialog'
 import {
-  isItemEligible,
   upsertAssignment,
   type CartItem,
+  type DesignOption,
   type GiftAssignment,
   type GiftOption,
   type GiftingIcons,
@@ -19,33 +21,48 @@ interface GiftingOptionsProps {
   items:       CartItem[]
   assignments: GiftAssignment[]
   icons:       GiftingIcons
+  /** Brand-scoped printed designs, shared by every option flagged `designs`. */
+  designs:     DesignOption[]
   onChange:    (assignments: GiftAssignment[]) => void
   onGenerateNote: () => Promise<string>
 }
 
+/**
+ * Both entry paths settle the item and the packaging before the panel opens,
+ * so the panel never has to ask — it goes straight to configuration.
+ */
 interface DrawerState {
-  /** null until packaging is chosen (entry point 2). */
-  optionId:      string | null
-  itemId:        string | null
-  /** Entry points 2 and 3 arrive without a packaging choice, so it stays swappable. */
-  packagingChangeable: boolean
-  note:          string
-  /** Showing the packaging chooser rather than the note. */
-  pickPackaging: boolean
+  optionId: string
+  itemId:   string
+  note:     string
+  /** Chosen design key. Seeded to the first design when the option has them. */
+  design:   string | null
+  pname:    string
+  photo:    boolean
 }
 
 export function GiftingOptions({
-  options, items, assignments, icons, onChange, onGenerateNote,
+  options, items, assignments, icons, designs, onChange, onGenerateNote,
 }: GiftingOptionsProps) {
   const { GiftIcon } = icons
 
   const [drawer, setDrawer] = useState<DrawerState | null>(null)
+  // Removal is confirmed rather than immediate whenever a note would be lost.
+  const [pendingRemoveId, setPendingRemoveId] = useState<string | null>(null)
   // Soft default for the second pass.
   const lastOptionIdRef = useRef<string | null>(null)
   // Restores focus to whatever opened the drawer.
   const triggerRef = useRef<HTMLElement | null>(null)
 
+  // A one-item bag has no item to choose, so packaging leads. Two or more and
+  // the bag leads instead: the shopper says which piece before anything else.
+  const isMultiItem = items.length > 1
+
   const noteFor = (itemId: string) => assignments.find(a => a.itemId === itemId)?.note ?? ''
+
+  /** Designs are cosmetic, so the first one is a safe default and saves a click. */
+  const defaultDesign = (option: GiftOption | null | undefined) =>
+    option?.designs ? designs[0]?.key ?? null : null
 
   const closeDrawer = useCallback(() => {
     setDrawer(null)
@@ -53,90 +70,96 @@ export function GiftingOptions({
     triggerRef.current = null
   }, [])
 
-  const openForOption = (option: GiftOption, trigger?: HTMLElement | null) => {
+  const openPanel = (itemId: string, optionId: string, trigger: HTMLElement | null) => {
     if (trigger) triggerRef.current = trigger
-    lastOptionIdRef.current = option.id
+    lastOptionIdRef.current = optionId
 
-    // Resolve the item when there is no real choice to make: a one-item bag, or a
-    // bag where every other item is already wrapped. With two or more unwrapped,
-    // the shopper picks.
-    const unassigned = items.filter(i =>
-      !assignments.some(a => a.itemId === i.id) && isItemEligible(option, i.id))
-    const onlyItem = items.length === 1
-      ? items[0]
-      : unassigned.length === 1 ? unassigned[0] : null
+    const option   = options.find(o => o.id === optionId) ?? null
+    const existing = assignments.find(a => a.itemId === itemId)
+
     setDrawer({
-      optionId:      option.id,
-      itemId:        onlyItem?.id ?? null,
-      packagingChangeable: false,
-      note:          onlyItem ? noteFor(onlyItem.id) : '',
-      pickPackaging: false,
+      optionId,
+      itemId,
+      // Re-wrapping an item keeps whatever note was already written for it.
+      note:   existing?.note ?? noteFor(itemId),
+      design: existing?.optionId === optionId ? existing.design : defaultDesign(option),
+      pname:  existing?.optionId === optionId ? existing.pname  : '',
+      photo:  existing?.optionId === optionId ? existing.photo  : false,
     })
+  }
+
+  /** Single-item flow: packaging is picked first, and the item is the only one. */
+  const handleSelectOption = (option: GiftOption, trigger: HTMLElement | null) => {
+    const only = items[0]
+    if (!only) return
+    openPanel(only.id, option.id, trigger)
   }
 
   const handleEdit = (assignment: GiftAssignment) => {
     lastOptionIdRef.current = assignment.optionId
+    triggerRef.current = document.activeElement as HTMLElement | null
     setDrawer({
-      optionId:      assignment.optionId,
-      itemId:        assignment.itemId,
-      packagingChangeable: true,
-      note:          assignment.note,
-      pickPackaging: false,
+      optionId: assignment.optionId,
+      itemId:   assignment.itemId,
+      note:     assignment.note,
+      design:   assignment.design,
+      pname:    assignment.pname,
+      photo:    assignment.photo,
     })
-  }
-
-  /** Entry point 2: the item is fixed, packaging is not yet chosen. */
-  const handleAddGifting = (itemId: string, trigger?: HTMLElement | null) => {
-    if (trigger) triggerRef.current = trigger
-
-    // With a single eligible option there is nothing to choose, so open straight
-    // on the note rather than showing a one-card picker.
-    const eligible = options.filter(o => isItemEligible(o, itemId))
-    const only = eligible.length === 1 ? eligible[0] : null
-    if (only) lastOptionIdRef.current = only.id
-
-    setDrawer({
-      optionId:      only?.id ?? null,
-      itemId,
-      packagingChangeable: true,
-      note:          '',
-      pickPackaging: !only,
-    })
-  }
-
-  /** Chooses packaging inside the drawer and moves on to the note. */
-  const handlePickPackaging = (option: GiftOption) => {
-    lastOptionIdRef.current = option.id
-    setDrawer(prev => prev && ({ ...prev, optionId: option.id, pickPackaging: false }))
-  }
-
-  const handleSelectItem = (itemId: string) => {
-    // Reassigning an already-wrapped item prefills its existing note.
-    const note = noteFor(itemId)
-    setDrawer(prev => prev && ({ ...prev, itemId, note }))
   }
 
   const handleAddToBag = () => {
-    if (!drawer?.itemId || !drawer.optionId) return
+    if (!drawer) return
     // Lifted state must be updated from the handler, never inside a setState
     // updater — React runs updaters during render.
     onChange(upsertAssignment(assignments, {
       itemId:   drawer.itemId,
       optionId: drawer.optionId,
       note:     drawer.note,
+      design:   drawer.design,
+      pname:    drawer.pname,
+      photo:    drawer.photo,
     }))
-    // Adding closes the drawer; the summary list is where the result is seen,
-    // and Edit reopens the drawer for changes.
+    // Adding closes the panel; the list is where the result is seen, and Edit
+    // reopens the panel for changes.
     closeDrawer()
   }
 
-  const activeOption = drawer?.optionId
+  const removeAssignment = (itemId: string) =>
+    onChange(assignments.filter(a => a.itemId !== itemId))
+
+  /**
+   * A written note is real work, so it is never discarded without asking. An
+   * empty note has nothing to lose, so that path stays a single click.
+   */
+  const handleRequestRemove = (itemId: string) => {
+    const assignment = assignments.find(a => a.itemId === itemId)
+    if (assignment && assignment.note.trim().length > 0) setPendingRemoveId(itemId)
+    else removeAssignment(itemId)
+  }
+
+  const activeOption = drawer
     ? options.find(o => o.id === drawer.optionId) ?? null
     : null
+  const activeItem = drawer
+    ? items.find(i => i.id === drawer.itemId) ?? null
+    : null
 
-  const hasAssignments = assignments.length > 0
-  const isSingle       = options.length === 1
-  const preselectId = lastOptionIdRef.current
+  const pendingRemoveItem = pendingRemoveId
+    ? items.find(i => i.id === pendingRemoveId) ?? null
+    : null
+
+  // ── Single-item body: packaging cards, or the wrapped row once assigned ────
+  const soleItem       = items[0] ?? null
+  const soleAssignment = soleItem
+    ? assignments.find(a => a.itemId === soleItem.id) ?? null
+    : null
+  const soleOption = soleAssignment
+    ? options.find(o => o.id === soleAssignment.optionId) ?? null
+    : null
+
+  const isSingleOption = options.length === 1
+  const preselectId    = lastOptionIdRef.current
 
   return (
     <section className={styles.section} aria-labelledby="gifting-options-heading">
@@ -145,48 +168,72 @@ export function GiftingOptions({
         <span className={styles.headingIcon} aria-hidden="true"><GiftIcon size={32} /></span>
       </h2>
 
-      {hasAssignments ? (
-        <GiftedItemsSummary
-          assignments={assignments}
-          items={items}
-          options={options}
-          icons={icons}
-          onEdit={handleEdit}
-          onAddGifting={itemId => handleAddGifting(itemId, document.activeElement as HTMLElement | null)}
-          onRemove={itemId => onChange(assignments.filter(a => a.itemId !== itemId))}
-        />
+      <p className={styles.sectionHelp}>
+        Gifts ship without a price tag. Your receipt is emailed to you.
+      </p>
+
+      {isMultiItem ? (
+        <>
+          <h3 className={styles.itemsPrompt}>Which items would you like to gift wrap?</h3>
+          <GiftItemList
+            items={items}
+            options={options}
+            assignments={assignments}
+            icons={icons}
+            onAdd={openPanel}
+            onEdit={handleEdit}
+            onRemove={handleRequestRemove}
+          />
+        </>
+      ) : soleItem && soleAssignment && soleOption ? (
+        <ul className={styles.itemStateList}>
+          <AssignedItemRow
+            item={soleItem}
+            option={soleOption}
+            assignment={soleAssignment}
+            icons={icons}
+            onEdit={handleEdit}
+            onRemove={handleRequestRemove}
+          />
+        </ul>
       ) : (
         <div className={styles.optionList}>
           {options.map(option => (
             <GiftOptionCard
               key={option.id}
               option={option}
-              preselected={!isSingle && option.id === preselectId}
-              onSelect={o => openForOption(o, document.activeElement as HTMLElement | null)}
+              preselected={!isSingleOption && option.id === preselectId}
+              onSelect={o => handleSelectOption(o, document.activeElement as HTMLElement | null)}
             />
           ))}
         </div>
       )}
 
-
-      {drawer && (
+      {drawer && activeOption && (
         <GiftingDrawer
-          options={options}
-          items={items}
-          assignments={assignments}
           icons={icons}
+          designs={designs}
           option={activeOption}
-          selectedItemId={drawer.itemId}
-          packagingChangeable={drawer.packagingChangeable}
-          pickPackaging={drawer.pickPackaging}
+          item={activeItem}
           note={drawer.note}
-          onSelectItem={handleSelectItem}
-          onPickPackaging={handlePickPackaging}
-          onChangePackaging={() => setDrawer(prev => prev && ({ ...prev, pickPackaging: true }))}
+          design={drawer.design}
+          pname={drawer.pname}
+          photo={drawer.photo}
           onNoteChange={note => setDrawer(prev => prev && ({ ...prev, note }))}
+          onDesignChange={design => setDrawer(prev => prev && ({ ...prev, design }))}
+          onNameChange={pname => setDrawer(prev => prev && ({ ...prev, pname }))}
+          onPhotoChange={photo => setDrawer(prev => prev && ({ ...prev, photo }))}
           onAddToBag={handleAddToBag}
           onClose={closeDrawer}
           onGenerateNote={onGenerateNote}
+        />
+      )}
+
+      {pendingRemoveItem && (
+        <RemoveGiftDialog
+          itemName={pendingRemoveItem.name}
+          onKeep={() => setPendingRemoveId(null)}
+          onRemove={() => { removeAssignment(pendingRemoveItem.id); setPendingRemoveId(null) }}
         />
       )}
     </section>

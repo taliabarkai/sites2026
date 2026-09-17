@@ -1,6 +1,10 @@
 export { GiftingOptions } from './GiftingOptions'
 export { GiftOptionCard } from './GiftOptionCard'
-export { GiftedItemsSummary } from './GiftedItemsSummary'
+export { GiftItemList } from './GiftItemList'
+export { AssignedItemRow } from './AssignedItemRow'
 export { GiftingDrawer } from './GiftingDrawer'
 export { GiftOptionsInfoPanel } from './GiftOptionsInfoPanel'
-export type { GiftOption, CartItem, GiftAssignment, GiftingIcons } from './types'
+export { RemoveGiftDialog } from './RemoveGiftDialog'
+export type {
+  GiftOption, CartItem, GiftAssignment, GiftingIcons, DesignOption,
+} from './types'

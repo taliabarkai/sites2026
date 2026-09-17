@@ -2,66 +2,64 @@
 
 import { useEffect, useId, useRef, useState } from 'react'
 import { Button } from '../../Button'
-import { GiftOptionCard } from './GiftOptionCard'
-import { PanelPortal } from './PanelPortal'
+import { PanelPortal } from '../../PanelPortal'
 import {
   formatPrice,
-  isItemEligible,
+  requiredFieldsMet,
+  MAX_NAME_LENGTH,
+  MAX_NOTE_LENGTH,
   type CartItem,
-  type GiftAssignment,
+  type DesignOption,
   type GiftOption,
   type GiftingIcons,
 } from './types'
 import styles from './GiftingOptions.module.css'
 
-const MAX_NOTE_LENGTH = 280
 const COUNTER_ANNOUNCE_DELAY = 900
 
 interface GiftingDrawerProps {
-  options:      GiftOption[]
-  items:        CartItem[]
-  assignments:  GiftAssignment[]
-  icons:        GiftingIcons
-  /** null while packaging is still being chosen (entry point 2). */
-  option:         GiftOption | null
-  selectedItemId: string | null
-  /** Entry points 2 and 3 arrive without a packaging choice, so it stays swappable. */
-  packagingChangeable: boolean
-  pickPackaging:  boolean
-  note:           string
-  onSelectItem:   (itemId: string) => void
-  onPickPackaging:   (option: GiftOption) => void
-  onChangePackaging: () => void
+  icons:   GiftingIcons
+  designs: DesignOption[]
+  /** Settled before the panel opens and never swappable from inside it. */
+  option:  GiftOption
+  item:    CartItem | null
+  note:    string
+  design:  string | null
+  pname:   string
+  photo:   boolean
   onNoteChange:   (note: string) => void
+  onDesignChange: (design: string) => void
+  onNameChange:   (pname: string) => void
+  onPhotoChange:  (photo: boolean) => void
   onAddToBag:     () => void
   onClose:        () => void
   onGenerateNote: () => Promise<string>
 }
 
+/**
+ * Configuration for one item's packaging. Both entry paths settle the item and
+ * the option first, so this panel only ever collects fields — to use different
+ * packaging the shopper closes it and picks again.
+ */
 export function GiftingDrawer({
-  options, items, assignments, icons, option, selectedItemId, packagingChangeable, pickPackaging, note,
-  onSelectItem, onPickPackaging, onChangePackaging, onNoteChange, onAddToBag, onClose, onGenerateNote,
+  icons, designs, option, item, note, design, pname, photo,
+  onNoteChange, onDesignChange, onNameChange, onPhotoChange,
+  onAddToBag, onClose, onGenerateNote,
 }: GiftingDrawerProps) {
   const { XIcon } = icons
 
   const panelRef  = useRef<HTMLDivElement>(null)
+  const fileRef   = useRef<HTMLInputElement>(null)
   const titleId   = useId()
-  const groupId   = useId()
   const counterId = useId()
+  const nameCounterId = useId()
 
   const [open, setOpen]                     = useState(false)
   const [generating, setGenerating]         = useState(false)
-  const [focusedIndex, setFocusedIndex]     = useState(0)
   const [announcedCount, setAnnouncedCount] = useState(note.length)
 
-  // Selecting and advancing are separate actions: a card sets the pending choice,
-  // NEXT commits it. Seeded from the committed item so Change keeps the selection.
-  const [pendingItemId, setPendingItemId] = useState<string | null>(selectedItemId)
-  useEffect(() => { setPendingItemId(selectedItemId) }, [selectedItemId])
-
-  // Cart size is a line-item count; a line never carries a quantity in this model.
-  const isSingleItem  = items.length === 1
-
+  // Double rAF: the portal must commit with the closed transform before we flip,
+  // otherwise the panel renders already-open and the slide-in never plays.
   useEffect(() => {
     let inner = 0
     const outer = requestAnimationFrame(() => { inner = requestAnimationFrame(() => setOpen(true)) })
@@ -99,7 +97,7 @@ export function GiftingDrawer({
 
     panel.addEventListener('keydown', onKeyDown)
     return () => panel.removeEventListener('keydown', onKeyDown)
-  }, [pendingItemId])
+  }, [])
 
   // Counter announces on a delay, not on every keystroke.
   useEffect(() => {
@@ -117,133 +115,102 @@ export function GiftingDrawer({
     }
   }
 
-  // ── Item cards: roving tabindex, arrows move focus, Enter/Space selects ─────
-  // Already-wrapped items drop out of the picker; the one being worked on stays,
-  // so Edit and Change can still show and re-select it.
-  const selectableItems = items.filter(i =>
-    i.id === selectedItemId || !assignments.some(a => a.itemId === i.id))
+  // The note is optional by design and must never gate the primary action; only
+  // the fields the option marks required can.
+  const primaryDisabled = !requiredFieldsMet(option, { pname, photo })
 
-  const selectableIndexes = selectableItems
-    .map((item, i) => (!option || isItemEligible(option, item.id) ? i : -1))
-    .filter(i => i !== -1)
-
-  const moveFocus = (delta: number) => {
-    if (selectableIndexes.length === 0) return
-    const pos  = selectableIndexes.indexOf(focusedIndex)
-    const next = selectableIndexes[
-      (((pos === -1 ? 0 : pos) + delta) % selectableIndexes.length + selectableIndexes.length)
-        % selectableIndexes.length
-    ]
-    setFocusedIndex(next)
-    panelRef.current?.querySelectorAll<HTMLElement>('[data-item-card]')[next]?.focus()
+  // ── Design tiles: roving tabindex across the grid ───────────────────────────
+  const onDesignKeyDown = (e: React.KeyboardEvent, index: number) => {
+    const isNext = e.key === 'ArrowRight' || e.key === 'ArrowDown'
+    const isPrev = e.key === 'ArrowLeft'  || e.key === 'ArrowUp'
+    if (!isNext && !isPrev) return
+    e.preventDefault()
+    const next = (index + (isNext ? 1 : -1) + designs.length) % designs.length
+    onDesignChange(designs[next].key)
+    panelRef.current?.querySelectorAll<HTMLElement>('[data-design-tile]')[next]?.focus()
   }
 
-  const onCardKeyDown = (e: React.KeyboardEvent, itemId: string, eligible: boolean) => {
-    if (e.key === 'ArrowDown' || e.key === 'ArrowRight') { e.preventDefault(); moveFocus(1) }
-    else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') { e.preventDefault(); moveFocus(-1) }
-    else if ((e.key === 'Enter' || e.key === ' ') && eligible) { e.preventDefault(); chooseItem(itemId) }
-  }
+  const selectedDesign = designs.find(d => d.key === design) ?? null
 
-  // One continuous view: choosing an item collapses the list and reveals the note.
-  const resolvedItemId = isSingleItem ? (items[0]?.id ?? null) : pendingItemId
-  const resolvedItem   = items.find(i => i.id === resolvedItemId) ?? null
+  // The preview follows the chosen design so the shopper sees what ships.
+  const previewImage = selectedDesign?.image ?? option.imageUrl
 
-  // Options this item can actually use — ineligible ones never reach the chooser.
-  const eligibleOptions = options.filter(o => !resolvedItemId || isItemEligible(o, resolvedItemId))
+  const designBlock = option.designs && designs.length > 0 && (
+    <div className={styles.fieldBlock}>
+      <span className={styles.fieldLabel}>Choose a design</span>
+      <div className={styles.designGrid} role="radiogroup" aria-label="Choose a design">
+        {designs.map((d, index) => (
+          <button
+            key={d.key}
+            data-design-tile
+            type="button"
+            role="radio"
+            aria-checked={d.key === design}
+            tabIndex={d.key === design || (!selectedDesign && index === 0) ? 0 : -1}
+            className={`${styles.designTile} ${d.key === design ? styles.designTileSelected : ''}`}
+            onClick={() => onDesignChange(d.key)}
+            onKeyDown={e => onDesignKeyDown(e, index)}
+          >
+            {d.image ? (
+              <span className={styles.designTileImageWrap}>
+                <img src={d.image} alt="" aria-hidden="true" className={styles.designTileImage} />
+              </span>
+            ) : (
+              <span className={styles.designTilePlaceholder} aria-hidden="true" />
+            )}
+            <span className={styles.designTileLabel}>{d.label}</span>
+          </button>
+        ))}
+      </div>
+    </div>
+  )
 
+  const nameBlock = option.wantsName && (
+    <div className={styles.fieldBlock}>
+      <span className={styles.fieldLabelRow}>
+        <label className={styles.fieldLabel} htmlFor={`${titleId}-name`}>Name on the box</label>
+        <span className={styles.requiredBadge}>Required</span>
+      </span>
+      <input
+        id={`${titleId}-name`}
+        type="text"
+        className={styles.nameInput}
+        placeholder="Enter name"
+        value={pname}
+        autoComplete="off"
+        aria-describedby={nameCounterId}
+        onChange={e => onNameChange(e.target.value.slice(0, MAX_NAME_LENGTH))}
+      />
+      <span id={nameCounterId} className={styles.fieldCounter}>
+        {pname.length}/{MAX_NAME_LENGTH} characters.
+      </span>
+    </div>
+  )
 
-  const primaryDisabled = pickPackaging || !option || !resolvedItemId || note.trim().length === 0
-
-  const chooseItem = (itemId: string) => {
-    setPendingItemId(itemId)
-    onSelectItem(itemId)
-  }
-
-  const itemCard = (item: CartItem, index: number, mode: 'select' | 'chosen') => {
-    const eligible = !option || isItemEligible(option, item.id)
-    const existing = assignments.find(a => a.itemId === item.id)
-    const existingOption = existing && options.find(o => o.id === existing.optionId)
-    const chosen = item.id === pendingItemId
-
-    const common = (
-      <>
-        <span className={styles.itemCardThumb}>
-          <img src={item.imageUrl} alt="" aria-hidden="true" className={styles.itemCardImage} />
-        </span>
-        <span className={styles.itemCardBody}>
-          <span className={styles.itemCardName}>{item.name}</span>
-          {existingOption && mode === 'select' && (
-            <span className={styles.itemCardBadge}>{existingOption.name}</span>
-          )}
-          {!eligible && mode === 'select' && (
-            <span className={styles.itemCardReason}>Not available for this piece</span>
-          )}
-          {mode === 'chosen' ? (
-            <span className={styles.itemCardAction}>Change</span>
-          ) : eligible ? (
-            <span className={styles.itemCardAction}>{chosen ? 'Selected' : 'Select'}</span>
-          ) : null}
-        </span>
-      </>
-    )
-
-    if (mode === 'chosen') {
-      return (
-        <button
-          type="button"
-          className={`${styles.itemCard} ${styles.itemCardChosen}`}
-          onClick={() => setPendingItemId(null)}
-        >
-          {common}
-        </button>
-      )
-    }
-
-    return (
-      <div
-        key={item.id}
-        data-item-card
-        role="radio"
-        aria-checked={chosen}
-        aria-disabled={!eligible}
-        tabIndex={index === focusedIndex ? 0 : -1}
-        className={[
-          styles.itemCard,
-          chosen ? styles.itemCardSelected : '',
-          !eligible ? styles.itemCardDisabled : '',
-        ].filter(Boolean).join(' ')}
-        onClick={() => eligible && chooseItem(item.id)}
-        onFocus={() => setFocusedIndex(index)}
-        onKeyDown={e => onCardKeyDown(e, item.id, eligible)}
+  const photoBlock = option.wantsPhoto && (
+    <div className={styles.fieldBlock}>
+      <span className={styles.fieldLabelRow}>
+        <span className={styles.fieldLabel}>Upload a photo</span>
+        <span className={styles.requiredBadge}>Required</span>
+      </span>
+      {/* The button below is the real control, so the input stays out of the
+          tab order rather than making the shopper tab past a hidden field. */}
+      <input
+        ref={fileRef}
+        type="file"
+        accept="image/*"
+        className={styles.photoInput}
+        tabIndex={-1}
+        aria-hidden="true"
+        onChange={e => onPhotoChange(Boolean(e.target.files?.length))}
+      />
+      <button
+        type="button"
+        className={styles.photoButton}
+        onClick={() => fileRef.current?.click()}
       >
-        {common}
-      </div>
-    )
-  }
-
-  const noteBlock = (
-    <div className={styles.noteBlock}>
-      <div className={styles.noteLabelRow}>
-        <span className={styles.noteLabel}>Your Gift Note:</span>
-        <button type="button" className={styles.noteAssist} onClick={handleGenerate} disabled={generating}>
-          {generating ? 'Generating' : 'Create Gift Note'}
-        </button>
-      </div>
-
-      <div className={styles.noteFieldWrap}>
-        <textarea
-          className={styles.noteTextarea}
-          aria-label="Gift note"
-          aria-describedby={counterId}
-          placeholder="Write your message or generate one with our AI gift note assistant"
-          value={note}
-          rows={5}
-          onChange={e => onNoteChange(e.target.value.slice(0, MAX_NOTE_LENGTH))}
-        />
-        <span id={counterId} className={styles.noteCounter} aria-live="polite">
-          {announcedCount}/{MAX_NOTE_LENGTH}
-        </span>
-      </div>
+        {photo ? 'Photo added · Replace' : 'Add photo'}
+      </button>
     </div>
   )
 
@@ -262,11 +229,12 @@ export function GiftingDrawer({
         aria-modal="true"
         aria-labelledby={titleId}
       >
-        {/* Title row — option name only, close button right */}
+        {/* Title row — option name, item name beneath, close button right */}
         <header className={styles.drawerHeader}>
-          <h2 id={titleId} className={styles.drawerTitle}>
-            {option && !pickPackaging ? `Add ${option.name}` : 'Add Gifting'}
-          </h2>
+          <span className={styles.drawerTitleGroup}>
+            <h2 id={titleId} className={styles.drawerTitle}>Add {option.name}</h2>
+            {item && <span className={styles.drawerCaption}>{item.name}</span>}
+          </span>
           <button
             type="button"
             className={styles.drawerClose}
@@ -278,64 +246,58 @@ export function GiftingDrawer({
         </header>
 
         <div className={styles.drawerBody}>
-          {/* Descriptive block — only once packaging is settled */}
-          {option && !pickPackaging && (
-            <>
-              <div className={styles.optionBlock}>
-                <span className={styles.optionBlockThumb}>
-                  <img src={option.imageUrl} alt="" aria-hidden="true" className={styles.optionBlockImage} />
-                </span>
-                <div className={styles.optionBlockText}>
-                  <p className={styles.optionBlockDescription}>
-                    {option.longDescription ?? option.description}
-                  </p>
-                  <p className={styles.optionBlockPrice}>{formatPrice(option.price)}</p>
-                  {packagingChangeable && eligibleOptions.length > 1 && (
-                    <button type="button" className={styles.optionBlockChange} onClick={onChangePackaging}>
-                      Change
-                    </button>
-                  )}
-                </div>
+          <div className={styles.optionBlock}>
+            <span className={styles.optionBlockThumb}>
+              <img
+                src={previewImage}
+                alt=""
+                aria-hidden="true"
+                className={styles.optionBlockImage}
+              />
+            </span>
+            <div className={styles.optionBlockText}>
+              <p className={styles.optionBlockDescription}>
+                {option.longDescription ?? option.description}
+              </p>
+              <p className={styles.optionBlockPrice}>{formatPrice(option.price)}</p>
+            </div>
+          </div>
+
+          <hr className={styles.drawerDivider} />
+
+          <div className={styles.stepArea}>
+            {designBlock}
+            {nameBlock}
+            {photoBlock}
+
+            <div className={styles.noteBlock}>
+              <div className={styles.noteLabelRow}>
+                <span className={styles.noteLabel}>Your Gift Note:</span>
+                <button
+                  type="button"
+                  className={styles.noteAssist}
+                  onClick={handleGenerate}
+                  disabled={generating}
+                >
+                  {generating ? 'Generating' : 'Create Gift Note'}
+                </button>
               </div>
 
-              <hr className={styles.drawerDivider} />
-            </>
-          )}
-
-          <div className={styles.stepArea} aria-live="polite">
-
-            {/* Item — fixed by the entry point, or chosen here */}
-            {!isSingleItem && (
-              <>
-                <h3 className={styles.stepHeading} id={groupId}>Which item is this gift for?</h3>
-                {resolvedItem ? (
-                  <div className={styles.itemCardList}>{itemCard(resolvedItem, 0, 'chosen')}</div>
-                ) : (
-                  <div className={styles.itemCardList} role="radiogroup" aria-labelledby={groupId}>
-                    {selectableItems.map((item, index) => itemCard(item, index, 'select'))}
-                  </div>
-                )}
-              </>
-            )}
-
-            {/* Packaging chooser — entry point 2, and the reverse of Change packaging */}
-            {pickPackaging || !option ? (
-              <>
-                <h3 className={styles.stepHeading}>Choose your gift packaging</h3>
-                <div className={styles.packagingList}>
-                  {eligibleOptions.map(o => (
-                    <GiftOptionCard key={o.id} option={o} onSelect={onPickPackaging} />
-                  ))}
-                </div>
-              </>
-            ) : (
-              resolvedItemId && (
-                <>
-                  {noteBlock}
-                </>
-              )
-            )}
-
+              <div className={styles.noteFieldWrap}>
+                <textarea
+                  className={styles.noteTextarea}
+                  aria-label="Gift note"
+                  aria-describedby={counterId}
+                  placeholder="Write your message or generate one with our AI gift note assistant"
+                  value={note}
+                  rows={5}
+                  onChange={e => onNoteChange(e.target.value.slice(0, MAX_NOTE_LENGTH))}
+                />
+                <span id={counterId} className={styles.noteCounter} aria-live="polite">
+                  {announcedCount}/{MAX_NOTE_LENGTH}
+                </span>
+              </div>
+            </div>
           </div>
         </div>
 

@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useId, useRef, useState } from 'react'
-import { PanelPortal } from './PanelPortal'
+import { PanelPortal } from '../../PanelPortal'
 import { formatPrice, type GiftOption } from './types'
 import styles from './GiftingOptions.module.css'
 

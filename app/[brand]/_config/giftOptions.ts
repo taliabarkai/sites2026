@@ -16,6 +16,12 @@ export interface BrandGiftOption {
   price:          number
   originalPrice?: number
   image:          string
+  /** Shopper picks a printed design. Designs are cosmetic and never change price. */
+  designs?:       boolean
+  /** "Name on the box" is shown and required (max 16 characters). */
+  wantsName?:     boolean
+  /** A photo upload is shown and required. */
+  wantsPhoto?:    boolean
 }
 
 const DEFAULT_GIFT_OPTIONS: BrandGiftOption[] = [
@@ -45,6 +51,8 @@ const TGR_GIFT_OPTIONS: BrandGiftOption[] = [
     description: 'Includes: Gift bag, gift box, fabric pouch and a custom note',
     price:       700,
     image:       'https://cdn.theograce.com/digital-asset/product/personalized-gift-boxes-7.jpg',
+    designs:     true,
+    wantsName:   true,
   },
 ]
 
@@ -76,6 +84,7 @@ const MNN_GIFT_OPTIONS: BrandGiftOption[] = [
     description: 'Includes: Gift bag, premium gift box and a custom note',
     price:       700,
     image:       'https://cdn.myka.com/digital-asset/product/personalized-gift-boxs-different-designs-for-children-52.jpg',
+    designs:     true,
   },
   {
     id:          'personalized-with-photo',
@@ -84,6 +93,9 @@ const MNN_GIFT_OPTIONS: BrandGiftOption[] = [
     description: 'Includes: Gift bag, a gift box printed with your photo and a custom note',
     price:       1000,
     image:       'https://cdn.myka.com/digital-asset/product/personalized-picture-gift-box-9.jpg',
+    designs:     true,
+    wantsName:   true,
+    wantsPhoto:  true,
   },
 ]
 

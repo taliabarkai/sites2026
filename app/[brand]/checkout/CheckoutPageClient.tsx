@@ -14,7 +14,7 @@ import { Button } from '../_components/Button'
 import { Header } from '../_components/Header'
 import { useCart, WARRANTY_CENTS } from '../_context/CartContext'
 import { createPlacedOrder, savePlacedOrder, DEMO_CONTACT } from '../_context/placedOrder'
-import { getBrandFromPathname } from '../_config/brands'
+import { getBrandFromPathname, BRAND_GIFT_CONFIG, type BrandKey } from '../_config/brands'
 import { prefixNavLinks, withBrandPrefix } from '../_config/brandPaths'
 import { DEFAULT_NAV_LINKS, DEFAULT_TOPLINE } from '../_config/siteContent'
 import { getGiftOptions } from '../_config/giftOptions'
@@ -50,6 +50,12 @@ const BRAND_ICONS: Record<string, BrandIcons> = {
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
+
+/**
+ * Express checkout (Apple Pay) and its "or" divider are hidden for now.
+ * The markup below is intentionally kept — flip this to true to bring it back.
+ */
+const SHOW_EXPRESS_CHECKOUT = false
 
 function formatPrice(cents: number): string {
   const dollars = cents / 100
@@ -372,12 +378,16 @@ interface OrderSummaryProps {
   hideBenefits?:        boolean
   taxAmount?:           number | null
   orderTotalDisplay?:   number
+  /** Gift packaging, totalled separately from merchandise. */
+  giftTotal?:           number
+  /** How many items are wrapped — shown beside the label once above one. */
+  giftCount?:           number
   /** itemId -> packaging applied to it. */
   giftByItemId?:        Record<string, { name: string; price: number }>
   onOpenGiftModal?:     (itemId: string) => void
 }
 
-function OrderSummary({ items, icons, showDetails, subtotal = 0, selectedShipping = 'free', hideHeader, hideBenefits, taxAmount, orderTotalDisplay, onOpenGiftModal, giftByItemId }: OrderSummaryProps) {
+function OrderSummary({ items, icons, showDetails, subtotal = 0, selectedShipping = 'free', hideHeader, hideBenefits, taxAmount, orderTotalDisplay, onOpenGiftModal, giftByItemId, giftTotal = 0, giftCount = 0 }: OrderSummaryProps) {
   const [promoCode,    setPromoCode]    = useState('')
   const [promoApplied, setPromoApplied] = useState(false)
   const [appliedCode,  setAppliedCode]  = useState('')
@@ -385,7 +395,7 @@ function OrderSummary({ items, icons, showDetails, subtotal = 0, selectedShippin
   const { ShippingIcon, ReturnIcon, WarrantyIcon, CouponIcon, XIcon } = icons
   const shippingCost   = selectedShipping === 'standard' ? 500 : 0
   const discountAmount = promoApplied ? Math.round(subtotal * 0.20) : 0
-  const orderTotal     = subtotal + shippingCost - discountAmount + (taxAmount ?? 0)
+  const orderTotal     = subtotal + giftTotal + shippingCost - discountAmount + (taxAmount ?? 0)
   const displayTotal   = orderTotalDisplay ?? orderTotal
 
   const handleApplyPromo = () => {
@@ -464,6 +474,14 @@ function OrderSummary({ items, icons, showDetails, subtotal = 0, selectedShippin
               <span className={styles.totalLabel}>Subtotal:</span>
               <span className={styles.totalValue}>{formatPrice(subtotal)}</span>
             </div>
+            {giftTotal > 0 && (
+              <div className={styles.totalRow}>
+                <span className={styles.totalLabel}>
+                  Gift packaging{giftCount > 1 ? ` (${giftCount})` : ''}:
+                </span>
+                <span className={styles.totalValue}>{formatPrice(giftTotal)}</span>
+              </div>
+            )}
             <div className={styles.totalRow}>
               <span className={styles.totalLabel}>Shipping:</span>
               <span className={styles.totalValue}>
@@ -542,6 +560,8 @@ function CheckoutPageInner() {
 
   const isTgr          = brand === 'tgr'
   const brandGiftOptions = getGiftOptions(brand)
+  // Printed designs are brand-scoped and shared by every option flagged `designs`.
+  const giftDesigns = BRAND_GIFT_CONFIG[brand as BrandKey]?.assets?.designOptions ?? []
 
 
   // Gifting assignments live here (lifted out of GiftingOptions) so the order
@@ -810,6 +830,8 @@ function CheckoutPageInner() {
     items, icons,
     taxAmount,
     giftByItemId,
+    giftTotal,
+    giftCount: giftAssignments.length,
   }
 
   return (
@@ -851,7 +873,7 @@ function CheckoutPageInner() {
           </button>
         </div>
         <div className={styles.mobileSummarySheetBody}>
-          <OrderSummary {...summaryProps} hideHeader showDetails hideBenefits subtotal={giftedSubtotal} selectedShipping={selectedShipping} orderTotalDisplay={orderTotal} />
+          <OrderSummary {...summaryProps} hideHeader showDetails hideBenefits subtotal={subtotal} selectedShipping={selectedShipping} orderTotalDisplay={orderTotal} />
         </div>
       </div>
 
@@ -879,7 +901,7 @@ function CheckoutPageInner() {
                 isCompleted={isCompleted(1)}
                 completedSummary={step1Summary}
                 onEdit={() => editStep(1)}
-                preTitle={
+                preTitle={SHOW_EXPRESS_CHECKOUT ? (
                   <section className={styles.expressCheckout}>
                     <p className={styles.expressTitle}>Express Checkout</p>
                     <div className={styles.expressButtons}>
@@ -889,7 +911,7 @@ function CheckoutPageInner() {
                     </div>
                     <div className={styles.expressDivider}><span>or</span></div>
                   </section>
-                }
+                ) : undefined}
               >
                 {/* Contact */}
                 <div className={styles.formSubSection}>
@@ -1036,7 +1058,11 @@ function CheckoutPageInner() {
                   longDescription: o.longDescription,
                   price:           o.price,
                   imageUrl:        o.image,
+                  designs:         o.designs,
+                  wantsName:       o.wantsName,
+                  wantsPhoto:      o.wantsPhoto,
                 }))}
+                designs={giftDesigns}
                 items={eligibleGiftItems.map(i => ({ id: i.id, name: i.name, imageUrl: i.image }))}
                 assignments={giftAssignments}
                 onChange={setGiftAssignments}
@@ -1324,7 +1350,7 @@ function CheckoutPageInner() {
             {/* ══════════════ RIGHT COLUMN ══════════════ */}
             <aside className={styles.rightCol}>
               <div className={styles.orderSummaryDesktop}>
-                <OrderSummary {...summaryProps} showDetails subtotal={giftedSubtotal} selectedShipping={selectedShipping} />
+                <OrderSummary {...summaryProps} showDetails subtotal={subtotal} selectedShipping={selectedShipping} />
               </div>
               {/* You May Also Like — desktop (hidden) */}
             </aside>
