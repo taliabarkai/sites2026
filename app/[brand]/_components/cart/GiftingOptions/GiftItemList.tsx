@@ -4,6 +4,7 @@ import { useEffect, useId, useState } from 'react'
 import { AssignedItemRow } from './AssignedItemRow'
 import { GiftOptionCard } from './GiftOptionCard'
 import {
+  formatPrice,
   isItemEligible,
   type CartItem,
   type DesignOption,
@@ -96,6 +97,7 @@ export function GiftItemList({
         // the control opens the panel directly rather than expanding a list of
         // one. Only the multi-option case behaves as a checkbox.
         const solo = eligible.length === 1 ? eligible[0] : null
+        const cheapest = Math.min(...eligible.map(o => o.price))
 
         const activate = () => {
           if (solo) onAdd(item.id, solo.id, document.activeElement as HTMLElement | null)
@@ -123,6 +125,16 @@ export function GiftItemList({
               <img src={item.imageUrl} alt="" aria-hidden="true" className={styles.itemStateThumb} />
               <div className={styles.itemStateBody}>
                 <span className={styles.itemStateName}>{item.name}</span>
+                {/* Prices are otherwise hidden until the row is expanded, and
+                    what is eligible differs per item, so this is that item's
+                    own cheapest. The heading and prompt above already name what
+                    is on offer, so the row only carries the missing fact — and
+                    "From" only when there is actually a range. */}
+                <span className={styles.itemStatePrice}>
+                  {eligible.length > 1
+                    ? `From ${formatPrice(cheapest)}`
+                    : formatPrice(cheapest)}
+                </span>
               </div>
               <div className={`${styles.itemStateActions} ${styles.itemStateActionsCheckbox}`}>
                 <button
