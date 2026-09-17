@@ -80,7 +80,7 @@ export function RemoveGiftDialog({ itemName, onKeep, onRemove }: RemoveGiftDialo
         </p>
 
         <div className={styles.dialogActions}>
-          <button type="button" className={styles.dialogKeep} onClick={onKeep}>Keep</button>
+          <Button variant="secondary" onClick={onKeep}>Keep</Button>
           <Button variant="primary" onClick={onRemove}>Remove</Button>
         </div>
       </div>

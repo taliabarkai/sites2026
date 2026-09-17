@@ -249,12 +249,14 @@ function CheckoutItemRow({ item, icons, showGuarantee, onAddGift, gift }: Checko
 
   return (
     <article className={styles.checkoutItem}>
+      {/* Spans the row rather than sitting beside the image, so the promise
+          reads as a banner over the whole line item. */}
+      {showGuarantee && <p className={styles.deliveryGuarantee}>Guaranteed to arrive by Christmas</p>}
       <div className={styles.checkoutItemRow}>
         <div className={styles.itemImageWrap}>
           <img src={item.image} alt={item.name} className={styles.itemImage} />
         </div>
         <div className={styles.itemContent}>
-          {showGuarantee && <p className={styles.deliveryGuarantee}>Guaranteed to arrive by Christmas</p>}
           <div className={styles.itemInfoGroup}>
             <div className={styles.itemTitleRow}>
               <p className={styles.itemName}>{item.name}</p>

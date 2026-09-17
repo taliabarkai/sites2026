@@ -6,6 +6,7 @@ import { GiftOptionCard } from './GiftOptionCard'
 import {
   isItemEligible,
   type CartItem,
+  type DesignOption,
   type GiftAssignment,
   type GiftOption,
   type GiftingIcons,
@@ -17,6 +18,7 @@ interface GiftItemListProps {
   options:     GiftOption[]
   assignments: GiftAssignment[]
   icons:       GiftingIcons
+  designs:     DesignOption[]
   /** Item and packaging are both settled here, so the panel opens ready to configure. */
   onAdd:       (itemId: string, optionId: string, trigger: HTMLElement | null) => void
   onEdit:      (assignment: GiftAssignment) => void
@@ -32,7 +34,7 @@ interface GiftItemListProps {
  * an item with exactly one skips it and goes straight to the panel.
  */
 export function GiftItemList({
-  items, options, assignments, icons, onAdd, onEdit, onRemove,
+  items, options, assignments, icons, designs, onAdd, onEdit, onRemove,
 }: GiftItemListProps) {
   const { CheckmarkIcon } = icons
   // One at a time: opening an item's options closes whichever was open.
@@ -49,9 +51,7 @@ export function GiftItemList({
   }, [assignments, expandedItemId])
   const listId = useId()
 
-  return (
-    <ul className={styles.itemStateList}>
-      {items.map(item => {
+  const renderItem = (item: CartItem) => {
         const assignment = assignments.find(a => a.itemId === item.id)
         const assigned   = assignment && options.find(o => o.id === assignment.optionId)
 
@@ -63,6 +63,7 @@ export function GiftItemList({
               option={assigned}
               assignment={assignment}
               icons={icons}
+              designs={designs}
               onEdit={onEdit}
               onRemove={onRemove}
             />
@@ -165,7 +166,34 @@ export function GiftItemList({
             )}
           </li>
         )
-      })}
-    </ul>
+  }
+
+  // Wrapped items rise above the rule; what is still to do sits below it. Cart
+  // order is preserved inside each group.
+  const wrapped   = items.filter(i => assignments.some(a => a.itemId === i.id))
+  const unwrapped = items.filter(i => !assignments.some(a => a.itemId === i.id))
+
+  return (
+    // Owns its own spacing so the rule between the groups can breathe wider
+    // than the gap between rows inside them.
+    <div className={styles.itemGroups}>
+      {wrapped.length > 0 && (
+        <ul className={styles.itemStateList}>{wrapped.map(renderItem)}</ul>
+      )}
+
+      {/* Only earns its place once there is something on both sides. */}
+      {wrapped.length > 0 && unwrapped.length > 0 && (
+        <hr className={styles.groupDivider} />
+      )}
+
+      {/* The prompt sits with the unwrapped group, so once some items are
+          wrapped it travels below the rule with the ones still to do. */}
+      {unwrapped.length > 0 && (
+        <div className={styles.itemGroup}>
+          <h3 className={styles.itemGroupTitle}>Select an item to add gift packaging</h3>
+          <ul className={styles.itemStateList}>{unwrapped.map(renderItem)}</ul>
+        </div>
+      )}
+    </div>
   )
 }

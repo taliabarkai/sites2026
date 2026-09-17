@@ -167,32 +167,34 @@ export function GiftingDrawer({
 
   const nameBlock = option.wantsName && (
     <div className={styles.fieldBlock}>
-      <span className={styles.fieldLabelRow}>
-        <label className={styles.fieldLabel} htmlFor={`${titleId}-name`}>Name on the box</label>
-        <span className={styles.requiredBadge}>Required</span>
-      </span>
-      <input
-        id={`${titleId}-name`}
-        type="text"
-        className={styles.nameInput}
-        placeholder="Enter name"
-        value={pname}
-        autoComplete="off"
-        aria-describedby={nameCounterId}
-        onChange={e => onNameChange(e.target.value.slice(0, MAX_NAME_LENGTH))}
-      />
-      <span id={nameCounterId} className={styles.fieldCounter}>
-        {pname.length}/{MAX_NAME_LENGTH} characters.
-      </span>
+      <label className={styles.fieldLabel} htmlFor={`${titleId}-name`}>Name on the box</label>
+      <div className={styles.nameFieldWrap}>
+        <input
+          id={`${titleId}-name`}
+          type="text"
+          className={styles.nameInput}
+          placeholder="Enter name"
+          value={pname}
+          autoComplete="off"
+          /* No visible badge, but the field is still announced as required. */
+          required
+          aria-required="true"
+          aria-describedby={pname ? nameCounterId : undefined}
+          onChange={e => onNameChange(e.target.value.slice(0, MAX_NAME_LENGTH))}
+        />
+        {/* Only once there is something to count. */}
+        {pname.length > 0 && (
+          <span id={nameCounterId} className={styles.nameCounter} aria-live="polite">
+            {pname.length}/{MAX_NAME_LENGTH}
+          </span>
+        )}
+      </div>
     </div>
   )
 
   const photoBlock = option.wantsPhoto && (
     <div className={styles.fieldBlock}>
-      <span className={styles.fieldLabelRow}>
-        <span className={styles.fieldLabel}>Upload a photo</span>
-        <span className={styles.requiredBadge}>Required</span>
-      </span>
+      <span className={styles.fieldLabel}>Upload a photo</span>
       {/* The button below is the real control, so the input stays out of the
           tab order rather than making the shopper tab past a hidden field. */}
       <input

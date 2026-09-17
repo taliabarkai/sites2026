@@ -7,7 +7,9 @@
 .section {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-xs);
+  /* Matches .accordionBody's padding-top, so this section sits off its title
+     exactly as the shipping and payment steps do. */
+  gap: var(--spacing-md);
   padding: var(--spacing-lg) var(--layout-page-margin);
   border-bottom: var(--border-width) solid var(--border-color);
   /* Space below the divider, before the next step's title. The sibling steps get
@@ -84,15 +86,14 @@
 
 /* The blend token tints the backdrop; the image multiplies over it so its white
    studio background picks up the theme instead of punching a white hole. */
-/* Flush to the card edge, full height — the card's own radius clips it, and a
-   rule divides it from the copy, matching the cart item rows. */
+/* Flush to the card edge, full height — the card's own radius clips it. The
+   tinted backdrop is enough to separate it from the copy. */
 .optionCardImageWrap {
   flex: 0 0 120px;
   width: 120px;
   align-self: stretch;
   overflow: hidden;
   background-color: var(--product-image-background-blend);
-  border-right: var(--border-width) solid var(--border-color);
 }
 
 .optionCardImage {
@@ -485,9 +486,9 @@
 }
 
 .optionBlockThumb {
-  flex: 0 0 140px;
-  width: 140px;
-  height: 140px;
+  flex: 0 0 160px;
+  width: 160px;
+  height: 160px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -810,11 +811,6 @@
   gap: var(--spacing-xxs);
 }
 
-.fieldLabelRow {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-xxs);
-}
 
 .fieldLabel {
   font-family:    var(--typography-rules-text1-font-family);
@@ -825,24 +821,7 @@
   color: var(--colors-text);
 }
 
-.requiredBadge {
-  padding: 0 var(--spacing-xxxs);
-  border: var(--border-width) solid var(--border-color);
-  border-radius: var(--radius-sm);
-  font-family:    var(--typography-rules-text3-font-family);
-  font-size:      var(--typography-rules-text3-font-size);
-  line-height:    var(--typography-rules-text3-line-height);
-  letter-spacing: var(--typography-rules-text3-letter-spacing, normal);
-  color: var(--colors-text-secondary);
-}
 
-.fieldCounter {
-  align-self: flex-end;
-  font-family:    var(--typography-rules-text3-font-family);
-  font-size:      var(--typography-rules-text3-font-size);
-  line-height:    var(--typography-rules-text3-line-height);
-  color: var(--colors-text-secondary);
-}
 
 /* ── Design picker ───────────────────────────────────────────────────────── */
 
@@ -909,8 +888,27 @@
 
 /* ── Name on the box ─────────────────────────────────────────────────────── */
 
+.nameFieldWrap {
+  position: relative;
+  display: flex;
+}
+
+.nameCounter {
+  position: absolute;
+  right: var(--spacing-xs);
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  font-family: var(--typography-rules-text3-font-family);
+  font-size:   var(--typography-rules-text3-font-size);
+  line-height: var(--typography-rules-text3-line-height);
+  color: var(--colors-text-secondary);
+}
+
 .nameInput {
   width: 100%;
+  /* Room for the counter so long names never run under it. */
+  padding-right: calc(var(--spacing-xs) + 48px);
   padding: var(--spacing-xxs) var(--spacing-xs);
   background: var(--form-field-background);
   border: var(--border-width) solid var(--form-field-border-color);
@@ -1025,18 +1023,6 @@
   padding-top: var(--spacing-xxs);
 }
 
-.dialogKeep {
-  background: transparent;
-  border: none;
-  padding: 0;
-  cursor: pointer;
-  color: var(--colors-text);
-  text-decoration: underline;
-  text-underline-offset: 2px;
-  font-family: var(--typography-rules-text1-font-family);
-  font-size:   var(--typography-rules-text1-font-size);
-  line-height: var(--typography-rules-text1-line-height);
-}
 
 
 /* Wraps a row together with the options it expands, so the two read as one
@@ -1178,9 +1164,67 @@
    itself already says whether it is wrapped, so "0 of 1" is just noise. */
 .wrapCount {
   margin: 0;
-  font-family:    var(--typography-rules-text3-font-family);
-  font-size:      var(--typography-rules-text3-font-size);
-  line-height:    var(--typography-rules-text3-line-height);
-  letter-spacing: var(--typography-rules-text3-letter-spacing, normal);
-  color: var(--colors-text-secondary);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xxs);
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+  color: var(--colors-text);
+}
+
+
+/* Separates wrapped items from those still waiting for packaging. */
+.groupDivider {
+  width: 100%;
+  margin: 0;
+  border: none;
+  border-top: var(--border-width) solid var(--border-color);
+}
+
+
+
+
+
+
+/* Rows inside a group stay at --spacing-xs; the groups themselves sit further
+   apart so the dividing rule reads as a break. */
+.itemGroups {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+
+.sectionHeader {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xxs);
+}
+
+
+/* Title sits tight to its list; the --spacing-md between groups comes from
+   .itemGroups above. */
+.itemGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.itemGroupTitle {
+  margin: 0;
+  font-family:    var(--typography-rules-text2-font-family);
+  font-size:      var(--typography-rules-text2-font-size);
+  line-height:    var(--typography-rules-text2-line-height);
+  font-weight:    var(--typography-rules-text4-font-weight, 600);
+  letter-spacing: var(--typography-rules-text2-letter-spacing, normal);
+  color: var(--colors-text);
+}
+
+
+.wrapCountCheck {
+  display: flex;
+  align-items: center;
+  color: var(--colors-text);
 }

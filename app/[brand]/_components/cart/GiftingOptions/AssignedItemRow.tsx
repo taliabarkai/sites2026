@@ -3,6 +3,7 @@
 import {
   formatPrice,
   type CartItem,
+  type DesignOption,
   type GiftAssignment,
   type GiftOption,
   type GiftingIcons,
@@ -14,6 +15,8 @@ interface AssignedItemRowProps {
   option:     GiftOption
   assignment: GiftAssignment
   icons:      GiftingIcons
+  /** Needed to turn the stored design key back into its label. */
+  designs:    DesignOption[]
   onEdit:     (assignment: GiftAssignment) => void
   onRemove:   (itemId: string) => void
 }
@@ -31,15 +34,20 @@ interface AssignedItemRowProps {
  * only controls, so there is no whole-card hover to imply otherwise.
  */
 export function AssignedItemRow({
-  item, option, assignment, icons, onEdit, onRemove,
+  item, option, assignment, icons, designs, onEdit, onRemove,
 }: AssignedItemRowProps) {
   const { TrashCanIcon } = icons
+
+  // The saved card shows the design the shopper actually picked, not the
+  // option's generic packshot — that is the thing being posted.
+  const design = designs.find(d => d.key === assignment.design)
+  const imageUrl = (option.designs && design?.image) || option.imageUrl
 
   return (
     <li className={styles.assignedCard}>
       <span className={styles.optionCardImageWrap}>
         <img
-          src={option.imageUrl}
+          src={imageUrl}
           alt=""
           aria-hidden="true"
           className={styles.optionCardImage}

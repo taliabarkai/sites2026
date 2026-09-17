@@ -44,7 +44,7 @@ interface DrawerState {
 export function GiftingOptions({
   options, items, assignments, icons, designs, onChange, onGenerateNote,
 }: GiftingOptionsProps) {
-  const { GiftIcon } = icons
+  const { GiftIcon, CheckmarkIcon } = icons
 
   const [drawer, setDrawer] = useState<DrawerState | null>(null)
   // Removal is confirmed rather than immediate whenever a note would be lost.
@@ -159,16 +159,27 @@ export function GiftingOptions({
 
   return (
     <section className={styles.section} aria-labelledby="gifting-options-heading">
-      <h2 id="gifting-options-heading" className={styles.heading}>
-        3. Add Gifting Options
-        <span className={styles.headingIcon} aria-hidden="true"><GiftIcon size={32} /></span>
-      </h2>
+      {/* Heading and count are one block, so the section's own gap sets the
+          distance to the content rather than sitting between the two. */}
+      <div className={styles.sectionHeader}>
+        <h2 id="gifting-options-heading" className={styles.heading}>
+          3. Add Gift Packaging
+          <span className={styles.headingIcon} aria-hidden="true"><GiftIcon size={32} /></span>
+        </h2>
 
-      {isMultiItem && (
-        <p className={styles.wrapCount} aria-live="polite">
-          {wrappedCount} of {items.length} items gift wrapped
-        </p>
-      )}
+        {/* Only once something is actually added — a tick against zero would be
+            a lie, and the prompt below already covers the empty state. */}
+        {wrappedCount > 0 && (
+          <p className={styles.wrapCount} aria-live="polite">
+            <span className={styles.wrapCountCheck} aria-hidden="true">
+              <CheckmarkIcon size={16} />
+            </span>
+            {isMultiItem
+              ? `Gift packaging added to ${wrappedCount} of ${items.length} items`
+              : 'Gift packaging added'}
+          </p>
+        )}
+      </div>
 
       {isMultiItem ? (
         <GiftItemList
@@ -176,6 +187,7 @@ export function GiftingOptions({
           options={options}
           assignments={assignments}
           icons={icons}
+          designs={designs}
           onAdd={openPanel}
           onEdit={handleEdit}
           onRemove={handleRequestRemove}
@@ -187,6 +199,7 @@ export function GiftingOptions({
             option={soleOption}
             assignment={soleAssignment}
             icons={icons}
+            designs={designs}
             onEdit={handleEdit}
             onRemove={handleRequestRemove}
           />
