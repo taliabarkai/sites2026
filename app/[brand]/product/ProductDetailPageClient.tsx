@@ -39,6 +39,10 @@ import type { ProductItem } from '../../../data/products'
 import { LalCanvasCustomizer } from './LalCanvasCustomizer'
 import { getGiftOptions } from '../_config/giftOptions'
 import { GiftOptionsInfoPanel } from '../_components/cart/GiftingOptions'
+import { PanelPortal } from '../_components/PanelPortal'
+import { StickyCustomizeBar } from '../_components/StickyCustomizeBar'
+import { TranslationAdvisor } from '../_components/TranslationAdvisor'
+import type { TranslationAdvisorVariant } from '../_components/TranslationAdvisor'
 import { MusicMemoriesCustomizer } from './MusicMemoriesCustomizer'
 import { AIPreviewCustomizer } from '../_components/AIPreviewCustomizer'
 
@@ -833,6 +837,15 @@ function TrustBadges({
   )
 }
 
+/**
+ * Which Translation Advisor treatment to show (demo toggle, IB only).
+ * v1 — floating launcher in the corner. v2 — inline under the engrave field.
+ *
+ * Held at module scope so the choice survives a client-side remount while SSR
+ * and the first client render still agree on the default.
+ */
+let lastAdvisorVariant: TranslationAdvisorVariant = 'inline'
+
 // ─── Product form panel ───────────────────────────────────────────────────────
 
 interface ProductFormProps {
@@ -859,6 +872,14 @@ function ProductForm({ brand, product, icons, nestedItems = [], onAddToBag }: Pr
 
   // "See details" on the gift USP row opens a read-only packaging panel.
   const [giftInfoOpen, setGiftInfoOpen] = useState(false)
+
+  // Sticky "continue customization" bar watches the CTA and returns here.
+  const addToBagRef = useRef<HTMLDivElement>(null)
+  const formPanelRef = useRef<HTMLElement>(null)
+
+  // Translation Advisor treatment — demo toggle, IB only.
+  const [advisorVariant, setAdvisorVariant] = useState<TranslationAdvisorVariant>(() => lastAdvisorVariant)
+  useEffect(() => { lastAdvisorVariant = advisorVariant }, [advisorVariant])
 
   // ── Nested Items — staged companion products + quick-add panel state ──────
   // `staged` maps a nested item's key → its fully configured cart item.
@@ -899,7 +920,7 @@ function ProductForm({ brand, product, icons, nestedItems = [], onAddToBag }: Pr
   }
 
   return (
-    <section className={styles.formPanel} aria-label="Product options">
+    <section ref={formPanelRef} className={styles.formPanel} aria-label="Product options">
       {/* Header group: breadcrumb / title+price / stars */}
       <div className={styles.productHeader}>
         <nav className={styles.breadcrumb} aria-label="Breadcrumb">
@@ -944,9 +965,15 @@ function ProductForm({ brand, product, icons, nestedItems = [], onAddToBag }: Pr
 
       {/* Engrave input */}
       <div className={styles.fieldGroup}>
-        <label className={styles.fieldLabel} htmlFor="engrave-input">
-          Engrave a name or message
-        </label>
+        <div className={styles.fieldLabelRow}>
+          <label className={styles.fieldLabel} htmlFor="engrave-input">
+            Inscription:
+          </label>
+          {/* No destination yet — wire to the font guide when it exists */}
+          <button type="button" className={styles.fieldLabelLink}>
+            Font Guide
+          </button>
+        </div>
         <div className={styles.inputWrap}>
           <input
             id="engrave-input"
@@ -958,6 +985,12 @@ function ProductForm({ brand, product, icons, nestedItems = [], onAddToBag }: Pr
             onChange={(e) => setEngravedText(e.target.value)}
           />
         </div>
+
+        {/* v2 belongs to this field, so it sits inside the group and picks up
+            its 8px gap rather than the form panel's 24px. IB-only. */}
+        {brand === 'ib' && (advisorVariant === 'inline' || advisorVariant === 'link') && (
+          <TranslationAdvisor variant={advisorVariant} onUseName={setEngravedText} />
+        )}
       </div>
 
       {/* Chain length */}
@@ -999,13 +1032,18 @@ function ProductForm({ brand, product, icons, nestedItems = [], onAddToBag }: Pr
       </div>
 
       {/* CTA */}
-      <Button
-        variant="add-to-cart"
-        className={styles.addToBagBtn}
-        onClick={handleMainAdd}
-      >
-        {ctaLabel}
-      </Button>
+      <div ref={addToBagRef}>
+        <Button
+          variant="add-to-cart"
+          className={styles.addToBagBtn}
+          onClick={handleMainAdd}
+        >
+          {ctaLabel}
+        </Button>
+      </div>
+
+      {/* Every brand gets the sticky bar; the advisor above is IB-only */}
+      <StickyCustomizeBar watch={addToBagRef} target={formPanelRef} />
 
       {/* Trust badges */}
       <TrustBadges
@@ -1015,6 +1053,30 @@ function ProductForm({ brand, product, icons, nestedItems = [], onAddToBag }: Pr
         GiftIcon={GiftIcon}
         onSeeGiftDetails={() => setGiftInfoOpen(true)}
       />
+
+      {/* v1 floats over the page rather than sitting in the form flow */}
+      {brand === 'ib' && advisorVariant === 'floating' && (
+        <TranslationAdvisor variant="floating" onUseName={setEngravedText} />
+      )}
+
+      {/* Advisor version switcher — presentation/demo only */}
+      {brand === 'ib' && (
+        <PanelPortal>
+        <div className={styles.advisorVersionToggle} role="group" aria-label="Translation Advisor version">
+          {([['v1', 'floating'], ['v2', 'inline'], ['v3', 'link']] as const).map(([label, v]) => (
+            <button
+              key={v}
+              type="button"
+              className={`${styles.advisorVersionBtn} ${advisorVariant === v ? styles.advisorVersionBtnActive : ''}`}
+              aria-pressed={advisorVariant === v}
+              onClick={() => setAdvisorVariant(v)}
+            >
+              {label.toUpperCase()}
+            </button>
+          ))}
+        </div>
+        </PanelPortal>
+      )}
 
       {giftInfoOpen && (
         <GiftOptionsInfoPanel

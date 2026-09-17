@@ -1,0 +1,469 @@
+/* ─── Translation Advisor ──────────────────────────────────────────────────────
+   Layout comes from Tailwind on the elements; everything brand-specific — colour,
+   type, radius, timing — resolves from theme tokens so any [data-theme] works.  */
+
+.advisor {
+  /* Sits between the engrave field and the chain selector */
+  gap: var(--spacing-xxs);
+}
+
+/* ── Collapsed row ── */
+
+.toggle {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-align: left;
+  color: var(--colors-text);
+  font-family:    var(--typography-rules-text3-font-family);
+  font-size:      var(--typography-rules-text3-font-size);
+  line-height:    var(--typography-rules-text3-line-height);
+  letter-spacing: var(--typography-rules-text3-letter-spacing, normal);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: opacity var(--transition-fast);
+}
+
+.toggle:hover {
+  opacity: 0.7;
+}
+
+.toggleChevron {
+  flex-shrink: 0;
+  color: var(--colors-text-secondary);
+  /* Brand ChevronIcon points right; rotate to face down when collapsed. */
+  transform: rotate(90deg);
+  transition: transform var(--transition-fast);
+}
+
+.toggleChevronOpen {
+  transform: rotate(-90deg);
+}
+
+/* ── Expand / collapse ──
+   Animating grid-template-rows lets the card ease to its natural height without
+   a hardcoded max-height. */
+
+.panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows var(--transition-fast);
+}
+
+.panelOpen {
+  grid-template-rows: 1fr;
+}
+
+.panelInner {
+  overflow: hidden;
+  min-height: 0;
+}
+
+/* ── Card ── */
+
+.chatHeader {
+  gap: var(--spacing-xxs);
+  text-align: center;
+}
+
+.chatAvatar {
+  width: 48px;
+  height: 48px;
+  margin-bottom: var(--spacing-xxs);
+  border-radius: var(--radius-full);
+  background: var(--colors-surface-primary);
+  color: var(--colors-brand-default-primary);
+}
+
+.chatTitle {
+  margin: 0;
+  font-family:    var(--typography-rules-headline4-font-family);
+  font-size:      var(--typography-rules-headline4-font-size);
+  line-height:    var(--typography-rules-headline4-line-height);
+  font-weight:    var(--typography-rules-headline4-font-weight, normal);
+  letter-spacing: var(--typography-rules-headline4-letter-spacing, normal);
+  text-transform: var(--typography-rules-headline4-text-transform, none);
+  color: var(--colors-text);
+}
+
+.chatSubtitle {
+  margin: 0;
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+  color: var(--colors-text-secondary);
+}
+
+/* Scrolling half: header and the conversation */
+/* Owns its own layout rather than splitting gap (Tailwind) from padding (here),
+   so the three spacing values sit together. 32 top / 16 sides / 4 bottom — the
+   composer below supplies the rest of the bottom breathing room. */
+.conversation {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-lg) var(--spacing-sm) var(--spacing-xxxs);
+}
+
+/* Same surface as the chat; the hairline above is what separates them, and the
+   white field reads against it. */
+.composer {
+  flex: 0 0 auto;
+  padding: var(--spacing-sm);
+  background: var(--colors-background);
+}
+
+.card {
+  margin-top: var(--spacing-xxs);
+  /* White, matching the floating panel — the composer sits on the same surface
+     as the conversation rather than reading as a separate strip. */
+  background: var(--colors-background);
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+/* ── Sent messages ──
+   Mockup thread: the shopper's questions echo back as accent bubbles. */
+
+.thread {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  max-height: 220px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.rowYou,
+/* Avatar sits beside the bubble, both aligned to the top of the message. */
+.rowAdvisor {
+  display: flex;
+  align-items: flex-start;
+}
+
+.bubbleAvatar {
+  flex: 0 0 32px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-full);
+  background: var(--colors-background);
+  color: var(--colors-brand-default-primary);
+}
+
+/* align-items alone did nothing without a flex context — the shopper's bubble
+   was sitting left with the advisor's. */
+.rowYou {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.rowAdvisor {
+  align-items: flex-start;
+}
+
+.bubbleYou,
+.bubble {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-xs);
+  max-width: 85%;
+  padding: var(--spacing-sm);
+  border-radius: var(--radius-lg);
+  overflow-wrap: anywhere;
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+}
+
+.bubbleText {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* Square the corner each bubble speaks from, so they read as tails. */
+.bubbleAdvisor {
+  background: var(--colors-surface-secondary);
+  color: var(--colors-text);
+  border-bottom-left-radius: 0;
+}
+
+/* The shopper's own messages carry the brand accent */
+.bubbleYou {
+  background: var(--colors-brand-accent, var(--colors-brand-default-primary));
+  color: var(--colors-text-inverse);
+  border-bottom-right-radius: 0;
+}
+
+.bubbleAdvisor {
+  background: var(--colors-surface-primary);
+  color: var(--colors-text);
+}
+
+/* Accepts a suggested spelling straight into the engrave field. Outlined so it
+   reads as a control on the light bubble rather than another bubble. */
+.resultBody {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xxs);
+}
+
+.resultHebrew {
+  font-family: var(--typography-rules-headline4-font-family);
+  font-size:   var(--typography-rules-headline4-font-size);
+  line-height: var(--typography-rules-headline4-line-height);
+  color: var(--colors-text);
+}
+
+.copyName {
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: var(--colors-text);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  font-weight:    var(--typography-rules-text4-font-weight, 600);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+}
+
+.useName {
+  cursor: pointer;
+  background:    transparent;
+  color:         var(--colors-text);
+  border:        var(--border-width) solid var(--border-strong);
+  border-radius: var(--radius-full);
+  padding:       var(--spacing-xxs) var(--spacing-sm);
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+  transition: opacity var(--transition-fast);
+}
+
+.useName:hover {
+  background: var(--colors-background);
+}
+
+.useNameHebrew {
+  font-size: var(--typography-rules-text2-font-size);
+}
+
+/* ── v1: floating launcher + window ─────────────────────────────────────────── */
+
+/* Pill on the right edge: sparkle, label, arrow. Vertically centred so it clears
+   the sticky customisation bar at the bottom of the page. */
+.launcher {
+  position: fixed;
+  right: var(--spacing-sm);
+  top: 86%;
+  transform: translateY(-50%);
+  z-index: var(--z-cart);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border: none;
+  border-radius: var(--radius-full);
+  background: var(--colors-brand-accent, var(--colors-brand-default-primary));
+  color: var(--colors-text-inverse);
+  box-shadow: var(--shadow-md);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: box-shadow var(--transition-fast);
+}
+
+.launcher:hover {
+  box-shadow: var(--shadow-lg, var(--shadow-md));
+}
+
+.launcherSparkle {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  color: var(--colors-brand-default-primary);
+}
+
+.launcherLabel {
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+  color: var(--colors-text-inverse);
+}
+
+.launcherArrow {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  color: var(--colors-text-inverse);
+}
+
+/* Mobile only: dims the page behind the sheet */
+.floatingOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-overlay);
+  /* No scrim token exists in the theme files; matches GiftOptionsModal. */
+  background: rgba(0, 0, 0, 0.45);
+}
+
+/* Mobile-first: a sheet that slides up from the bottom. */
+.floating {
+  position: fixed;
+  inset: auto 0 0 0;
+  z-index: var(--z-modal);
+  display: flex;
+  flex-direction: column;
+  max-height: 85dvh;
+  background: var(--colors-background);
+  border-top-left-radius: var(--radius-lg);
+  border-top-right-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  transform: translateY(110%);
+  transition: transform var(--transition-base);
+}
+
+.floatingOpen {
+  transform: translateY(0);
+}
+
+/* md+: a window pinned to the bottom-right corner, above the launcher. */
+@media (min-width: 768px) {
+  /* 56px has no spacing token; the scale jumps 48 → 60. */
+  .launcher {
+    top: auto;
+    bottom: 56px;
+    right: 56px;
+    transform: none;
+  }
+
+  .floating {
+    inset: auto 56px calc(56px + var(--buttons-primary-min-height) + var(--spacing-xs)) auto;
+    width: min(380px, calc(100vw - var(--spacing-lg)));
+    max-height: min(560px, calc(100dvh - var(--spacing-xxl)));
+    border-radius: var(--radius-lg);
+    transform: translateY(var(--spacing-xs));
+    opacity: 0;
+    transition: transform var(--transition-base), opacity var(--transition-base);
+  }
+
+  .floatingOpen {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  /* v3 has no launcher pill below it, so the window sits in the corner itself. */
+  .floatingNoLauncher {
+    bottom: 56px;
+  }
+}
+
+
+
+.floatingClose {
+  position: absolute;
+  top: var(--spacing-sm);
+  right: var(--spacing-sm);
+  z-index: 1;
+  background: transparent;
+  border: none;
+  padding: 0;
+  line-height: 0;
+  cursor: pointer;
+  color: var(--colors-text);
+  transition: opacity var(--transition-fast);
+}
+
+.floatingClose:hover {
+  opacity: 0.6;
+}
+
+.floatingBody {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+/* ── Pill input ── */
+
+/* Wrapper so the send control can nest inside the field's right edge */
+.field {
+  display: flex;
+  align-items: stretch;
+  overflow: hidden;
+  border-radius: var(--radius-sm);
+}
+
+/* Overrides the theme's field surface for this component only — the chat sits on
+   surface-secondary, so the field needs to be white to read as an input. */
+.input {
+  flex: 1 1 auto;
+  background: var(--colors-surface-primary);
+  border: none;
+  border-radius: 0;
+  min-height: var(--field-min-height);
+  padding: 0 var(--spacing-sm);
+  color: var(--colors-text);
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  box-sizing: border-box;
+  outline: none;
+}
+
+.input::placeholder {
+  color: var(--form-input-placeholder, var(--colors-text-secondary));
+  /* It is an example prompt, not a label */
+  font-style: italic;
+}
+
+.input:focus {
+  border-color: var(--border-strong);
+}
+
+/* Send button follows the theme's primary-button shape, and sits on the brand
+   accent (camel on IB). Falls back to brand primary for themes with no accent. */
+.send {
+  position: static;
+  flex: 0 0 auto;
+  width: var(--field-min-height);
+  border: none;
+  border-radius: 0;
+  background: var(--colors-brand-accent, var(--colors-brand-default-primary));
+  color: var(--colors-text-inverse);
+  cursor: pointer;
+  transition: opacity var(--transition-fast);
+}
+
+.send:hover {
+  opacity: 0.85;
+}
+
+/* Brand ArrowIcon points right; angle it up so it reads as send. */
+.sendIcon {
+  transform: rotate(-45deg);
+}
+
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

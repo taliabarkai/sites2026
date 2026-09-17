@@ -28,6 +28,8 @@
 
   /* Brand */
   --colors-brand-default-primary:   var(--ib-navy);
+  /* Camel — brand accent used for AI/assistive surfaces */
+  --colors-brand-accent:            var(--ib-copper);
   --colors-brand-default-secondary: var(--ib-white);
 
   /* Surfaces */

@@ -1,0 +1,32 @@
+/* ─── Sticky customisation bar ─────────────────────────────────────────────────
+   Slides up from the bottom once the add-to-bag CTA scrolls out of view.       */
+
+.bar {
+  position: fixed;
+  inset: auto 0 0 0;
+  z-index: var(--z-sticky);
+  box-sizing: border-box;
+  /* 16px all round */
+  padding: var(--spacing-sm);
+  background: var(--colors-background);
+  border-top: var(--border-width) solid var(--border-color);
+  transform: translateY(100%);
+  transition: transform var(--transition-base);
+}
+
+.barVisible {
+  transform: translateY(0);
+}
+
+/* Mobile only. On desktop the customisation panel sits beside the gallery and
+   stays in reach, so the bar has nothing to bring back. Hidden in CSS rather
+   than skipped in JS so the server and client render the same markup. */
+@media (min-width: 1024px) {
+  .bar {
+    display: none;
+  }
+}
+
+.button {
+  width: 100%;
+}
