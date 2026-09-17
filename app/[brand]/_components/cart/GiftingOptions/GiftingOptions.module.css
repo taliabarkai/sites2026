@@ -270,9 +270,10 @@
   border-radius: var(--radius-sm);
 }
 
+/* Matches .optionCardImageWrap so a product row and a packaging card line up. */
 .itemStateThumb {
-  flex: 0 0 96px;
-  width: 96px;
+  flex: 0 0 120px;
+  width: 120px;
   align-self: stretch;
   object-fit: contain;
   background: var(--colors-card-image-bg);
@@ -1037,17 +1038,6 @@
   line-height: var(--typography-rules-text1-line-height);
 }
 
-/* ── Multi-item flow: the bag leads ──────────────────────────────────────── */
-
-.itemsPrompt {
-  margin: 0;
-  font-family:    var(--typography-rules-text2-font-family);
-  font-size:      var(--typography-rules-text2-font-size);
-  line-height:    var(--typography-rules-text2-line-height);
-  font-weight:    var(--typography-rules-text4-font-weight, 600);
-  letter-spacing: var(--typography-rules-text2-letter-spacing, normal);
-  color: var(--colors-text);
-}
 
 /* Wraps a row together with the options it expands, so the two read as one
    unit rather than two stacked cards. */
@@ -1181,4 +1171,16 @@
   justify-content: space-between;
   gap: var(--spacing-xs);
   padding: var(--spacing-xs);
+}
+
+
+/* Progress line under the heading. Multi-item only — with one item the card
+   itself already says whether it is wrapped, so "0 of 1" is just noise. */
+.wrapCount {
+  margin: 0;
+  font-family:    var(--typography-rules-text3-font-family);
+  font-size:      var(--typography-rules-text3-font-size);
+  line-height:    var(--typography-rules-text3-line-height);
+  letter-spacing: var(--typography-rules-text3-letter-spacing, normal);
+  color: var(--colors-text-secondary);
 }

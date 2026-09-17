@@ -141,6 +141,8 @@ export function GiftingOptions({
     ? items.find(i => i.id === drawer.itemId) ?? null
     : null
 
+  const wrappedCount = items.filter(i => assignments.some(a => a.itemId === i.id)).length
+
   const pendingRemoveItem = pendingRemoveId
     ? items.find(i => i.id === pendingRemoveId) ?? null
     : null
@@ -162,19 +164,22 @@ export function GiftingOptions({
         <span className={styles.headingIcon} aria-hidden="true"><GiftIcon size={32} /></span>
       </h2>
 
+      {isMultiItem && (
+        <p className={styles.wrapCount} aria-live="polite">
+          {wrappedCount} of {items.length} items gift wrapped
+        </p>
+      )}
+
       {isMultiItem ? (
-        <>
-          <h3 className={styles.itemsPrompt}>Which items would you like to gift wrap?</h3>
-          <GiftItemList
-            items={items}
-            options={options}
-            assignments={assignments}
-            icons={icons}
-            onAdd={openPanel}
-            onEdit={handleEdit}
-            onRemove={handleRequestRemove}
-          />
-        </>
+        <GiftItemList
+          items={items}
+          options={options}
+          assignments={assignments}
+          icons={icons}
+          onAdd={openPanel}
+          onEdit={handleEdit}
+          onRemove={handleRequestRemove}
+        />
       ) : soleItem && soleAssignment && soleOption ? (
         <ul className={styles.itemStateList}>
           <AssignedItemRow
