@@ -575,6 +575,12 @@ function CheckoutPageInner() {
     !item.name.toLowerCase().includes('warranty')
   )
 
+  // Demo scenario: on TGR the third cart line carries only the Classic box, so
+  // selecting it skips the option list and opens the panel straight away — the
+  // same shortcut single-option brands get. Eligibility is per item, so this is
+  // expressed as an allow-list on the option the third line cannot use.
+  const soloOnlyItemId = brand === 'tgr' ? eligibleGiftItems[2]?.id : undefined
+
   const [giftAssignments, setGiftAssignments] = useState<GiftAssignment[]>([])
 
   // ── Step state machine ──────────────────────────────────────────────────────
@@ -1065,6 +1071,11 @@ function CheckoutPageInner() {
                   designs:         o.designs,
                   wantsName:       o.wantsName,
                   wantsPhoto:      o.wantsPhoto,
+                  eligibleItemIds: soloOnlyItemId && o.id === 'personalized-gift-box'
+                    ? eligibleGiftItems
+                        .filter(i => i.id !== soloOnlyItemId)
+                        .map(i => i.id)
+                    : undefined,
                 }))}
                 designs={giftDesigns}
                 items={eligibleGiftItems.map(i => ({ id: i.id, name: i.name, imageUrl: i.image }))}

@@ -1057,9 +1057,7 @@
   flex-direction: column;
   gap: var(--spacing-xs);
   background: var(--colors-background);
-  /* Rendered only while the item is selected, so it always carries the strong
-     border that continues down from the row above. */
-  border: var(--border-width) solid var(--border-strong);
+  border: var(--border-width) solid var(--border-color);
   border-top: none;
   border-bottom-left-radius: var(--radius-sm);
   border-bottom-right-radius: var(--radius-sm);
@@ -1112,18 +1110,6 @@
 .itemStateCheckbox:hover .itemStateCheckboxChecked {
   background: var(--colors-brand-default-primary);
   border-color: var(--colors-brand-default-primary);
-}
-
-/* Selected: the strong border wraps the whole group — the product row and the
-   options beneath it — so the selection reads as one unit alongside the tick.
-   The row's bottom edge stays light, acting as the divider inside that group
-   rather than a second outline. */
-.itemStateRowSelected,
-.itemStateRowSelected:hover,
-.itemStateRowSelected:focus-visible,
-.itemStateRowSelected.itemStateRowClickable:hover {
-  border-color: var(--border-strong);
-  border-bottom-color: var(--border-color);
 }
 
 /* Options nested under a cart item are styled exactly as they are in the

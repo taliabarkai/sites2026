@@ -188,6 +188,7 @@ export function GiftingOptions({
           assignments={assignments}
           icons={icons}
           designs={designs}
+          activeItemId={drawer?.itemId ?? null}
           onAdd={openPanel}
           onEdit={handleEdit}
           onRemove={handleRequestRemove}

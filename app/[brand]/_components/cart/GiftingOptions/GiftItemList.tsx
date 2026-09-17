@@ -19,6 +19,8 @@ interface GiftItemListProps {
   assignments: GiftAssignment[]
   icons:       GiftingIcons
   designs:     DesignOption[]
+  /** The item whose panel is currently open, if any. */
+  activeItemId: string | null
   /** Item and packaging are both settled here, so the panel opens ready to configure. */
   onAdd:       (itemId: string, optionId: string, trigger: HTMLElement | null) => void
   onEdit:      (assignment: GiftAssignment) => void
@@ -34,7 +36,7 @@ interface GiftItemListProps {
  * an item with exactly one skips it and goes straight to the panel.
  */
 export function GiftItemList({
-  items, options, assignments, icons, designs, onAdd, onEdit, onRemove,
+  items, options, assignments, icons, designs, activeItemId, onAdd, onEdit, onRemove,
 }: GiftItemListProps) {
   const { CheckmarkIcon } = icons
   // One at a time: opening an item's options closes whichever was open.
@@ -100,6 +102,10 @@ export function GiftItemList({
           else setExpandedItemId(expanded ? null : item.id)
         }
 
+        // A solo item has no options to expand, so its panel being open is the
+        // only signal that it is the one being configured — tick it too.
+        const selected = expanded || activeItemId === item.id
+
         return (
           <li key={item.id} className={styles.itemStateGroup}>
             {/* The whole card stays clickable for mouse users, but keyboard
@@ -110,7 +116,6 @@ export function GiftItemList({
                 styles.itemStateRow,
                 styles.itemStateRowClickable,
                 styles.itemStateRowCentered,
-                expanded ? styles.itemStateRowSelected : '',
                 expanded ? styles.itemStateRowExpanded : '',
               ].filter(Boolean).join(' ')}
               onClick={activate}
@@ -126,9 +131,10 @@ export function GiftItemList({
                     // A single option is a direct route to the panel, not a
                     // toggle, so it must not announce itself as a checkbox.
                     ? { 'aria-haspopup': 'dialog' as const,
+                        'aria-expanded': selected,
                         'aria-label': `Add gift packaging to ${item.name}` }
                     : { role: 'checkbox',
-                        'aria-checked': expanded,
+                        'aria-checked': selected,
                         'aria-controls': panelId,
                         'aria-label': `Gift wrap ${item.name}` })}
                   className={styles.itemStateCheckbox}
@@ -138,10 +144,10 @@ export function GiftItemList({
                       20px, so the control lines up optically without shrinking
                       the target. */}
                   <span
-                    className={`${styles.itemStateCheckboxCircle} ${expanded ? styles.itemStateCheckboxChecked : ''}`}
+                    className={`${styles.itemStateCheckboxCircle} ${selected ? styles.itemStateCheckboxChecked : ''}`}
                     aria-hidden="true"
                   >
-                    {expanded && <CheckmarkIcon size={12} />}
+                    {selected && <CheckmarkIcon size={12} />}
                   </span>
                 </button>
               </div>
