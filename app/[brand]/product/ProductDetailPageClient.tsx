@@ -844,7 +844,7 @@ function TrustBadges({
  * Held at module scope so the choice survives a client-side remount while SSR
  * and the first client render still agree on the default.
  */
-let lastAdvisorVariant: TranslationAdvisorVariant = 'inline'
+let lastAdvisorVariant: TranslationAdvisorVariant = 'floating'
 
 // ─── Product form panel ───────────────────────────────────────────────────────
 

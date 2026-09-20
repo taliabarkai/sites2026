@@ -78,12 +78,12 @@
 
 .chatTitle {
   margin: 0;
-  font-family:    var(--typography-rules-headline4-font-family);
-  font-size:      var(--typography-rules-headline4-font-size);
-  line-height:    var(--typography-rules-headline4-line-height);
-  font-weight:    var(--typography-rules-headline4-font-weight, normal);
-  letter-spacing: var(--typography-rules-headline4-letter-spacing, normal);
-  text-transform: var(--typography-rules-headline4-text-transform, none);
+  font-family:    var(--typography-rules-headline9-font-family);
+  font-size:      var(--typography-rules-headline9-font-size);
+  line-height:    var(--typography-rules-headline9-line-height);
+  font-weight:    var(--typography-rules-headline9-font-weight, normal);
+  letter-spacing: var(--typography-rules-headline9-letter-spacing, normal);
+  text-transform: var(--typography-rules-headline9-text-transform, none);
   color: var(--colors-text);
 }
 
@@ -100,8 +100,13 @@
 /* Owns its own layout rather than splitting gap (Tailwind) from padding (here),
    so the three spacing values sit together. 32 top / 16 sides / 4 bottom — the
    composer below supplies the rest of the bottom breathing room. */
+/* Owns its own layout rather than splitting gap (Tailwind) from padding (here),
+   so the three spacing values sit together. 32 top / 16 sides / 4 bottom — the
+   composer below supplies the rest of the bottom breathing room. */
 .conversation {
+  flex: 1 1 auto;
   min-width: 0;
+  min-height: 0;
   display: flex;
   flex-direction: column;
   gap: var(--spacing-sm);
@@ -134,7 +139,8 @@
   margin: 0;
   padding: 0;
   list-style: none;
-  max-height: 220px;
+  flex: 1 1 auto;
+  min-height: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
 }
@@ -295,10 +301,11 @@
 }
 
 .launcherLabel {
-  font-family:    var(--typography-rules-text1-font-family);
-  font-size:      var(--typography-rules-text1-font-size);
-  line-height:    var(--typography-rules-text1-line-height);
-  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+  font-family:    var(--typography-rules-text2-font-family);
+  font-size:      var(--typography-rules-text2-font-size);
+  line-height:    var(--typography-rules-text2-line-height);
+  font-weight:    var(--typography-rules-text2-font-weight, normal);
+  letter-spacing: var(--typography-rules-text2-letter-spacing, normal);
   color: var(--colors-text-inverse);
 }
 
@@ -325,7 +332,7 @@
   z-index: var(--z-modal);
   display: flex;
   flex-direction: column;
-  max-height: 85dvh;
+  height: 75dvh;
   background: var(--colors-background);
   border-top-left-radius: var(--radius-lg);
   border-top-right-radius: var(--radius-lg);
@@ -351,7 +358,8 @@
   .floating {
     inset: auto 56px calc(56px + var(--buttons-primary-min-height) + var(--spacing-xs)) auto;
     width: min(380px, calc(100vw - var(--spacing-lg)));
-    max-height: min(560px, calc(100dvh - var(--spacing-xxl)));
+    /* 540px, but never taller than a short window can hold. */
+    height: min(540px, calc(100dvh - 160px));
     border-radius: var(--radius-lg);
     transform: translateY(var(--spacing-xs));
     opacity: 0;
@@ -392,8 +400,8 @@
 .floatingBody {
   flex: 1 1 auto;
   min-height: 0;
-  overflow-y: auto;
-  overscroll-behavior: contain;
+  display: flex;
+  overflow: hidden;
 }
 
 /* ── Pill input ── */
