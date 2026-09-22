@@ -8,6 +8,7 @@ import * as tgrIcons from '@/src/components/icons/tgr'
 import * as lalIcons from '@/src/components/icons/lal'
 import * as ibIcons from '@/src/components/icons/ib'
 import { getBrandFromPathname } from '../../_config/brands'
+import { Button } from '../Button'
 import { PanelPortal } from '../PanelPortal'
 import { lookupReply } from './hebrewNames'
 import styles from './TranslationAdvisor.module.css'
@@ -72,7 +73,7 @@ export function TranslationAdvisor({
 }: TranslationAdvisorProps = {}) {
   const pathname = usePathname()
   const brand = getBrandFromPathname(pathname)
-  const { AiSparkleIcon, ArrowIcon, ChevronIcon, XIcon } = BRAND_ICONS[brand]
+  const { AiSparkleIcon, ArrowIcon, ChevronIcon, ClipboardCopyIcon, XIcon } = BRAND_ICONS[brand]
 
   const [open, setOpen]     = useState(false)
   const [query, setQuery]   = useState('')
@@ -190,13 +191,15 @@ export function TranslationAdvisor({
                   </span>
                   <span className={styles.resultBody}>
                     <span className={styles.resultHebrew} lang="he" dir="rtl">{entry.hebrew}</span>
-                    <button
-                      type="button"
+                    <Button
+                      variant="secondary"
+                      size="compact"
                       className={styles.copyName}
+                      leadingIcon={<ClipboardCopyIcon size={20} />}
                       onClick={() => handleCopyName(entry.hebrew!)}
                     >
                       {copied === entry.hebrew ? 'Copied' : 'Copy Hebrew Name'}
-                    </button>
+                    </Button>
                   </span>
                 </div>
               </li>

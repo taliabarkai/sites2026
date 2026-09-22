@@ -231,19 +231,22 @@
   color: var(--colors-text);
 }
 
-.copyName {
-  padding: 0;
-  border: none;
-  background: none;
-  cursor: pointer;
-  color: var(--colors-text);
-  text-decoration: underline;
-  text-underline-offset: 2px;
-  font-family:    var(--typography-rules-text1-font-family);
-  font-size:      var(--typography-rules-text1-font-size);
-  line-height:    var(--typography-rules-text1-line-height);
-  font-weight:    var(--typography-rules-text4-font-weight, 600);
-  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+/* Chrome comes from Button's secondary variant — white ground, navy text and
+   navy border on IB. The label drops button1 for text2 so it reads in sentence
+   case rather than the uppercase a button label would normally take.
+   The class is doubled to out-specify .secondary, which lives in another
+   stylesheet and would otherwise win or lose on bundle order alone. */
+.copyName.copyName {
+  gap: var(--spacing-xxs);
+  /* Transparent, so the bubble's own surface shows through rather than a white
+     panel sitting on it. */
+  background: transparent;
+  font-family:    var(--typography-rules-text2-font-family);
+  font-size:      var(--typography-rules-text2-font-size);
+  line-height:    var(--typography-rules-text2-line-height);
+  font-weight:    var(--typography-rules-text2-font-weight, normal);
+  letter-spacing: var(--typography-rules-text2-letter-spacing, normal);
+  text-transform: none;
 }
 
 .useName {
