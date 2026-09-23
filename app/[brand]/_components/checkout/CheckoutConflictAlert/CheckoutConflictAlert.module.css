@@ -1,0 +1,152 @@
+/* Error surface tint, derived from the semantic error colour rather than a new
+   hex, matching how the success tint is built elsewhere on this page.
+   See the note in the PR: a real --colors-surface-error token is proposed.
+
+   Mobile-first: icon + text stack above a full-width button. From 768px the
+   alert becomes a single row with the button parked on the right. */
+.alert {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--spacing-sm);
+  width: 100%;
+  padding: var(--spacing-md);
+  background: color-mix(in srgb, var(--colors-error) 8%, var(--colors-background));
+  border: none;
+  border-radius: var(--radius-sm);
+}
+
+/* The wrapper is focused on mount purely so screen readers land on the alert.
+   It is tabindex="-1", so it is never reached by keyboard navigation and a
+   focus ring here would only read as a border the design does not call for.
+   The Refresh button inside keeps its own visible focus style. */
+.alert:focus,
+.alert:focus-visible {
+  outline: none;
+}
+
+/* Icon and copy sit on one line, the icon pinned to the first text line. */
+.body {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-xs);
+  min-width: 0;
+}
+
+.icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  color: var(--colors-error);
+}
+
+/* 36px, composed from spacing tokens (24 + 12). */
+.icon svg {
+  width:  calc(var(--spacing-md) + var(--spacing-xs));
+  height: calc(var(--spacing-md) + var(--spacing-xs));
+}
+
+.text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xxxs);
+  min-width: 0;
+}
+
+/* Black, not red: red is reserved for the icon and the button. */
+.title {
+  margin: 0;
+  color: var(--colors-text);
+  font-family:    var(--typography-rules-headline4-font-family);
+  font-size:      var(--typography-rules-headline4-font-size);
+  line-height:    var(--typography-rules-headline4-line-height);
+  letter-spacing: var(--typography-rules-headline4-letter-spacing, normal);
+  text-transform: var(--typography-rules-headline4-text-transform, none);
+  font-weight:    var(--typography-rules-headline4-font-weight, normal);
+}
+
+.message {
+  margin: 0;
+  color: var(--colors-text);
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+  text-transform: var(--typography-rules-text1-text-transform, none);
+  font-weight:    var(--typography-rules-text1-font-weight, normal);
+}
+
+/* Colour only. Height, padding, border-radius and typography are left to the
+   Button component's own --buttons-primary-* tokens, so this matches Place
+   Order and every other primary button in the brand exactly.
+   Doubled class beats Button's own .primary rules regardless of which module's
+   stylesheet loads first. */
+.button.button {
+  width: 100%;
+  background: var(--colors-error);
+  border-color: var(--colors-error);
+  color: var(--colors-text-inverse);
+}
+
+.button.button:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--colors-error) 88%, var(--colors-text));
+  border-color: color-mix(in srgb, var(--colors-error) 88%, var(--colors-text));
+}
+
+.button.button:active:not(:disabled) {
+  background: color-mix(in srgb, var(--colors-error) 78%, var(--colors-text));
+  border-color: color-mix(in srgb, var(--colors-error) 78%, var(--colors-text));
+}
+
+.button.button:focus-visible {
+  outline: 2px solid var(--colors-text);
+  outline-offset: 2px;
+}
+
+@media (min-width: 768px) {
+  .alert {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacing-lg);
+    padding: var(--spacing-md) var(--spacing-lg);
+  }
+
+  /* Copy takes the slack so the button keeps its natural width on the right. */
+  .body {
+    flex: 1 1 auto;
+  }
+
+  .button.button {
+    width: auto;
+    flex: 0 0 auto;
+  }
+}
+
+/* Reload-in-progress spinner. Inherits the button's text colour, so it needs
+   no colour of its own and stays correct on every brand. */
+.spinner {
+  display: inline-block;
+  width:  var(--spacing-sm);
+  height: var(--spacing-sm);
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: var(--radius-full);
+  animation: spin 600ms linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spinner { animation-duration: 2s; }
+}
+
+/* The button keeps its error colouring while the reload is in flight, rather
+   than dropping to the generic disabled grey. */
+.button.button:disabled {
+  background: var(--colors-error);
+  border-color: var(--colors-error);
+  color: var(--colors-text-inverse);
+  cursor: progress;
+}

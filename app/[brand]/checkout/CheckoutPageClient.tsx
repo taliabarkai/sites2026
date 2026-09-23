@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
-import { usePathname, useRouter } from 'next/navigation'
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import * as oalIcons from '@/src/components/icons/oal'
 import * as mnnIcons from '@/src/components/icons/mnn'
 import * as tgrIcons from '@/src/components/icons/tgr'
@@ -18,7 +18,9 @@ import { getBrandFromPathname, BRAND_GIFT_CONFIG, type BrandKey } from '../_conf
 import { prefixNavLinks, withBrandPrefix } from '../_config/brandPaths'
 import { DEFAULT_NAV_LINKS, DEFAULT_TOPLINE } from '../_config/siteContent'
 import { getGiftOptions } from '../_config/giftOptions'
+import { DEMO_CART_ITEMS, ERROR_PREVIEW_CART_SIZE } from '../_config/demoCart'
 import { GiftingOptions } from '../_components/cart/GiftingOptions'
+import { CheckoutConflictAlert } from '../_components/checkout/CheckoutConflictAlert'
 import type { GiftAssignment } from '../_components/cart/GiftingOptions'
 import styles from './CheckoutPage.module.css'
 
@@ -39,6 +41,7 @@ interface BrandIcons {
   XIcon:         React.ComponentType<IconProps>
   TrashCanIcon:  React.ComponentType<IconProps>
   AiMagicIcon:   React.ComponentType<IconProps>
+  WarningIcon:   React.ComponentType<IconProps>
 }
 
 const BRAND_ICONS: Record<string, BrandIcons> = {
@@ -548,9 +551,28 @@ function OrderSummary({ items, icons, showDetails, subtotal = 0, selectedShippin
 // ─── Page Inner ────────────────────────────────────────────────────────────────
 
 function CheckoutPageInner() {
-  const pathname = usePathname()
-  const brand    = getBrandFromPathname(pathname)
-  const router   = useRouter()
+  const pathname     = usePathname()
+  const brand        = getBrandFromPathname(pathname)
+  const router       = useRouter()
+  const searchParams = useSearchParams()
+
+  // Preview-only: ?state=error renders the session-conflict view, so the error
+  // can be linked and shared for QA and design review. The real flow is wired
+  // to the submit response instead — see the TODO on the alert below.
+  const isErrorPreview = searchParams.get('state') === 'error'
+
+  /**
+   * Full document load of the same checkout with `state` dropped, so the page
+   * genuinely re-reads rather than re-rendering the stale view. A plain
+   * reload() would keep ?state=error and bring the alert straight back.
+   * Against the real API this becomes a reload of the canonical checkout URL.
+   */
+  const reloadWithoutConflict = () => {
+    const next = new URLSearchParams(searchParams.toString())
+    next.delete('state')
+    const query = next.toString()
+    window.location.href = query ? `${pathname}?${query}` : pathname
+  }
   const icons    = BRAND_ICONS[brand]
   const navLinks = prefixNavLinks(brand, DEFAULT_NAV_LINKS)
   const topline  = {
@@ -560,7 +582,7 @@ function CheckoutPageInner() {
     contactHref: withBrandPrefix(brand, DEFAULT_TOPLINE.contactHref),
   }
 
-  const { items, subtotal } = useCart()
+  const { items, subtotal, replaceItems } = useCart()
 
   const isTgr          = brand === 'tgr'
   const brandGiftOptions = getGiftOptions(brand)
@@ -714,6 +736,36 @@ function CheckoutPageInner() {
   const [cardCvv,          setCardCvv]          = useState('')
   const [cardName,         setCardName]         = useState('')
   const [summaryOpen,      setSummaryOpen]      = useState(true)
+
+  // The error preview is only legible against a filled-in checkout — an empty
+  // form would read as a validation error rather than a stale-session one.
+  useEffect(() => {
+    if (!isErrorPreview) return
+
+    setEmail(DEMO_CONTACT.email)
+    setCountry('US')
+    setFirstName(DEMO_CONTACT.firstName)
+    setLastName(DEMO_CONTACT.lastName)
+    setStreetAddress(DEMO_CONTACT.line1)
+    setCity(DEMO_CONTACT.city)
+    setAddrState(DEMO_CONTACT.state)
+    setZipCode(DEMO_CONTACT.zip)
+    setPhone(DEMO_CONTACT.phone)
+
+    setPaymentMethod('credit-card')
+    setCardName(`${DEMO_CONTACT.firstName} ${DEMO_CONTACT.lastName}`)
+    setCardNumber('4242 4242 4242 4242')
+    setCardExpiry('04/29')
+    setCardCvv('123')
+  }, [isErrorPreview])
+
+  // Opened straight from a shared ?state=error link the bag is empty, which
+  // would render the conflict over a $0 order. Fill it to the same size the
+  // toggle pins the preview to. Only ever seeds an empty cart.
+  useEffect(() => {
+    if (!isErrorPreview || items.length > 0) return
+    replaceItems(DEMO_CART_ITEMS.slice(0, ERROR_PREVIEW_CART_SIZE))
+  }, [isErrorPreview, items.length, replaceItems])
 
   const { DropdownIcon, TooltipIcon, CheckmarkIcon, LockIcon, XIcon, CouponIcon, ShippingIcon, ReturnIcon, WarrantyIcon, ChevronIcon } = icons
 
@@ -892,7 +944,23 @@ function CheckoutPageInner() {
           <div className={styles.layout}>
 
             {/* ══════════════ LEFT COLUMN ══════════════ */}
-            <div className={styles.leftCol}>
+            <div className={styles.formCol}>
+
+              {/* Sits in its own section above the bordered step box, not inside it.
+                  TODO: replace `isErrorPreview` with the real conflict state once the
+                  submit endpoint is live. When POST /checkout/order answers with a
+                  session-conflict / stale-version response (409), hold that response
+                  in state and render this alert with the server's own title and
+                  message, keeping Place Order disabled until the page is re-read. */}
+              {isErrorPreview && (
+                <CheckoutConflictAlert
+                  icons={icons}
+                  className={styles.conflictAlert}
+                  onRefresh={reloadWithoutConflict}
+                />
+              )}
+
+              <div className={styles.leftCol}>
 
               {/* Step breadcrumb — hidden via CSS, kept for accessibility */}
               <StepBreadcrumb
@@ -1311,16 +1379,32 @@ function CheckoutPageInner() {
                   )}
                 </div>
 
+                {/* Repeat of the alert, directly above the disabled Place Order
+                    button — anyone who scrolled past the first one meets the
+                    blocked button here with no other explanation.
+                    Not announced: the copy at the top of the form already is. */}
+                {isErrorPreview && (
+                  <CheckoutConflictAlert
+                    icons={icons}
+                    announce={false}
+                    onRefresh={reloadWithoutConflict}
+                  />
+                )}
+
                 {/* Place Order */}
                 <div className={styles.placeOrderSection}>
                   <Button
                     variant="primary"
-                    className={styles.placeOrderButton}
                     onClick={() => completeStep(4)}
+                    /* A stale checkout cannot be submitted: the newer session has
+                       already saved different data, so the order must be re-read. */
                     disabled={
+                      isErrorPreview ||
                       paymentMethod === null ||
                       (paymentMethod === 'credit-card' && (!cardNumber.trim() || !cardCvv.trim() || !cardName.trim()))
                     }
+                    aria-disabled={isErrorPreview || undefined}
+                    className={`${styles.placeOrderButton}${isErrorPreview ? ` ${styles.placeOrderButtonBlocked}` : ''}`}
                     style={
                       paymentMethod === 'paypal'   ? { background: '#0070BA', color: '#fff', borderColor: '#0070BA' } :
                       paymentMethod === 'applepay' ? { background: '#000000', color: '#fff', borderColor: '#000000' } :
@@ -1360,6 +1444,7 @@ function CheckoutPageInner() {
 
               {/* You May Also Like — mobile (hidden) */}
 
+              </div>
             </div>
             {/* ══════════════ END LEFT COLUMN ══════════════ */}
 

@@ -1,42 +1,50 @@
 'use client'
 
-import { useCart, type CartItem } from '../../_context/CartContext'
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+
+import { useCart } from '../../_context/CartContext'
+import { DEMO_CART_ITEMS, ERROR_PREVIEW_CART_SIZE } from '../../_config/demoCart'
 
 /**
- * Demo control, checkout only: swaps the bag between one, two and three items.
+ * Demo control, checkout only: swaps the bag between one, two and three items,
+ * and exposes the checkout error state as a fourth, linkable preview.
+ *
  * The gifting flow branches on cart size (a single item skips item selection),
  * so both shapes need to be reachable without hand-editing localStorage.
+ *
+ * The error preview is driven by `?state=error` rather than local state so the
+ * view survives a refresh and can be shared as a link for QA and design review.
  */
-
-const CDN = 'https://cdn.oakandluna.com/digital-asset/product/'
-
-const DEMO_ITEMS: CartItem[] = [
-  {
-    id: 'demo-willow-tag',
-    name: 'Willow Tag Initial Necklace with Diamond — Gold Vermeil',
-    price: 13000,
-    image: `${CDN}lock-luna-charm-with-round-cut-moissanite-gold-vermeil-6.jpg`,
-    isPersonalized: true,
-  },
-  {
-    id: 'demo-engraved-compass',
-    name: 'Engraved Compass Necklace with Diamond — Gold Vermeil',
-    price: 15000,
-    image: `${CDN}engraved-comprass-necklace-gold-vermeil-1.jpg`,
-    isPersonalized: true,
-  },
-  {
-    id: 'demo-singapore-chain',
-    name: 'Singapore Chain Name Necklace — Gold Vermeil',
-    price: 11000,
-    image: `${CDN}singapore-chain-name-necklace-gold-vermeil-8.jpg`,
-    isPersonalized: true,
-  },
-]
 
 export function CartSizeToggle({ className }: { className?: string }) {
   const { items, replaceItems } = useCart()
-  const count = items.length
+  const router       = useRouter()
+  const pathname     = usePathname()
+  const searchParams = useSearchParams()
+
+  const count     = items.length
+  const isError   = searchParams.get('state') === 'error'
+
+  /** Rewrites `state` without touching any other param already on the URL. */
+  const setState = (value: string | null) => {
+    const next = new URLSearchParams(searchParams.toString())
+    if (value) next.set('state', value)
+    else next.delete('state')
+
+    const query = next.toString()
+    router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false })
+  }
+
+  const showSize = (n: number) => {
+    replaceItems(DEMO_CART_ITEMS.slice(0, n))
+    setState(null)
+  }
+
+  const showError = () => {
+    // Pin the bag so the error preview always renders the same checkout.
+    replaceItems(DEMO_CART_ITEMS.slice(0, ERROR_PREVIEW_CART_SIZE))
+    setState('error')
+  }
 
   return (
     <div className={className} role="group" aria-label="Demo cart size">
@@ -47,12 +55,23 @@ export function CartSizeToggle({ className }: { className?: string }) {
           key={n}
           type="button"
           aria-label={`Set cart to ${n} ${n === 1 ? 'item' : 'items'}`}
-          aria-pressed={count === n}
-          onClick={() => replaceItems(DEMO_ITEMS.slice(0, n))}
+          aria-pressed={!isError && count === n}
+          onClick={() => showSize(n)}
         >
           {n}
         </button>
       ))}
+
+      <span aria-hidden="true" data-toggle-divider />
+
+      <button
+        type="button"
+        aria-label="Preview the checkout error state"
+        aria-pressed={isError}
+        onClick={showError}
+      >
+        Error
+      </button>
     </div>
   )
 }

@@ -109,6 +109,38 @@
   color: var(--colors-text-inverse);
 }
 
+/* Hit area is padded out to 44px without growing the pill: the visual button
+   keeps its compact size, the pseudo-element carries the touch target. */
+.cartSizeToggle button {
+  position: relative;
+}
+
+.cartSizeToggle button::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  min-height: 44px;
+  height: 100%;
+}
+
+.cartSizeToggle button:focus-visible {
+  outline: 2px solid var(--colors-text);
+  outline-offset: 2px;
+}
+
+/* Separates the cart-size steps from the error-state preview. Horizontal
+   spacing comes from the container's gap, so it matches the step spacing. */
+.cartSizeToggle [data-toggle-divider] {
+  display: block;
+  flex: 0 0 auto;
+  width: var(--border-width);
+  height: var(--spacing-sm);
+  background: var(--border-color);
+}
+
 /* ── Default / transparent modes ── */
 .barInner {
   display: grid;

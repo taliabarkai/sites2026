@@ -594,6 +594,29 @@
   width: 100%;
 }
 
+/* Blocked by an unresolved checkout conflict — muted well past the Button
+   component's own 0.7 disabled opacity, so it reads as unavailable rather
+   than merely incomplete. */
+.placeOrderButtonBlocked:disabled {
+  background: var(--colors-surface-disabled);
+  border-color: var(--colors-surface-disabled);
+  color: var(--colors-text-disabled);
+  opacity: 1;
+}
+
+/* Form column wrapper: carries the conflict alert as its own section above the
+   bordered step box, so the alert is not enclosed by that border. */
+.formCol {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+/* Sits above the first step, below the mobile order-summary bar. */
+.conflictAlert {
+  margin-bottom: var(--spacing-md);
+}
+
 .applePayBtnContent {
   display: inline-flex;
   align-items: center;
