@@ -23,6 +23,8 @@ export interface GiftOption {
   longDescription?: string
   /** Minor units (cents). */
   price:            number
+  /** Was-price, when this packaging is on offer. Struck through beside `price`. */
+  originalPrice?:   number
   imageUrl:         string
   /** When present, only these cart items can use this option. */
   eligibleItemIds?: string[]

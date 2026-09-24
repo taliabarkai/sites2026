@@ -19,9 +19,11 @@ import { prefixNavLinks, withBrandPrefix } from '../_config/brandPaths'
 import { DEFAULT_NAV_LINKS, DEFAULT_TOPLINE } from '../_config/siteContent'
 import { getGiftOptions, type BrandGiftOption } from '../_config/giftOptions'
 import { getDemoCartItems, ERROR_PREVIEW_CART_SIZE } from '../_config/demoCart'
-import { readCartSize, readGiftingVariant } from '../_config/demoParams'
+import { readCartSize, readFlow, readGiftingVariant } from '../_config/demoParams'
+import { getBrandFeatures, getFlowConfig, getFlowSteps } from '../_config/flow'
 import { GiftingOptions } from '../_components/cart/GiftingOptions'
 import { GiftingSection as GiftingSectionV2 } from '../_components/cart/GiftingV2'
+import { Usps } from '../_components/cart/Usps'
 import type { GiftItem } from '../_components/cart/GiftingV2'
 import { CheckoutConflictAlert } from '../_components/checkout/CheckoutConflictAlert'
 import { findOptionForItem } from '../_components/cart/GiftingOptions'
@@ -102,6 +104,8 @@ interface StepBreadcrumbProps {
   completedSteps: Set<number>
   icons:          BrandIcons
   brand:          string
+  /** Absent in a flow with no cart page, which drops the step entirely. */
+  cartHref?:      string
   onEditStep:     (step: number) => void
 }
 
@@ -111,23 +115,26 @@ const BREADCRUMB_STEPS = [
   { n: 3, label: 'Payment' },
 ] as const
 
-function StepBreadcrumb({ currentStep, completedSteps, icons, brand, onEditStep }: StepBreadcrumbProps) {
+function StepBreadcrumb({ currentStep, completedSteps, icons, brand, cartHref, onEditStep }: StepBreadcrumbProps) {
   const { ChevronIcon } = icons
 
   return (
     <nav className={styles.stepBreadcrumb} aria-label="Checkout steps">
-      {/* Cart — always a link back */}
-      <span className={styles.stepBreadcrumbItem}>
-        <Link
-          href={`/${brand}/cart`}
-          className={`${styles.stepBreadcrumbLabel} ${styles.stepBreadcrumbCompleted}`}
-        >
-          Cart
-        </Link>
-        <span className={styles.stepBreadcrumbSep} aria-hidden="true">
-          <ChevronIcon size={12} />
+      {/* Cart — only in the flows that have one. The shrinking step count is
+          part of what the phases are demonstrating. */}
+      {cartHref && (
+        <span className={styles.stepBreadcrumbItem}>
+          <Link
+            href={cartHref}
+            className={`${styles.stepBreadcrumbLabel} ${styles.stepBreadcrumbCompleted}`}
+          >
+            Cart
+          </Link>
+          <span className={styles.stepBreadcrumbSep} aria-hidden="true">
+            <ChevronIcon size={12} />
+          </span>
         </span>
-      </span>
+      )}
 
       {BREADCRUMB_STEPS.map(({ n, label }, i) => {
         const isActive    = n === currentStep
@@ -411,9 +418,18 @@ interface OrderSummaryProps {
    * itself and would just be repeating it here.
    */
   defaultItemsOpen?:    boolean
+  /**
+   * Whether this summary asks for a promo code. False once an earlier page
+   * already did: one code, one place to enter it.
+   */
+  showPromo?:           boolean
+  /** The three promises, inside the card beneath the total. */
+  showUsps?:            boolean
+  /** Dropped on brands whose products no plan covers. */
+  uspsWarranty?:        boolean
 }
 
-function OrderSummary({ items, icons, showDetails, subtotal = 0, selectedShipping = 'free', hideHeader, hideBenefits, taxAmount, orderTotalDisplay, onOpenGiftModal, giftByItemId, giftTotal = 0, giftCount = 0, collapsibleItems, defaultItemsOpen = false }: OrderSummaryProps) {
+function OrderSummary({ items, icons, showDetails, subtotal = 0, selectedShipping = 'free', hideHeader, hideBenefits, taxAmount, orderTotalDisplay, onOpenGiftModal, giftByItemId, giftTotal = 0, giftCount = 0, collapsibleItems, defaultItemsOpen = false, showPromo = true, showUsps, uspsWarranty = true }: OrderSummaryProps) {
   const [promoCode,    setPromoCode]    = useState('')
   const [promoApplied, setPromoApplied] = useState(false)
   const [appliedCode,  setAppliedCode]  = useState('')
@@ -500,6 +516,7 @@ function OrderSummary({ items, icons, showDetails, subtotal = 0, selectedShippin
 
       {showDetails && (
         <>
+          {showPromo && (
           <div className={styles.promoRow}>
             <span className={styles.promoQuestion}>
               <CouponIcon size={16} />
@@ -533,6 +550,7 @@ function OrderSummary({ items, icons, showDetails, subtotal = 0, selectedShippin
               </div>
             )}
           </div>
+          )}
 
           <div className={styles.totalsRows}>
             <div className={styles.totalRow}>
@@ -581,25 +599,12 @@ function OrderSummary({ items, icons, showDetails, subtotal = 0, selectedShippin
             <p className={styles.savingsNote}>You're saving {formatPrice(discountAmount)} on this order!</p>
           )}
 
-          {!hideBenefits && (
-            <>
-              <div className={styles.summaryDivider} />
-              <ul className={styles.benefits}>
-                <li className={styles.benefit}>
-                  <span className={styles.benefitIcon}><ShippingIcon size={24} /></span>
-                  <span>Free shipping on all orders</span>
-                </li>
-                <li className={styles.benefit}>
-                  <span className={styles.benefitIcon}><ReturnIcon size={24} /></span>
-                  <span>60-day extended returns</span>
-                </li>
-                <li className={styles.benefit}>
-                  <span className={styles.benefitIcon}><WarrantyIcon size={24} /></span>
-                  <span>2-year warranty</span>
-                </li>
-              </ul>
-            </>
+          {/* Inside the card, under the total, with no rule above: the list is
+              part of the summary rather than a footnote hung beneath it. */}
+          {showUsps && (
+            <Usps icons={icons} showWarranty={uspsWarranty} className={styles.summaryUsps} />
           )}
+
         </>
       )}
     </section>
@@ -643,6 +648,10 @@ function CheckoutPageInner() {
   const { items, subtotal, replaceItems } = useCart()
 
   const giftingVariant = readGiftingVariant(searchParams)
+  const flow       = readFlow(searchParams)
+  const flowConfig = getFlowConfig(flow)
+  const features   = getBrandFeatures(brand as BrandKey)
+  const query      = searchParams.toString()
 
   const isTgr          = brand === 'tgr'
   const brandGiftOptions = getGiftOptions(brand)
@@ -1044,7 +1053,7 @@ function CheckoutPageInner() {
           </button>
         </div>
         <div className={styles.mobileSummarySheetBody}>
-          <OrderSummary {...summaryProps} hideHeader showDetails hideBenefits subtotal={subtotal} selectedShipping={selectedShipping} orderTotalDisplay={orderTotal} />
+          <OrderSummary {...summaryProps} hideHeader showDetails hideBenefits showPromo={flowConfig.promo === 'checkout'} subtotal={subtotal} selectedShipping={selectedShipping} orderTotalDisplay={orderTotal} />
         </div>
       </div>
 
@@ -1077,6 +1086,7 @@ function CheckoutPageInner() {
                 completedSteps={completedSteps}
                 icons={icons}
                 brand={brand}
+                cartHref={flowConfig.hasCartPage ? `/${brand}/cart${query ? `?${query}` : ''}` : undefined}
                 onEditStep={editStep}
               />
 
@@ -1194,7 +1204,8 @@ function CheckoutPageInner() {
                 </div>
               </AccordionStep>
 
-              {/* ── Step 2: Shipping Method ── */}
+              {/* ── Step 2: Shipping Method — Phase 1 chose it on the cart page ── */}
+              {flowConfig.shipping === 'checkout' && (
               <AccordionStep
                 title="Shipping Method"
                 stepNumber={2}
@@ -1235,12 +1246,13 @@ function CheckoutPageInner() {
                   <img src="/images/carriers/dhl.svg"   alt="DHL"   className={styles.carrierLogo} />
                 </div>
               </AccordionStep>
+              )}
 
               {/* ── Step 3: Gifting ──
                   Two variants of the same step, in the same slot, chosen by
                   `?gifting=`. They share the lifted assignments, so the totals
                   and the order summary are indifferent to which one is on. */}
-              {giftingVariant === 'v2' ? (
+              {flowConfig.gifting !== 'checkout' ? null : giftingVariant === 'v2' ? (
                 <GiftingSectionV2
                   options={giftingOptions}
                   designs={giftDesigns}
@@ -1411,6 +1423,9 @@ function CheckoutPageInner() {
 
                   {summaryOpen && (
                     <div className={styles.paymentSummaryBody}>
+                      {/* Same rule as the summary card's: the phases with a
+                          cart page collected the code there. */}
+                      {flowConfig.promo === 'checkout' && (
                       <div className={styles.promoRow}>
                         <span className={styles.promoQuestion}>Have a promo code?</span>
                         {promoApplied ? (
@@ -1441,6 +1456,7 @@ function CheckoutPageInner() {
                           </div>
                         )}
                       </div>
+                      )}
 
                       <div className={styles.totalsRows}>
                         <div className={styles.totalRow}>
@@ -1552,12 +1568,19 @@ function CheckoutPageInner() {
 
             {/* ══════════════ RIGHT COLUMN ══════════════ */}
             <aside className={styles.rightCol}>
+              {/* The lines open from the start once the bag has a page of its
+                  own: the shopper settled it there and left it behind, so this
+                  is the only place it still shows. V2 opens them too, since its
+                  packaging step writes into these very lines. */}
               <div className={styles.orderSummaryDesktop}>
                 <OrderSummary
                   {...summaryProps}
                   showDetails
                   collapsibleItems
-                  defaultItemsOpen={giftingVariant === 'v2'}
+                  defaultItemsOpen={flowConfig.hasCartPage || giftingVariant === 'v2'}
+                  showPromo={flowConfig.promo === 'checkout'}
+                  showUsps={flowConfig.usps === 'checkout'}
+                  uspsWarranty={features.warranty}
                   subtotal={subtotal}
                   selectedShipping={selectedShipping}
                 />

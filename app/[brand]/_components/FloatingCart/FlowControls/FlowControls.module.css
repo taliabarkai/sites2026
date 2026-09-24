@@ -1,0 +1,166 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   Presenter control in the floating cart header.
+
+   One trigger, one dropdown. It shares that row with the bag title and the
+   close button, so everything but the current phase's name folds away.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.controls {
+  display: inline-flex;
+  align-items: center;
+}
+
+/* Names the phase it is on, so the header says what is running without the
+   dropdown being open. Borrows the header's existing pill treatment. */
+.trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xxs);
+  padding: var(--spacing-xxxs) var(--spacing-xs);
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--colors-text);
+  cursor: pointer;
+  white-space: nowrap;
+  font-family:    var(--typography-rules-text3-font-family);
+  font-size:      var(--typography-rules-text3-font-size);
+  line-height:    var(--typography-rules-text3-line-height);
+  letter-spacing: var(--typography-rules-text3-letter-spacing, normal);
+  transition: border-color var(--transition-fast);
+}
+
+.trigger:hover {
+  border-color: var(--border-strong);
+}
+
+.trigger:focus-visible,
+.phase:focus-visible {
+  outline: 2px solid var(--colors-text);
+  outline-offset: 2px;
+}
+
+.caret {
+  border-left:  4px solid transparent;
+  border-right: 4px solid transparent;
+  border-top:   4px solid currentColor;
+}
+
+/* Portalled and pinned in viewport coordinates: the cart panel is a fixed,
+   scrolling element and would otherwise clip this. */
+.menu {
+  position: fixed;
+  z-index: var(--z-toast);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xxs);
+  min-width: 280px;
+  max-width: calc(100vw - var(--spacing-md) * 2);
+  padding: var(--spacing-xs);
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: var(--colors-surface-primary);
+  box-shadow: var(--shadow-md);
+}
+
+.menuLabel,
+.menuNote {
+  margin: 0;
+  font-family: var(--typography-rules-text3-font-family);
+  font-size:   var(--typography-rules-text3-font-size);
+  line-height: var(--typography-rules-text3-line-height);
+  color: var(--colors-text-secondary);
+}
+
+/* ── The flow: the parent choice, so it leads ──────────────────────────────
+   Full-width rows carrying what each phase actually moves. "P1" on its own
+   named nothing. */
+
+.phaseList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xxxs);
+}
+
+.phase {
+  appearance: none;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+  padding: var(--spacing-xxs) var(--spacing-xs);
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--colors-text);
+  cursor: pointer;
+  text-align: left;
+  transition: background var(--transition-fast), border-color var(--transition-fast),
+              color var(--transition-fast);
+}
+
+.phase:hover {
+  border-color: var(--border-strong);
+}
+
+.phaseActive {
+  background: var(--colors-text);
+  border-color: var(--colors-text);
+  color: var(--colors-text-inverse);
+}
+
+.phaseName {
+  font-family: var(--typography-rules-text1-font-family);
+  font-size:   var(--typography-rules-text1-font-size);
+  line-height: var(--typography-rules-text1-line-height);
+}
+
+.phaseSummary {
+  font-family: var(--typography-rules-text3-font-family);
+  font-size:   var(--typography-rules-text3-font-size);
+  line-height: var(--typography-rules-text3-line-height);
+  color: var(--colors-text-secondary);
+}
+
+/* The selected row inverts, so its summary has to invert with it. */
+.phaseActive .phaseSummary {
+  color: var(--colors-text-inverse);
+  opacity: 0.75;
+}
+
+/* ── Settings within the selected flow ─────────────────────────────────── */
+
+.menuRow {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xxxs);
+}
+
+.menuRow button {
+  appearance: none;
+  flex: 1;
+  min-height: 32px;
+  padding: var(--spacing-xxxs) var(--spacing-xs);
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--colors-text-secondary);
+  cursor: pointer;
+  font-family: var(--typography-rules-text3-font-family);
+  font-size:   var(--typography-rules-text3-font-size);
+  line-height: var(--typography-rules-text3-line-height);
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.menuRow button[aria-pressed='true'] {
+  background: var(--colors-text);
+  border-color: var(--colors-text);
+  color: var(--colors-text-inverse);
+}
+
+.menuRow button:focus-visible {
+  outline: 2px solid var(--colors-text);
+  outline-offset: 2px;
+}
+
+

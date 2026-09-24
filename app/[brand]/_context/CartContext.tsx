@@ -11,6 +11,10 @@ export interface SelectedOption {
 
 export interface GiftPackaging {
   type: 'classic' | 'personalized'
+  /** Which option from the brand's catalogue, when it came from one. */
+  optionId?: string
+  /** The option's own name, so a summary can show it without a lookup. */
+  name?: string
   giftNote?: string
   selectedDesign?: string
   recipientName?: string

@@ -35,27 +35,14 @@
   transform: translateX(0);
 }
 
-/* Mobile: a centered pop-up with a 16px margin instead of a right slide-in drawer. */
+/* Mobile: the same right-hand drawer as desktop, full height and nearly full
+   width. It was a centred pop-up inset 16px on every side, which left a strip
+   of page showing down the right and read as a dialog rather than the bag
+   sliding in. */
 @media (max-width: 767px) {
   .panel {
-    top: 16px;
-    right: 16px;
-    bottom: 16px;
-    left: 16px;
-    width: auto;
     max-width: none;
-    height: auto;
-    border-radius: var(--radius-panel);
-    transform: scale(0.96);
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity var(--transition-base), transform var(--transition-base);
-  }
-
-  .panelOpen {
-    transform: scale(1);
-    opacity: 1;
-    pointer-events: auto;
+    width: 97%;
   }
 }
 
@@ -223,7 +210,9 @@
 
 .itemMain {
   display: flex;
-  align-items: flex-start;
+  /* Centred, not top-aligned: the copy is shorter than the 148px image, and
+     hanging it from the top leaves the row bottom-heavy. */
+  align-items: center;
   gap: var(--spacing-sm);
   width: 100%;
 }

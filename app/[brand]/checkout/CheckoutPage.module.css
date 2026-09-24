@@ -128,6 +128,12 @@
   display: block;
 }
 
+/* Inside the card, below the total. No rule above it — the list belongs to the
+   summary rather than hanging off its base. */
+.summaryUsps {
+  margin-top: var(--spacing-md);
+}
+
 /* Items that only appear in the left column on mobile */
 .orderSummaryMobile {
   display: block;

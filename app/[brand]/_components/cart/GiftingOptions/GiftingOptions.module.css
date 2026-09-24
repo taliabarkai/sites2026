@@ -155,6 +155,14 @@
   color: var(--colors-text);
 }
 
+/* Was-price, when the packaging is on offer. Sits before the selling price so
+   the two read as one figure. */
+.optionCardPriceWas {
+  margin-right: var(--spacing-xxs);
+  text-decoration: line-through;
+  color: var(--colors-text-secondary);
+}
+
 .optionCardAction {
   background:    var(--buttons-upsell-primary-background);
   color:         var(--buttons-upsell-primary-text);

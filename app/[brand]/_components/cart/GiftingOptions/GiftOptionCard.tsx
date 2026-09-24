@@ -56,7 +56,12 @@ export const GiftOptionCard = forwardRef<HTMLButtonElement, GiftOptionCardProps>
           {availability && (
             <span className={styles.optionCardDescription}>{availability}</span>
           )}
-          <span className={styles.optionCardPrice}>{formatPrice(option.price)}</span>
+          <span className={styles.optionCardPrice}>
+            {option.originalPrice != null && option.originalPrice > option.price && (
+              <span className={styles.optionCardPriceWas}>{formatPrice(option.originalPrice)}</span>
+            )}
+            {formatPrice(option.price)}
+          </span>
         </span>
 
         <span className={styles.optionCardAside}>

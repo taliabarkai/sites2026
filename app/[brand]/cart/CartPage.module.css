@@ -7,10 +7,22 @@
   background: var(--colors-background);
 }
 
+/* globals.css derives --sticky-top from --layout-header-height on :root, but
+   that height is declared on the [data-theme] wrapper — so on :root it resolves
+   to nothing, --sticky-top is invalid, and `top` falls back to `auto`, which
+   silently disables the sticky column. Redeclared here, inside the theme, where
+   the height actually resolves. The checkout does the same. */
+@media (min-width: 1024px) {
+  .page {
+    --sticky-top: calc(var(--layout-header-height) + var(--spacing-md));
+  }
+}
+
 /* ─── Page inner — shared max-width + margin container ───────────────────────── */
 
 .pageInner {
-  max-width: 1440px;
+  /* The checkout's measure, so the two pages' columns line up. */
+  max-width: 1200px;
   margin: 0 auto;
   padding: var(--spacing-lg) var(--layout-page-margin);
   width: 100%;
@@ -105,18 +117,24 @@
 @media (min-width: 1024px) {
   .layout {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(320px, 400px);
+    grid-template-columns: minmax(0, 1fr) minmax(300px, 460px);
     grid-template-rows: auto auto auto;
     grid-template-areas:
       'bag     right'
       'upsell  right'
       'continue right';
-    column-gap: clamp(24px, 5vw, 80px);
+    column-gap: var(--spacing-lg);
     row-gap: 0;
     align-items: start;
   }
 
-  .bagSection      { grid-area: bag; }
+  /* No frame and no inset: the bag runs to the column's own edges, so its
+     items line up with the carousel heading beneath it rather than sitting
+     indented inside a card. Only the gap to that section is kept. */
+  .bagSection {
+    grid-area: bag;
+    margin-bottom: var(--spacing-md);
+  }
   .upsellSection   { grid-area: upsell; }
   .continueShoppingRow { grid-area: continue; }
 
@@ -125,6 +143,21 @@
     position: sticky;
     top: var(--sticky-top);
     align-self: start;
+  }
+}
+
+/* Mobile: a full-bleed band between sections. Stacked in one column they run
+   together, and on a phone the page has no columns to separate them the way
+   the desktop layout does. Negative margins take it past the page gutter so it
+   reads as a break in the page rather than a rule inside a section. */
+@media (max-width: 1023px) {
+  .bagSection::after,
+  .shippingSection::after {
+    content: '';
+    display: block;
+    height: 4px;
+    margin: var(--spacing-md) calc(-1 * var(--layout-page-margin)) 0;
+    background: var(--colors-surface-secondary);
   }
 }
 
@@ -141,7 +174,16 @@
   margin-bottom: var(--spacing-sm);
 }
 
+/* Body type, not the heading's. It sits inside the h1, so it inherits that
+   scale, its casing and its tracking unless every one of them is said again —
+   and the count is a fact about the bag, not part of its name. */
 .bagCount {
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  font-weight:    var(--typography-rules-text1-font-weight, normal);
+  letter-spacing: normal;
+  text-transform: none;
   color: var(--colors-text);
 }
 
@@ -156,12 +198,91 @@
   display: grid;
   grid-template-columns: 160px 1fr;
   gap: var(--spacing-sm);
-  padding: var(--spacing-sm) 0;
+  padding: var(--spacing-lg) 0;
   border-top: var(--border-width) solid var(--border-color);
+}
+
+/* The heading already separates itself from the bag; a rule directly beneath it
+   reads as an underline on the title rather than the top of the first line.
+   Its own top padding goes too, so the distance under "My Bag" is the title's
+   16px margin alone rather than that stacked on the row's 32px inset. */
+.cartItem:first-of-type {
+  border-top: none;
+  padding-top: 0;
 }
 
 .cartItem:last-of-type {
   border-bottom: var(--border-width) solid var(--border-color);
+}
+
+/* Two placements, one shown at a time. Mobile puts the control on its own
+   full-width row; desktop puts it inside the copy column. */
+.itemGiftTrayInline {
+  display: none;
+}
+
+.itemGiftTrayRow {
+  grid-column: 1 / -1;
+}
+
+/* Mobile-first: the cards take the row's full width, under the image too. */
+.itemGiftPanel {
+  grid-column: 1 / -1;
+  padding-top: var(--spacing-xs);
+}
+
+/* The desktop placement, inside the copy column. Hidden here. */
+.itemGiftPanelInline {
+  display: none;
+}
+
+/* Desktop: back into the copy column, directly under the price.
+   The image spans both rows rather than sitting in the first one alone — left
+   in a single row it sets that row's height to its own 160px, and the tray,
+   starting in the row beneath, was pushed clear of the image's foot with a
+   band of dead space above it. Spanning lets the copy row be copy-height and
+   the tray follow immediately. */
+@media (min-width: 1024px) {
+  /* Row one is at least as tall as the image, and the copy centres inside it.
+     The cards get row two. That way opening them only ever adds height below —
+     centring the whole group instead made the copy jump upward the moment the
+     group outgrew the image. */
+  .cartItem {
+    grid-template-rows: minmax(160px, auto) auto;
+    align-content: start;
+    column-gap: var(--spacing-sm);
+    row-gap: 0;
+  }
+
+  .itemImage {
+    grid-row: 1;
+    align-self: start;
+  }
+
+  .itemContent {
+    grid-row: 1;
+    grid-column: 2;
+  }
+
+  .itemGiftTrayInline {
+    display: block;
+  }
+
+  .itemGiftTrayRow {
+    display: none;
+  }
+
+  .itemGiftPanel {
+    display: none;
+  }
+
+  /* In the copy column's own flow, directly under the control. The column
+     already puts its own xxxs gap between children, so the padding makes up
+     the difference to xs rather than adding a second full gap on top of it. */
+  .itemGiftPanelInline {
+    display: block;
+    padding-top: calc(var(--spacing-xs) - var(--spacing-xxxs));
+  }
 }
 
 .itemImage {
@@ -177,7 +298,25 @@
   flex-direction: column;
   gap: var(--spacing-xxxs);
   min-width: 0;
+  /* Mobile-first: centred against the image, where the copy column is narrow
+     and the tray sits below the whole row rather than under the price. */
   justify-content: center;
+}
+
+/* Desktop: the copy sits level with the product, but anchored rather than
+   centred. Centring re-computes the moment the gift cards open underneath and
+   drags the title upward with it; a fixed inset holds the copy still, so
+   opening the tray only ever adds height below.
+
+   The inset is the space centring would have left above a one-line title in a
+   160px image row, which is exactly --spacing-lg. Declared after the base rule
+   rather than in the grid block above — same specificity, source order
+   decides. */
+@media (min-width: 1024px) {
+  .itemContent {
+    justify-content: flex-start;
+    padding-top: var(--spacing-lg);
+  }
 }
 
 .itemTopRow {
@@ -199,7 +338,7 @@
 .itemActions {
   display: flex;
   align-items: center;
-  gap: var(--spacing-xxxs);
+  gap: var(--spacing-xxs);
   flex-shrink: 0;
 }
 
@@ -321,7 +460,6 @@
   justify-content: space-between;
   align-items: center;
   padding: var(--spacing-sm) 0;
-  border-top: var(--border-width) solid var(--border-color);
 }
 
 .subtotalLabel {
@@ -472,9 +610,26 @@
 
 /* ─── Shipping Section ───────────────────────────────────────────────────────── */
 
+/* The same card as the order summary beneath it: both are panels in the right
+   column, so they read as two of a kind rather than one framed and one loose.
+   The bottom rule goes with it — the frame is the separation now. */
 .shippingSection {
-  padding: var(--spacing-md) 0;
-  border-bottom: var(--border-width) solid var(--border-color);
+  background: var(--colors-background);
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+}
+
+/* Mobile: no card treatment, as on the summary. */
+@media (max-width: 1023px) {
+  .shippingSection {
+    background: none;
+    border: none;
+    border-radius: 0;
+    padding: var(--spacing-md) 0 0 0;
+    margin-bottom: 0;
+  }
 }
 
 .shippingSectionHeader {
@@ -634,17 +789,39 @@
 
 /* ─── Order Summary ──────────────────────────────────────────────────────────── */
 
+/* The checkout's summary card, matched: same frame, same radius, same inset —
+   the two pages show the same figures and should look like the same object. */
 .orderSummary {
-  padding: var(--spacing-md) 0;
+  background: var(--colors-background);
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-md);
   display: flex;
   flex-direction: column;
   gap: var(--spacing-sm);
 }
 
+/* Mobile: no card treatment, as on checkout. */
+@media (max-width: 1023px) {
+  .orderSummary {
+    background: none;
+    border: none;
+    border-radius: 0;
+    padding: var(--spacing-md) 0 0 0;
+  }
+}
+
+/* Two classes, so it outranks the margin the checkout's own rule sets: the card
+   already gaps its children and the two were stacking. */
+.orderSummary > .cartPromoRow {
+  margin-bottom: 0;
+}
+
 .summaryRows {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-xs);
+  /* Matches the checkout's totals rows. */
+  gap: var(--spacing-xxs);
 }
 
 .summaryRow {
@@ -686,19 +863,21 @@
   align-items: baseline;
 }
 
+/* paragraph3, as on checkout: the order total is the figure the page is for,
+   and it was sitting at the same size as the lines above it. */
 .totalLabel {
-  font-family: var(--typography-rules-text2-font-family);
-  font-size: var(--typography-rules-text2-font-size);
-  font-weight: var(--typography-rules-text2-font-weight, normal);
-  line-height: var(--typography-rules-text2-line-height);
+  font-family: var(--typography-rules-paragraph3-font-family);
+  font-size: var(--typography-rules-paragraph3-font-size);
+  font-weight: var(--typography-rules-paragraph3-font-weight, normal);
+  line-height: var(--typography-rules-paragraph3-line-height);
   color: var(--colors-text);
 }
 
 .totalValue {
-  font-family: var(--typography-rules-text2-font-family);
-  font-size: var(--typography-rules-text2-font-size);
-  font-weight: var(--typography-rules-text2-font-weight, normal);
-  line-height: var(--typography-rules-text2-line-height);
+  font-family: var(--typography-rules-paragraph3-font-family);
+  font-size: var(--typography-rules-paragraph3-font-size);
+  font-weight: var(--typography-rules-paragraph3-font-weight, normal);
+  line-height: var(--typography-rules-paragraph3-line-height);
   color: var(--colors-text);
 }
 

@@ -1,0 +1,29 @@
+/* No frame and no ground of its own: the list sits wherever the flow puts it —
+   inside a summary card on one page, loose beneath one on another — and takes
+   its surroundings from whatever contains it. */
+
+.usps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.usp {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  font-family: var(--typography-rules-text1-font-family);
+  font-size:   var(--typography-rules-text1-font-size);
+  line-height: var(--typography-rules-text1-line-height);
+  color: var(--colors-text);
+}
+
+.uspIcon {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  color: var(--colors-text);
+}

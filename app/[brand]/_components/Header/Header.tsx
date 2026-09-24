@@ -13,6 +13,7 @@ import * as ibIcons from '@/src/components/icons/ib'
 import { SiteLogo } from '../SiteLogo'
 import { ThemeSwitcher } from '../ThemeSwitcher'
 import { CartSizeToggle } from './CartSizeToggle'
+import { FlowControls } from '../FloatingCart/FlowControls'
 import { Topline, type ToplineProps } from '../Topline'
 import { getBrandFromPathname, getBrandHomePath, resolveBrand, type BrandKey } from '../../_config/brands'
 import { useCart } from '../../_context/CartContext'
@@ -75,6 +76,10 @@ export function Header({
   const { items, openCart, closeCart } = useCart()
   const isScrolled = useHeaderScroll()
   const isCheckout = pathname.includes('/checkout')
+  // The two pages the phases actually change. The presenter needs to see which
+  // phase is running from the page itself, not only from inside the floating
+  // cart they may have closed several steps ago.
+  const isCartPage = pathname.endsWith('/cart')
   const showNavImages = !NAV_IMAGE_EXCLUDED.includes(brandSegment)
   const [menuOpen, setMenuOpen] = useState(false)
   // Which dropdown is expanded in the mobile drawer (by label).
@@ -94,6 +99,19 @@ export function Header({
   /* ── Checkout mode: logo only, horizontally centered ── */
   const wrapperClass = sticky ? styles.wrapper : styles.wrapperStatic
 
+  /* Demo-only controls, on the two pages a phase actually changes. Rendered in
+     both slots and switched by media query: the bar has room for them on
+     desktop, and on mobile it does not — there they get a strip of their own
+     directly under the bar, still at the top of the page. Only one slot is ever
+     displayed, so the duplicate never reaches the accessibility tree. */
+  const demoControls = isCheckout || isCartPage ? (
+    <>
+      <FlowControls brand={brandSegment} />
+      {isCheckout && <CartSizeToggle className={styles.cartSizeToggle} />}
+    </>
+  ) : null
+  const demoBar = demoControls && <div className={styles.demoBar}>{demoControls}</div>
+
   if (isCheckout) {
     return (
       <header className={wrapperClass}>
@@ -105,11 +123,12 @@ export function Header({
             {/* Brand switcher — checkout keeps the logo-only bar, this sits to its right.
                 The cart-size control is demo-only and lives on checkout alone. */}
             <div className={styles.checkoutSwitcher}>
-              <CartSizeToggle className={styles.cartSizeToggle} />
+              <div className={styles.demoInline}>{demoControls}</div>
               <ThemeSwitcher brand={brandSegment} />
             </div>
           </div>
         </div>
+        {demoBar}
       </header>
     )
   }
@@ -189,6 +208,7 @@ export function Header({
             </nav>
 
             <div className={styles.actions}>
+              <div className={styles.demoInline}>{demoControls}</div>
               <ThemeSwitcher brand={brandSegment} />
               <button type="button" className={`${styles.iconButton} ${styles.desktopOnly}`} aria-label="Search">
                 <MagnifyingGlassIcon />
@@ -210,6 +230,7 @@ export function Header({
             </div>
           </div>
         </div>
+        {demoBar}
       </div>
 
       {menuOpen && (

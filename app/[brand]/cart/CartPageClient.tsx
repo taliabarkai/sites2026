@@ -1,8 +1,8 @@
 'use client'
 
 import Link from 'next/link'
-import { useRef, useState } from 'react'
-import { usePathname } from 'next/navigation'
+import { useEffect, useRef, useState } from 'react'
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import * as oalIcons from '@/src/components/icons/oal'
 import * as mnnIcons from '@/src/components/icons/mnn'
 import * as tgrIcons from '@/src/components/icons/tgr'
@@ -10,15 +10,30 @@ import * as lalIcons from '@/src/components/icons/lal'
 import * as ibIcons from '@/src/components/icons/ib'
 import type { IconProps } from '@/src/components/icons/Icon'
 import { useCart } from '../_context/CartContext'
-import type { CartItem } from '../_context/CartContext'
+import type { CartItem, GiftPackaging } from '../_context/CartContext'
+import { useDemoCartSync } from '../_context/useDemoCartSync'
+import { GiftTray, GiftTrayPanel } from '../_components/cart/GiftTray'
+import { Usps } from '../_components/cart/Usps'
+import { optionsForItem, type GiftOption } from '../_components/cart/GiftingOptions/types'
+/* The very panels the checkout uses — the cart page makes the same offer, so
+   it collects the same fields in the same place. Which one is on follows the
+   prototype's existing gifting switch. */
+import { GiftingDrawer } from '../_components/cart/GiftingOptions/GiftingDrawer'
+import { GiftPanel } from '../_components/cart/GiftingV2/GiftPanel'
+import { getGiftOptions } from '../_config/giftOptions'
+import { BRAND_GIFT_CONFIG } from '../_config/brands'
+import { readFlow, readGiftingVariant } from '../_config/demoParams'
+import { getBrandFeatures, getFlowConfig } from '../_config/flow'
 import { Header } from '../_components/Header'
 import { Footer } from '../_components/Footer'
 import { Button } from '../_components/Button'
-import { InputAction } from '../_components/InputAction'
 import { getBrandFromPathname } from '../_config/brands'
 import { prefixFooterColumns, prefixNavLinks, withBrandPrefix } from '../_config/brandPaths'
 import { DEFAULT_FOOTER_COLUMNS, DEFAULT_NAV_LINKS, DEFAULT_TOPLINE } from '../_config/siteContent'
 import styles from './CartPage.module.css'
+/* Promo styling comes straight from the checkout's sheet: the same control,
+   the same rules, so the two pages cannot drift apart. */
+import checkoutStyles from '../checkout/CheckoutPage.module.css'
 
 // ─── Brand icons ──────────────────────────────────────────────────────────────
 
@@ -32,6 +47,12 @@ interface BrandIcons {
   WarrantyIcon:  React.ComponentType<IconProps>
   ReturnIcon:    React.ComponentType<IconProps>
   CheckmarkIcon: React.ComponentType<IconProps>
+  CouponIcon:    React.ComponentType<IconProps>
+  /* Required by the shared gift-option card and the checkout's gifting panels,
+     both of which the cart page reuses. */
+  XIcon:         React.ComponentType<IconProps>
+  AiMagicIcon:   React.ComponentType<IconProps>
+  WarningIcon:   React.ComponentType<IconProps>
 }
 
 const BRAND_ICONS: Record<string, BrandIcons> = {
@@ -59,6 +80,13 @@ interface UpsellProduct {
   image:          string
   isPersonalized: boolean
 }
+
+/**
+ * Parked, not removed: flip either to true to bring the section back. The
+ * markup, data and styles all stay where they are.
+ */
+const SHOW_UPSELL_CAROUSEL = false
+const SHOW_CONTINUE_SHOPPING = false
 
 const UPSELL_PRODUCTS: UpsellProduct[] = [
   {
@@ -129,14 +157,54 @@ function ProgressSteps() {
 
 // ─── Cart Item Row ─────────────────────────────────────────────────────────────
 
+/** One item's packaging, being configured. Mirrors what the panel collects. */
+interface GiftDraft {
+  itemId:   string
+  optionId: string
+  note:     string
+  design:   string | null
+  pname:    string
+  photo:    boolean
+}
+
 interface CartItemRowProps {
   item:     CartItem
   onRemove: (id: string) => void
   icons:    BrandIcons
+  /** The packaging this line can take — its own, or the brand's catalogue. */
+  giftOptions:  GiftOption[]
+  onSelectGift: (itemId: string, option: GiftOption) => void
+  onRemoveGift: (itemId: string) => void
 }
 
-function CartItemRow({ item, onRemove, icons }: CartItemRowProps) {
+function CartItemRow({ item, onRemove, icons, giftOptions, onSelectGift, onRemoveGift }: CartItemRowProps) {
   const [detailsOpen, setDetailsOpen] = useState(false)
+  // Lifted out of the tray so the control and its cards can sit in different
+  // rows: the control belongs with the copy, the cards below the whole row.
+  const [trayOpen, setTrayOpen] = useState(false)
+
+  const giftTray = (
+    <GiftTray
+      itemName={item.name}
+      options={giftOptions}
+      selectedOptionId={item.giftPackaging?.optionId}
+      icons={icons}
+      open={trayOpen}
+      onToggle={() => setTrayOpen(o => !o)}
+      onSelect={option => onSelectGift(item.id, option)}
+      onRemove={() => onRemoveGift(item.id)}
+    />
+  )
+  // Built once, placed twice — the cards belong under the price on desktop and
+  // across the whole row on mobile. Only one placement is ever displayed.
+  const giftPanel = trayOpen && !item.giftPackaging && giftOptions.length > 0 ? (
+    <GiftTrayPanel
+      options={giftOptions}
+      icons={icons}
+      onSelect={option => { onSelectGift(item.id, option); setTrayOpen(false) }}
+    />
+  ) : null
+
   const hasOptions = item.selectedOptions && item.selectedOptions.length > 0
   const { TrashCanIcon, ChevronIcon } = icons
 
@@ -195,7 +263,26 @@ function CartItemRow({ item, onRemove, icons }: CartItemRowProps) {
             ))}
           </dl>
         )}
+
+        {/* Desktop: the control sits with the copy, centred against the image. */}
+        <div className={styles.itemGiftTrayInline}>{giftTray}</div>
+
+        {/* Desktop: the cards follow the control in flow, so the gap between
+            them is the tray's own and not whatever the image's row left over.
+            They run past the image's foot, which is fine — the copy column
+            starts to its right. */}
+        {giftPanel && <div className={styles.itemGiftPanelInline}>{giftPanel}</div>}
       </div>
+
+      {/* Mobile: a row of its own across the full width — the copy column
+          beside the image is barely half a phone wide and the control wraps
+          inside it. Same component, same lifted state, so the two placements
+          cannot disagree; only one is ever displayed. */}
+      <div className={styles.itemGiftTrayRow}>{giftTray}</div>
+
+      {/* Mobile: a row of its own under the image, where the copy column is too
+          narrow for a card. */}
+      {giftPanel && <div className={styles.itemGiftPanel}>{giftPanel}</div>}
     </article>
   )
 }
@@ -242,11 +329,133 @@ function CartPageInner() {
     contactHref: withBrandPrefix(brand, DEFAULT_TOPLINE.contactHref),
   }
 
-  const { items, subtotal, removeItem } = useCart()
+  const { items, subtotal, removeItem, updateGiftPackaging } = useCart()
   const icons = BRAND_ICONS[brand]
+  const searchParams = useSearchParams()
+
+  // The bag is one shared store, so without this the previous brand's products
+  // follow you here. Same rule the checkout uses.
+  useDemoCartSync()
+
+  // Printed designs are brand-scoped and shared by every option flagged `designs`.
+  const giftDesigns = BRAND_GIFT_CONFIG[brand]?.assets?.designOptions ?? []
+  const giftingVariant = readGiftingVariant(searchParams)
+  const flowConfig = getFlowConfig(readFlow(searchParams))
+  const features   = getBrandFeatures(brand)
+
+  /** Every step forward carries the configuration, or the demo resets itself. */
+  const query = searchParams.toString()
+  const checkoutHref = `/${brand}/checkout${query ? `?${query}` : ''}`
+
+  // Phase 3 has no bag page. Arriving here by link or by switching flow while
+  // standing on it would strand the shopper on a page that flow does not have,
+  // so move them on rather than render it.
+  const router = useRouter()
+  useEffect(() => {
+    if (!flowConfig.hasCartPage) router.replace(checkoutHref)
+  }, [flowConfig.hasCartPage, checkoutHref, router])
+
+  const brandGiftOptions: GiftOption[] = getGiftOptions(brand).map(o => ({
+    id:            o.id,
+    name:          o.name,
+    description:   o.description,
+    price:         o.price,
+    originalPrice: o.originalPrice,
+    imageUrl:      o.image,
+    designs:       o.designs,
+    wantsName:     o.wantsName,
+    wantsPhoto:    o.wantsPhoto,
+  }))
+
+  /** An item's own packaging when it brings some, else the brand's catalogue. */
+  const giftOptionsFor = (item: CartItem): GiftOption[] =>
+    optionsForItem(
+      { id: item.id, name: item.name, imageUrl: item.image,
+        giftOptions: item.giftOptions?.map(o => ({
+          id: o.id, name: o.name, description: o.description, price: o.price,
+          originalPrice: o.originalPrice, imageUrl: o.image,
+          designs: o.designs, wantsName: o.wantsName, wantsPhoto: o.wantsPhoto,
+        })) },
+      brandGiftOptions,
+    )
+
+  // Choosing a packaging opens the panel rather than saving on the spot: the
+  // note, the design and the name are the point of the offer, and there is
+  // nowhere else on this page to write them.
+  const [giftDraft, setGiftDraft] = useState<GiftDraft | null>(null)
+
+  const handleSelectGift = (itemId: string, option: GiftOption) => {
+    const existing = items.find(i => i.id === itemId)?.giftPackaging
+    const sameOption = existing?.optionId === option.id
+    setGiftDraft({
+      itemId,
+      optionId: option.id,
+      // Designs are cosmetic, so the first is a safe default and saves a click.
+      design: option.designs ? (sameOption ? existing.selectedDesign ?? null : giftDesigns[0]?.key ?? null) : null,
+      note:   sameOption ? existing.giftNote ?? '' : '',
+      pname:  sameOption ? existing.recipientName ?? '' : '',
+      photo:  false,
+    })
+  }
+
+  const handleRemoveGift = (itemId: string) => updateGiftPackaging(itemId, undefined)
+
+  const draftItem   = giftDraft ? items.find(i => i.id === giftDraft.itemId) ?? null : null
+  const draftOption = giftDraft && draftItem
+    ? giftOptionsFor(draftItem).find(o => o.id === giftDraft.optionId) ?? null
+    : null
+
+  const giftingIcons = {
+    GiftIcon:      icons.GiftIcon,
+    CheckmarkIcon: icons.CheckmarkIcon,
+    XIcon:         icons.XIcon,
+    AiMagicIcon:   icons.AiMagicIcon,
+    TrashCanIcon:  icons.TrashCanIcon,
+    PlusMinusIcon: icons.PlusMinusIcon,
+  }
+
+  const generateGiftNote = async () => 'Wishing you a wonderful day filled with joy!'
+
+  const closeGiftDraft = () => setGiftDraft(null)
+
+  const saveGiftDraft = () => {
+    if (!giftDraft || !draftOption) return
+    const gift: GiftPackaging = {
+      // The two legacy types predate the catalogue; the id is what identifies
+      // the option now, and the name saves every reader a lookup.
+      type:     draftOption.id.includes('personalized') ? 'personalized' : 'classic',
+      optionId: draftOption.id,
+      name:     draftOption.name,
+      price:    draftOption.price,
+      originalPrice: draftOption.originalPrice,
+      giftNote:       giftDraft.note || undefined,
+      selectedDesign: giftDraft.design ?? undefined,
+      recipientName:  giftDraft.pname || undefined,
+    }
+    updateGiftPackaging(giftDraft.itemId, gift)
+    closeGiftDraft()
+  }
+
+  /** What the packaging on this bag costs, kept beside the merchandise total. */
+  const giftTotal = items.reduce((sum, item) => sum + (item.giftPackaging?.price ?? 0), 0)
 
   const [selectedShipping, setSelectedShipping] = useState<'free' | 'express'>('free')
-  const [promoOpen, setPromoOpen] = useState(false)
+  const [promoCode,    setPromoCode]    = useState('')
+  const [promoApplied, setPromoApplied] = useState(false)
+  const [appliedCode,  setAppliedCode]  = useState('')
+
+  const handleApplyPromo = () => {
+    if (promoCode.trim()) {
+      setAppliedCode(promoCode.trim().toUpperCase())
+      setPromoApplied(true)
+    }
+  }
+
+  const handleRemovePromo = () => {
+    setPromoApplied(false)
+    setAppliedCode('')
+    setPromoCode('')
+  }
 
   const carouselRef = useRef<HTMLDivElement>(null)
   const scrollCarousel = (dir: 'prev' | 'next') => {
@@ -255,8 +464,10 @@ function CartPageInner() {
 
   const totalOriginalValue = items.reduce((sum, item) => sum + (item.originalPrice ?? item.price), 0)
   const savings    = totalOriginalValue - subtotal
-  const shippingCost = selectedShipping === 'express' ? 1500 : 0
-  const orderTotal   = subtotal + shippingCost
+  // Only a flow that asks here can charge here.
+  const shippingCost   = flowConfig.shipping === 'cart' && selectedShipping === 'express' ? 1500 : 0
+  const discountAmount = promoApplied ? Math.round(subtotal * 0.20) : 0
+  const orderTotal     = subtotal + giftTotal + shippingCost - discountAmount
 
   return (
     <div className={styles.page}>
@@ -279,27 +490,26 @@ function CartPageInner() {
 
             <div className={styles.cartItems}>
               {items.map(item => (
-                <CartItemRow key={item.id} item={item} onRemove={removeItem} icons={icons} />
+                <CartItemRow
+                  key={item.id}
+                  item={item}
+                  onRemove={removeItem}
+                  icons={icons}
+                  giftOptions={giftOptionsFor(item)}
+                  onSelectGift={handleSelectGift}
+                  onRemoveGift={handleRemoveGift}
+                />
               ))}
-            </div>
-
-            <div className={styles.giftButtonRow}>
-              <Button
-                variant="upsell-primary"
-                leadingIcon={<icons.GiftIcon size={24} />}
-                trailingIcon={<icons.PlusMinusIcon size={24} />}
-              >
-                Is It a Gift?
-              </Button>
             </div>
 
             <div className={styles.subtotalRow}>
               <span className={styles.subtotalLabel}>Subtotal</span>
-              <span className={styles.subtotalAmount}>{formatPrice(subtotal)}</span>
+              <span className={styles.subtotalAmount}>{formatPrice(subtotal + giftTotal)}</span>
             </div>
           </section>
 
           {/* ── Left: Upsell Carousel ─────────────────────────────── */}
+          {SHOW_UPSELL_CAROUSEL && (
           <section className={styles.upsellSection} aria-labelledby="upsell-heading">
             <div className={styles.upsellHeader}>
               <h2 id="upsell-heading" className={styles.sectionTitle}>Get Everything You Need</h2>
@@ -329,13 +539,15 @@ function CartPageInner() {
               ))}
             </div>
           </section>
+          )}
 
           {/* ── Right Column — before continueShoppingRow in DOM so it appears
                between upsell and "Continue Shopping" on mobile, while
                grid-area places it in the right column on desktop ─────── */}
           <aside className={styles.rightCol}>
 
-            {/* Shipping Options
+            {/* Shipping Options — Phase 1 only; Phases 2 and 3 ask at checkout. */}
+            {flowConfig.shipping === 'cart' && (
             <section className={styles.shippingSection} aria-labelledby="shipping-heading">
               <div className={styles.shippingSectionHeader}>
                 <h2 id="shipping-heading" className={styles.sectionTitle}>Shipping Options</h2>
@@ -392,47 +604,87 @@ function CartPageInner() {
                 <img src="/images/carriers/fedex.svg" alt="FedEx" className={styles.carrierLogo} />
                 <img src="/images/carriers/dhl.svg" alt="DHL" className={styles.carrierLogo} />
               </div>
-            </section> */}
-
-            {/* Promo Code */}
-            <div className={styles.promoSection}>
-              <button
-                type="button"
-                className={styles.promoToggle}
-                onClick={() => setPromoOpen(prev => !prev)}
-                aria-expanded={promoOpen}
-              >
-                <span className={styles.promoLabel}>Promotional Code</span>
-                <span className={styles.promoIcon} aria-hidden="true">{promoOpen ? '−' : '+'}</span>
-              </button>
-              {promoOpen && (
-                <div className={styles.promoInput}>
-                  <InputAction
-                    placeholder="Enter promo code"
-                    buttonLabel="Apply"
-                    onSubmit={() => {}}
-                    groupLabel="Promotional code"
-                    inputLabel="Promo code"
-                  />
-                </div>
-              )}
-            </div>
+            </section>
+            )}
 
             {/* Order Summary */}
             <section className={styles.orderSummary} aria-labelledby="summary-heading">
               <h2 id="summary-heading" className={styles.sectionTitle}>Order Summary</h2>
+
+              {/* The checkout's promo control, inside the card and above the
+                  figures it changes — not a separate accordion above it. */}
+              <div className={`${checkoutStyles.promoRow} ${styles.cartPromoRow}`}>
+                <span className={checkoutStyles.promoQuestion}>
+                  <icons.CouponIcon size={16} />
+                  Have a promo code?
+                </span>
+                {promoApplied ? (
+                  <div className={checkoutStyles.promoAppliedWrap}>
+                    <div className={checkoutStyles.appliedPromoBox}>
+                      <span className={checkoutStyles.appliedPromoIcon}>
+                        <icons.CouponIcon size={16} />
+                      </span>
+                      <span className={checkoutStyles.appliedPromoCode}>{appliedCode}</span>
+                      <button
+                        type="button"
+                        className={checkoutStyles.removePromoBtn}
+                        onClick={handleRemovePromo}
+                        aria-label="Remove promo code"
+                      >
+                        <icons.XIcon size={16} />
+                      </button>
+                    </div>
+                    <p className={checkoutStyles.promoSuccessMsg}>You saved 20% with this coupon.</p>
+                  </div>
+                ) : (
+                  <div className={checkoutStyles.storeCreditRow}>
+                    <div className={checkoutStyles.storeCreditInput}>
+                      <input
+                        type="text"
+                        placeholder="Promo code"
+                        value={promoCode}
+                        onChange={e => setPromoCode(e.target.value)}
+                        onKeyDown={e => e.key === 'Enter' && handleApplyPromo()}
+                        className={checkoutStyles.input}
+                        aria-label="Promo code"
+                      />
+                    </div>
+                    <Button
+                      variant="primary"
+                      className={checkoutStyles.applyButton}
+                      onClick={handleApplyPromo}
+                    >
+                      Apply
+                    </Button>
+                  </div>
+                )}
+              </div>
 
               <div className={styles.summaryRows}>
                 <div className={styles.summaryRow}>
                   <span className={styles.summaryLabel}>Subtotal:</span>
                   <span className={styles.summaryValue}>{formatPrice(subtotal)}</span>
                 </div>
+                {giftTotal > 0 && (
+                  <div className={styles.summaryRow}>
+                    <span className={styles.summaryLabel}>Gift packaging:</span>
+                    <span className={styles.summaryValue}>{formatPrice(giftTotal)}</span>
+                  </div>
+                )}
                 <div className={styles.summaryRow}>
                   <span className={styles.summaryLabel}>Shipping:</span>
                   <span className={styles.summaryValueBold}>
-                    {selectedShipping === 'free' ? 'Free' : formatPrice(shippingCost)}
+                    {flowConfig.shipping === 'cart'
+                      ? (selectedShipping === 'free' ? 'Free' : formatPrice(shippingCost))
+                      : 'Calculated at checkout'}
                   </span>
                 </div>
+                {promoApplied && (
+                  <div className={styles.summaryRow}>
+                    <span className={styles.summaryLabel}>Promotional Discounts:</span>
+                    <span className={styles.summaryValue}>−{formatPrice(discountAmount)}</span>
+                  </div>
+                )}
                 <div className={styles.summaryRow}>
                   <span className={styles.summaryLabel}>Tax:</span>
                   <span className={styles.summaryValueBold}>Calculated at checkout</span>
@@ -446,49 +698,85 @@ function CartPageInner() {
                 <span className={styles.totalValue}>{formatPrice(orderTotal)}</span>
               </div>
 
-              <Button variant="add-to-cart" href={`/${brand}/checkout`} className={styles.checkoutButton}>
-                CONTINUE TO CHECKOUT
+              <Button variant="add-to-cart" href={checkoutHref} className={styles.checkoutButton}>
+                Continue to Checkout
               </Button>
 
               {savings > 0 && (
                 <p className={styles.savingsNote}>You're saving {formatPrice(savings)} on this order!</p>
               )}
 
-              <ul className={styles.benefits}>
-                <li className={styles.benefit}>
-                  <span className={styles.benefitIcon}>
-                    <icons.ShippingIcon size={24} />
-                  </span>
-                  <span>Free Shipping</span>
-                </li>
-                <li className={styles.benefit}>
-                  <span className={styles.benefitIcon}>
-                    <icons.WarrantyIcon size={24} />
-                  </span>
-                  <span>2 Year Warranty</span>
-                </li>
-                <li className={styles.benefit}>
-                  <span className={styles.benefitIcon}>
-                    <icons.ReturnIcon size={24} />
-                  </span>
-                  <span>Free 60-Day Extended Returns</span>
-                </li>
-              </ul>
+              {/* One page per flow shows these — here when there is a cart
+                  page, on checkout when there is not. */}
+              {flowConfig.usps === 'cart' && (
+                <Usps icons={icons} showWarranty={features.warranty} />
+              )}
             </section>
 
           </aside>
 
           {/* ── Left: Continue Shopping — after aside so it appears last on
                mobile; grid-area places it in the left column on desktop ── */}
-          <div className={styles.continueShoppingRow}>
-            <Link href={`/${brand}/category`} className={styles.continueShoppingLink}>
-              Continue Shopping
-            </Link>
-          </div>
+          {SHOW_CONTINUE_SHOPPING && (
+            <div className={styles.continueShoppingRow}>
+              <Link href={`/${brand}/category`} className={styles.continueShoppingLink}>
+                Continue Shopping
+              </Link>
+            </div>
+          )}
 
         </div>
         </div>
       </main>
+
+      {/* Item and packaging are both settled by the time this opens, so either
+          panel goes straight to the fields — no item step, no picker. */}
+      {giftDraft && draftOption && draftItem && (
+        giftingVariant === 'v2' ? (
+          <GiftPanel
+            icons={{ ...giftingIcons, WarningIcon: icons.WarningIcon }}
+            option={draftOption}
+            eligibleItems={[]}
+            selectedItem={{ id: draftItem.id, name: draftItem.name, imageUrl: draftItem.image }}
+            designs={giftDesigns}
+            draft={{
+              optionId: giftDraft.optionId,
+              itemId:   giftDraft.itemId,
+              history:  ['config'],
+              note:     giftDraft.note,
+              design:   giftDraft.design,
+              pname:    giftDraft.pname,
+              photo:    giftDraft.photo,
+            }}
+            onDraftChange={next => setGiftDraft({
+              itemId: next.itemId ?? giftDraft.itemId,
+              optionId: next.optionId,
+              note: next.note, design: next.design, pname: next.pname, photo: next.photo,
+            })}
+            onAddToBag={saveGiftDraft}
+            onClose={closeGiftDraft}
+            onGenerateNote={generateGiftNote}
+          />
+        ) : (
+          <GiftingDrawer
+            icons={giftingIcons}
+            designs={giftDesigns}
+            option={draftOption}
+            item={{ id: draftItem.id, name: draftItem.name, imageUrl: draftItem.image }}
+            note={giftDraft.note}
+            design={giftDraft.design}
+            pname={giftDraft.pname}
+            photo={giftDraft.photo}
+            onNoteChange={note => setGiftDraft(d => d && ({ ...d, note }))}
+            onDesignChange={design => setGiftDraft(d => d && ({ ...d, design }))}
+            onNameChange={pname => setGiftDraft(d => d && ({ ...d, pname }))}
+            onPhotoChange={photo => setGiftDraft(d => d && ({ ...d, photo }))}
+            onAddToBag={saveGiftDraft}
+            onClose={closeGiftDraft}
+            onGenerateNote={generateGiftNote}
+          />
+        )
+      )}
 
       <Footer columns={footerColumns} />
     </div>

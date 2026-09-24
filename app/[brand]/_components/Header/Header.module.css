@@ -107,7 +107,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--spacing-xxxs);
-  min-width: 180px;
+  min-width: 160px;
   padding: var(--spacing-xs);
   border: var(--border-width) solid var(--border-color);
   border-radius: var(--radius-md);
@@ -126,7 +126,6 @@
   display: flex;
   align-items: center;
   gap: var(--spacing-xxxs);
-  margin-bottom: var(--spacing-xxs);
 }
 
 .scenarioRow button {
@@ -627,5 +626,45 @@
 
   .desktopOnly {
     display: inline-flex;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Demo-only phase / cart-state controls (cart + checkout pages).
+
+   Two slots, one visible at a time. Desktop keeps them in the bar beside the
+   brand switcher. Below 1024px the bar is already carrying a hamburger, a
+   logo and three icons, and a third pill pushed the bag button off-screen —
+   so there they get their own strip directly under the bar, which is still
+   "the top" and costs the real header nothing.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.demoInline {
+  display: none;
+}
+
+.demoBar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: var(--spacing-xxs);
+  padding: var(--spacing-xxs) var(--layout-page-margin);
+  background: var(--colors-surface-primary);
+  border-top: var(--border-width) solid var(--border-color);
+}
+
+.demoBar:empty {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .demoInline {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+  }
+
+  .demoBar {
+    display: none;
   }
 }

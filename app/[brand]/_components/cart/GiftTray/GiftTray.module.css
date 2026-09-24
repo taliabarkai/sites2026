@@ -1,0 +1,99 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   Per-item gift packaging tray — the cart page's route into the same offer
+   the checkout makes. Only the collapsed control and the added state are new;
+   the cards themselves come from GiftingOptions.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Mobile-first: no top margin. The tray spans the whole row there, and the
+   row's own 32px inset already separates it from the copy above. */
+.tray {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  align-items: flex-start;
+}
+
+/* Desktop puts the tray in the copy column, directly under the price, where it
+   needs its own breathing room. */
+@media (min-width: 1024px) {
+  .tray {
+    margin-top: var(--spacing-xs);
+  }
+}
+
+.options {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  width: 100%;
+}
+
+/* Drawn rather than an icon: the brand sets ship a plus but no minus. The box
+   keeps the 24px the icon occupies so the control does not shift when it
+   opens; the bar inside matches the plus's own crossbar, which every brand
+   draws from x 6 to 18 at y 11–12.5 in a 24 viewBox. Same stroke, so opening
+   the tray reads as the plus losing its upright rather than as a new mark. */
+.minus {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+}
+
+.minus::before {
+  content: '';
+  display: block;
+  width: 12px;
+  height: 1.5px;
+  background: currentColor;
+}
+
+/* ── Added ──────────────────────────────────────────────────────────────── */
+
+.added {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xxs);
+  margin-top: var(--spacing-xs);
+  font-family: var(--typography-rules-text1-font-family);
+  font-size:   var(--typography-rules-text1-font-size);
+  line-height: var(--typography-rules-text1-line-height);
+  color: var(--colors-text-secondary);
+}
+
+.addedCheck {
+  display: inline-flex;
+  align-items: center;
+  color: var(--colors-text);
+}
+
+.addedName {
+  min-width: 0;
+}
+
+.addedPrice {
+  color: var(--colors-text);
+}
+
+.addedRemove {
+  appearance: none;
+  border: none;
+  background: transparent;
+  padding: 0;
+  margin-left: auto;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  color: var(--colors-text-secondary);
+  transition: color var(--transition-fast);
+}
+
+.addedRemove:hover {
+  color: var(--colors-text);
+}
+
+.addedRemove:focus-visible {
+  outline: 2px solid var(--colors-text);
+  outline-offset: 2px;
+}

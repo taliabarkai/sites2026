@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { usePathname } from 'next/navigation'
+import { usePathname, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import * as oalIcons from '@/src/components/icons/oal'
 import * as mnnIcons from '@/src/components/icons/mnn'
@@ -9,6 +9,9 @@ import * as tgrIcons from '@/src/components/icons/tgr'
 import * as lalIcons from '@/src/components/icons/lal'
 import * as ibIcons from '@/src/components/icons/ib'
 import { getBrandFromPathname } from '../../_config/brands'
+import { FlowControls } from './FlowControls'
+import { getBrandFeatures, getFlowConfig } from '../../_config/flow'
+import { readFlow, readWarrantyVariant } from '../../_config/demoParams'
 import type { BrandKey } from '../../_config/brands'
 import { Button } from '../Button'
 import { StarRating } from '../StarRating'
@@ -70,6 +73,8 @@ interface CartItemRowProps {
   DropdownIcon: React.ComponentType<{ size?: number }>
   /** Whether the 5-year protection plan is selected for this item. */
   hasPlan: boolean
+  /** False on brands whose products no plan covers. */
+  showWarranty: boolean
   onTogglePlan: () => void
   /** Open the protection-plan details sub-panel for this item. */
   onOpenCarePlan: () => void
@@ -97,7 +102,7 @@ const PLAN_TITLE = '5-Year Jewelry Protection Plan'
 /** Whole-dollar plan price ("$15"), matching the nested-item card price style. */
 const PLAN_PRICE = `$${(WARRANTY_CENTS / 100).toFixed(0)}`
 
-function CartItemRow({ item, showGuarantee, brand, onRemove, onEdit, onNavigate, DropdownIcon, hasPlan, onTogglePlan, onOpenCarePlan, ratingAbove, onToggleRatingPosition, planVariant }: CartItemRowProps) {
+function CartItemRow({ item, showGuarantee, brand, onRemove, onEdit, onNavigate, DropdownIcon, hasPlan, showWarranty, onTogglePlan, onOpenCarePlan, ratingAbove, onToggleRatingPosition, planVariant }: CartItemRowProps) {
   const [detailsOpen, setDetailsOpen] = useState(false)
   const [confirmRemove, setConfirmRemove] = useState(false)
   const hasOptions = item.selectedOptions && item.selectedOptions.length > 0
@@ -238,8 +243,9 @@ function CartItemRow({ item, showGuarantee, brand, onRemove, onEdit, onNavigate,
       </div>
 
       {/* Per-item 5-year protection plan — toggling adjusts the cart subtotal.
-          Two designs, swapped live by the header's V1/V2 toggle. */}
-      {planVariant === 'v1' ? (
+          Two designs, swapped live by the header's warranty control. Absent
+          altogether on a brand with no plan to sell. */}
+      {!showWarranty ? null : planVariant === 'v1' ? (
         /* V1 — checkbox row */
         <div className={styles.protectionRow}>
           <button
@@ -343,7 +349,18 @@ export function FloatingCart({
   // Prototype presentation switch for the protection-plan add-on design. The
   // V1/V2 control in the header swaps it in place — no reload, no scroll jump,
   // and the cart's scroll position and plan selections are preserved.
-  const [planVariant, setPlanVariant] = useState<PlanVariant>('v1')
+  const searchParams = useSearchParams()
+  const flow         = readFlow(searchParams)
+  const flowConfig   = getFlowConfig(flow)
+  // Owned by the header control, so the choice is linkable and survives a
+  // refresh like every other demo setting.
+  const planVariant  = readWarrantyVariant(searchParams) as PlanVariant
+  // LAL sells canvases; no plan covers them, so the add-on is absent rather
+  // than present and empty.
+  const showWarranty = getBrandFeatures(brand).warranty
+
+  const query = searchParams.toString()
+  const nextStepHref = `/${brand}/${flowConfig.hasCartPage ? 'cart' : 'checkout'}${query ? `?${query}` : ''}`
   const carePlanImage = CARE_PLAN_IMAGES[brand]
   // Whether the plan is already selected for the item the details panel is showing.
   const carePlanSelected = !!items.find(it => it.id === carePlanItemId)?.warranty
@@ -421,25 +438,8 @@ export function FloatingCart({
           </h2>
 
           <div className={styles.headerActions}>
-            {/* Presentation-only: swaps the protection-plan add-on design in place */}
-            <div
-              className={styles.variantToggle}
-              role="group"
-              aria-label="Protection plan add-on design"
-            >
-              {(['v1', 'v2'] as PlanVariant[]).map(v => (
-                <button
-                  key={v}
-                  type="button"
-                  aria-pressed={planVariant === v}
-                  className={`${styles.variantBtn} ${planVariant === v ? styles.variantBtnActive : ''}`}
-                  title={v === 'v1' ? 'Protection plan as a checkbox row' : 'Protection plan as a card'}
-                  onClick={() => setPlanVariant(v)}
-                >
-                  {v.toUpperCase()}
-                </button>
-              ))}
-            </div>
+            {/* Presenter control: the flow first, its settings folded under it. */}
+            <FlowControls brand={brand} onNavigate={onClose} />
 
             <button
               type="button"
@@ -482,6 +482,7 @@ export function FloatingCart({
                 onGenerateGiftNote={onGenerateGiftNote}
                 DropdownIcon={icons.DropdownIcon}
                 hasPlan={!!item.warranty}
+                showWarranty={showWarranty}
                 onTogglePlan={() => toggleWarranty(item.id)}
                 onOpenCarePlan={() => setCarePlanItemId(item.id)}
                 ratingAbove={ratingAbove}
@@ -504,13 +505,22 @@ export function FloatingCart({
                 <span className={styles.taxNote}>Calculated at checkout</span>
               </div>
             </div>
-            <Button variant="add-to-cart" href={`/${brand}/checkout`} className={styles.checkoutBtn}>
-              Checkout
+            {/* Phases 1 and 2 have a bag page to visit first; Phase 3 does not. */}
+            <Button
+              variant="add-to-cart"
+              href={nextStepHref}
+              onClick={onClose}
+              className={styles.checkoutBtn}
+            >
+              {flowConfig.hasCartPage ? 'View Bag' : 'Checkout'}
             </Button>
           </div>
         )}
 
-        {/* Protection-plan details — slides over the cart content */}
+        {/* Protection-plan details — slides over the cart content. Not rendered
+            at all on a brand with no plan: nothing can open it there, and left
+            in the DOM its copy is still reachable by a screen reader. */}
+        {showWarranty && (
         <div
           className={`${styles.carePlan} ${carePlanItemId ? styles.carePlanOpen : ''}`}
           role="dialog"
@@ -585,6 +595,7 @@ export function FloatingCart({
             </Button>
           </div>
         </div>
+        )}
       </div>
     </>
   )
