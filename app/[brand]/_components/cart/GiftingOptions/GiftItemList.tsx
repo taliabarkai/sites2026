@@ -200,7 +200,7 @@ export function GiftItemList({
               <p className={styles.itemGroupTitle}>
                 Select gift packaging for {expandedItem.name}
               </p>
-              <div className={styles.optionRow}>
+              <div className={expandedOptions.length > 1 ? styles.optionRow : styles.optionList}>
                 {expandedOptions.map(option => (
                   <GiftOptionCard
                     key={option.id}

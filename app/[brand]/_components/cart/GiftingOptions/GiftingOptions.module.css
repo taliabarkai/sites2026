@@ -1383,6 +1383,11 @@
 
    The card component is unchanged; it is restacked here, so the row and the
    full-width list stay one component.
+
+   Applied only once there are two or more options: one card on its own is not
+   a set to compare, and at a third of the column it reads as a fragment of a
+   row that never arrives. A lone option keeps .optionList's full width — the
+   callers choose between the two on the option count.
    ═══════════════════════════════════════════════════════════════════════════ */
 .optionRow {
   display: grid;

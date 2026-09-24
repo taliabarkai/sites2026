@@ -217,7 +217,7 @@ export function GiftingSection({
       )))}
     </ul>
   ) : (
-    <div className={v1Styles.optionRow}>
+    <div className={options.length > 1 ? v1Styles.optionRow : v1Styles.optionList}>
       {options.map(option => (
         <GiftOptionCard
           key={option.id}
@@ -284,7 +284,23 @@ export function GiftingSection({
         <hr className={v1Styles.groupDivider} />
       )}
 
-      {unwrappedItems.length > 0 && optionCards}
+      {unwrappedItems.length > 0 && (
+        <div className={v1Styles.itemGroup}>
+          {/* V1 names what the list below is for; V2 had nothing, so once a
+              first item was wrapped the packaging still on offer read as a
+              leftover of the card above rather than the next thing to do.
+              Which noun it uses is read off the options, like every other
+              line in this section. */}
+          <h3 className={v1Styles.itemGroupTitle}>
+            {isPopulated
+              ? (optionsAreItemBound
+                  ? 'Add a gift note to another item'
+                  : 'Add gift packaging to another item')
+              : (optionsAreItemBound ? 'Select a gift note' : 'Select gift packaging')}
+          </h3>
+          {optionCards}
+        </div>
+      )}
 
       {draft && activeOption && (
         <GiftPanel

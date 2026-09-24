@@ -278,7 +278,7 @@ export function GiftingOptions({
           />
         </ul>
       ) : (
-        <div className={styles.optionRow}>
+        <div className={options.length > 1 ? styles.optionRow : styles.optionList}>
           {options.map(option => (
             <GiftOptionCard
               key={option.id}
