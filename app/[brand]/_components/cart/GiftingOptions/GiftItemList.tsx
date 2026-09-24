@@ -100,20 +100,18 @@ export function GiftItemList({
       )
     }
 
-    // With a single eligible option there is nothing to choose between, so the
-    // control opens the panel directly rather than expanding a list of one.
-    // Only the multi-option case behaves as a checkbox.
-    const solo     = eligible.length === 1 ? eligible[0] : null
+    // Every card behaves the same, however many options its item can take. A
+    // card with one eligible option used to jump straight to the panel, which
+    // read as a different control in the same row — and on the one item the
+    // demo makes ineligible for the personalised box, picking it skipped the
+    // step the other two cards show.
     const cheapest = Math.min(...eligible.map(o => o.price))
     const expanded = expandedItemId === item.id
-    // A solo item has no options to expand, so its panel being open is the only
-    // signal that it is the one being configured — tick it too.
+    // The panel being open is also a signal that this is the card being
+    // configured, so it stays ticked behind the scrim.
     const selected = expanded || activeItemId === item.id
 
-    const activate = () => {
-      if (solo) onAdd(item.id, solo.id, document.activeElement as HTMLElement | null)
-      else setExpandedItemId(expanded ? null : item.id)
-    }
+    const activate = () => setExpandedItemId(expanded ? null : item.id)
 
     return (
       <li key={item.id} className={styles.itemCardCell}>
@@ -132,14 +130,10 @@ export function GiftItemList({
             <img src={item.imageUrl} alt="" aria-hidden="true" className={styles.itemCardImage} />
             <button
               type="button"
-              {...(solo
-                ? { 'aria-haspopup': 'dialog' as const,
-                    'aria-expanded': selected,
-                    'aria-label': `Add gift packaging to ${item.name}` }
-                : { role: 'checkbox',
-                    'aria-checked': selected,
-                    'aria-controls': panelId,
-                    'aria-label': `Gift wrap ${item.name}` })}
+              role="checkbox"
+              aria-checked={selected}
+              aria-controls={panelId}
+              aria-label={`Gift wrap ${item.name}`}
               className={styles.itemCardCheckbox}
               onClick={e => { e.stopPropagation(); activate() }}
             >
@@ -199,7 +193,7 @@ export function GiftItemList({
           {/* The options belong to one card, but a card in a scroller has no
               room beneath it — so they open across the full width under the
               whole row instead, where they can be read without scrolling. */}
-          {expandedItem && expandedOptions.length > 1 && (
+          {expandedItem && expandedOptions.length > 0 && (
             <div id={`${listId}-${expandedItem.id}`} className={styles.optionsForItem}>
               <p className={styles.optionsForItemLabel}>
                 Gift packaging for {expandedItem.name}

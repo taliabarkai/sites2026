@@ -87,11 +87,14 @@ interface UpsellProduct {
 }
 
 /**
- * Parked, not removed: flip either to true to bring the section back. The
- * markup, data and styles all stay where they are.
+ * Parked, not removed: flip any of these to true to bring the section back.
+ * The markup, data and styles all stay where they are.
  */
 const SHOW_UPSELL_CAROUSEL = false
 const SHOW_CONTINUE_SHOPPING = false
+/* The per-item protection plan. Still sold in the floating cart, and its price
+   still counts towards this page's totals — only the control here is parked. */
+const SHOW_ITEM_WARRANTY = false
 
 const UPSELL_PRODUCTS: UpsellProduct[] = [
   {
@@ -205,7 +208,14 @@ function CartItemRow({ item, onRemove, icons, giftOptions, onSelectGift, onRemov
   )
   // Built once, placed twice — the cards belong under the price on desktop and
   // across the whole row on mobile. Only one placement is ever displayed.
-  const giftPanel = trayOpen && !item.giftPackaging && giftOptions.length > 0 ? (
+  // What the tray shows as bought: the option resolved against the options
+  // this line can actually take. The raw presence of `giftPackaging` is not the
+  // same test — an option from another brand's catalogue does not resolve — and
+  // letting the two disagree left the tray offering packaging that was already
+  // being charged for.
+  const chosenGift = giftOptions.find(o => o.id === item.giftPackaging?.optionId) ?? null
+
+  const giftPanel = trayOpen && !chosenGift && giftOptions.length > 0 ? (
     <GiftTrayPanel
       options={giftOptions}
       icons={icons}
@@ -493,7 +503,10 @@ function CartPageInner() {
   }
 
   /** What the packaging on this bag costs, kept beside the merchandise total. */
-  const giftTotal = items.reduce((sum, item) => sum + (item.giftPackaging?.price ?? 0), 0)
+  const giftTotal = items.reduce((sum, item) => {
+    const chosen = giftOptionsFor(item).find(o => o.id === item.giftPackaging?.optionId)
+    return sum + (chosen?.price ?? 0)
+  }, 0)
 
   const [selectedShipping, setSelectedShipping] = useState<'free' | 'express'>('free')
   const [promoCode,    setPromoCode]    = useState('')
@@ -554,7 +567,7 @@ function CartPageInner() {
                   giftOptions={giftOptionsFor(item)}
                   onSelectGift={handleSelectGift}
                   onRemoveGift={handleRemoveGift}
-                  showWarranty={features.warranty}
+                  showWarranty={SHOW_ITEM_WARRANTY && features.warranty}
                   onToggleWarranty={toggleWarranty}
                 />
               ))}
