@@ -78,6 +78,9 @@ export function GiftItemList({
    * and a half fit the column and the rest scroll, which keeps a three-item bag
    * on one screen instead of a stack the shopper has to scroll past.
    */
+  /** One packaging in the whole section: there is no list worth opening. */
+  const singleOptionCatalogue = options.length === 1
+
   const renderCard = (item: CartItem) => {
     const eligible = options.filter(o => isItemEligible(o, item.id))
     const panelId  = `${listId}-${item.id}`
@@ -100,18 +103,25 @@ export function GiftItemList({
       )
     }
 
-    // Every card behaves the same, however many options its item can take. A
-    // card with one eligible option used to jump straight to the panel, which
-    // read as a different control in the same row — and on the one item the
-    // demo makes ineligible for the personalised box, picking it skipped the
-    // step the other two cards show.
     const cheapest = Math.min(...eligible.map(o => o.price))
     const expanded = expandedItemId === item.id
     // The panel being open is also a signal that this is the card being
     // configured, so it stays ticked behind the scrim.
     const selected = expanded || activeItemId === item.id
 
-    const activate = () => setExpandedItemId(expanded ? null : item.id)
+    /*
+     * A section that stocks one packaging has nothing to choose between, so
+     * picking an item goes straight to the panel — a list of one asks the
+     * shopper to make a choice that has already been made for them.
+     *
+     * The test is what the section offers, not what this item is eligible for.
+     * Where there are several and one item happens to qualify for a single one,
+     * that card still expands like its neighbours: one card behaving unlike the
+     * others in the same row reads as a different control, not a shortcut.
+     */
+    const activate = singleOptionCatalogue
+      ? () => onAdd(item.id, options[0].id, document.activeElement as HTMLElement | null)
+      : () => setExpandedItemId(expanded ? null : item.id)
 
     return (
       <li key={item.id} className={styles.itemCardCell}>
@@ -130,10 +140,14 @@ export function GiftItemList({
             <img src={item.imageUrl} alt="" aria-hidden="true" className={styles.itemCardImage} />
             <button
               type="button"
-              role="checkbox"
-              aria-checked={selected}
-              aria-controls={panelId}
-              aria-label={`Gift wrap ${item.name}`}
+              {...(singleOptionCatalogue
+                ? { 'aria-haspopup': 'dialog' as const,
+                    'aria-expanded': selected,
+                    'aria-label': `Add gift packaging to ${item.name}` }
+                : { role: 'checkbox',
+                    'aria-checked': selected,
+                    'aria-controls': panelId,
+                    'aria-label': `Gift wrap ${item.name}` })}
               className={styles.itemCardCheckbox}
               onClick={e => { e.stopPropagation(); activate() }}
             >
