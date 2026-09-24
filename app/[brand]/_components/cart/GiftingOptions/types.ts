@@ -16,8 +16,9 @@ export interface DesignOption {
 export interface GiftOption {
   id:               string
   name:             string
-  /** e.g. "Gift bag, gift box and a custom note" */
-  description:      string
+  /** e.g. "Gift bag, gift box and a custom note". Absent when the option is
+   *  the image, the name and the price — nothing more. */
+  description?:     string
   /** Full-sentence form shown in the drawer. Falls back to `description`. */
   longDescription?: string
   /** Minor units (cents). */
@@ -37,6 +38,41 @@ export interface CartItem {
   id:       string
   name:     string
   imageUrl: string
+  /**
+   * The item's own gift options. When present they replace the brand list for
+   * this item; when absent the brand list applies, so a shared catalog is
+   * simply the case where nothing is supplied here.
+   */
+  giftOptions?: GiftOption[]
+}
+
+/** An item's own options when it has them, otherwise the brand's shared list. */
+export function optionsForItem(item: CartItem, brandOptions: GiftOption[]): GiftOption[] {
+  return item.giftOptions ?? brandOptions
+}
+
+/**
+ * Whether every item in the bag brings its own options.
+ *
+ * The one fact the section branches on. It stands in for "the options describe
+ * this item, not the brand" — so the card already names the item, the panel has
+ * no item left to ask about, and the heading can say what is being added. A
+ * brand moving to per-item options needs no code change to get all three.
+ */
+export function areOptionsItemBound(items: CartItem[]): boolean {
+  return items.length > 0 && items.every(i => (i.giftOptions?.length ?? 0) > 0)
+}
+
+/** Resolves an option id against the pool that actually applies to the item. */
+export function findOptionForItem(
+  items: CartItem[],
+  brandOptions: GiftOption[],
+  itemId: string,
+  optionId: string,
+): GiftOption | null {
+  const item = items.find(i => i.id === itemId)
+  const pool = item ? optionsForItem(item, brandOptions) : brandOptions
+  return pool.find(o => o.id === optionId) ?? null
 }
 
 /** One assignment per item, keyed by itemId. */
@@ -80,6 +116,50 @@ export function upsertAssignment(
 
 export function isItemEligible(option: GiftOption, itemId: string): boolean {
   return !option.eligibleItemIds || option.eligibleItemIds.includes(itemId)
+}
+
+/** "A", "A and B", "A, B and C". */
+function formatList(names: string[]): string {
+  if (names.length <= 1) return names[0] ?? ''
+  return `${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}`
+}
+
+/**
+ * How an option applies to the bag — the line the option card carries where it
+ * used to list the box contents.
+ *
+ * The contents belong in the panel, where the shopper is deciding in detail.
+ * On the card the useful fact is whether this packaging covers their bag, and
+ * that only becomes a question when there is more than one item *and* more than
+ * one packaging to choose between. Either of those being one makes the answer
+ * obvious, so the line is left off rather than stating it.
+ *
+ * Names the exception, not the rule: an option that excludes one piece stays a
+ * short line however many pieces it does cover.
+ */
+export function availabilityNote(
+  option: GiftOption,
+  items: CartItem[],
+  /** The options actually on offer alongside this one. */
+  pool: GiftOption[],
+): string | undefined {
+  if (items.length < 2 || pool.length < 2) return undefined
+  return excludedItemsNote(option, items) ?? 'Available for all items'
+}
+
+/**
+ * The pieces in the bag this option cannot go on, or undefined when it covers
+ * all of them. Ungated, unlike `availabilityNote` — somewhere that has already
+ * decided to explain itself just needs the words.
+ */
+export function excludedItemsNote(
+  option: GiftOption,
+  items: CartItem[],
+): string | undefined {
+  const excluded = items.filter(item => !isItemEligible(option, item.id))
+  return excluded.length === 0
+    ? undefined
+    : `Not available for ${formatList(excluded.map(i => i.name))}`
 }
 
 /**

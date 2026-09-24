@@ -73,6 +73,90 @@
 }
 
 /* Demo-only cart-size control, checkout bar */
+/* ── Checkout demo controls ─────────────────────────────────────────────────
+   Two pills side by side: the gifting variant (the comparison) and a dropdown
+   of scenarios to demo within it. */
+
+.demoControls {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xxs);
+}
+
+.scenarioMenu {
+  position: relative;
+  display: inline-flex;
+}
+
+/* Points down closed and up open would need state here; the trigger's own label
+   already says which scenario is live, so this stays a static affordance. */
+.scenarioCaret {
+  display: inline-block;
+  margin-left: var(--spacing-xxxs);
+  border-left:  4px solid transparent;
+  border-right: 4px solid transparent;
+  border-top:   4px solid currentColor;
+}
+
+/* Portalled to the theme root and pinned in viewport coordinates, so no
+   ancestor's stacking context can bury it under the page's sticky chrome.
+   Above the header and the sticky bars, below overlays and modals. */
+.scenarioPanel {
+  position: fixed;
+  z-index: var(--z-cart);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xxxs);
+  min-width: 180px;
+  padding: var(--spacing-xs);
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: var(--colors-surface-primary);
+  box-shadow: var(--shadow-md);
+}
+
+.scenarioLabel {
+  font-family: var(--typography-rules-text3-font-family);
+  font-size:   var(--typography-rules-text3-font-size);
+  line-height: var(--typography-rules-text3-line-height);
+  color: var(--colors-text-secondary);
+}
+
+.scenarioRow {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xxxs);
+  margin-bottom: var(--spacing-xxs);
+}
+
+.scenarioRow button {
+  appearance: none;
+  flex: 1;
+  border: var(--border-width) solid var(--border-color);
+  background: transparent;
+  color: var(--colors-text-secondary);
+  cursor: pointer;
+  white-space: nowrap;
+  min-height: 32px;
+  padding: var(--spacing-xxxs) var(--spacing-xs);
+  border-radius: var(--radius-sm);
+  font-family: var(--typography-rules-text3-font-family);
+  font-size:   var(--typography-rules-text3-font-size);
+  line-height: var(--typography-rules-text3-line-height);
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.scenarioRow button[aria-pressed='true'] {
+  background: var(--colors-text);
+  color: var(--colors-text-inverse);
+  border-color: var(--colors-text);
+}
+
+.scenarioRow button:focus-visible {
+  outline: 2px solid var(--colors-text);
+  outline-offset: 2px;
+}
+
 .cartSizeToggle {
   display: inline-flex;
   align-items: center;

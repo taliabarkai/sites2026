@@ -97,7 +97,9 @@ export function GiftOptionsInfoPanel({ options, onClose }: GiftOptionsInfoPanelP
                   <span className={styles.infoBody}>
                     <span className={styles.infoName}>{option.name}</span>
                     <span className={styles.infoPrice}>{formatPrice(option.price)}</span>
-                    <span className={styles.infoDescription}>{option.description}</span>
+                    {option.description && (
+                      <span className={styles.infoDescription}>{option.description}</span>
+                    )}
                   </span>
                 </li>
               ))}

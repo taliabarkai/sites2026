@@ -1431,6 +1431,27 @@
   gap: var(--spacing-xxxs);
 }
 
+/* Title-as-control: the words and the chevron are one button, so the whole
+   phrase is the hit area and the state is announced once. Inherits the heading
+   type wholesale — this adds a control, not a second look. */
+.summaryTitleToggle {
+  display: inline-flex;
+  align-items: center;
+  /* One step up the scale from the heading's own 4px: the chevron reads as a
+     control beside the words rather than a glyph stuck to them. */
+  gap: var(--spacing-xxs);
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
 .summaryTitle {
   font-family: var(--typography-rules-headline4-font-family);
   font-size: var(--typography-rules-headline4-font-size);
@@ -1442,6 +1463,20 @@
   display: flex;
   align-items: center;
   gap: var(--spacing-xxxs);
+}
+
+/* The item count, now part of the title line. Body type, not the heading's —
+   it is a fact about the order, not a second heading — and it opts out of the
+   heading token's casing and tracking explicitly, since it inherits them. */
+.summaryCount {
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  font-weight:    var(--typography-rules-text1-font-weight, normal);
+  letter-spacing: normal;
+  text-transform: none;
+  color: var(--colors-text-secondary);
+  white-space: nowrap;
 }
 
 .itemCount {
@@ -1575,6 +1610,12 @@
   flex-direction: column;
   margin-bottom: var(--spacing-sm);
   gap: var(--spacing-sm);
+}
+
+/* `display: flex` above outranks the UA's [hidden] rule, so collapsing the
+   list has to say so here. */
+.summaryItems[hidden] {
+  display: none;
 }
 
 .checkoutItem {

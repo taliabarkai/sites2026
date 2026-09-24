@@ -2,6 +2,8 @@
 
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react'
 
+import type { BrandGiftOption } from '../_config/giftOptions'
+
 export interface SelectedOption {
   label: string
   value: string
@@ -41,6 +43,13 @@ export interface CartItem {
   canvasConfig?: CanvasConfig   // LAL custom canvas — lets the PDP restore the preview
   isCompanion?: boolean         // added as a nested/companion product (not a standalone main item)
   warranty?: boolean            // 5-year protection plan selected for this item
+  /**
+   * Gift options belonging to this item, which replace the brand's shared list
+   * for it. Present where the offer is cut to the product — LAL's gift note
+   * cards mirror their product's artwork — and absent wherever a brand stocks
+   * one catalog for the whole bag.
+   */
+  giftOptions?: BrandGiftOption[]
 }
 
 /** Flat price of the optional 5-year protection plan (cents). */

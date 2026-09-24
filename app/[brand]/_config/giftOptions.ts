@@ -8,10 +8,12 @@
 export interface BrandGiftOption {
   id:             string
   name:           string
-  description:    string
+  /** Absent when the option is the image, the name and the price — nothing
+   *  more, as with a per-product gift note whose design is the product. */
+  description?:   string
   /** Full-sentence form used in the gifting drawer, e.g.
    *  "The Classic Gift Set includes a gift bag, gift box and a custom note". */
-  longDescription: string
+  longDescription?: string
   /** Minor units (cents). */
   price:          number
   originalPrice?: number

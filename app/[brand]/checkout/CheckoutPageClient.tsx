@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
+import { useEffect, useId, useState } from 'react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import * as oalIcons from '@/src/components/icons/oal'
 import * as mnnIcons from '@/src/components/icons/mnn'
@@ -17,11 +17,15 @@ import { createPlacedOrder, savePlacedOrder, DEMO_CONTACT } from '../_context/pl
 import { getBrandFromPathname, BRAND_GIFT_CONFIG, type BrandKey } from '../_config/brands'
 import { prefixNavLinks, withBrandPrefix } from '../_config/brandPaths'
 import { DEFAULT_NAV_LINKS, DEFAULT_TOPLINE } from '../_config/siteContent'
-import { getGiftOptions } from '../_config/giftOptions'
-import { DEMO_CART_ITEMS, ERROR_PREVIEW_CART_SIZE } from '../_config/demoCart'
+import { getGiftOptions, type BrandGiftOption } from '../_config/giftOptions'
+import { getDemoCartItems, ERROR_PREVIEW_CART_SIZE } from '../_config/demoCart'
+import { readCartSize, readGiftingVariant } from '../_config/demoParams'
 import { GiftingOptions } from '../_components/cart/GiftingOptions'
+import { GiftingSection as GiftingSectionV2 } from '../_components/cart/GiftingV2'
+import type { GiftItem } from '../_components/cart/GiftingV2'
 import { CheckoutConflictAlert } from '../_components/checkout/CheckoutConflictAlert'
-import type { GiftAssignment } from '../_components/cart/GiftingOptions'
+import { findOptionForItem } from '../_components/cart/GiftingOptions'
+import type { GiftAssignment, GiftOption } from '../_components/cart/GiftingOptions'
 import styles from './CheckoutPage.module.css'
 
 // ─── Brand icons ──────────────────────────────────────────────────────────────
@@ -392,18 +396,44 @@ interface OrderSummaryProps {
   /** itemId -> packaging applied to it. */
   giftByItemId?:        Record<string, { name: string; price: number }>
   onOpenGiftModal?:     (itemId: string) => void
+  /**
+   * Fold the item list away behind a chevron on the summary title, closed to
+   * start. Desktop only: the summary sits alongside the form the whole way
+   * down, so the totals are what the shopper keeps glancing at, and the items
+   * are there to check once. On mobile the summary is a sheet opened on
+   * purpose, so its items stay out in the open.
+   */
+  collapsibleItems?:    boolean
+  /**
+   * Whether the item list starts open. Set per gifting variant rather than
+   * fixed: V2 chooses packaging on the page and benefits from seeing the bag
+   * it is choosing for, where V1 leads with the item list in the section
+   * itself and would just be repeating it here.
+   */
+  defaultItemsOpen?:    boolean
 }
 
-function OrderSummary({ items, icons, showDetails, subtotal = 0, selectedShipping = 'free', hideHeader, hideBenefits, taxAmount, orderTotalDisplay, onOpenGiftModal, giftByItemId, giftTotal = 0, giftCount = 0 }: OrderSummaryProps) {
+function OrderSummary({ items, icons, showDetails, subtotal = 0, selectedShipping = 'free', hideHeader, hideBenefits, taxAmount, orderTotalDisplay, onOpenGiftModal, giftByItemId, giftTotal = 0, giftCount = 0, collapsibleItems, defaultItemsOpen = false }: OrderSummaryProps) {
   const [promoCode,    setPromoCode]    = useState('')
   const [promoApplied, setPromoApplied] = useState(false)
   const [appliedCode,  setAppliedCode]  = useState('')
+  const [itemsOpen,    setItemsOpen]    = useState(defaultItemsOpen)
+  const itemsId = useId()
 
-  const { ShippingIcon, ReturnIcon, WarrantyIcon, CouponIcon, XIcon } = icons
+  // Switching variant changes what the default is, and the summary is not
+  // remounted when it happens — so follow the new default rather than stranding
+  // the shopper on the old one. Toggling by hand still sticks within a variant.
+  useEffect(() => { setItemsOpen(defaultItemsOpen) }, [defaultItemsOpen])
+
+  const { ShippingIcon, ReturnIcon, WarrantyIcon, CouponIcon, XIcon, ChevronIcon } = icons
   const shippingCost   = selectedShipping === 'standard' ? 500 : 0
   const discountAmount = promoApplied ? Math.round(subtotal * 0.20) : 0
   const orderTotal     = subtotal + giftTotal + shippingCost - discountAmount + (taxAmount ?? 0)
   const displayTotal   = orderTotalDisplay ?? orderTotal
+
+  // Reads as part of the title now rather than a figure opposite it, so it is
+  // parenthesised and set in body type.
+  const countLabel = `(${items.length} ${items.length === 1 ? 'item' : 'items'})`
 
   const handleApplyPromo = () => {
     if (promoCode.trim()) {
@@ -422,12 +452,40 @@ function OrderSummary({ items, icons, showDetails, subtotal = 0, selectedShippin
     <section className={styles.orderSummary} aria-labelledby="summary-heading">
       {!hideHeader && (
         <div className={styles.summaryHeader}>
-          <h2 id="summary-heading" className={styles.summaryTitle}>Order Summary</h2>
-          <span className={styles.itemCount}>{items.length} {items.length === 1 ? 'item' : 'items'}</span>
+          {/* The chevron is the control, so it lives inside the button with the
+              words — the count opposite stays plain text rather than becoming
+              a second, silent hit area. */}
+          <h2 id="summary-heading" className={styles.summaryTitle}>
+            {collapsibleItems ? (
+              <button
+                type="button"
+                className={styles.summaryTitleToggle}
+                aria-expanded={itemsOpen}
+                aria-controls={itemsId}
+                onClick={() => setItemsOpen(prev => !prev)}
+              >
+                Order Summary
+                <span className={styles.summaryCount}>{countLabel}</span>
+                <span
+                  className={itemsOpen ? styles.chevronOpen : styles.chevronClosed}
+                  aria-hidden="true"
+                >
+                  <ChevronIcon size={24} />
+                </span>
+              </button>
+            ) : (
+              <>
+                Order Summary
+                <span className={styles.summaryCount}>{countLabel}</span>
+              </>
+            )}
+          </h2>
         </div>
       )}
 
-      <div className={styles.summaryItems}>
+      {/* Kept in the DOM while closed so the button's aria-controls always
+          resolves; [hidden] is honoured by the rule beside .summaryItems. */}
+      <div id={itemsId} className={styles.summaryItems} hidden={collapsibleItems && !itemsOpen}>
         {items.map(item => (
           <CheckoutItemRow
             key={item.id}
@@ -584,6 +642,8 @@ function CheckoutPageInner() {
 
   const { items, subtotal, replaceItems } = useCart()
 
+  const giftingVariant = readGiftingVariant(searchParams)
+
   const isTgr          = brand === 'tgr'
   const brandGiftOptions = getGiftOptions(brand)
   // Printed designs are brand-scoped and shared by every option flagged `designs`.
@@ -602,6 +662,53 @@ function CheckoutPageInner() {
   // same shortcut single-option brands get. Eligibility is per item, so this is
   // expressed as an allow-list on the option the third line cannot use.
   const soloOnlyItemId = brand === 'tgr' ? eligibleGiftItems[2]?.id : undefined
+
+  const toGiftOption = (o: BrandGiftOption): GiftOption => ({
+    id:              o.id,
+    name:            o.name,
+    description:     o.description,
+    longDescription: o.longDescription,
+    price:           o.price,
+    imageUrl:        o.image,
+    designs:         o.designs,
+    wantsName:       o.wantsName,
+    wantsPhoto:      o.wantsPhoto,
+  })
+
+  // The bag as the gifting section sees it. An item carrying its own options
+  // brings them along, and those replace the brand list for that item — so the
+  // totals and the summary below must resolve an assignment against the item,
+  // not against the brand catalog alone.
+  const giftItems: GiftItem[] = eligibleGiftItems.map(i => ({
+    id:          i.id,
+    name:        i.name,
+    imageUrl:    i.image,
+    // V2's item cards show it; V1 ignores it.
+    price:       i.price,
+    giftOptions: i.giftOptions?.map(toGiftOption),
+  }))
+
+  const optionForAssignment = (a: GiftAssignment) =>
+    findOptionForItem(giftItems, brandGiftOptions.map(toGiftOption), a.itemId, a.optionId)
+
+  // Identical inputs for both gifting variants — only the flow over them differs.
+  const giftingOptions: GiftOption[] = brandGiftOptions.map(o => ({
+    ...toGiftOption(o),
+    eligibleItemIds: soloOnlyItemId && o.id === 'personalized-gift-box'
+      ? eligibleGiftItems.filter(i => i.id !== soloOnlyItemId).map(i => i.id)
+      : undefined,
+  }))
+
+  const giftingIcons = {
+    GiftIcon:      icons.GiftIcon,
+    CheckmarkIcon: icons.CheckmarkIcon,
+    XIcon:         icons.XIcon,
+    AiMagicIcon:   icons.AiMagicIcon,
+    TrashCanIcon:  icons.TrashCanIcon,
+    PlusMinusIcon: icons.PlusMinusIcon,
+  }
+
+  const generateGiftNote = async () => 'Wishing you a wonderful day filled with joy!'
 
   const [giftAssignments, setGiftAssignments] = useState<GiftAssignment[]>([])
 
@@ -763,9 +870,11 @@ function CheckoutPageInner() {
   // would render the conflict over a $0 order. Fill it to the same size the
   // toggle pins the preview to. Only ever seeds an empty cart.
   useEffect(() => {
-    if (!isErrorPreview || items.length > 0) return
-    replaceItems(DEMO_CART_ITEMS.slice(0, ERROR_PREVIEW_CART_SIZE))
-  }, [isErrorPreview, items.length, replaceItems])
+    // `?items=` is explicit and the demo controls own it, so this only covers
+    // the older shape of the link, where the bag size was left unsaid.
+    if (!isErrorPreview || items.length > 0 || readCartSize(searchParams) !== null) return
+    replaceItems(getDemoCartItems(brand as BrandKey).slice(0, ERROR_PREVIEW_CART_SIZE))
+  }, [isErrorPreview, items.length, replaceItems, brand, searchParams])
 
   const { DropdownIcon, TooltipIcon, CheckmarkIcon, LockIcon, XIcon, CouponIcon, ShippingIcon, ReturnIcon, WarrantyIcon, ChevronIcon } = icons
 
@@ -788,7 +897,7 @@ function CheckoutPageInner() {
   // Gift packaging is part of the merchandise subtotal, so it sits inside the
   // taxable base rather than being tacked on after tax.
   const giftTotal      = giftAssignments.reduce(
-    (sum, a) => sum + (brandGiftOptions.find(o => o.id === a.optionId)?.price ?? 0), 0)
+    (sum, a) => sum + (optionForAssignment(a)?.price ?? 0), 0)
   const giftedSubtotal = subtotal + giftTotal
   const taxAmount      = isCompleted(1) ? Math.round(giftedSubtotal * 0.08) : null
   const orderTotal     = giftedSubtotal + shippingCost - discountAmount + (taxAmount ?? 0)
@@ -884,7 +993,7 @@ function CheckoutPageInner() {
   // Packaging shown per item in the order summary.
   const giftByItemId: Record<string, { name: string; price: number }> = {}
   for (const a of giftAssignments) {
-    const opt = brandGiftOptions.find(o => o.id === a.optionId)
+    const opt = optionForAssignment(a)
     if (opt) giftByItemId[a.itemId] = { name: opt.name, price: opt.price }
   }
 
@@ -1127,38 +1236,31 @@ function CheckoutPageInner() {
                 </div>
               </AccordionStep>
 
-              {/* ── Step 3: Gifting — options-first section ── */}
-              <GiftingOptions
-                options={brandGiftOptions.map(o => ({
-                  id:              o.id,
-                  name:            o.name,
-                  description:     o.description,
-                  longDescription: o.longDescription,
-                  price:           o.price,
-                  imageUrl:        o.image,
-                  designs:         o.designs,
-                  wantsName:       o.wantsName,
-                  wantsPhoto:      o.wantsPhoto,
-                  eligibleItemIds: soloOnlyItemId && o.id === 'personalized-gift-box'
-                    ? eligibleGiftItems
-                        .filter(i => i.id !== soloOnlyItemId)
-                        .map(i => i.id)
-                    : undefined,
-                }))}
-                designs={giftDesigns}
-                items={eligibleGiftItems.map(i => ({ id: i.id, name: i.name, imageUrl: i.image }))}
-                assignments={giftAssignments}
-                onChange={setGiftAssignments}
-                icons={{
-                  GiftIcon:      icons.GiftIcon,
-                  CheckmarkIcon: icons.CheckmarkIcon,
-                  XIcon:         icons.XIcon,
-                  AiMagicIcon:   icons.AiMagicIcon,
-                  TrashCanIcon:  icons.TrashCanIcon,
-                  PlusMinusIcon: icons.PlusMinusIcon,
-                }}
-                onGenerateNote={async () => 'Wishing you a wonderful day filled with joy!'}
-              />
+              {/* ── Step 3: Gifting ──
+                  Two variants of the same step, in the same slot, chosen by
+                  `?gifting=`. They share the lifted assignments, so the totals
+                  and the order summary are indifferent to which one is on. */}
+              {giftingVariant === 'v2' ? (
+                <GiftingSectionV2
+                  options={giftingOptions}
+                  designs={giftDesigns}
+                  items={giftItems}
+                  assignments={giftAssignments}
+                  onChange={setGiftAssignments}
+                  icons={{ ...giftingIcons, WarningIcon: icons.WarningIcon }}
+                  onGenerateNote={generateGiftNote}
+                />
+              ) : (
+                <GiftingOptions
+                  options={giftingOptions}
+                  designs={giftDesigns}
+                  items={giftItems}
+                  assignments={giftAssignments}
+                  onChange={setGiftAssignments}
+                  icons={giftingIcons}
+                  onGenerateNote={generateGiftNote}
+                />
+              )}
 
               {/* ── Step 4: Payment ── */}
               <AccordionStep
@@ -1451,7 +1553,14 @@ function CheckoutPageInner() {
             {/* ══════════════ RIGHT COLUMN ══════════════ */}
             <aside className={styles.rightCol}>
               <div className={styles.orderSummaryDesktop}>
-                <OrderSummary {...summaryProps} showDetails subtotal={subtotal} selectedShipping={selectedShipping} />
+                <OrderSummary
+                  {...summaryProps}
+                  showDetails
+                  collapsibleItems
+                  defaultItemsOpen={giftingVariant === 'v2'}
+                  subtotal={subtotal}
+                  selectedShipping={selectedShipping}
+                />
               </div>
               {/* You May Also Like — desktop (hidden) */}
             </aside>

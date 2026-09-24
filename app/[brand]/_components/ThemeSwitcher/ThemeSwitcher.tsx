@@ -65,7 +65,14 @@ export function ThemeSwitcher({ brand }: ThemeSwitcherProps = {}) {
   const handleSelect = (brand: BrandKey) => {
     setOpen(false)
     if (brand === currentBrand) return
-    router.push(buildBrandPath(pathname, brand), { scroll: false })
+    // Carry the query across. The demo's whole configuration — gifting
+    // variant, cart size, error state — lives there, and dropping it on a
+    // theme switch silently reset the prototype to its defaults.
+    // Read at click time rather than via useSearchParams: this switcher renders
+    // in the header of every page, and the hook would opt them all out of
+    // static rendering for a value only this handler needs.
+    const query = typeof window === 'undefined' ? '' : window.location.search
+    router.push(`${buildBrandPath(pathname, brand)}${query}`, { scroll: false })
   }
 
   return (

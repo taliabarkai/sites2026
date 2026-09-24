@@ -7,6 +7,10 @@ import { GiftOptionCard } from './GiftOptionCard'
 import { GiftingDrawer } from './GiftingDrawer'
 import { RemoveGiftDialog } from './RemoveGiftDialog'
 import {
+  areOptionsItemBound,
+  availabilityNote,
+  findOptionForItem,
+  optionsForItem,
   upsertAssignment,
   type CartItem,
   type DesignOption,
@@ -17,6 +21,7 @@ import {
 import styles from './GiftingOptions.module.css'
 
 interface GiftingOptionsProps {
+  /** The brand's shared catalog. An item carrying its own options overrides it. */
   options:     GiftOption[]
   items:       CartItem[]
   assignments: GiftAssignment[]
@@ -56,6 +61,17 @@ export function GiftingOptions({
   // the bag leads instead: the shopper says which piece before anything else.
   const isMultiItem = items.length > 1
 
+  // Every item brings its own options, so each card already stands for one item
+  // and there is never a choice of item left to make — at any cart size. The
+  // section reads this off the data; it never asks which brand it is rendering.
+  const optionsAreItemBound = areOptionsItemBound(items)
+
+  /** The options that actually apply to an item. */
+  const optionsFor = (item: CartItem) => optionsForItem(item, options)
+
+  const findOption = (itemId: string, optionId: string) =>
+    findOptionForItem(items, options, itemId, optionId)
+
   const noteFor = (itemId: string) => assignments.find(a => a.itemId === itemId)?.note ?? ''
 
   /** Designs are cosmetic, so the first one is a safe default and saves a click. */
@@ -71,7 +87,7 @@ export function GiftingOptions({
   const openPanel = (itemId: string, optionId: string, trigger: HTMLElement | null) => {
     if (trigger) triggerRef.current = trigger
 
-    const option   = options.find(o => o.id === optionId) ?? null
+    const option   = findOption(itemId, optionId)
     const existing = assignments.find(a => a.itemId === itemId)
 
     setDrawer({
@@ -135,7 +151,7 @@ export function GiftingOptions({
   }
 
   const activeOption = drawer
-    ? options.find(o => o.id === drawer.optionId) ?? null
+    ? findOption(drawer.itemId, drawer.optionId)
     : null
   const activeItem = drawer
     ? items.find(i => i.id === drawer.itemId) ?? null
@@ -153,7 +169,7 @@ export function GiftingOptions({
     ? assignments.find(a => a.itemId === soleItem.id) ?? null
     : null
   const soleOption = soleAssignment
-    ? options.find(o => o.id === soleAssignment.optionId) ?? null
+    ? findOption(soleAssignment.itemId, soleAssignment.optionId)
     : null
 
 
@@ -163,7 +179,11 @@ export function GiftingOptions({
           distance to the content rather than sitting between the two. */}
       <div className={styles.sectionHeader}>
         <h2 id="gifting-options-heading" className={styles.heading}>
-          3. Add Gift Packaging
+          {/* What is on offer, read off the options themselves: item-bound
+              options are a note card cut to that product, not packaging the
+              brand stocks. Any brand whose options move that way gets this
+              heading without a change here. */}
+          {optionsAreItemBound ? '3. Add Gift Note' : '3. Add Gift Packaging'}
           <span className={styles.headingIcon} aria-hidden="true"><GiftIcon size={32} /></span>
         </h2>
 
@@ -174,14 +194,60 @@ export function GiftingOptions({
             <span className={styles.wrapCountCheck} aria-hidden="true">
               <CheckmarkIcon size={16} />
             </span>
-            {isMultiItem
-              ? `Gift packaging added to ${wrappedCount} of ${items.length} items`
-              : 'Gift packaging added'}
+            {/* Names what was actually added. Read off the options, like the
+                heading above it — a brand whose options are notes rather than
+                packaging says so here too. */}
+            {optionsAreItemBound
+              ? (isMultiItem
+                  ? `Gift note added to ${wrappedCount} of ${items.length} items`
+                  : 'Gift note added')
+              : (isMultiItem
+                  ? `Gift packaging added to ${wrappedCount} of ${items.length} items`
+                  : 'Gift packaging added')}
           </p>
         )}
       </div>
 
-      {isMultiItem ? (
+      {optionsAreItemBound ? (
+        /* One card per cart item, in cart order — each card is its item, so
+           there is nothing to pick between and no item step to render. A card
+           becomes the assigned row in place once its note is added. */
+        <ul className={styles.itemStateList}>
+          {items.map(item => {
+            const assignment = assignments.find(a => a.itemId === item.id)
+            const assigned   = assignment
+              ? findOption(item.id, assignment.optionId)
+              : null
+
+            if (assignment && assigned) {
+              return (
+                <AssignedItemRow
+                  key={item.id}
+                  item={item}
+                  option={assigned}
+                  assignment={assignment}
+                  icons={icons}
+                  designs={designs}
+                  onEdit={handleEdit}
+                  onRemove={handleRequestRemove}
+                />
+              )
+            }
+
+            return optionsFor(item).map(option => (
+              <li key={`${item.id}-${option.id}`} className={styles.itemStateGroup}>
+                <GiftOptionCard
+                  option={option}
+                  itemName={item.name}
+                  icons={icons}
+                  onSelect={o => openPanel(
+                    item.id, o.id, document.activeElement as HTMLElement | null)}
+                />
+              </li>
+            ))
+          })}
+        </ul>
+      ) : isMultiItem ? (
         <GiftItemList
           items={items}
           options={options}
@@ -212,6 +278,7 @@ export function GiftingOptions({
               key={option.id}
               option={option}
               icons={icons}
+              availability={availabilityNote(option, items, options)}
               onSelect={o => handleSelectOption(o, document.activeElement as HTMLElement | null)}
             />
           ))}

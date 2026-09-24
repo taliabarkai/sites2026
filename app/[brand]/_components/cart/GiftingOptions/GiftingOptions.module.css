@@ -114,6 +114,16 @@
   padding: var(--spacing-sm);
 }
 
+/* Which cart item this card's note belongs to. Sits above the name because it
+   is how the card is told apart, not a detail of it. Same small muted type as
+   the description below, so it reads as supporting copy either way. */
+.optionCardItemName {
+  font-family: var(--typography-rules-text3-font-family);
+  font-size:   var(--typography-rules-text3-font-size);
+  line-height: var(--typography-rules-text3-line-height);
+  color: var(--colors-text-secondary);
+}
+
 .optionCardName {
   font-family: var(--typography-rules-text2-font-family);
   font-size:   var(--typography-rules-text2-font-size);
