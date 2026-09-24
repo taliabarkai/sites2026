@@ -106,16 +106,29 @@ interface StepBreadcrumbProps {
   brand:          string
   /** Absent in a flow with no cart page, which drops the step entirely. */
   cartHref?:      string
+  /** The crumbs this flow actually has, in order. */
+  steps:          ReadonlyArray<{ n: number; label: string }>
   onEditStep:     (step: number) => void
 }
 
-const BREADCRUMB_STEPS = [
-  { n: 1, label: 'Contact & Delivery' },
-  { n: 2, label: 'Shipping' },
-  { n: 3, label: 'Payment' },
-] as const
+/**
+ * Every step this checkout can have, in order, keyed by the identity the page's
+ * state machine uses. Which of them a given flow actually renders is decided in
+ * CheckoutPageInner — the earlier phases hand shipping and gifting to the cart
+ * page, and a step that is not there should be neither numbered nor named.
+ */
+const CONTACT_STEP  = 1
+const SHIPPING_STEP = 2
+const GIFTING_STEP  = 3
+const PAYMENT_STEP  = 4
 
-function StepBreadcrumb({ currentStep, completedSteps, icons, brand, cartHref, onEditStep }: StepBreadcrumbProps) {
+const STEP_LABELS: Record<number, string> = {
+  [CONTACT_STEP]:  'Contact & Delivery',
+  [SHIPPING_STEP]: 'Shipping',
+  [PAYMENT_STEP]:  'Payment',
+}
+
+function StepBreadcrumb({ currentStep, completedSteps, icons, brand, cartHref, steps, onEditStep }: StepBreadcrumbProps) {
   const { ChevronIcon } = icons
 
   return (
@@ -136,7 +149,7 @@ function StepBreadcrumb({ currentStep, completedSteps, icons, brand, cartHref, o
         </span>
       )}
 
-      {BREADCRUMB_STEPS.map(({ n, label }, i) => {
+      {steps.map(({ n, label }, i) => {
         const isActive    = n === currentStep
         const isCompleted = completedSteps.has(n)
 
@@ -247,6 +260,9 @@ function AccordionStep({ title, stepNumber, isActive, isCompleted, completedSumm
 
 // ─── Checkout Item Row ────────────────────────────────────────────────────────
 
+/** The add-on's name as the floating cart sells it. */
+const PLAN_TITLE = '5-Year Protection Plan'
+
 interface CheckoutItemRowProps {
   item:           CartItem
   icons:          BrandIcons
@@ -260,6 +276,18 @@ function CheckoutItemRow({ item, icons, showGuarantee, onAddGift, gift }: Checko
   const [detailsOpen, setDetailsOpen] = useState(false)
   const hasOptions = item.selectedOptions && item.selectedOptions.length > 0
   const { ChevronIcon, GiftIcon } = icons
+
+  /** What this line carries besides the product itself, in the order added. */
+  const addOns: { key: string; name: string; price: number; icon?: React.ReactNode }[] = []
+  if (gift) {
+    addOns.push({
+      key: 'gift', name: gift.name, price: gift.price,
+      icon: <span className={styles.summaryGiftIcon} aria-hidden="true"><GiftIcon size={24} /></span>,
+    })
+  }
+  if (item.warranty) {
+    addOns.push({ key: 'warranty', name: PLAN_TITLE, price: WARRANTY_CENTS })
+  }
 
   return (
     <article className={styles.checkoutItem}>
@@ -317,26 +345,24 @@ function CheckoutItemRow({ item, icons, showGuarantee, onAddGift, gift }: Checko
         </div>{/* end itemContent */}
       </div>
 
-      {/* Warranty add-on — single line below the item when the plan is selected
-          (read-only on checkout: no remove control) */}
-      {gift && (
+      {/* Everything bought alongside this piece, read-only: one box, one
+          "Includes:", a line each. Packaging and the protection plan are the
+          same kind of thing to a shopper reading a receipt, so they are listed
+          together rather than in two differently-shaped rows. */}
+      {addOns.length > 0 && (
         <div className={styles.summaryGiftRow}>
-          <span className={styles.summaryGiftLabel}>
-            <strong className={styles.summaryGiftIncludes}>Includes:</strong>
-            {gift.name}
-            <span className={styles.summaryGiftIcon} aria-hidden="true"><GiftIcon size={24} /></span>
-          </span>
-          <span className={styles.summaryGiftPrice}>{formatPrice(gift.price)}</span>
-        </div>
-      )}
-
-      {item.warranty && (
-        <div className={styles.warrantyRow}>
-          <span className={styles.warrantyLabel}>
-            <span className={styles.warrantyPlus} aria-hidden="true">+</span>
-            5-Year Protection Plan
-          </span>
-          <span className={styles.warrantyPrice}>{formatPrice(WARRANTY_CENTS)}</span>
+          <strong className={styles.summaryGiftIncludes}>Includes:</strong>
+          <ul className={styles.summaryIncludesList}>
+            {addOns.map(addOn => (
+              <li key={addOn.key} className={styles.summaryIncludesItem}>
+                <span className={styles.summaryGiftLabel}>
+                  {addOn.name}
+                  {addOn.icon}
+                </span>
+                <span className={styles.summaryGiftPrice}>{formatPrice(addOn.price)}</span>
+              </li>
+            ))}
+          </ul>
         </div>
       )}
     </article>
@@ -650,6 +676,24 @@ function CheckoutPageInner() {
   const giftingVariant = readGiftingVariant(searchParams)
   const flow       = readFlow(searchParams)
   const flowConfig = getFlowConfig(flow)
+
+  /**
+   * The steps this flow renders, in order. Identities stay put — the state
+   * machine and every onEdit key off them — so only the number the shopper
+   * reads moves. Without this, Phase 1 numbered its two steps "1." and "4.".
+   */
+  const visibleSteps: number[] = [
+    CONTACT_STEP,
+    ...(flowConfig.shipping === 'checkout' ? [SHIPPING_STEP] : []),
+    ...(flowConfig.gifting  === 'checkout' ? [GIFTING_STEP]  : []),
+    PAYMENT_STEP,
+  ]
+  /** What to print in front of a step's title: its place in this flow. */
+  const stepLabel = (step: number) => visibleSteps.indexOf(step) + 1
+  /** Gifting has no crumb of its own; the rest follow the same list. */
+  const breadcrumbSteps = visibleSteps
+    .filter(n => n !== GIFTING_STEP)
+    .map(n => ({ n, label: STEP_LABELS[n] }))
   const features   = getBrandFeatures(brand as BrandKey)
   const query      = searchParams.toString()
 
@@ -1087,13 +1131,14 @@ function CheckoutPageInner() {
                 icons={icons}
                 brand={brand}
                 cartHref={flowConfig.hasCartPage ? `/${brand}/cart${query ? `?${query}` : ''}` : undefined}
+                steps={breadcrumbSteps}
                 onEditStep={editStep}
               />
 
               {/* ── Step 1: Contact & Delivery ── */}
               <AccordionStep
                 title="Contact & Delivery"
-                stepNumber={1}
+                stepNumber={stepLabel(CONTACT_STEP)}
                 isActive={isActive(1)}
                 isCompleted={isCompleted(1)}
                 completedSummary={step1Summary}
@@ -1208,7 +1253,7 @@ function CheckoutPageInner() {
               {flowConfig.shipping === 'checkout' && (
               <AccordionStep
                 title="Shipping Method"
-                stepNumber={2}
+                stepNumber={stepLabel(SHIPPING_STEP)}
                 isActive={isActive(2)}
                 isCompleted={isCompleted(2)}
                 completedSummary={step2Summary}
@@ -1254,6 +1299,7 @@ function CheckoutPageInner() {
                   and the order summary are indifferent to which one is on. */}
               {flowConfig.gifting !== 'checkout' ? null : giftingVariant === 'v2' ? (
                 <GiftingSectionV2
+                  stepNumber={stepLabel(GIFTING_STEP)}
                   options={giftingOptions}
                   designs={giftDesigns}
                   items={giftItems}
@@ -1264,6 +1310,7 @@ function CheckoutPageInner() {
                 />
               ) : (
                 <GiftingOptions
+                  stepNumber={stepLabel(GIFTING_STEP)}
                   options={giftingOptions}
                   designs={giftDesigns}
                   items={giftItems}
@@ -1277,7 +1324,7 @@ function CheckoutPageInner() {
               {/* ── Step 4: Payment ── */}
               <AccordionStep
                 title="Payment"
-                stepNumber={4}
+                stepNumber={stepLabel(PAYMENT_STEP)}
                 isActive={isActive(4)}
                 isCompleted={isCompleted(4)}
                 completedSummary={step4Summary}

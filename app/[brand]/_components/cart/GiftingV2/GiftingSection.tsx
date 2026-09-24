@@ -25,6 +25,11 @@ import { RemoveGiftDialog } from './RemoveGiftDialog'
 import styles from './GiftingV2.module.css'
 
 interface GiftingSectionProps {
+  /**
+   * Where this step falls in the flow being shown. Defaults to 3, the
+   * place it has always held in the full checkout.
+   */
+  stepNumber?: number
   /** The brand's shared catalog. An item carrying its own options overrides it. */
   options:     GiftOption[]
   items:       GiftItem[]
@@ -49,7 +54,7 @@ interface GiftingSectionProps {
  * them. This owns only the panel and the dialog.
  */
 export function GiftingSection({
-  options, items, assignments, icons, designs, onChange, onGenerateNote,
+  options, items, assignments, icons, designs, onChange, onGenerateNote, stepNumber,
 }: GiftingSectionProps) {
   const { GiftIcon, CheckmarkIcon } = icons
 
@@ -63,6 +68,7 @@ export function GiftingSection({
   // Prompt A's rule, inherited rather than reimplemented — and the reason V2
   // and V1 are the same flow on a brand like that.
   const optionsAreItemBound = areOptionsItemBound(items)
+  const step = stepNumber ?? 3
 
   const optionsFor = (item: GiftItem) => optionsForItem(item, options)
 
@@ -233,7 +239,7 @@ export function GiftingSection({
         <h2 id="gifting-options-heading" className={v1Styles.heading}>
           {/* Read off the options, never the brand: item-bound options are a
               note card cut to the product, not packaging the brand stocks. */}
-          {optionsAreItemBound ? '3. Add Gift Note' : '3. Add Gift Packaging'}
+          {`${step}. ${optionsAreItemBound ? 'Add Gift Note' : 'Add Gift Packaging'}`}
           <span className={v1Styles.headingIcon} aria-hidden="true"><GiftIcon size={32} /></span>
         </h2>
 

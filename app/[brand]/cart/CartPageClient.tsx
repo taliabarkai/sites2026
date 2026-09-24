@@ -9,7 +9,7 @@ import * as tgrIcons from '@/src/components/icons/tgr'
 import * as lalIcons from '@/src/components/icons/lal'
 import * as ibIcons from '@/src/components/icons/ib'
 import type { IconProps } from '@/src/components/icons/Icon'
-import { useCart } from '../_context/CartContext'
+import { useCart, WARRANTY_CENTS } from '../_context/CartContext'
 import type { CartItem, GiftPackaging } from '../_context/CartContext'
 import { useDemoCartSync } from '../_context/useDemoCartSync'
 import { GiftTray, GiftTrayPanel } from '../_components/cart/GiftTray'
@@ -48,6 +48,8 @@ interface BrandIcons {
   ReturnIcon:    React.ComponentType<IconProps>
   CheckmarkIcon: React.ComponentType<IconProps>
   CouponIcon:    React.ComponentType<IconProps>
+  /* The protection plan's checkbox, shared with the floating cart's V1 row. */
+  CheckboxIcon:  React.ComponentType<IconProps>
   /* Required by the shared gift-option card and the checkout's gifting panels,
      both of which the cart page reuses. */
   XIcon:         React.ComponentType<IconProps>
@@ -64,6 +66,9 @@ const BRAND_ICONS: Record<string, BrandIcons> = {
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
+
+/** The add-on as the floating cart sells it — same words, same price. */
+const PLAN_TITLE = '5-Year Jewelry Protection Plan'
 
 function formatPrice(cents: number): string {
   const dollars = cents / 100
@@ -175,9 +180,12 @@ interface CartItemRowProps {
   giftOptions:  GiftOption[]
   onSelectGift: (itemId: string, option: GiftOption) => void
   onRemoveGift: (itemId: string) => void
+  /** False on brands whose products no plan covers. */
+  showWarranty: boolean
+  onToggleWarranty: (itemId: string) => void
 }
 
-function CartItemRow({ item, onRemove, icons, giftOptions, onSelectGift, onRemoveGift }: CartItemRowProps) {
+function CartItemRow({ item, onRemove, icons, giftOptions, onSelectGift, onRemoveGift, showWarranty, onToggleWarranty }: CartItemRowProps) {
   const [detailsOpen, setDetailsOpen] = useState(false)
   // Lifted out of the tray so the control and its cards can sit in different
   // rows: the control belongs with the copy, the cards below the whole row.
@@ -204,6 +212,48 @@ function CartItemRow({ item, onRemove, icons, giftOptions, onSelectGift, onRemov
       onSelect={option => { onSelectGift(item.id, option); setTrayOpen(false) }}
     />
   ) : null
+
+  // The floating cart's V1 checkbox row, on the bag page so a plan added there
+  // is visible — and removable — here too. Both write the same cart state, so
+  // the two surfaces cannot disagree.
+  const warrantyRow = !showWarranty ? null : item.warranty ? (
+    // Added: the offer is settled, so it reads as a line on the bag — the same
+    // tick, name, price and bin as the packaging added above it, rather than a
+    // ticked checkbox still phrased as an invitation.
+    <div className={styles.warrantyAdded}>
+      <span className={styles.warrantyAddedCheck} aria-hidden="true">
+        <icons.CheckmarkIcon size={16} />
+      </span>
+      <span className={styles.warrantyAddedName}>{PLAN_TITLE}</span>
+      <span className={styles.warrantyAddedPrice}>{formatPrice(WARRANTY_CENTS)}</span>
+      <button
+        type="button"
+        className={styles.warrantyAddedRemove}
+        aria-label={`Remove the ${PLAN_TITLE} from ${item.name}`}
+        onClick={() => onToggleWarranty(item.id)}
+      >
+        <icons.TrashCanIcon size={20} />
+      </button>
+    </div>
+  ) : (
+    <div className={styles.itemWarrantyRow}>
+      <button
+        type="button"
+        role="checkbox"
+        aria-checked={false}
+        className={styles.warrantyToggle}
+        onClick={() => onToggleWarranty(item.id)}
+      >
+        <span className={styles.warrantyCheckbox} aria-hidden="true">
+          <icons.CheckboxIcon size={24} />
+        </span>
+        <span className={styles.warrantyLabel}>
+          Add a {PLAN_TITLE} for{' '}
+          <span className={styles.warrantyPrice}>{formatPrice(WARRANTY_CENTS)}</span>
+        </span>
+      </button>
+    </div>
+  )
 
   const hasOptions = item.selectedOptions && item.selectedOptions.length > 0
   const { TrashCanIcon, ChevronIcon } = icons
@@ -265,7 +315,10 @@ function CartItemRow({ item, onRemove, icons, giftOptions, onSelectGift, onRemov
         )}
 
         {/* Desktop: the control sits with the copy, centred against the image. */}
-        <div className={styles.itemGiftTrayInline}>{giftTray}</div>
+        <div className={styles.itemGiftTrayInline}>
+          {giftTray}
+          {warrantyRow}
+        </div>
 
         {/* Desktop: the cards follow the control in flow, so the gap between
             them is the tray's own and not whatever the image's row left over.
@@ -278,7 +331,10 @@ function CartItemRow({ item, onRemove, icons, giftOptions, onSelectGift, onRemov
           beside the image is barely half a phone wide and the control wraps
           inside it. Same component, same lifted state, so the two placements
           cannot disagree; only one is ever displayed. */}
-      <div className={styles.itemGiftTrayRow}>{giftTray}</div>
+      <div className={styles.itemGiftTrayRow}>
+        {giftTray}
+        {warrantyRow}
+      </div>
 
       {/* Mobile: a row of its own under the image, where the copy column is too
           narrow for a card. */}
@@ -329,7 +385,7 @@ function CartPageInner() {
     contactHref: withBrandPrefix(brand, DEFAULT_TOPLINE.contactHref),
   }
 
-  const { items, subtotal, removeItem, updateGiftPackaging } = useCart()
+  const { items, subtotal, removeItem, updateGiftPackaging, toggleWarranty } = useCart()
   const icons = BRAND_ICONS[brand]
   const searchParams = useSearchParams()
 
@@ -498,6 +554,8 @@ function CartPageInner() {
                   giftOptions={giftOptionsFor(item)}
                   onSelectGift={handleSelectGift}
                   onRemoveGift={handleRemoveGift}
+                  showWarranty={features.warranty}
+                  onToggleWarranty={toggleWarranty}
                 />
               ))}
             </div>

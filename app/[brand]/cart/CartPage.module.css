@@ -920,3 +920,129 @@
   flex-shrink: 0;
   color: var(--colors-text);
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Per-item protection plan — the floating cart's V1 checkbox row, repeated on
+   the bag page so a plan added in the cart is visible and removable here. The
+   price is already in the cart's subtotal, so only the control was missing.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.itemWarrantyRow {
+  display: flex;
+  align-items: center;
+  padding-top: var(--spacing-xs);
+}
+
+.warrantyToggle {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xxs);
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  text-align: left;
+  color: var(--colors-text);
+}
+
+.warrantyCheckbox {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--spacing-md);
+  height: var(--spacing-md);
+  color: var(--colors-text);
+}
+
+/* Checked — filled circle with an inverse tick, matching the floating cart. */
+.warrantyChecked {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--spacing-sm);
+  height: var(--spacing-sm);
+  border-radius: var(--radius-full);
+  background: var(--colors-text);
+  color: var(--colors-text-inverse);
+}
+
+.warrantyLabel {
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  font-weight:    var(--typography-rules-text1-font-weight, normal);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+  color: var(--colors-text);
+}
+
+.warrantyPrice {
+  font-family:    var(--typography-rules-text2-font-family);
+  font-size:      var(--typography-rules-text2-font-size);
+  line-height:    var(--typography-rules-text2-line-height);
+  font-weight:    var(--typography-rules-text2-font-weight, 600);
+  letter-spacing: var(--typography-rules-text2-letter-spacing, normal);
+}
+
+/* The desktop placement puts the control inside the copy column, which already
+   spaces its children; the row's own padding makes up the difference to xs. */
+@media (min-width: 1024px) {
+  .itemGiftTrayInline .itemWarrantyRow {
+    padding-top: calc(var(--spacing-xs) - var(--spacing-xxxs));
+  }
+}
+
+/* Added: the same line the gift tray draws for chosen packaging — tick, name,
+   price, bin — so the two add-ons on a bag line read as one list. */
+.warrantyAdded {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xxs);
+  padding-top: var(--spacing-xs);
+  font-family: var(--typography-rules-text1-font-family);
+  font-size:   var(--typography-rules-text1-font-size);
+  line-height: var(--typography-rules-text1-line-height);
+  color: var(--colors-text-secondary);
+}
+
+.warrantyAddedCheck {
+  display: inline-flex;
+  align-items: center;
+  color: var(--colors-text);
+}
+
+.warrantyAddedName {
+  min-width: 0;
+}
+
+.warrantyAddedPrice {
+  color: var(--colors-text);
+}
+
+.warrantyAddedRemove {
+  appearance: none;
+  border: none;
+  background: transparent;
+  padding: 0;
+  margin-left: auto;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  color: var(--colors-text-secondary);
+  transition: color var(--transition-fast);
+}
+
+.warrantyAddedRemove:hover {
+  color: var(--colors-text);
+}
+
+.warrantyAddedRemove:focus-visible {
+  outline: 2px solid var(--colors-text);
+  outline-offset: 2px;
+}
+
+@media (min-width: 1024px) {
+  .itemGiftTrayInline .warrantyAdded {
+    padding-top: calc(var(--spacing-xs) - var(--spacing-xxxs));
+  }
+}

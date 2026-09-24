@@ -21,6 +21,11 @@ import {
 import styles from './GiftingOptions.module.css'
 
 interface GiftingOptionsProps {
+  /**
+   * Where this step falls in the flow being shown. Defaults to 3, the
+   * place it has always held in the full checkout.
+   */
+  stepNumber?: number
   /** The brand's shared catalog. An item carrying its own options overrides it. */
   options:     GiftOption[]
   items:       CartItem[]
@@ -47,7 +52,7 @@ interface DrawerState {
 }
 
 export function GiftingOptions({
-  options, items, assignments, icons, designs, onChange, onGenerateNote,
+  options, items, assignments, icons, designs, onChange, onGenerateNote, stepNumber,
 }: GiftingOptionsProps) {
   const { GiftIcon, CheckmarkIcon } = icons
 
@@ -65,6 +70,7 @@ export function GiftingOptions({
   // and there is never a choice of item left to make — at any cart size. The
   // section reads this off the data; it never asks which brand it is rendering.
   const optionsAreItemBound = areOptionsItemBound(items)
+  const step = stepNumber ?? 3
 
   /** The options that actually apply to an item. */
   const optionsFor = (item: CartItem) => optionsForItem(item, options)
@@ -183,7 +189,7 @@ export function GiftingOptions({
               options are a note card cut to that product, not packaging the
               brand stocks. Any brand whose options move that way gets this
               heading without a change here. */}
-          {optionsAreItemBound ? '3. Add Gift Note' : '3. Add Gift Packaging'}
+          {`${step}. ${optionsAreItemBound ? 'Add Gift Note' : 'Add Gift Packaging'}`}
           <span className={styles.headingIcon} aria-hidden="true"><GiftIcon size={32} /></span>
         </h2>
 

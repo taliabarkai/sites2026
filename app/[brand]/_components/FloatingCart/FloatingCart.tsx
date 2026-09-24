@@ -501,7 +501,12 @@ export function FloatingCart({
                 <span className={styles.footerAmount}>{formatPrice(subtotal)}</span>
               </div>
               <div className={styles.taxRow}>
-                <span className={styles.footerLabel}>Tax</span>
+                {/* Phase 3 has no bag page to choose shipping on, so this is
+                    the last word before checkout on both. Where a cart page
+                    follows, shipping is settled there and only tax is left. */}
+                <span className={styles.footerLabel}>
+                  {flowConfig.hasCartPage ? 'Tax' : 'Tax & Shipping'}
+                </span>
                 <span className={styles.taxNote}>Calculated at checkout</span>
               </div>
             </div>
@@ -512,7 +517,7 @@ export function FloatingCart({
               onClick={onClose}
               className={styles.checkoutBtn}
             >
-              {flowConfig.hasCartPage ? 'View Bag' : 'Checkout'}
+              {flowConfig.hasCartPage ? 'View Bag' : 'Continue To Checkout'}
             </Button>
           </div>
         )}
