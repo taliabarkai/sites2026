@@ -1372,3 +1372,64 @@
     grid-auto-columns: calc((100% - 0.5 * var(--spacing-xs)) / 1.5);
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Packaging on offer — cards in a row
+
+   Stacked, the options read as the same object as the packaging already
+   added above them: same width, same shape, same order. Turning them on
+   their side makes the two lists tell apart at a glance, and lines the
+   packaging up with the item cards it follows.
+
+   The card component is unchanged; it is restacked here, so the row and the
+   full-width list stay one component.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.optionRow {
+  display: grid;
+  grid-auto-flow: column;
+  /* The item cards' measure, so the two rows line up down the column. */
+  grid-auto-columns: calc((100% - 2.5 * var(--spacing-xs)) / 3.5);
+  justify-content: start;
+  gap: var(--spacing-xs);
+  padding-bottom: var(--spacing-xxs);
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  overscroll-behavior-x: contain;
+}
+
+.optionRow .optionCard {
+  flex-direction: column;
+  align-items: stretch;
+  height: 100%;
+  scroll-snap-align: start;
+}
+
+.optionRow .optionCardImageWrap {
+  flex: 0 0 auto;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-bottom: var(--border-width) solid var(--border-color);
+}
+
+.optionRow .optionCardBody {
+  flex: 1 1 auto;
+  justify-content: flex-start;
+  padding: var(--spacing-xs);
+}
+
+/* Add runs the card's width at its foot rather than sitting beside the copy. */
+.optionRow .optionCardAside {
+  display: block;
+  padding: 0 var(--spacing-xs) var(--spacing-xs);
+}
+
+.optionRow .optionCardAction {
+  width: 100%;
+  justify-content: center;
+}
+
+@media (max-width: 767px) {
+  .optionRow {
+    grid-auto-columns: calc((100% - 0.5 * var(--spacing-xs)) / 1.5);
+  }
+}

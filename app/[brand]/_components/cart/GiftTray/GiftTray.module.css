@@ -51,6 +51,16 @@
 
 /* ── Added ──────────────────────────────────────────────────────────────── */
 
+/* AssignedItemRow is an <li>, so it needs a list to sit in. The card brings
+   its own frame and spacing; this only places it. */
+.addedList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  margin-top: var(--spacing-xs);
+}
+
+
 .added {
   display: flex;
   align-items: center;

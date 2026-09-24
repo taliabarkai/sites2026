@@ -8,7 +8,11 @@ import { Button } from '../../Button'
    and an Add pill. Imported, not rebuilt, so the offer looks the same wherever
    it is made. */
 import { GiftOptionCard } from '../GiftingOptions/GiftOptionCard'
-import { formatPrice, type GiftOption, type GiftingIcons } from '../GiftingOptions/types'
+/* The wrapped state the checkout draws, imported rather than drawn again: the
+   bag page and the checkout are reporting the same thing, so they say it in
+   the same card. */
+import { AssignedItemRow } from '../GiftingOptions/AssignedItemRow'
+import { type DesignOption, type GiftOption, type GiftingIcons } from '../GiftingOptions/types'
 import styles from './GiftTray.module.css'
 
 export interface GiftTrayIcons extends GiftingIcons {
@@ -16,6 +20,14 @@ export interface GiftTrayIcons extends GiftingIcons {
 }
 
 interface GiftTrayProps {
+  /** The line this tray belongs to. */
+  itemId: string
+  /** Turns the stored design key back into the artwork that was chosen. */
+  designs: DesignOption[]
+  /** The design saved against this line, if its packaging has any. */
+  selectedDesign?: string
+  /** Reopens the panel on what was already chosen. */
+  onEdit: (option: GiftOption) => void
   /** Open state is lifted, so the control and the panel can live in different
    *  places in the caller's layout. */
   open: boolean
@@ -24,6 +36,13 @@ interface GiftTrayProps {
   itemName: string
   /** The packaging this item can take. */
   options:  GiftOption[]
+  /**
+   * Whether these options are the item's own rather than the brand's catalogue.
+   * Read off the data, never the brand key: a product that ships its own option
+   * is offering a note cut to that piece, not packaging the brand stocks, so
+   * the control has to say so.
+   */
+  optionsAreItemBound: boolean
   /** The option currently on the item, if any. */
   selectedOptionId?: string
   icons:    GiftTrayIcons
@@ -39,32 +58,33 @@ interface GiftTrayProps {
  * warranty here on any brand — that belongs to the floating cart.
  */
 export function GiftTray({
-  itemName, options, selectedOptionId, icons, open, onToggle, onSelect, onRemove,
+  itemId, itemName, options, optionsAreItemBound, selectedOptionId, designs,
+  selectedDesign, icons, open, onToggle, onSelect, onRemove, onEdit,
 }: GiftTrayProps) {
   const panelId = useId()
 
-  const { GiftIcon, PlusMinusIcon, CheckmarkIcon, TrashCanIcon } = icons
+  const { GiftIcon, PlusMinusIcon } = icons
   const selected = options.find(o => o.id === selectedOptionId) ?? null
 
-  // Already chosen: the tray's job is done, so it steps aside for what was
-  // added and a way to undo it.
+  // Already chosen: the tray's job is done, so it steps aside for the card the
+  // checkout shows for the same state — the chosen artwork, what it wraps, its
+  // price, and Edit and remove down the right-hand edge.
   if (selected) {
     return (
-      <div className={styles.added}>
-        <span className={styles.addedCheck} aria-hidden="true">
-          <CheckmarkIcon size={16} />
-        </span>
-        <span className={styles.addedName}>{selected.name}</span>
-        <span className={styles.addedPrice}>{formatPrice(selected.price)}</span>
-        <button
-          type="button"
-          className={styles.addedRemove}
-          aria-label={`Remove gift packaging from ${itemName}`}
-          onClick={onRemove}
-        >
-          <TrashCanIcon size={20} />
-        </button>
-      </div>
+      <ul className={styles.addedList}>
+        <AssignedItemRow
+          item={{ id: itemId, name: itemName, imageUrl: '' }}
+          option={selected}
+          assignment={{
+            itemId, optionId: selected.id, note: '',
+            design: selectedDesign ?? null, pname: '', photo: false,
+          }}
+          icons={icons}
+          designs={designs}
+          onEdit={() => onEdit(selected)}
+          onRemove={onRemove}
+        />
+      </ul>
     )
   }
 
@@ -86,7 +106,7 @@ export function GiftTray({
         }
         onClick={onToggle}
       >
-        Add Gift Packaging
+        {optionsAreItemBound ? 'Add Gift Note' : 'Add Gift Packaging'}
       </Button>
 
     </div>

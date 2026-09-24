@@ -195,10 +195,12 @@ export function GiftItemList({
               whole row instead, where they can be read without scrolling. */}
           {expandedItem && expandedOptions.length > 0 && (
             <div id={`${listId}-${expandedItem.id}`} className={styles.optionsForItem}>
-              <p className={styles.optionsForItemLabel}>
-                Gift packaging for {expandedItem.name}
+              {/* Same scale as the prompt above the item cards: the two are
+                  the same instruction, one step apart. */}
+              <p className={styles.itemGroupTitle}>
+                Select gift packaging for {expandedItem.name}
               </p>
-              <div className={styles.optionList}>
+              <div className={styles.optionRow}>
                 {expandedOptions.map(option => (
                   <GiftOptionCard
                     key={option.id}

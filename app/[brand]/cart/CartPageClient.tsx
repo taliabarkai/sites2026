@@ -14,7 +14,7 @@ import type { CartItem, GiftPackaging } from '../_context/CartContext'
 import { useDemoCartSync } from '../_context/useDemoCartSync'
 import { GiftTray, GiftTrayPanel } from '../_components/cart/GiftTray'
 import { Usps } from '../_components/cart/Usps'
-import { optionsForItem, type GiftOption } from '../_components/cart/GiftingOptions/types'
+import { optionsForItem, type DesignOption, type GiftOption } from '../_components/cart/GiftingOptions/types'
 /* The very panels the checkout uses — the cart page makes the same offer, so
    it collects the same fields in the same place. Which one is on follows the
    prototype's existing gifting switch. */
@@ -181,6 +181,8 @@ interface CartItemRowProps {
   icons:    BrandIcons
   /** The packaging this line can take — its own, or the brand's catalogue. */
   giftOptions:  GiftOption[]
+  /** Printed artwork, so a saved design resolves back to its image. */
+  designs:      DesignOption[]
   onSelectGift: (itemId: string, option: GiftOption) => void
   onRemoveGift: (itemId: string) => void
   /** False on brands whose products no plan covers. */
@@ -188,7 +190,7 @@ interface CartItemRowProps {
   onToggleWarranty: (itemId: string) => void
 }
 
-function CartItemRow({ item, onRemove, icons, giftOptions, onSelectGift, onRemoveGift, showWarranty, onToggleWarranty }: CartItemRowProps) {
+function CartItemRow({ item, onRemove, icons, giftOptions, designs, onSelectGift, onRemoveGift, showWarranty, onToggleWarranty }: CartItemRowProps) {
   const [detailsOpen, setDetailsOpen] = useState(false)
   // Lifted out of the tray so the control and its cards can sit in different
   // rows: the control belongs with the copy, the cards below the whole row.
@@ -196,14 +198,21 @@ function CartItemRow({ item, onRemove, icons, giftOptions, onSelectGift, onRemov
 
   const giftTray = (
     <GiftTray
+      itemId={item.id}
       itemName={item.name}
       options={giftOptions}
+      /* The product brings its own options, so what it offers is its own note
+         card — the same test the checkout's gifting section makes. */
+      optionsAreItemBound={(item.giftOptions?.length ?? 0) > 0}
       selectedOptionId={item.giftPackaging?.optionId}
+      designs={designs}
+      selectedDesign={item.giftPackaging?.selectedDesign}
       icons={icons}
       open={trayOpen}
       onToggle={() => setTrayOpen(o => !o)}
       onSelect={option => onSelectGift(item.id, option)}
       onRemove={() => onRemoveGift(item.id)}
+      onEdit={option => onSelectGift(item.id, option)}
     />
   )
   // Built once, placed twice — the cards belong under the price on desktop and
@@ -565,6 +574,7 @@ function CartPageInner() {
                   onRemove={removeItem}
                   icons={icons}
                   giftOptions={giftOptionsFor(item)}
+                  designs={giftDesigns}
                   onSelectGift={handleSelectGift}
                   onRemoveGift={handleRemoveGift}
                   showWarranty={SHOW_ITEM_WARRANTY && features.warranty}
@@ -661,13 +671,6 @@ function CartPageInner() {
                     <span className={styles.shippingOptionPrice}>$15</span>
                   </div>
                 </label>
-              </div>
-
-              <div className={styles.shippingInsurance}>
-                <span className={styles.insuranceIcon}>
-                  <icons.CheckmarkIcon size={16} />
-                </span>
-                <span>All methods are tracked &amp; insured</span>
               </div>
 
               <div className={styles.carriersRow}>
