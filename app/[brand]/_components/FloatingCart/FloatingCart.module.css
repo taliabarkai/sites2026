@@ -585,8 +585,10 @@
   margin-top: calc(var(--spacing-xs) - var(--spacing-sm));
 }
 
-.planCard:hover,
-.planCardSelected {
+/* Hover only. Selection is the checkmark in the corner and nothing else: a
+   card that keeps a heavy border once chosen reads as still asking to be
+   chosen, and next to the plain rows around it it looked like an error. */
+.planCard:hover {
   border-color: var(--colors-text);
 }
 

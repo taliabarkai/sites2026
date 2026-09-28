@@ -277,7 +277,7 @@ function CartItemRow({ item, showGuarantee, brand, onRemove, onEdit, onNavigate,
            "Add a … for $15" label with the Details link inline beside it. The
            card face is a stretched button so the whole card selects the plan
            while Details stays independently clickable. */
-        <div className={`${styles.planCard} ${hasPlan ? styles.planCardSelected : ''}`}>
+        <div className={styles.planCard}>
           <button
             type="button"
             role="checkbox"
