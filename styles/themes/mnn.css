@@ -34,6 +34,9 @@
   --colors-surface-primary:   var(--mnn-off-white);
   --colors-surface-secondary: var(--mnn-oyster);
   --colors-surface-disabled:  var(--mnn-light-grey);
+  /* Scrim behind a modal. Shared across brands — a dim is a dim — and the
+     one value the existing hardcoded overlays already agreed on. */
+  --colors-overlay:           rgb(0 0 0 / 0.45);
 
   /* Text */
   --colors-text:           var(--mnn-black);

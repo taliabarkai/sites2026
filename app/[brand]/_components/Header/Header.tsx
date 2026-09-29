@@ -13,6 +13,7 @@ import * as ibIcons from '@/src/components/icons/ib'
 import { SiteLogo } from '../SiteLogo'
 import { ThemeSwitcher } from '../ThemeSwitcher'
 import { CartSizeToggle } from './CartSizeToggle'
+import { TrackOrderStateToggle } from './TrackOrderStateToggle'
 import { FlowControls } from '../FloatingCart/FlowControls'
 import { Topline, type ToplineProps } from '../Topline'
 import { getBrandFromPathname, getBrandHomePath, resolveBrand, type BrandKey } from '../../_config/brands'
@@ -80,6 +81,7 @@ export function Header({
   // phase is running from the page itself, not only from inside the floating
   // cart they may have closed several steps ago.
   const isCartPage = pathname.endsWith('/cart')
+  const isTrackOrder = pathname.endsWith('/track-order')
   const showNavImages = !NAV_IMAGE_EXCLUDED.includes(brandSegment)
   const [menuOpen, setMenuOpen] = useState(false)
   // Which dropdown is expanded in the mobile drawer (by label).
@@ -104,10 +106,13 @@ export function Header({
      desktop, and on mobile it does not — there they get a strip of their own
      directly under the bar, still at the top of the page. Only one slot is ever
      displayed, so the duplicate never reaches the accessibility tree. */
-  const demoControls = isCheckout || isCartPage ? (
+  const demoControls = isCheckout || isCartPage || isTrackOrder ? (
     <>
-      <FlowControls brand={brandSegment} />
+      {/* The phases do not reach Track My Order, so it gets only the one
+          control it has a state for. */}
+      {!isTrackOrder && <FlowControls brand={brandSegment} />}
       {isCheckout && <CartSizeToggle className={styles.cartSizeToggle} />}
+      {isTrackOrder && <TrackOrderStateToggle className={styles.cartSizeToggle} />}
     </>
   ) : null
   const demoBar = demoControls && <div className={styles.demoBar}>{demoControls}</div>

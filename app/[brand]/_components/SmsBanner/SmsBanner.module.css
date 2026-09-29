@@ -1,0 +1,119 @@
+/* SmsBanner — the confirmation page's SMS band, class for class. */
+
+.block {
+  padding: var(--spacing-md);
+  border-bottom: var(--border-width) solid var(--border-color);
+}
+
+.sms {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  column-gap: var(--spacing-xs);
+  row-gap: var(--spacing-sm);
+  padding: var(--spacing-md);
+  border-radius: var(--radius-md);
+  background: var(--colors-surface-secondary);
+  text-align: left;
+}
+
+.icon {
+  display: inline-flex;
+  color: var(--colors-text);
+}
+
+.copy {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xxxs);
+  margin: 0;
+}
+
+.title {
+  margin: 0;
+  font-family:    var(--typography-rules-headline4-font-family);
+  font-size:      var(--typography-rules-headline4-font-size);
+  line-height:    var(--typography-rules-headline4-line-height);
+  font-weight:    var(--typography-rules-headline4-font-weight, normal);
+  letter-spacing: var(--typography-rules-headline4-letter-spacing, normal);
+  text-transform: var(--typography-rules-headline4-text-transform, none);
+  color: var(--colors-text);
+}
+
+.body {
+  margin: 0;
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  font-weight:    var(--typography-rules-text1-font-weight, normal);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+  color: var(--colors-text);
+}
+
+.button {
+  grid-column: 1 / -1;
+  width: 100%;
+}
+
+/* The band has no card frame of its own — it is a tint, not a card — so the
+   bottom rule goes and the row lays out horizontally. */
+@media (min-width: 1024px) {
+  .block {
+    padding: 0;
+    border-bottom: none;
+  }
+
+  .sms {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: var(--spacing-sm);
+  }
+
+  .copy {
+    flex: 1;
+  }
+
+  .button {
+    width: auto;
+    flex: 0 0 auto;
+  }
+}
+
+/* Stacked: a narrow column has no room for one row, so the button drops
+   below. The mark spans the title and the copy beside it, so the description
+   sits under the title rather than under the icon. */
+.smsStacked {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  column-gap: var(--spacing-sm);
+  row-gap: var(--spacing-xxxs);
+  align-items: start;
+}
+
+.smsStacked .icon {
+  grid-column: 1;
+  grid-row: 1 / span 2;
+  align-self: center;
+}
+
+.smsStacked .copy {
+  display: contents;
+}
+
+.smsStacked .title {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.smsStacked .body {
+  grid-column: 2;
+  grid-row: 2;
+}
+
+.smsStacked .button {
+  grid-column: 1 / -1;
+  grid-row: 3;
+  width: 100%;
+  margin-top: var(--spacing-sm);
+}

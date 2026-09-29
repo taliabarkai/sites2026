@@ -1,0 +1,59 @@
+/* PromoCard — one offer in the thank-you page's card frame. */
+
+.card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-lg) var(--spacing-md);
+  border-bottom: var(--border-width) solid var(--border-color);
+}
+
+.icon {
+  display: inline-flex;
+  align-items: center;
+  color: var(--colors-text);
+}
+
+.title {
+  margin: 0;
+  font-family:    var(--typography-rules-headline4-font-family);
+  font-size:      var(--typography-rules-headline4-font-size);
+  line-height:    var(--typography-rules-headline4-line-height);
+  font-weight:    var(--typography-rules-headline4-font-weight, normal);
+  letter-spacing: var(--typography-rules-headline4-letter-spacing, normal);
+  text-transform: var(--typography-rules-headline4-text-transform, none);
+  color: var(--colors-text);
+}
+
+.body {
+  margin: 0;
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  font-weight:    var(--typography-rules-text1-font-weight, normal);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+  color: var(--colors-text);
+}
+
+.cta {
+  width: 100%;
+  margin-top: var(--spacing-xxs);
+}
+
+@media (min-width: 768px) {
+  .cta {
+    width: auto;
+  }
+}
+
+/* Desktop turns each card into a bordered box, exactly as the thank-you page
+   does — same padding, same border, same radius, so the two pages frame the
+   same information identically. */
+@media (min-width: 1024px) {
+  .card {
+    padding: var(--spacing-lg);
+    border: var(--border-width) solid var(--border-color);
+    border-radius: var(--radius-md);
+  }
+}

@@ -1,0 +1,444 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   Track My Order
+
+   One implementation, five brands. Everything that differs between them —
+   the condensed uppercase heading on OAL against the serif title case on TGR,
+   square buttons against pills — arrives through the theme's typography and
+   radius tokens. There is no brand key anywhere in this file.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: var(--colors-background);
+}
+
+.main {
+  flex: 1 1 auto;
+  padding: var(--spacing-md) 0 var(--spacing-xxl);
+}
+
+.inner {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 var(--layout-page-margin);
+  box-sizing: border-box;
+}
+
+/* ── Lookup ──────────────────────────────────────────────────────────────── */
+
+.lookupLayout {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.lookupCard {
+  display: flex;
+  flex-direction: column;
+  padding: var(--spacing-lg) 0;
+}
+
+/* The heading takes its face, casing and tracking from the theme — this is
+   the whole of the OAL/TGR difference in the reference. headline3 rather than
+   headline2: OAL sets headline2 at 72px, which wraps "TRACK MY ORDER" onto two
+   lines on a phone, and the reference has it on one. */
+.title {
+  margin: 0 0 var(--spacing-xxs);
+  text-align: center;
+  font-family:    var(--typography-rules-headline3-font-family);
+  font-size:      var(--typography-rules-headline3-font-size);
+  line-height:    var(--typography-rules-headline3-line-height);
+  font-weight:    var(--typography-rules-headline3-font-weight, normal);
+  letter-spacing: var(--typography-rules-headline3-letter-spacing, normal);
+  text-transform: var(--typography-rules-headline3-text-transform, none);
+  color: var(--colors-text);
+}
+
+.subtitle {
+  margin: 0 0 var(--spacing-md);
+  text-align: center;
+  font-family: var(--typography-rules-text1-font-family);
+  font-size:   var(--typography-rules-text1-font-size);
+  line-height: var(--typography-rules-text1-line-height);
+  color: var(--colors-text);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.submit,
+.secondary {
+  width: 100%;
+}
+
+.submit {
+  margin-top: var(--spacing-xs);
+}
+
+/* A rule with the word sitting in the gap. */
+.divider {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  margin: var(--spacing-md) 0;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1 1 auto;
+  height: var(--border-width);
+  background: var(--border-color);
+}
+
+.dividerLabel {
+  font-family: var(--typography-rules-text1-font-family);
+  font-size:   var(--typography-rules-text1-font-size);
+  line-height: var(--typography-rules-text1-line-height);
+  color: var(--colors-text);
+}
+
+.signUpLine {
+  margin: var(--spacing-md) 0 0;
+  text-align: center;
+  font-family: var(--typography-rules-text1-font-family);
+  font-size:   var(--typography-rules-text1-font-size);
+  line-height: var(--typography-rules-text1-line-height);
+  color: var(--colors-text);
+}
+
+.inlineLink,
+.inlineLinkButton {
+  color: var(--colors-text);
+  text-decoration: underline;
+}
+
+.inlineLinkButton {
+  appearance: none;
+  border: none;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+  font-family: var(--typography-rules-text1-font-family);
+  font-size:   var(--typography-rules-text1-font-size);
+  line-height: var(--typography-rules-text1-line-height);
+}
+
+/* ── Error banner ────────────────────────────────────────────────────────── */
+
+.errorBanner {
+  margin-bottom: var(--spacing-sm);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border: var(--border-width) solid var(--colors-error);
+  border-radius: var(--radius-sm);
+  /* White, not surface-primary: the warm off-white read as a filled alert and
+     muddied the red rule. The border carries the warning on its own. */
+  background: var(--colors-background);
+}
+
+.errorTitle {
+  margin: 0 0 var(--spacing-xxxs);
+  font-family: var(--font-family-main-bold);
+  font-size:   var(--typography-rules-text1-font-size);
+  line-height: var(--typography-rules-text1-line-height);
+  font-weight: var(--font-weight-bold, 600);
+  color: var(--colors-error);
+}
+
+.errorHint {
+  margin: 0;
+  font-family: var(--typography-rules-text3-font-family);
+  font-size:   var(--typography-rules-text3-font-size);
+  line-height: var(--typography-rules-text3-line-height);
+  color: var(--colors-text);
+}
+
+/* ── Need Help ───────────────────────────────────────────────────────────── */
+
+.helpCard {
+  padding: var(--spacing-lg) 0;
+  border-top: var(--border-width) solid var(--border-color);
+}
+
+.helpTitle {
+  margin: 0 0 var(--spacing-xs);
+  font-family:    var(--typography-rules-headline4-font-family);
+  font-size:      var(--typography-rules-headline4-font-size);
+  line-height:    var(--typography-rules-headline4-line-height);
+  font-weight:    var(--typography-rules-headline4-font-weight, normal);
+  letter-spacing: var(--typography-rules-headline4-letter-spacing, normal);
+  text-transform: var(--typography-rules-headline4-text-transform, none);
+  color: var(--colors-text);
+}
+
+.helpGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--spacing-xs);
+  margin: var(--spacing-md) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Each topic in its own bordered tile, the arrow pinned to the far edge. */
+.helpTile {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-sm);
+  min-height: 44px;
+  padding: var(--spacing-sm);
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--radius-sm);
+  color: var(--colors-text);
+  text-decoration: none;
+  font-family: var(--font-family-main-bold);
+  font-size:   var(--typography-rules-text1-font-size);
+  line-height: var(--typography-rules-text1-line-height);
+  font-weight: var(--font-weight-bold, 600);
+  transition: border-color var(--transition-fast);
+}
+
+.helpTile:hover {
+  border-color: var(--border-strong);
+}
+
+.helpArrow {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+/* 44px of tap target on touch, where the finger needs it. */
+.continueLink {
+  appearance: none;
+  border: none;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-family: var(--typography-rules-text1-font-family);
+  font-size:   var(--typography-rules-text1-font-size);
+  line-height: var(--typography-rules-text1-line-height);
+  color: var(--colors-text);
+  text-decoration: underline;
+}
+
+/* ── Results ─────────────────────────────────────────────────────────────── */
+
+.resultsBar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-sm) 0;
+}
+
+.showing {
+  margin: 0;
+  font-family: var(--typography-rules-text1-font-family);
+  font-size:   var(--typography-rules-text1-font-size);
+  line-height: var(--typography-rules-text1-line-height);
+  color: var(--colors-text-secondary);
+}
+
+.resultsLayout {
+  display: flex;
+  flex-direction: column;
+}
+
+.mainColumn,
+.sideColumn {
+  display: flex;
+  flex-direction: column;
+}
+
+.card {
+  padding: var(--spacing-lg) var(--spacing-md);
+  border-bottom: var(--border-width) solid var(--border-color);
+}
+
+.sectionTitle {
+  margin: 0;
+  font-family:    var(--typography-rules-headline4-font-family);
+  font-size:      var(--typography-rules-headline4-font-size);
+  line-height:    var(--typography-rules-headline4-line-height);
+  font-weight:    var(--typography-rules-headline4-font-weight, normal);
+  letter-spacing: var(--typography-rules-headline4-letter-spacing, normal);
+  text-transform: var(--typography-rules-headline4-text-transform, none);
+  color: var(--colors-text);
+}
+
+.meta {
+  margin: var(--spacing-xxs) 0 0;
+  color: var(--colors-text);
+}
+
+.metaLabel {
+  font-family:    var(--typography-rules-paragraph4-font-family);
+  font-size:      var(--typography-rules-paragraph4-font-size);
+  line-height:    var(--typography-rules-paragraph4-line-height);
+  letter-spacing: var(--typography-rules-paragraph4-letter-spacing, normal);
+}
+
+.metaValue {
+  font-family:    var(--typography-rules-paragraph3-font-family);
+  font-size:      var(--typography-rules-paragraph3-font-size);
+  line-height:    var(--typography-rules-paragraph3-line-height);
+  letter-spacing: var(--typography-rules-paragraph3-letter-spacing, normal);
+}
+
+.progress {
+  margin-top: var(--spacing-md);
+}
+
+/* ── Tracking block ──────────────────────────────────────────────────────── */
+
+/* Two facts and the action, on one tinted row. */
+.tracking {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-md);
+  padding: var(--spacing-sm);
+  background: var(--colors-surface-primary);
+}
+
+.trackingFact {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xxxs);
+}
+
+.trackingLabel {
+  font-family:    var(--typography-rules-text3-font-family);
+  font-size:      var(--typography-rules-text3-font-size);
+  line-height:    var(--typography-rules-text3-line-height);
+  letter-spacing: var(--typography-rules-text3-letter-spacing, normal);
+  text-transform: uppercase;
+  color: var(--colors-text-secondary);
+}
+
+.trackingValue {
+  font-family: var(--font-family-main-bold);
+  font-size:   var(--typography-rules-text1-font-size);
+  line-height: var(--typography-rules-text1-line-height);
+  font-weight: var(--font-weight-bold, 600);
+  color: var(--colors-text);
+}
+
+/* An anchor rather than the Button component: Button renders a next/link for
+   href and forwards nothing but onClick, so target would be dropped. */
+.trackLink {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--buttons-secondary-min-height, 44px);
+  padding: var(--buttons-secondary-padding);
+  border: var(--border-width) solid var(--buttons-secondary-border-color);
+  border-radius: var(--buttons-secondary-border-radius);
+  background: var(--buttons-secondary-background);
+  color: var(--buttons-secondary-text);
+  text-decoration: none;
+  font-family:    var(--typography-rules-button1-font-family);
+  font-size:      var(--typography-rules-button1-font-size);
+  line-height:    var(--typography-rules-button1-line-height);
+  font-weight:    var(--typography-rules-button1-font-weight, normal);
+  letter-spacing: var(--typography-rules-button1-letter-spacing, normal);
+  text-transform: var(--typography-rules-button1-text-transform, none);
+}
+
+.continueRow {
+  padding: var(--spacing-md) var(--spacing-md) 0;
+}
+
+.trustpilot {
+  margin-top: var(--spacing-xs);
+  max-width: 160px;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ── Desktop ─────────────────────────────────────────────────────────────── */
+
+@media (min-width: 1024px) {
+  /* Lookup: the form in its own card, Need Help beside it. */
+  .lookupLayout {
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: center;
+    gap: var(--spacing-lg);
+    padding: var(--spacing-lg) 0;
+  }
+
+  .lookupCard {
+    flex: 0 1 540px;
+    max-width: 540px;
+    padding: var(--spacing-lg);
+    border: var(--border-width) solid var(--border-color);
+    border-radius: var(--radius-md);
+  }
+
+  .helpCard {
+    flex: 0 0 380px;
+    padding: var(--spacing-lg);
+    border: var(--border-width) solid var(--border-color);
+    border-radius: var(--radius-md);
+  }
+
+  .submit,
+  .secondary {
+    width: 100%;
+  }
+
+  /* A pointer does not need a 44px row, so the links sit at their own height
+     and the list carries the spacing instead — 8px between one link and the
+     next, rather than the 24px of dead room a 44px row leaves around 20px of
+     text. */
+  /* Two across once there is width for it. */
+  .helpGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  /* The page's own cards — Order Updates, Need Help — framed like the shared
+     ones, so every card in the results view matches the thank-you page. */
+  .card {
+    padding: var(--spacing-lg);
+    border: var(--border-width) solid var(--border-color);
+    border-radius: var(--radius-md);
+  }
+
+  /* Results: left column takes the room, right column is fixed. */
+  .resultsLayout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 408px;
+    align-items: start;
+    gap: var(--spacing-md);
+  }
+
+  .mainColumn,
+  .sideColumn {
+    gap: var(--spacing-md);
+  }
+}

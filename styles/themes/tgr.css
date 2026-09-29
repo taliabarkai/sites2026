@@ -33,6 +33,9 @@
   --colors-surface-primary:   var(--tgr-light-grey);
   --colors-surface-secondary: var(--tgr-neutral);
   --colors-surface-disabled:  var(--tgr-mid-grey);
+  /* Scrim behind a modal. Shared across brands — a dim is a dim — and the
+     one value the existing hardcoded overlays already agreed on. */
+  --colors-overlay:           rgb(0 0 0 / 0.45);
 
   /* Text */
   --colors-text:           var(--tgr-raisin);

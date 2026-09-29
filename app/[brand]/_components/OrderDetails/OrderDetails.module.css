@@ -1,0 +1,88 @@
+/* OrderDetails — the thank-you page's details card, prop-driven. */
+
+.card {
+  padding: var(--spacing-lg) var(--spacing-md);
+  border-bottom: var(--border-width) solid var(--border-color);
+}
+
+.sectionTitle {
+  margin: 0;
+  font-family:    var(--typography-rules-headline4-font-family);
+  font-size:      var(--typography-rules-headline4-font-size);
+  line-height:    var(--typography-rules-headline4-line-height);
+  font-weight:    var(--typography-rules-headline4-font-weight, normal);
+  letter-spacing: var(--typography-rules-headline4-letter-spacing, normal);
+  text-transform: var(--typography-rules-headline4-text-transform, none);
+  color: var(--colors-text);
+}
+
+.grid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-md);
+}
+
+.col {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.group {
+  display: flex;
+  flex-direction: column;
+}
+
+.heading {
+  margin: 0 0 var(--spacing-xxxs) 0;
+  font-family: var(--font-family-main-bold);
+  font-size:   var(--typography-rules-text1-font-size);
+  line-height: var(--typography-rules-text1-line-height);
+  font-weight: var(--font-weight-bold, 600);
+  color: var(--colors-text);
+}
+
+.line,
+.footer {
+  margin: 0;
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  font-weight:    var(--typography-rules-text1-font-weight, normal);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+  color: var(--colors-text);
+}
+
+.footer {
+  margin-top: var(--spacing-md);
+}
+
+/* Two columns once there is room, like the confirmation page. */
+@media (min-width: 768px) {
+  .grid {
+    flex-direction: row;
+  }
+
+  .col {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+
+  /* Opted out by a caller in a narrow column, where two columns would leave
+     the address wrapping after every second word. */
+  .gridStacked {
+    flex-direction: column;
+  }
+}
+
+/* Desktop turns each card into a bordered box, exactly as the thank-you page
+   does — same padding, same border, same radius, so the two pages frame the
+   same information identically. */
+@media (min-width: 1024px) {
+  .card {
+    padding: var(--spacing-lg);
+    border: var(--border-width) solid var(--border-color);
+    border-radius: var(--radius-md);
+  }
+}

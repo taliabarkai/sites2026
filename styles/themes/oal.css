@@ -31,6 +31,9 @@
   --colors-surface-primary:   var(--oal-warm-white);
   --colors-surface-secondary: var(--oal-off-white);
   --colors-surface-disabled:  var(--oal-light-grey);
+  /* Scrim behind a modal. Shared across brands — a dim is a dim — and the
+     one value the existing hardcoded overlays already agreed on. */
+  --colors-overlay:           rgb(0 0 0 / 0.45);
 
   /* Text */
   --colors-text:          var(--oal-black);

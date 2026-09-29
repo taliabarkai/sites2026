@@ -35,6 +35,9 @@
   --colors-surface-primary:   var(--ib-light-blue);
   --colors-surface-secondary: var(--ib-light-stone);
   --colors-surface-disabled:  var(--ib-stone);
+  /* Scrim behind a modal. Shared across brands — a dim is a dim — and the
+     one value the existing hardcoded overlays already agreed on. */
+  --colors-overlay:           rgb(0 0 0 / 0.45);
 
   /* Text */
   --colors-text:           var(--ib-navy);

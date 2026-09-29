@@ -1,0 +1,179 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   OrderProgress — the five-step fulfillment stepper.
+
+   The circle, its filled state and the connecting rule are the thank-you
+   page's treatment, so the two pages read as one journey.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.stepper {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.step {
+  position: relative;
+  display: flex;
+  gap: var(--spacing-xs);
+}
+
+.circle {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: var(--spacing-sm);
+  height: var(--spacing-sm);
+  border-radius: var(--radius-full);
+  border: var(--border-width) solid var(--border-color);
+  background: var(--colors-background);
+}
+
+.stepReached .circle {
+  border-color: var(--colors-text);
+  background: var(--colors-text);
+  color: var(--colors-text-inverse);
+}
+
+/* The step just reached is ringed and named in bold — it is the answer to
+   "where is my order", and the eye should land on it first. */
+.step[aria-current='step'] .circle {
+  box-shadow: 0 0 0 3px var(--colors-background), 0 0 0 4px var(--colors-text);
+}
+
+.step[aria-current='step'] .label {
+  font-family: var(--font-family-main-bold);
+  font-weight: var(--font-weight-bold, 600);
+  color: var(--colors-text);
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.label {
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+  color: var(--colors-text-secondary);
+}
+
+.stepReached .label {
+  color: var(--colors-text);
+}
+
+.date {
+  font-family: var(--typography-rules-text3-font-family);
+  font-size:   var(--typography-rules-text3-font-size);
+  line-height: var(--typography-rules-text3-line-height);
+  color: var(--colors-text-secondary);
+}
+
+/* ── Vertical: the rule runs down through the circles ────────────────────── */
+
+.vertical,
+.responsive {
+  display: flex;
+  flex-direction: column;
+}
+
+.vertical .step,
+.responsive .step {
+  align-items: flex-start;
+  padding-bottom: var(--spacing-md);
+}
+
+.vertical .step:last-child,
+.responsive .step:last-child {
+  padding-bottom: 0;
+}
+
+/* Drawn from the circle's centre down to the next one. */
+.vertical .step:not(:last-child)::before,
+.responsive .step:not(:last-child)::before {
+  content: '';
+  position: absolute;
+  top: var(--spacing-sm);
+  bottom: 0;
+  left: calc(var(--spacing-sm) / 2);
+  width: var(--border-width);
+  background: var(--border-color);
+}
+
+.vertical .stepReached:not(:last-child)::before,
+.responsive .stepReached:not(:last-child)::before {
+  background: var(--colors-text);
+}
+
+/* ── Horizontal: the rule runs across, behind the circles ────────────────── */
+
+.horizontal {
+  display: flex;
+  flex-direction: row;
+}
+
+/* Left-aligned, not centred: centring each circle in its own column insets
+   the first one from the card's edge, so the track starts adrift of the
+   title and the tracking block below it. */
+.horizontal .step {
+  flex: 1 1 0;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  padding-bottom: 0;
+}
+
+.horizontal .body {
+  align-items: flex-start;
+  padding-top: var(--spacing-xxs);
+}
+
+/* From this circle's centre to the next one's. */
+.horizontal .step:not(:last-child)::before {
+  content: '';
+  position: absolute;
+  top: calc(var(--spacing-sm) / 2);
+  left: calc(var(--spacing-sm) / 2);
+  width: 100%;
+  height: var(--border-width);
+  background: var(--border-color);
+}
+
+.horizontal .stepReached:not(:last-child)::before {
+  background: var(--colors-text);
+}
+
+/* Responsive turns horizontal once there is room for five labels side by side. */
+@media (min-width: 768px) {
+  .responsive {
+    flex-direction: row;
+  }
+
+  .responsive .step {
+    flex: 1 1 0;
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+    padding-bottom: 0;
+  }
+
+  .responsive .body {
+    align-items: flex-start;
+    padding-top: var(--spacing-xxs);
+  }
+
+  .responsive .step:not(:last-child)::before {
+    top: calc(var(--spacing-sm) / 2);
+    bottom: auto;
+    left: calc(var(--spacing-sm) / 2);
+    right: auto;
+    width: 100%;
+    height: var(--border-width);
+  }
+}

@@ -1,0 +1,248 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   AuthModal — Sign In / Create Account.
+
+   One implementation, five brands: the serif-versus-condensed split, pill
+   versus square buttons and the uppercase CTA all arrive through the theme.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.panel {
+  /* Two fields and a button do not need a wide panel, and at the Modal's own
+     ceiling the form floated in the middle of a lot of nothing. Sized to the
+     reference instead. */
+  max-width: 440px;
+}
+
+/* ── Tabs ────────────────────────────────────────────────────────────────── */
+
+.tablist {
+  display: flex;
+  /* Clears the close button, which is absolutely positioned in the panel's
+     top-right and would otherwise crowd the second tab on a narrow screen. */
+  margin-top: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+}
+
+.tab {
+  flex: 1 1 0;
+  appearance: none;
+  min-height: 44px;
+  padding: var(--spacing-xxs) var(--spacing-xs);
+  border: none;
+  /* The inactive rule; the active one overrides just the colour and weight. */
+  border-bottom: var(--border-width) solid var(--border-color);
+  background: none;
+  cursor: pointer;
+  color: var(--colors-text-secondary);
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+  transition: color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.tabActive {
+  border-bottom-color: var(--colors-text);
+  border-bottom-width: 2px;
+  color: var(--colors-text);
+  font-family: var(--font-family-main-bold);
+  font-weight: var(--font-weight-bold, 600);
+}
+
+.tab:focus-visible {
+  outline: 2px solid var(--colors-text);
+  outline-offset: -2px;
+}
+
+/* ── Form ────────────────────────────────────────────────────────────────── */
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.nameRow {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.nameField {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.submit {
+  width: 100%;
+}
+
+.forgotRow {
+  margin: var(--spacing-xxxs) 0 0;
+  text-align: center;
+}
+
+.forgot {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--colors-text);
+  text-decoration: underline;
+  font-family: var(--typography-rules-text1-font-family);
+  font-size:   var(--typography-rules-text1-font-size);
+  line-height: var(--typography-rules-text1-line-height);
+}
+
+/* ── Reveal toggle ───────────────────────────────────────────────────────── */
+
+.reveal {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  /* One icon, two states: quiet when hidden, full strength when revealed. */
+  color: var(--colors-text-secondary);
+  transition: color var(--transition-fast);
+}
+
+.revealOn {
+  color: var(--colors-text);
+}
+
+.reveal:focus-visible {
+  outline: 2px solid var(--colors-text);
+  outline-offset: -2px;
+}
+
+/* ── Divider ─────────────────────────────────────────────────────────────── */
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  margin: var(--spacing-sm) 0;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1 1 auto;
+  height: var(--border-width);
+  background: var(--border-color);
+}
+
+.dividerLabel {
+  font-family: var(--typography-rules-text1-font-family);
+  font-size:   var(--typography-rules-text1-font-size);
+  line-height: var(--typography-rules-text1-line-height);
+  color: var(--colors-text);
+}
+
+/* ── Social ──────────────────────────────────────────────────────────────── */
+
+.social {
+  display: flex;
+  gap: var(--spacing-xs);
+}
+
+.socialButton {
+  flex: 1 1 0;
+  min-width: 0;
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-xs);
+  min-height: var(--field-min-height);
+  padding: var(--spacing-xs);
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--form-field-border-radius, var(--radius-sm));
+  /* Matches the panel it sits on, so the pair read as outlines rather than
+     tinted tiles. */
+  background: var(--colors-background);
+  color: var(--colors-text);
+  cursor: pointer;
+  font-family: var(--typography-rules-text1-font-family);
+  font-size:   var(--typography-rules-text1-font-size);
+  line-height: var(--typography-rules-text1-line-height);
+  transition: border-color var(--transition-fast);
+}
+
+.socialButton:hover {
+  border-color: var(--border-strong);
+}
+
+.socialButton:focus-visible {
+  outline: 2px solid var(--colors-text);
+  outline-offset: 2px;
+}
+
+.socialIcon {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+/* ── Errors and terms ────────────────────────────────────────────────────── */
+
+.errorBanner {
+  margin-bottom: var(--spacing-sm);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border: var(--border-width) solid var(--colors-error);
+  border-radius: var(--radius-sm);
+  background: var(--colors-background);
+  color: var(--colors-error);
+  font-family: var(--typography-rules-text1-font-family);
+  font-size:   var(--typography-rules-text1-font-size);
+  line-height: var(--typography-rules-text1-line-height);
+}
+
+.inlineError {
+  margin: calc(-1 * var(--spacing-xxs)) 0 0;
+  font-family: var(--typography-rules-text3-font-family);
+  font-size:   var(--typography-rules-text3-font-size);
+  line-height: var(--typography-rules-text3-line-height);
+  color: var(--colors-error);
+}
+
+.switchLink {
+  appearance: none;
+  border: none;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+  color: var(--colors-error);
+  text-decoration: underline;
+  font: inherit;
+}
+
+.terms {
+  margin: var(--spacing-md) 0 0;
+  text-align: center;
+  font-family: var(--typography-rules-text3-font-family);
+  font-size:   var(--typography-rules-text3-font-size);
+  line-height: var(--typography-rules-text3-line-height);
+  color: var(--colors-text-secondary);
+}
+
+.termsLink {
+  color: var(--colors-text-secondary);
+  text-decoration: underline;
+}
+
+@media (min-width: 768px) {
+  /* The panel is wide enough here that the tabs never reach the close button. */
+  .tablist {
+    margin-top: 0;
+  }
+
+  /* First and last name share a row once there is width for both. */
+  .nameRow {
+    flex-direction: row;
+  }
+}

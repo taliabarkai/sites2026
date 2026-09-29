@@ -1,0 +1,159 @@
+/* OrderStatusHeader — the thank-you page's header card, with a status badge
+   and a delivery-date tile. Card framing matches that page exactly. */
+
+.card {
+  padding: var(--spacing-lg) var(--spacing-md);
+  border-bottom: var(--border-width) solid var(--border-color);
+}
+
+/* Two halves, divided by a rule on desktop and stacked on a phone. */
+.split {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+/* The mark sits beside the headline, not above it. */
+.titleRow {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-sm);
+  min-width: 0;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: var(--spacing-xl);
+  height: var(--spacing-xl);
+  border-radius: var(--radius-full);
+  background: var(--colors-text);
+}
+
+.main {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.title {
+  margin: 0 0 var(--spacing-xs);
+  font-family:    var(--typography-rules-headline3-font-family);
+  font-size:      var(--typography-rules-headline3-font-size);
+  line-height:    var(--typography-rules-headline3-line-height);
+  font-weight:    var(--typography-rules-headline3-font-weight, normal);
+  letter-spacing: var(--typography-rules-headline3-letter-spacing, normal);
+  text-transform: var(--typography-rules-headline3-text-transform, none);
+  color: var(--colors-text);
+}
+
+.meta {
+  margin: 0 0 var(--spacing-xxxs);
+  color: var(--colors-text);
+}
+
+.metaLabel {
+  font-family:    var(--typography-rules-paragraph4-font-family);
+  font-size:      var(--typography-rules-paragraph4-font-size);
+  line-height:    var(--typography-rules-paragraph4-line-height);
+  font-weight:    var(--typography-rules-paragraph4-font-weight, normal);
+  letter-spacing: var(--typography-rules-paragraph4-letter-spacing, normal);
+}
+
+.metaValue {
+  font-family:    var(--typography-rules-paragraph3-font-family);
+  font-size:      var(--typography-rules-paragraph3-font-size);
+  line-height:    var(--typography-rules-paragraph3-line-height);
+  font-weight:    var(--typography-rules-paragraph3-font-weight, normal);
+  letter-spacing: var(--typography-rules-paragraph3-letter-spacing, normal);
+}
+
+.link {
+  appearance: none;
+  align-self: flex-start;
+  margin-top: var(--spacing-xs);
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: var(--colors-text);
+  text-decoration: underline;
+  font-family: var(--typography-rules-text1-font-family);
+  font-size:   var(--typography-rules-text1-font-size);
+  line-height: var(--typography-rules-text1-line-height);
+}
+
+/* ── Arrival panel ───────────────────────────────────────────────────────── */
+
+.eta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--spacing-xxxs);
+}
+
+.etaLabel {
+  margin: 0;
+  font-family: var(--typography-rules-text1-font-family);
+  font-size:   var(--typography-rules-text1-font-size);
+  line-height: var(--typography-rules-text1-line-height);
+  color: var(--colors-text);
+}
+
+.etaDay {
+  margin: 0;
+  font-family:    var(--typography-rules-headline4-font-family);
+  font-size:      var(--typography-rules-headline4-font-size);
+  line-height:    var(--typography-rules-headline4-line-height);
+  font-weight:    var(--typography-rules-headline4-font-weight, normal);
+  letter-spacing: var(--typography-rules-headline4-letter-spacing, normal);
+  text-transform: var(--typography-rules-headline4-text-transform, uppercase);
+  color: var(--colors-text);
+}
+
+/* The largest thing on the card: it is what the page is for. */
+.etaDate {
+  margin: 0;
+  font-family:    var(--typography-rules-headline2-font-family);
+  font-size:      var(--typography-rules-headline2-font-size);
+  line-height:    var(--typography-rules-headline2-line-height);
+  font-weight:    var(--typography-rules-headline2-font-weight, normal);
+  letter-spacing: var(--typography-rules-headline2-letter-spacing, normal);
+  text-transform: var(--typography-rules-headline2-text-transform, uppercase);
+  color: var(--colors-text);
+}
+
+/* Desktop turns each card into a bordered box, exactly as the thank-you page
+   does — same padding, same border, same radius, so the two pages frame the
+   same information identically. */
+@media (min-width: 1024px) {
+  .card {
+    padding: var(--spacing-lg);
+    border: var(--border-width) solid var(--border-color);
+    border-radius: var(--radius-md);
+  }
+
+  .split {
+    flex-direction: row;
+    align-items: stretch;
+    gap: var(--spacing-lg);
+  }
+
+  .titleRow {
+    flex: 1 1 auto;
+  }
+
+  /* The rule belongs to the panel, so it only exists when the two sit side
+     by side. */
+  .eta {
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding-left: var(--spacing-lg);
+    border-left: var(--border-width) solid var(--border-color);
+    min-width: 240px;
+  }
+}

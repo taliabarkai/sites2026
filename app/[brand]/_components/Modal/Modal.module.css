@@ -1,0 +1,68 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   Modal — scrim plus panel.
+
+   Mobile is a bottom sheet, which is what every other overlay in this project
+   does (GiftOptionsModal, the gifting drawer); desktop centres the panel.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-overlay);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  background: var(--colors-overlay);
+}
+
+.panel {
+  position: relative;
+  z-index: var(--z-modal);
+  width: 100%;
+  max-height: 92vh;
+  overflow-y: auto;
+  box-sizing: border-box;
+  padding: var(--spacing-lg) var(--spacing-md) var(--spacing-xl);
+  /* --colors-background, not surface-primary: the latter is a warm off-white
+     on most brands, and against the scrim the panel read as grey. */
+  background: var(--colors-background);
+  /* Rounded at the top only: it rises from the bottom edge. */
+  border-radius: var(--radius-panel) var(--radius-panel) 0 0;
+}
+
+.close {
+  position: absolute;
+  top: var(--spacing-sm);
+  right: var(--spacing-sm);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--spacing-xl);
+  height: var(--spacing-xl);
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--colors-text);
+  cursor: pointer;
+}
+
+.close:focus-visible {
+  outline: 2px solid var(--colors-text);
+  outline-offset: 2px;
+}
+
+@media (min-width: 768px) {
+  .overlay {
+    align-items: center;
+    padding: var(--spacing-md);
+  }
+
+  .panel {
+    max-width: 800px;
+    max-height: 88vh;
+    /* Even padding: the extra horizontal inset made narrow panels look like a
+       wide one with the content squeezed into the middle. */
+    padding: var(--spacing-lg) var(--spacing-md) var(--spacing-lg);
+    border-radius: var(--radius-panel);
+  }
+}
