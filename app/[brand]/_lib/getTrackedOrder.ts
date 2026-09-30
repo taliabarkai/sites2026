@@ -71,7 +71,7 @@ const SAMPLE: TrackedOrder = {
     line1:        '123 Main Street',
     cityStateZip: 'Port Washington, NY 11050',
   },
-  shippingMethod: { name: 'Free Shipping', estimate: 'Get it by Tue, Oct 6 to Thu, Oct 8' },
+  shippingMethod: { name: 'Free Shipping', estimate: 'Get it by Tue, Oct 6 – Thu, Oct 8' },
   paymentMethod:  { label: 'Apple Pay' },
   items: [
     {

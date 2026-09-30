@@ -13,7 +13,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--spacing-md);
+  gap: var(--spacing-xxs);
   text-align: center;
 }
 
@@ -93,8 +93,9 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--spacing-xs);
+  gap: 0;
   align-self: stretch;
+  margin-top: var(--spacing-md);
   padding-top: var(--spacing-md);
   border-top: var(--border-width) solid var(--border-color);
 }
@@ -108,25 +109,37 @@
 }
 
 .etaDay {
-  margin: 0;
+  margin: var(--spacing-md) 0 0;
   font-family:    var(--typography-rules-headline4-font-family);
   font-size:      var(--typography-rules-headline4-font-size);
   line-height:    var(--typography-rules-headline4-line-height);
   font-weight:    var(--typography-rules-headline4-font-weight, normal);
   letter-spacing: var(--typography-rules-headline4-letter-spacing, normal);
-  text-transform: var(--typography-rules-headline4-text-transform, uppercase);
+  text-transform: var(--typography-rules-headline4-text-transform, none);
   color: var(--colors-text);
 }
 
-/* The largest thing on the card: it is what the page is for. */
+/* The largest thing on the card: it is what the page is for. The weekday and
+   the year sit close to it — the three read as one date, not three lines. */
 .etaDate {
-  margin: 0;
+  margin: var(--spacing-xxxs) 0 0;
   font-family:    var(--typography-rules-headline1-font-family);
   font-size:      var(--typography-rules-headline1-font-size);
   line-height:    var(--typography-rules-headline1-line-height);
   font-weight:    var(--typography-rules-headline1-font-weight, normal);
   letter-spacing: var(--typography-rules-headline1-letter-spacing, normal);
-  text-transform: var(--typography-rules-headline1-text-transform, uppercase);
+  text-transform: var(--typography-rules-headline1-text-transform, none);
+  color: var(--colors-text);
+}
+
+.etaYear {
+  margin: var(--spacing-xxxs) 0 0;
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  font-weight:    var(--typography-rules-text1-font-weight, normal);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+  text-transform: var(--typography-rules-text1-text-transform, none);
   color: var(--colors-text);
 }
 
@@ -142,14 +155,16 @@
 
   /* The order on the left, the arrival date on the right, everything ranged
      left within its own half. */
+  /* Two equal halves. Sizing the arrival column to its content let the date
+     decide the split, and a 100px date on OAL took two thirds of the card. */
   .split {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     grid-template-areas:
       "title eta"
       "main  eta";
     align-items: start;
-    column-gap: 0;
+    column-gap: var(--spacing-lg);
     row-gap: 0;
     text-align: left;
   }
@@ -157,7 +172,7 @@
   .titleRow {
     grid-area: title;
     align-items: flex-start;
-    margin-bottom: var(--spacing-xs);
+    margin-bottom: var(--spacing-xxs);
   }
 
   .main {
@@ -169,8 +184,7 @@
     grid-area: eta;
     align-self: stretch;
     justify-content: center;
-    min-width: 240px;
-    margin-left: var(--spacing-lg);
+    margin-top: 0;
     padding-top: 0;
     padding-left: var(--spacing-lg);
     border-top: none;

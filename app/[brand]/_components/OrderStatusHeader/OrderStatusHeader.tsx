@@ -27,9 +27,15 @@ interface OrderStatusHeaderProps {
   icons: OrderStatusHeaderIcons
 }
 
-/** "Oct 6, 2026" → "Oct 6". The label above already says which date it is. */
+/** "Oct 6, 2026" → "Oct 6". The year is set on its own line beneath it. */
 function withoutYear(date: string): string {
   return date.split(',')[0].trim()
+}
+
+/** "Oct 6, 2026" → "2026", or nothing when the date carries no year. */
+function yearOf(date: string): string | null {
+  const parts = date.split(',')
+  return parts.length > 1 ? parts[parts.length - 1].trim() : null
 }
 
 /**
@@ -84,6 +90,9 @@ export function OrderStatusHeader({
           <p className={styles.etaLabel}>{deliveryDateLabel(status, arrivingToday)}</p>
           {estDeliveryWeekday && <p className={styles.etaDay}>{estDeliveryWeekday}</p>}
           <p className={styles.etaDate}>{withoutYear(estDeliveryDate)}</p>
+          {yearOf(estDeliveryDate) && (
+            <p className={styles.etaYear}>{yearOf(estDeliveryDate)}</p>
+          )}
         </div>
       </div>
     </section>

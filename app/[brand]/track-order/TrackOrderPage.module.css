@@ -300,7 +300,7 @@
 }
 
 .progress {
-  margin-top: var(--spacing-xl);
+  margin-top: var(--spacing-md);
 }
 
 /* ── Tracking block ──────────────────────────────────────────────────────── */
@@ -309,11 +309,15 @@
    on the card rather than tinted — the stepper above it is the figure, and a
    second filled band beside it competed with that. */
 .tracking {
-  margin-top: var(--spacing-xl);
+  /* The same value above the rule and below it, so the rule sits centred in
+     the space it divides. */
+  margin-top: var(--spacing-md);
+  padding-top: var(--spacing-md);
+  border-top: var(--border-width) solid var(--border-color);
 }
 
 .trackingTitle {
-  margin: 0 0 var(--spacing-md);
+  margin: 0 0 var(--spacing-xs);
   font-family:    var(--typography-rules-text2-font-family);
   font-size:      var(--typography-rules-text2-font-size);
   line-height:    var(--typography-rules-text2-line-height);
@@ -378,19 +382,20 @@
 }
 
 /* An anchor rather than the Button component: Button renders a next/link for
-   href and forwards nothing but onClick, so target would be dropped. Styled
-   as the primary button, which is what the reference shows. */
+   href and forwards nothing but onClick, so target would be dropped. Outlined
+   rather than solid — the stepper is the loudest thing on this card and a
+   filled button beside it competed. */
 .trackLink {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: var(--spacing-xxs);
-  min-height: var(--buttons-primary-min-height, 44px);
-  padding: var(--buttons-primary-padding);
-  border: var(--border-width) solid var(--buttons-primary-border-color);
-  border-radius: var(--buttons-primary-border-radius);
-  background: var(--buttons-primary-background);
-  color: var(--buttons-primary-text);
+  min-height: var(--buttons-secondary-min-height, 44px);
+  padding: var(--buttons-secondary-padding);
+  border: var(--border-width) solid var(--buttons-secondary-border-color);
+  border-radius: var(--buttons-secondary-border-radius);
+  background: var(--buttons-secondary-background);
+  color: var(--buttons-secondary-text);
   text-decoration: none;
   font-family:    var(--typography-rules-button1-font-family);
   font-size:      var(--typography-rules-button1-font-size);
@@ -434,6 +439,14 @@
    every card becomes one flat list in DOM order. Only the closing link has to
    move — it belongs at the foot of the page, not in the middle of it. */
 @media (max-width: 1023px) {
+  /* The closing link is the last thing on the page and sits on its own 44px
+     row, so the footer can follow it directly — the tail of empty white the
+     page margin left under it was doing no work. */
+  .main {
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+
   .mainColumn,
   .sideColumn {
     display: contents;
@@ -469,8 +482,11 @@
     padding: var(--spacing-sm) 0;
   }
 
+  /* No padding of its own: the column's own gap already separates this from
+     the card above, and adding to it made the last gap in the stack twice
+     every other one. */
   .continueRow {
-    padding: var(--spacing-md) 0 0;
+    padding: 0;
     text-align: left;
   }
 

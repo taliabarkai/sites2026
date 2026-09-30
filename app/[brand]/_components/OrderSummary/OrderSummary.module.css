@@ -208,3 +208,17 @@
     border-radius: var(--radius-md);
   }
 }
+
+/* The arrival window makes this the one total that can wrap, so its halves
+   align on the first line and the value keeps to the right edge. */
+.shippingRow {
+  align-items: baseline;
+}
+
+.shippingRow dt {
+  flex: 0 0 auto;
+}
+
+.shippingRow dd {
+  text-align: right;
+}

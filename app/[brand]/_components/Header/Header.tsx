@@ -61,6 +61,12 @@ export interface HeaderProps {
   navLinks?: NavLink[]
   topline?: ToplineProps
   sticky?: boolean
+  /**
+   * Track My Order only: whether the default/error demo toggle belongs on
+   * screen. The error it previews is a failed lookup, so it has nothing to
+   * say once an order is found — the page passes false there.
+   */
+  showStateToggle?: boolean
 }
 
 export function Header({
@@ -69,6 +75,7 @@ export function Header({
   navLinks = DEFAULT_NAV_LINKS,
   topline = DEFAULT_TOPLINE,
   sticky = true,
+  showStateToggle = true,
 }: HeaderProps) {
   const pathname = usePathname()
   const brandSegment = resolveBrand(brand ?? getBrandFromPathname(pathname))
@@ -106,13 +113,14 @@ export function Header({
      desktop, and on mobile it does not — there they get a strip of their own
      directly under the bar, still at the top of the page. Only one slot is ever
      displayed, so the duplicate never reaches the accessibility tree. */
-  const demoControls = isCheckout || isCartPage || isTrackOrder ? (
+  const showTrackOrderToggle = isTrackOrder && showStateToggle
+  const demoControls = isCheckout || isCartPage || showTrackOrderToggle ? (
     <>
       {/* The phases do not reach Track My Order, so it gets only the one
           control it has a state for. */}
       {!isTrackOrder && <FlowControls brand={brandSegment} />}
       {isCheckout && <CartSizeToggle className={styles.cartSizeToggle} />}
-      {isTrackOrder && <TrackOrderStateToggle className={styles.cartSizeToggle} />}
+      {showTrackOrderToggle && <TrackOrderStateToggle className={styles.cartSizeToggle} />}
     </>
   ) : null
   const demoBar = demoControls && <div className={styles.demoBar}>{demoControls}</div>

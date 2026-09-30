@@ -480,8 +480,8 @@
   --typography-default-font-size: 14;
 
   --typography-rules-headline1-font-family:    var(--font-family-main-bold);
-  --typography-rules-headline1-font-size:      24px;
-  --typography-rules-headline1-line-height:    28px;
+  --typography-rules-headline1-font-size:      52px;
+  --typography-rules-headline1-line-height:    60px;
   --typography-rules-headline1-letter-spacing: 0.5px;
   --typography-rules-headline1-text-transform: uppercase;
   --typography-rules-headline1-font-weight:    700;
@@ -652,8 +652,8 @@
 
 @media (min-width: 768px) {
   [data-theme="lal"] {
-    --typography-rules-headline1-font-size:    40px;
-    --typography-rules-headline1-line-height:  44px;
+    --typography-rules-headline1-font-size:    60px;
+    --typography-rules-headline1-line-height:  60px;
     --typography-rules-headline2-font-size:    32px;
     --typography-rules-headline2-line-height:  38px;
     --typography-rules-headline3-font-size:    32px;

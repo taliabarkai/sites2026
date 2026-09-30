@@ -425,7 +425,7 @@ export function TrackOrderClient() {
                     rel="noopener noreferrer"
                   >
                     Track Your Package
-                    <ArrowIcon size={16} className={styles.trackLinkArrow} />
+                    <ArrowIcon size={24} className={styles.trackLinkArrow} />
                     <span className={styles.srOnly}> (opens in a new tab)</span>
                   </a>
                 </div>
@@ -456,9 +456,11 @@ export function TrackOrderClient() {
             subtotal={order.totals.subtotal}
             shipping={order.totals.shipping}
             promoDiscount={order.totals.promoDiscount}
+            shippingNote={order.shippingMethod.estimate}
             tax={order.totals.tax}
             total={order.totals.total}
             collapsible
+            defaultOpen="desktop"
             icons={icons}
           />
 
@@ -497,7 +499,16 @@ export function TrackOrderClient() {
 
   return (
     <div className={styles.page}>
-      <Header variant="white" brand={brand} navLinks={navLinks} topline={topline} sticky={false} />
+      {/* The toggle previews a failed lookup, so it goes once there is an
+          order on screen — there is no error state to show from there. */}
+      <Header
+        variant="white"
+        brand={brand}
+        navLinks={navLinks}
+        topline={topline}
+        sticky={false}
+        showStateToggle={!order}
+      />
 
       <main id="main-content" className={styles.main}>
         <div className={styles.inner}>
