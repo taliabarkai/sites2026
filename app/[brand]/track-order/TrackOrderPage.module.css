@@ -37,7 +37,7 @@
 .lookupCard {
   display: flex;
   flex-direction: column;
-  padding: var(--spacing-lg) var(--spacing-md);
+  padding: var(--spacing-lg);
 }
 
 /* The heading takes its face, casing and tracking from the theme — this is
@@ -161,7 +161,7 @@
 /* ── Need Help ───────────────────────────────────────────────────────────── */
 
 .helpCard {
-  padding: var(--spacing-lg) var(--spacing-md);
+  padding: var(--spacing-lg);
   border-top: var(--border-width) solid var(--border-color);
 }
 
@@ -265,7 +265,7 @@
 }
 
 .card {
-  padding: var(--spacing-lg) var(--spacing-md);
+  padding: var(--spacing-lg);
   border-bottom: var(--border-width) solid var(--border-color);
 }
 

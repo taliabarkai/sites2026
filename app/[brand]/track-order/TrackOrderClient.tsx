@@ -122,6 +122,18 @@ export function TrackOrderClient() {
   const [user, setUser]         = useState<AuthUser | null>(null)
   const [authTab, setAuthTab]   = useState<AuthTab | null>(null)
 
+  /*
+   * Raised while a reset is navigating.
+   *
+   * `router.replace` does not land in the same tick as the state updates
+   * beside it, so for one render the order is cleared while the URL still
+   * names it — and the effect below, seeing exactly that, would fetch the
+   * order straight back and undo the reset. Clearing on "the URL has no
+   * order" instead is not an option: a submit sets the order first and
+   * writes the URL after, so the same rule would wipe every lookup.
+   */
+  const resettingRef = useRef(false)
+
   const orderFieldRef = useRef<HTMLInputElement>(null)
   const emailFieldRef = useRef<HTMLInputElement>(null)
 
@@ -172,6 +184,11 @@ export function TrackOrderClient() {
      Skipped once that very order is already on screen, so writing the URL
      after a successful lookup does not fetch it a second time. */
   useEffect(() => {
+    if (resettingRef.current) {
+      /* Lower the flag once the navigation has actually landed. */
+      if (!urlOrder && !urlEmail) resettingRef.current = false
+      return
+    }
     if (isErrorState) return
     if (!urlOrder || !urlEmail) return
     if (
@@ -212,17 +229,31 @@ export function TrackOrderClient() {
   const openAuth  = (tab: AuthTab) => setAuthTab(tab)
   const closeAuth = () => setAuthTab(null)
 
+  /**
+   * Back to the lookup exactly as it first loads.
+   *
+   * Every parameter goes, not just the order and the email: `state=error`
+   * and the QA status override would otherwise follow the shopper back and
+   * the "default" page would not be the default. Scroll goes to the top too,
+   * since the link that gets here sits at the foot of a long page.
+   */
   const resetLookup = () => {
-    const params = new URLSearchParams(searchParams.toString())
-    params.delete('order')
-    params.delete('email')
+    resettingRef.current = true
     setOrder(null)
     setState('idle')
     setErrors({})
     setOrderNumber('')
     setEmail('')
-    const query = params.toString()
-    router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false })
+    setCopied(false)
+
+    /* The fields are controlled, but the nodes are emptied directly as well:
+       this is the same Chrome value restoration the mount effect guards
+       against, which can otherwise put the old text straight back. */
+    if (orderFieldRef.current) orderFieldRef.current.value = ''
+    if (emailFieldRef.current) emailFieldRef.current.value = ''
+
+    router.replace(pathname, { scroll: false })
+    window.scrollTo({ top: 0 })
   }
 
   /**

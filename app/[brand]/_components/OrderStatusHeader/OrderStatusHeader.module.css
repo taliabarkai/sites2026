@@ -2,7 +2,7 @@
    and a delivery-date tile. Card framing matches that page exactly. */
 
 .card {
-  padding: var(--spacing-lg) var(--spacing-md);
+  padding: var(--spacing-lg);
   border-bottom: var(--border-width) solid var(--border-color);
 }
 

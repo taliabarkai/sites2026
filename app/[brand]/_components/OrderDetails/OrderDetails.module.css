@@ -1,7 +1,7 @@
 /* OrderDetails — the thank-you page's details card, prop-driven. */
 
 .card {
-  padding: var(--spacing-lg) var(--spacing-md);
+  padding: var(--spacing-lg);
   border-bottom: var(--border-width) solid var(--border-color);
 }
 
