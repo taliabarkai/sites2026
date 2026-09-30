@@ -176,6 +176,25 @@
     padding-top: var(--spacing-xxs);
   }
 
+  /* The last step is the width of its own circle, not a fifth of the row, so
+     that circle lands on the right edge instead of a fifth short of it. The
+     four columns before it then divide what is left, which keeps every gap
+     between circles equal. Its label is ranged right from there and is free
+     to overhang the narrow column. */
+  .responsive .step:last-child {
+    flex: 0 0 var(--spacing-sm);
+    /* Without this the flex item floors at its label's min-content width and
+       the basis is ignored, which stretches the last gap past the others. */
+    min-width: 0;
+    align-items: flex-end;
+    text-align: right;
+  }
+
+  .responsive .step:last-child .body {
+    align-items: flex-end;
+    white-space: nowrap;
+  }
+
   .responsive .step:not(:last-child)::before {
     top: calc(var(--spacing-sm) / 2);
     bottom: auto;
