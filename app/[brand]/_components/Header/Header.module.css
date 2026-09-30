@@ -642,15 +642,31 @@
   display: none;
 }
 
+/* Floated, not stacked. These are demo chrome rather than part of the page,
+   so the strip is pulled out of flow and hangs off the bottom of the bar: the
+   controls still read as "the top" and the page below keeps its own spacing.
+   The strip itself is invisible and lets the pointer through — only the
+   controls sitting in it are clickable. */
 .demoBar {
+  /* Zero-height and overflowing rather than absolute: the checkout page
+     overrides the header wrapper to `position: static`, so an absolute strip
+     would anchor to the body instead of the bar. A collapsed flex row owes
+     nothing to its ancestors and costs the page no vertical space either way. */
+  position: relative;
+  z-index: var(--z-header);
+  height: 0;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   flex-wrap: wrap;
   gap: var(--spacing-xxs);
-  padding: var(--spacing-xxs) var(--layout-page-margin);
-  background: var(--colors-surface-primary);
-  border-top: var(--border-width) solid var(--border-color);
+  padding: 0 var(--layout-page-margin);
+  pointer-events: none;
+}
+
+.demoBar > * {
+  pointer-events: auto;
+  margin-top: var(--spacing-xxs);
 }
 
 .demoBar:empty {

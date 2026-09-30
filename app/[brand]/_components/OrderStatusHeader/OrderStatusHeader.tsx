@@ -15,6 +15,8 @@ export interface OrderStatusHeaderIcons {
 interface OrderStatusHeaderProps {
   status:      OrderStatus
   headline:    string
+  /** The quiet line under the headline, e.g. "It's on its way to you, Dana." */
+  subhead?:    string
   orderNumber: string
   orderDate:   string
   /** "Oct 6, 2026" — the year is dropped in the panel, kept here in full. */
@@ -23,8 +25,6 @@ interface OrderStatusHeaderProps {
   estDeliveryWeekday?: string
   arrivingToday?: boolean
   icons: OrderStatusHeaderIcons
-  /** A quiet text link, not a button: the card states, it does not prompt. */
-  link?: { label: string; href?: string; onClick?: () => void }
 }
 
 /** "Oct 6, 2026" → "Oct 6". The label above already says which date it is. */
@@ -36,12 +36,13 @@ function withoutYear(date: string): string {
  * Where an order stands, at a glance.
  *
  * Two halves either side of a rule: what the order is on the left, when it
- * arrives on the right. The date is the one thing a shopper opens this page
- * to read, so it is the largest thing on the card.
+ * arrives on the right — or, on a phone, stacked and centred with the rule
+ * running between them. The date is the one thing a shopper opens this page
+ * to read, so it is the largest thing on the card either way.
  */
 export function OrderStatusHeader({
-  status, headline, orderNumber, orderDate, estDeliveryDate, estDeliveryWeekday,
-  arrivingToday = false, icons, link,
+  status, headline, subhead, orderNumber, orderDate, estDeliveryDate, estDeliveryWeekday,
+  arrivingToday = false, icons,
 }: OrderStatusHeaderProps) {
   /* Chosen from the status rather than passed in, so every surface showing a
      given status shows the same mark. Only icons that exist in all five brand
@@ -58,31 +59,25 @@ export function OrderStatusHeader({
   return (
     <section className={styles.card} aria-labelledby="order-status-title">
       <div className={styles.split}>
+        {/* Badge above the headline at every width; only the alignment and
+            the arrival panel's position change between them. */}
         <div className={styles.titleRow}>
           <span className={styles.badge} aria-hidden="true">
             <StatusIcon size={22} color="var(--colors-text-inverse)" />
           </span>
+          <h1 id="order-status-title" className={styles.title}>{headline}</h1>
+        </div>
 
-          <div className={styles.main}>
-            <h1 id="order-status-title" className={styles.title}>{headline}</h1>
-            <p className={styles.meta}>
-              <span className={styles.metaLabel}>Order Number:</span>{' '}
-              <span className={styles.metaValue}>{orderNumber}</span>
-            </p>
-            <p className={styles.meta}>
-              <span className={styles.metaLabel}>Order Date:</span>{' '}
-              <span className={styles.metaValue}>{orderDate}</span>
-            </p>
-            {link && (
-              link.href ? (
-                <a className={styles.link} href={link.href}>{link.label}</a>
-              ) : (
-                <button type="button" className={styles.link} onClick={link.onClick}>
-                  {link.label}
-                </button>
-              )
-            )}
-          </div>
+        <div className={styles.main}>
+          {subhead && <p className={styles.subhead}>{subhead}</p>}
+          <p className={styles.meta}>
+            <span className={styles.metaLabel}>Order Number:</span>{' '}
+            <span className={styles.metaValue}>#{orderNumber}</span>
+          </p>
+          <p className={styles.meta}>
+            <span className={styles.metaLabel}>Order Date:</span>{' '}
+            <span className={styles.metaValue}>{orderDate}</span>
+          </p>
         </div>
 
         <div className={styles.eta}>

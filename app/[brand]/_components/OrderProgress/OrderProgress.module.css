@@ -37,10 +37,14 @@
   color: var(--colors-text-inverse);
 }
 
-/* The step just reached is ringed and named in bold — it is the answer to
-   "where is my order", and the eye should land on it first. */
+/* The step just reached is drawn larger and named in bold — it is the answer
+   to "where is my order", and the eye should land on it first.
+
+   Scaled rather than resized: a transform grows the mark about its own centre
+   and costs the layout nothing, so the circle stays exactly on the connector
+   line and the labels below it do not shift. */
 .step[aria-current='step'] .circle {
-  box-shadow: 0 0 0 3px var(--colors-background), 0 0 0 4px var(--colors-text);
+  transform: scale(1.4);
 }
 
 .step[aria-current='step'] .label {
@@ -106,8 +110,12 @@
   background: var(--border-color);
 }
 
-.vertical .stepReached:not(:last-child)::before,
-.responsive .stepReached:not(:last-child)::before {
+/* A connector is filled only once the step it leads *to* has been reached,
+   so the track stops at the current milestone instead of running past it.
+   `:has(+ .stepReached)` asks about the next sibling, which is the one thing
+   the connector's own step cannot know. */
+.vertical .step:not(:last-child):has(+ .stepReached)::before,
+.responsive .step:not(:last-child):has(+ .stepReached)::before {
   background: var(--colors-text);
 }
 
@@ -145,7 +153,7 @@
   background: var(--border-color);
 }
 
-.horizontal .stepReached:not(:last-child)::before {
+.horizontal .step:not(:last-child):has(+ .stepReached)::before {
   background: var(--colors-text);
 }
 

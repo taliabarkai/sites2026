@@ -15,7 +15,7 @@ export const ORDER_STEPS = [
   'Jewelry Creation',
   'Packing & Quality Control',
   'Shipped',
-  'Out for Delivery',
+  'Delivered',
 ] as const
 
 export type OrderStep = (typeof ORDER_STEPS)[number]
@@ -36,37 +36,35 @@ export function isOrderStatus(value: string): value is OrderStatus {
 }
 
 /**
- * How far along the five steps a status stands.
+ * Which of the five steps each status stands on.
  *
- * Returns the index of the step in progress, or `ORDER_STEPS.length` once
- * everything is done — so `index < completedCount` reads as "reached" whether
- * the order is mid-journey or delivered.
+ * `out_for_delivery` shares the Shipped step: the journey ends at Delivered,
+ * so there is no separate milestone for the van. It is still its own status
+ * because the arrival copy above the stepper changes on the day.
  */
 const STATUS_STEP_INDEX: Record<OrderStatus, number> = {
   placed:           0,
   creation:         1,
   packing:          2,
   shipped:          3,
-  out_for_delivery: 4,
-  delivered:        ORDER_STEPS.length,
+  out_for_delivery: 3,
+  delivered:        4,
 }
 
 /**
- * The step the order has most recently reached, or null once delivered.
+ * The step the order has most recently reached.
  *
  * A status names a milestone that has *happened* — "shipped" means the parcel
  * is gone, not that shipping is pending — so that step is the current one and
  * it counts as done. The confirmation page has always drawn it this way.
  */
-export function currentStepIndex(status: OrderStatus): number | null {
-  const index = STATUS_STEP_INDEX[status]
-  return index >= ORDER_STEPS.length ? null : index
+export function currentStepIndex(status: OrderStatus): number {
+  return STATUS_STEP_INDEX[status]
 }
 
 /** How many steps are finished, the current one included. */
 export function completedStepCount(status: OrderStatus): number {
-  const index = STATUS_STEP_INDEX[status]
-  return index >= ORDER_STEPS.length ? ORDER_STEPS.length : index + 1
+  return STATUS_STEP_INDEX[status] + 1
 }
 
 /** A package is only traceable once it has actually left. */
@@ -77,7 +75,7 @@ export function hasTracking(status: OrderStatus): boolean {
 /** What the delivery tile calls the date it is showing. */
 export function deliveryDateLabel(status: OrderStatus, arrivingToday = false): string {
   if (status === 'delivered') return 'Delivered on'
-  return arrivingToday ? 'Arriving today' : 'Arriving by'
+  return arrivingToday ? 'Arriving today' : 'Estimated Delivery'
 }
 
 /**

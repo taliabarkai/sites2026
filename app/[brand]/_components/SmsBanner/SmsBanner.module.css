@@ -63,11 +63,14 @@
     border-bottom: none;
   }
 
+  /* Framed like the cards it sits between, so the column reads as one stack
+     of boxes rather than a band floating between two of them. */
   .sms {
     display: flex;
     flex-direction: row;
     align-items: center;
     gap: var(--spacing-sm);
+    border: var(--border-width) solid var(--border-color);
   }
 
   .copy {

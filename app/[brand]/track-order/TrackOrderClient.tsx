@@ -41,13 +41,17 @@ const BRAND_ICONS = {
 
 
 /** What the header says, per status. */
-const STATUS_COPY: Record<OrderStatus, { headline: string; subtext: string }> = {
-  placed:           { headline: 'Your order is confirmed!',   subtext: 'We’ve got it. You’ll hear from us as soon as it moves.' },
-  creation:         { headline: 'Your jewelry is being made', subtext: 'Each piece is made to order, so this is the longest step.' },
-  packing:          { headline: 'Packing & quality control',  subtext: 'We’re checking it over and boxing it up.' },
-  shipped:          { headline: 'Your order has shipped!',     subtext: 'It’s with the carrier and on its way to you.' },
-  out_for_delivery: { headline: 'Out for delivery',           subtext: 'It’s on the van and arriving today.' },
-  delivered:        { headline: 'Your order was delivered',   subtext: 'We hope you love it.' },
+/**
+ * `subtext` takes the shopper's first name: the line under the headline is
+ * the one place on the page that speaks to them rather than about the order.
+ */
+const STATUS_COPY: Record<OrderStatus, { headline: string; subtext: (name: string) => string }> = {
+  placed:           { headline: 'Your order is confirmed',    subtext: name => `We’ve got it, ${name}. You’ll hear from us as soon as it moves.` },
+  creation:         { headline: 'Your jewelry is being made', subtext: name => `Each piece is made to order, ${name}, so this is the longest step.` },
+  packing:          { headline: 'Packing & quality control',  subtext: name => `We’re checking it over and boxing it up, ${name}.` },
+  shipped:          { headline: 'Your order has shipped',     subtext: name => `It’s on its way to you, ${name}.` },
+  out_for_delivery: { headline: 'Out for delivery',           subtext: name => `It’s on the van and arriving today, ${name}.` },
+  delivered:        { headline: 'Your order was delivered',   subtext: name => `We hope you love it, ${name}.` },
 }
 
 /** The one action worth offering at each stage. */
@@ -67,11 +71,12 @@ function ctaFor(status: OrderStatus, brand: string, onTrack: () => void) {
 }
 
 /**
- * Parked, not removed: flip to true to bring the lookup page's Need Help card
- * back. The markup and styles stay where they are. The results view keeps its
- * own Need Help card, which this does not touch.
+ * Parked, not removed: flip either to true to bring the card back. The markup
+ * and styles stay where they are so this is a one-word change.
  */
-const SHOW_LOOKUP_NEED_HELP = false
+const SHOW_LOOKUP_NEED_HELP   = false
+const SHOW_RESULTS_NEED_HELP  = false
+const SHOW_RESULTS_DETAILS    = false
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
@@ -83,6 +88,9 @@ export function TrackOrderClient() {
   const searchParams = useSearchParams()
   const brand        = getBrandFromPathname(pathname)
   const icons        = BRAND_ICONS[brand]
+  /* Resolved through BRAND_ICONS like everything else — these three are named
+     because the tracking block renders them directly. */
+  const { ArrowIcon, CheckmarkIcon, ClipboardCopyIcon } = icons
 
   const navLinks      = prefixNavLinks(brand, DEFAULT_NAV_LINKS)
   const footerColumns = prefixFooterColumns(brand, DEFAULT_FOOTER_COLUMNS)
@@ -114,7 +122,6 @@ export function TrackOrderClient() {
   const [user, setUser]         = useState<AuthUser | null>(null)
   const [authTab, setAuthTab]   = useState<AuthTab | null>(null)
 
-  const updatesRef = useRef<HTMLElement>(null)
   const orderFieldRef = useRef<HTMLInputElement>(null)
   const emailFieldRef = useRef<HTMLInputElement>(null)
 
@@ -131,10 +138,6 @@ export function TrackOrderClient() {
     if (!urlOrder && orderFieldRef.current) orderFieldRef.current.value = ''
     if (!urlEmail && emailFieldRef.current) emailFieldRef.current.value = ''
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-  const scrollToUpdates = useCallback(() => {
-    updatesRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }, [])
 
   /* One lookup path, whether it came from the form or straight off the URL. */
@@ -371,51 +374,71 @@ export function TrackOrderClient() {
           <OrderStatusHeader
             status={order.status}
             headline={STATUS_COPY[order.status].headline}
+            subhead={STATUS_COPY[order.status].subtext(order.customer.firstName)}
             orderNumber={order.orderNumber}
             orderDate={order.orderDate}
             estDeliveryDate={order.estDeliveryDate}
             estDeliveryWeekday={order.estDeliveryWeekday}
             arrivingToday={order.arrivingToday}
             icons={icons}
-            link={{ label: 'View Updates', onClick: scrollToUpdates }}
           />
 
-          <section ref={updatesRef} className={styles.card} aria-labelledby="shipping-updates-title">
-            <h2 id="shipping-updates-title" className={styles.sectionTitle}>Shipping Updates</h2>
+          <SmsBanner icons={icons} title="Join our SMS club" onSignUp={() => undefined} />
+
+          <section className={styles.card} aria-labelledby="order-updates-title">
+            <h2 id="order-updates-title" className={styles.sectionTitle}>Order Updates</h2>
 
             <OrderProgress status={order.status} icons={icons} className={styles.progress} />
 
             {/* Nothing to trace until the parcel has actually left. */}
             {hasTracking(order.status) && (
               <div className={styles.tracking}>
-                <div className={styles.trackingFact}>
-                  <span className={styles.trackingLabel}>Carrier</span>
-                  <span className={styles.trackingValue}>{order.carrier.name}</span>
+                <h3 className={styles.trackingTitle}>Shipping Updates</h3>
+
+                <div className={styles.trackingRow}>
+                  <div className={styles.trackingFact}>
+                    <span className={styles.trackingLabel}>Tracking number</span>
+                    <span className={styles.trackingNumberRow}>
+                      <span className={styles.trackingNumber}>{order.carrier.trackingNumber}</span>
+                      <button
+                        type="button"
+                        className={styles.copyButton}
+                        onClick={copyTracking}
+                      >
+                        <span className={styles.srOnly}>
+                          {copied ? 'Tracking number copied' : 'Copy tracking number'}
+                        </span>
+                        {copied
+                          ? <CheckmarkIcon size={16} />
+                          : <ClipboardCopyIcon size={16} />}
+                      </button>
+                    </span>
+                  </div>
+
+                  {/* An anchor, not the Button component: Button renders a
+                      next/link for href and forwards nothing but onClick, so
+                      target would be dropped. */}
+                  <a
+                    className={styles.trackLink}
+                    href={order.carrier.trackingUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Track Your Package
+                    <ArrowIcon size={16} className={styles.trackLinkArrow} />
+                    <span className={styles.srOnly}> (opens in a new tab)</span>
+                  </a>
                 </div>
-                <div className={styles.trackingFact}>
-                  <span className={styles.trackingLabel}>Tracking #</span>
-                  <span className={styles.trackingValue}>{order.carrier.trackingNumber}</span>
-                </div>
-                {/* An anchor, not the Button component: Button renders a
-                    next/link for href and forwards nothing but onClick, so
-                    target would be dropped. */}
-                <a
-                  className={styles.trackLink}
-                  href={order.carrier.trackingUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Track Package
-                  <span className={styles.srOnly}> (opens in a new tab)</span>
-                </a>
               </div>
             )}
           </section>
 
-          <section className={styles.card} aria-labelledby="results-help-title">
-            <h2 id="results-help-title" className={styles.sectionTitle}>Need Help With Your Order?</h2>
-            {needHelpTiles(['Shipping & Delivery', 'Change Order Details', 'Received Item Issues', 'Contact Us'])}
-          </section>
+          {SHOW_RESULTS_NEED_HELP && (
+            <section className={styles.card} aria-labelledby="results-help-title">
+              <h2 id="results-help-title" className={styles.sectionTitle}>Need Help With Your Order?</h2>
+              {needHelpTiles(['Shipping & Delivery', 'Change Order Details', 'Received Item Issues', 'Contact Us'])}
+            </section>
+          )}
 
           <div className={styles.continueRow}>
             <button type="button" className={styles.continueLink} onClick={resetLookup}>
@@ -425,8 +448,6 @@ export function TrackOrderClient() {
         </div>
 
         <div className={styles.sideColumn}>
-          <SmsBanner icons={icons} title="Join our SMS club" stacked onSignUp={() => undefined} />
-
           {/* Collapsible here and only here: the confirmation page shows the
               order it has just taken in full, while this is a page you come
               back to, where the totals answer the question. */}
@@ -441,14 +462,16 @@ export function TrackOrderClient() {
             icons={icons}
           />
 
-          <OrderDetails
-            contact={{ email: order.email, phone: order.customer.phone }}
-            shippingAddress={order.shippingAddress}
-            shippingMethod={order.shippingMethod}
-            paymentMethod={order.paymentMethod}
-            maskPhone
-            stacked
-          />
+          {SHOW_RESULTS_DETAILS && (
+            <OrderDetails
+              contact={{ email: order.email, phone: order.customer.phone }}
+              shippingAddress={order.shippingAddress}
+              shippingMethod={order.shippingMethod}
+              paymentMethod={order.paymentMethod}
+              maskPhone
+              stacked
+            />
+          )}
 
           {/* Only worth asking once the piece is actually in their hands. */}
           {order.status === 'delivered' && (

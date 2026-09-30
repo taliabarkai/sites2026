@@ -23,7 +23,6 @@
   width: 100%;
   max-width: 1280px;
   margin: 0 auto;
-  padding: 0 var(--layout-page-margin);
   box-sizing: border-box;
 }
 
@@ -38,7 +37,7 @@
 .lookupCard {
   display: flex;
   flex-direction: column;
-  padding: var(--spacing-lg) 0;
+  padding: var(--spacing-lg) var(--spacing-md);
 }
 
 /* The heading takes its face, casing and tracking from the theme — this is
@@ -162,7 +161,7 @@
 /* ── Need Help ───────────────────────────────────────────────────────────── */
 
 .helpCard {
-  padding: var(--spacing-lg) 0;
+  padding: var(--spacing-lg) var(--spacing-md);
   border-top: var(--border-width) solid var(--border-color);
 }
 
@@ -225,9 +224,12 @@
   display: inline-flex;
   align-items: center;
   min-height: 44px;
-  font-family: var(--typography-rules-text1-font-family);
-  font-size:   var(--typography-rules-text1-font-size);
-  line-height: var(--typography-rules-text1-line-height);
+  font-family:    var(--typography-rules-text2-font-family);
+  font-size:      var(--typography-rules-text2-font-size);
+  line-height:    var(--typography-rules-text2-line-height);
+  font-weight:    var(--typography-rules-text2-font-weight, normal);
+  letter-spacing: var(--typography-rules-text2-letter-spacing, normal);
+  text-transform: var(--typography-rules-text2-text-transform, none);
   color: var(--colors-text);
   text-decoration: underline;
 }
@@ -240,7 +242,7 @@
   align-items: center;
   justify-content: space-between;
   gap: var(--spacing-xs);
-  padding: var(--spacing-sm) 0;
+  padding: var(--spacing-sm) var(--spacing-md);
 }
 
 .showing {
@@ -298,20 +300,35 @@
 }
 
 .progress {
-  margin-top: var(--spacing-md);
+  margin-top: var(--spacing-xl);
 }
 
 /* ── Tracking block ──────────────────────────────────────────────────────── */
 
-/* Two facts and the action, on one tinted row. */
+/* The tracking block: a sub-heading, the number, and the one action. Plain
+   on the card rather than tinted — the stepper above it is the figure, and a
+   second filled band beside it competed with that. */
 .tracking {
+  margin-top: var(--spacing-xl);
+}
+
+.trackingTitle {
+  margin: 0 0 var(--spacing-md);
+  font-family:    var(--typography-rules-text2-font-family);
+  font-size:      var(--typography-rules-text2-font-size);
+  line-height:    var(--typography-rules-text2-line-height);
+  font-weight:    var(--typography-rules-text2-font-weight, normal);
+  letter-spacing: var(--typography-rules-text2-letter-spacing, normal);
+  text-transform: var(--typography-rules-text2-text-transform, none);
+  color: var(--colors-text);
+}
+
+.trackingRow {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
+  align-items: flex-end;
+  justify-content: space-between;
   gap: var(--spacing-md);
-  margin-top: var(--spacing-md);
-  padding: var(--spacing-sm);
-  background: var(--colors-surface-primary);
 }
 
 .trackingFact {
@@ -325,31 +342,55 @@
   font-size:      var(--typography-rules-text3-font-size);
   line-height:    var(--typography-rules-text3-line-height);
   letter-spacing: var(--typography-rules-text3-letter-spacing, normal);
-  text-transform: uppercase;
   color: var(--colors-text-secondary);
 }
 
-.trackingValue {
-  font-family: var(--font-family-main-bold);
-  font-size:   var(--typography-rules-text1-font-size);
-  line-height: var(--typography-rules-text1-line-height);
-  font-weight: var(--font-weight-bold, 600);
+.trackingNumberRow {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.trackingNumber {
+  font-family:    var(--typography-rules-headline12-font-family);
+  font-size:      var(--typography-rules-headline12-font-size);
+  line-height:    var(--typography-rules-headline12-line-height);
+  font-weight:    var(--typography-rules-headline12-font-weight, normal);
+  letter-spacing: var(--typography-rules-headline12-letter-spacing, normal);
+  color: var(--colors-text);
+}
+
+.copyButton {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-xxxs);
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: var(--colors-text-secondary);
+  transition: color var(--transition-fast);
+}
+
+.copyButton:hover {
   color: var(--colors-text);
 }
 
 /* An anchor rather than the Button component: Button renders a next/link for
-   href and forwards nothing but onClick, so target would be dropped. */
+   href and forwards nothing but onClick, so target would be dropped. Styled
+   as the primary button, which is what the reference shows. */
 .trackLink {
-  margin-left: auto;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: var(--buttons-secondary-min-height, 44px);
-  padding: var(--buttons-secondary-padding);
-  border: var(--border-width) solid var(--buttons-secondary-border-color);
-  border-radius: var(--buttons-secondary-border-radius);
-  background: var(--buttons-secondary-background);
-  color: var(--buttons-secondary-text);
+  gap: var(--spacing-xxs);
+  min-height: var(--buttons-primary-min-height, 44px);
+  padding: var(--buttons-primary-padding);
+  border: var(--border-width) solid var(--buttons-primary-border-color);
+  border-radius: var(--buttons-primary-border-radius);
+  background: var(--buttons-primary-background);
+  color: var(--buttons-primary-text);
   text-decoration: none;
   font-family:    var(--typography-rules-button1-font-family);
   font-size:      var(--typography-rules-button1-font-size);
@@ -359,8 +400,15 @@
   text-transform: var(--typography-rules-button1-text-transform, none);
 }
 
+/* The shared arrow points right; a quarter turn makes the "leaves this page"
+   mark the reference shows, without inventing an icon the brands don't have. */
+.trackLinkArrow {
+  transform: rotate(-45deg);
+}
+
 .continueRow {
   padding: var(--spacing-md) var(--spacing-md) 0;
+  text-align: center;
 }
 
 .trustpilot {
@@ -380,9 +428,52 @@
   border: 0;
 }
 
+/* ── Mobile stack ────────────────────────────────────────────────────────── */
+
+/* Below two columns there are no columns to keep: the wrappers dissolve and
+   every card becomes one flat list in DOM order. Only the closing link has to
+   move — it belongs at the foot of the page, not in the middle of it. */
+@media (max-width: 1023px) {
+  .mainColumn,
+  .sideColumn {
+    display: contents;
+  }
+
+  .continueRow {
+    order: 1;
+  }
+}
+
+/* The action drops below the number on a narrow screen and takes the full
+   width, rather than being squeezed in beside it. */
+@media (max-width: 767px) {
+  .trackingRow {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--spacing-sm);
+  }
+
+  .trackLink {
+    width: 100%;
+  }
+}
+
 /* ── Desktop ─────────────────────────────────────────────────────────────── */
 
 @media (min-width: 1024px) {
+  .inner {
+    padding: 0 var(--layout-page-margin);
+  }
+
+  .resultsBar {
+    padding: var(--spacing-sm) 0;
+  }
+
+  .continueRow {
+    padding: var(--spacing-md) 0 0;
+    text-align: left;
+  }
+
   /* Lookup: the form in its own card, Need Help beside it. */
   .lookupLayout {
     flex-direction: row;

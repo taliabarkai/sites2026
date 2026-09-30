@@ -30,8 +30,9 @@ interface OrderProgressProps {
  * The five-step fulfillment stepper.
  *
  * Steps and their order come from `_lib/orderStatus`, so this never decides
- * what the journey is — only how far along it has got. Delivered fills every
- * step and marks none of them current, because there is nothing in progress.
+ * what the journey is — only how far along it has got. Delivered is the last
+ * step rather than a state beyond the last one, so it fills the stepper and
+ * is marked current like any other milestone that has been reached.
  */
 export function OrderProgress({
   status, icons, stepDates, orientation = 'responsive', className,

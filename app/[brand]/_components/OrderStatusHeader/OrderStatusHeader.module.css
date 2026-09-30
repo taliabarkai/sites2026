@@ -6,17 +6,21 @@
   border-bottom: var(--border-width) solid var(--border-color);
 }
 
-/* Two halves, divided by a rule on desktop and stacked on a phone. */
+/* On a phone the card is one centred column — mark, headline, order facts,
+   then a rule with the arrival date under it. Desktop turns the same three
+   blocks into a grid; see the bottom of the file. */
 .split {
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: var(--spacing-md);
+  text-align: center;
 }
 
-/* The mark sits beside the headline, not above it. */
 .titleRow {
   display: flex;
-  align-items: flex-start;
+  flex-direction: column;
+  align-items: center;
   gap: var(--spacing-sm);
   min-width: 0;
 }
@@ -35,18 +39,29 @@
 .main {
   display: flex;
   flex-direction: column;
+  align-items: center;
   min-width: 0;
 }
 
 .title {
-  margin: 0 0 var(--spacing-xs);
-  font-family:    var(--typography-rules-headline3-font-family);
-  font-size:      var(--typography-rules-headline3-font-size);
-  line-height:    var(--typography-rules-headline3-line-height);
-  font-weight:    var(--typography-rules-headline3-font-weight, normal);
-  letter-spacing: var(--typography-rules-headline3-letter-spacing, normal);
-  text-transform: var(--typography-rules-headline3-text-transform, none);
+  margin: 0;
+  font-family:    var(--typography-rules-headline4-font-family);
+  font-size:      var(--typography-rules-headline4-font-size);
+  line-height:    var(--typography-rules-headline4-line-height);
+  font-weight:    var(--typography-rules-headline4-font-weight, normal);
+  letter-spacing: var(--typography-rules-headline4-letter-spacing, normal);
+  text-transform: var(--typography-rules-headline4-text-transform, none);
   color: var(--colors-text);
+}
+
+.subhead {
+  margin: 0 0 var(--spacing-sm);
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  font-weight:    var(--typography-rules-text1-font-weight, normal);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+  color: var(--colors-text-secondary);
 }
 
 .meta {
@@ -70,28 +85,18 @@
   letter-spacing: var(--typography-rules-paragraph3-letter-spacing, normal);
 }
 
-.link {
-  appearance: none;
-  align-self: flex-start;
-  margin-top: var(--spacing-xs);
-  padding: 0;
-  border: none;
-  background: none;
-  cursor: pointer;
-  color: var(--colors-text);
-  text-decoration: underline;
-  font-family: var(--typography-rules-text1-font-family);
-  font-size:   var(--typography-rules-text1-font-size);
-  line-height: var(--typography-rules-text1-line-height);
-}
-
 /* ── Arrival panel ───────────────────────────────────────────────────────── */
 
+/* The rule belongs to the panel, so it follows it: above on a phone, to the
+   left once the two sit side by side. */
 .eta {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  gap: var(--spacing-xxxs);
+  align-items: center;
+  gap: var(--spacing-xs);
+  align-self: stretch;
+  padding-top: var(--spacing-md);
+  border-top: var(--border-width) solid var(--border-color);
 }
 
 .etaLabel {
@@ -116,12 +121,12 @@
 /* The largest thing on the card: it is what the page is for. */
 .etaDate {
   margin: 0;
-  font-family:    var(--typography-rules-headline2-font-family);
-  font-size:      var(--typography-rules-headline2-font-size);
-  line-height:    var(--typography-rules-headline2-line-height);
-  font-weight:    var(--typography-rules-headline2-font-weight, normal);
-  letter-spacing: var(--typography-rules-headline2-letter-spacing, normal);
-  text-transform: var(--typography-rules-headline2-text-transform, uppercase);
+  font-family:    var(--typography-rules-headline1-font-family);
+  font-size:      var(--typography-rules-headline1-font-size);
+  line-height:    var(--typography-rules-headline1-line-height);
+  font-weight:    var(--typography-rules-headline1-font-weight, normal);
+  letter-spacing: var(--typography-rules-headline1-letter-spacing, normal);
+  text-transform: var(--typography-rules-headline1-text-transform, uppercase);
   color: var(--colors-text);
 }
 
@@ -135,25 +140,40 @@
     border-radius: var(--radius-md);
   }
 
+  /* The order on the left, the arrival date on the right, everything ranged
+     left within its own half. */
   .split {
-    flex-direction: row;
-    align-items: stretch;
-    gap: var(--spacing-lg);
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "title eta"
+      "main  eta";
+    align-items: start;
+    column-gap: 0;
+    row-gap: 0;
+    text-align: left;
   }
 
   .titleRow {
-    flex: 1 1 auto;
+    grid-area: title;
+    align-items: flex-start;
+    margin-bottom: var(--spacing-xs);
   }
 
-  /* The rule belongs to the panel, so it only exists when the two sit side
-     by side. */
+  .main {
+    grid-area: main;
+    align-items: flex-start;
+  }
+
   .eta {
-    flex: 0 0 auto;
-    align-items: center;
+    grid-area: eta;
+    align-self: stretch;
     justify-content: center;
-    text-align: center;
-    padding-left: var(--spacing-lg);
-    border-left: var(--border-width) solid var(--border-color);
     min-width: 240px;
+    margin-left: var(--spacing-lg);
+    padding-top: 0;
+    padding-left: var(--spacing-lg);
+    border-top: none;
+    border-left: var(--border-width) solid var(--border-color);
   }
 }
