@@ -29,6 +29,7 @@
   border-radius: var(--radius-full);
   border: var(--border-width) solid var(--border-color);
   background: var(--colors-background);
+  box-shadow: 0 0 0 2px var(--colors-background);
 }
 
 .stepReached .circle {
@@ -174,6 +175,7 @@
   .responsive .body {
     align-items: flex-start;
     padding-top: var(--spacing-xxs);
+    padding-right: var(--spacing-md);
   }
 
   /* The last step is the width of its own circle, not a fifth of the row, so
@@ -193,6 +195,7 @@
   .responsive .step:last-child .body {
     align-items: flex-end;
     white-space: nowrap;
+    padding-right: 0;
   }
 
   .responsive .step:not(:last-child)::before {
