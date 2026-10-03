@@ -358,7 +358,6 @@ export function TrackOrderClient() {
             autoComplete="off"
             error={errors.email}
             invalid={state === 'notFound'}
-            hint="Your order number is in your order confirmation email"
           />
 
           <Button
