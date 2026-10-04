@@ -71,6 +71,21 @@ export function readIsErrorState(params: ReadableParams): boolean {
 }
 
 /**
+ * Track My Order previews three outcomes rather than two, so it reads the
+ * same key for a value rather than a flag. `readIsErrorState` stays as it is
+ * for checkout, which only knows "error" — a `duplicate` there reads as no
+ * error at all, which is the right answer for a page with no such state.
+ */
+export const TRACK_ORDER_STATES = ['default', 'error', 'duplicate'] as const
+
+export type TrackOrderState = (typeof TRACK_ORDER_STATES)[number]
+
+export function readTrackOrderState(params: ReadableParams): TrackOrderState {
+  const value = params.get(STATE_PARAM)
+  return value === 'error' || value === 'duplicate' ? value : 'default'
+}
+
+/**
  * A path with the current demo configuration attached.
  *
  * Every internal step has to carry these forward: the whole point is that one

@@ -29,7 +29,7 @@ import {
   SMS_SIGNUP,
   TRUSTPILOT,
 } from '../_config/siteContent'
-import { readIsErrorState } from '../_config/demoParams'
+import { readTrackOrderState } from '../_config/demoParams'
 import { DEMO_LOOKUP, getTrackedOrder, type TrackedOrder } from '../_lib/getTrackedOrder'
 import type { AuthUser } from '../_lib/mockAuth'
 import { hasTracking, type OrderStatus } from '../_lib/orderStatus'
@@ -80,6 +80,24 @@ const SHOW_RESULTS_DETAILS    = false
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
+/**
+ * What the banner says when a lookup comes back empty.
+ *
+ * Two different failures, not one with two wordings: nothing matched, or too
+ * much did. The second is not something the shopper can correct by retyping,
+ * so it points at a person instead of at the fields.
+ */
+const LOOKUP_FAILURE = {
+  error: {
+    title: 'We couldn’t find an order with those details.',
+    hint:  'Double-check the order number in your confirmation email and make sure the email matches the one used at checkout.',
+  },
+  duplicate: {
+    title: 'We found more than one order matching those details.',
+    hint:  'Please contact customer service for assistance.',
+  },
+} as const
+
 type LookupState = 'idle' | 'loading' | 'notFound'
 
 export function TrackOrderClient() {
@@ -106,9 +124,14 @@ export function TrackOrderClient() {
   const urlOrder  = searchParams.get('order') ?? ''
   const urlEmail  = searchParams.get('email') ?? ''
   const urlStatus = searchParams.get('status')
-  /* The header's Default/Error toggle. Every lookup resolves in a prototype,
-     so this is what makes the not-found state reachable. */
-  const isErrorState = readIsErrorState(searchParams)
+  /* The header's Default/Error/Duplicate toggle. Every lookup resolves in a
+     prototype, so this is what makes the failing states reachable; both of
+     them fail the lookup and differ only in what the banner says. */
+  const demoState    = readTrackOrderState(searchParams)
+  const isErrorState = demoState !== 'default'
+  /* A lookup can only come back empty here by way of the toggle, but if one
+     ever does on its own the generic wording is the safe thing to show. */
+  const bannerState  = demoState === 'duplicate' ? 'duplicate' : 'error'
 
   const [orderNumber, setOrderNumber] = useState(urlOrder)
   const [email, setEmail]             = useState(urlEmail)
@@ -338,11 +361,8 @@ export function TrackOrderClient() {
 
         {state === 'notFound' && (
           <div className={styles.errorBanner} role="alert">
-            <p className={styles.errorTitle}>We couldn&rsquo;t find an order with those details.</p>
-            <p className={styles.errorHint}>
-              Double-check the order number in your confirmation email and make sure the
-              email matches the one used at checkout.
-            </p>
+            <p className={styles.errorTitle}>{LOOKUP_FAILURE[bannerState].title}</p>
+            <p className={styles.errorHint}>{LOOKUP_FAILURE[bannerState].hint}</p>
           </div>
         )}
 
