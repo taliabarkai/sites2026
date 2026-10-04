@@ -57,6 +57,19 @@ export interface TrackedOrder {
 const SAMPLE_ORDER_NUMBER = '516422457'
 const SAMPLE_EMAIL        = 'johndoe@gmail.com'
 
+/**
+ * What an empty lookup stands in with.
+ *
+ * The prototype is here to show the states, and asking a reviewer to invent
+ * an order number before they can see any of them is friction with nothing
+ * behind it. Exported so the form fills the blanks with the same identity
+ * the mock already answers to.
+ */
+export const DEMO_LOOKUP = {
+  orderNumber: SAMPLE_ORDER_NUMBER,
+  email:       SAMPLE_EMAIL,
+} as const
+
 const SAMPLE: TrackedOrder = {
   orderNumber:     SAMPLE_ORDER_NUMBER,
   email:           SAMPLE_EMAIL,

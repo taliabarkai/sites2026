@@ -30,7 +30,7 @@ import {
   TRUSTPILOT,
 } from '../_config/siteContent'
 import { readIsErrorState } from '../_config/demoParams'
-import { getTrackedOrder, type TrackedOrder } from '../_lib/getTrackedOrder'
+import { DEMO_LOOKUP, getTrackedOrder, type TrackedOrder } from '../_lib/getTrackedOrder'
 import type { AuthUser } from '../_lib/mockAuth'
 import { hasTracking, type OrderStatus } from '../_lib/orderStatus'
 import styles from './TrackOrderPage.module.css'
@@ -202,16 +202,29 @@ export function TrackOrderClient() {
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault()
 
-    const nextErrors: { order?: string; email?: string } = {}
-    if (!orderNumber.trim()) nextErrors.order = 'Enter your order number'
-    if (!email.trim()) nextErrors.email = 'Enter your email address'
-    else if (!EMAIL_PATTERN.test(email.trim())) nextErrors.email = 'Enter a valid email address'
+    /* A field left blank takes the demo's own order and address, so Check
+       Status works on an untouched form. Something actually typed is still
+       held to the format — replacing a typo with a stand-in would look like
+       the page ignored them. */
+    const typedOrder = orderNumber.trim().replace(/^#/, '')
+    const typedEmail = email.trim()
+
+    const nextErrors: { email?: string } = {}
+    if (typedEmail && !EMAIL_PATTERN.test(typedEmail)) {
+      nextErrors.email = 'Enter a valid email address'
+    }
 
     setErrors(nextErrors)
     if (Object.keys(nextErrors).length > 0) return
 
-    const nextOrder = orderNumber.trim().replace(/^#/, '')
-    const nextEmail = email.trim()
+    const nextOrder = typedOrder || DEMO_LOOKUP.orderNumber
+    const nextEmail = typedEmail || DEMO_LOOKUP.email
+
+    /* Show what the lookup actually used, so a filled result never sits above
+       an empty form. */
+    if (!typedOrder) setOrderNumber(nextOrder)
+    if (!typedEmail) setEmail(nextEmail)
+
     const found = await runLookup(nextOrder, nextEmail)
 
     /* Only a found order goes into the URL. A result should survive a refresh
@@ -340,8 +353,6 @@ export function TrackOrderClient() {
             placeholder="Order Number"
             value={orderNumber}
             onChange={event => setOrderNumber(event.target.value)}
-            required
-            aria-required="true"
             autoComplete="off"
             error={errors.order}
             invalid={state === 'notFound'}
@@ -353,8 +364,6 @@ export function TrackOrderClient() {
             placeholder="Email Address"
             value={email}
             onChange={event => setEmail(event.target.value)}
-            required
-            aria-required="true"
             autoComplete="off"
             error={errors.email}
             invalid={state === 'notFound'}
