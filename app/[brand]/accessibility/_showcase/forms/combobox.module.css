@@ -1,0 +1,76 @@
+.combobox {
+  position: relative;
+}
+
+.inputWrap {
+  position: relative;
+}
+
+.input {
+  padding-right: calc(var(--spacing-xs) + var(--spacing-md) + var(--spacing-xxs));
+}
+
+.icon {
+  position: absolute;
+  top: 50%;
+  right: var(--spacing-xs);
+  display: inline-flex;
+  color: var(--colors-text);
+  /* The brand DropdownIcon points right; production turns it down too */
+  transform: translateY(-50%) rotate(90deg);
+  pointer-events: none;
+}
+
+.svg {
+  width: var(--spacing-md);
+  height: var(--spacing-md);
+}
+
+.list {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  left: 0;
+  z-index: var(--z-raised);
+  max-height: calc(var(--target-size-recommended) * 5);
+  margin: var(--spacing-xxxs) 0 0;
+  padding: var(--spacing-xxxs) 0;
+  overflow-y: auto;
+  list-style: none;
+  background: var(--colors-background);
+  border: var(--border-width) solid var(--border-interactive);
+  border-radius: var(--form-field-border-radius);
+  box-shadow: var(--shadow-md);
+}
+
+.listStatic {
+  position: static;
+}
+
+.list[hidden] {
+  display: none;
+}
+
+.option {
+  display: flex;
+  align-items: center;
+  min-height: var(--target-size-recommended);
+  padding: 0 var(--spacing-xs);
+  color: var(--colors-text);
+  cursor: pointer;
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  font-weight:    var(--typography-rules-text1-font-weight, normal);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+}
+
+.option:hover {
+  background: var(--colors-surface-primary);
+}
+
+/* The active option: inverted, so it reads at a glance and isn't a tint alone */
+.option[aria-selected='true'] {
+  background: var(--colors-text);
+  color: var(--colors-background);
+}

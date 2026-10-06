@@ -1,0 +1,275 @@
+/* Production today, copied from the live components named in Production.tsx.
+   Hardcoded px values are production's own. Where production sets
+   `outline: none`, a transparent outline is used instead — it looks the same. */
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.note,
+.text {
+  margin: 0;
+  color: var(--colors-text);
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+}
+
+.note {
+  font-family:    var(--typography-rules-text3-font-family);
+  font-size:      var(--typography-rules-text3-font-size);
+  line-height:    var(--typography-rules-text3-line-height);
+}
+
+.title {
+  margin: 0;
+  color: var(--colors-text);
+  font-family:    var(--typography-rules-headline4-font-family);
+  font-size:      var(--typography-rules-headline4-font-size);
+  line-height:    var(--typography-rules-headline4-line-height);
+  text-transform: var(--typography-rules-headline4-text-transform, none);
+}
+
+.arrowIcon {
+  width: var(--spacing-md);
+  height: var(--spacing-md);
+}
+
+/* ─── Carousel: HomePage .carouselArrow ───────────────────────────────────── */
+
+.carousel {
+  position: relative;
+  max-width: 64rem;
+}
+
+.track {
+  display: flex;
+  gap: var(--spacing-xs);
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+}
+
+.slide {
+  flex: 0 0 45%;
+  scroll-snap-align: start;
+  color: var(--colors-text);
+  text-decoration: none;
+}
+
+.slideImage {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+}
+
+.slideTitle {
+  font-family: var(--typography-rules-text1-font-family);
+  font-size:   var(--typography-rules-text1-font-size);
+}
+
+.arrow {
+  position: absolute;
+  top: 40%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  color: var(--colors-text-inverse);
+  background: var(--colors-text);
+  border: 0;
+  opacity: 0;
+  pointer-events: none;
+  cursor: pointer;
+  transition: opacity var(--transition-fast);
+}
+
+.carousel:hover .arrow {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.arrowPrev {
+  left: var(--spacing-xxs);
+  transform: scaleX(-1);
+}
+
+.arrowNext {
+  right: var(--spacing-xxs);
+}
+
+/* ─── Drawer: FloatingCart — off-screen but not inert ─────────────────────── */
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-overlay);
+  background: var(--colors-overlay);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition-base);
+}
+
+.overlayOpen {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: var(--z-modal);
+  width: min(44rem, 100%);
+  background: var(--colors-background);
+  transform: translateX(100%);
+  transition: transform var(--transition-base);
+}
+
+.drawerOpen {
+  transform: translateX(0);
+}
+
+.drawerHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-sm);
+  border-bottom: var(--border-width) solid var(--border-color);
+}
+
+.drawerClose {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  color: var(--colors-text);
+  background: none;
+  border: 0;
+  outline-color: transparent;
+  cursor: pointer;
+}
+
+.drawerClose.drawerClose:focus-visible {
+  outline-color: transparent;
+}
+
+.modalContent {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md);
+}
+
+/* ─── Accordion: FooterNav ────────────────────────────────────────────────── */
+
+.accordion {
+  max-width: 56rem;
+}
+
+.accordionItem {
+  border-bottom: var(--border-width) solid var(--border-color);
+}
+
+.accordionButton {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: var(--spacing-xs) 0;
+  color: var(--colors-text);
+  background: none;
+  border: 0;
+  cursor: pointer;
+  font-family: var(--typography-rules-text2-font-family);
+  font-size:   var(--typography-rules-text2-font-size);
+  line-height: var(--typography-rules-text2-line-height);
+}
+
+.chevron {
+  display: inline-flex;
+  transform: rotate(90deg);
+}
+
+.chevronOpen {
+  transform: rotate(-90deg);
+}
+
+.accordionPanel {
+  padding-bottom: var(--spacing-sm);
+}
+
+/* ─── Tabs: MusicMemoriesCustomizer ───────────────────────────────────────── */
+
+.tabList {
+  display: flex;
+  gap: var(--spacing-sm);
+  border-bottom: var(--border-width) solid var(--border-color);
+}
+
+.tab {
+  padding: var(--spacing-xxs) 0;
+  color: var(--colors-text-secondary);
+  background: none;
+  border: 0;
+  cursor: pointer;
+  font-family: var(--typography-rules-text1-font-family);
+  font-size:   var(--typography-rules-text1-font-size);
+}
+
+.tabActive {
+  color: var(--colors-text);
+}
+
+/* ─── Breadcrumbs: ProductDetailPage ──────────────────────────────────────── */
+
+.crumbs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.crumbGroup {
+  display: inline-flex;
+  align-items: center;
+}
+
+.crumbLink {
+  color: var(--colors-text);
+  text-decoration: none;
+  font-family: var(--typography-rules-text3-font-family);
+  font-size:   var(--typography-rules-text3-font-size);
+}
+
+.crumbSep {
+  display: inline-flex;
+  color: var(--colors-text-secondary);
+}
+
+/* ─── Reviews: Load More ──────────────────────────────────────────────────── */
+
+.reviews {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xxs);
+  margin: 0;
+  padding-left: var(--spacing-sm);
+}
+
+/* ─── Tooltip: CheckoutPageClientV1 ───────────────────────────────────────── */
+
+.tooltipIcon {
+  display: inline-flex;
+  vertical-align: middle;
+  color: var(--colors-text);
+}

@@ -1,0 +1,222 @@
+/* Card chrome only uses --colors-text for text: --colors-text-secondary fails
+   4.5:1 today, and the chrome must pass on its own. */
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  padding: var(--spacing-sm);
+  background: var(--colors-background);
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--radius-lg);
+  min-width: 0;
+}
+
+@media (min-width: 768px) {
+  .card {
+    padding: var(--spacing-md);
+  }
+}
+
+/* ─── Collapsed by default ─────────────────────────────────────────────────── */
+
+.card:has(.body[hidden]) {
+  gap: var(--spacing-xs);
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.body[hidden] {
+  display: none;
+}
+
+.toggleIcon {
+  display: inline-flex;
+  flex-shrink: 0;
+  color: var(--colors-text);
+  transition: transform var(--transition-base);
+}
+
+.toggleIconOpen {
+  transform: rotate(90deg);
+}
+
+.chevron {
+  width: var(--spacing-md);
+  height: var(--spacing-md);
+}
+
+/* ─── Header ──────────────────────────────────────────────────────────────── */
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.title {
+  margin: 0;
+}
+
+/* The whole title row is the button; the chevron sits in front, pointing
+   right when closed and turning down when open. */
+.toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  width: 100%;
+  min-height: var(--target-size-recommended);
+  padding: 0;
+  background: none;
+  border: 0;
+  border-radius: var(--radius-sm);
+  text-align: left;
+  cursor: pointer;
+  color: var(--colors-text);
+  font-family:    var(--typography-rules-headline4-font-family);
+  font-size:      var(--typography-rules-headline4-font-size);
+  line-height:    var(--typography-rules-headline4-line-height);
+  font-weight:    var(--typography-rules-headline4-font-weight, normal);
+  letter-spacing: var(--typography-rules-headline4-letter-spacing, normal);
+  text-transform: var(--typography-rules-headline4-text-transform, none);
+}
+
+.criteria {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xxs);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.criterion {
+  padding: var(--spacing-xxxs) var(--spacing-xxs);
+  background: var(--colors-surface-secondary);
+  color: var(--colors-text);
+  border-radius: var(--radius-sm);
+  font-family:    var(--typography-rules-caption1-font-family);
+  font-size:      var(--typography-rules-caption1-font-size);
+  line-height:    var(--typography-rules-caption1-line-height);
+  font-weight:    var(--typography-rules-caption1-font-weight, normal);
+  letter-spacing: var(--typography-rules-caption1-letter-spacing, normal);
+  text-transform: var(--typography-rules-caption1-text-transform, none);
+}
+
+/* ─── Blocks ──────────────────────────────────────────────────────────────── */
+
+.block {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.blockTitle {
+  margin: 0;
+  color: var(--colors-text);
+  font-family:    var(--typography-rules-text4-font-family);
+  font-size:      var(--typography-rules-text4-font-size);
+  line-height:    var(--typography-rules-text4-line-height);
+  font-weight:    var(--typography-rules-text4-font-weight, normal);
+  letter-spacing: var(--typography-rules-text4-letter-spacing, normal);
+  text-transform: var(--typography-rules-text4-text-transform, none);
+}
+
+.live {
+  padding: var(--spacing-md) var(--spacing-sm);
+  background: var(--colors-surface-primary);
+  border-radius: var(--radius-md);
+}
+
+/* ─── View note ───────────────────────────────────────────────────────────── */
+
+.viewNote {
+  margin: 0;
+  color: var(--colors-text);
+  font-family:    var(--typography-rules-text3-font-family);
+  font-size:      var(--typography-rules-text3-font-size);
+  line-height:    var(--typography-rules-text3-line-height);
+  font-weight:    var(--typography-rules-text3-font-weight, normal);
+  letter-spacing: var(--typography-rules-text3-letter-spacing, normal);
+  text-transform: var(--typography-rules-text3-text-transform, none);
+}
+
+.viewLabel {
+  font-family: var(--typography-rules-text4-font-family);
+  font-weight: var(--typography-rules-text4-font-weight, normal);
+}
+
+/* ─── States matrix ───────────────────────────────────────────────────────── */
+
+.states {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 26rem), 1fr));
+  gap: var(--spacing-xs);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.state {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xxs);
+  min-width: 0;
+}
+
+.stateLabel {
+  color: var(--colors-text);
+  font-family:    var(--typography-rules-caption1-font-family);
+  font-size:      var(--typography-rules-caption1-font-size);
+  line-height:    var(--typography-rules-caption1-line-height);
+  font-weight:    var(--typography-rules-caption1-font-weight, normal);
+  letter-spacing: var(--typography-rules-caption1-letter-spacing, normal);
+  text-transform: var(--typography-rules-caption1-text-transform, none);
+}
+
+.stateBody {
+  padding: var(--spacing-sm);
+  background: var(--colors-surface-primary);
+  border-radius: var(--radius-md);
+}
+
+/* ─── Do / Don't ──────────────────────────────────────────────────────────── */
+
+.guidance {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--spacing-sm);
+  padding-top: var(--spacing-sm);
+  border-top: var(--border-width) solid var(--border-color);
+}
+
+@media (min-width: 768px) {
+  .guidance {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.guidanceColumn {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xxs);
+}
+
+.guidanceList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xxxs);
+  margin: 0;
+  padding-left: var(--spacing-sm);
+  color: var(--colors-text);
+  font-family:    var(--typography-rules-text3-font-family);
+  font-size:      var(--typography-rules-text3-font-size);
+  line-height:    var(--typography-rules-text3-line-height);
+  font-weight:    var(--typography-rules-text3-font-weight, normal);
+  letter-spacing: var(--typography-rules-text3-letter-spacing, normal);
+  text-transform: var(--typography-rules-text3-text-transform, none);
+}

@@ -1,0 +1,77 @@
+.examples {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 14rem), 1fr));
+  gap: var(--spacing-sm);
+}
+
+.example {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  margin: 0;
+  padding: var(--spacing-md) var(--spacing-sm);
+  background: var(--colors-background);
+  border-radius: var(--radius-md);
+}
+
+.stage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(var(--target-size-recommended) + var(--spacing-md));
+}
+
+/* The dashed outline marks the hit area, so its size is visible. */
+.target {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  color: var(--colors-text);
+  background: transparent;
+  border: var(--border-width) dashed var(--border-interactive);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.tooSmall {
+  width: var(--spacing-sm);
+  height: var(--spacing-sm);
+  cursor: default;
+}
+
+.minimum {
+  width: var(--target-size-min);
+  height: var(--target-size-min);
+}
+
+.recommended {
+  width: var(--target-size-recommended);
+  height: var(--target-size-recommended);
+}
+
+.iconSmall {
+  width: var(--spacing-sm);
+  height: var(--spacing-sm);
+}
+
+.icon {
+  width: var(--spacing-md);
+  height: var(--spacing-md);
+}
+
+.caption {
+  color: var(--colors-text);
+  font-family:    var(--typography-rules-text3-font-family);
+  font-size:      var(--typography-rules-text3-font-size);
+  line-height:    var(--typography-rules-text3-line-height);
+  font-weight:    var(--typography-rules-text3-font-weight, normal);
+  letter-spacing: var(--typography-rules-text3-letter-spacing, normal);
+  text-transform: var(--typography-rules-text3-text-transform, none);
+}
+
+.size {
+  display: block;
+  font-family: var(--typography-rules-text4-font-family);
+  font-weight: var(--typography-rules-text4-font-weight, normal);
+}

@@ -1,0 +1,222 @@
+/* Page chrome only uses --colors-text for text: --colors-text-secondary fails
+   4.5:1 today, and the page itself must pass. */
+
+.page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: var(--colors-surface-primary);
+}
+
+/* ─── Skip link — first focusable element, visible on focus ──────────────── */
+
+.skipLink {
+  position: absolute;
+  top: var(--spacing-xxs);
+  left: var(--spacing-xxs);
+  z-index: calc(var(--z-header) + 1);
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--target-size-recommended);
+  padding: 0 var(--spacing-sm);
+  background: var(--colors-background);
+  color: var(--colors-text);
+  border: var(--border-width) solid var(--colors-text);
+  border-radius: var(--radius-sm);
+  transform: translateY(calc(-100% - var(--spacing-md)));
+  font-family:    var(--typography-rules-text2-font-family);
+  font-size:      var(--typography-rules-text2-font-size);
+  line-height:    var(--typography-rules-text2-line-height);
+  font-weight:    var(--typography-rules-text2-font-weight, normal);
+  letter-spacing: var(--typography-rules-text2-letter-spacing, normal);
+  text-transform: var(--typography-rules-text2-text-transform, none);
+}
+
+.skipLink:focus {
+  transform: none;
+}
+
+/* ─── Main ────────────────────────────────────────────────────────────────── */
+
+.main {
+  flex: 1;
+  width: 100%;
+}
+
+/* 2.4.11 Focus Not Obscured: anything scrolled into view — by focus or an
+   anchor link — stops below the sticky top bar (sticky from 768px up). */
+@media (min-width: 768px) {
+  .main :where(*) {
+    scroll-margin-top: calc(var(--a11y-topbar-height, 0px) + var(--spacing-sm));
+  }
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xl);
+  width: 100%;
+  max-width: var(--layout-content-width);
+  margin: 0 auto;
+  padding: var(--spacing-lg) var(--layout-page-margin) var(--spacing-xxl);
+}
+
+@media (min-width: 768px) {
+  .container {
+    gap: var(--spacing-xxl);
+    padding-top: var(--spacing-xl);
+  }
+}
+
+/* ─── Intro ───────────────────────────────────────────────────────────────── */
+
+.intro {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  max-width: 70ch;
+}
+
+.pageTitle {
+  margin: 0;
+  color: var(--colors-text);
+  font-family:    var(--typography-rules-headline2-font-family);
+  font-size:      var(--typography-rules-headline2-font-size);
+  line-height:    var(--typography-rules-headline2-line-height);
+  font-weight:    var(--typography-rules-headline2-font-weight, normal);
+  letter-spacing: var(--typography-rules-headline2-letter-spacing, normal);
+  text-transform: var(--typography-rules-headline2-text-transform, none);
+}
+
+.lead {
+  margin: 0;
+  color: var(--colors-text);
+  font-family:    var(--typography-rules-paragraph4-font-family);
+  font-size:      var(--typography-rules-paragraph4-font-size);
+  line-height:    var(--typography-rules-paragraph4-line-height);
+  font-weight:    var(--typography-rules-paragraph4-font-weight, normal);
+  letter-spacing: var(--typography-rules-paragraph4-letter-spacing, normal);
+  text-transform: var(--typography-rules-paragraph4-text-transform, none);
+}
+
+.note,
+.plannedList,
+.footerText {
+  margin: 0;
+  font-family:    var(--typography-rules-text3-font-family);
+  font-size:      var(--typography-rules-text3-font-size);
+  line-height:    var(--typography-rules-text3-line-height);
+  font-weight:    var(--typography-rules-text3-font-weight, normal);
+  letter-spacing: var(--typography-rules-text3-letter-spacing, normal);
+  text-transform: var(--typography-rules-text3-text-transform, none);
+}
+
+.note,
+.plannedList {
+  color: var(--colors-text);
+}
+
+/* ─── On this page ────────────────────────────────────────────────────────── */
+
+.toc {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xxs);
+}
+
+.tocTitle,
+.plannedTitle {
+  margin: 0;
+  color: var(--colors-text);
+  font-family:    var(--typography-rules-text4-font-family);
+  font-size:      var(--typography-rules-text4-font-size);
+  line-height:    var(--typography-rules-text4-line-height);
+  font-weight:    var(--typography-rules-text4-font-weight, normal);
+  letter-spacing: var(--typography-rules-text4-letter-spacing, normal);
+  text-transform: var(--typography-rules-text4-text-transform, none);
+}
+
+.expandControls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+  margin-top: var(--spacing-xs);
+}
+
+.tocList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 var(--spacing-md);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tocLink,
+.footerLink {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--target-size-recommended);
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  font-family:    var(--typography-rules-links1-font-family);
+  font-size:      var(--typography-rules-links1-font-size);
+  line-height:    var(--typography-rules-links1-line-height);
+  font-weight:    var(--typography-rules-links1-font-weight, normal);
+  letter-spacing: var(--typography-rules-links1-letter-spacing, normal);
+  text-transform: var(--typography-rules-links1-text-transform, none);
+}
+
+.tocLink {
+  color: var(--colors-text);
+}
+
+/* ─── Sections ───────────────────────────────────────────────────────────── */
+
+.cards {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.planned {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xxs);
+  padding: var(--spacing-sm);
+  border: var(--border-width) dashed var(--border-interactive);
+  border-radius: var(--radius-lg);
+}
+
+.plannedList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xxxs) var(--spacing-md);
+  padding-left: var(--spacing-sm);
+}
+
+/* ─── Footer ──────────────────────────────────────────────────────────────── */
+
+/* The footer is dark in some brands and light in others, so the ring takes
+   the footer's own text color — it contrasts with the footer by definition. */
+.footer {
+  --focus-ring-color: var(--footer-text);
+  background: var(--footer-main-background);
+  color: var(--footer-text);
+}
+
+.footerInner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-xs) var(--spacing-md);
+  max-width: var(--layout-content-width);
+  margin: 0 auto;
+  padding: var(--spacing-md) var(--layout-page-margin);
+}
+
+.footerText code {
+  overflow-wrap: anywhere;
+}

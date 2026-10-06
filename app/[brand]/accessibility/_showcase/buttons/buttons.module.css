@@ -1,0 +1,281 @@
+/* Buttons and links. The proposed fixes sit on top of the site's own Button
+   component through className, so Button itself is untouched. Production
+   replicas are marked "Production"; where production sets `outline: none`
+   they use a transparent outline, which looks the same. */
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.body,
+.note {
+  margin: 0;
+  color: var(--colors-text);
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  font-weight:    var(--typography-rules-text1-font-weight, normal);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+}
+
+.caption {
+  margin: 0;
+  color: var(--colors-text);
+  font-family:    var(--typography-rules-caption1-font-family);
+  font-size:      var(--typography-rules-caption1-font-size);
+  line-height:    var(--typography-rules-caption1-line-height);
+  font-weight:    var(--typography-rules-caption1-font-weight, normal);
+  letter-spacing: var(--typography-rules-caption1-letter-spacing, normal);
+  text-transform: var(--typography-rules-caption1-text-transform, none);
+}
+
+/* ─── Hover, drawn for the states matrix — Button's own hover rules ───────── */
+
+.hoverPrimary {
+  background: color-mix(in srgb, var(--buttons-primary-background) 88%, var(--colors-text));
+}
+
+.hoverSecondary {
+  background: color-mix(in srgb, var(--buttons-secondary-background) 92%, var(--colors-text));
+}
+
+/* ─── Text button (Button variant="link") ─────────────────────────────────── */
+
+/* Production fades the link to 70% on hover, which drops its contrast. The fix
+   keeps full color and thickens the underline, and gives it a 24px target. */
+.textButton {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--target-size-min);
+  text-underline-offset: 3px;
+}
+
+/* Button gives the link variant no disabled look; this one dims it and
+   drops the underline, so it doesn't read as clickable. */
+.textButton:disabled {
+  color: var(--colors-text-secondary);
+  text-decoration: none;
+  cursor: not-allowed;
+}
+
+.textButton:hover:not(:disabled),
+.textButtonHover {
+  opacity: 1;
+  text-decoration-thickness: 2px;
+}
+
+/* ─── Icon-only buttons ───────────────────────────────────────────────────── */
+
+.iconButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--target-size-recommended);
+  height: var(--target-size-recommended);
+  padding: 0;
+  color: var(--colors-text);
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.iconButton:hover {
+  background: var(--colors-surface-primary);
+}
+
+.icon {
+  width: var(--spacing-md);
+  height: var(--spacing-md);
+}
+
+/* Production: Header.module.css .iconButton — 24×24, outline: none */
+.iconButtonToday {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  color: inherit;
+  background: transparent;
+  border: none;
+  outline-color: transparent;
+  cursor: pointer;
+}
+
+.iconButtonToday.iconButtonToday:focus-visible {
+  outline-color: transparent;
+}
+
+/* ─── Loading ─────────────────────────────────────────────────────────────── */
+
+.spinner {
+  width: var(--spacing-md);
+  height: var(--spacing-md);
+  animation: spin 900ms linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Busy but still focusable: aria-disabled, not disabled, so focus isn't lost */
+.busy {
+  cursor: progress;
+}
+
+.status {
+  margin: 0;
+  min-height: var(--typography-rules-text3-line-height);
+  color: var(--colors-text);
+  font-family:    var(--typography-rules-text3-font-family);
+  font-size:      var(--typography-rules-text3-font-size);
+  line-height:    var(--typography-rules-text3-line-height);
+}
+
+/* ─── aria-disabled ───────────────────────────────────────────────────────── */
+
+.softDisabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* ─── Inline links ────────────────────────────────────────────────────────── */
+
+.link {
+  color: var(--colors-text);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  transition: text-decoration-thickness var(--transition-fast);
+  font-family:    var(--typography-rules-links1-font-family);
+  font-size:      var(--typography-rules-links1-font-size);
+  line-height:    var(--typography-rules-links1-line-height);
+  font-weight:    var(--typography-rules-links1-font-weight, normal);
+  letter-spacing: var(--typography-rules-links1-letter-spacing, normal);
+}
+
+.link:hover {
+  text-decoration-thickness: 2px;
+}
+
+/* Production: ConfirmationPage .inlineLink — fades on hover */
+.linkToday {
+  color: var(--colors-text);
+  text-decoration: underline;
+  font-family:    var(--typography-rules-links1-font-family);
+  font-size:      var(--typography-rules-links1-font-size);
+  line-height:    var(--typography-rules-links1-line-height);
+}
+
+.linkToday:hover {
+  opacity: 0.7;
+}
+
+/* ─── Toggle button (metal filter) ────────────────────────────────────────── */
+
+.filterList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xxxs);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  max-width: 32rem;
+}
+
+.filterItem {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  width: 100%;
+  min-height: var(--target-size-recommended);
+  padding: 0 var(--spacing-xxs);
+  color: var(--colors-text);
+  background: none;
+  border: 0;
+  border-radius: var(--radius-sm);
+  text-align: left;
+  cursor: pointer;
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  font-weight:    var(--typography-rules-text1-font-weight, normal);
+}
+
+.filterItem:hover {
+  background: var(--colors-surface-primary);
+}
+
+.filterSwatch {
+  flex-shrink: 0;
+  width: var(--spacing-md);
+  height: var(--spacing-md);
+  border: var(--border-width) solid var(--border-interactive);
+  border-radius: var(--radius-full);
+  box-shadow: inset 0 0 0 calc(var(--spacing-xxxs) / 2) var(--colors-background);
+}
+
+/* Pressed: a thick ring on the swatch, bold text and a checkmark */
+.filterItem[aria-pressed='true'] .filterSwatch {
+  border-color: var(--colors-text);
+  box-shadow:
+    0 0 0 var(--border-width) var(--colors-text),
+    inset 0 0 0 calc(var(--spacing-xxxs) / 2) var(--colors-background);
+}
+
+.filterItem[aria-pressed='true'] .filterLabel {
+  font-family: var(--typography-rules-text2-font-family);
+  font-weight: var(--typography-rules-text2-font-weight, normal);
+}
+
+.filterLabel {
+  flex: 1;
+}
+
+.filterCheck {
+  width: var(--spacing-sm);
+  height: var(--spacing-sm);
+}
+
+/* Production: CategoryPage .materialItem — no focus style, #ebebeb swatch border */
+.filterItemToday {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  width: 100%;
+  padding: var(--spacing-xxxs) 0;
+  color: var(--colors-text);
+  background: none;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+}
+
+.filterSwatchToday {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--radius-full);
+}
+
+.filterItemToday[aria-pressed='true'] .filterSwatchToday {
+  box-shadow: 0 0 0 2px var(--colors-background), 0 0 0 3px var(--colors-text);
+}

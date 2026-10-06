@@ -1,0 +1,60 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  max-width: 48rem;
+}
+
+/* A thick error-colored edge plus the heading: the summary is found by its
+   words and its position at the top, not by its color. */
+.summary {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-sm);
+  background: var(--colors-background);
+  border: calc(var(--focus-ring-width) * 2) solid var(--colors-error);
+  border-radius: var(--radius-md);
+}
+
+.title {
+  margin: 0;
+  color: var(--colors-text);
+  font-family:    var(--typography-rules-text2-font-family);
+  font-size:      var(--typography-rules-text2-font-size);
+  line-height:    var(--typography-rules-text2-line-height);
+  font-weight:    var(--typography-rules-text2-font-weight, normal);
+  letter-spacing: var(--typography-rules-text2-letter-spacing, normal);
+  text-transform: var(--typography-rules-text2-text-transform, none);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xxxs);
+  margin: 0;
+  padding-left: var(--spacing-sm);
+}
+
+.link {
+  color: var(--colors-error);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  font-family:    var(--typography-rules-links1-font-family);
+  font-size:      var(--typography-rules-links1-font-size);
+  line-height:    var(--typography-rules-links1-line-height);
+  font-weight:    var(--typography-rules-links1-font-weight, normal);
+  letter-spacing: var(--typography-rules-links1-letter-spacing, normal);
+}
+
+.sent {
+  margin: 0;
+  padding: var(--spacing-sm);
+  color: var(--colors-text);
+  background: var(--colors-background);
+  border: var(--border-width) solid var(--colors-success);
+  border-radius: var(--radius-md);
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+}

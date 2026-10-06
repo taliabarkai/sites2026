@@ -1,0 +1,76 @@
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xxs);
+  max-width: 70ch;
+}
+
+.title {
+  margin: 0;
+}
+
+/* The whole heading row is the button; the chevron sits in front */
+.toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  width: 100%;
+  min-height: var(--target-size-recommended);
+  padding: 0;
+  color: var(--colors-text);
+  background: none;
+  border: 0;
+  border-radius: var(--radius-sm);
+  text-align: left;
+  cursor: pointer;
+  font-family:    var(--typography-rules-headline12-font-family);
+  font-size:      var(--typography-rules-headline12-font-size);
+  line-height:    var(--typography-rules-headline12-line-height);
+  font-weight:    var(--typography-rules-headline12-font-weight, normal);
+  letter-spacing: var(--typography-rules-headline12-letter-spacing, normal);
+  text-transform: var(--typography-rules-headline12-text-transform, none);
+}
+
+.toggleIcon {
+  display: inline-flex;
+  flex-shrink: 0;
+  transition: transform var(--transition-base);
+}
+
+.toggleIconOpen {
+  transform: rotate(90deg);
+}
+
+.chevron {
+  width: var(--spacing-md);
+  height: var(--spacing-md);
+}
+
+/* Lines up with the title text, past the chevron */
+.intro {
+  margin: 0;
+  padding-left: calc(var(--spacing-md) + var(--spacing-xs));
+  color: var(--colors-text);
+  font-family:    var(--typography-rules-text3-font-family);
+  font-size:      var(--typography-rules-text3-font-size);
+  line-height:    var(--typography-rules-text3-line-height);
+  font-weight:    var(--typography-rules-text3-font-weight, normal);
+  letter-spacing: var(--typography-rules-text3-letter-spacing, normal);
+  text-transform: var(--typography-rules-text3-text-transform, none);
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.body[hidden] {
+  display: none;
+}

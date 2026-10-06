@@ -1,0 +1,238 @@
+/* Select, checkbox, radio and switch. Borders use --border-interactive (3:1);
+   checked states add a mark or a position, never a fill alone. */
+
+/* ─── Select ──────────────────────────────────────────────────────────────── */
+
+.selectWrap {
+  position: relative;
+}
+
+.select {
+  appearance: none;
+  padding-right: calc(var(--spacing-xs) + var(--spacing-md) + var(--spacing-xxs));
+  cursor: pointer;
+}
+
+.selectIcon {
+  position: absolute;
+  top: 50%;
+  right: var(--spacing-xs);
+  display: inline-flex;
+  color: var(--colors-text);
+  /* The brand DropdownIcon points right; production turns it down too */
+  transform: translateY(-50%) rotate(90deg);
+  pointer-events: none;
+}
+
+.icon {
+  width: var(--spacing-md);
+  height: var(--spacing-md);
+}
+
+/* ─── Shared row: control + label, at least 24px tall ─────────────────────── */
+
+.choiceField {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xxxs);
+}
+
+.choiceRow {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  min-height: var(--target-size-recommended);
+}
+
+.choiceLabel {
+  color: var(--colors-text);
+  cursor: pointer;
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  font-weight:    var(--typography-rules-text1-font-weight, normal);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+  text-transform: var(--typography-rules-text1-text-transform, none);
+}
+
+/* Hints line up with the label, not the box */
+.choiceHint {
+  margin-left: calc(var(--spacing-md) + var(--spacing-xs));
+}
+
+/* ─── Checkbox ────────────────────────────────────────────────────────────── */
+
+.boxWrap {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
+.checkbox,
+.radio {
+  appearance: none;
+  flex-shrink: 0;
+  width: var(--spacing-md);
+  height: var(--spacing-md);
+  margin: 0;
+  background: var(--colors-background);
+  border: var(--border-width) solid var(--border-interactive);
+  cursor: pointer;
+  transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+
+.checkbox {
+  border-radius: var(--radius-sm);
+}
+
+.checkbox:checked {
+  background: var(--colors-text);
+  border-color: var(--colors-text);
+}
+
+.checkbox[aria-invalid='true'] {
+  border-color: var(--colors-error);
+}
+
+.check {
+  position: absolute;
+  inset: 0;
+  width: var(--spacing-md);
+  height: var(--spacing-md);
+  color: var(--colors-background);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.checkbox:checked + .check {
+  opacity: 1;
+}
+
+/* ─── Radio ───────────────────────────────────────────────────────────────── */
+
+.fieldset {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xxs);
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.legend {
+  padding: 0;
+}
+
+.options {
+  display: flex;
+  flex-direction: column;
+}
+
+.radio {
+  position: relative;
+  border-radius: var(--radius-full);
+}
+
+/* Selected: a dot inside the ring */
+.radio::before {
+  content: '';
+  position: absolute;
+  inset: calc(var(--spacing-xxxs) + var(--border-width));
+  background: var(--colors-text);
+  border-radius: var(--radius-full);
+  transform: scale(0);
+  transition: transform var(--transition-fast);
+}
+
+.radio:checked {
+  border-color: var(--colors-text);
+}
+
+.radio:checked::before {
+  transform: scale(1);
+}
+
+.radio:disabled,
+.checkbox:disabled {
+  background: var(--colors-surface-primary);
+  border-color: var(--border-color);
+  cursor: not-allowed;
+}
+
+.radio:disabled + .choiceLabel {
+  color: var(--colors-text-secondary);
+  text-decoration: line-through;
+  cursor: not-allowed;
+}
+
+/* ─── Switch ──────────────────────────────────────────────────────────────── */
+
+.switchRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-sm);
+  min-height: var(--target-size-recommended);
+}
+
+.switchControl {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: var(--spacing-xxs);
+}
+
+.switch {
+  appearance: none;
+  position: relative;
+  width: calc(var(--spacing-xl) + var(--spacing-xxxs));
+  height: var(--spacing-md);
+  margin: 0;
+  background: var(--colors-background);
+  border: var(--border-width) solid var(--border-interactive);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+
+.switch::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: calc(var(--spacing-xxxs) / 2);
+  width: calc(var(--spacing-md) - var(--spacing-xxxs) - var(--border-width) * 2);
+  height: calc(var(--spacing-md) - var(--spacing-xxxs) - var(--border-width) * 2);
+  background: var(--border-interactive);
+  border-radius: var(--radius-full);
+  transform: translateY(-50%);
+  transition: transform var(--transition-fast), background var(--transition-fast);
+}
+
+.switch:checked {
+  background: var(--colors-text);
+  border-color: var(--colors-text);
+}
+
+.switch:checked::before {
+  background: var(--colors-background);
+  transform: translate(var(--spacing-md), -50%);
+}
+
+/* The word beside the switch, so on/off doesn't rest on the knob alone */
+.switchState {
+  min-width: calc(var(--spacing-md) + var(--spacing-xxxs));
+  color: var(--colors-text);
+  font-family:    var(--typography-rules-text3-font-family);
+  font-size:      var(--typography-rules-text3-font-size);
+  line-height:    var(--typography-rules-text3-line-height);
+  font-weight:    var(--typography-rules-text3-font-weight, normal);
+}
+
+.switchState::after {
+  content: 'Off';
+}
+
+.switch:checked + .switchState::after {
+  content: 'On';
+}

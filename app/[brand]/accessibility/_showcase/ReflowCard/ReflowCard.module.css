@@ -1,0 +1,185 @@
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--spacing-md);
+}
+
+@media (min-width: 1024px) {
+  .layout {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+    align-items: start;
+  }
+}
+
+/* ─── Controls ────────────────────────────────────────────────────────────── */
+
+.controls {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.fieldset {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xxxs);
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.legend,
+.choice,
+.hint {
+  color: var(--colors-text);
+  font-family:    var(--typography-rules-text3-font-family);
+  font-size:      var(--typography-rules-text3-font-size);
+  line-height:    var(--typography-rules-text3-line-height);
+  font-weight:    var(--typography-rules-text3-font-weight, normal);
+  letter-spacing: var(--typography-rules-text3-letter-spacing, normal);
+  text-transform: var(--typography-rules-text3-text-transform, none);
+}
+
+.legend {
+  padding: 0;
+  margin-bottom: var(--spacing-xxxs);
+  font-family: var(--typography-rules-text4-font-family);
+  font-weight: var(--typography-rules-text4-font-weight, normal);
+}
+
+/* The whole row is the target, at least 24px tall */
+.choice {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xxs);
+  min-height: var(--target-size-min);
+  cursor: pointer;
+}
+
+.input {
+  width: var(--spacing-sm);
+  height: var(--spacing-sm);
+  margin: 0;
+  accent-color: var(--colors-text);
+}
+
+.hint {
+  margin: 0;
+}
+
+/* ─── Preview ─────────────────────────────────────────────────────────────── */
+
+.viewport {
+  overflow-x: auto;
+}
+
+/* 320px and 640px are the WCAG test widths themselves, not layout choices */
+.frame {
+  width: 320px;
+  max-width: 100%;
+  background: var(--colors-background);
+  border: var(--border-width) solid var(--border-interactive);
+  border-radius: var(--radius-md);
+}
+
+.frameZoom {
+  width: 640px;
+  max-width: none;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-sm);
+}
+
+.zoomed {
+  zoom: 2;
+}
+
+/* WCAG 1.4.12 test values, all relative to the text size */
+.spaced,
+.spaced * {
+  line-height: 1.5 !important;
+  letter-spacing: 0.12em !important;
+  word-spacing: 0.16em !important;
+}
+
+.spaced p {
+  margin-bottom: 2em !important;
+}
+
+/* ─── Product content ─────────────────────────────────────────────────────── */
+
+.eyebrow,
+.price,
+.description,
+.fieldLabel,
+.productName {
+  margin: 0;
+  color: var(--colors-text);
+}
+
+.eyebrow {
+  font-family:    var(--typography-rules-caption1-font-family);
+  font-size:      var(--typography-rules-caption1-font-size);
+  line-height:    var(--typography-rules-caption1-line-height);
+  font-weight:    var(--typography-rules-caption1-font-weight, normal);
+  letter-spacing: var(--typography-rules-caption1-letter-spacing, normal);
+  text-transform: var(--typography-rules-caption1-text-transform, none);
+}
+
+.productName {
+  overflow-wrap: anywhere;
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  font-weight:    var(--typography-rules-text1-font-weight, normal);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+  text-transform: var(--typography-rules-text1-text-transform, none);
+}
+
+.price {
+  color: var(--colors-price-selling);
+  font-family:    var(--typography-rules-text2-font-family);
+  font-size:      var(--typography-rules-text2-font-size);
+  line-height:    var(--typography-rules-text2-line-height);
+  font-weight:    var(--typography-rules-text2-font-weight, normal);
+  letter-spacing: var(--typography-rules-text2-letter-spacing, normal);
+}
+
+.description,
+.fieldLabel {
+  font-family:    var(--typography-rules-text3-font-family);
+  font-size:      var(--typography-rules-text3-font-size);
+  line-height:    var(--typography-rules-text3-line-height);
+  font-weight:    var(--typography-rules-text3-font-weight, normal);
+  letter-spacing: var(--typography-rules-text3-letter-spacing, normal);
+  text-transform: var(--typography-rules-text3-text-transform, none);
+}
+
+.field {
+  width: 100%;
+  min-height: var(--field-min-height);
+  padding: 0 var(--spacing-xs);
+  background: var(--form-field-background);
+  color: var(--colors-text);
+  border: var(--border-width) solid var(--form-field-border-color);
+  border-radius: var(--form-field-border-radius);
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+}
+
+/* Height grows with the text instead of clipping it */
+.cta {
+  width: 100%;
+  height: auto;
+}
+
+.link {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}

@@ -1,0 +1,265 @@
+.bar {
+  background: var(--colors-background);
+  border-bottom: var(--border-width) solid var(--border-color);
+}
+
+/* Sticky from tablet up only. On a phone — or at 200% zoom on a laptop — the
+   bar wraps to several rows, and pinned it would cover a third of the screen. */
+@media (min-width: 768px) {
+  .bar {
+    position: sticky;
+    top: 0;
+    z-index: var(--z-header);
+  }
+}
+
+.inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacing-xxs) var(--spacing-md);
+  max-width: var(--layout-content-width);
+  margin: 0 auto;
+  padding: var(--spacing-xxs) var(--layout-page-margin);
+}
+
+.name {
+  margin: 0;
+  color: var(--colors-text);
+  font-family:    var(--typography-rules-text2-font-family);
+  font-size:      var(--typography-rules-text2-font-size);
+  line-height:    var(--typography-rules-text2-line-height);
+  font-weight:    var(--typography-rules-text2-font-weight, normal);
+  letter-spacing: var(--typography-rules-text2-letter-spacing, normal);
+  text-transform: var(--typography-rules-text2-text-transform, none);
+}
+
+/* ─── Brand switcher ──────────────────────────────────────────────────────── */
+
+/* Full row on mobile. Visual order always matches DOM order (2.4.3). */
+.brands {
+  width: 100%;
+}
+
+@media (min-width: 768px) {
+  .brands {
+    width: auto;
+  }
+}
+
+.brandList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xxxs);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* 44×44 target. Focus is a 3px underline (.ringUnderline), so the current
+   brand is shown as a filled chip in bold instead — never an underline, and
+   not by color alone. */
+.brandLink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--target-size-recommended);
+  min-height: var(--target-size-recommended);
+  padding: 0 var(--spacing-xxs);
+  color: var(--colors-text);
+  text-decoration: none;
+  border-radius: var(--radius-sm);
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  font-weight:    var(--typography-rules-text1-font-weight, normal);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+  text-transform: var(--typography-rules-text1-text-transform, none);
+  transition: background var(--transition-fast);
+}
+
+.brandLink:hover {
+  background: var(--colors-surface-primary);
+}
+
+.brandLink[aria-current='page'] {
+  background: var(--colors-text);
+  color: var(--colors-background);
+  font-family: var(--typography-rules-text2-font-family);
+  font-weight: var(--typography-rules-text2-font-weight, normal);
+}
+
+/* ─── Controls ────────────────────────────────────────────────────────────── */
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacing-xxs) var(--spacing-md);
+}
+
+@media (min-width: 768px) {
+  .controls {
+    margin-left: auto;
+  }
+}
+
+/* ─── Before / After ──────────────────────────────────────────────────────── */
+
+.segmented {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xxs);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+
+/* Legends don't flex; floating it lets it sit inline with the segments. */
+.segmentedLegend {
+  float: left;
+  padding: 0;
+  margin-right: var(--spacing-xxs);
+  color: var(--colors-text);
+  font-family:    var(--typography-rules-text3-font-family);
+  font-size:      var(--typography-rules-text3-font-size);
+  line-height:    var(--typography-rules-text3-line-height);
+  font-weight:    var(--typography-rules-text3-font-weight, normal);
+  letter-spacing: var(--typography-rules-text3-letter-spacing, normal);
+  text-transform: var(--typography-rules-text3-text-transform, none);
+}
+
+.segments {
+  display: inline-flex;
+  border: var(--border-width) solid var(--border-interactive);
+  border-radius: var(--radius-sm);
+}
+
+.segment {
+  position: relative;
+  display: inline-flex;
+}
+
+/* The radio covers its segment, so the whole 44px target is clickable; the
+   visible state and the focus ring are drawn on the text beside it. */
+.segmentInput {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.segmentText {
+  display: inline-flex;
+  align-items: center;
+  min-height: calc(var(--target-size-recommended) - var(--border-width) * 2);
+  padding: 0 var(--spacing-sm);
+  color: var(--colors-text);
+  border-radius: var(--radius-sm);
+  transition: background var(--transition-fast), color var(--transition-fast);
+  font-family:    var(--typography-rules-text3-font-family);
+  font-size:      var(--typography-rules-text3-font-size);
+  line-height:    var(--typography-rules-text3-line-height);
+  font-weight:    var(--typography-rules-text3-font-weight, normal);
+  letter-spacing: var(--typography-rules-text3-letter-spacing, normal);
+  text-transform: var(--typography-rules-text3-text-transform, none);
+}
+
+.segment:hover .segmentText {
+  background: var(--colors-surface-primary);
+}
+
+/* Selected: filled and bold — not color alone */
+.segmentInput:checked + .segmentText {
+  background: var(--colors-text);
+  color: var(--colors-background);
+  font-family: var(--typography-rules-text4-font-family);
+  font-weight: var(--typography-rules-text4-font-weight, normal);
+}
+
+.segmentInput:focus-visible + .segmentText {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+  box-shadow: inset 0 0 0 var(--focus-ring-width) var(--focus-ring-color-inverse);
+}
+
+.switch {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xxs);
+  min-height: var(--target-size-recommended);
+  cursor: pointer;
+}
+
+/* Native checkbox with role="switch", drawn as a track. On/off is shown by the
+   knob's position as well as the fill, so it doesn't rely on color. */
+.switchInput {
+  appearance: none;
+  position: relative;
+  flex-shrink: 0;
+  width: var(--spacing-xl);
+  height: var(--spacing-md);
+  margin: 0;
+  background: var(--colors-background);
+  border: var(--focus-ring-width) solid var(--border-interactive);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+
+.switchInput::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: calc(var(--spacing-xxxs) / 2);
+  width: var(--spacing-sm);
+  height: var(--spacing-sm);
+  margin-top: calc(var(--spacing-sm) / -2);
+  background: var(--border-interactive);
+  border-radius: var(--radius-full);
+  transition: transform var(--transition-fast), background var(--transition-fast);
+}
+
+.switchInput:checked {
+  background: var(--colors-text);
+  border-color: var(--colors-text);
+}
+
+.switchInput:checked::before {
+  background: var(--colors-background);
+  transform: translateX(var(--spacing-sm));
+}
+
+.switchText,
+.motion {
+  color: var(--colors-text);
+  font-family:    var(--typography-rules-text3-font-family);
+  font-size:      var(--typography-rules-text3-font-size);
+  line-height:    var(--typography-rules-text3-line-height);
+  font-weight:    var(--typography-rules-text3-font-weight, normal);
+  letter-spacing: var(--typography-rules-text3-letter-spacing, normal);
+  text-transform: var(--typography-rules-text3-text-transform, none);
+}
+
+.motion {
+  margin: 0;
+}
+
+.motionValue {
+  font-family: var(--typography-rules-text4-font-family);
+  font-weight: var(--typography-rules-text4-font-weight, normal);
+}
+
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}

@@ -1,0 +1,227 @@
+/* Production today, copied from the live components named in Production.tsx.
+   Where production sets `outline: none`, this file uses a transparent outline:
+   it looks the same — no ring — without adding a real `outline: none` to the
+   codebase. */
+
+.field,
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xxs);
+}
+
+.label {
+  color: var(--colors-text);
+  font-family:    var(--typography-rules-text3-font-family);
+  font-size:      var(--typography-rules-text3-font-size);
+  line-height:    var(--typography-rules-text3-line-height);
+  font-weight:    var(--typography-rules-text3-font-weight, normal);
+}
+
+.input {
+  width: 100%;
+  min-height: var(--field-min-height);
+  padding: 0 var(--spacing-xs);
+  background: var(--form-field-background);
+  color: var(--colors-text);
+  border: var(--border-width) solid var(--form-field-border-color);
+  border-radius: var(--form-field-border-radius);
+  outline-color: transparent;
+  transition: border-color var(--transition-fast);
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+}
+
+.input::placeholder {
+  color: var(--form-input-placeholder);
+}
+
+.input:hover {
+  border-color: var(--form-field-border-color-hover);
+}
+
+/* The whole focus treatment: a border-color swap */
+.input.input:focus {
+  border-color: var(--colors-text);
+  outline-color: transparent;
+}
+
+.textarea {
+  padding: var(--spacing-xs);
+  resize: vertical;
+}
+
+/* ─── Counter: 11px, inside the field, unlinked ───────────────────────────── */
+
+.counterWrap {
+  position: relative;
+}
+
+.counterWrap .input {
+  padding-right: calc(var(--spacing-xxl));
+}
+
+.counter {
+  position: absolute;
+  top: 50%;
+  right: var(--spacing-xs);
+  color: var(--colors-text-secondary);
+  font-size: 11px;
+  transform: translateY(-50%);
+}
+
+/* ─── Select ──────────────────────────────────────────────────────────────── */
+
+.selectWrap,
+.comboWrap {
+  position: relative;
+}
+
+.select {
+  appearance: none;
+  cursor: pointer;
+}
+
+.selectIcon {
+  position: absolute;
+  top: 50%;
+  right: var(--spacing-xs);
+  display: inline-flex;
+  transform: translateY(-50%) rotate(90deg);
+  pointer-events: none;
+}
+
+.icon {
+  width: var(--spacing-md);
+  height: var(--spacing-md);
+}
+
+/* ─── Combobox ────────────────────────────────────────────────────────────── */
+
+.comboList {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  left: 0;
+  z-index: var(--z-raised);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  background: var(--colors-background);
+  border: var(--border-width) solid var(--form-field-border-color);
+}
+
+.comboList[hidden] {
+  display: none;
+}
+
+.comboOption {
+  padding: var(--spacing-xxs) var(--spacing-xs);
+  color: var(--colors-text);
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.comboOption:hover,
+.comboOption[aria-selected='true'] {
+  background: var(--colors-surface-secondary);
+}
+
+/* ─── Checkboxes ──────────────────────────────────────────────────────────── */
+
+.checkboxLabel,
+.upsell {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xxs);
+  color: var(--colors-text);
+  cursor: pointer;
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+}
+
+.nativeCheckbox {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: var(--colors-text);
+}
+
+.upsell {
+  position: relative;
+}
+
+/* Visually hidden native box, and no focus style on the drawn one */
+.hiddenInput {
+  position: absolute;
+  opacity: 0;
+}
+
+.fakeBox {
+  width: 20px;
+  height: 20px;
+  border: var(--border-width) solid var(--border-strong);
+  border-radius: 4px;
+}
+
+.hiddenInput:checked + .fakeBox {
+  background: var(--colors-text);
+}
+
+/* ─── Radios ──────────────────────────────────────────────────────────────── */
+
+.radioCard {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  min-height: var(--field-min-height);
+  padding: var(--spacing-xs);
+  color: var(--colors-text);
+  background: var(--colors-background);
+  border: var(--border-width) solid var(--border-color);
+  cursor: pointer;
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+}
+
+.radioCardSelected {
+  border-color: var(--colors-text);
+}
+
+.nativeRadio {
+  margin: 0;
+  accent-color: var(--colors-text);
+}
+
+.radioHint {
+  color: var(--colors-text-secondary);
+}
+
+/* ─── Error banner ────────────────────────────────────────────────────────── */
+
+.errorBanner {
+  padding: var(--spacing-sm);
+  background: var(--colors-background);
+  border: var(--border-width) solid var(--colors-error);
+}
+
+.errorTitle,
+.errorText {
+  margin: 0;
+  font-family:    var(--typography-rules-text3-font-family);
+  font-size:      var(--typography-rules-text3-font-size);
+  line-height:    var(--typography-rules-text3-line-height);
+}
+
+.errorTitle {
+  color: var(--colors-error);
+  font-family: var(--typography-rules-text4-font-family);
+  font-weight: var(--typography-rules-text4-font-weight, normal);
+}
+
+.errorText {
+  color: var(--colors-text);
+}

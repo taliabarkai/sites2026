@@ -1,0 +1,219 @@
+/**
+ * Accessibility showcase — proposed tokens
+ * ─────────────────────────────────────────────────────────────────────────────
+ * Scoped to the accessibility page. Nothing in this file reaches globals.css,
+ * the theme files or any other page.
+ *
+ * Raw hex values appear here on purpose: they are proposals that don't exist
+ * as tokens yet. Once approved, each one moves into styles/themes/{brand}.css
+ * (primitive + semantic token) and this file goes away.
+ *
+ *   .scope   — the page root. Proposed focus + border tokens. The page's own
+ *              chrome (top bar, contents, footer) always uses them.
+ *   .after   — demo regions while the top bar is on After. Redefines the
+ *              semantic tokens that fail today, so a component reads the
+ *              proposed value through the same variable name.
+ *   .before  — demo regions while the top bar is on Before. Production today:
+ *              current theme values and the 0.5px focus ring.
+ *   .demo    — a live demo region; "Show all focus states" forces the ring on
+ *              every focusable element inside one.
+ */
+
+/* ── Proposed tokens — shared by all brands ───────────────────────────────── */
+.scope {
+  --focus-ring-width:         2px;
+  --focus-ring-offset:        0;      /* the ring sits on the element's edge — no gap */
+  --focus-ring-color:         var(--colors-text);          /* ≥9.95:1 on every light surface */
+  --focus-ring-color-inverse: var(--colors-text-inverse);  /* for dark surfaces */
+
+  /* Unselected swatches, chips, checkboxes, inputs — ≥3.42:1 on background,
+     both surfaces and form fields in every brand (1.4.11 needs 3:1).
+     Today these use --border-color (#ebebeb / #e3e3e3, 1.04–1.28:1). */
+  --border-interactive-proposed: #808080;
+  --border-interactive: var(--border-interactive-proposed);
+
+  /* Target size (2.5.8): 24px is the AA minimum, 44px what we aim for */
+  --target-size-min:         24px;
+  --target-size-recommended: 44px;
+
+  /* Production values, kept so the Before demos can show them */
+  --before-focus-ring-width: 0.5px;
+  --before-option-border:    #949494;  /* material tiles on the live product page: 3.03:1 on white, 2.86:1 on #f8f8f8 */
+}
+
+/* ── OAL is rectangular ─────────────────────────────────────────────────────
+   oal.css still rounds fields (4px), large/extra-large corners (4px / 8px) and
+   panels (8px). Squared here for the whole page — Before and After — since
+   it's a brand correction, not an accessibility fix. --radius-full stays, so
+   round swatches and the switch keep their shape. */
+:global([data-theme='oal']) .scope {
+  --form-field-border-radius: 0;
+  --radius-lg:                0;
+  --radius-xl:                0;
+  --radius-panel:             0;
+}
+
+/* ── Before: production today ─────────────────────────────────────────────── */
+.before {
+  --border-interactive: var(--border-color);  /* #ebebeb / #e3e3e3, 1.04–1.28:1 */
+}
+
+/* ── Proposed contrast fixes (1.4.3 — 4.5:1 for text) ────────────────────── */
+.after {
+  --colors-text-secondary:  #6b6b6b;  /* was #808080, 3.42–3.95:1 → ≥4.62:1 */
+  --form-input-placeholder: #6b6b6b;  /* was 1.70–3.95:1 */
+  --ribbon-oos-background:  #6b6b6b;  /* white text, was 3.95:1 → 5.33:1 */
+  --colors-success:         #257a5b;  /* was #2b8b68, 4.20:1 → 5.23:1 */
+
+  /* 1.4.11 — field borders were #ebebeb / #e3e3e3, 1.04–1.28:1 */
+  --form-field-border-color: var(--border-interactive);
+}
+
+/* Light footers only — OAL's footer is black, where today's grey already
+   passes (7.3:1) and #6b6b6b would fail. */
+:global([data-theme='tgr']) .after,
+:global([data-theme='lal']) .after,
+:global([data-theme='mnn']) .after {
+  --footer-text-muted: #6b6b6b;  /* was 2.50–3.72:1 → ≥4.62:1 */
+}
+
+:global([data-theme='tgr']) .after {
+  --colors-success:           #3b7365;  /* was #478978, 4.10:1 → 5.49:1 */
+  --ribbon-bundle-background: #3b7365;
+}
+
+:global([data-theme='ib']) .after {
+  --footer-text-muted:             #4a5f7f;  /* = --ib-navy-light; on stone footer 1.36:1 → 4.75:1 */
+  --buttons-primary-background:    #6b6f58;  /* darker olive; white text 3.21:1 → 5.20:1 */
+  --buttons-primary-border-color:  #6b6f58;
+  --ribbon-background:             #6b6f58;
+  --ribbon-secondary-background:   #6b6f58;
+  --ribbon-bundle-background:      #8a6440;  /* darker copper; 4.03:1 → 5.28:1 */
+}
+
+/* ── Focus ring — option D, tailored per component type ──────────────────────
+   Every type keeps the same core: a 2px solid ring drawn right on the
+   element's edge, no gap, following its corner radius (square in OAL, rounded
+   elsewhere). Drawn outside the edge, it changes a full 2px band from the
+   surface color to the ring color — that is what passes 1.4.11 and 2.4.13.
+   Only the details change per type:
+
+     default         outlined buttons, tiles, chips, nav links — the
+                     ring merges with the border into one thicker edge
+     .ringField      text fields, selects — the border darkens too, so the
+                     edge reads as one solid 3px line
+     .ringSwatch     round swatches — the thin border darkens and thickens
+                     with the ring. The white circle inside it is part of the
+                     swatch at rest, not of the focus state.
+     .ringFilled     filled buttons — a dark ring on a dark fill would only make
+                     the button look bigger, so a thin inverse line runs just
+                     inside the edge
+     .ringMedia      anything over a photo — an inverse band outside the ring,
+                     so one of the two always contrasts
+     .ringUnderline  nav links, menu items, breadcrumbs — text with no
+                     underline at rest gets a 3px underline on focus. Their
+                     "current page" marker must be something else (bold, a
+                     fill), never an underline.
+     .ringLink       links already underlined at rest — inline links, text
+                     buttons like Edit and Remove — the underline thickens from
+                     1px to 3px; no box, no tint. Both underline types meet
+                     2.4.7 (AA),
+                     not 2.4.13 (AAA). The transparent outline is kept so
+                     focus still shows in Windows High Contrast mode.
+
+   :where() keeps the default at the lowest specificity so a type can restyle
+   it — never remove it without an equal or stronger replacement. A
+   border-color change alone does not count. */
+
+@keyframes ringIn {
+  from {
+    outline-width: 0;
+  }
+}
+
+.scope :where(:focus-visible) {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+  animation: ringIn var(--transition-fast);
+}
+
+.scope .before :where(:focus-visible) {
+  outline-width: var(--before-focus-ring-width);
+  animation: none;
+}
+
+/* On a dark surface */
+.inverse {
+  --focus-ring-color: var(--focus-ring-color-inverse);
+}
+
+/* "Show all focus states" — and .forceFocus for a single static example */
+.scope[data-force-focus='true'] .demo :where(a[href], button, input, select, textarea, summary, [tabindex]:not([tabindex='-1'])),
+.scope .forceFocus :where(a[href], button, input, select, textarea, summary, [tabindex]:not([tabindex='-1'])) {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.scope[data-force-focus='true'] .before :where(a[href], button, input, select, textarea, summary, [tabindex]:not([tabindex='-1'])),
+.scope .before .forceFocus :where(a[href], button, input, select, textarea, summary, [tabindex]:not([tabindex='-1'])) {
+  outline-width: var(--before-focus-ring-width);
+}
+
+/* ── Per-type treatments. Each selector list covers real focus, "Show all
+   focus states" and the static .forceFocus examples, at a specificity that
+   beats the defaults above. ───────────────────────────────────────────────── */
+
+.scope .ringField:focus-visible,
+.scope[data-force-focus='true'] .demo .ringField,
+.scope .forceFocus .ringField {
+  border-color: var(--focus-ring-color);
+}
+
+.scope .ringSwatch:focus-visible,
+.scope[data-force-focus='true'] .demo .ringSwatch,
+.scope .forceFocus .ringSwatch {
+  border-color: var(--focus-ring-color);
+}
+
+.scope .ringFilled:focus-visible,
+.scope[data-force-focus='true'] .demo .ringFilled,
+.scope .forceFocus .ringFilled {
+  box-shadow: inset 0 0 0 var(--focus-ring-width) var(--focus-ring-color-inverse);
+}
+
+.scope .ringMedia:focus-visible,
+.scope[data-force-focus='true'] .demo .ringMedia,
+.scope .forceFocus .ringMedia {
+  box-shadow: 0 0 0 calc(var(--focus-ring-width) * 2) var(--focus-ring-color-inverse);
+}
+
+.scope .ringUnderline:focus-visible,
+.scope[data-force-focus='true'] .demo .ringUnderline,
+.scope .forceFocus .ringUnderline {
+  outline: var(--focus-ring-width) solid transparent;
+  text-decoration: underline;
+  text-decoration-thickness: 3px;
+  text-decoration-color: currentColor;
+  text-underline-offset: 6px;
+  animation: none;
+}
+
+.scope .ringLink:focus-visible,
+.scope[data-force-focus='true'] .demo .ringLink,
+.scope .forceFocus .ringLink {
+  outline: var(--focus-ring-width) solid transparent;
+  text-decoration-thickness: 3px;
+  animation: none;
+}
+
+/* ── Reduced motion — every transition and animation on the page ─────────── */
+@media (prefers-reduced-motion: reduce) {
+  .scope *,
+  .scope *::before,
+  .scope *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

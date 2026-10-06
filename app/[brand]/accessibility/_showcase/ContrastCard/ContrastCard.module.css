@@ -1,0 +1,148 @@
+.tables {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.probe {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+
+.summary {
+  margin: 0;
+  color: var(--colors-text);
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  font-weight:    var(--typography-rules-text1-font-weight, normal);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+  text-transform: var(--typography-rules-text1-text-transform, none);
+}
+
+.summary strong {
+  font-family: var(--typography-rules-text2-font-family);
+  font-weight: var(--typography-rules-text2-font-weight, normal);
+}
+
+.scroller {
+  overflow-x: auto;
+  background: var(--colors-background);
+  border-radius: var(--radius-md);
+}
+
+.table {
+  width: 100%;
+  min-width: 64rem;
+  table-layout: fixed;
+  border-collapse: collapse;
+  color: var(--colors-text);
+  font-family:    var(--typography-rules-text3-font-family);
+  font-size:      var(--typography-rules-text3-font-size);
+  line-height:    var(--typography-rules-text3-line-height);
+  font-weight:    var(--typography-rules-text3-font-weight, normal);
+  letter-spacing: var(--typography-rules-text3-letter-spacing, normal);
+}
+
+.colPair { width: 34%; }
+.colSample { width: 12%; }
+.colColors { width: 20%; }
+.colRatio { width: 12%; }
+.colNeeds { width: 10%; }
+.colResult { width: 12%; }
+
+.caption {
+  padding: var(--spacing-sm) var(--spacing-sm) var(--spacing-xxs);
+  text-align: left;
+  font-family:    var(--typography-rules-text2-font-family);
+  font-size:      var(--typography-rules-text2-font-size);
+  line-height:    var(--typography-rules-text2-line-height);
+  font-weight:    var(--typography-rules-text2-font-weight, normal);
+  letter-spacing: var(--typography-rules-text2-letter-spacing, normal);
+  text-transform: var(--typography-rules-text2-text-transform, none);
+}
+
+.table th,
+.table td {
+  padding: var(--spacing-xxs) var(--spacing-sm);
+  text-align: left;
+  vertical-align: middle;
+  border-top: var(--border-width) solid var(--border-color);
+}
+
+.table thead th {
+  font-family: var(--typography-rules-text4-font-family);
+  font-weight: var(--typography-rules-text4-font-weight, normal);
+}
+
+.pair {
+  font-family: var(--typography-rules-text4-font-family);
+  font-weight: var(--typography-rules-text4-font-weight, normal);
+}
+
+.tokens {
+  display: block;
+  margin-top: var(--spacing-xxxs);
+}
+
+.tokens,
+.hex {
+  font-family: var(--font-family-main-regular);
+  font-weight: normal;
+  overflow-wrap: anywhere;
+}
+
+.ratio {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* ─── Sample ──────────────────────────────────────────────────────────────── */
+
+.sample {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--spacing-xxl);
+  height: var(--spacing-xl);
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--radius-sm);
+  font-family:    var(--typography-rules-text2-font-family);
+  font-size:      var(--typography-rules-text2-font-size);
+  font-weight:    var(--typography-rules-text2-font-weight, normal);
+}
+
+.sampleLine {
+  width: 60%;
+  height: 0;
+  border-top: var(--focus-ring-width) solid;
+}
+
+/* ─── Result — the word carries the meaning, not the color ────────────────── */
+
+.pass,
+.fail,
+.na {
+  display: inline-flex;
+  padding: 0 var(--spacing-xxs);
+  border-radius: var(--radius-sm);
+  font-family: var(--typography-rules-text4-font-family);
+  font-weight: var(--typography-rules-text4-font-weight, normal);
+  white-space: nowrap;
+}
+
+.pass {
+  border: var(--border-width) solid var(--colors-text);
+}
+
+.fail {
+  background: var(--colors-error);
+  color: var(--colors-text-inverse);
+  border: var(--border-width) solid var(--colors-error);
+}
+
+.na {
+  border: var(--border-width) dashed var(--colors-text);
+}

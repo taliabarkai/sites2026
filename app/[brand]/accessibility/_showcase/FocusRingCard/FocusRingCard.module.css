@@ -1,0 +1,220 @@
+.live {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.body {
+  margin: 0;
+  color: var(--colors-text);
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  font-weight:    var(--typography-rules-text1-font-weight, normal);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+  text-transform: var(--typography-rules-text1-text-transform, none);
+}
+
+/* ─── One block per component type ────────────────────────────────────────── */
+
+.types {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--spacing-sm);
+}
+
+@media (min-width: 768px) {
+  .types {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .types {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.type {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-md) var(--spacing-sm);
+  background: var(--colors-background);
+  border-radius: var(--radius-md);
+}
+
+.typeLabel,
+.fieldLabel {
+  color: var(--colors-text);
+  font-family:    var(--typography-rules-caption1-font-family);
+  font-size:      var(--typography-rules-caption1-font-size);
+  line-height:    var(--typography-rules-caption1-line-height);
+  font-weight:    var(--typography-rules-caption1-font-weight, normal);
+  letter-spacing: var(--typography-rules-caption1-letter-spacing, normal);
+  text-transform: var(--typography-rules-caption1-text-transform, none);
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+/* ─── Field ───────────────────────────────────────────────────────────────── */
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xxxs);
+  min-width: 0;
+}
+
+.input {
+  width: 100%;
+  min-height: var(--field-min-height);
+  padding: 0 var(--spacing-xs);
+  background: var(--form-field-background);
+  color: var(--colors-text);
+  border: var(--border-width) solid var(--form-field-border-color);
+  border-radius: var(--form-field-border-radius);
+  transition: border-color var(--transition-fast);
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  font-weight:    var(--typography-rules-text1-font-weight, normal);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+}
+
+.input::placeholder {
+  color: var(--form-input-placeholder);
+}
+
+/* ─── Link ────────────────────────────────────────────────────────────────── */
+
+/* Underlined, so it reads as a link without relying on color (1.4.1). */
+.link {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  transition: text-decoration-thickness var(--transition-fast);
+  font-family:    var(--typography-rules-links1-font-family);
+  font-size:      var(--typography-rules-links1-font-size);
+  line-height:    var(--typography-rules-links1-line-height);
+  font-weight:    var(--typography-rules-links1-font-weight, normal);
+  letter-spacing: var(--typography-rules-links1-letter-spacing, normal);
+  text-transform: var(--typography-rules-links1-text-transform, none);
+}
+
+/* ─── Nav ───────────────────────────────────────────────────────────────── */
+
+.nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xxxs) var(--spacing-md);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* No underline at rest. 24px tall clears the 2.5.8 minimum target. */
+.navLink {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--target-size-min);
+  color: var(--colors-text);
+  text-decoration: none;
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  font-weight:    var(--typography-rules-text1-font-weight, normal);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+  text-transform: var(--nav-text-transform, none);
+}
+
+/* ─── Swatch ──────────────────────────────────────────────────────────────── */
+
+.swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+}
+
+/* 32px — clears the 24px minimum target (2.5.8). */
+.swatch {
+  width: var(--spacing-lg);
+  height: var(--spacing-lg);
+  padding: 0;
+  border: var(--border-width) solid var(--border-interactive);
+  border-radius: var(--radius-full);
+  /* The white circle between the border and the metal, at rest */
+  box-shadow: inset 0 0 0 calc(var(--spacing-xxxs) / 2) var(--colors-background);
+  cursor: pointer;
+}
+
+/* ─── Surfaces ────────────────────────────────────────────────────────────── */
+
+.photo {
+  display: flex;
+  align-items: flex-end;
+  min-height: calc(var(--spacing-xxl) * 2);
+  padding: var(--spacing-sm);
+  background: url('/images/hero-desktop.jpg') center / cover;
+  border-radius: var(--radius-md);
+}
+
+.dark {
+  padding: var(--spacing-sm);
+  background: var(--buttons-primary-background);
+  color: var(--colors-text-inverse);
+  border-radius: var(--radius-md);
+}
+
+.dark {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacing-xxs) var(--spacing-md);
+}
+
+.onDark {
+  color: inherit;
+}
+
+/* ─── Spec ────────────────────────────────────────────────────────────────── */
+
+.spec {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xxs);
+  margin: 0;
+}
+
+.specRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xxxs) var(--spacing-xs);
+}
+
+.specTerm,
+.specValue {
+  margin: 0;
+  color: var(--colors-text);
+  font-family:    var(--typography-rules-text3-font-family);
+  font-size:      var(--typography-rules-text3-font-size);
+  line-height:    var(--typography-rules-text3-line-height);
+  font-weight:    var(--typography-rules-text3-font-weight, normal);
+  letter-spacing: var(--typography-rules-text3-letter-spacing, normal);
+  text-transform: var(--typography-rules-text3-text-transform, none);
+}
+
+.specTerm {
+  font-family: var(--typography-rules-text4-font-family);
+  font-weight: var(--typography-rules-text4-font-weight, normal);
+}
+
+.token {
+  overflow-wrap: anywhere;
+}

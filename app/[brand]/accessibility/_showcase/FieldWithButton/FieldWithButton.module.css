@@ -1,0 +1,139 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xxs);
+  max-width: 56rem;
+}
+
+/* The footer newsletter band. The ring takes the band's own text color, so it
+   contrasts on OAL black, TGR blue and LAL lime alike. */
+.footer {
+  --focus-ring-color: var(--footer-newsletter-text);
+  padding: var(--spacing-md) var(--spacing-sm);
+  color: var(--footer-newsletter-text);
+  background: var(--footer-newsletter-background);
+  border-radius: var(--radius-md);
+}
+
+/* ─── The row: field and button share one edge and one shape ──────────────── */
+
+.row {
+  display: flex;
+  align-items: stretch;
+  min-height: calc(var(--field-min-height) + var(--spacing-xs));
+  background: var(--form-field-background);
+  border: var(--border-width) solid var(--form-field-border-color);
+  border-radius: var(--buttons-primary-border-radius);
+  overflow: hidden;
+  transition: border-color var(--transition-fast);
+}
+
+.field {
+  position: relative;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+  padding: var(--spacing-xxs) var(--spacing-md);
+  border-radius: var(--buttons-primary-border-radius) 0 0 var(--buttons-primary-border-radius);
+}
+
+/* Visible all the time, small and on top — not a placeholder that disappears */
+.label {
+  color: var(--colors-text);
+  font-family:    var(--typography-rules-text3-font-family);
+  font-size:      var(--typography-rules-text3-font-size);
+  line-height:    var(--typography-rules-text3-line-height);
+  font-weight:    var(--typography-rules-text3-font-weight, normal);
+  letter-spacing: var(--typography-rules-text3-letter-spacing, normal);
+}
+
+.input {
+  width: 100%;
+  min-width: 0;
+  padding: 0;
+  color: var(--colors-text);
+  background: transparent;
+  border: 0;
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  font-weight:    var(--typography-rules-text1-font-weight, normal);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+}
+
+.button {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: calc(var(--field-min-height) + var(--spacing-xs));
+  padding: 0;
+  color: var(--buttons-primary-text);
+  background: var(--buttons-primary-background);
+  border: 0;
+  border-radius: 0 var(--buttons-primary-border-radius) var(--buttons-primary-border-radius) 0;
+  cursor: pointer;
+}
+
+.icon {
+  width: var(--spacing-md);
+  height: var(--spacing-md);
+}
+
+.message {
+  padding-left: var(--spacing-md);
+}
+
+/* On the footer band, messages take the band's text color */
+.footer .message p {
+  color: inherit;
+}
+
+.todayMessage {
+  margin: 0;
+  font-family:    var(--typography-rules-text3-font-family);
+  font-size:      var(--typography-rules-text3-font-size);
+  line-height:    var(--typography-rules-text3-line-height);
+}
+
+/* ─── Before: the live site ───────────────────────────────────────────────────
+   The ring wraps the text field alone; the button cuts it off at the right. */
+
+.today .input,
+.today .button {
+  outline-color: transparent;
+}
+
+.today .field:has(.input:focus-visible),
+:global([data-force-focus='true']) .today .field,
+.today.isFocused .field {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: calc(var(--focus-ring-width) * -1);
+}
+
+/* ─── After: the whole row ────────────────────────────────────────────────── */
+
+.proposed:has(.input:focus-visible),
+:global([data-force-focus='true']) .proposed,
+.proposed.isFocused {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+  border-color: var(--focus-ring-color);
+}
+
+/* The row carries the ring, so the text field doesn't draw a second one.
+   Transparent rather than removed, so Windows High Contrast still shows it. */
+.proposed .input.input:focus-visible,
+:global([data-force-focus='true']) .proposed .input.input {
+  outline: var(--focus-ring-width) solid transparent;
+}
+
+/* The button: a light line inside its dark fill, and the row stays quiet */
+.proposed .button.button:focus-visible,
+:global([data-force-focus='true']) .proposed .button.button,
+.proposed.isButtonFocused .button.button {
+  outline: var(--focus-ring-width) solid var(--buttons-primary-text);
+  outline-offset: calc(var(--focus-ring-width) * -2);
+}

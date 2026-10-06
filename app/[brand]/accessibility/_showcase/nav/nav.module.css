@@ -1,0 +1,562 @@
+.icon {
+  width: var(--spacing-md);
+  height: var(--spacing-md);
+}
+
+.text {
+  margin: 0;
+  color: var(--colors-text);
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  font-weight:    var(--typography-rules-text1-font-weight, normal);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+}
+
+/* ─── Accordion ───────────────────────────────────────────────────────────── */
+
+.accordion {
+  max-width: 56rem;
+  border-top: var(--border-width) solid var(--border-interactive);
+}
+
+.accordionItem {
+  border-bottom: var(--border-width) solid var(--border-interactive);
+}
+
+.accordionHeading {
+  margin: 0;
+}
+
+.accordionButton {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-sm);
+  width: 100%;
+  min-height: var(--target-size-recommended);
+  padding: var(--spacing-xs) var(--spacing-xxs);
+  color: var(--colors-text);
+  background: none;
+  border: 0;
+  text-align: left;
+  cursor: pointer;
+  font-family:    var(--typography-rules-text2-font-family);
+  font-size:      var(--typography-rules-text2-font-size);
+  line-height:    var(--typography-rules-text2-line-height);
+  font-weight:    var(--typography-rules-text2-font-weight, normal);
+  letter-spacing: var(--typography-rules-text2-letter-spacing, normal);
+  text-transform: var(--typography-rules-text2-text-transform, none);
+}
+
+.chevron {
+  display: inline-flex;
+  flex-shrink: 0;
+  transform: rotate(90deg);
+  transition: transform var(--transition-base);
+}
+
+.chevronOpen {
+  transform: rotate(-90deg);
+}
+
+.accordionPanel {
+  padding: 0 var(--spacing-xxs) var(--spacing-sm);
+}
+
+/* ─── Tabs ────────────────────────────────────────────────────────────────── */
+
+.tabs {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  max-width: 56rem;
+}
+
+.tabList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xxs);
+  border-bottom: var(--border-width) solid var(--border-interactive);
+}
+
+.tab {
+  min-height: var(--target-size-recommended);
+  padding: 0 var(--spacing-sm);
+  color: var(--colors-text);
+  background: none;
+  border: 0;
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  cursor: pointer;
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  font-weight:    var(--typography-rules-text1-font-weight, normal);
+}
+
+.tab:hover {
+  background: var(--colors-surface-primary);
+}
+
+/* Selected: bold and a 3px bar — so focus is the box ring, never an underline */
+.tab[aria-selected='true'] {
+  font-family: var(--typography-rules-text2-font-family);
+  font-weight: var(--typography-rules-text2-font-weight, normal);
+  box-shadow: inset 0 calc(var(--spacing-xxxs) * -0.75) 0 var(--colors-text);
+}
+
+.tabDemoFocus {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.tabPanel {
+  padding: var(--spacing-xxs);
+}
+
+/* ─── Breadcrumbs ─────────────────────────────────────────────────────────── */
+
+.crumbs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacing-xxxs);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.crumb {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xxxs);
+}
+
+.crumbLink,
+.crumbCurrent {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--target-size-min);
+  color: var(--colors-text);
+  font-family:    var(--typography-rules-text3-font-family);
+  font-size:      var(--typography-rules-text3-font-size);
+  line-height:    var(--typography-rules-text3-line-height);
+  font-weight:    var(--typography-rules-text3-font-weight, normal);
+}
+
+.crumbLink {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.crumbCurrent {
+  font-family: var(--typography-rules-text4-font-family);
+  font-weight: var(--typography-rules-text4-font-weight, normal);
+}
+
+.crumbSeparator {
+  display: inline-flex;
+  color: var(--colors-text);
+}
+
+.separatorIcon {
+  width: var(--spacing-sm);
+  height: var(--spacing-sm);
+}
+
+/* ─── Pagination ──────────────────────────────────────────────────────────── */
+
+.pages {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacing-xxs);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pageLink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-xxxs);
+  min-width: var(--target-size-recommended);
+  min-height: var(--target-size-recommended);
+  padding: 0 var(--spacing-xs);
+  color: var(--colors-text);
+  text-decoration: none;
+  border: var(--border-width) solid var(--border-interactive);
+  border-radius: var(--radius-sm);
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  font-weight:    var(--typography-rules-text1-font-weight, normal);
+}
+
+.pageLink:hover {
+  border-color: var(--colors-text);
+}
+
+/* Current page: filled and bold, not a color change alone */
+.pageLink[aria-current='page'] {
+  color: var(--colors-background);
+  background: var(--colors-text);
+  border-color: var(--colors-text);
+  font-family: var(--typography-rules-text2-font-family);
+  font-weight: var(--typography-rules-text2-font-weight, normal);
+}
+
+.pageStep {
+  border-color: transparent;
+}
+
+.pageStepOff {
+  color: var(--colors-text-secondary);
+}
+
+.prevIcon {
+  display: inline-flex;
+  transform: rotate(180deg);
+}
+
+.pageGap {
+  padding: 0 var(--spacing-xxxs);
+  color: var(--colors-text);
+}
+
+/* ─── Tooltip ─────────────────────────────────────────────────────────────── */
+
+.tooltipWrap {
+  position: relative;
+  display: inline-flex;
+  vertical-align: middle;
+}
+
+.tooltipTrigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--target-size-min);
+  height: var(--target-size-min);
+  padding: 0;
+  color: var(--colors-text);
+  background: none;
+  border: 0;
+  border-radius: var(--radius-full);
+  cursor: help;
+}
+
+/* Sits flush below the trigger — no gap for the pointer to fall through */
+.tooltip {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  z-index: var(--z-tooltip);
+  display: none;
+  width: max-content;
+  max-width: min(28rem, 80vw);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  color: var(--colors-background);
+  background: var(--colors-text);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  transform: translateX(-50%);
+  font-family:    var(--typography-rules-text3-font-family);
+  font-size:      var(--typography-rules-text3-font-size);
+  line-height:    var(--typography-rules-text3-line-height);
+  font-weight:    var(--typography-rules-text3-font-weight, normal);
+}
+
+.tooltipOpen {
+  display: block;
+}
+
+/* ─── Carousel ────────────────────────────────────────────────────────────── */
+
+.carousel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  max-width: 64rem;
+}
+
+.carouselControls {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.carouselControl {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--target-size-recommended);
+  height: var(--target-size-recommended);
+  padding: 0;
+  color: var(--colors-text);
+  background: var(--colors-background);
+  border: var(--border-width) solid var(--border-interactive);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+}
+
+.carouselNote {
+  color: var(--colors-text);
+  font-family:    var(--typography-rules-text3-font-family);
+  font-size:      var(--typography-rules-text3-font-size);
+  line-height:    var(--typography-rules-text3-line-height);
+}
+
+.carouselViewport {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-md);
+}
+
+.carouselTrack {
+  display: flex;
+  transition: transform var(--transition-base);
+}
+
+.slide {
+  position: relative;
+  flex: 0 0 100%;
+  aspect-ratio: 16 / 9;
+}
+
+.slideImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.slideLink {
+  position: absolute;
+  bottom: var(--spacing-md);
+  left: 50%;
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--target-size-recommended);
+  padding: 0 var(--spacing-md);
+  color: var(--buttons-primary-text);
+  background: var(--buttons-primary-background);
+  border-radius: var(--buttons-primary-border-radius);
+  text-decoration: none;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  font-family:    var(--typography-rules-button1-font-family);
+  font-size:      var(--typography-rules-button1-font-size);
+  line-height:    var(--typography-rules-button1-line-height);
+  font-weight:    var(--typography-rules-button1-font-weight, normal);
+  letter-spacing: var(--typography-rules-button1-letter-spacing, normal);
+  text-transform: var(--typography-rules-button1-text-transform, none);
+}
+
+.carouselArrow {
+  position: absolute;
+  top: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--target-size-recommended);
+  height: var(--target-size-recommended);
+  padding: 0;
+  color: var(--colors-text);
+  background: var(--colors-background);
+  border: var(--border-width) solid var(--border-interactive);
+  border-radius: var(--radius-full);
+  transform: translateY(-50%);
+  cursor: pointer;
+}
+
+.carouselPrev {
+  left: var(--spacing-sm);
+}
+
+.carouselNext {
+  right: var(--spacing-sm);
+}
+
+.prevArrow {
+  display: inline-flex;
+  transform: rotate(180deg);
+}
+
+/* Dots: 24px buttons around an 8px mark; current is filled and wider */
+.dots {
+  display: flex;
+  justify-content: center;
+  gap: var(--spacing-xxxs);
+}
+
+.dot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--target-size-min);
+  height: var(--target-size-min);
+  padding: 0;
+  background: none;
+  border: 0;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+}
+
+.dotMark {
+  width: var(--spacing-xxs);
+  height: var(--spacing-xxs);
+  border: var(--border-width) solid var(--colors-text);
+  border-radius: var(--radius-full);
+  transition: width var(--transition-fast);
+}
+
+.dot[aria-current='true'] .dotMark {
+  width: var(--spacing-md);
+  background: var(--colors-text);
+}
+
+/* ─── Modal and drawer ───────────────────────────────────────────────────── */
+
+.triggerWrap {
+  display: inline-flex;
+}
+
+
+/* Tailwind's reset zeroes every margin; auto is what centers a modal dialog */
+.modal {
+  inset: 0;
+  margin: auto;
+  width: min(48rem, calc(100% - var(--spacing-lg)));
+  max-height: calc(100% - var(--spacing-xxl));
+  padding: 0;
+  color: var(--colors-text);
+  background: var(--colors-background);
+  border: 0;
+  border-radius: var(--radius-panel);
+  box-shadow: var(--shadow-md);
+}
+
+.modal::backdrop {
+  background: var(--colors-overlay);
+}
+
+.modalBody {
+  display: flex;
+  flex-direction: column;
+}
+
+.overlayHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-xs) var(--spacing-xs) var(--spacing-xs) var(--spacing-md);
+  border-bottom: var(--border-width) solid var(--border-color);
+}
+
+.overlayTitle {
+  margin: 0;
+  color: var(--colors-text);
+  font-family:    var(--typography-rules-headline4-font-family);
+  font-size:      var(--typography-rules-headline4-font-size);
+  line-height:    var(--typography-rules-headline4-line-height);
+  font-weight:    var(--typography-rules-headline4-font-weight, normal);
+  letter-spacing: var(--typography-rules-headline4-letter-spacing, normal);
+  text-transform: var(--typography-rules-headline4-text-transform, none);
+}
+
+.closeButton {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: var(--target-size-recommended);
+  height: var(--target-size-recommended);
+  padding: 0;
+  color: var(--colors-text);
+  background: none;
+  border: 0;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.closeButton:hover {
+  background: var(--colors-surface-primary);
+}
+
+.overlayContent {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md);
+  overflow-y: auto;
+}
+
+.overlayFooter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-top: var(--border-width) solid var(--border-color);
+}
+
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-overlay);
+  background: var(--colors-overlay);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity var(--transition-base), visibility var(--transition-base);
+}
+
+.backdropOpen {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* The FloatingCart pattern: always in the DOM, transform drives show/hide */
+.drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: var(--z-modal);
+  display: flex;
+  flex-direction: column;
+  width: min(44rem, 100%);
+  color: var(--colors-text);
+  background: var(--colors-background);
+  border-radius: var(--radius-panel) 0 0 var(--radius-panel);
+  box-shadow: var(--shadow-md);
+  transform: translateX(100%);
+  visibility: hidden;
+  /* Hide only after the slide-out; on open (below) it's visible at once, so
+     focus can move in straight away */
+  transition: transform var(--transition-base), visibility 0s linear var(--transition-base);
+}
+
+.drawerOpen {
+  transform: translateX(0);
+  visibility: visible;
+  transition: transform var(--transition-base), visibility 0s;
+}
+
+@media (max-width: 767px) {
+  .drawer {
+    top: auto;
+    width: 100%;
+    max-height: 85vh;
+    border-radius: var(--radius-panel) var(--radius-panel) 0 0;
+    transform: translateY(100%);
+  }
+
+  .drawerOpen {
+    transform: translateY(0);
+  }
+}
+
+.drawer .overlayContent {
+  flex: 1;
+}
