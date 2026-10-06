@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useEffect, useId, useState } from 'react'
+import { useCallback, useEffect, useId, useState } from 'react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import * as oalIcons from '@/src/components/icons/oal'
 import * as mnnIcons from '@/src/components/icons/mnn'
@@ -26,7 +26,7 @@ import { GiftingSection as GiftingSectionV2 } from '../_components/cart/GiftingV
 import { Usps } from '../_components/cart/Usps'
 import type { GiftItem } from '../_components/cart/GiftingV2'
 import { CheckoutConflictAlert } from '../_components/checkout/CheckoutConflictAlert'
-import { findOptionForItem } from '../_components/cart/GiftingOptions'
+import { areOptionsItemBound, findOptionForItem } from '../_components/cart/GiftingOptions'
 import type { GiftAssignment, GiftOption } from '../_components/cart/GiftingOptions'
 import styles from './CheckoutPage.module.css'
 
@@ -771,16 +771,37 @@ function CheckoutPageInner() {
   const [activeSteps,    setActiveSteps]    = useState<Set<number>>(new Set([1]))
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set())
 
-  // In v2 every step is expanded and nothing is shown as "completed" (collapsed).
-  // Flat layout: every step is expanded, nothing is gated behind Continue.
-  const isActive    = (_s: number) => true
-  const isCompleted = (_s: number) => false
+  const isActive    = (s: number) => activeSteps.has(s)
+  const isCompleted = (s: number) => completedSteps.has(s)
+
+  /* Shipping and gifting share one pane: they open together and are finished
+     by the same Continue, so one is never active without the other. Read off
+     `visibleSteps` rather than written out, because a flow that keeps either
+     on the cart page has only the other here — or neither. */
+  const stepGroup = (step: number): number[] =>
+    step === SHIPPING_STEP || step === GIFTING_STEP
+      ? visibleSteps.filter(n => n === SHIPPING_STEP || n === GIFTING_STEP)
+      : [step]
+
+  /** What this flow opens after the given step, or undefined at the end. */
+  const stepAfter = (step: number): number | undefined => {
+    const group = stepGroup(step)
+    return visibleSteps[visibleSteps.indexOf(group[group.length - 1]) + 1]
+  }
+
+  /** "Continue to Shipping" — named for whatever this flow opens next. */
+  const continueLabel = (step: number) => {
+    const next = stepAfter(step)
+    if (next === undefined) return 'Continue'
+    return `Continue to ${next === GIFTING_STEP ? 'Gift Options' : STEP_LABELS[next]}`
+  }
 
   const editStep = (step: number) => {
-    if (step === 2) {
+    if (step === SHIPPING_STEP) {
       // Editing shipping re-opens both shipping and gift options
-      setActiveSteps(new Set([2, 3]))
-      setCompletedSteps(prev => { const n = new Set(prev); n.delete(2); n.delete(3); return n })
+      const group = stepGroup(SHIPPING_STEP)
+      setActiveSteps(new Set(group))
+      setCompletedSteps(prev => { const n = new Set(prev); group.forEach(g => n.delete(g)); return n })
     } else if (step === 3) {
       // Editing gift options only — shipping stays completed
       setActiveSteps(new Set([3]))
@@ -792,21 +813,14 @@ function CheckoutPageInner() {
   }
 
   const completeStep = (step: number) => {
-    if (step === 1) {
-      setCompletedSteps(prev => new Set([...prev, 1]))
-      setActiveSteps(new Set([2, 3]))
-    } else if (step === 3) {
-      // Completing gift options phase also completes shipping
-      setCompletedSteps(prev => new Set([...prev, 2, 3]))
-      setActiveSteps(new Set([4]))
-    } else if (step === 4) {
-      setCompletedSteps(prev => new Set([...prev, 4]))
-      setActiveSteps(new Set())
-    }
+    const group = stepGroup(step)
+    setCompletedSteps(prev => new Set([...prev, ...group]))
+    const next = stepAfter(step)
+    setActiveSteps(next === undefined ? new Set() : new Set(stepGroup(next)))
   }
 
   const animateAndComplete = (step: number) => {
-    const nextStep = step === 1 ? 2 : step === 3 ? 4 : step + 1
+    const nextStep = stepAfter(step)
     const stepEl   = document.querySelector(`[data-step="${step}"]`) as HTMLElement | null
     const body     = stepEl?.querySelector('[data-accordion-body]') as HTMLElement | null
 
@@ -897,11 +911,13 @@ function CheckoutPageInner() {
   const [cardName,         setCardName]         = useState('')
   const [summaryOpen,      setSummaryOpen]      = useState(true)
 
-  // The error preview is only legible against a filled-in checkout — an empty
-  // form would read as a validation error rather than a stale-session one.
-  useEffect(() => {
-    if (!isErrorPreview) return
-
+  /**
+   * Every field the checkout asks for, filled from the demo contact.
+   *
+   * Setters are stable, so this never changes identity and the effect below
+   * runs only when the preview is switched on.
+   */
+  const fillDemoDetails = useCallback(() => {
     setEmail(DEMO_CONTACT.email)
     setCountry('US')
     setFirstName(DEMO_CONTACT.firstName)
@@ -917,7 +933,14 @@ function CheckoutPageInner() {
     setCardNumber('4242 4242 4242 4242')
     setCardExpiry('04/29')
     setCardCvv('123')
-  }, [isErrorPreview])
+  }, [])
+
+  // The error preview is only legible against a filled-in checkout — an empty
+  // form would read as a validation error rather than a stale-session one.
+  useEffect(() => {
+    if (!isErrorPreview) return
+    fillDemoDetails()
+  }, [isErrorPreview, fillDemoDetails])
 
   // Opened straight from a shared ?state=error link the bag is empty, which
   // would render the conflict over a $0 order. Fill it to the same size the
@@ -1143,6 +1166,11 @@ function CheckoutPageInner() {
                 isCompleted={isCompleted(1)}
                 completedSummary={step1Summary}
                 onEdit={() => editStep(1)}
+                headerRight={
+                  <button type="button" className={styles.autofillBtn} onClick={fillDemoDetails}>
+                    Autofill
+                  </button>
+                }
                 preTitle={SHOW_EXPRESS_CHECKOUT ? (
                   <section className={styles.expressCheckout}>
                     <p className={styles.expressTitle}>Express Checkout</p>
@@ -1247,6 +1275,17 @@ function CheckoutPageInner() {
                     <p className={styles.sectionSubtitle}>(Delivery notifications will be sent to this number)</p>
                   </div>
                 </div>
+
+                <div className={styles.stepContinueRow}>
+                  <Button
+                    variant="primary"
+                    className={styles.continueBtn}
+                    disabled={!step1Valid}
+                    onClick={() => animateAndComplete(CONTACT_STEP)}
+                  >
+                    {continueLabel(CONTACT_STEP)}
+                  </Button>
+                </div>
               </AccordionStep>
 
               {/* ── Step 2: Shipping Method — Phase 1 chose it on the cart page ── */}
@@ -1290,6 +1329,20 @@ function CheckoutPageInner() {
                   <img src="/images/carriers/fedex.svg" alt="FedEx" className={styles.carrierLogo} />
                   <img src="/images/carriers/dhl.svg"   alt="DHL"   className={styles.carrierLogo} />
                 </div>
+
+                {/* Gifting shares this pane and carries the Continue when it
+                    is here; without it, shipping closes the pane itself. */}
+                {flowConfig.gifting !== 'checkout' && (
+                  <div className={styles.stepContinueRow}>
+                    <Button
+                      variant="primary"
+                      className={styles.continueBtn}
+                      onClick={() => animateAndComplete(SHIPPING_STEP)}
+                    >
+                      {continueLabel(SHIPPING_STEP)}
+                    </Button>
+                  </div>
+                )}
               </AccordionStep>
               )}
 
@@ -1297,7 +1350,22 @@ function CheckoutPageInner() {
                   Two variants of the same step, in the same slot, chosen by
                   `?gifting=`. They share the lifted assignments, so the totals
                   and the order summary are indifferent to which one is on. */}
-              {flowConfig.gifting !== 'checkout' ? null : giftingVariant === 'v2' ? (
+              {/* Shut, gifting still holds its number in the sequence. The
+                  title is read off the same data the section itself reads, so
+                  a brand whose options are notes says so in both places. */}
+              {flowConfig.gifting === 'checkout' && !isActive(GIFTING_STEP) && (
+                <AccordionStep
+                  title={areOptionsItemBound(giftItems) ? 'Add Gift Note' : 'Add Gift Packaging'}
+                  stepNumber={stepLabel(GIFTING_STEP)}
+                  isActive={false}
+                  isCompleted={isCompleted(GIFTING_STEP)}
+                  onEdit={() => editStep(GIFTING_STEP)}
+                >
+                  {null}
+                </AccordionStep>
+              )}
+
+              {flowConfig.gifting !== 'checkout' || !isActive(GIFTING_STEP) ? null : giftingVariant === 'v2' ? (
                 <GiftingSectionV2
                   stepNumber={stepLabel(GIFTING_STEP)}
                   options={giftingOptions}
@@ -1319,6 +1387,18 @@ function CheckoutPageInner() {
                   icons={giftingIcons}
                   onGenerateNote={generateGiftNote}
                 />
+              )}
+
+              {flowConfig.gifting === 'checkout' && isActive(GIFTING_STEP) && (
+                <div className={styles.stepContinueRow}>
+                  <Button
+                    variant="primary"
+                    className={styles.continueBtn}
+                    onClick={() => animateAndComplete(GIFTING_STEP)}
+                  >
+                    {continueLabel(GIFTING_STEP)}
+                  </Button>
+                </div>
               )}
 
               {/* ── Step 4: Payment ── */}
