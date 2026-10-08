@@ -20,6 +20,7 @@ import {
   readFlow,
   readGiftingVariant,
   readIsErrorState,
+  readIsSaleState,
 } from '../../_config/demoParams'
 import styles from './Header.module.css'
 
@@ -135,6 +136,7 @@ export function CartSizeToggle({ className }: { className?: string }) {
   // switch here — it is hidden rather than left sitting inert.
   const giftingInCheckout = getFlowConfig(readFlow(searchParams)).gifting === 'checkout'
   const isError = readIsErrorState(searchParams)
+  const isSale  = readIsSaleState(searchParams)
   const urlSize = readCartSize(searchParams)
 
   // The bag is the brand's own, so the gifting section sees that brand's items
@@ -204,16 +206,28 @@ export function CartSizeToggle({ className }: { className?: string }) {
         )}
       </Dropdown>
 
-      {/* ── Normal, or the checkout's error preview ── */}
-      <Dropdown label={isError ? 'Error' : 'Normal'} title="Page state" className={className}>
+      {/* ── Normal, the error preview, or a line marked down ── */}
+      <Dropdown
+        label={isError ? 'Error' : isSale ? 'Sale' : 'Normal'}
+        title="Page state"
+        className={className}
+      >
         {close => (
           <div className={styles.scenarioRow}>
             <button
               type="button"
-              aria-pressed={!isError}
+              aria-pressed={!isError && !isSale}
               onClick={() => { setParams({ [STATE_PARAM]: null }); close() }}
             >
               Normal
+            </button>
+            <button
+              type="button"
+              aria-label="Preview the cart with an item on sale"
+              aria-pressed={isSale}
+              onClick={() => { setParams({ [STATE_PARAM]: 'sale' }); close() }}
+            >
+              Sale
             </button>
             <button
               type="button"

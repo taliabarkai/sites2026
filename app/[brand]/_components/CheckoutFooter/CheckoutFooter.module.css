@@ -1,0 +1,59 @@
+.footer {
+  /* The site footer's own ground, so the short version reads as the same
+     footer cut down rather than a different one. */
+  background: var(--footer-main-background);
+  color: var(--footer-text);
+  padding: var(--spacing-sm) var(--layout-page-margin);
+}
+
+.inner {
+  width: 100%;
+  max-width: var(--layout-max-width);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-xs);
+  text-align: center;
+}
+
+.copyright {
+  margin: 0;
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+  color: var(--footer-text);
+}
+
+.payments {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xxs);
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+/* Blank slots sized like a card mark. Tinted from the footer's own text
+   colour, so they sit on any brand's ground without a colour of their own. */
+.paymentSlot {
+  width: 38px;
+  height: 24px;
+  border-radius: var(--radius-sm);
+  background: currentColor;
+  opacity: 0.22;
+}
+
+/* The line and the marks sit either end of the bar once there is room. */
+@media (min-width: 1024px) {
+  .inner {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    text-align: left;
+  }
+
+  .payments {
+    flex-wrap: nowrap;
+  }
+}

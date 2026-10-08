@@ -67,6 +67,13 @@
   right: var(--spacing-sm);
   top: 50%;
   transform: translateY(-50%);
+  /* The transform above makes this a stacking context, which sealed the brand
+     menu inside it — however high the menu's own z-index, the whole subtree
+     painted at `auto` and the page's sticky summary bar covered it. So the
+     context takes its own rank, and it has to clear the demo strip as well:
+     that sits at --z-header, and a tie would be settled by DOM order, which
+     the strip wins. The ladder is page < sticky < demo chrome < this menu. */
+  z-index: var(--z-cart);
   display: flex;
   align-items: center;
   gap: var(--spacing-xs);

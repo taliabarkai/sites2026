@@ -1,0 +1,65 @@
+.root {
+  position: relative;
+  display: inline-flex;
+  /* Centred on the mark, not hung from the top of it: the label is one line
+     in every use so far, and top alignment left it riding high of the box. */
+  align-items: center;
+  gap: var(--spacing-xxs);
+  cursor: pointer;
+}
+
+/* Invisible, not absent: the input still carries the role, the keyboard
+   behaviour and the value, and `pointer-events: none` leaves the click to the
+   label that wraps it. */
+.input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.box {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--spacing-md);
+  height: var(--spacing-md);
+  color: var(--colors-text);
+}
+
+/* The ring follows the box, since the input it belongs to cannot be seen. */
+.input:focus-visible + .box {
+  outline: var(--border-width) solid var(--colors-text);
+  outline-offset: 2px;
+  border-radius: var(--radius-full);
+}
+
+.checked {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--spacing-sm);
+  height: var(--spacing-sm);
+  border-radius: var(--radius-full);
+  background: var(--colors-text);
+  color: var(--colors-text-inverse);
+}
+
+.label {
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+  color: var(--colors-text);
+}
+
+/* Faded rather than recoloured: --colors-text-disabled is near-white on TGR
+   and IB, which would leave the box invisible against the page. Opacity dims
+   the mark the theme already draws, in every theme. */
+.root:has(.input:disabled) {
+  cursor: not-allowed;
+  opacity: 0.4;
+}

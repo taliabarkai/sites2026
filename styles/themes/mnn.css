@@ -130,6 +130,8 @@
 
   /* Price */
   --colors-price-selling: var(--mnn-red);
+  /* Marked-down price — the brand's own red, not the selling colour. */
+  --colors-price-sale:    var(--mnn-red);
   --colors-star-filled:   var(--mnn-dune-yellow);
 
   /* Cards */

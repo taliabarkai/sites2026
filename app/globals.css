@@ -67,6 +67,11 @@ html {
   --layout-content-width: 1200px;
   --sticky-top:           var(--layout-header-height);
 
+  /* ── Demo chrome (prototype controls — deliberately not brand-themed) ── */
+  /* The phase control changes the whole journey, so it is tinted apart from
+     the other demo pills. Soft enough to read as chrome under any brand. */
+  --demo-phase-background: #E6F2F1;
+
   /* ── Material colors (universal product attributes — not brand-themed) ── */
   --sterling-silver-925:   #CBCBCB;
   --gold-vermeil-18k:      #E2C385;

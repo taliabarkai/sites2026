@@ -1,0 +1,1 @@
+export { CheckoutFooter } from './CheckoutFooter'

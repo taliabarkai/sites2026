@@ -106,6 +106,8 @@
 
   /* Price */
   --colors-price-selling: var(--oal-black);
+  /* Marked-down price — the brand's own red, not the selling colour. */
+  --colors-price-sale:    var(--oal-red);
   --colors-star-filled:   var(--oal-black);
 
   /* Cards */

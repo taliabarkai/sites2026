@@ -59,6 +59,20 @@ export interface CartItem {
 /** Flat price of the optional 5-year protection plan (cents). */
 export const WARRANTY_CENTS = 1500
 
+/**
+ * What the bag's markdowns are worth, in cents.
+ *
+ * Zero whenever nothing carries an `originalPrice`, which is every bag that is
+ * not on sale — so a summary can add the line unconditionally and simply not
+ * render it at zero.
+ */
+export function promotionalDiscount(items: CartItem[]): number {
+  return items.reduce(
+    (sum, item) => sum + Math.max(0, (item.originalPrice ?? item.price) - item.price),
+    0,
+  )
+}
+
 interface CartContextValue {
   items: CartItem[]
   isOpen: boolean
@@ -127,7 +141,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setItems(prev => prev.map(item => item.id === id ? { ...item, warranty: !item.warranty } : item))
   }, [])
 
-  const subtotal = items.reduce((sum, item) => sum + item.price + (item.warranty ? WARRANTY_CENTS : 0), 0)
+  /* The pre-discount sum: a markdown is shown on its own line below, so
+     counting the sale price here too would take it twice. Identical to the
+     old arithmetic for any bag with nothing marked down. */
+  const subtotal = items.reduce(
+    (sum, item) => sum + (item.originalPrice ?? item.price) + (item.warranty ? WARRANTY_CENTS : 0),
+    0,
+  )
 
   return (
     <CartContext.Provider value={{

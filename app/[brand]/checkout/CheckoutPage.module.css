@@ -134,6 +134,15 @@
   margin-top: var(--spacing-md);
 }
 
+/* Not on a phone. The list earns its place on the bag, where someone is still
+   deciding; by checkout the decision is made and it is three more rows between
+   the shopper and the pay button. The bag keeps it at every width. */
+@media (max-width: 1023px) {
+  .summaryUsps {
+    display: none;
+  }
+}
+
 /* Items that only appear in the left column on mobile */
 .orderSummaryMobile {
   display: block;
@@ -306,6 +315,111 @@
   align-items: center;
   color: var(--colors-text-secondary);
   cursor: help;
+}
+
+/* The field's help bubble. Sits above the badge rather than below it, so it
+   never covers the next field while someone is still filling this one. */
+.fieldTipButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: none;
+  background: none;
+  /* Full-strength, not the muted colour the wrapper sets: this is a control
+     to be used, and a grey glyph beside grey placeholder text reads disabled. */
+  color: var(--colors-text);
+  cursor: pointer;
+}
+
+/* Same panel as the SMS terms below it — bordered, light, no tail. Two
+   explanations in the same card should not look like two different kinds of
+   thing. */
+.fieldTooltip {
+  position: absolute;
+  bottom: calc(100% + var(--spacing-xxs));
+  right: 0;
+  z-index: var(--z-raised);
+  width: max-content;
+  max-width: 260px;
+  padding: var(--spacing-sm);
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: var(--colors-background);
+  box-shadow: var(--shadow-md);
+  color: var(--colors-text);
+  font-family: var(--typography-rules-text3-font-family);
+  font-size:   var(--typography-rules-text3-font-size);
+  line-height: var(--typography-rules-text3-line-height);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity var(--transition-fast), visibility var(--transition-fast);
+}
+
+.fieldTooltipVisible {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* ─── SMS opt-in ─────────────────────────────────────────────────────────────── */
+
+.smsOptInRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-sm);
+  flex-wrap: wrap;
+}
+
+.smsTermsWrap {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.smsTermsToggle {
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: var(--colors-text);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  font-family: var(--typography-rules-text1-font-family);
+  font-size:   var(--typography-rules-text1-font-size);
+  line-height: var(--typography-rules-text1-line-height);
+}
+
+/* Anchored to the link and ranged right, so it opens inside the card rather
+   than off the edge of it. */
+.smsTermsPopover {
+  position: absolute;
+  top: calc(100% + var(--spacing-xxs));
+  right: 0;
+  z-index: var(--z-raised);
+  width: max-content;
+  max-width: 360px;
+  padding: var(--spacing-sm);
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: var(--colors-background);
+  box-shadow: var(--shadow-md);
+}
+
+.smsTermsBody {
+  margin: 0;
+  font-family: var(--typography-rules-text3-font-family);
+  font-size:   var(--typography-rules-text3-font-size);
+  line-height: var(--typography-rules-text3-line-height);
+  color: var(--colors-text);
+}
+
+/* On a phone it stays hung off the link and is held inside the viewport by
+   its width instead. Pinning it to the bottom of the screen read as an
+   unrelated panel rather than an answer to the link that opened it. */
+@media (max-width: 767px) {
+  .smsTermsPopover {
+    max-width: calc(100vw - var(--spacing-xl));
+  }
 }
 
 /* ─── Checkbox ───────────────────────────────────────────────────────────────── */
@@ -1028,6 +1142,18 @@
   color: var(--colors-text);
 }
 
+/* The saved shipping price, sitting under its estimate rather than ranged
+   against the far edge of the card. Bold, so it still reads as the figure. */
+.completedShippingPrice {
+  margin-top: var(--spacing-xxxs);
+  font-family:    var(--typography-rules-text2-font-family);
+  font-size:      var(--typography-rules-text2-font-size);
+  font-weight:    var(--typography-rules-text2-font-weight, normal);
+  line-height:    var(--typography-rules-text2-line-height);
+  letter-spacing: var(--typography-rules-text2-letter-spacing, normal);
+  color: var(--colors-text);
+}
+
 .completedValue {
   font-family:    var(--typography-rules-text1-font-family);
   font-size:      var(--typography-rules-text1-font-size);
@@ -1220,7 +1346,7 @@
 /* ─── Step continue row ──────────────────────────────────────────────────────── */
 
 .stepContinueRow {
-  /* margin-top: var(--spacing-md); */
+  margin-top: var(--spacing-md);
   display: flex;
 }
 
@@ -2034,7 +2160,8 @@
   line-height:    var(--typography-rules-text2-line-height);
   font-weight:    var(--typography-rules-text2-font-weight, 600);
   letter-spacing: var(--typography-rules-text2-letter-spacing, normal);
-  color: var(--colors-success);
+  /* The amount reads as an amount — only the coupon mark is green. */
+  color: var(--colors-text);
 }
 
 .savingsNote {
@@ -3207,4 +3334,11 @@
 .versionToggleBtnActive {
   background: var(--colors-text);
   color: var(--colors-text-inverse);
+}
+
+/* A price that follows a struck-through one is a marked-down price, so it
+   takes the brand's sale red. No flag needed: the crossed price beside it is
+   already the only evidence there is a markdown. */
+.priceOriginal + .priceSelling {
+  color: var(--colors-price-sale);
 }

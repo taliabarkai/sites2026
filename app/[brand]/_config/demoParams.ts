@@ -71,6 +71,16 @@ export function readIsErrorState(params: ReadableParams): boolean {
 }
 
 /**
+ * The sale preview: one line in the bag marked down, and the saving carried
+ * into every order summary. Shares the `state` key with the error preview —
+ * both answer "show me this page in a particular state" — and the two are
+ * mutually exclusive by construction, since one key holds one value.
+ */
+export function readIsSaleState(params: ReadableParams): boolean {
+  return params.get(STATE_PARAM) === 'sale'
+}
+
+/**
  * Track My Order previews three outcomes rather than two, so it reads the
  * same key for a value rather than a flag. `readIsErrorState` stays as it is
  * for checkout, which only knows "error" — a `duplicate` there reads as no

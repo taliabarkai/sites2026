@@ -844,6 +844,16 @@
   color: var(--colors-text);
 }
 
+.summaryDiscountValue {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xxs);
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  color: var(--colors-text);
+}
+
 .summaryValueBold {
   font-family: var(--typography-rules-text2-font-family);
   font-size: var(--typography-rules-text2-font-size);
@@ -1045,4 +1055,11 @@
   .itemGiftTrayInline .warrantyAdded {
     padding-top: calc(var(--spacing-xs) - var(--spacing-xxxs));
   }
+}
+
+/* A price that follows a struck-through one is a marked-down price, so it
+   takes the brand's sale red. No flag needed: the crossed price beside it is
+   already the only evidence there is a markdown. */
+.priceOriginal + .priceSelling {
+  color: var(--colors-price-sale);
 }

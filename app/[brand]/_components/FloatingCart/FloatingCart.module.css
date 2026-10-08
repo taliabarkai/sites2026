@@ -1025,3 +1025,10 @@
   letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
   color: #166534;
 }
+
+/* A price that follows a struck-through one is a marked-down price, so it
+   takes the brand's sale red. No flag needed: the crossed price beside it is
+   already the only evidence there is a markdown. */
+.itemOriginalPrice + .itemPrice {
+  color: var(--colors-price-sale);
+}

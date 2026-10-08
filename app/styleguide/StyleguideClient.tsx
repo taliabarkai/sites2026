@@ -4,6 +4,7 @@ import { useRef, useEffect, useState, type FC } from 'react'
 import { useRouter } from 'next/navigation'
 import { brandToThemeKey, themeKeyToBrand, type BrandKey } from '../[brand]/_config/brands'
 import { Button, type ButtonVariant } from '../[brand]/_components/Button'
+import { Checkbox, type CheckboxIcons } from '../[brand]/_components/Checkbox'
 
 import * as oalIcons from '@/src/components/icons/oal'
 import * as mnnIcons from '@/src/components/icons/mnn'
@@ -354,6 +355,35 @@ function ThemeSelect() {
   )
 }
 
+/**
+ * The real checkbox, in both states and actually clickable.
+ *
+ * Each row owns its own state so the page demonstrates the toggle rather than
+ * describing it; the icons come from whichever theme is selected, so switching
+ * brand switches the mark.
+ */
+function ThemeCheckboxes({ icons }: { icons: CheckboxIcons }) {
+  const [checked, setChecked]     = useState(true)
+  const [unchecked, setUnchecked] = useState(false)
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <Checkbox checked={checked} onChange={setChecked} icons={icons}>
+        {checked ? 'Checked' : 'Unchecked'}
+      </Checkbox>
+      <Checkbox checked={unchecked} onChange={setUnchecked} icons={icons}>
+        {unchecked ? 'Checked' : 'Unchecked'}
+      </Checkbox>
+      <Checkbox checked={false} onChange={() => undefined} icons={icons} disabled>
+        Disabled
+      </Checkbox>
+      <Checkbox checked onChange={() => undefined} icons={icons} disabled>
+        Disabled, checked
+      </Checkbox>
+    </div>
+  )
+}
+
 function ThemeTextarea() {
   const [hovered, setHovered] = useState(false)
   return (
@@ -659,22 +689,12 @@ export default function StyleguideClient({ brand }: StyleguideClientProps) {
               <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--colors-text-secondary)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
                 Checkbox
               </div>
-              {(['Checked', 'Unchecked'] as const).map((state, i) => (
-                <label key={state} style={{
-                  display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer',
-                  fontFamily: 'var(--font-family-main-regular)',
-                  fontSize: 'var(--typography-rules-text1-font-size)',
-                  color: 'var(--colors-text)',
-                  marginTop: i > 0 ? 8 : 0,
-                }}>
-                  <input
-                    type="checkbox"
-                    defaultChecked={state === 'Checked'}
-                    style={{ accentColor: 'var(--colors-text)', width: 16, height: 16, cursor: 'pointer' }}
-                  />
-                  {state}
-                </label>
-              ))}
+              <ThemeCheckboxes
+                icons={{
+                  CheckboxIcon:  BRAND_ICONS[activeBrand].CheckboxIcon,
+                  CheckmarkIcon: BRAND_ICONS[activeBrand].CheckmarkIcon,
+                } as unknown as CheckboxIcons}
+              />
             </div>
           </div>
         </section>

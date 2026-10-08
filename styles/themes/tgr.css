@@ -106,6 +106,8 @@
 
   /* Price */
   --colors-price-selling: var(--tgr-raisin);
+  /* Marked-down price — the brand's own red, not the selling colour. */
+  --colors-price-sale:    var(--tgr-red);
   --colors-star-filled:   var(--tgr-raisin);
 
   /* Cards */

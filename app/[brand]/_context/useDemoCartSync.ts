@@ -5,8 +5,8 @@ import { usePathname, useSearchParams } from 'next/navigation'
 
 import { useCart } from './CartContext'
 import { getBrandFromPathname } from '../_config/brands'
-import { getDemoCartItems, isDemoCart } from '../_config/demoCart'
-import { readCartSize } from '../_config/demoParams'
+import { getDemoCartItems, isDemoCart, withSalePreview } from '../_config/demoCart'
+import { readCartSize, readIsSaleState } from '../_config/demoParams'
 import { getGiftOptions } from '../_config/giftOptions'
 import { getBrandFeatures } from '../_config/flow'
 
@@ -34,14 +34,18 @@ export function useDemoCartSync() {
 
   const brand   = getBrandFromPathname(pathname)
   const urlSize = readCartSize(searchParams)
+  const onSale  = readIsSaleState(searchParams)
 
   useEffect(() => {
     const demoItems = getDemoCartItems(brand)
     const size = urlSize ?? (isDemoCart(items) ? items.length : null)
     if (size === null) return
 
-    const want = demoItems.slice(0, size)
-    const same = items.length === want.length && want.every((w, i) => items[i]?.id === w.id)
+    const want = onSale ? withSalePreview(demoItems.slice(0, size)) : demoItems.slice(0, size)
+    const same = items.length === want.length && want.every((w, i) =>
+      items[i]?.id === w.id
+      && items[i]?.price === w.price
+      && items[i]?.originalPrice === w.originalPrice)
     if (!same) {
       replaceItems(want)
       return
@@ -84,5 +88,5 @@ export function useDemoCartSync() {
     // demoItems is rebuilt each render from static config; keying the effect on
     // it would re-run this on every render and fight the shopper's own edits.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [urlSize, items, replaceItems, brand])
+  }, [urlSize, onSale, items, replaceItems, brand])
 }

@@ -107,6 +107,8 @@
 
   /* Price */
   --colors-price-selling: var(--ib-navy);
+  /* Marked-down price — the brand's own red, not the selling colour. */
+  --colors-price-sale:    var(--ib-red);
   --colors-star-filled:   var(--ib-navy);
 
   /* Cards */

@@ -113,3 +113,28 @@ export function isDemoCart(items: { id: string }[]): boolean {
 
 /** Cart size the error preview is pinned to, so the shared link is deterministic. */
 export const ERROR_PREVIEW_CART_SIZE = 2
+
+/**
+ * The sale preview marks the first line down by this much.
+ *
+ * The first line rather than a named product, so the preview works at any cart
+ * size — including one item, where a sale on the second would never be seen.
+ */
+const SALE_FRACTION = 0.3
+
+/**
+ * One line marked down, with its old price kept as `originalPrice`.
+ *
+ * Price stays the amount charged and `originalPrice` is what it was, which is
+ * the shape the cart page and the floating cart already draw a crossed-out
+ * price from — so no surface needs to learn a new field.
+ */
+export function withSalePreview(items: CartItem[]): CartItem[] {
+  if (items.length === 0) return items
+  const [first, ...rest] = items
+  const original = first.price
+  return [
+    { ...first, originalPrice: original, price: Math.round(original * (1 - SALE_FRACTION)) },
+    ...rest,
+  ]
+}

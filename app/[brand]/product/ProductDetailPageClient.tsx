@@ -134,6 +134,13 @@ function ProductCarousel({
 const REVIEWS_PAGE_SIZE = 4
 
 /**
+ * Parked, not removed: flip to true to bring the "With photos" review filter
+ * back. The chip, its state and the filtering it drives all stay where they
+ * are, so this is a one-word change.
+ */
+const SHOW_PHOTOS_FILTER = false
+
+/**
  * Products whose reviews carry only a handful of photos, so the sparse version
  * of the photo strip can be seen alongside the busy one. Everything else shows
  * the full set.
@@ -380,7 +387,7 @@ function ReviewsSection({
           </div>
 
           {/* Photos filter — sits next to the ratings chip on both breakpoints */}
-          {reviewsWithPhotos > 0 && (
+          {SHOW_PHOTOS_FILTER && reviewsWithPhotos > 0 && (
             <button
               type="button"
               className={`${styles.reviewsFilterChip} ${photosOnly ? styles.reviewsFilterChipActive : ''}`}

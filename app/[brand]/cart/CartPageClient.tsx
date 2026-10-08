@@ -9,7 +9,7 @@ import * as tgrIcons from '@/src/components/icons/tgr'
 import * as lalIcons from '@/src/components/icons/lal'
 import * as ibIcons from '@/src/components/icons/ib'
 import type { IconProps } from '@/src/components/icons/Icon'
-import { useCart, WARRANTY_CENTS } from '../_context/CartContext'
+import { useCart, WARRANTY_CENTS, promotionalDiscount } from '../_context/CartContext'
 import type { CartItem, GiftPackaging } from '../_context/CartContext'
 import { useDemoCartSync } from '../_context/useDemoCartSync'
 import { GiftTray, GiftTrayPanel } from '../_components/cart/GiftTray'
@@ -21,11 +21,11 @@ import { optionsForItem, type DesignOption, type GiftOption } from '../_componen
 import { GiftingDrawer } from '../_components/cart/GiftingOptions/GiftingDrawer'
 import { GiftPanel } from '../_components/cart/GiftingV2/GiftPanel'
 import { getGiftOptions } from '../_config/giftOptions'
-import { BRAND_GIFT_CONFIG } from '../_config/brands'
+import { BRAND_GIFT_CONFIG, type BrandKey } from '../_config/brands'
 import { readFlow, readGiftingVariant } from '../_config/demoParams'
 import { getBrandFeatures, getFlowConfig } from '../_config/flow'
 import { Header } from '../_components/Header'
-import { Footer } from '../_components/Footer'
+import { CheckoutFooter } from '../_components/CheckoutFooter'
 import { Button } from '../_components/Button'
 import { getBrandFromPathname } from '../_config/brands'
 import { prefixFooterColumns, prefixNavLinks, withBrandPrefix } from '../_config/brandPaths'
@@ -544,7 +544,12 @@ function CartPageInner() {
   const savings    = totalOriginalValue - subtotal
   // Only a flow that asks here can charge here.
   const shippingCost   = flowConfig.shipping === 'cart' && selectedShipping === 'express' ? 1500 : 0
-  const discountAmount = promoApplied ? Math.round(subtotal * 0.20) : 0
+  /* A markdown is a promotional discount too, so it lands on the same line
+     rather than inventing a second one; the coupon adds to it when both are
+     on. Zero whenever nothing in the bag carries an original price. */
+  const saleDiscount   = promotionalDiscount(items)
+  const couponDiscount = promoApplied ? Math.round(subtotal * 0.20) : 0
+  const discountAmount = couponDiscount + saleDiscount
   const orderTotal     = subtotal + giftTotal + shippingCost - discountAmount
 
   return (
@@ -753,10 +758,13 @@ function CartPageInner() {
                       : 'Calculated at checkout'}
                   </span>
                 </div>
-                {promoApplied && (
+                {discountAmount > 0 && (
                   <div className={styles.summaryRow}>
                     <span className={styles.summaryLabel}>Promotional Discounts:</span>
-                    <span className={styles.summaryValue}>−{formatPrice(discountAmount)}</span>
+                    <span className={styles.summaryDiscountValue}>
+                      <icons.CouponIcon size={24} color="var(--colors-success)" />
+                      −{formatPrice(discountAmount)}
+                    </span>
                   </div>
                 )}
                 <div className={styles.summaryRow}>
@@ -852,7 +860,7 @@ function CartPageInner() {
         )
       )}
 
-      <Footer columns={footerColumns} />
+      <CheckoutFooter brand={brand as BrandKey} />
     </div>
   )
 }

@@ -19,7 +19,11 @@
   padding: var(--spacing-xxxs) var(--spacing-xs);
   border: var(--border-width) solid var(--border-color);
   border-radius: var(--radius-full);
-  background: transparent;
+  /* Demo chrome, so this is deliberately outside the theme palette: the phase
+     control is the one pill that changes the whole journey, and a faint tint
+     separates it from the cart-size and warranty pills beside it. Soft enough
+     to sit under any brand's header without competing with it. */
+  background: var(--demo-phase-background);
   color: var(--colors-text);
   cursor: pointer;
   white-space: nowrap;

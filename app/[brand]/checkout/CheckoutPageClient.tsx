@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useCallback, useEffect, useId, useState } from 'react'
+import { useCallback, useEffect, useId, useRef, useState } from 'react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import * as oalIcons from '@/src/components/icons/oal'
 import * as mnnIcons from '@/src/components/icons/mnn'
@@ -11,10 +11,12 @@ import * as ibIcons from '@/src/components/icons/ib'
 import type { IconProps } from '@/src/components/icons/Icon'
 import type { CartItem } from '../_context/CartContext'
 import { Button } from '../_components/Button'
+import { CheckoutFooter } from '../_components/CheckoutFooter'
+import { Checkbox } from '../_components/Checkbox'
 import { Header } from '../_components/Header'
-import { useCart, WARRANTY_CENTS } from '../_context/CartContext'
+import { useCart, WARRANTY_CENTS, promotionalDiscount } from '../_context/CartContext'
 import { createPlacedOrder, savePlacedOrder, DEMO_CONTACT } from '../_context/placedOrder'
-import { getBrandFromPathname, BRAND_GIFT_CONFIG, type BrandKey } from '../_config/brands'
+import { getBrandFromPathname, BRANDS, BRAND_GIFT_CONFIG, type BrandKey } from '../_config/brands'
 import { prefixNavLinks, withBrandPrefix } from '../_config/brandPaths'
 import { DEFAULT_NAV_LINKS, DEFAULT_TOPLINE } from '../_config/siteContent'
 import { getGiftOptions, type BrandGiftOption } from '../_config/giftOptions'
@@ -39,6 +41,7 @@ interface BrandIcons {
   ReturnIcon:    React.ComponentType<IconProps>
   WarrantyIcon:  React.ComponentType<IconProps>
   CheckmarkIcon: React.ComponentType<IconProps>
+  CheckboxIcon:  React.ComponentType<IconProps>
   DropdownIcon:  React.ComponentType<IconProps>
   PlusMinusIcon: React.ComponentType<IconProps>
   TooltipIcon:   React.ComponentType<IconProps>
@@ -469,7 +472,9 @@ function OrderSummary({ items, icons, showDetails, subtotal = 0, selectedShippin
 
   const { ShippingIcon, ReturnIcon, WarrantyIcon, CouponIcon, XIcon, ChevronIcon } = icons
   const shippingCost   = selectedShipping === 'standard' ? 500 : 0
-  const discountAmount = promoApplied ? Math.round(subtotal * 0.20) : 0
+  /* A markdown is a promotional discount too, so it shares the line with the
+     coupon rather than adding a second one. Zero with nothing marked down. */
+  const discountAmount = (promoApplied ? Math.round(subtotal * 0.20) : 0) + promotionalDiscount(items)
   const orderTotal     = subtotal + giftTotal + shippingCost - discountAmount + (taxAmount ?? 0)
   const displayTotal   = orderTotalDisplay ?? orderTotal
 
@@ -597,11 +602,11 @@ function OrderSummary({ items, icons, showDetails, subtotal = 0, selectedShippin
                 {selectedShipping === 'free' ? 'Free' : formatPrice(shippingCost)}
               </span>
             </div>
-            {promoApplied && (
+            {discountAmount > 0 && (
               <div className={styles.totalRow}>
                 <span className={styles.totalLabel}>Promotional Discounts:</span>
                 <span className={styles.promoDiscountValue}>
-                  <CouponIcon size={14} />
+                  <CouponIcon size={24} color="var(--colors-success)" />
                   -{formatPrice(discountAmount)}
                 </span>
               </div>
@@ -875,6 +880,36 @@ function CheckoutPageInner() {
   // Contact
   const [email,      setEmail]      = useState('')
   const [emailOptIn, setEmailOptIn] = useState(true)
+  const [smsOptIn,   setSmsOptIn]   = useState(false)
+
+  /* The phone field's help bubble and the SMS terms popover. Both are opened
+     by their own control and neither blocks the form, so they are plain
+     local state rather than anything routed. */
+  const [phoneTipOpen,  setPhoneTipOpen]  = useState(false)
+  const [smsTermsOpen,  setSmsTermsOpen]  = useState(false)
+  const phoneTipId  = useId()
+  const smsTermsId  = useId()
+  const smsTermsRef = useRef<HTMLDivElement>(null)
+
+  /* A popover closes on Escape and on a click past its own edge — it is not
+     modal, so nothing else is trapped or disabled while it is open. */
+  useEffect(() => {
+    if (!smsTermsOpen) return
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setSmsTermsOpen(false)
+    }
+    const onPointerDown = (event: MouseEvent) => {
+      if (!smsTermsRef.current?.contains(event.target as Node)) setSmsTermsOpen(false)
+    }
+
+    document.addEventListener('keydown', onKeyDown)
+    document.addEventListener('mousedown', onPointerDown)
+    return () => {
+      document.removeEventListener('keydown', onKeyDown)
+      document.removeEventListener('mousedown', onPointerDown)
+    }
+  }, [smsTermsOpen])
 
   // Delivery
   const [country,       setCountry]       = useState('')
@@ -952,7 +987,7 @@ function CheckoutPageInner() {
     replaceItems(getDemoCartItems(brand as BrandKey).slice(0, ERROR_PREVIEW_CART_SIZE))
   }, [isErrorPreview, items.length, replaceItems, brand, searchParams])
 
-  const { DropdownIcon, TooltipIcon, CheckmarkIcon, LockIcon, XIcon, CouponIcon, ShippingIcon, ReturnIcon, WarrantyIcon, ChevronIcon } = icons
+  const { DropdownIcon, TooltipIcon, CheckmarkIcon, CheckboxIcon, LockIcon, XIcon, CouponIcon, ShippingIcon, ReturnIcon, WarrantyIcon, ChevronIcon } = icons
 
   const handleApplyMobilePromo = () => {
     if (promoCode.trim()) {
@@ -969,7 +1004,9 @@ function CheckoutPageInner() {
 
   // ── Derived ─────────────────────────────────────────────────────────────────
   const shippingCost   = selectedShipping === 'standard' ? 500 : 0
-  const discountAmount = promoApplied ? Math.round(subtotal * 0.20) : 0
+  /* A markdown is a promotional discount too, so it shares the line with the
+     coupon rather than adding a second one. Zero with nothing marked down. */
+  const discountAmount = (promoApplied ? Math.round(subtotal * 0.20) : 0) + promotionalDiscount(items)
   // Gift packaging is part of the merchandise subtotal, so it sits inside the
   // taxable base rather than being tacked on after tax.
   const giftTotal      = giftAssignments.reduce(
@@ -1040,17 +1077,18 @@ function CheckoutPageInner() {
   )
   const step2Summary = (
     <div className={styles.completedGroup}>
+      {/* Name, then the estimate, then what it costs. Ranged right against the
+          card's far edge the price sat a long way from the method it belongs
+          to, with nothing between them — easy to read past. */}
       <div className={styles.completedSection}>
-        <div className={styles.completedLabelRow}>
-          <span className={styles.completedLabel}>
-            {selectedShipping === 'free' ? 'Free Shipping' : 'Standard Shipping'}
-          </span>
-          <span className={styles.completedLabel}>
-            {selectedShipping === 'free' ? 'FREE' : formatPrice(shippingCost)}
-          </span>
-        </div>
+        <span className={styles.completedLabel}>
+          {selectedShipping === 'free' ? 'Free Shipping' : 'Standard Shipping'}
+        </span>
         <span className={styles.completedValue}>
           {selectedShipping === 'free' ? 'Arrives 6-8 business days after production time' : 'Arrives 4-6 business days after production time'}
+        </span>
+        <span className={styles.completedShippingPrice}>
+          {selectedShipping === 'free' ? 'FREE' : formatPrice(shippingCost)}
         </span>
       </div>
     </div>
@@ -1201,18 +1239,14 @@ function CheckoutPageInner() {
                         autoComplete="email"
                       />
                     </div>
-                    <label className={styles.checkboxLabel}>
-                      <input
-                        type="checkbox"
-                        checked={emailOptIn}
-                        onChange={e => setEmailOptIn(e.target.checked)}
-                        className={styles.checkbox}
-                      />
-                      <span className={styles.checkboxText}>
-                        Yes, email me special offers and 20% off my next purchase!{' '}
-                        <a href="#" className={styles.inlineLink}>Mailing Conditions</a>
-                      </span>
-                    </label>
+                    <Checkbox
+                      checked={emailOptIn}
+                      onChange={setEmailOptIn}
+                      icons={{ CheckboxIcon, CheckmarkIcon }}
+                    >
+                      Yes, email me special offers and 20% off my next purchase!{' '}
+                      <a href="#" className={styles.inlineLink}>Mailing Conditions</a>
+                    </Checkbox>
                   </div>
                 </div>
 
@@ -1271,8 +1305,81 @@ function CheckoutPageInner() {
 
                     <div className={styles.fieldWrap}>
                       <input type="tel" placeholder="Phone Number" value={phone} onChange={e => setPhone(e.target.value)} className={styles.input} aria-label="Phone number" autoComplete="tel" />
+
+                      {/* What used to be a line of small print under the field.
+                          It only answers a question the field raises, so it
+                          waits to be asked. */}
+                      <span
+                        className={styles.fieldIconRight}
+                        onMouseEnter={() => setPhoneTipOpen(true)}
+                        onMouseLeave={() => setPhoneTipOpen(false)}
+                      >
+                        <button
+                          type="button"
+                          className={styles.fieldTipButton}
+                          aria-label="Why we ask for your phone number"
+                          aria-describedby={phoneTipId}
+                          aria-expanded={phoneTipOpen}
+                          onFocus={() => setPhoneTipOpen(true)}
+                          onBlur={() => setPhoneTipOpen(false)}
+                          onClick={() => setPhoneTipOpen(open => !open)}
+                        >
+                          <TooltipIcon size={16} />
+                        </button>
+
+                        {/* Always in the DOM so aria-describedby resolves. */}
+                        <span
+                          id={phoneTipId}
+                          role="tooltip"
+                          className={`${styles.fieldTooltip} ${phoneTipOpen ? styles.fieldTooltipVisible : ''}`}
+                        >
+                          Shipping notifications will be sent to this number
+                        </span>
+                      </span>
                     </div>
-                    <p className={styles.sectionSubtitle}>(Delivery notifications will be sent to this number)</p>
+
+                    <div className={styles.smsOptInRow}>
+                      <Checkbox
+                        checked={smsOptIn}
+                        onChange={setSmsOptIn}
+                        icons={{ CheckboxIcon, CheckmarkIcon }}
+                      >
+                        Get offers and updates by text
+                      </Checkbox>
+
+                      <div className={styles.smsTermsWrap} ref={smsTermsRef}>
+                        <button
+                          type="button"
+                          className={styles.smsTermsToggle}
+                          aria-expanded={smsTermsOpen}
+                          aria-controls={smsTermsId}
+                          onClick={() => setSmsTermsOpen(open => !open)}
+                        >
+                          See Terms
+                        </button>
+
+                        {smsTermsOpen && (
+                          <div
+                            id={smsTermsId}
+                            role="dialog"
+                            aria-label="Text message terms"
+                            className={styles.smsTermsPopover}
+                          >
+                            <p className={styles.smsTermsBody}>
+                              By checking this box, you agree to receive recurring automated marketing
+                              texts (offers, new arrivals, cart reminders, and order updates) from{' '}
+                              {BRANDS.find(b => b.key === brand)?.label} at the number provided. This is
+                              optional and not required to complete your purchase. Message frequency
+                              varies, and message and data rates may apply. You can withdraw your consent
+                              at any time. See our{' '}
+                              <a className={styles.inlineLink} href={withBrandPrefix(brand, '/terms')}>Terms</a>
+                              {' '}and{' '}
+                              <a className={styles.inlineLink} href={withBrandPrefix(brand, '/privacy')}>Privacy Policy</a>.
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 </div>
 
@@ -1596,11 +1703,11 @@ function CheckoutPageInner() {
                             {selectedShipping === 'free' ? 'Free' : formatPrice(shippingCost)}
                           </span>
                         </div>
-                        {promoApplied && (
+                        {discountAmount > 0 && (
                           <div className={styles.totalRow}>
                             <span className={styles.totalLabel}>Promotional Discounts:</span>
                             <span className={styles.promoDiscountValue}>
-                              <CouponIcon size={14} />
+                              <CouponIcon size={24} color="var(--colors-success)" />
                               -{formatPrice(discountAmount)}
                             </span>
                           </div>
@@ -1718,24 +1825,11 @@ function CheckoutPageInner() {
 
           </div>
 
-          <footer className={styles.pageFooter}>
-            <p className={styles.footerHelp}>
-              Need some help?{' '}
-              <a href="#" className={styles.footerLink}>Contact us</a>
-              {' '}now and we'll be able to assist you!
-            </p>
-            <Link href={`/${brand}/cart`} className={styles.returnLink}>
-              Return to Shopping Bag
-            </Link>
-            <p className={styles.copyright}>
-              Copyright &copy; 2026 Oak and Luna | All rights reserved
-            </p>
-          </footer>
 
         </div>
       </main>
 
-
+      <CheckoutFooter brand={brand as BrandKey} />
     </div>
   )
 }
