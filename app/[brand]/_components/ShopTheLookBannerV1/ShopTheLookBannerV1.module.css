@@ -1,0 +1,139 @@
+/* ── Root — mirrors HotspotImage sizing so V1 and Current share one footprint ── */
+
+/* Mobile: height driven by the image's natural dimensions */
+.root {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+/* Desktop: fills the grid cell (the parent slot provides the height) */
+@media (min-width: 1440px) {
+  .root {
+    height: 100%;
+  }
+}
+
+.image {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+@media (min-width: 1440px) {
+  .image {
+    position: absolute;
+    inset: 0;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+  }
+}
+
+/* ── Overlay — bottom-left copy, no scrim ─────────────────────────────────────
+   Dark text straight on the pale banner, same as the Current tile's headline. */
+.content {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--spacing-xxs);
+  padding: var(--spacing-sm);
+  color: var(--colors-text);
+}
+
+@media (min-width: 768px) {
+  .content {
+    gap: var(--spacing-xs);
+    padding: var(--spacing-lg);
+  }
+}
+
+.eyebrow {
+  margin: 0;
+  font-family:    var(--typography-rules-headline6-font-family);
+  font-size:      var(--typography-rules-headline6-font-size);
+  line-height:    var(--typography-rules-headline6-line-height);
+  font-weight:    var(--typography-rules-headline6-font-weight, normal);
+  letter-spacing: var(--typography-rules-headline6-letter-spacing, normal);
+  text-transform: uppercase;
+}
+
+/* The design system's h4 — headline4 scale */
+.heading {
+  margin: 0;
+  font-family:    var(--typography-rules-headline4-font-family);
+  font-size:      var(--typography-rules-headline4-font-size);
+  line-height:    var(--typography-rules-headline4-line-height);
+  font-weight:    var(--typography-rules-headline4-font-weight, normal);
+  letter-spacing: var(--typography-rules-headline4-letter-spacing, normal);
+  text-transform: uppercase;
+}
+
+.cta {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xxs);
+  margin-top: var(--spacing-xxs);
+  height: var(--spacing-xl);
+  padding: 0 var(--spacing-sm);
+
+  /* Same chrome as ProductCard's Quick-Add bag button, widened to hold a label */
+  background: var(--colors-background);
+  color: var(--colors-text);
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--buttons-primary-border-radius);
+  cursor: pointer;
+  transition:
+    background var(--transition-base),
+    color var(--transition-base),
+    border-color var(--transition-base);
+}
+
+.cta:hover,
+.cta:focus-visible {
+  background: var(--colors-text);
+  color: var(--colors-text-inverse);
+  border-color: var(--colors-text);
+}
+
+.ctaIcon {
+  display: inline-flex;
+  flex: 0 0 auto;
+}
+
+.ctaLabel {
+  font-family:    var(--typography-rules-button1-font-family);
+  font-size:      var(--typography-rules-button1-font-size);
+  line-height:    var(--typography-rules-button1-line-height);
+  font-weight:    var(--typography-rules-button1-font-weight, normal);
+  letter-spacing: var(--typography-rules-button1-letter-spacing, normal);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* ── V3 desktop options ───────────────────────────────────────────────────── */
+/* Label-only CTA: the banner isn't a click target */
+.static,
+.static .cta {
+  cursor: default;
+}
+
+.hideCtaOnHover .cta {
+  transition:
+    opacity var(--transition-base),
+    background var(--transition-base),
+    color var(--transition-base),
+    border-color var(--transition-base);
+}
+
+.hideCtaOnHover:hover .cta,
+.hideCtaOnHover:focus-within .cta {
+  opacity: 0;
+}

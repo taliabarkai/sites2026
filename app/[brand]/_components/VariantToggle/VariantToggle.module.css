@@ -1,0 +1,60 @@
+.root {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xxs);
+  min-width: 0;
+}
+
+.prefix {
+  font-family:    var(--typography-rules-caption1-font-family);
+  font-size:      var(--typography-rules-caption1-font-size);
+  line-height:    var(--typography-rules-caption1-line-height);
+  font-weight:    var(--typography-rules-caption1-font-weight, normal);
+  letter-spacing: var(--typography-rules-caption1-letter-spacing, normal);
+  text-transform: var(--typography-rules-caption1-text-transform, none);
+  color: var(--colors-text-secondary);
+}
+
+.selectWrap {
+  position: relative;
+  display: inline-flex;
+}
+
+/* Compact take on the Quick Add select */
+.select {
+  appearance: none;
+  /* room on the right for the chevron */
+  padding: var(--spacing-xxxs) var(--spacing-lg) var(--spacing-xxxs) var(--spacing-xs);
+  border: var(--border-width) solid var(--form-field-border-color);
+  border-radius: var(--form-field-border-radius, 0);
+  background: var(--form-field-background);
+  color: var(--colors-text);
+  font-family:    var(--typography-rules-caption1-font-family);
+  font-size:      var(--typography-rules-caption1-font-size);
+  line-height:    var(--typography-rules-caption1-line-height);
+  font-weight:    var(--typography-rules-caption1-font-weight, normal);
+  letter-spacing: var(--typography-rules-caption1-letter-spacing, normal);
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.select:hover,
+.select:focus {
+  border-color: var(--form-field-border-color-hover, var(--border-strong));
+}
+
+.select:focus-visible {
+  outline: var(--border-width) solid var(--border-strong);
+  outline-offset: var(--border-width);
+}
+
+/* Theme chevron, rotated to point down */
+.arrow {
+  position: absolute;
+  top: 50%;
+  right: var(--spacing-xxs);
+  display: flex;
+  transform: translateY(-50%) rotate(90deg);
+  color: var(--colors-text);
+  pointer-events: none;
+}

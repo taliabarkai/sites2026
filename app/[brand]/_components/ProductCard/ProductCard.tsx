@@ -41,6 +41,10 @@ export interface ProductCardProps {
   /** When provided, a Quick-Add cart button overlays the image corner and
    *  opens the shared hotspot Quick-Add drawer with this product's data. */
   quickAddProduct?: QuickAddProduct
+  /** Force a 1:1 image on every brand (OAL otherwise defaults to 4:5). */
+  squareImage?: boolean
+  /** `horizontal`: thumbnail left; rating, name and price on the right. */
+  layout?: 'default' | 'horizontal'
 }
 
 export function ProductCard({
@@ -57,6 +61,8 @@ export function ProductCard({
   reviewCount,
   StarIcon,
   quickAddProduct,
+  squareImage = false,
+  layout = 'default',
 }: ProductCardProps) {
   const pathname = usePathname()
   const brand = getBrandFromPathname(pathname)
@@ -68,7 +74,7 @@ export function ProductCard({
 
   // Only enable the hover crossfade when a second image exists — otherwise the
   // single image would fade to the empty card background on hover.
-  const classes = [styles.card, hoverImage && styles.hasHover, className].filter(Boolean).join(' ')
+  const classes = [styles.card, hoverImage && styles.hasHover, squareImage && styles.squareImage, layout === 'horizontal' && styles.horizontal, className].filter(Boolean).join(' ')
 
   return (
     <article className={classes}>
@@ -131,7 +137,7 @@ export function ProductCard({
           </div>
         )}
         {rating != null && StarIcon && (
-          <StarRating rating={rating} reviewCount={reviewCount} StarIcon={StarIcon} />
+          <StarRating rating={rating} reviewCount={reviewCount} StarIcon={StarIcon} className={styles.rating} />
         )}
       </div>
 

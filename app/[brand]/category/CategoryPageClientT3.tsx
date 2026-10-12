@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useLayoutEffect, useRef, useState } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import { useCart } from '../_context/CartContext'
 import { Footer } from '../_components/Footer'
@@ -26,6 +26,12 @@ import { tgrRatingProps } from './tgrProductRatings'
 import { HotspotImage } from '../_components/HotspotImage'
 import type { HotspotPinData } from '../_components/HotspotImage'
 import type { QuickAddProduct } from '../_components/QuickAddPanel'
+import { ShopTheLookBannerV1 } from '../_components/ShopTheLookBannerV1'
+import { ShopTheLookBannerV3 } from '../_components/ShopTheLookBannerV3'
+import { ShopTheLookPanel } from '../_components/ShopTheLookPanel'
+import type { ShopTheLookItem } from '../_components/ShopTheLookPanel'
+import { VariantToggle } from '../_components/VariantToggle'
+import type { StlVariant } from './stlVariant'
 import * as oalIcons from '@/src/components/icons/oal'
 import * as mnnIcons from '@/src/components/icons/mnn'
 import * as tgrIcons from '@/src/components/icons/tgr'
@@ -204,9 +210,112 @@ const TILE_CONFIGS: Record<number, TileConfig> = {
     type: 'hotspot',
     image: 'https://cdn.oakandluna.com/digital-asset/banners/RINGS-banner_HP_OAL.jpg',
     imageAlt: 'Stack Em Up — ring collection',
-    headline: 'Stack Em Up',
+    headline: 'Shop The Look',
     pins: STACK_EM_UP_PINS,
   },
+}
+
+function resolveTile(product: ProductItem): TileConfig {
+  return TILE_CONFIGS[product.id] ?? TILE_CONFIGS[1]!
+}
+
+// ─── T3: Shop The Look preview variant (?stl=current | ?stl=v1) ───────────
+
+const STL_VARIANT_OPTIONS: { value: StlVariant; label: string }[] = [
+  { value: 'current', label: 'Current' },
+  { value: 'v1',      label: 'V1' },
+  { value: 'v2',      label: 'V2' },
+  { value: 'v3',      label: 'V3' },
+]
+
+function formatCents(cents: number, currency = '$'): string {
+  return `${currency}${(cents / 100).toFixed(0)}`
+}
+
+/**
+ * Hotspot pins → ProductCard props for the Shop The Look panel. The pins are
+ * the single source of truth, so the Current hotspots and the V1 panel always
+ * show the same products. Card chrome follows the grid's rules: swatches on
+ * every brand but LAL, review stars on TGR and LAL only.
+ */
+function pinsToLookItems(
+  pins: HotspotPinData[],
+  brand: string,
+  StarIcon: React.ComponentType<{ size?: number }>,
+): ShopTheLookItem[] {
+  return pins.map(({ product: p }) => {
+    const swatches = p.options
+      .find((o) => o.type === 'swatch')
+      ?.values?.map((v) => v.color)
+      .filter((c): c is string => Boolean(c))
+    const showRating = (brand === 'tgr' || brand === 'lal') && p.rating != null && p.reviewCount != null
+    return {
+      id: p.pdpUrl,
+      name: p.title,
+      price: formatCents(p.price, p.currency),
+      originalPrice: p.salePrice ? formatCents(p.salePrice, p.currency) : undefined,
+      defaultImage: p.images[0]?.src ?? '',
+      hoverImage: p.images[1]?.src,
+      href: `/${brand}${p.pdpUrl}`,
+      quickAddProduct: p,
+      squareImage: true,
+      swatches: brand !== 'lal' ? swatches : undefined,
+      ...(showRating ? { rating: p.rating, reviewCount: p.reviewCount, StarIcon } : {}),
+    }
+  })
+}
+
+// ─── T3: Desktop banner height — end at the product images, not the card text ─
+//
+// From 1440px a banner spans N grid rows of product cards. Left to stretch, it
+// would run past the last row's product name and price; instead its height is
+// set so its bottom lines up with the bottom of that row's product images.
+// Below 1440px the banner is a full-width row sized by its image — untouched.
+
+function useAlignBannerToCardImages(ref: React.RefObject<HTMLElement | null>) {
+  useLayoutEffect(() => {
+    const el = ref.current
+    const group = el?.parentElement
+    if (!el || !group) return
+
+    const desktop = window.matchMedia('(min-width: 1440px)')
+
+    const align = () => {
+      el.style.height = ''
+      el.style.alignSelf = ''
+      if (!desktop.matches) return
+
+      const { gridRowStart, gridRowEnd } = getComputedStyle(el)
+      const span = Number(gridRowEnd) - Number(gridRowStart)
+      if (!Number.isFinite(span) || span < 1) return
+
+      const top = el.getBoundingClientRect().top
+      // One image per sibling card (the card's default image fills its frame).
+      const images = Array.from(group.children)
+        .filter((c) => c !== el)
+        .map((c) => c.querySelector('img')?.getBoundingClientRect())
+        .filter((r): r is DOMRect => Boolean(r) && r!.top >= top - 1)
+      // Rows the banner spans, by distinct image top; take the last one's bottom.
+      const rowTops = [...new Set(images.map((r) => Math.round(r.top)))].sort((a, b) => a - b)
+      const lastRowTop = rowTops[span - 1]
+      if (lastRowTop == null) return
+      const bottom = Math.max(...images.filter((r) => Math.round(r.top) === lastRowTop).map((r) => r.bottom))
+
+      el.style.alignSelf = 'start'
+      el.style.height = `${bottom - top}px`
+    }
+
+    align()
+    const ro = new ResizeObserver(align)
+    Array.from(group.children).forEach((c) => { if (c !== el) ro.observe(c) })
+    desktop.addEventListener('change', align)
+    return () => {
+      ro.disconnect()
+      desktop.removeEventListener('change', align)
+      el.style.height = ''
+      el.style.alignSelf = ''
+    }
+  }, [ref])
 }
 
 // ─── T3: FeaturedCard — resolves to a tile config by product id ───────────
@@ -216,18 +325,72 @@ function FeaturedCard({
   swatches: _swatches,
   slotClassName,
   disableHotspots = false,
+  stlVariant = 'current',
+  onOpenShopTheLook,
 }: {
   product: ProductItem
   swatches?: string[]
   slotClassName: string
   /** Render as a plain image + headline banner (no hotspot pins). */
   disableHotspots?: boolean
+  /** Shop The Look preview variant — V1 replaces hotspot tiles with a CTA banner. */
+  stlVariant?: StlVariant
+  onOpenShopTheLook?: () => void
 }) {
-  const config = TILE_CONFIGS[product.id] ?? TILE_CONFIGS[1]!
+  const config = resolveTile(product)
+  const articleRef = useRef<HTMLElement>(null)
+  useAlignBannerToCardImages(articleRef)
+
+  // V3 — touch: V1 (CTA opens the panel). Desktop pointer: CTA label; hover
+  // reveals the dots, each with a mini-card popover + Quick Add.
+  if (config.type === 'hotspot' && stlVariant === 'v3' && onOpenShopTheLook) {
+    return (
+      <article ref={articleRef} className={`${styles.featuredCard} ${slotClassName}`}>
+        <ShopTheLookBannerV3
+          image={config.image}
+          imageAlt={config.imageAlt}
+          heading={null}
+          pins={config.pins}
+          onOpen={onOpenShopTheLook}
+        />
+      </article>
+    )
+  }
+
+  // V2 — V1's banner without a heading: just the "Shop The Look" CTA, which
+  // opens the v2 panel (image with dots + selected product).
+  if (config.type === 'hotspot' && stlVariant === 'v2' && onOpenShopTheLook) {
+    return (
+      <article ref={articleRef} className={`${styles.featuredCard} ${slotClassName}`}>
+        <ShopTheLookBannerV1
+          image={config.image}
+          imageAlt={config.imageAlt}
+          heading={null}
+          onOpen={onOpenShopTheLook}
+        />
+      </article>
+    )
+  }
+
+  // V1 — same image, no hotspots, heading + CTA that opens the STL panel.
+  // Applies to every hotspot tile, including the one Current renders without pins.
+  if (config.type === 'hotspot' && stlVariant === 'v1' && onOpenShopTheLook) {
+    return (
+      <article ref={articleRef} className={`${styles.featuredCard} ${slotClassName}`}>
+        <ShopTheLookBannerV1
+          image={config.image}
+          imageAlt={config.imageAlt}
+          // "Shop The Look" lives only in the CTA, so the heading names the look
+          heading="Stack Em Up"
+          onOpen={onOpenShopTheLook}
+        />
+      </article>
+    )
+  }
 
   if (config.type === 'hotspot' && !disableHotspots) {
     return (
-      <article className={`${styles.featuredCard} ${slotClassName}`}>
+      <article ref={articleRef} className={`${styles.featuredCard} ${slotClassName}`}>
         <HotspotImage
           src={config.image}
           alt={config.imageAlt}
@@ -241,7 +404,7 @@ function FeaturedCard({
 
   // Static banner (Tiles 1 & 3)
   return (
-    <article className={`${styles.featuredCard} ${slotClassName}`}>
+    <article ref={articleRef} className={`${styles.featuredCard} ${slotClassName}`}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={config.image}
@@ -388,17 +551,23 @@ function FilterBar({
   onOpenFilters,
   activeCount,
   FilterIcon,
+  previewControl,
 }: {
   itemCount: number
   onOpenFilters: () => void
   activeCount: number
   FilterIcon: React.ComponentType<{ size?: number }>
+  /** Design-preview control shown beside the item count. */
+  previewControl?: React.ReactNode
 }) {
   return (
     <div className={styles.filterBar}>
       <div className={styles.filterBarInner}>
         <div className={styles.filterRight}>
-          <span className={styles.itemCount}>{itemCount} items</span>
+          <span className={styles.itemCountGroup}>
+            {previewControl}
+            <span className={styles.itemCount}>{itemCount} items</span>
+          </span>
           <button
             type="button"
             className={styles.filtersTrigger}
@@ -416,7 +585,7 @@ function FilterBar({
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
-function CategoryPageInnerT3() {
+function CategoryPageInnerT3({ initialStlVariant }: { initialStlVariant: StlVariant }) {
   const pathname = usePathname()
   const brand = getBrandFromPathname(pathname)
   const navLinks = prefixNavLinks(brand, DEFAULT_NAV_LINKS)
@@ -456,6 +625,22 @@ function CategoryPageInnerT3() {
   const products = allBrandProducts.slice(3)
   const rhythmGroups = buildRhythmGroups(products, featuredProducts)
 
+  // Shop The Look preview — state is the source of truth; the URL mirrors it
+  // (?stl=current | ?stl=v1) so a reload or shared link restores the variant.
+  const [stlVariant, setStlVariant] = useState<StlVariant>(initialStlVariant)
+  const changeStlVariant = (next: StlVariant) => {
+    setStlVariant(next)
+    const url = new URL(window.location.href)
+    url.searchParams.set('stl', next)
+    window.history.replaceState(window.history.state, '', url)
+  }
+
+  // Both banner instances share one panel, fed by the tile's hotspot pins.
+  const [stlOpen, setStlOpen] = useState(false)
+  const openShopTheLook = () => setStlOpen(true)
+  const stlTile = featuredProducts[0] ? resolveTile(featuredProducts[0]) : TILE_CONFIGS[1]!
+  const stlItems = stlTile.type === 'hotspot' ? pinsToLookItems(stlTile.pins, brand, StarIcon) : []
+
   return (
     <div className={styles.page}>
       <Header variant="white" brand={brand} navLinks={navLinks} topline={topline} sticky={false} />
@@ -468,6 +653,14 @@ function CategoryPageInnerT3() {
           onOpenFilters={() => setFilterPanelOpen(true)}
           activeCount={activeMaterials.size}
           FilterIcon={FilterIcon}
+          previewControl={
+            <VariantToggle
+              label="Shop The Look banner preview"
+              options={STL_VARIANT_OPTIONS}
+              value={stlVariant}
+              onChange={changeStlVariant}
+            />
+          }
         />
 
         <section className={styles.productsSection} aria-label="Products">
@@ -486,6 +679,7 @@ function CategoryPageInnerT3() {
                         hoverImage={p.hoverImage}
                         href={`/${brand}${p.href}`}
                         quickAddProduct={toQuickAddProduct(p)}
+                        squareImage
                         swatches={brand !== 'lal' ? DEFAULT_PRODUCT_SWATCHES : undefined}
                         {...ratingProps(p)}
                       />
@@ -502,6 +696,8 @@ function CategoryPageInnerT3() {
                       product={group.featured}
                       swatches={brand !== 'lal' ? DEFAULT_PRODUCT_SWATCHES : undefined}
                       slotClassName={styles.featuredCardRight}
+                      stlVariant={stlVariant}
+                      onOpenShopTheLook={openShopTheLook}
                     />
                     {group.cards.map((p) => (
                       <ProductCard
@@ -513,6 +709,7 @@ function CategoryPageInnerT3() {
                         hoverImage={p.hoverImage}
                         href={`/${brand}${p.href}`}
                         quickAddProduct={toQuickAddProduct(p)}
+                        squareImage
                         swatches={brand !== 'lal' ? DEFAULT_PRODUCT_SWATCHES : undefined}
                         {...ratingProps(p)}
                       />
@@ -530,6 +727,8 @@ function CategoryPageInnerT3() {
                       swatches={brand !== 'lal' ? DEFAULT_PRODUCT_SWATCHES : undefined}
                       slotClassName={styles.featuredCardWide}
                       disableHotspots
+                      stlVariant={stlVariant}
+                      onOpenShopTheLook={openShopTheLook}
                     />
                     {group.cards.map((p) => (
                       <ProductCard
@@ -541,6 +740,7 @@ function CategoryPageInnerT3() {
                         hoverImage={p.hoverImage}
                         href={`/${brand}${p.href}`}
                         quickAddProduct={toQuickAddProduct(p)}
+                        squareImage
                         swatches={brand !== 'lal' ? DEFAULT_PRODUCT_SWATCHES : undefined}
                         {...ratingProps(p)}
                       />
@@ -557,6 +757,8 @@ function CategoryPageInnerT3() {
                     product={group.featured}
                     swatches={brand !== 'lal' ? DEFAULT_PRODUCT_SWATCHES : undefined}
                     slotClassName={styles.featuredCardLeft}
+                    stlVariant={stlVariant}
+                    onOpenShopTheLook={openShopTheLook}
                   />
                   {group.cards.map((p) => (
                     <ProductCard
@@ -568,6 +770,7 @@ function CategoryPageInnerT3() {
                       hoverImage={p.hoverImage}
                       href={`/${brand}${p.href}`}
                       quickAddProduct={toQuickAddProduct(p)}
+                      squareImage
                       swatches={brand !== 'lal' ? DEFAULT_PRODUCT_SWATCHES : undefined}
                       {...ratingProps(p)}
                     />
@@ -604,10 +807,24 @@ function CategoryPageInnerT3() {
         ChevronIcon={ChevronIcon}
         CheckmarkIcon={CheckmarkIcon}
       />
+
+      <ShopTheLookPanel
+        isOpen={stlOpen}
+        onClose={() => setStlOpen(false)}
+        image={stlTile.image}
+        imageAlt={stlTile.imageAlt}
+        variant={stlVariant === 'v2' ? 'v2' : 'v1'}
+        items={stlItems}
+        pins={stlTile.type === 'hotspot' ? stlTile.pins : []}
+      />
     </div>
   )
 }
 
-export default function CategoryPageClientT3() {
-  return <CategoryPageInnerT3 />
+export default function CategoryPageClientT3({
+  initialStlVariant = 'current',
+}: {
+  initialStlVariant?: StlVariant
+}) {
+  return <CategoryPageInnerT3 initialStlVariant={initialStlVariant} />
 }

@@ -1,0 +1,31 @@
+/* ── Touch vs hover-capable desktop ───────────────────────────────────────── */
+/* Default (phones, touch tablets): the V1 banner. */
+.touchOnly { display: block; }
+.hoverOnly { display: none; }
+
+@media (hover: hover) and (pointer: fine) and (min-width: 768px) {
+  .touchOnly { display: none; }
+  .hoverOnly { display: block; }
+}
+
+/* From 1440px the tile fills its grid cell — pass the height through */
+@media (min-width: 1440px) {
+  .touchOnly,
+  .hoverOnly {
+    height: 100%;
+  }
+}
+
+/* ── Desktop dots — hidden until the banner is hovered or focused into ────── */
+.pinLayer {
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-raised);
+  opacity: 0;
+  transition: opacity var(--transition-base);
+}
+
+.hoverOnly:hover .pinLayer,
+.hoverOnly:focus-within .pinLayer {
+  opacity: 1;
+}

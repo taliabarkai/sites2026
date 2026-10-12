@@ -1,0 +1,239 @@
+/* Shop The Look drawer — placement, motion and overlay mirror QuickAddPanel.
+   Mobile: bottom sheet, image full-bleed above the cards.
+   Desktop: 1200px — image left, cards right, both inside the panel padding. Always in the DOM; transform drives show/hide. */
+
+/* ── Backdrop ─────────────────────────────────────────────────────────────── */
+.backdrop {
+  position: fixed;
+  inset: 0;
+  background: var(--colors-overlay);
+  z-index: var(--z-overlay);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition-base);
+}
+
+.backdropVisible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ── Panel ────────────────────────────────────────────────────────────────── */
+/* Mobile: bottom sheet, same as Quick Add on mobile */
+.panel {
+  position: fixed;
+  overscroll-behavior: contain;
+  z-index: var(--z-modal);
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 90dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--colors-background);
+  color: var(--colors-text);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  transform: translateY(100%);
+  transition: transform var(--transition-base);
+}
+
+.panelOpen {
+  transform: translateY(0);
+}
+
+/* Desktop: slides in from the right */
+@media (min-width: 768px) {
+  .panel {
+    top: 0;
+    right: 0;
+    bottom: auto;
+    left: auto;
+    /* Wide enough that a stacked Quick Add (600px) covers only the product
+       column, leaving the look image visible on the left */
+    width: min(1200px, 100vw);
+    height: 100vh;
+    border-radius: var(--radius-panel) 0 0 var(--radius-panel);
+    transform: translateX(100%);
+  }
+
+  .panelOpen {
+    transform: translateX(0);
+  }
+}
+
+/* ── Header ───────────────────────────────────────────────────────────────── */
+.header {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-sm) var(--spacing-xs);
+  border-bottom: var(--border-width) solid var(--border-color);
+}
+
+@media (min-width: 768px) {
+  .header {
+    padding: var(--spacing-lg) var(--spacing-lg) var(--spacing-md);
+    border-bottom: none;
+  }
+}
+
+.title {
+  margin: 0;
+  font-family:    var(--typography-rules-headline4-font-family);
+  font-size:      var(--typography-rules-headline4-font-size);
+  line-height:    var(--typography-rules-headline4-line-height);
+  font-weight:    var(--typography-rules-headline4-font-weight, normal);
+  letter-spacing: var(--typography-rules-headline4-letter-spacing, normal);
+  text-transform: var(--typography-rules-headline4-text-transform, none);
+}
+
+.closeBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--colors-text);
+  cursor: pointer;
+  transition: opacity var(--transition-fast);
+}
+
+.closeBtn:hover {
+  opacity: 0.6;
+}
+
+/* ── Scroll area: banner image + product cards ────────────────────────────── */
+.scrollArea {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  /* No horizontal rubber-band, and no trackpad swipe chaining out to the page
+     (browser back/forward slide) */
+  overscroll-behavior: contain;
+  overscroll-behavior-x: none;
+  touch-action: pan-y;
+  /* Image and products share the panel's inner padding */
+  padding: var(--spacing-sm) var(--spacing-sm) var(--spacing-lg);
+}
+
+.image {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--spacing-xxs);
+  margin: 0;
+  padding: var(--spacing-sm) 0 0;
+  list-style: none;
+}
+
+/* Desktop: image column left, product grid right, inside the panel padding */
+@media (min-width: 768px) {
+  .scrollArea {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: start;
+    gap: var(--spacing-lg);
+    padding: 0 var(--spacing-lg) var(--spacing-lg);
+  }
+
+  .grid {
+    padding: 0;
+  }
+}
+
+.gridItem {
+  min-width: 0;
+}
+
+/* ── Layout switch — v2 is v1 on desktop, its own layout on mobile ───────── */
+/* Wrappers don't box their children, so the desktop two-column grid still
+   sees the image and product grid directly. */
+.contents { display: contents; }
+.desktopOnly { display: none; }
+.mobileOnly { display: block; }
+
+@media (min-width: 768px) {
+  .desktopOnly { display: contents; }
+  .mobileOnly { display: none; }
+}
+
+/* ── v2 mobile: image with hotspot dots + the selected product's card ────── */
+.hotspotImage {
+  position: relative;
+}
+
+.imageColumn {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Prev / next — same chrome as the product card's Quick-Add button */
+.arrows {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  padding-top: var(--spacing-sm);
+}
+
+.arrowBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--spacing-xl);
+  height: var(--spacing-xl);
+  padding: 0;
+  background: var(--colors-background);
+  color: var(--colors-text);
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--buttons-primary-border-radius);
+  cursor: pointer;
+  transition:
+    background var(--transition-base),
+    color var(--transition-base),
+    border-color var(--transition-base);
+}
+
+.arrowBtn:hover,
+.arrowBtn:focus-visible {
+  background: var(--colors-text);
+  color: var(--colors-text-inverse);
+  border-color: var(--colors-text);
+}
+
+.arrowBtn > span {
+  display: inline-flex;
+}
+
+.arrowPrev {
+  transform: rotate(180deg);
+}
+
+.counter {
+  min-width: var(--spacing-xl);
+  text-align: center;
+  font-family:    var(--typography-rules-caption1-font-family);
+  font-size:      var(--typography-rules-caption1-font-size);
+  line-height:    var(--typography-rules-caption1-line-height);
+  font-weight:    var(--typography-rules-caption1-font-weight, normal);
+  letter-spacing: var(--typography-rules-caption1-letter-spacing, normal);
+  color: var(--colors-text-secondary);
+}
+
+.selectedProduct {
+  padding-top: var(--spacing-md);
+  scroll-margin-bottom: var(--spacing-sm);
+}
+
+

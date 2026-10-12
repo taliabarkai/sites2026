@@ -1,0 +1,99 @@
+/* Anchored beside its dot; the dot is up to 44px wide, so --spacing-lg clears it.
+   Layout: 180px square image | a wide copy column — title (text1), price
+   (text2), "Shop Now" — 8px apart. The copy column is ~1.6× the image, capped
+   to the room between the dot and the banner edge (keeps a --spacing-sm gutter). */
+.popover {
+  position: absolute;
+  z-index: calc(var(--z-raised) + 1);
+  display: grid;
+  /* 180px image + a 288px copy column */
+  width: calc(var(--spacing-xxxl) * 6.5);
+  grid-template-columns: calc(var(--spacing-xxxl) * 2.5) minmax(0, 1fr);
+  background: var(--colors-background);
+  color: var(--colors-text);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  cursor: default;
+
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity var(--transition-fast),
+    visibility var(--transition-fast);
+}
+
+.right {
+  max-width: calc(100% - var(--pin-x) - var(--spacing-lg) - var(--spacing-sm));
+  transform: translate(var(--spacing-lg), -50%);
+}
+
+.left {
+  max-width: calc(var(--pin-x) - var(--spacing-lg) - var(--spacing-sm));
+  transform: translate(calc(-100% - var(--spacing-lg)), -50%);
+}
+
+.open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.thumb {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  background: var(--colors-surface-secondary);
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  gap: var(--spacing-xxs);
+  min-width: 0;
+  padding: var(--spacing-md);
+}
+
+.name {
+  margin: 0;
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  font-weight:    var(--typography-rules-text1-font-weight, normal);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+}
+
+.prices {
+  display: flex;
+  align-items: baseline;
+  gap: var(--spacing-xxs);
+}
+
+.price {
+  font-family:    var(--typography-rules-text2-font-family);
+  font-size:      var(--typography-rules-text2-font-size);
+  line-height:    var(--typography-rules-text2-line-height);
+  font-weight:    var(--typography-rules-text2-font-weight, normal);
+  letter-spacing: var(--typography-rules-text2-letter-spacing, normal);
+}
+
+.priceOriginal {
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  font-weight:    var(--typography-rules-text1-font-weight, normal);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+  color: var(--colors-text-secondary);
+  text-decoration: line-through;
+}
+
+/* "Shop Now" — a ruled underline just below the descenders instead of the
+   link variant's text-decoration (two classes so it wins over .link) */
+.info .shopNow {
+  display: inline-block;
+  padding: 0 var(--border-width);
+  text-decoration: none;
+  border-bottom: var(--border-width) solid currentColor;
+}

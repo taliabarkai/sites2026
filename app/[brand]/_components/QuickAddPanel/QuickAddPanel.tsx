@@ -7,6 +7,7 @@ import { useCart } from '../../_context/CartContext'
 import { getBrandFromPathname } from '../../_config/brands'
 import { Button } from '../Button'
 import { ProductImageCarousel } from '../ProductImageCarousel'
+import { usePanelLayer, closeAllPanels, layerZIndex } from '../PanelStack'
 import * as oalIcons from '@/src/components/icons/oal'
 import * as mnnIcons from '@/src/components/icons/mnn'
 import * as tgrIcons from '@/src/components/icons/tgr'
@@ -80,6 +81,13 @@ export function QuickAddPanel({ isOpen, onClose, product, closeButtonRef, ctaLab
 
   const internalCloseRef = useRef<HTMLButtonElement>(null)
   const closeRef = closeButtonRef ?? internalCloseRef
+  const panelRef = useRef<HTMLDivElement>(null)
+
+  // Panel stack — Escape (topmost panel only), focus trap, focus return, and the
+  // page scroll lock. Depth > 0 when opened on top of another panel (e.g. from a
+  // card inside Shop The Look); a lone panel is depth 0 and behaves as before.
+  const depth = usePanelLayer(isOpen, onClose, panelRef)
+  const stackZ = layerZIndex(depth)
 
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({})
   const [imageIdx, setImageIdx] = useState(0)
@@ -120,15 +128,6 @@ export function QuickAddPanel({ isOpen, onClose, product, closeButtonRef, ctaLab
     }
   }, [isOpen, closeRef])
 
-  // Lock background page scroll while the panel is open — only the panel's own
-  // scroll areas (image column + content) scroll. Matches FloatingCart.
-  useEffect(() => {
-    if (!isOpen) return
-    const prev = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
-    return () => { document.body.style.overflow = prev }
-  }, [isOpen])
-
   // Reset state when product changes — pre-select first value of each option
   useEffect(() => {
     if (product) {
@@ -148,15 +147,6 @@ export function QuickAddPanel({ isOpen, onClose, product, closeButtonRef, ctaLab
     setNames([''])
     setShowNameErrors(false)
   }, [product?.title])
-
-  // Escape key closes panel
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isOpen) onClose()
-    }
-    document.addEventListener('keydown', onKey)
-    return () => document.removeEventListener('keydown', onKey)
-  }, [isOpen, onClose])
 
   // Always render panel in the DOM so CSS transform transitions work.
   // (Unmounting on close = no initial transform to transition from, breaking animation.)
@@ -255,6 +245,9 @@ export function QuickAddPanel({ isOpen, onClose, product, closeButtonRef, ctaLab
     }
     addItem(cartItem)
     onClose()
+    // Close any panel this one is stacked on (e.g. Shop The Look) so the bag
+    // opens unobstructed — same end state as a Quick Add from the grid.
+    closeAllPanels()
     openCart(true)
   }
 
@@ -417,12 +410,15 @@ export function QuickAddPanel({ isOpen, onClose, product, closeButtonRef, ctaLab
       {/* Backdrop */}
       <div
         className={`${styles.backdrop} ${isOpen ? styles.backdropVisible : ''}`}
+        style={stackZ.backdrop}
         aria-hidden="true"
         onClick={onClose}
       />
 
       {/* Panel */}
       <div
+        ref={panelRef}
+        style={stackZ.panel}
         className={`${styles.panel} ${isOpen ? styles.panelOpen : ''} ${singleColumn ? styles.panelSingle : ''} ${(hideGalleryOnMobile || hideGallery) ? styles.panelHugMobile : ''}`}
         role="dialog"
         aria-modal="true"

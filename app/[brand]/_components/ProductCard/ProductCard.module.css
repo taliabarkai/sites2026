@@ -30,6 +30,11 @@
   aspect-ratio: 4/5;
 }
 
+/* Opt-in square image — overrides the OAL 4:5 default (equal specificity, later rule) */
+.squareImage .imageWrap {
+  aspect-ratio: 1;
+}
+
 .image {
   position: absolute;
   inset: 0;
@@ -161,3 +166,23 @@
   inset: 0;
   z-index: var(--z-base);
 }
+
+/* ── Horizontal layout — thumbnail left; rating, name, price right ────────── */
+.horizontal {
+  flex-direction: row;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.horizontal .media {
+  flex: 0 0 33%;
+}
+
+.horizontal .info {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 0;
+}
+
+/* Rating → name → price */
+.horizontal .rating { order: -1; }

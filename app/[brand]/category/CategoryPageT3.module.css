@@ -211,7 +211,8 @@
 .filterBar {
   position: sticky;
   top: 0;
-  z-index: 1;
+  /* Above the cards' Quick-Add buttons (--z-raised) as they scroll beneath */
+  z-index: var(--z-sticky);
   background: var(--colors-background);
 }
 
@@ -223,6 +224,12 @@
   padding: var(--spacing-md) var(--layout-page-margin);
   max-width: var(--layout-max-width);
   margin: 0 auto;
+}
+
+@media (min-width: 768px) {
+  .filterBarInner {
+    padding-block: var(--spacing-sm);
+  }
 }
 
 .materialPills {
@@ -277,6 +284,19 @@
   gap: var(--spacing-sm);
   width: 100%;
   justify-content: space-between;
+}
+
+/* Item count + the Shop The Look design-preview toggle beside it */
+.itemCountGroup {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+@media (min-width: 768px) {
+  .itemCountGroup {
+    gap: var(--spacing-md);
+  }
 }
 
 .itemCount {

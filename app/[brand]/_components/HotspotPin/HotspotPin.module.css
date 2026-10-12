@@ -70,3 +70,52 @@
 .open .icon {
   transform: rotate(45deg);
 }
+
+/* ── Selection mode (Shop The Look V2 panel) ──────────────────────────────── */
+.selectable:focus-visible {
+  outline: var(--border-width) solid var(--border-strong);
+  outline-offset: var(--spacing-xxxs);
+}
+
+.dark.selected {
+  background: var(--colors-text);
+  border-color: var(--colors-text);
+  color: var(--colors-text-inverse);
+}
+
+.light.selected {
+  background: var(--colors-background);
+  border-color: var(--colors-background);
+  color: var(--colors-text);
+}
+
+/* ── Minus indicator (V3 popover dots): + ↔ − ─────────────────────────────── */
+/* A plus drawn from two bars; when open the vertical bar rotates flat onto the
+   horizontal one, so the icon animates + → − and back. */
+.bars {
+  position: relative;
+  width: calc(var(--spacing-sm) + var(--spacing-xxxs) / 2);
+  height: calc(var(--spacing-sm) + var(--spacing-xxxs) / 2);
+  pointer-events: none;
+}
+
+.bars::before,
+.bars::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 100%;
+  height: calc(var(--border-width) * 1.5);
+  background: currentColor;
+  transform: translateY(-50%);
+  transition: transform var(--transition-base);
+}
+
+.bars::after {
+  transform: translateY(-50%) rotate(90deg);
+}
+
+.minusMode.open .bars::after {
+  transform: translateY(-50%) rotate(0deg);
+}
