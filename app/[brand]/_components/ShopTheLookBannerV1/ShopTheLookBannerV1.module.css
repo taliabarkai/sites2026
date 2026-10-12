@@ -65,15 +65,24 @@
   text-transform: uppercase;
 }
 
-/* The design system's h4 — headline4 scale */
+/* Same size as the Current tile's headline (.bannerHeadline in
+   CategoryPageT3.module.css): headline2, then a flat 3.2rem on mobile. */
 .heading {
   margin: 0;
-  font-family:    var(--typography-rules-headline4-font-family);
-  font-size:      var(--typography-rules-headline4-font-size);
-  line-height:    var(--typography-rules-headline4-line-height);
-  font-weight:    var(--typography-rules-headline4-font-weight, normal);
-  letter-spacing: var(--typography-rules-headline4-letter-spacing, normal);
+  font-family:    var(--typography-rules-headline2-font-family);
+  font-size:      var(--typography-rules-headline2-font-size);
+  line-height:    var(--typography-rules-headline2-line-height);
+  font-weight:    var(--typography-rules-headline2-font-weight, normal);
+  letter-spacing: var(--typography-rules-headline2-letter-spacing, normal);
   text-transform: uppercase;
+}
+
+/* Mirrors Current's mobile override so both variants read the same size */
+@media (max-width: 767px) {
+  .heading {
+    font-size: 3.2rem;
+    line-height: 3.2rem;
+  }
 }
 
 .cta {
