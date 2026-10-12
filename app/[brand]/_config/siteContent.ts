@@ -139,6 +139,7 @@ export const TRUSTPILOT = {
   score: 4.5,
   outOf: 5,
   reviewUrl: 'https://www.trustpilot.com',
+  reviewCountLabel: 'Over 60,000 Reviews',
 }
 
 /**

@@ -106,9 +106,9 @@ export function TrackOrderClient() {
   const searchParams = useSearchParams()
   const brand        = getBrandFromPathname(pathname)
   const icons        = BRAND_ICONS[brand]
-  /* Resolved through BRAND_ICONS like everything else — these three are named
-     because the tracking block renders them directly. */
-  const { ArrowIcon, CheckmarkIcon, ClipboardCopyIcon } = icons
+  /* Resolved through BRAND_ICONS like everything else — these are named
+     because the tracking block and the contact band render them directly. */
+  const { ArrowIcon, CheckmarkIcon, ClipboardCopyIcon, EnvelopeIcon } = icons
 
   const navLinks      = prefixNavLinks(brand, DEFAULT_NAV_LINKS)
   const footerColumns = prefixFooterColumns(brand, DEFAULT_FOOTER_COLUMNS)
@@ -569,10 +569,44 @@ export function TrackOrderClient() {
         showStateToggle={!order}
       />
 
-      <main id="main-content" className={styles.main}>
+      <main
+        id="main-content"
+        className={order ? `${styles.main} ${styles.mainWithBand}` : styles.main}
+      >
         <div className={styles.inner}>
           {order ? results : lookup}
         </div>
+
+        {/* Results only. A full-width band, outside .inner, so it reads as the
+            page's close rather than one more card in the grid, and sits
+            directly on the footer. */}
+        {order && (
+          <section className={styles.contactBand} aria-labelledby="contact-band-title">
+            <div className={styles.contactInner}>
+              <h2 id="contact-band-title" className={styles.contactTitle}>
+                Need help with anything else?
+              </h2>
+              <Button
+                variant="primary"
+                className={styles.contactButton}
+                href={withBrandPrefix(brand, '/contact-us')}
+                leadingIcon={<EnvelopeIcon size={24} />}
+              >
+                Contact Us
+              </Button>
+              <div className={styles.contactRating}>
+                {/* Supplied as one piece of Trustpilot artwork — mark, stars and score */}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/images/trustpilot.svg"
+                  alt={`Trustpilot ${TRUSTPILOT.score} out of ${TRUSTPILOT.outOf}`}
+                  className={styles.contactTrustpilot}
+                />
+                <p className={styles.contactReviews}>{TRUSTPILOT.reviewCountLabel}</p>
+              </div>
+            </div>
+          </section>
+        )}
       </main>
 
       <Footer columns={footerColumns} />
