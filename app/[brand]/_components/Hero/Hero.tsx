@@ -1,6 +1,5 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
 import { DEFAULT_HERO, HERO_IMAGES } from '../../_config/siteContent'
 import { useCart } from '../../_context/CartContext'
 import { Button } from '../Button'
@@ -40,27 +39,6 @@ export function Hero({
   transparentHeader = false,
 }: HeroProps) {
   const { addItem, openCart } = useCart()
-  const sectionRef = useRef<HTMLElement>(null)
-  const bgRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    if (window.matchMedia('(max-width: 768px)').matches) return
-
-    const section = sectionRef.current
-    const bg = bgRef.current
-    if (!section || !bg) return
-
-    const onScroll = () => {
-      const rect = section.getBoundingClientRect()
-      const scrolled = -rect.top
-      if (scrolled > -window.innerHeight && scrolled < rect.height) {
-        bg.style.transform = `translateY(${scrolled * 0.35}px)`
-      }
-    }
-
-    window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
-  }, [])
 
   const handleAddToBag = () => {
     addItem(DEMO_PRODUCT)
@@ -70,10 +48,9 @@ export function Hero({
   const heroClass = [styles.hero, transparentHeader ? styles.heroTransparent : ''].join(' ').trim()
 
   return (
-    <section ref={sectionRef} className={heroClass} aria-labelledby="home-hero-title">
-      {/* Parallax background layer */}
+    <section className={heroClass} aria-labelledby="home-hero-title">
+      {/* Background image */}
       <div
-        ref={bgRef}
         className={styles.bg}
         aria-hidden="true"
         style={{

@@ -21,17 +21,13 @@
   }
 }
 
-/* ── Parallax background layer ────────────────────────────────────────────── */
+/* ── Background layer ─────────────────────────────────────────────────────── */
 .bg {
   position: absolute;
-  top: -20%;
-  left: 0;
-  right: 0;
-  bottom: -20%;
+  inset: 0;
   background-image: var(--bg-mobile, none);
   background-size: cover;
   background-position: center;
-  will-change: transform;
 }
 
 @media (min-width: 769px) {
@@ -40,17 +36,12 @@
   }
 }
 
-/* Mobile: 4:5 aspect ratio, collapse extra bg height */
+/* Mobile: 9:16 aspect ratio */
 @media (max-width: 768px) {
   .hero {
     height: auto;
     aspect-ratio: 9 / 16;
     align-items: flex-end;
-  }
-
-  .bg {
-    top: 0;
-    bottom: 0;
   }
 }
 
