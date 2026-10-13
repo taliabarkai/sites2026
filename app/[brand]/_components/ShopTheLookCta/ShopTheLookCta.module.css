@@ -1,0 +1,45 @@
+.cta {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xxs);
+  height: var(--spacing-xl);
+  padding: 0 var(--spacing-sm);
+
+  /* Same chrome as ProductCard's Quick-Add bag button, widened to hold a label */
+  background: var(--colors-background);
+  color: var(--colors-text);
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--buttons-primary-border-radius);
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background var(--transition-base),
+    color var(--transition-base),
+    border-color var(--transition-base);
+}
+
+.cta:not(.label):hover,
+.cta:not(.label):focus-visible {
+  background: var(--colors-text);
+  color: var(--colors-text-inverse);
+  border-color: var(--colors-text);
+}
+
+.label {
+  cursor: default;
+}
+
+.icon {
+  display: inline-flex;
+  flex: 0 0 auto;
+}
+
+.text {
+  font-family:    var(--typography-rules-button1-font-family);
+  font-size:      var(--typography-rules-button1-font-size);
+  line-height:    var(--typography-rules-button1-line-height);
+  font-weight:    var(--typography-rules-button1-font-weight, normal);
+  letter-spacing: var(--typography-rules-button1-letter-spacing, normal);
+  text-transform: uppercase;
+  white-space: nowrap;
+}

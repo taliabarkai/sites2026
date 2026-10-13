@@ -1,7 +1,7 @@
 'use client'
 
 import { useLayoutEffect, useRef, useState } from 'react'
-import { usePathname, useRouter } from 'next/navigation'
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { useCart } from '../_context/CartContext'
 import { Footer } from '../_components/Footer'
 import { Header } from '../_components/Header'
@@ -28,10 +28,11 @@ import type { HotspotPinData } from '../_components/HotspotImage'
 import type { QuickAddProduct } from '../_components/QuickAddPanel'
 import { ShopTheLookBannerV1 } from '../_components/ShopTheLookBannerV1'
 import { ShopTheLookBannerV3 } from '../_components/ShopTheLookBannerV3'
+import { ShopTheLookCta } from '../_components/ShopTheLookCta'
 import { ShopTheLookPanel } from '../_components/ShopTheLookPanel'
 import type { ShopTheLookItem } from '../_components/ShopTheLookPanel'
 import { VariantToggle } from '../_components/VariantToggle'
-import type { StlVariant } from './stlVariant'
+import { parseStlVariant, type StlVariant } from './stlVariant'
 import * as oalIcons from '@/src/components/icons/oal'
 import * as mnnIcons from '@/src/components/icons/mnn'
 import * as tgrIcons from '@/src/components/icons/tgr'
@@ -219,14 +220,18 @@ function resolveTile(product: ProductItem): TileConfig {
   return TILE_CONFIGS[product.id] ?? TILE_CONFIGS[1]!
 }
 
-// ─── T3: Shop The Look preview variant (?stl=current | ?stl=v1) ───────────
+// ─── T3: Shop The Look preview variant (?stl=current | v1 | v2 | v3 | v4) ──
 
 const STL_VARIANT_OPTIONS: { value: StlVariant; label: string }[] = [
   { value: 'current', label: 'Current' },
   { value: 'v1',      label: 'V1' },
   { value: 'v2',      label: 'V2' },
   { value: 'v3',      label: 'V3' },
+  { value: 'v4',      label: 'V4' },
 ]
+
+// V4's CTA leaves the page for a category listing instead of opening a panel
+const STL_V4_CATEGORY_PATH = '/category/t4'
 
 function formatCents(cents: number, currency = '$'): string {
   return `${currency}${(cents / 100).toFixed(0)}`
@@ -327,6 +332,8 @@ function FeaturedCard({
   disableHotspots = false,
   stlVariant = 'current',
   onOpenShopTheLook,
+  shopTheLookHref,
+  productHref,
 }: {
   product: ProductItem
   swatches?: string[]
@@ -336,10 +343,40 @@ function FeaturedCard({
   /** Shop The Look preview variant — V1 replaces hotspot tiles with a CTA banner. */
   stlVariant?: StlVariant
   onOpenShopTheLook?: () => void
+  /** V4 — where the CTA links to. */
+  shopTheLookHref?: string
+  /** V4 — a dot's popover "Shop Now" links to the product's PDP. */
+  productHref?: (product: QuickAddProduct) => string
 }) {
   const config = resolveTile(product)
   const articleRef = useRef<HTMLElement>(null)
   useAlignBannerToCardImages(articleRef)
+
+  // V4 — Current's tile (dots → Quick Add where Current has them) with V1's
+  // CTA in place of the headline; the CTA links to another category page.
+  // On desktop, hovering a dot shows V3's popover.
+  if (config.type === 'hotspot' && stlVariant === 'v4' && shopTheLookHref) {
+    const cta = (
+      <div className={styles.bannerCta}>
+        <ShopTheLookCta href={shopTheLookHref} />
+      </div>
+    )
+    return (
+      <article ref={articleRef} className={`${styles.featuredCard} ${slotClassName}`}>
+        {disableHotspots ? (
+          <>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={config.image} alt={config.imageAlt} className={styles.bannerImage} loading="lazy" />
+            {cta}
+          </>
+        ) : (
+          <HotspotImage src={config.image} alt={config.imageAlt} pins={config.pins} popoverHref={productHref}>
+            {cta}
+          </HotspotImage>
+        )}
+      </article>
+    )
+  }
 
   // V3 — touch: V1 (CTA opens the panel). Desktop pointer: CTA label; hover
   // reveals the dots, each with a mini-card popover + Quick Add.
@@ -625,19 +662,23 @@ function CategoryPageInnerT3({ initialStlVariant }: { initialStlVariant: StlVari
   const products = allBrandProducts.slice(3)
   const rhythmGroups = buildRhythmGroups(products, featuredProducts)
 
-  // Shop The Look preview — state is the source of truth; the URL mirrors it
-  // (?stl=current | ?stl=v1) so a reload or shared link restores the variant.
-  const [stlVariant, setStlVariant] = useState<StlVariant>(initialStlVariant)
+  // Shop The Look preview — the URL (?stl=current | v1 | v2 | v3 | v4) is the
+  // source of truth, so a reload, a shared link or going Back (e.g. from V4's
+  // CTA) restores the variant. Next.js syncs useSearchParams with replaceState.
+  const searchParams = useSearchParams()
+  const stlVariant = searchParams.has('stl') ? parseStlVariant(searchParams.get('stl') ?? undefined) : initialStlVariant
   const changeStlVariant = (next: StlVariant) => {
-    setStlVariant(next)
     const url = new URL(window.location.href)
     url.searchParams.set('stl', next)
-    window.history.replaceState(window.history.state, '', url)
+    // null (not history.state) so Next.js picks up the change and keeps its own state
+    window.history.replaceState(null, '', url)
   }
 
   // Both banner instances share one panel, fed by the tile's hotspot pins.
   const [stlOpen, setStlOpen] = useState(false)
   const openShopTheLook = () => setStlOpen(true)
+  const stlV4Href = `/${brand}${STL_V4_CATEGORY_PATH}`
+  const stlV4ProductHref = (p: QuickAddProduct) => `/${brand}${p.pdpUrl}`
   const stlTile = featuredProducts[0] ? resolveTile(featuredProducts[0]) : TILE_CONFIGS[1]!
   const stlItems = stlTile.type === 'hotspot' ? pinsToLookItems(stlTile.pins, brand, StarIcon) : []
 
@@ -698,6 +739,8 @@ function CategoryPageInnerT3({ initialStlVariant }: { initialStlVariant: StlVari
                       slotClassName={styles.featuredCardRight}
                       stlVariant={stlVariant}
                       onOpenShopTheLook={openShopTheLook}
+                      shopTheLookHref={stlV4Href}
+                      productHref={stlV4ProductHref}
                     />
                     {group.cards.map((p) => (
                       <ProductCard
@@ -729,6 +772,8 @@ function CategoryPageInnerT3({ initialStlVariant }: { initialStlVariant: StlVari
                       disableHotspots
                       stlVariant={stlVariant}
                       onOpenShopTheLook={openShopTheLook}
+                      shopTheLookHref={stlV4Href}
+                      productHref={stlV4ProductHref}
                     />
                     {group.cards.map((p) => (
                       <ProductCard
@@ -759,6 +804,8 @@ function CategoryPageInnerT3({ initialStlVariant }: { initialStlVariant: StlVari
                     slotClassName={styles.featuredCardLeft}
                     stlVariant={stlVariant}
                     onOpenShopTheLook={openShopTheLook}
+                    shopTheLookHref={stlV4Href}
+                      productHref={stlV4ProductHref}
                   />
                   {group.cards.map((p) => (
                     <ProductCard

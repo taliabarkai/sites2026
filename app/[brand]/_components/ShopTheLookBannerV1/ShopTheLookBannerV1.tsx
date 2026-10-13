@@ -1,18 +1,8 @@
 'use client'
 
 import type { ReactNode } from 'react'
-import { usePathname } from 'next/navigation'
-import { getBrandFromPathname } from '../../_config/brands'
-import * as oalIcons from '@/src/components/icons/oal'
-import * as mnnIcons from '@/src/components/icons/mnn'
-import * as tgrIcons from '@/src/components/icons/tgr'
-import * as lalIcons from '@/src/components/icons/lal'
-import * as ibIcons  from '@/src/components/icons/ib'
+import { ShopTheLookCta } from '../ShopTheLookCta'
 import styles from './ShopTheLookBannerV1.module.css'
-
-const BRAND_ICONS = {
-  oal: oalIcons, mnn: mnnIcons, tgr: tgrIcons, lal: lalIcons, ib: ibIcons,
-} as const
 
 export interface ShopTheLookBannerV1Props {
   image: string
@@ -52,8 +42,6 @@ export function ShopTheLookBannerV1({
   children,
   className,
 }: ShopTheLookBannerV1Props) {
-  const { ShoppingBagIcon } = BRAND_ICONS[getBrandFromPathname(usePathname())]
-
   return (
     // The whole image is a mouse shortcut to the panel; the CTA is the
     // keyboard / screen-reader affordance.
@@ -68,30 +56,12 @@ export function ShopTheLookBannerV1({
       <div className={styles.content}>
         {eyebrow && <p className={styles.eyebrow}>{eyebrow}</p>}
         {heading && <h4 className={styles.heading}>{heading}</h4>}
-        {/* CTA — the product card's Quick-Add bag button, widened to hold the label */}
-        {ctaAsLabel ? (
-          <span className={styles.cta}>
-            <span className={styles.ctaIcon} aria-hidden="true">
-              <ShoppingBagIcon size={20} />
-            </span>
-            <span className={styles.ctaLabel}>{ctaLabel}</span>
-          </span>
-        ) : (
-          <button
-            type="button"
-            className={styles.cta}
-            aria-haspopup="dialog"
-            onClick={(e) => {
-              e.stopPropagation()
-              onOpen?.()
-            }}
-          >
-            <span className={styles.ctaIcon} aria-hidden="true">
-              <ShoppingBagIcon size={20} />
-            </span>
-            <span className={styles.ctaLabel}>{ctaLabel}</span>
-          </button>
-        )}
+        <ShopTheLookCta
+          label={ctaLabel}
+          asLabel={ctaAsLabel}
+          onClick={onOpen}
+          className={styles.cta}
+        />
       </div>
 
       {children}

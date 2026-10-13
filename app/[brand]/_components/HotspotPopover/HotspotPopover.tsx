@@ -15,7 +15,9 @@ export interface HotspotPopoverProps {
   x: number
   y: number
   /** "Shop Now" — opens the Shop The Look panel. */
-  onShopNow: () => void
+  onShopNow?: () => void
+  /** Makes "Shop Now" a link to this page instead (V4: the product's PDP). */
+  shopNowHref?: string
 }
 
 function formatCents(cents: number, currency = '$'): string {
@@ -28,7 +30,7 @@ function formatCents(cents: number, currency = '$'): string {
  * mounted so it can fade; hidden popovers are `visibility: hidden`, so they're
  * out of the tab order.
  */
-export function HotspotPopover({ id, product, isOpen, side = 'right', x, y, onShopNow }: HotspotPopoverProps) {
+export function HotspotPopover({ id, product, isOpen, side = 'right', x, y, onShopNow, shopNowHref }: HotspotPopoverProps) {
   return (
     <div
       id={id}
@@ -49,9 +51,15 @@ export function HotspotPopover({ id, product, isOpen, side = 'right', x, y, onSh
           )}
           <span className={styles.price}>{formatCents(product.price, product.currency)}</span>
         </div>
-        <Button variant="link" className={styles.shopNow} aria-haspopup="dialog" onClick={onShopNow}>
-          Shop Now
-        </Button>
+        {shopNowHref ? (
+          <Button variant="link" className={styles.shopNow} href={shopNowHref}>
+            Shop Now
+          </Button>
+        ) : (
+          <Button variant="link" className={styles.shopNow} aria-haspopup="dialog" onClick={onShopNow}>
+            Shop Now
+          </Button>
+        )}
       </div>
     </div>
   )

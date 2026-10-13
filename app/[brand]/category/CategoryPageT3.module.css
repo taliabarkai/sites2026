@@ -405,6 +405,21 @@
   color: var(--colors-text);
 }
 
+/* V4: V1's Shop The Look CTA in the headline's spot (same inset as V1) */
+.bannerCta {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  z-index: 1;
+  padding: var(--spacing-sm);
+}
+
+@media (min-width: 768px) {
+  .bannerCta {
+    padding: var(--spacing-lg);
+  }
+}
+
 /* Group A: featured RIGHT on desktop → full-width row after the 4 cards on mobile */
 .featuredCardRight {
   grid-column: 1 / -1;
