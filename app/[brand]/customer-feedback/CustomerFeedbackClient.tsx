@@ -1,20 +1,29 @@
 'use client'
 
 import { useRef, useState } from 'react'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { Header } from '../_components/Header'
 import { Footer } from '../_components/Footer'
 import { Button } from '../_components/Button'
+import { ShareTheLove } from '../_components/ShareTheLove'
+import { VariantToggle } from '../_components/VariantToggle'
 import { getBrandFromPathname, getBrandMeta } from '../_config/brands'
 import type { BrandKey } from '../_config/brands'
 import { prefixFooterColumns, prefixNavLinks, withBrandPrefix } from '../_config/brandPaths'
-import { DEFAULT_FOOTER_COLUMNS, DEFAULT_NAV_LINKS, DEFAULT_TOPLINE } from '../_config/siteContent'
+import {
+  DEFAULT_FOOTER_COLUMNS,
+  DEFAULT_NAV_LINKS,
+  DEFAULT_TOPLINE,
+  SHARE_THE_LOVE_IMAGE,
+  TRUSTPILOT,
+} from '../_config/siteContent'
 import { getBrandProducts } from '../../../data/products/getBrandProducts'
 import * as oalIcons from '@/src/components/icons/oal'
 import * as mnnIcons from '@/src/components/icons/mnn'
 import * as tgrIcons from '@/src/components/icons/tgr'
 import * as lalIcons from '@/src/components/icons/lal'
 import * as ibIcons  from '@/src/components/icons/ib'
+import { parseSuccessVersion, type FeedbackSuccessVersion } from './successVersion'
 import styles from './customer-feedback.module.css'
 
 // Brand-scoped icons — resolved at runtime per the icon rules (never hardcode a brand).
@@ -145,6 +154,13 @@ const EMPTY_FEEDBACK: ProductFeedback = {
 
 const REVIEW_PLACEHOLDER = 'What did you love? What could be better?'
 
+/** Design-preview options for the success screen (?v=). */
+const SUCCESS_VERSION_OPTIONS: { value: FeedbackSuccessVersion; label: string }[] = [
+  { value: 'v1', label: 'V1 · Share the Love' },
+  { value: 'v2', label: 'V2 · Discount' },
+  { value: 'v3', label: 'V3 · Brand image' },
+]
+
 /**
  * Thank-you reward shown on the success screen — percent off the next order,
  * per brand. IB and MNN have no figure of their own yet, so they use OAL's 20%.
@@ -157,8 +173,19 @@ const DISCOUNT_PERCENT: Record<BrandKey, number> = {
   mnn: 20,
 }
 
-export default function CustomerFeedbackPage() {
+export interface CustomerFeedbackClientProps {
+  /** Open straight on the success screen — the shareable /success link. */
+  initialSubmitted?: boolean
+  /** Success-screen version from ?v= on load. */
+  initialVersion?: FeedbackSuccessVersion
+}
+
+export default function CustomerFeedbackClient({
+  initialSubmitted = false,
+  initialVersion = 'v1',
+}: CustomerFeedbackClientProps) {
   const pathname = usePathname()
+  const router = useRouter()
   const brand = getBrandFromPathname(pathname)
   const { StarIcon, FileUploadIcon, XIcon, CheckmarkIcon, CheckboxIcon, ClipboardCopyIcon } = BRAND_ICONS[brand]
 
@@ -183,8 +210,22 @@ export default function CustomerFeedbackPage() {
 
   const [productFeedback, setProductFeedback] = useState<Record<number, ProductFeedback>>({})
   const [score, setScore] = useState<number | null>(null)
-  const [submitted, setSubmitted] = useState(false)
+  const submitted = initialSubmitted
   const [copied, setCopied] = useState(false)
+
+  // Success-screen version — the URL (?v=v1 | v2 | v3) is the source of truth,
+  // so a reload or a shared link shows the same one. Next.js syncs
+  // useSearchParams with replaceState.
+  const searchParams = useSearchParams()
+  const version = searchParams.has('v') ? parseSuccessVersion(searchParams.get('v') ?? undefined) : initialVersion
+  const changeVersion = (next: FeedbackSuccessVersion) => {
+    const url = new URL(window.location.href)
+    url.searchParams.set('v', next)
+    // null (not history.state) so Next.js picks up the change and keeps its own state
+    window.history.replaceState(null, '', url)
+  }
+  const successHref = `/${brand}/customer-feedback/success?v=${version}`
+  const shareImage = SHARE_THE_LOVE_IMAGE[brand]
 
   const feedbackFor = (id: number): ProductFeedback => productFeedback[id] ?? EMPTY_FEEDBACK
 
@@ -220,9 +261,8 @@ export default function CustomerFeedbackPage() {
     // TODO: no feedback endpoint exists in this project yet — POST the payload
     // once one is available (e.g. `await fetch('/api/feedback', { method: 'POST', … })`).
     console.log('[customer-feedback] submit', payload)
-    setSubmitted(true)
-    // The success screen replaces the form in place, so bring it into view.
-    window.scrollTo({ top: 0, behavior: 'smooth' })
+    // The success screen has its own URL, so it can be shared or reloaded
+    router.push(successHref)
   }
 
   async function copyCode() {
@@ -243,7 +283,18 @@ export default function CustomerFeedbackPage() {
       <main id="main-content" className={styles.main}>
         <div className={styles.container}>
           {submitted ? (
-            /* ── Success screen — replaces the form once submitted ────────── */
+            /* ── Success screen — its own URL (/customer-feedback/success) ── */
+            <>
+            {/* Design preview: which success version to show */}
+            <div className={styles.previewBar}>
+              <VariantToggle
+                label="Success message preview"
+                options={SUCCESS_VERSION_OPTIONS}
+                value={version}
+                onChange={changeVersion}
+              />
+            </div>
+
             <section className={styles.card} aria-labelledby="cf-success-heading">
               <div className={styles.success}>
                 <span className={styles.successCheck} aria-hidden="true">
@@ -255,28 +306,60 @@ export default function CustomerFeedbackPage() {
               </div>
 
               <div className={styles.successBody}>
-                <p className={styles.successIntro}>
-                  Your review helps other jewelry lovers shop with confidence, and we’ve
-                  sent your {discountPercent}% off code to your inbox too.
-                </p>
+                {version === 'v2' ? (
+                  /* V2 — the thank-you discount for the next order */
+                  <>
+                    <p className={styles.successIntro}>
+                      Your review helps other jewelry lovers shop with confidence, and we’ve
+                      sent your {discountPercent}% off code to your inbox too.
+                    </p>
 
-                <div className={styles.offer}>
-                  <p className={styles.offerAmount}>{discountAmount}</p>
-                  <p className={styles.offerLabel}>Your next order</p>
-                </div>
+                    <div className={styles.offer}>
+                      <p className={styles.offerAmount}>{discountAmount}</p>
+                      <p className={styles.offerLabel}>Your next order</p>
+                    </div>
 
-                <div className={styles.codeGroup}>
-                  <button type="button" className={styles.code} onClick={copyCode}>
-                    <span className={styles.codeValue}>{discountCode}</span>
-                    <span className={styles.codeIcon} aria-hidden="true">
-                      <ClipboardCopyIcon size={20} />
-                    </span>
-                    <span className={styles.srOnly}>Copy discount code</span>
-                  </button>
-                  <p className={styles.codeStatus} role="status">
-                    {copied ? 'Code copied' : ''}
+                    <div className={styles.codeGroup}>
+                      <button type="button" className={styles.code} onClick={copyCode}>
+                        <span className={styles.codeValue}>{discountCode}</span>
+                        <span className={styles.codeIcon} aria-hidden="true">
+                          <ClipboardCopyIcon size={20} />
+                        </span>
+                        <span className={styles.srOnly}>Copy discount code</span>
+                      </button>
+                      <p className={styles.codeStatus} role="status">
+                        {copied ? 'Code copied' : ''}
+                      </p>
+                    </div>
+                  </>
+                ) : (
+                  <p className={styles.successIntro}>
+                    Your review helps other jewelry lovers shop with confidence.
                   </p>
-                </div>
+                )}
+
+                {/* V1 — the Share the Love widget from the thank-you page */}
+                {version === 'v1' && <ShareTheLove headingId="cf-share-title" className={styles.share} />}
+
+                {/* V3 — the brand's own artwork, linking to Trustpilot. Until a
+                    brand supplies one, a placeholder frame holds its place. */}
+                {version === 'v3' && (
+                  <a
+                    href={TRUSTPILOT.reviewUrl}
+                    className={styles.brandImageLink}
+                    aria-label="Leave a review on Trustpilot"
+                  >
+                    {shareImage ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={shareImage} alt="" className={styles.brandImage} />
+                    ) : (
+                      <span className={styles.brandImagePlaceholder} aria-hidden="true">
+                        <span className={styles.brandImagePlaceholderTitle}>{brandName} image</span>
+                        <span className={styles.hint}>1200 × 800 · links to Trustpilot</span>
+                      </span>
+                    )}
+                  </a>
+                )}
 
                 <Button href={`/${brand}`} variant="primary" className={styles.successCta}>
                   Continue Shopping
@@ -287,6 +370,7 @@ export default function CustomerFeedbackPage() {
                 </p>
               </div>
             </section>
+            </>
           ) : (
             <>
             <header className={styles.pageHeader}>

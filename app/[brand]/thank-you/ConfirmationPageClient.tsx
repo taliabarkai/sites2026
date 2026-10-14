@@ -11,6 +11,7 @@ import * as ibIcons  from '@/src/components/icons/ib'
 import { Button } from '../_components/Button'
 import { Header } from '../_components/Header'
 import { Footer } from '../_components/Footer'
+import { ShareTheLove } from '../_components/ShareTheLove'
 import { getBrandFromPathname } from '../_config/brands'
 import { prefixFooterColumns, prefixNavLinks, withBrandPrefix } from '../_config/brandPaths'
 import {
@@ -18,7 +19,6 @@ import {
   DEFAULT_NAV_LINKS,
   DEFAULT_TOPLINE,
   SMS_SIGNUP,
-  TRUSTPILOT,
 } from '../_config/siteContent'
 import { BRAND_LOYALTY } from '../_config/loyalty'
 import type { LoyaltyPerkIcon } from '../_config/loyalty'
@@ -317,25 +317,7 @@ export function ConfirmationPageClient() {
     </section>
   )
 
-  const shareTheLove = (
-    <section className={`${styles.card} ${styles.blockShare}`} aria-labelledby="share-title">
-      <h2 id="share-title" className={styles.sectionTitle}>Share the Love</h2>
-      <p className={styles.shareCopy}>
-        Tell us about your experience<br />and make an impact!
-      </p>
-      <Button variant="secondary" className={styles.shareButton} href={TRUSTPILOT.reviewUrl}>
-        Leave a review
-      </Button>
-
-      {/* Supplied as one piece of Trustpilot artwork — mark, stars and score */}
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src="/images/trustpilot.svg"
-        alt={`Trustpilot ${TRUSTPILOT.score} out of ${TRUSTPILOT.outOf}`}
-        className={styles.trustpilot}
-      />
-    </section>
-  )
+  const shareTheLove = <ShareTheLove className={`${styles.card} ${styles.blockShare}`} />
 
   const continueShopping = (
     <div className={styles.blockContinue}>

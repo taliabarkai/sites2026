@@ -1,3 +1,5 @@
+import type { BrandKey } from './brands'
+
 export interface NavLink {
   label: string
   href: string
@@ -140,6 +142,21 @@ export const TRUSTPILOT = {
   outOf: 5,
   reviewUrl: 'https://www.trustpilot.com',
   reviewCountLabel: 'Over 60,000 Reviews',
+}
+
+/**
+ * Each brand's own clickable artwork for the feedback success screen (V3) —
+ * it links to Trustpilot, like the Share the Love CTA. `null` until the brand
+ * supplies one; the page shows a placeholder frame of the same size instead.
+ * Artwork is 3:2 (1200 × 800). The link is named "Leave a review on
+ * Trustpilot", so the image itself needs no alt text.
+ */
+export const SHARE_THE_LOVE_IMAGE: Record<BrandKey, string | null> = {
+  oal: null,
+  tgr: null,
+  lal: null,
+  ib:  null,
+  mnn: null,
 }
 
 /**

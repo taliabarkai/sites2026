@@ -137,8 +137,7 @@
 .meta,
 .detailLine,
 .helpLine,
-.keyClubCopy,
-.shareCopy {
+.keyClubCopy {
   margin: 0;
   font-family:    var(--typography-rules-text1-font-family);
   font-size:      var(--typography-rules-text1-font-size);
@@ -751,36 +750,13 @@
 }
 
 /* ── G. Share the love ────────────────────────────────────────────────────── */
-.blockShare {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--spacing-xs);
-  text-align: center;
-}
-
-.shareButton {
-  width: 100%;
-}
-
+/* Content and layout come from the ShareTheLove component; the page adds the
+   tinted panel on desktop. */
 @media (min-width: 1024px) {
   .blockShare {
     background: var(--share-panel-background);
     padding: var(--spacing-2xl) var(--spacing-lg);
   }
-
-  .shareButton {
-    width: auto;
-    min-width: 220px;
-  }
-}
-
-.trustpilot {
-  display: block;
-  width: 100%;
-  max-width: 256px;
-  height: auto;
-  margin-top: var(--spacing-xs);
 }
 
 /* ── Klaviyo SMS popup (placeholder) ──────────────────────────────────────── */
