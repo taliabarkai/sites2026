@@ -78,12 +78,27 @@ const renderTile = (box: Box) => (
 )
 
 const NOTES_AFTER =
-  'A radio group: Tab reaches the selected option, arrow keys move and select, Tab leaves. Selected shows a thicker edge and a checkmark; sold out is crossed through and says so.'
+  'A radio group: Tab reaches the selected option, arrow keys move and select, Tab leaves. Unselected options have a --form-option-border-color (#cccccc) border; selected is a 1px edge in the text color and a checkmark; sold out is crossed through and says so.'
 
 const DOS = [
   'Use the radio group pattern: one tab stop, arrow keys to choose.',
-  'Give unselected options a border of at least 3:1.',
-  'Show selected with a thicker edge and a checkmark, and name it next to the label.',
+  'Give unselected options a --form-option-border-color border.',
+  'Show selected with a 1px text-color edge and a checkmark, and name it next to the label.',
+]
+
+const SWATCH_NOTES_AFTER =
+  'A radio group: Tab reaches the selected swatch, arrow keys move and select, Tab leaves. The metal fills the whole circle with no border. Selected is a ring outside it — a 2px gap, then a 1px line in the text color — so the circle keeps its full size; the name shows next to the label. Focus is the 2px ring, 4px outside the circle.'
+
+const SWATCH_DOS = [
+  'Use the radio group pattern: one tab stop, arrow keys to choose.',
+  'Draw selected outside the circle (2px gap, 1px ring), and name it next to the label.',
+  'Keep every swatch the same size, selected or not.',
+]
+
+const SWATCH_DONTS = [
+  "Don't make every option its own tab stop.",
+  "Don't draw selected inside the circle; it shrinks the color.",
+  "Don't hide sold-out options; cross them out and say \"Sold out\".",
 ]
 
 const DONTS = [
@@ -141,10 +156,10 @@ export function ColorSwatchCard() {
       notes={{
         before:
           'Product page metal: aria-pressed buttons, each its own tab stop, a #ebebeb border (1.19:1), no focus style, and no sold-out state.',
-        after: NOTES_AFTER,
+        after: SWATCH_NOTES_AFTER,
       }}
-      dos={DOS}
-      donts={DONTS}
+      dos={SWATCH_DOS}
+      donts={SWATCH_DONTS}
       states={[
         { label: 'Selected', content: <VariantGroup kind="swatch" label="Metal" options={METALS} defaultValue="vermeil" renderOption={renderSwatch} /> },
         {

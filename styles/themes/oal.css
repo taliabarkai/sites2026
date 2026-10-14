@@ -17,6 +17,7 @@
   --oal-off-white:  #f8f8f8;
   --oal-green:      #2b8b68;
   --oal-red:        #8e0000;
+  --oal-option-grey: #cccccc;
 }
 
 /* ── Semantic tokens ──────────────────────────────────────────────────────── */
@@ -129,6 +130,8 @@
   /* Form field extras */
   --form-field-border-color-hover: var(--oal-black);
   --form-field-border-radius:      4px;
+  /* Unselected product option tiles, pills and rows */
+  --form-option-border-color: var(--oal-option-grey);
 
   /* Ribbon variants */
   --ribbon-border-radius:          var(--radius-sm);

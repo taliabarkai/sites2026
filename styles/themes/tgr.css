@@ -19,6 +19,7 @@
   --tgr-red:         #b6475f;
   --tgr-warning:     #f36641;
   --tgr-snow:        #f6f8fa;
+  --tgr-option-grey: #cccccc;
 }
 
 /* ── Semantic tokens ──────────────────────────────────────────────────────── */
@@ -129,6 +130,8 @@
   /* Form field extras */
   --form-field-border-color-hover: var(--tgr-raisin);
   --form-field-border-radius:      4px;
+  /* Unselected product option tiles, pills and rows */
+  --form-option-border-color: var(--tgr-option-grey);
 
   /* Ribbon variants */
   --ribbon-border-radius:          var(--radius-full);

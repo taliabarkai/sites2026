@@ -102,9 +102,9 @@
                      ring merges with the border into one thicker edge
      .ringField      text fields, selects — the border darkens too, so the
                      edge reads as one solid 3px line
-     .ringSwatch     round swatches — the thin border darkens and thickens
-                     with the ring. The white circle inside it is part of the
-                     swatch at rest, not of the focus state.
+     .ringSwatch     round swatches — the ring sits outside the selected
+                     ring (a 4px gap), so focus and selected never merge and
+                     the color circle keeps its full size.
      .ringFilled     filled buttons — a dark ring on a dark fill would only make
                      the button look bigger, so a thin inverse line runs just
                      inside the edge
@@ -172,7 +172,7 @@
 .scope .ringSwatch:focus-visible,
 .scope[data-force-focus='true'] .demo .ringSwatch,
 .scope .forceFocus .ringSwatch {
-  border-color: var(--focus-ring-color);
+  outline-offset: var(--spacing-xxxs);
 }
 
 .scope .ringFilled:focus-visible,

@@ -1,6 +1,7 @@
-/* Product variant pickers. Unselected: a 3:1 border (--border-interactive).
-   Selected: the edge thickens to the text color and a checkmark appears.
-   Sold out: crossed through, plus "Sold out" in words. */
+/* Product variant pickers. Unselected: a --form-option-border-color border.
+   Selected: a 1px border in the text color (plus a checkmark on chips, images
+   and tiles). Round swatches have no border; selected is a ring outside the
+   circle. Sold out: crossed through, plus "Sold out" in words. */
 
 .group {
   display: flex;
@@ -49,7 +50,7 @@
   padding: 0;
   color: var(--colors-text);
   background: var(--colors-background);
-  border: var(--border-width) solid var(--border-interactive);
+  border: var(--border-width) solid var(--form-option-border-color);
   cursor: pointer;
   transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
@@ -60,7 +61,6 @@
 
 .selected {
   border-color: var(--colors-text);
-  box-shadow: 0 0 0 var(--border-width) var(--colors-text);
 }
 
 /* Checkmark badge on the top-right corner of the selected option */
@@ -114,17 +114,40 @@
   text-transform: var(--typography-rules-caption1-text-transform, none);
 }
 
-/* ─── Color swatch: a white circle between the border and the metal ───────── */
+/* ─── Color swatch: the metal fills the whole circle, no border ───────────
+   Selected is a ring outside the circle: a 2px see-through gap, then a 1px
+   line in the text color. Drawn as a pseudo-element, so the circle never
+   shrinks, the layout never shifts and the gap shows whatever surface the
+   swatch sits on. */
 
 .option_swatch {
   width: calc(var(--spacing-xl) - var(--spacing-xxxs));
   height: calc(var(--spacing-xl) - var(--spacing-xxxs));
+  border: none;
   border-radius: var(--radius-full);
+}
+
+.option_swatch::before {
+  content: '';
+  position: absolute;
+  inset: calc((var(--spacing-xxxs) / 2 + var(--border-width)) * -1);
+  border: var(--border-width) solid transparent;
+  border-radius: inherit;
+  transition: border-color var(--transition-fast);
+  pointer-events: none;
+}
+
+.option_swatch:hover:not([aria-disabled='true']):not(.selected)::before {
+  border-color: var(--form-option-border-color);
+}
+
+.option_swatch.selected::before {
+  border-color: var(--colors-text);
 }
 
 .swatchFill {
   position: absolute;
-  inset: calc(var(--spacing-xxxs) / 2);
+  inset: 0;
   border-radius: inherit;
 }
 

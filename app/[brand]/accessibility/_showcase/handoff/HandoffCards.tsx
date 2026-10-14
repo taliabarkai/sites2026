@@ -88,16 +88,16 @@ export function MaterialSelectorCard() {
         before:
           'From the live product page: a #949494 border (3.03:1 on white, 2.86:1 on the grey surface) and selected shown by a 1px darker border, a fill and bold text.',
         after:
-          'A radio group: Tab reaches the selected tile, arrow keys move and select, Tab leaves. 3:1 borders on every surface; selected is a 2px edge, a light fill and bold text; focus is the 2px ring on the edge. Each tile is read as "Gold Plated, $145".',
+          'A radio group: Tab reaches the selected tile, arrow keys move and select, Tab leaves. Unselected tiles have a --form-option-border-color (#cccccc) border; selected is a 1px edge in the text color, a light fill and bold text; focus is the 2px ring on the edge. Each tile is read as "Gold Plated, $145".',
       }}
       dos={[
         'Use the radio group pattern: one tab stop, arrow keys to choose.',
         'Read the name and price together as the tile’s name.',
-        'Show selected with more than color: a 2px edge and bold text, plus the fill.',
-              ]}
+        'Show selected with more than color: a 1px text-color edge and bold text, plus the fill.',
+      ]}
       donts={[
         "Don't make every tile its own tab stop.",
-        "Don't use a border lighter than --border-interactive on grey surfaces.",
+        "Don't show selected with the border color alone.",
       ]}
       states={[
         { label: 'Unselected', content: <GoldTile /> },

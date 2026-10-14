@@ -20,6 +20,7 @@
   --mnn-dune-yellow: #E6C379;
   --mnn-warning:    #ef7d60;
   --mnn-forest:     #09391e;
+  --mnn-option-grey: #cccccc;
 }
 
 /* ── Semantic tokens ──────────────────────────────────────────────────────── */
@@ -153,6 +154,8 @@
   /* Form field extras */
   --form-field-border-color-hover: var(--mnn-black);
   --form-field-border-radius:      4px;
+  /* Unselected product option tiles, pills and rows */
+  --form-option-border-color: var(--mnn-option-grey);
 
   /* Ribbon variants */
   --ribbon-border-radius:          var(--radius-full);

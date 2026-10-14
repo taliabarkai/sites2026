@@ -21,6 +21,7 @@
   --ib-warning:     #f36641;
   --ib-copper:      #a3754d;
   --ib-slate:       #808080;
+  --ib-option-grey: #cccccc;
 }
 
 /* ── Semantic tokens ──────────────────────────────────────────────────────── */
@@ -130,6 +131,8 @@
   /* Form field extras */
   --form-field-border-color-hover: var(--ib-navy);
   --form-field-border-radius:      4px;
+  /* Unselected product option tiles, pills and rows */
+  --form-option-border-color: var(--ib-option-grey);
 
   /* Ribbon variants */
   --ribbon-border-radius:          var(--radius-sm);

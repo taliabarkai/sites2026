@@ -36,8 +36,10 @@ export interface VariantGroupProps<T extends VariantOption> {
  *                  and announced, but not selected
  *   Home / End     first / last option
  *
- * Unselected options have a 3:1 border. Selected adds a thicker edge and a
- * checkmark, so it never rests on color. Sold out is crossed through, says
+ * Unselected options have a --form-option-border-color border; round swatches
+ * have none. Selected is a 1px text-color edge plus a checkmark (option tiles
+ * add a fill and bold text; swatches get a ring outside the circle instead),
+ * so it never rests on color alone. Sold out is crossed through, says
  * "Sold out" in words, and uses aria-disabled so it stays discoverable.
  */
 export function VariantGroup<T extends VariantOption>({
@@ -127,8 +129,8 @@ export function VariantGroup<T extends VariantOption>({
                   .join(' ')}
               >
                 {renderOption(option, { selected: isSelected })}
-                {/* Option tiles show selected with the 2px edge, fill and bold text alone */}
-                {isSelected && kind !== 'option' && (
+                {/* Option tiles show selected with the edge, fill and bold text; swatches with the outer ring */}
+                {isSelected && kind !== 'option' && kind !== 'swatch' && (
                   <span className={styles.check} aria-hidden="true">
                     <CheckmarkIcon className={styles.checkIcon} />
                   </span>

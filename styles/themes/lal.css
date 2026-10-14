@@ -17,6 +17,7 @@
   --lal-red:         #8e0000;
   --lal-warning:     #f36641;
   --lal-slate:       #808080;
+  --lal-option-grey: #cccccc;
 }
 
 /* ── Semantic tokens ──────────────────────────────────────────────────────── */
@@ -127,6 +128,8 @@
   /* Form field extras */
   --form-field-border-color-hover: var(--lal-black);
   --form-field-border-radius:      8px;
+  /* Unselected product option tiles, pills and rows */
+  --form-option-border-color: var(--lal-option-grey);
 
   /* Ribbon variants */
   --ribbon-border-radius:          var(--radius-sm);

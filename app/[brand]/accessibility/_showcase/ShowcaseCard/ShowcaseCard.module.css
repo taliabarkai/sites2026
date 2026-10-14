@@ -127,9 +127,8 @@
 }
 
 .live {
-  padding: var(--spacing-md) var(--spacing-sm);
-  background: var(--colors-surface-primary);
-  border-radius: var(--radius-md);
+  /* No panel behind the demo: it sits on the card's own white */
+  min-width: 0;
 }
 
 /* ─── View note ───────────────────────────────────────────────────────────── */
@@ -179,9 +178,8 @@
 }
 
 .stateBody {
-  padding: var(--spacing-sm);
-  background: var(--colors-surface-primary);
-  border-radius: var(--radius-md);
+  /* No panel behind the state examples either */
+  min-width: 0;
 }
 
 /* ─── Do / Don't ──────────────────────────────────────────────────────────── */
