@@ -1,6 +1,8 @@
 'use client'
 
 import type { ReactNode } from 'react'
+import { HotspotImage } from '../HotspotImage'
+import type { HotspotPinData } from '../HotspotImage'
 import { ShopTheLookCta } from '../ShopTheLookCta'
 import styles from './ShopTheLookBannerV1.module.css'
 
@@ -11,6 +13,12 @@ export interface ShopTheLookBannerV1Props {
   eyebrow?: string
   /** h4 heading above the CTA; pass `null` for a CTA-only banner (V2). */
   heading?: string | null
+  /**
+   * Hotspot dots on the image, each opening Quick Add like the Current tile
+   * (NEW FINAL). With pins only the CTA opens the panel, so a tap near a dot
+   * never opens both.
+   */
+  pins?: HotspotPinData[]
   ctaLabel?: string
   /** Opens the Shop The Look panel. Not used when `ctaAsLabel` is set. */
   onOpen?: () => void
@@ -24,7 +32,7 @@ export interface ShopTheLookBannerV1Props {
 }
 
 /**
- * V1 of the Shop The Look tile: the same banner image with no hotspots, a
+ * The Shop The Look tile: the banner image (optionally with hotspot dots), a
  * heading overlay and a bottom-left CTA that opens the Shop The Look panel.
  * Sizes itself exactly like HotspotImage (natural height on mobile, fills the
  * grid cell with a cover crop from 1440px) so swapping variants never shifts
@@ -35,6 +43,7 @@ export function ShopTheLookBannerV1({
   imageAlt,
   eyebrow,
   heading = 'Shop The Look',
+  pins,
   ctaLabel = 'Shop The Look',
   onOpen,
   ctaAsLabel = false,
@@ -42,6 +51,30 @@ export function ShopTheLookBannerV1({
   children,
   className,
 }: ShopTheLookBannerV1Props) {
+  const content = (
+    <div className={styles.content}>
+      {eyebrow && <p className={styles.eyebrow}>{eyebrow}</p>}
+      {heading && <h4 className={styles.heading}>{heading}</h4>}
+      <ShopTheLookCta
+        label={ctaLabel}
+        asLabel={ctaAsLabel}
+        onClick={onOpen}
+        className={styles.cta}
+      />
+    </div>
+  )
+
+  if (pins) {
+    return (
+      <div className={[styles.root, styles.static, className].filter(Boolean).join(' ')}>
+        <HotspotImage src={image} alt={imageAlt} pins={pins}>
+          {content}
+        </HotspotImage>
+        {children}
+      </div>
+    )
+  }
+
   return (
     // The whole image is a mouse shortcut to the panel; the CTA is the
     // keyboard / screen-reader affordance.
@@ -53,16 +86,7 @@ export function ShopTheLookBannerV1({
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src={image} alt={imageAlt} className={styles.image} loading="lazy" />
 
-      <div className={styles.content}>
-        {eyebrow && <p className={styles.eyebrow}>{eyebrow}</p>}
-        {heading && <h4 className={styles.heading}>{heading}</h4>}
-        <ShopTheLookCta
-          label={ctaLabel}
-          asLabel={ctaAsLabel}
-          onClick={onOpen}
-          className={styles.cta}
-        />
-      </div>
+      {content}
 
       {children}
     </div>

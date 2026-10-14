@@ -204,7 +204,15 @@ const STACK_EM_UP_PINS: HotspotPinData[] = [
 // Map featured product id → tile config (id 1 = Wedding Shop, id 2 = Stack Em Up, id 3 = placeholder)
 type TileConfig =
   | { type: 'static'; image: string; imageAlt: string; headline: string }
-  | { type: 'hotspot'; image: string; imageAlt: string; headline: string; pins: HotspotPinData[] }
+  | {
+      type: 'hotspot'
+      image: string
+      imageAlt: string
+      headline: string
+      pins: HotspotPinData[]
+      /** NEW FINAL — optional live-text title above the CTA; omit for a CTA-only banner. */
+      title?: string
+    }
 
 const TILE_CONFIGS: Record<number, TileConfig> = {
   1: {
@@ -212,6 +220,7 @@ const TILE_CONFIGS: Record<number, TileConfig> = {
     image: 'https://cdn.oakandluna.com/digital-asset/banners/RINGS-banner_HP_OAL.jpg',
     imageAlt: 'Stack Em Up — ring collection',
     headline: 'Shop The Look',
+    title: 'Stack Em Up',
     pins: STACK_EM_UP_PINS,
   },
 }
@@ -220,11 +229,12 @@ function resolveTile(product: ProductItem): TileConfig {
   return TILE_CONFIGS[product.id] ?? TILE_CONFIGS[1]!
 }
 
-// ─── T3: Shop The Look preview variant (?stl=current | v1 | v2 | v3 | v4) ──
+// ─── T3: Shop The Look preview variant (?stl=v1 | current | v2 | v3 | v4) ──
+// v1 is NEW FINAL, the default; the param keeps its old value so links still work.
 
 const STL_VARIANT_OPTIONS: { value: StlVariant; label: string }[] = [
+  { value: 'v1',      label: 'NEW FINAL' },
   { value: 'current', label: 'Current' },
-  { value: 'v1',      label: 'V1' },
   { value: 'v2',      label: 'V2' },
   { value: 'v3',      label: 'V3' },
   { value: 'v4',      label: 'V4' },
@@ -409,16 +419,18 @@ function FeaturedCard({
     )
   }
 
-  // V1 — same image, no hotspots, heading + CTA that opens the STL panel.
-  // Applies to every hotspot tile, including the one Current renders without pins.
+  // NEW FINAL (v1) — Current's hotspot dots (each opens Quick Add), the
+  // tile's optional live-text title and a CTA that opens the STL panel.
+  // Dots appear wherever Current has them; the wide banner keeps title + CTA.
   if (config.type === 'hotspot' && stlVariant === 'v1' && onOpenShopTheLook) {
     return (
       <article ref={articleRef} className={`${styles.featuredCard} ${slotClassName}`}>
         <ShopTheLookBannerV1
           image={config.image}
           imageAlt={config.imageAlt}
-          // "Shop The Look" lives only in the CTA, so the heading names the look
-          heading="Stack Em Up"
+          // "Shop The Look" lives only in the CTA, so the title names the look
+          heading={config.title ?? null}
+          pins={disableHotspots ? undefined : config.pins}
           onOpen={onOpenShopTheLook}
         />
       </article>
@@ -662,7 +674,7 @@ function CategoryPageInnerT3({ initialStlVariant }: { initialStlVariant: StlVari
   const products = allBrandProducts.slice(3)
   const rhythmGroups = buildRhythmGroups(products, featuredProducts)
 
-  // Shop The Look preview — the URL (?stl=current | v1 | v2 | v3 | v4) is the
+  // Shop The Look preview — the URL (?stl=v1 | current | v2 | v3 | v4) is the
   // source of truth, so a reload, a shared link or going Back (e.g. from V4's
   // CTA) restores the variant. Next.js syncs useSearchParams with replaceState.
   const searchParams = useSearchParams()

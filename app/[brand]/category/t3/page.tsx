@@ -9,6 +9,6 @@ type PageProps = {
 export default async function CategoryPageT3({ params, searchParams }: PageProps) {
   await params
   const { stl } = await searchParams
-  // Shop The Look preview variant — restored from ?stl= on load (default: current)
+  // Shop The Look preview variant — restored from ?stl= on load (default: v1, NEW FINAL)
   return <CategoryPageClientT3 initialStlVariant={parseStlVariant(stl)} />
 }
