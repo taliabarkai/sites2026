@@ -1,0 +1,212 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   OptionTile — one option value, every tile style, every state.
+
+   Bordered tiles (text, standard, big):
+     default   1px --form-option-border-color, transparent, regular label
+     hover     a darker grey edge + --colors-surface-secondary
+     selected  --border-strong edge + --colors-surface-secondary + bold label
+     focus     2px ring in the text color
+     disabled  secondary text, faded, not clickable
+   Image-only swatches have no border; selected is a ring outside the circle.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-xxs);
+  box-sizing: border-box;
+  width: 100%;
+  margin: 0;
+  padding: var(--spacing-xxs);
+  color: var(--colors-text);
+  background: transparent;
+  border: var(--border-width) solid var(--form-option-border-color);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  text-align: center;
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  font-weight:    var(--typography-rules-text1-font-weight, normal);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+  transition:
+    border-color var(--transition-fast),
+    background var(--transition-fast);
+}
+
+.tile:hover:not(.selected):not(.disabled) {
+  border-color: var(--colors-text-secondary);
+  background: var(--colors-surface-secondary);
+}
+
+.selected {
+  border-color: var(--border-strong);
+  background: var(--colors-surface-secondary);
+}
+
+.selected .label {
+  font-family: var(--typography-rules-text2-font-family);
+  font-weight: var(--typography-rules-text2-font-weight, 600);
+}
+
+.tile:focus-visible {
+  outline: calc(var(--border-width) * 2) solid var(--colors-text);
+  outline-offset: calc(var(--border-width) * 2);
+}
+
+.disabled {
+  color: var(--colors-text-secondary);
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ── Label + price delta ──────────────────────────────────────────────────── */
+.copy {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 0;
+}
+
+.label {
+  overflow-wrap: break-word;
+  hyphens: manual;
+}
+
+.delta {
+  color: var(--colors-text-secondary);
+  font-family:    var(--typography-rules-text3-font-family);
+  font-size:      var(--typography-rules-text3-font-size);
+  line-height:    var(--typography-rules-text3-line-height);
+  font-weight:    var(--typography-rules-text3-font-weight, normal);
+}
+
+/* ── Media ────────────────────────────────────────────────────────────────── */
+.media {
+  display: block;
+  flex-shrink: 0;
+}
+
+.image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: inherit;
+}
+
+/* ── text: pill (carousels, grids) or small square (letters panel) ────────── */
+.pill {
+  min-height: var(--spacing-xl);
+  padding: var(--spacing-xxs) var(--spacing-sm);
+  white-space: nowrap;
+}
+
+.letter {
+  aspect-ratio: 1;
+  min-height: 0;
+  padding: var(--spacing-xxxs);
+}
+
+/* ── standard: a small image above the label ──────────────────────────────── */
+.standard .media {
+  width: var(--spacing-2xl);
+  height: var(--spacing-2xl);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+/* ── big: a large image (circle or square) above the label ────────────────── */
+.big .media {
+  width: 100%;
+  aspect-ratio: 1;
+  overflow: hidden;
+}
+
+.circle .media {
+  border-radius: var(--radius-full);
+}
+
+.squareImage .media {
+  border-radius: var(--radius-sm);
+}
+
+/* ── image-only: a circle, no border, no label ────────────────────────────────
+   Selected is a ring outside the circle — a see-through 2px gap, then a 1px
+   line — drawn as a pseudo-element so the circle never shrinks. */
+.image-only {
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-full);
+  background: none;
+}
+
+.image-only.selected,
+.image-only:hover:not(.selected):not(.disabled) {
+  background: none;
+}
+
+.image-only .media {
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  overflow: hidden;
+}
+
+.sm {
+  width: calc(var(--spacing-xl) - var(--spacing-xxxs));
+  height: calc(var(--spacing-xl) - var(--spacing-xxxs));
+}
+
+.lg {
+  width: calc(var(--spacing-xxl) - var(--spacing-xxxs));
+  height: calc(var(--spacing-xxl) - var(--spacing-xxxs));
+}
+
+.image-only::before {
+  content: '';
+  position: absolute;
+  inset: calc((var(--spacing-xxxs) / 2 + var(--border-width)) * -1);
+  border: var(--border-width) solid transparent;
+  border-radius: inherit;
+  transition: border-color var(--transition-fast);
+  pointer-events: none;
+}
+
+.image-only:hover:not(.selected):not(.disabled)::before {
+  border-color: var(--form-option-border-color);
+}
+
+.image-only.selected::before {
+  border-color: var(--border-strong);
+}
+
+/* Focus sits outside the selected ring so the two never merge */
+.image-only:focus-visible {
+  outline-offset: var(--spacing-xxxs);
+}
+
+/* ── Drawer: radio circle, top-right ──────────────────────────────────────── */
+.radio {
+  position: absolute;
+  top: var(--spacing-xxs);
+  right: var(--spacing-xxs);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: calc(var(--spacing-sm) + var(--spacing-xxxs));
+  height: calc(var(--spacing-sm) + var(--spacing-xxxs));
+  box-sizing: border-box;
+  color: var(--colors-text-inverse);
+  background: var(--colors-background);
+  border: var(--border-width) solid var(--border-strong);
+  border-radius: var(--radius-full);
+}
+
+.selected .radio {
+  background: var(--colors-text);
+  border-color: var(--colors-text);
+}

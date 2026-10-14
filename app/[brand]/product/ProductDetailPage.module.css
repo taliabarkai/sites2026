@@ -299,6 +299,11 @@
   gap: 0;
 }
 
+/* The config-driven options form keeps the standard spacing on every brand */
+.formPanel.formPanelOptions {
+  gap: var(--spacing-md);
+}
+
 @media (min-width: 1024px) {
   .formPanel {
     padding: var(--layout-page-margin);

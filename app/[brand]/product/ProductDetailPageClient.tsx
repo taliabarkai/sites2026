@@ -45,6 +45,9 @@ import { TranslationAdvisor } from '../_components/TranslationAdvisor'
 import type { TranslationAdvisorVariant } from '../_components/TranslationAdvisor'
 import { MusicMemoriesCustomizer } from './MusicMemoriesCustomizer'
 import { AIPreviewCustomizer } from '../_components/AIPreviewCustomizer'
+import { ProductOptions, useProductOptions } from '../_components/ProductOptions'
+import type { OptionGroup, SelectedOption } from '../_components/ProductOptions'
+import { OPTION_GROUPS, OPTIONS_SHOWCASE_PRODUCT_ID, optionsShowcaseProduct } from './[id]/_data/optionGroups'
 
 // LAL products that use the song-based Music Memories customizer
 // (Custom Canvas, Acrylic Wall Art, Metal Wall Art, Square Custom Canvas)
@@ -867,14 +870,33 @@ interface ProductFormProps {
     chainLength: string,
     nestedCartItems: CartItem[],
   ) => void
+  /**
+   * Config-driven option groups. When set they replace the metal, inscription
+   * and chain length controls, and the price, subtotal and Add to Bag read
+   * from them (see `onAddConfigured`).
+   */
+  optionGroups?: OptionGroup[]
+  onAddConfigured?: (price: number, selectedOptions: SelectedOption[], isPersonalized: boolean, nestedCartItems: CartItem[]) => void
 }
 
-function ProductForm({ brand, product, icons, nestedItems = [], onAddToBag }: ProductFormProps) {
+const NO_OPTION_GROUPS: OptionGroup[] = []
+
+function ProductForm({ brand, product, icons, nestedItems = [], onAddToBag, optionGroups, onAddConfigured }: ProductFormProps) {
   const [selectedSwatchKey, setSelectedSwatchKey] = useState<MaterialSwatch['key']>(
     product.defaultSwatchKey ?? 'vermeil'
   )
   const [engravedText, setEngravedText] = useState('')
   const [chainLength, setChainLength] = useState(DEFAULT_CHAIN_LENGTH)
+
+  // Config-driven options — one state for every group, the price and the subtotal
+  const usesOptions = optionGroups !== undefined
+  const options = useProductOptions(optionGroups ?? NO_OPTION_GROUPS, product.priceInCents ?? 0)
+  // The Translation Advisor fills the first text field, whichever form is showing
+  const engravingGroupId = optionGroups?.find((g) => g.kind === 'text-input')?.id
+  const useName = (name: string) => {
+    if (usesOptions && engravingGroupId) options.setText(engravingGroupId, name)
+    else setEngravedText(name)
+  }
   const { DropdownIcon, StarIcon, ShippingIcon, ReturnIcon, WarrantyIcon, GiftIcon, ChevronIcon } = icons
 
   // "See details" on the gift USP row opens a read-only packaging panel.
@@ -916,18 +938,31 @@ function ProductForm({ brand, product, icons, nestedItems = [], onAddToBag }: Pr
   }
 
   const selectedSwatch = MATERIAL_SWATCHES.find((s) => s.key === selectedSwatchKey)!
-  const currentPrice = (product.priceInCents ?? 0) + selectedSwatch.priceOffset
-  const subtotalValue = currentPrice + nestedTotal
+  const currentPrice = usesOptions ? options.itemPrice : (product.priceInCents ?? 0) + selectedSwatch.priceOffset
+  const subtotalValue = (usesOptions ? options.subtotal : currentPrice) + nestedTotal
   // N = 1 (main product) + staged nested items.
   const ctaLabel = stagedCount === 0 ? 'Add to Bag' : `Add ${1 + stagedCount} Items to bag`
 
   const handleMainAdd = () => {
-    onAddToBag(selectedSwatchKey, engravedText, chainLength, stagedItems)
+    if (usesOptions) {
+      const personalized = Boolean(engravingGroupId && options.state.text[engravingGroupId]?.trim())
+      onAddConfigured?.(options.subtotal, options.selectedOptions, personalized, stagedItems)
+    }
+    else onAddToBag(selectedSwatchKey, engravedText, chainLength, stagedItems)
     setStaged({})
   }
 
+  // IB only: the inline / link advisor sits under the text field it fills
+  const inlineAdvisor = brand === 'ib' && (advisorVariant === 'inline' || advisorVariant === 'link') && (
+    <TranslationAdvisor variant={advisorVariant} onUseName={useName} />
+  )
+
   return (
-    <section ref={formPanelRef} className={styles.formPanel} aria-label="Product options">
+    <section
+      ref={formPanelRef}
+      className={`${styles.formPanel} ${usesOptions ? styles.formPanelOptions : ''}`}
+      aria-label="Product options"
+    >
       {/* Header group: breadcrumb / title+price / stars */}
       <div className={styles.productHeader}>
         <nav className={styles.breadcrumb} aria-label="Breadcrumb">
@@ -962,67 +997,76 @@ function ProductForm({ brand, product, icons, nestedItems = [], onAddToBag }: Pr
         />
       </div>
 
-      {/* Swatch selector */}
-      <SwatchSelector
-        swatches={MATERIAL_SWATCHES}
-        basePrice={product.priceInCents ?? 0}
-        selectedKey={selectedSwatchKey}
-        onSelect={setSelectedSwatchKey}
-      />
+      {usesOptions ? (
+        <ProductOptions
+          groups={optionGroups}
+          options={options}
+          basePrice={product.priceInCents ?? 0}
+          slots={engravingGroupId ? { [engravingGroupId]: inlineAdvisor } : undefined}
+        />
+      ) : (
+        <>
+        {/* Swatch selector */}
+        <SwatchSelector
+          swatches={MATERIAL_SWATCHES}
+          basePrice={product.priceInCents ?? 0}
+          selectedKey={selectedSwatchKey}
+          onSelect={setSelectedSwatchKey}
+        />
 
-      {/* Engrave input */}
-      <div className={styles.fieldGroup}>
-        <div className={styles.fieldLabelRow}>
-          <label className={styles.fieldLabel} htmlFor="engrave-input">
-            Inscription:
+        {/* Engrave input */}
+        <div className={styles.fieldGroup}>
+          <div className={styles.fieldLabelRow}>
+            <label className={styles.fieldLabel} htmlFor="engrave-input">
+              Inscription:
+            </label>
+            {/* No destination yet — wire to the font guide when it exists */}
+            <button type="button" className={styles.fieldLabelLink}>
+              Font Guide
+            </button>
+          </div>
+          <div className={styles.inputWrap}>
+            <input
+              id="engrave-input"
+              type="text"
+              value={engravedText}
+              maxLength={MAX_ENGRAVE_CHARS}
+              placeholder="e.g. Sofia"
+              className={styles.textInput}
+              onChange={(e) => setEngravedText(e.target.value)}
+            />
+          </div>
+
+          {/* v2 belongs to this field, so it sits inside the group and picks up
+              its 8px gap rather than the form panel's 24px. IB-only. */}
+          {inlineAdvisor}
+        </div>
+
+        {/* Chain length */}
+        <div className={styles.fieldGroup}>
+          <label className={styles.fieldLabel} htmlFor="chain-length">
+            Chain Length
           </label>
-          {/* No destination yet — wire to the font guide when it exists */}
-          <button type="button" className={styles.fieldLabelLink}>
-            Font Guide
-          </button>
+          <div className={styles.selectWrap}>
+            <select
+              id="chain-length"
+              value={chainLength}
+              className={styles.chainSelect}
+              onChange={(e) => setChainLength(e.target.value)}
+            >
+              {CHAIN_LENGTHS.map((len) => (
+                <option key={len} value={len}>
+                  {len}
+                </option>
+              ))}
+            </select>
+            <span className={styles.selectArrow} aria-hidden="true">
+              <DropdownIcon size={24} />
+            </span>
+          </div>
         </div>
-        <div className={styles.inputWrap}>
-          <input
-            id="engrave-input"
-            type="text"
-            value={engravedText}
-            maxLength={MAX_ENGRAVE_CHARS}
-            placeholder="e.g. Sofia"
-            className={styles.textInput}
-            onChange={(e) => setEngravedText(e.target.value)}
-          />
-        </div>
-
-        {/* v2 belongs to this field, so it sits inside the group and picks up
-            its 8px gap rather than the form panel's 24px. IB-only. */}
-        {brand === 'ib' && (advisorVariant === 'inline' || advisorVariant === 'link') && (
-          <TranslationAdvisor variant={advisorVariant} onUseName={setEngravedText} />
-        )}
-      </div>
-
-      {/* Chain length */}
-      <div className={styles.fieldGroup}>
-        <label className={styles.fieldLabel} htmlFor="chain-length">
-          Chain Length
-        </label>
-        <div className={styles.selectWrap}>
-          <select
-            id="chain-length"
-            value={chainLength}
-            className={styles.chainSelect}
-            onChange={(e) => setChainLength(e.target.value)}
-          >
-            {CHAIN_LENGTHS.map((len) => (
-              <option key={len} value={len}>
-                {len}
-              </option>
-            ))}
-          </select>
-          <span className={styles.selectArrow} aria-hidden="true">
-            <DropdownIcon size={24} />
-          </span>
-        </div>
-      </div>
+        </>
+      )}
 
       {/* Nested Items — companion products, directly above the Subtotal */}
       <NestedItems
@@ -1063,7 +1107,7 @@ function ProductForm({ brand, product, icons, nestedItems = [], onAddToBag }: Pr
 
       {/* v1 floats over the page rather than sitting in the form flow */}
       {brand === 'ib' && advisorVariant === 'floating' && (
-        <TranslationAdvisor variant="floating" onUseName={setEngravedText} />
+        <TranslationAdvisor variant="floating" onUseName={useName} />
       )}
 
       {/* Advisor version switcher — presentation/demo only */}
@@ -1132,7 +1176,11 @@ function ProductDetailPageInner({ productId, previewId }: { productId: number; p
     contactHref: withBrandPrefix(brand, DEFAULT_TOPLINE.contactHref),
   }
 
-  const product = getBrandProducts(brand).find((p) => p.id === productId)
+  // The options showcase product comes from the shared jewelry catalog, so it
+  // exists on every brand (LAL's own catalog is canvases).
+  const isOptionsShowcase = productId === OPTIONS_SHOWCASE_PRODUCT_ID
+  const product =
+    getBrandProducts(brand).find((p) => p.id === productId) ?? (isOptionsShowcase ? optionsShowcaseProduct : undefined)
   if (!product) notFound()
 
   const images = product.hoverImage
@@ -1179,12 +1227,34 @@ function ProductDetailPageInner({ productId, previewId }: { productId: number; p
     openCart(true)
   }
 
+  // Config-driven options: the price already includes every option and add-on
+  const handleAddConfigured = (
+    price: number,
+    selectedOptions: SelectedOption[],
+    isPersonalized: boolean,
+    nestedCartItems: CartItem[] = [],
+  ) => {
+    addItem({
+      id: `${product.id}-${Date.now()}`,
+      name: product.name,
+      price,
+      originalPrice: undefined,
+      image: product.image,
+      isPersonalized,
+      rating: product.rating,
+      reviewCount: product.reviewCount,
+      selectedOptions,
+    })
+    nestedCartItems.forEach((item) => addItem(item))
+    openCart(true)
+  }
+
   return (
     <div className={styles.page}>
       <Header variant="white" brand={brand} navLinks={navLinks} topline={topline} />
 
       <main id="main-content">
-        {brand === 'lal' && AI_PREVIEW_PRODUCT_IDS.has(product.id) ? (
+        {brand === 'lal' && !isOptionsShowcase && AI_PREVIEW_PRODUCT_IDS.has(product.id) ? (
           /* Pop Your Memories — AI-preview customizer owns its own preview + layout */
           <AIPreviewCustomizer
             brand={brand}
@@ -1210,7 +1280,17 @@ function ProductDetailPageInner({ productId, previewId }: { productId: number; p
           }
 
           {/* Right / main: product form — LAL music memories / canvas customizer, else jewelry form */}
-          {brand === 'lal' && MUSIC_MEMORIES_PRODUCT_IDS.has(product.id) ? (
+          {isOptionsShowcase ? (
+            <ProductForm
+              brand={brand}
+              product={product}
+              icons={icons}
+              nestedItems={nestedItems}
+              onAddToBag={handleAddToBag}
+              optionGroups={OPTION_GROUPS}
+              onAddConfigured={handleAddConfigured}
+            />
+          ) : brand === 'lal' && MUSIC_MEMORIES_PRODUCT_IDS.has(product.id) ? (
             <MusicMemoriesCustomizer
               brand={brand}
               product={product}
