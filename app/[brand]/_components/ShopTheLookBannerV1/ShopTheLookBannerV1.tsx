@@ -15,8 +15,9 @@ export interface ShopTheLookBannerV1Props {
   heading?: string | null
   /**
    * Hotspot dots on the image, each opening Quick Add like the Current tile
-   * (NEW FINAL). With pins only the CTA opens the panel, so a tap near a dot
-   * never opens both.
+   * (NEW FINAL). On hover-capable desktops a dot also shows V3's popover, whose
+   * "Shop Now" opens the panel. With pins only the CTA and popovers open the
+   * panel, so a tap near a dot never opens both.
    */
   pins?: HotspotPinData[]
   ctaLabel?: string
@@ -67,7 +68,7 @@ export function ShopTheLookBannerV1({
   if (pins) {
     return (
       <div className={[styles.root, styles.static, className].filter(Boolean).join(' ')}>
-        <HotspotImage src={image} alt={imageAlt} pins={pins}>
+        <HotspotImage src={image} alt={imageAlt} pins={pins} onPopoverShopNow={onOpen}>
           {content}
         </HotspotImage>
         {children}

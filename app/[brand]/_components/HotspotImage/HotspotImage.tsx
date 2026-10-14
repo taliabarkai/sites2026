@@ -5,6 +5,7 @@ import { HotspotPin } from '../HotspotPin'
 import { HotspotPopover } from '../HotspotPopover'
 import { QuickAddPanel } from '../QuickAddPanel'
 import type { QuickAddProduct } from '../QuickAddPanel'
+import { useOpenPanelCount } from '../PanelStack'
 import styles from './HotspotImage.module.css'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -27,6 +28,11 @@ export interface HotspotImageProps {
    * where each popover's "Shop Now" links. Clicking a dot still opens Quick Add.
    */
   popoverHref?: (product: QuickAddProduct) => string
+  /**
+   * Turns on the same hover popovers, with "Shop Now" calling this instead of
+   * linking (V3 / NEW FINAL: opens the Shop The Look panel).
+   */
+  onPopoverShopNow?: () => void
 }
 
 // Only real pointers get popovers — on touch a tap goes straight to Quick Add.
@@ -36,10 +42,11 @@ const POPOVER_CLOSE_DELAY = 150
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-export function HotspotImage({ src, alt, pins = [], children, className, popoverHref }: HotspotImageProps) {
+export function HotspotImage({ src, alt, pins = [], children, className, popoverHref, onPopoverShopNow }: HotspotImageProps) {
   const [openPinIndex, setOpenPinIndex] = useState<number | null>(null)
 
-  // Hover / focus popovers (only when `popoverHref` is set)
+  // Hover / focus popovers (only when `popoverHref` or `onPopoverShopNow` is set)
+  const hasPopovers = Boolean(popoverHref || onPopoverShopNow)
   const baseId = useId()
   const [popoverPin, setPopoverPin] = useState<number | null>(null)
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -57,6 +64,19 @@ export function HotspotImage({ src, alt, pins = [], children, className, popover
     closeTimer.current = setTimeout(() => setPopoverPin(null), POPOVER_CLOSE_DELAY)
   }
   useEffect(() => cancelClose, [])
+
+  // "Shop Now" opening the panel holds its popover open meanwhile, so focus can
+  // return to its link on close; released once every panel has closed.
+  const [heldPin, setHeldPin] = useState<number | null>(null)
+  const openPanels = useOpenPanelCount()
+  useEffect(() => {
+    if (openPanels === 0) setHeldPin(null)
+  }, [openPanels])
+  const shopNow = (i: number) => {
+    cancelClose()
+    setHeldPin(i)
+    onPopoverShopNow?.()
+  }
 
   // Refs for returning focus to the pin that opened the panel
   const pinRefs = useRef<(HTMLButtonElement | null)[]>([])
@@ -100,7 +120,7 @@ export function HotspotImage({ src, alt, pins = [], children, className, popover
 
         {/* Hotspot pins */}
         {pins.map((pin, i) => {
-          if (!popoverHref) {
+          if (!hasPopovers) {
             return (
               <HotspotPin
                 key={i}
@@ -113,7 +133,7 @@ export function HotspotImage({ src, alt, pins = [], children, className, popover
               />
             )
           }
-          const isOpen = popoverPin === i || openPinIndex === i
+          const isOpen = popoverPin === i || openPinIndex === i || heldPin === i
           return (
             <div
               key={i}
@@ -136,11 +156,12 @@ export function HotspotImage({ src, alt, pins = [], children, className, popover
               <HotspotPopover
                 id={`${baseId}-pop-${i}`}
                 product={pin.product}
-                isOpen={popoverPin === i}
+                isOpen={popoverPin === i || heldPin === i}
                 side={pin.x > 50 ? 'left' : 'right'}
                 x={pin.x}
                 y={pin.y}
-                shopNowHref={popoverHref(pin.product)}
+                shopNowHref={popoverHref?.(pin.product)}
+                onShopNow={() => shopNow(i)}
               />
             </div>
           )

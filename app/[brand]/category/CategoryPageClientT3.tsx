@@ -419,8 +419,9 @@ function FeaturedCard({
     )
   }
 
-  // NEW FINAL (v1) — Current's hotspot dots (each opens Quick Add), the
-  // tile's optional live-text title and a CTA that opens the STL panel.
+  // NEW FINAL (v1) — Current's hotspot dots (each opens Quick Add; on desktop
+  // hover, V3's popover whose Shop Now opens the STL panel), the tile's
+  // optional live-text title and a CTA that opens the STL panel.
   // Dots appear wherever Current has them; the wide banner keeps title + CTA.
   if (config.type === 'hotspot' && stlVariant === 'v1' && onOpenShopTheLook) {
     return (
