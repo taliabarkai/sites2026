@@ -160,6 +160,20 @@ export const SHARE_THE_LOVE_IMAGE: Record<BrandKey, string | null> = {
 }
 
 /**
+ * Each brand's image on the feedback success screen (V4), between the intro
+ * sentence and the discount code. Not a link. `null` until the brand supplies
+ * one; the page shows a placeholder frame of the same size instead. Artwork is
+ * 3:2 (1200 × 800) and decorative, so it needs no alt text.
+ */
+export const FEEDBACK_OFFER_IMAGE: Record<BrandKey, string | null> = {
+  oal: null,
+  tgr: null,
+  lal: null,
+  ib:  null,
+  mnn: null,
+}
+
+/**
  * SMS signup prompt on the order confirmation page. Shared across brands for
  * now — when the per-brand copy lands, this becomes a Record<BrandKey, …> map
  * the way BRAND_HIGHLIGHTS already is.

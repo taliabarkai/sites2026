@@ -14,6 +14,7 @@ import {
   DEFAULT_FOOTER_COLUMNS,
   DEFAULT_NAV_LINKS,
   DEFAULT_TOPLINE,
+  FEEDBACK_OFFER_IMAGE,
   SHARE_THE_LOVE_IMAGE,
   TRUSTPILOT,
 } from '../_config/siteContent'
@@ -159,6 +160,7 @@ const SUCCESS_VERSION_OPTIONS: { value: FeedbackSuccessVersion; label: string }[
   { value: 'v1', label: 'V1 · Share the Love' },
   { value: 'v2', label: 'V2 · Discount' },
   { value: 'v3', label: 'V3 · Brand image' },
+  { value: 'v4', label: 'V4 · Image + discount' },
 ]
 
 /**
@@ -213,7 +215,7 @@ export default function CustomerFeedbackClient({
   const submitted = initialSubmitted
   const [copied, setCopied] = useState(false)
 
-  // Success-screen version — the URL (?v=v1 | v2 | v3) is the source of truth,
+  // Success-screen version — the URL (?v=v1 | v2 | v3 | v4) is the source of truth,
   // so a reload or a shared link shows the same one. Next.js syncs
   // useSearchParams with replaceState.
   const searchParams = useSearchParams()
@@ -226,6 +228,9 @@ export default function CustomerFeedbackClient({
   }
   const successHref = `/${brand}/customer-feedback/success?v=${version}`
   const shareImage = SHARE_THE_LOVE_IMAGE[brand]
+  const offerImage = FEEDBACK_OFFER_IMAGE[brand]
+  // V2 and V4 both give the thank-you discount; V4 adds an image under the intro
+  const showDiscount = version === 'v2' || version === 'v4'
 
   const feedbackFor = (id: number): ProductFeedback => productFeedback[id] ?? EMPTY_FEEDBACK
 
@@ -306,13 +311,29 @@ export default function CustomerFeedbackClient({
               </div>
 
               <div className={styles.successBody}>
-                {version === 'v2' ? (
-                  /* V2 — the thank-you discount for the next order */
+                {showDiscount ? (
+                  /* V2 / V4 — the thank-you discount for the next order */
                   <>
                     <p className={styles.successIntro}>
                       Your review helps other jewelry lovers shop with confidence, and we’ve
                       sent your {discountPercent}% off code to your inbox too.
                     </p>
+
+                    {/* V4 — the brand's image between the intro and the discount.
+                        Until a brand supplies one, a placeholder frame holds its place. */}
+                    {version === 'v4' && (
+                      <div className={styles.brandImageFrame}>
+                        {offerImage ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={offerImage} alt="" className={styles.brandImage} />
+                        ) : (
+                          <span className={styles.brandImagePlaceholder} aria-hidden="true">
+                            <span className={styles.brandImagePlaceholderTitle}>{brandName} image</span>
+                            <span className={styles.hint}>1200 × 800</span>
+                          </span>
+                        )}
+                      </div>
+                    )}
 
                     <div className={styles.offer}>
                       <p className={styles.offerAmount}>{discountAmount}</p>
@@ -364,10 +385,6 @@ export default function CustomerFeedbackClient({
                 <Button href={`/${brand}`} variant="primary" className={styles.successCta}>
                   Continue Shopping
                 </Button>
-
-                <p className={`${styles.hint} ${styles.successNote}`}>
-                  If you added photos, they’ll appear on the product page once reviewed.
-                </p>
               </div>
             </section>
             </>

@@ -759,18 +759,6 @@
 
 /* Fine print under the CTA — primary text colour, and pulled up so the space
    below the button nets 16px whatever the section gap is */
-.successNote {
-  text-align: center;
-  color: var(--colors-text);
-  margin-top: calc(var(--spacing-sm) - var(--spacing-md));
-}
-
-@media (min-width: 768px) {
-  .successNote {
-    margin-top: calc(var(--spacing-sm) - var(--spacing-lg));
-  }
-}
-
 /* Design-preview picker for the success version — sits above the card */
 .previewBar {
   display: flex;
@@ -795,8 +783,10 @@
   border-radius: var(--radius-md);
 }
 
-/* V3 — the brand's clickable image (3:2), or its placeholder frame */
-.brandImageLink {
+/* V3 — the brand's clickable image (3:2), or its placeholder frame.
+   V4 — the same frame, not a link, between the intro and the discount. */
+.brandImageLink,
+.brandImageFrame {
   display: block;
   width: 100%;
   max-width: 480px;
