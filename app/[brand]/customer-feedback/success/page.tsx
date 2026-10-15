@@ -8,7 +8,7 @@ type PageProps = {
 
 /**
  * Shareable link straight to the feedback success screen — no need to fill in
- * and submit the form first. ?v=v1 | v2 | v3 | v4 picks the version (default v1).
+ * and submit the form first. ?v=v1 | v2 | v3 | v4 picks the version (default v3).
  */
 export default async function CustomerFeedbackSuccessPage({ params, searchParams }: PageProps) {
   await params

@@ -1,12 +1,11 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useRef, useState, type ReactNode } from 'react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { Header } from '../_components/Header'
 import { Footer } from '../_components/Footer'
 import { Button } from '../_components/Button'
 import { ShareTheLove } from '../_components/ShareTheLove'
-import { VariantToggle } from '../_components/VariantToggle'
 import { getBrandFromPathname, getBrandMeta } from '../_config/brands'
 import type { BrandKey } from '../_config/brands'
 import { prefixFooterColumns, prefixNavLinks, withBrandPrefix } from '../_config/brandPaths'
@@ -15,6 +14,7 @@ import {
   DEFAULT_NAV_LINKS,
   DEFAULT_TOPLINE,
   FEEDBACK_OFFER_IMAGE,
+  FEEDBACK_SUCCESS_TITLE,
   SHARE_THE_LOVE_IMAGE,
   TRUSTPILOT,
 } from '../_config/siteContent'
@@ -155,24 +155,173 @@ const EMPTY_FEEDBACK: ProductFeedback = {
 
 const REVIEW_PLACEHOLDER = 'What did you love? What could be better?'
 
-/** Design-preview options for the success screen (?v=). */
-const SUCCESS_VERSION_OPTIONS: { value: FeedbackSuccessVersion; label: string }[] = [
-  { value: 'v1', label: 'V1 · Share the Love' },
-  { value: 'v2', label: 'V2 · Discount' },
-  { value: 'v3', label: 'V3 · Brand image' },
-  { value: 'v4', label: 'V4 · Image + discount' },
-]
-
 /**
  * Thank-you reward shown on the success screen — percent off the next order,
- * per brand. IB and MNN have no figure of their own yet, so they use OAL's 20%.
+ * per brand.
  */
 const DISCOUNT_PERCENT: Record<BrandKey, number> = {
   oal: 20,
   tgr: 25,
   lal: 30,
-  ib:  20,
-  mnn: 20,
+  ib:  15,
+  mnn: 15,
+}
+
+/** Brands whose thank-you code isn't the default `THANKU{percent}`. */
+const DISCOUNT_CODE: Partial<Record<BrandKey, string>> = {
+  oal: 'THANKYOUOAK20HGTFY',
+  mnn: 'TY15FF22',
+}
+
+/**
+ * V3 copy around the brand's Trustpilot image, per brand: `intro` replaces the
+ * default line under the title, `outro` sits under the image. Brands without
+ * one keep the default intro and nothing under the image.
+ */
+interface ReviewPromo {
+  intro: (percent: number, code: string) => ReactNode
+  outro: (percent: number, code: string) => ReactNode
+  /** Replaces the default linked image, e.g. live copy beside a photo (MNN). */
+  banner?: (image: string | null) => ReactNode
+}
+
+const REVIEW_PROMO: Partial<Record<BrandKey, ReviewPromo>> = {
+  oal: {
+    intro: () => (
+      <div className={styles.promoGroup}>
+        <p className={styles.successIntro}>
+          We want you to share your experience with Oak &amp; Luna with everyone.
+        </p>
+        <p className={styles.successIntro}>
+          <a href={TRUSTPILOT.reviewUrl} className={styles.successLink}>Click here</a>
+        </p>
+      </div>
+    ),
+    outro: (percent, code) => (
+      <>
+        <Button href={TRUSTPILOT.reviewUrl} variant="secondary" className={styles.successCta}>
+          Post Your Review
+        </Button>
+        <hr className={styles.promoDivider} />
+        <div className={styles.promoGroup}>
+          <p className={styles.promoHeadline}>Share The Love</p>
+          <p className={styles.successIntro}>
+            Enjoy your <strong className={styles.promoCode}>{percent}% discount</strong> on all
+            jewelry with promotional code{' '}
+            <strong className={styles.promoCode}>{code}</strong>
+          </p>
+        </div>
+        <ul className={`${styles.promoList} ${styles.promoListCompact}`}>
+          <li>Full Name needed for Oak &amp; Luna to contact free necklace winners</li>
+          <li>Coupon is valid for 14 days</li>
+          <li>3 randomly selected winners will be chosen from all eligible reviews</li>
+        </ul>
+      </>
+    ),
+  },
+  mnn: {
+    intro: () => (
+      <div className={styles.promoGroup}>
+        <p className={styles.successIntro}>We want you to share your experience with MYKA with everyone.</p>
+        <p className={styles.successIntro}>
+          <a href={TRUSTPILOT.reviewUrl} className={styles.successLink}>Click here</a>
+        </p>
+      </div>
+    ),
+    // The photo carries no copy, so "Enter to Win" is live text beside it:
+    // side by side from 768px, stacked (copy, then photo) on mobile
+    banner: (image) => (
+      <div className={styles.splitBanner}>
+        <div className={styles.splitBannerPanel}>
+          <p className={styles.promoHeadline}>Enter to Win!</p>
+          <p className={styles.successIntro}>A free necklace is less than two minutes away from you</p>
+          <Button href={TRUSTPILOT.reviewUrl} variant="primary">Post Your Review</Button>
+        </div>
+        {image && (
+          // Mouse shortcut only — the button above is the accessible link
+          <a href={TRUSTPILOT.reviewUrl} className={styles.splitBannerImage} tabIndex={-1} aria-hidden="true">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={image} alt="" />
+          </a>
+        )}
+      </div>
+    ),
+    outro: (percent, code) => (
+      <>
+        <hr className={styles.promoDivider} />
+        <div className={styles.promoGroup}>
+          <p className={styles.promoHeadline}>Share The Love</p>
+          <p className={styles.successIntro}>
+            Enjoy your {percent}% discount on all jewelry with promotional code{' '}
+            <span className={styles.promoCodePlain}>{code}</span>
+          </p>
+        </div>
+        <ul className={`${styles.promoList} ${styles.promoListCompact}`}>
+          <li>Full Name needed for MYKA to contact free necklace winners</li>
+          <li>Coupon is valid for 14 days</li>
+          <li>3 randomly selected winners will be chosen from all eligible reviews</li>
+        </ul>
+      </>
+    ),
+  },
+  lal: {
+    intro: () => (
+      <p className={styles.successIntro}>
+        Share your experience with everyone for a chance to win an extra $100 voucher –{' '}
+        <a href={TRUSTPILOT.reviewUrl} className={styles.successLink}>Click here &gt;</a>
+      </p>
+    ),
+    outro: (percent, code) => (
+      <div className={styles.promoGroup}>
+        <p className={styles.successIntro}>
+          Plus enjoy {percent}% off with coupon code:{' '}
+          <strong className={styles.promoCode}>{code}</strong>
+        </p>
+        <p className={styles.hint}>*Valid for 14 days</p>
+      </div>
+    ),
+  },
+  tgr: {
+    intro: () => (
+      <div className={styles.promoGroup}>
+        <p className={styles.successIntro}>we want to share your theo grace experience with everyone.</p>
+        <p className={styles.successIntro}>
+          <a href={TRUSTPILOT.reviewUrl} className={styles.successLink}>
+            Click to share your review on Trustpilot and enter to win!
+          </a>
+        </p>
+      </div>
+    ),
+    outro: (percent) => (
+      <div className={styles.promoGroup}>
+        <p className={styles.successIntro}>
+          We’ve just sent your {percent}% off coupon code to your inbox as a thank you for your review!
+        </p>
+        <p className={styles.successIntro}>
+          {/* Placeholder link (no href) until it has a destination */}
+          <a className={styles.successLink}>check your inbox &amp; unlock {percent}% off</a>
+        </p>
+        <ul className={styles.promoFinePrint}>
+          <li>One randomly selected winner will be chosen from all eligible reviews every month!</li>
+        </ul>
+      </div>
+    ),
+  },
+  ib: {
+    intro: (percent, code) => (
+      <>
+        <hr className={styles.promoDivider} />
+        <p className={styles.promoHeadline}>Enjoy {percent}% OFF with code {code}</p>
+      </>
+    ),
+    outro: () => (
+      <ul className={styles.promoList}>
+        <li>Full name needed for Israel Blessing to contact voucher winners</li>
+        <li>Coupon is valid for 14 days</li>
+        <li>3 randomly selected winners will be chosen from all eligible reviews</li>
+      </ul>
+    ),
+  },
 }
 
 export interface CustomerFeedbackClientProps {
@@ -184,7 +333,7 @@ export interface CustomerFeedbackClientProps {
 
 export default function CustomerFeedbackClient({
   initialSubmitted = false,
-  initialVersion = 'v1',
+  initialVersion = 'v3',
 }: CustomerFeedbackClientProps) {
   const pathname = usePathname()
   const router = useRouter()
@@ -208,29 +357,24 @@ export default function CustomerFeedbackClient({
   // Reward copy, all derived from the brand's percentage
   const discountPercent = DISCOUNT_PERCENT[brand]
   const discountAmount = `${discountPercent}% Off`
-  const discountCode = `THANKU${discountPercent}`
+  const discountCode = DISCOUNT_CODE[brand] ?? `THANKU${discountPercent}`
 
   const [productFeedback, setProductFeedback] = useState<Record<number, ProductFeedback>>({})
   const [score, setScore] = useState<number | null>(null)
   const submitted = initialSubmitted
   const [copied, setCopied] = useState(false)
 
-  // Success-screen version — the URL (?v=v1 | v2 | v3 | v4) is the source of truth,
-  // so a reload or a shared link shows the same one. Next.js syncs
-  // useSearchParams with replaceState.
+  // Success-screen version — V3 unless the URL asks for another (?v=v1 | v2 | v4).
+  // There's no on-page picker; the other versions stay reachable by link.
   const searchParams = useSearchParams()
   const version = searchParams.has('v') ? parseSuccessVersion(searchParams.get('v') ?? undefined) : initialVersion
-  const changeVersion = (next: FeedbackSuccessVersion) => {
-    const url = new URL(window.location.href)
-    url.searchParams.set('v', next)
-    // null (not history.state) so Next.js picks up the change and keeps its own state
-    window.history.replaceState(null, '', url)
-  }
   const successHref = `/${brand}/customer-feedback/success?v=${version}`
   const shareImage = SHARE_THE_LOVE_IMAGE[brand]
   const offerImage = FEEDBACK_OFFER_IMAGE[brand]
   // V2 and V4 both give the thank-you discount; V4 adds an image under the intro
   const showDiscount = version === 'v2' || version === 'v4'
+  // V3 — brands with a review promo get its intro + "Click here", and their code under the image
+  const reviewPromo = version === 'v3' ? REVIEW_PROMO[brand] : undefined
 
   const feedbackFor = (id: number): ProductFeedback => productFeedback[id] ?? EMPTY_FEEDBACK
 
@@ -289,24 +433,13 @@ export default function CustomerFeedbackClient({
         <div className={styles.container}>
           {submitted ? (
             /* ── Success screen — its own URL (/customer-feedback/success) ── */
-            <>
-            {/* Design preview: which success version to show */}
-            <div className={styles.previewBar}>
-              <VariantToggle
-                label="Success message preview"
-                options={SUCCESS_VERSION_OPTIONS}
-                value={version}
-                onChange={changeVersion}
-              />
-            </div>
-
             <section className={styles.card} aria-labelledby="cf-success-heading">
               <div className={styles.success}>
                 <span className={styles.successCheck} aria-hidden="true">
                   <CheckmarkIcon size={24} />
                 </span>
                 <h2 id="cf-success-heading" className={styles.successTitle}>
-                  Thanks for your feedback
+                  {FEEDBACK_SUCCESS_TITLE[brand]}
                 </h2>
               </div>
 
@@ -322,7 +455,7 @@ export default function CustomerFeedbackClient({
                     {/* V4 — the brand's image between the intro and the discount.
                         Until a brand supplies one, a placeholder frame holds its place. */}
                     {version === 'v4' && (
-                      <div className={styles.brandImageFrame}>
+                      <div className={`${styles.brandImageFrame} ${offerImage ? styles.brandImageFilled : ''}`}>
                         {offerImage ? (
                           // eslint-disable-next-line @next/next/no-img-element
                           <img src={offerImage} alt="" className={styles.brandImage} />
@@ -353,6 +486,9 @@ export default function CustomerFeedbackClient({
                       </p>
                     </div>
                   </>
+                ) : reviewPromo ? (
+                  /* V3 with a review promo (LAL, TGR) — the intro links to Trustpilot too */
+                  reviewPromo.intro(discountPercent, discountCode)
                 ) : (
                   <p className={styles.successIntro}>
                     Your review helps other jewelry lovers shop with confidence.
@@ -364,10 +500,11 @@ export default function CustomerFeedbackClient({
 
                 {/* V3 — the brand's own artwork, linking to Trustpilot. Until a
                     brand supplies one, a placeholder frame holds its place. */}
-                {version === 'v3' && (
+                {version === 'v3' && reviewPromo?.banner?.(shareImage)}
+                {version === 'v3' && !reviewPromo?.banner && (
                   <a
                     href={TRUSTPILOT.reviewUrl}
-                    className={styles.brandImageLink}
+                    className={`${styles.brandImageLink} ${shareImage ? styles.brandImageFilled : ''}`}
                     aria-label="Leave a review on Trustpilot"
                   >
                     {shareImage ? (
@@ -382,12 +519,14 @@ export default function CustomerFeedbackClient({
                   </a>
                 )}
 
+                {/* V3 with a review promo — the thank-you offer, then its fine print */}
+                {reviewPromo?.outro(discountPercent, discountCode)}
+
                 <Button href={`/${brand}`} variant="primary" className={styles.successCta}>
                   Continue Shopping
                 </Button>
               </div>
             </section>
-            </>
           ) : (
             <>
             <header className={styles.pageHeader}>

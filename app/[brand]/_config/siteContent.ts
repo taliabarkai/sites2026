@@ -147,23 +147,34 @@ export const TRUSTPILOT = {
 /**
  * Each brand's own clickable artwork for the feedback success screen (V3) —
  * it links to Trustpilot, like the Share the Love CTA. `null` until the brand
- * supplies one; the page shows a placeholder frame of the same size instead.
- * Artwork is 3:2 (1200 × 800). The link is named "Leave a review on
- * Trustpilot", so the image itself needs no alt text.
+ * supplies one; the page shows a 3:2 placeholder frame instead. Artwork shows
+ * full card width at its own aspect ratio, so copy baked into it is never
+ * cropped. The link is named "Leave a review on Trustpilot", so the image
+ * itself needs no alt text.
  */
 export const SHARE_THE_LOVE_IMAGE: Record<BrandKey, string | null> = {
-  oal: null,
-  tgr: null,
-  lal: null,
-  ib:  null,
-  mnn: null,
+  oal: 'https://cdn.oakandluna.com/digital-asset/banners/TRUST_PILOT_MOBILE_BLACK__2.jpg',
+  tgr: 'https://d3k81ch9hvuctc.cloudfront.net/company/RW2niK/images/9d1ed465-293c-4c7d-becf-4434d0e3145a.jpeg',
+  lal: 'https://cdn.limeandlou.com/digital-asset/articles/ReviewMB.jpg',
+  ib:  'https://cdn.israelblessing.com/digital-asset/banners/IB_AfterFeedback_MB.png',
+  mnn: 'https://cdn.mynamenecklace.com/digital-asset/banners/feedback_img_MB.jpg',
+}
+
+/** Feedback success screen title, per brand (every version). `\n` breaks the line. */
+export const FEEDBACK_SUCCESS_TITLE: Record<BrandKey, string> = {
+  oal: 'Thank you\nFor Your Great Feedback!',
+  tgr: 'thank you for your great feedback!',
+  lal: 'Thank you for your kind feedback!',
+  ib:  'Thank you for your great feedback!',
+  mnn: 'Thank You For\nYour Great Feedback!',
 }
 
 /**
  * Each brand's image on the feedback success screen (V4), between the intro
  * sentence and the discount code. Not a link. `null` until the brand supplies
- * one; the page shows a placeholder frame of the same size instead. Artwork is
- * 3:2 (1200 × 800) and decorative, so it needs no alt text.
+ * one; the page shows a 3:2 placeholder frame (1200 × 800) instead. Artwork
+ * shows full card width at its own aspect ratio, and is decorative, so it
+ * needs no alt text.
  */
 export const FEEDBACK_OFFER_IMAGE: Record<BrandKey, string | null> = {
   oal: null,
