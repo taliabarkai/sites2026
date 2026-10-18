@@ -1,7 +1,7 @@
 'use client'
 
 import { useParams } from 'next/navigation'
-import { useRef, useState } from 'react'
+import { useState } from 'react'
 import {
   DEFAULT_FOOTER_COLUMNS,
   DEFAULT_HERO,
@@ -16,21 +16,10 @@ import { Header } from './_components/Header'
 import { Hero } from './_components/Hero'
 import { HighlightsBar } from './_components/HighlightsBar'
 import { FloatingCart } from './_components/FloatingCart'
-import { ProductCard, toQuickAddProduct } from './_components/ProductCard'
-import { DEFAULT_PRODUCT_SWATCHES } from './_config/products'
-import { getBrandProducts } from '../../data/products/getBrandProducts'
+import { BestSellersCarousel } from './_components/BestSellersCarousel'
 import styles from './HomePage.module.css'
 
 import { resolveBrand } from './_config/brands'
-import * as oalIcons from '@/src/components/icons/oal'
-import * as mnnIcons from '@/src/components/icons/mnn'
-import * as tgrIcons from '@/src/components/icons/tgr'
-import * as lalIcons from '@/src/components/icons/lal'
-import * as ibIcons  from '@/src/components/icons/ib'
-
-const BRAND_ICONS = {
-  oal: oalIcons, mnn: mnnIcons, tgr: tgrIcons, lal: lalIcons, ib: ibIcons,
-} as const
 
 function HomePageInner() {
   const params = useParams()
@@ -72,17 +61,6 @@ function HomePageInner() {
   // the bar's lower half, so the overlap is dropped while it is visible.
   // (Below md the same is handled in Hero.module.css, where the bar is always on.)
   const transparentHeader = brand === 'oal' && !showHighlightsDesktop
-
-  const bestSellers = getBrandProducts(brand).slice(0, 8)
-  const { ArrowIcon } = BRAND_ICONS[brand]
-  const carouselRef = useRef<HTMLDivElement>(null)
-
-  const scrollCarousel = (dir: 'prev' | 'next') => {
-    if (!carouselRef.current) return
-    const card = carouselRef.current.firstElementChild as HTMLElement
-    const amount = card ? card.offsetWidth + 4 : 320
-    carouselRef.current.scrollBy({ left: dir === 'next' ? amount : -amount, behavior: 'smooth' })
-  }
 
   // 'text-on-image' — title + CTA overlaid bottom-left, no padding between cards (OAL)
   // 'text-below'    — title + CTA below the image, with page-margin padding (all other brands)
@@ -134,43 +112,7 @@ function HomePageInner() {
         </section>
 
         {/* Best sellers carousel */}
-        <section className={styles.bestSellers} aria-labelledby="best-sellers-title">
-          <div className={styles.bestSellersHeader}>
-            <h2 id="best-sellers-title" className={styles.bestSellersTitle}>Best Sellers</h2>
-          </div>
-          <div className={styles.carouselWrapper}>
-            <div className={styles.carouselTrack} ref={carouselRef}>
-              {bestSellers.map(p => (
-                <div key={p.id} className={styles.carouselCard}>
-                  <ProductCard
-                    name={p.name}
-                    price={p.price ?? ''}
-                    originalPrice={p.originalPrice}
-                    defaultImage={p.image}
-                    hoverImage={p.hoverImage}
-                    href={`/${brand}${p.href}`}
-                    quickAddProduct={toQuickAddProduct(p)}
-                    swatches={brand !== 'lal' ? DEFAULT_PRODUCT_SWATCHES : undefined}
-                  />
-                </div>
-              ))}
-            </div>
-            <button
-              className={`${styles.carouselArrow} ${styles.carouselArrowPrev}`}
-              onClick={() => scrollCarousel('prev')}
-              aria-label="Previous products"
-            >
-              <ArrowIcon size={24} color="white" />
-            </button>
-            <button
-              className={`${styles.carouselArrow} ${styles.carouselArrowNext}`}
-              onClick={() => scrollCarousel('next')}
-              aria-label="Next products"
-            >
-              <ArrowIcon size={24} color="white" />
-            </button>
-          </div>
-        </section>
+        <BestSellersCarousel brand={brand} />
 
         {/* Promo image carousel */}
         <section
