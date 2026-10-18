@@ -5,6 +5,7 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { Header } from '../_components/Header'
 import { Footer } from '../_components/Footer'
 import { Button } from '../_components/Button'
+import { BestSellersCarousel } from '../_components/BestSellersCarousel'
 import { ShareTheLove } from '../_components/ShareTheLove'
 import { getBrandFromPathname, getBrandMeta } from '../_config/brands'
 import type { BrandKey } from '../_config/brands'
@@ -24,7 +25,12 @@ import * as mnnIcons from '@/src/components/icons/mnn'
 import * as tgrIcons from '@/src/components/icons/tgr'
 import * as lalIcons from '@/src/components/icons/lal'
 import * as ibIcons  from '@/src/components/icons/ib'
-import { parseSuccessVersion, type FeedbackSuccessVersion } from './successVersion'
+import {
+  parseReview,
+  parseSuccessVersion,
+  type FeedbackReview,
+  type FeedbackSuccessVersion,
+} from './successVersion'
 import styles from './customer-feedback.module.css'
 
 // Brand-scoped icons — resolved at runtime per the icon rules (never hardcode a brand).
@@ -174,16 +180,25 @@ const DISCOUNT_CODE: Partial<Record<BrandKey, string>> = {
 }
 
 /**
- * V3 copy around the brand's Trustpilot image, per brand: `intro` replaces the
- * default line under the title, `outro` sits under the image. Brands without
- * one keep the default intro and nothing under the image.
+ * V3 copy, per brand. Positive review: `intro` replaces the default line under
+ * the title, then the Trustpilot image (or `banner`), then `outro`. Negative
+ * review: only `negative` — the discount, code and validity, with no image and
+ * nothing about Trustpilot, sharing or winning. Brands without one keep the
+ * default intro and nothing under the image.
  */
 interface ReviewPromo {
   intro: (percent: number, code: string) => ReactNode
   outro: (percent: number, code: string) => ReactNode
   /** Replaces the default linked image, e.g. live copy beside a photo (MNN). */
   banner?: (image: string | null) => ReactNode
+  negative: (percent: number, code: string) => ReactNode
 }
+
+/** Preview toggle segments for the review outcome (bottom-right on the success screen). */
+const REVIEW_OPTIONS: { value: FeedbackReview; label: string; description: string }[] = [
+  { value: 'positive', label: 'Positive Review', description: 'Preview the success screen after a positive review' },
+  { value: 'negative', label: 'Negative Review', description: 'Preview the success screen after a negative review' },
+]
 
 const REVIEW_PROMO: Partial<Record<BrandKey, ReviewPromo>> = {
   oal: {
@@ -199,9 +214,6 @@ const REVIEW_PROMO: Partial<Record<BrandKey, ReviewPromo>> = {
     ),
     outro: (percent, code) => (
       <>
-        <Button href={TRUSTPILOT.reviewUrl} variant="secondary" className={styles.successCta}>
-          Post Your Review
-        </Button>
         <hr className={styles.promoDivider} />
         <div className={styles.promoGroup}>
           <p className={styles.promoHeadline}>Share The Love</p>
@@ -217,6 +229,16 @@ const REVIEW_PROMO: Partial<Record<BrandKey, ReviewPromo>> = {
           <li>3 randomly selected winners will be chosen from all eligible reviews</li>
         </ul>
       </>
+    ),
+    negative: (percent, code) => (
+      <div className={styles.promoGroup}>
+        <p className={styles.successIntro}>
+          Enjoy your <strong className={styles.promoCode}>{percent}% discount</strong> on all
+          jewelry with promotional code{' '}
+          <strong className={styles.promoCode}>{code}</strong>
+        </p>
+        <p className={styles.hint}>Coupon is valid for 14 days</p>
+      </div>
     ),
   },
   mnn: {
@@ -263,6 +285,15 @@ const REVIEW_PROMO: Partial<Record<BrandKey, ReviewPromo>> = {
         </ul>
       </>
     ),
+    negative: (percent, code) => (
+      <div className={styles.promoGroup}>
+        <p className={styles.successIntro}>
+          Enjoy your {percent}% discount on all jewelry with promotional code{' '}
+          <span className={styles.promoCodePlain}>{code}</span>
+        </p>
+        <p className={styles.hint}>Coupon is valid for 14 days</p>
+      </div>
+    ),
   },
   lal: {
     intro: () => (
@@ -275,6 +306,16 @@ const REVIEW_PROMO: Partial<Record<BrandKey, ReviewPromo>> = {
       <div className={styles.promoGroup}>
         <p className={styles.successIntro}>
           Plus enjoy {percent}% off with coupon code:{' '}
+          <strong className={styles.promoCode}>{code}</strong>
+        </p>
+        <p className={styles.hint}>*Valid for 14 days</p>
+      </div>
+    ),
+    // No voucher draw, so no "Plus"
+    negative: (percent, code) => (
+      <div className={styles.promoGroup}>
+        <p className={styles.successIntro}>
+          Enjoy {percent}% off with coupon code:{' '}
           <strong className={styles.promoCode}>{code}</strong>
         </p>
         <p className={styles.hint}>*Valid for 14 days</p>
@@ -306,6 +347,17 @@ const REVIEW_PROMO: Partial<Record<BrandKey, ReviewPromo>> = {
         </ul>
       </div>
     ),
+    negative: (percent) => (
+      <div className={styles.promoGroup}>
+        <p className={styles.successIntro}>
+          We’ve just sent your {percent}% off coupon code to your inbox as a thank you for your review!
+        </p>
+        <p className={styles.successIntro}>
+          {/* Placeholder link (no href) until it has a destination */}
+          <a className={styles.successLink}>check your inbox &amp; unlock {percent}% off</a>
+        </p>
+      </div>
+    ),
   },
   ib: {
     intro: (percent, code) => (
@@ -320,6 +372,15 @@ const REVIEW_PROMO: Partial<Record<BrandKey, ReviewPromo>> = {
         <li>Coupon is valid for 14 days</li>
         <li>3 randomly selected winners will be chosen from all eligible reviews</li>
       </ul>
+    ),
+    negative: (percent, code) => (
+      <>
+        <hr className={styles.promoDivider} />
+        <div className={styles.promoGroup}>
+          <p className={styles.promoHeadline}>Enjoy {percent}% OFF with code {code}</p>
+          <p className={styles.hint}>Coupon is valid for 14 days</p>
+        </div>
+      </>
     ),
   },
 }
@@ -375,6 +436,16 @@ export default function CustomerFeedbackClient({
   const showDiscount = version === 'v2' || version === 'v4'
   // V3 — brands with a review promo get its intro + "Click here", and their code under the image
   const reviewPromo = version === 'v3' ? REVIEW_PROMO[brand] : undefined
+  // V3 — a negative review gets only the discount (no Trustpilot, image or prize draw)
+  const review = parseReview(searchParams.get('review'))
+  const negativePromo = reviewPromo && review === 'negative' ? reviewPromo : undefined
+  const changeReview = (next: FeedbackReview) => {
+    const params = new URLSearchParams(searchParams.toString())
+    if (next === 'positive') params.delete('review')
+    else params.set('review', next)
+    const query = params.toString()
+    router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false })
+  }
 
   const feedbackFor = (id: number): ProductFeedback => productFeedback[id] ?? EMPTY_FEEDBACK
 
@@ -443,6 +514,16 @@ export default function CustomerFeedbackClient({
                 </h2>
               </div>
 
+              {negativePromo ? (
+                /* V3, negative review — just the discount and its validity */
+                <div className={styles.successBody}>
+                  {negativePromo.negative(discountPercent, discountCode)}
+
+                  <Button href={`/${brand}`} variant="primary" className={styles.successCta}>
+                    Continue Shopping
+                  </Button>
+                </div>
+              ) : (
               <div className={styles.successBody}>
                 {showDiscount ? (
                   /* V2 / V4 — the thank-you discount for the next order */
@@ -526,6 +607,7 @@ export default function CustomerFeedbackClient({
                   Continue Shopping
                 </Button>
               </div>
+              )}
             </section>
           ) : (
             <>
@@ -739,6 +821,26 @@ export default function CustomerFeedbackClient({
             </>
           )}
         </div>
+
+        {/* Negative review — the homepage Best Sellers row, full width under the card */}
+        {submitted && negativePromo && <BestSellersCarousel brand={brand} title="This Week’s Best Sellers" compact className={styles.successCarousel} />}
+
+        {/* Design preview: which review outcome the success screen shows (V3) */}
+        {submitted && reviewPromo && (
+          <div className={styles.reviewToggle} role="group" aria-label="Review outcome preview">
+            {REVIEW_OPTIONS.map((option) => (
+              <button
+                key={option.value}
+                type="button"
+                aria-label={option.description}
+                aria-pressed={review === option.value}
+                onClick={() => changeReview(option.value)}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+        )}
       </main>
 
       <Footer columns={footerColumns} />

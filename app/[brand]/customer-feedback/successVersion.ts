@@ -12,3 +12,15 @@ export type FeedbackSuccessVersion = 'v1' | 'v2' | 'v3' | 'v4'
 export function parseSuccessVersion(value: string | string[] | undefined): FeedbackSuccessVersion {
   return value === 'v1' || value === 'v2' || value === 'v4' ? value : 'v3'
 }
+
+// Which feedback the shopper left (?review=positive | negative, default positive).
+//   positive  asks them to review on Trustpilot too (image, link, prize draw)
+//   negative  only the thank-you discount and its validity — nothing about
+//             Trustpilot, sharing or winning
+// Shown on V3; the floating toggle on the success screen previews both.
+
+export type FeedbackReview = 'positive' | 'negative'
+
+export function parseReview(value: string | string[] | null | undefined): FeedbackReview {
+  return value === 'negative' ? 'negative' : 'positive'
+}

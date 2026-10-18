@@ -891,6 +891,76 @@
   }
 }
 
+/* Negative review: Best Sellers under the card. The container's bottom padding
+   already separates them, so only space below before the footer. */
+.successCarousel {
+  margin-top: calc(-1 * var(--spacing-lg));
+  padding-bottom: var(--spacing-xxl);
+}
+
+/* Design-preview toggle (Positive / Negative review), fixed bottom-right.
+   Same pill as Track My Order's state toggle in the header. */
+.reviewToggle {
+  position: fixed;
+  right: var(--spacing-sm);
+  bottom: calc(var(--spacing-sm) + env(safe-area-inset-bottom, 0px));
+  z-index: var(--z-sticky);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xxxs);
+  padding: var(--spacing-xxxs);
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--radius-full);
+  background: var(--colors-surface-primary);
+  box-shadow: var(--shadow-md);
+}
+
+.reviewToggle button {
+  position: relative;
+  appearance: none;
+  border: none;
+  background: transparent;
+  color: var(--colors-text-secondary);
+  cursor: pointer;
+  white-space: nowrap;
+  padding: var(--spacing-xxxs) var(--spacing-xs);
+  border-radius: var(--radius-full);
+  font-family:    var(--typography-rules-text3-font-family);
+  font-size:      var(--typography-rules-text3-font-size);
+  line-height:    var(--typography-rules-text3-line-height);
+  letter-spacing: var(--typography-rules-text3-letter-spacing, normal);
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.reviewToggle button[aria-pressed='true'] {
+  background: var(--colors-text);
+  color: var(--colors-text-inverse);
+}
+
+/* 44px touch target without growing the pill */
+.reviewToggle button::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  min-height: 44px;
+  height: 100%;
+}
+
+.reviewToggle button:focus-visible {
+  outline: calc(var(--border-width) * 2) solid var(--colors-text);
+  outline-offset: calc(var(--border-width) * 2);
+}
+
+@media (min-width: 768px) {
+  .reviewToggle {
+    right: var(--spacing-lg);
+    bottom: calc(var(--spacing-lg) + env(safe-area-inset-bottom, 0px));
+  }
+}
+
 /* V1 — Share the Love in a text-colour outline, on the card's own white.
    Capped at the width it has in the thank-you page's side column. */
 .share {
