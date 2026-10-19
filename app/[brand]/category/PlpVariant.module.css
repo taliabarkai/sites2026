@@ -417,7 +417,10 @@
 
   .threePart {
     display: flex;
-    padding: 0 var(--layout-page-margin);
+    height: auto;
+    min-height: 52px;
+    /* Extra breathing room on desktop so the bar reads as its own section */
+    padding: var(--spacing-sm) var(--layout-page-margin);
   }
 
   .threePartFilter {
