@@ -84,7 +84,7 @@ export function PlpVariantPage({ variant }: { variant: PlpVariant }) {
     contactHref: withBrandPrefix(brand, DEFAULT_TOPLINE.contactHref),
   }
 
-  const { FilterIcon, XIcon, ChevronIcon, CheckmarkIcon, StarIcon, GridSingleIcon, GridDoubleIcon, GridTripleIcon } = BRAND_ICONS[brand]
+  const { FilterIcon, XIcon, ChevronIcon, CheckmarkIcon, StarIcon, GridSingleIcon, GridDoubleIcon, GridTripleIcon, ProductViewIcon, ModelViewIcon } = BRAND_ICONS[brand]
 
   // LAL is wall art — the second view is the piece in a room, not on a model.
   const modelLabel = brand === 'lal' ? 'In Room' : 'On Model'
@@ -256,7 +256,9 @@ export function PlpVariantPage({ variant }: { variant: PlpVariant }) {
               </button>
 
               <button {...viewToggleProps} className={`${styles.ctl} ${styles.viewToggle}`}>
-                {viewToggleLabel}
+                {/* Icon names the current view; LAL (wall art) is text only. */}
+                {brand !== 'lal' && (view === 'model' ? <ModelViewIcon size={18} /> : <ProductViewIcon size={18} />)}
+                {view === 'model' ? `${modelLabel === 'On Model' ? 'Model' : modelLabel} View` : 'Product View'}
               </button>
 
               {mobileGrid}
