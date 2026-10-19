@@ -52,12 +52,25 @@
 
 .description {
   margin: var(--spacing-xxs) 0 0;
-  color: var(--colors-text-secondary);
+  color: var(--colors-text);
   font-family:    var(--typography-rules-text1-font-family);
   font-size:      var(--typography-rules-text1-font-size);
   line-height:    var(--typography-rules-text1-line-height);
   font-weight:    var(--typography-rules-text1-font-weight, normal);
   letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+}
+
+/* V4 item count row, above the grid */
+.countRow {
+  display: flex;
+  justify-content: center;
+  padding: var(--spacing-xs) var(--layout-page-margin) 0;
+}
+
+@media (min-width: 768px) {
+  .countRow {
+    justify-content: flex-end;
+  }
 }
 
 /* ── Controls (shared) ────────────────────────────────────────────────────── */

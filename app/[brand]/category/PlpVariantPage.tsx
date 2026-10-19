@@ -235,7 +235,7 @@ export function PlpVariantPage({ variant }: { variant: PlpVariant }) {
         <section className={styles.intro} aria-label="Category">
           <div className={styles.titleRow}>
             <h1 className={styles.title}>Best Sellers</h1>
-            {variant !== 'v3' && <span className={styles.count}>{countLabel}</span>}
+            {(variant === 'v1' || variant === 'v2') && <span className={styles.count}>{countLabel}</span>}
           </div>
           <p className={styles.description}>{PAGE_DESCRIPTION[brand]}</p>
         </section>
@@ -308,6 +308,13 @@ export function PlpVariantPage({ variant }: { variant: PlpVariant }) {
               {mobileGrid}
               {desktopGrid}
             </div>
+          </div>
+        )}
+
+        {/* ── V4: item count above the grid (centered mobile, right on desktop) ── */}
+        {variant === 'v4' && (
+          <div className={styles.countRow}>
+            <span className={styles.count}>{countLabel}</span>
           </div>
         )}
 
