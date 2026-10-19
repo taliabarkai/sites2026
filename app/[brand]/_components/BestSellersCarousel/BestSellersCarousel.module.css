@@ -134,10 +134,3 @@
   .compact .carouselArrowPrev { left: var(--layout-page-margin); }
   .compact .carouselArrowNext { right: var(--layout-page-margin); }
 }
-
-/* Five across from 1024px */
-@media (min-width: 1024px) {
-  .compact .carouselCard {
-    flex: 0 0 calc((100% - var(--spacing-xxxs) * 4) / 5);
-  }
-}

@@ -21,7 +21,7 @@ export interface BestSellersCarouselProps {
   title?: string
   /**
    * Secondary placement (e.g. the feedback success page): h4-size title,
-   * content capped at 1440px, and from 1024px five cards with the page margin
+   * content capped at 1440px, and from 768px four cards with the page margin
    * on both sides instead of bleeding off the right edge.
    */
   compact?: boolean
