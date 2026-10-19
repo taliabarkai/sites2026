@@ -17,10 +17,7 @@ import {
 } from '../_config/siteContent'
 import { DEFAULT_PRODUCT_SWATCHES } from '../_config/products'
 import { getBrandProducts } from '../../../data/products/getBrandProducts'
-import { BRAND_HIGHLIGHTS } from '../_config/highlights'
-import { CategoryBanner } from '../_components/CategoryBanner'
 import { CategoryHero } from '../_components/CategoryHero'
-import { HighlightsBar } from '../_components/HighlightsBar'
 import * as oalIcons from '@/src/components/icons/oal'
 import * as mnnIcons from '@/src/components/icons/mnn'
 import * as tgrIcons from '@/src/components/icons/tgr'
@@ -87,13 +84,6 @@ function CategoryPageInner() {
     contactHref: withBrandPrefix(brand, DEFAULT_TOPLINE.contactHref),
   }
 
-  // Story-style shortcuts, same source as the homepage's bar; every circle
-  // points back at the category page.
-  const highlights = BRAND_HIGHLIGHTS[brand].map((item) => ({
-    ...item,
-    href: `/${brand}/category`,
-  }))
-
   const icons = BRAND_ICONS[brand]
   const { FilterIcon, XIcon, ChevronIcon, CheckmarkIcon, StarIcon } = icons
 
@@ -119,12 +109,7 @@ function CategoryPageInner() {
       <Header variant="white" brand={brand} navLinks={navLinks} topline={topline} revealOnScrollUp />
 
       <main id="main-content">
-        <HighlightsBar items={highlights} showOnDesktop />
-
-        <CategoryBanner />
-
-        {/* Text-only pills rather than the image cards — the banner above
-            already carries the imagery for this page. */}
+        {/* Text-only category pills (no highlights bar or banner on this page). */}
         <CategoryHero brand={brand} variant="text-only" title="Best Sellers" />
 
         <FilterBar
