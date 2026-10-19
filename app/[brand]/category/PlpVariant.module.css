@@ -63,8 +63,8 @@
 /* V4 item count row, above the grid */
 .countRow {
   display: flex;
-  justify-content: center;
-  padding: var(--spacing-xs) var(--layout-page-margin) 0;
+  justify-content: flex-start;
+  padding: 0 var(--layout-page-margin);
 }
 
 @media (min-width: 768px) {
