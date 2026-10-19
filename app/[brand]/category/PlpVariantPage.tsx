@@ -327,7 +327,7 @@ export function PlpVariantPage({ variant }: { variant: PlpVariant }) {
         <section aria-label="Products" className={styles.productsSection}>
           <div className={`${gridClasses} ${view === 'model' ? styles.modelView : ''}`}>
             {products.map((p) => {
-              const showModel = view === 'model' && !!p.hoverImage
+              const showModel = view === 'model' && !!p.hoverImage && p.hasModelImage !== false
               return (
                 <ProductCard
                   key={p.id}
