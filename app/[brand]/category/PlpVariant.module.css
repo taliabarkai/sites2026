@@ -196,16 +196,6 @@
   }
 }
 
-/* ── Chips ────────────────────────────────────────────────────────────────── */
-
-.chips {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--spacing-xxs);
-  padding: var(--spacing-xs) var(--layout-page-margin) var(--spacing-xxxs);
-}
-
 /* ── Product grid ─────────────────────────────────────────────────────────── */
 
 .productsSection {

@@ -13,7 +13,6 @@ import { useCart } from '../_context/CartContext'
 import { Footer } from '../_components/Footer'
 import { Header } from '../_components/Header'
 import { FloatingCart } from '../_components/FloatingCart'
-import { FilterChips } from '../_components/FilterChips'
 import { ProductCard, toQuickAddProduct } from '../_components/ProductCard'
 import { getBrandFromPathname } from '../_config/brands'
 import { prefixFooterColumns, prefixNavLinks, withBrandPrefix } from '../_config/brandPaths'
@@ -22,7 +21,7 @@ import { DEFAULT_PRODUCT_SWATCHES } from '../_config/products'
 import { getBrandProducts } from '../../../data/products/getBrandProducts'
 import type { ProductItem } from '../../../data/products'
 import { tgrRatingProps } from './tgrProductRatings'
-import { FilterPanel, MATERIAL_FILTERS, type MaterialKey, type SortKey } from './CategoryFilterPanel'
+import { FilterPanel, type MaterialKey, type SortKey } from './CategoryFilterPanel'
 import * as oalIcons from '@/src/components/icons/oal'
 import * as mnnIcons from '@/src/components/icons/mnn'
 import * as tgrIcons from '@/src/components/icons/tgr'
@@ -118,10 +117,6 @@ export function PlpVariantPage({ variant }: { variant: PlpVariant }) {
     if (sortKey === 'price-desc') list = [...list].sort((a, b) => priceOf(b) - priceOf(a))
     return list
   }, [brand, activeMaterials, sortKey])
-
-  const activeChips = MATERIAL_FILTERS
-    .filter((m) => activeMaterials.has(m.key))
-    .map((m) => ({ value: m.key, label: m.label }))
 
   const { items, isOpen, subtotal, closeCart, removeItem } = useCart()
   const router = useRouter()
@@ -315,18 +310,6 @@ export function PlpVariantPage({ variant }: { variant: PlpVariant }) {
         {variant === 'v4' && (
           <div className={styles.countRow}>
             <span className={styles.count}>{countLabel}</span>
-          </div>
-        )}
-
-        {/* ── Active filter chips ── */}
-        {activeChips.length > 0 && (
-          <div className={styles.chips}>
-            <FilterChips
-              chips={activeChips}
-              onRemove={(value) => toggleMaterial(value as MaterialKey)}
-              onClearAll={clearAllMaterials}
-              XIcon={XIcon}
-            />
           </div>
         )}
 
