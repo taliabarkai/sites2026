@@ -52,10 +52,12 @@ export const DEFAULT_NAV_LINKS: NavLink[] = [
   {
     label: 'New In',
     href: '/category/t4',
-    image: {
-      default: '/images/nav/new-in-default.jpg',
-      hover:   '/images/nav/new-in-hover.jpg',
-    },
+    // Artwork label hidden for now — shows the plain "New In" text instead.
+    // Uncomment to bring the gold "New in" image back.
+    // image: {
+    //   default: '/images/nav/new-in-default.jpg',
+    //   hover:   '/images/nav/new-in-hover.jpg',
+    // },
   },
   {
     label: 'Shop By',
