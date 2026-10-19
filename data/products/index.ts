@@ -50,6 +50,43 @@ const oalProducts: ProductItem[] = [
   { id: 26, name: 'Inez Initial Necklace — Gold Plated',                                            image: 'https://cdn.oakandluna.com/digital-asset/products/inez-initial-necklace-gold-plated-2.jpg',                                                   hoverImage: 'https://cdn.oakandluna.com/digital-asset/product/inez-initial-necklace-gold-plated-1.jpg',                                                   href: '/product/26', price: '$79',  priceInCents: 7900,  rating: 4.5, reviewCount: 175,  defaultSwatchKey: 'vermeil' },
 ]
 
+// ─── TGR — Theo Grace ─────────────────────────────────────────────────────────
+// 30 best sellers. image = product shot, hoverImage = on-model shot.
+// Image files live in public/images/products/tgr. Also used for IB and MNN.
+
+const tgrProducts: ProductItem[] = [
+  { id: 1 , name: 'Balance Link Chain Necklace in Sterling Silver', image: '/images/products/tgr/tgr-01-product.jpg', hoverImage: '/images/products/tgr/tgr-01-model.jpg', href: '/product/1', price: '$140', priceInCents: 14000, rating: 4.5, reviewCount: 137, defaultSwatchKey: 'silver' },
+  { id: 2 , name: 'The Keepsake Oval Photo Necklace in Gold', image: '/images/products/tgr/tgr-02-product.jpg', hoverImage: '/images/products/tgr/tgr-02-model.jpg', href: '/product/2', price: '$110', priceInCents: 11000, rating: 4.6, reviewCount: 234, defaultSwatchKey: 'vermeil' },
+  { id: 3 , name: 'Personalized Classic Name Necklace in 18K Gold Plating', image: '/images/products/tgr/tgr-03-product.jpg', hoverImage: '/images/products/tgr/tgr-03-model.jpg', href: '/product/3', price: '$150', priceInCents: 15000, rating: 4.7, reviewCount: 331, defaultSwatchKey: 'vermeil' },
+  { id: 4 , name: 'Heritage Multiple Name Necklace in Silver Finish', image: '/images/products/tgr/tgr-04-product.jpg', hoverImage: '/images/products/tgr/tgr-04-model.jpg', href: '/product/4', price: '$190', priceInCents: 19000, rating: 4.8, reviewCount: 428, defaultSwatchKey: 'silver' },
+  { id: 5 , name: '18K Gold Plated Silver Carrie Name Necklace', image: '/images/products/tgr/tgr-05-product.jpg', hoverImage: '/images/products/tgr/tgr-05-model.jpg', href: '/product/5', price: '$95', priceInCents: 9500, rating: 4.9, reviewCount: 65, defaultSwatchKey: 'vermeil' },
+  { id: 6 , name: 'Nova Birthstone Necklace with Engraved Names in 18K Gold Plating', image: '/images/products/tgr/tgr-06-product.jpg', hoverImage: '/images/products/tgr/tgr-06-model.jpg', href: '/product/6', price: '$100', priceInCents: 10000, rating: 4.4, reviewCount: 162, defaultSwatchKey: 'vermeil' },
+  { id: 7 , name: 'Rory Chain Link Bracelet with Custom Charms in Silver', image: '/images/products/tgr/tgr-07-product.jpg', hoverImage: '/images/products/tgr/tgr-07-model.jpg', href: '/product/7', price: '$175', priceInCents: 17500, rating: 4.5, reviewCount: 259, defaultSwatchKey: 'silver' },
+  { id: 8 , name: 'Coco Hexagon Ring', image: '/images/products/tgr/tgr-08-product.jpg', hoverImage: '/images/products/tgr/tgr-08-model.jpg', href: '/product/8', price: '$105', priceInCents: 10500, rating: 4.6, reviewCount: 356, defaultSwatchKey: 'vermeil' },
+  { id: 9 , name: 'Heart to Heart Engravable Necklace in Sterling Silver with Diamond', image: '/images/products/tgr/tgr-09-product.jpg', hoverImage: '/images/products/tgr/tgr-09-model.jpg', href: '/product/9', price: '$145', priceInCents: 14500, rating: 4.7, reviewCount: 453, defaultSwatchKey: 'silver' },
+  { id: 10, name: 'Blooming Birth Flower Name Necklace with Birthstone in Sterling Silver', image: '/images/products/tgr/tgr-10-product.jpg', hoverImage: '/images/products/tgr/tgr-10-model.jpg', href: '/product/10', price: '$180', priceInCents: 18000, rating: 4.8, reviewCount: 90, defaultSwatchKey: 'silver' },
+  { id: 11, name: 'Sweetheart Necklace with Engraved Beads in Gold Plating', image: '/images/products/tgr/tgr-11-product.jpg', hoverImage: '/images/products/tgr/tgr-11-model.jpg', href: '/product/11', price: '$95', priceInCents: 9500, rating: 4.9, reviewCount: 187, defaultSwatchKey: 'vermeil' },
+  { id: 12, name: 'Engraved 3D Bar Necklace in Gold Plating', image: '/images/products/tgr/tgr-12-product.jpg', hoverImage: '/images/products/tgr/tgr-12-model.jpg', href: '/product/12', price: '$170', priceInCents: 17000, rating: 4.4, reviewCount: 284, defaultSwatchKey: 'vermeil' },
+  { id: 13, name: 'Tropical Layered Beads Bracelet Anklet with Initials in Gold Plating', image: '/images/products/tgr/tgr-13-product.jpg', hoverImage: '/images/products/tgr/tgr-13-model.jpg', href: '/product/13', price: '$120', priceInCents: 12000, rating: 4.5, reviewCount: 381, defaultSwatchKey: 'vermeil' },
+  { id: 14, name: 'Link to my Heart Name Bracelet in Sterling Silver', image: '/images/products/tgr/tgr-14-product.jpg', hoverImage: '/images/products/tgr/tgr-14-model.jpg', href: '/product/14', price: '$95', priceInCents: 9500, rating: 4.6, reviewCount: 478, defaultSwatchKey: 'silver' },
+  { id: 15, name: 'Diamond Russian Ring Necklace in Sterling Silver', image: '/images/products/tgr/tgr-15-product.jpg', hoverImage: '/images/products/tgr/tgr-15-model.jpg', href: '/product/15', price: '$100', priceInCents: 10000, rating: 4.7, reviewCount: 115, defaultSwatchKey: 'silver' },
+  { id: 16, name: 'The Balance Necklace in 18K Gold Vermeil', image: '/images/products/tgr/tgr-16-product.jpg', hoverImage: '/images/products/tgr/tgr-16-model.jpg', href: '/product/16', price: '$155', priceInCents: 15500, rating: 4.8, reviewCount: 212, defaultSwatchKey: 'vermeil' },
+  { id: 17, name: 'Bee Loved Locket with Blue Enamel', image: '/images/products/tgr/tgr-17-product.jpg', hoverImage: '/images/products/tgr/tgr-17-model.jpg', href: '/product/17', price: '$155', priceInCents: 15500, rating: 4.9, reviewCount: 309, defaultSwatchKey: 'vermeil' },
+  { id: 18, name: 'Personalized Jewelry Cursive Name Necklace in 18K Gold Plating', image: '/images/products/tgr/tgr-18-product.jpg', hoverImage: '/images/products/tgr/tgr-18-model.jpg', href: '/product/18', price: '$100', priceInCents: 10000, rating: 4.4, reviewCount: 406, defaultSwatchKey: 'vermeil' },
+  { id: 19, name: 'Name Anklet in Gold Vermeil', image: '/images/products/tgr/tgr-19-product.jpg', hoverImage: '/images/products/tgr/tgr-19-model.jpg', href: '/product/19', price: '$125', priceInCents: 12500, rating: 4.5, reviewCount: 43, defaultSwatchKey: 'vermeil' },
+  { id: 20, name: 'Initial Birthstone Tag Anklet in Sterling Silver', image: '/images/products/tgr/tgr-20-product.jpg', hoverImage: '/images/products/tgr/tgr-20-model.jpg', href: '/product/20', price: '$100', priceInCents: 10000, rating: 4.6, reviewCount: 140, defaultSwatchKey: 'silver' },
+  { id: 21, name: 'Charlize Russian Ring in Sterling Silver', image: '/images/products/tgr/tgr-21-product.jpg', hoverImage: '/images/products/tgr/tgr-21-model.jpg', href: '/product/21', price: '$175', priceInCents: 17500, rating: 4.7, reviewCount: 237, defaultSwatchKey: 'silver' },
+  { id: 22, name: 'Stackable Birthstone Name Ring in Silver Finish', image: '/images/products/tgr/tgr-22-product.jpg', hoverImage: '/images/products/tgr/tgr-22-model.jpg', href: '/product/22', price: '$155', priceInCents: 15500, rating: 4.8, reviewCount: 334, defaultSwatchKey: 'silver' },
+  { id: 23, name: 'Engraved Eternal Necklace with Cubic Zirconia in Sterling Silver', image: '/images/products/tgr/tgr-23-product.jpg', hoverImage: '/images/products/tgr/tgr-23-model.jpg', href: '/product/23', price: '$95', priceInCents: 9500, rating: 4.9, reviewCount: 431, defaultSwatchKey: 'silver' },
+  { id: 24, name: 'Personalized Jewelry 10K Gold Carrie Necklace', image: '/images/products/tgr/tgr-24-product.jpg', hoverImage: '/images/products/tgr/tgr-24-model.jpg', href: '/product/24', price: '$180', priceInCents: 18000, rating: 4.4, reviewCount: 68, defaultSwatchKey: 'vermeil' },
+  { id: 25, name: 'Custom Engraved Beads Necklace in Gold Vermeil', image: '/images/products/tgr/tgr-25-product.jpg', hoverImage: '/images/products/tgr/tgr-25-model.jpg', href: '/product/25', price: '$105', priceInCents: 10500, rating: 4.5, reviewCount: 165, defaultSwatchKey: 'vermeil' },
+  { id: 26, name: 'Link Blossom Birth Flower Stone Necklace in 18K Gold Plating', image: '/images/products/tgr/tgr-26-product.jpg', hoverImage: '/images/products/tgr/tgr-26-model.jpg', href: '/product/26', price: '$125', priceInCents: 12500, rating: 4.6, reviewCount: 262, defaultSwatchKey: 'vermeil' },
+  { id: 27, name: 'Linda Bangle Bracelet with Beads in Silver', image: '/images/products/tgr/tgr-27-product.jpg', hoverImage: '/images/products/tgr/tgr-27-model.jpg', href: '/product/27', price: '$190', priceInCents: 19000, rating: 4.7, reviewCount: 359, defaultSwatchKey: 'silver' },
+  { id: 28, name: 'Shine Bright Bow Earrings in Sterling Silver', image: '/images/products/tgr/tgr-28-product.jpg', hoverImage: '/images/products/tgr/tgr-28-model.jpg', href: '/product/28', price: '$190', priceInCents: 19000, rating: 4.8, reviewCount: 456, defaultSwatchKey: 'silver' },
+  { id: 29, name: 'Linda Toggle Heart Charm Bracelet with Diamond in Sterling Silver', image: '/images/products/tgr/tgr-29-product.jpg', hoverImage: '/images/products/tgr/tgr-29-model.jpg', href: '/product/29', price: '$180', priceInCents: 18000, rating: 4.9, reviewCount: 93, defaultSwatchKey: 'silver' },
+  { id: 30, name: 'Delina Bracelet with Engraved Beads 0.25ct Diamond in 18K Gold Vermeil', image: '/images/products/tgr/tgr-30-product.jpg', hoverImage: '/images/products/tgr/tgr-30-model.jpg', href: '/product/30', price: '$95', priceInCents: 9500, rating: 4.4, reviewCount: 190, defaultSwatchKey: 'vermeil' },
+]
+
 // ─── LAL — Lime and Lou ───────────────────────────────────────────────────────
 // 19 products sourced from lal_best_sellers.xlsx — URLs used verbatim
 
@@ -76,15 +113,15 @@ const lalProducts: ProductItem[] = [
 ]
 
 // ─── Brand registry ────────────────────────────────────────────────────────────
-// TGR, IB, MNN fall back to OAL data until their own arrays are provided.
+// IB and MNN use the TGR catalog until their own arrays are provided.
 // To add a brand: define its array above and point the key here.
 
 export const brandProducts: BrandProducts = {
   oal: oalProducts,
-  tgr: oalProducts,   // fallback — replace with tgrProducts when available
+  tgr: tgrProducts,
   lal: lalProducts,
-  ib:  oalProducts,   // fallback — replace with ibProducts when available
-  mnn: oalProducts,   // fallback — replace with mnnProducts when available
+  ib:  tgrProducts,   // shared — replace with ibProducts when available
+  mnn: tgrProducts,   // shared — replace with mnnProducts when available
 }
 
-export { oalProducts, lalProducts }
+export { oalProducts, tgrProducts, lalProducts }

@@ -1,0 +1,333 @@
+/* Sticky-bar PLP prototypes — /category/v1 and /category/v4.
+   Tokens only: colors, typography, spacing, radii and z-index all come from
+   the brand theme. Layout utilities that toggle `display` per breakpoint live
+   in Tailwind classes on the elements, so nothing here sets `display` on
+   .segment / .floatGroup (unlayered module CSS would beat Tailwind's layer). */
+
+.page {
+  background-color: var(--colors-background);
+  color: var(--colors-text);
+  font-family: var(--typography-rules-text1-font-family);
+  min-height: 100vh;
+}
+
+/* Leave room so the floating bar never covers the last row. */
+.mainFloating {
+  padding-bottom: calc(var(--spacing-xxxl) + var(--spacing-md));
+}
+
+/* ── Title ─────────────────────────────────────────────────────────────────── */
+
+.intro {
+  padding: var(--spacing-sm) var(--layout-page-margin) var(--spacing-sm);
+}
+
+.titleRow {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+  padding-top: var(--spacing-sm);
+}
+
+.title {
+  margin: 0;
+  color: var(--colors-text);
+  font-family:    var(--typography-rules-headline2-font-family);
+  font-size:      var(--typography-rules-headline2-font-size);
+  line-height:    var(--typography-rules-headline2-line-height);
+  font-weight:    var(--typography-rules-headline2-font-weight, normal);
+  letter-spacing: var(--typography-rules-headline2-letter-spacing, normal);
+  text-transform: var(--typography-rules-headline2-text-transform, none);
+}
+
+.count {
+  color: var(--colors-text-secondary);
+  font-family:    var(--typography-rules-text3-font-family);
+  font-size:      var(--typography-rules-text3-font-size);
+  line-height:    var(--typography-rules-text3-line-height);
+  font-weight:    var(--typography-rules-text3-font-weight, normal);
+  letter-spacing: var(--typography-rules-text3-letter-spacing, normal);
+}
+
+.description {
+  margin: var(--spacing-xxs) 0 0;
+  color: var(--colors-text-secondary);
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  font-weight:    var(--typography-rules-text1-font-weight, normal);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+}
+
+/* ── Controls (shared) ────────────────────────────────────────────────────── */
+
+.ctl,
+.segmentBtn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-xxs);
+  white-space: nowrap;
+  cursor: pointer;
+  color: var(--colors-text);
+  background: var(--colors-background);
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  font-weight:    var(--typography-rules-text1-font-weight, normal);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.ctl {
+  height: 40px;
+  padding: 0 var(--spacing-sm);
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--buttons-primary-border-radius);
+}
+
+.segmentBtn {
+  border: none;
+  border-radius: var(--buttons-primary-border-radius);
+  padding: 0 var(--spacing-xs);
+}
+
+.segmentBtnOn {
+  background: var(--colors-text);
+  color: var(--colors-text-inverse);
+}
+
+.ctl:focus-visible,
+.segmentBtn:focus-visible {
+  outline: var(--border-width) solid var(--colors-text);
+  outline-offset: 2px;
+}
+
+.badge {
+  position: absolute;
+  top: calc(var(--spacing-xxs) * -1);
+  right: calc(var(--spacing-xxxs) * -1);
+  min-width: 18px;
+  height: 18px;
+  padding: 0 var(--spacing-xxxs);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-full);
+  background: var(--colors-text);
+  color: var(--colors-text-inverse);
+  font-family:    var(--typography-rules-caption1-font-family);
+  font-size:      var(--typography-rules-caption1-font-size);
+  line-height:    1;
+  font-weight:    var(--typography-rules-caption1-font-weight, normal);
+}
+
+/* ── V1: sticky toolbar ───────────────────────────────────────────────────── */
+
+.toolbar {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-sticky);
+  background: var(--colors-background);
+}
+
+.toolbarInner {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xxs);
+  padding: var(--spacing-xs) var(--layout-page-margin);
+}
+
+/* Mobile: icon-only filter button */
+.filterBtn {
+  flex: 0 0 auto;
+  width: 56px;
+  padding: 0;
+}
+
+.viewToggle {
+  min-width: 96px;
+}
+
+.segment {
+  align-items: center;
+  gap: 2px;
+  height: 40px;
+  padding: 0 var(--spacing-xxxs);
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--buttons-primary-border-radius);
+  background: var(--colors-background);
+}
+
+.segment .segmentBtn {
+  height: 30px;
+}
+
+.iconBtn {
+  width: 40px;
+  padding: 0;
+}
+
+@media (min-width: 768px) {
+  .filterBtn {
+    width: auto;
+    padding: 0 var(--spacing-sm) 0 var(--spacing-xs);
+  }
+
+  /* Desktop: filter left, view + grid controls right */
+  .viewToggle {
+    margin-left: auto;
+  }
+}
+
+/* ── Chips ────────────────────────────────────────────────────────────────── */
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacing-xxs);
+  padding: var(--spacing-xs) var(--layout-page-margin) var(--spacing-xxxs);
+}
+
+/* ── Product grid ─────────────────────────────────────────────────────────── */
+
+.productsSection {
+  padding-top: var(--spacing-xs);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: calc(var(--spacing-xxxs) / 2);
+}
+
+@media (max-width: 767px) {
+  .gridMobile1 {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+  }
+
+  .gridMobile3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  /* 3 columns = images only */
+  .gridMobile3 .cardInfo,
+  .gridMobile3 .cardQuickAdd {
+    display: none;
+  }
+}
+
+@media (min-width: 768px) {
+  .productsSection {
+    padding-top: var(--spacing-sm);
+  }
+
+  .grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--spacing-xxxs);
+  }
+
+  .gridDesktopDense {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: calc(var(--spacing-xxxs) / 2);
+  }
+
+  /* 5 columns = images only */
+  .gridDesktopDense .cardInfo,
+  .gridDesktopDense .cardQuickAdd {
+    display: none;
+  }
+}
+
+/* On-model shots are lifestyle photos — don't multiply-blend them onto the
+   product-shot background (that tint is for packshots only). */
+.modelView img {
+  mix-blend-mode: normal;
+}
+
+/* ── Empty state ──────────────────────────────────────────────────────────── */
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xxl) var(--layout-page-margin);
+  text-align: center;
+}
+
+.emptyText {
+  margin: 0;
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  font-weight:    var(--typography-rules-text1-font-weight, normal);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+}
+
+/* ── V4: floating control bar ─────────────────────────────────────────────── */
+
+.floatBar {
+  position: fixed;
+  left: 50%;
+  bottom: var(--spacing-md);
+  z-index: var(--z-sticky);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xxs);
+  white-space: nowrap;
+  transform: translateX(-50%);
+  transition: opacity var(--transition-base);
+}
+
+.floatBarHidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.floatGroup {
+  align-items: center;
+  gap: 2px;
+  height: 50px;
+  padding: var(--spacing-xxxs);
+  box-sizing: border-box;
+  background: var(--colors-background);
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--buttons-primary-border-radius);
+  box-shadow: var(--shadow-md);
+}
+
+.floatGroup .segmentBtn {
+  height: 38px;
+}
+
+/* Square icon buttons in the floating bar */
+.floatGroup .iconBtn,
+.floatFilterBtn {
+  width: 38px;
+  padding: 0;
+}
+
+.textBtn {
+  padding: 0 var(--spacing-xs);
+}
+
+.floatFilterBtn .badge {
+  top: 2px;
+  right: 0;
+}
+
+@media (min-width: 768px) {
+  .floatFilterBtn {
+    width: auto;
+    padding: 0 var(--spacing-xs) 0 var(--spacing-xxs);
+  }
+
+  .floatFilterBtn .badge {
+    position: static;
+  }
+}

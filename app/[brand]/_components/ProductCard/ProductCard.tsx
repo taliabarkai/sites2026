@@ -45,6 +45,11 @@ export interface ProductCardProps {
   squareImage?: boolean
   /** `horizontal`: thumbnail left; rating, name and price on the right. */
   layout?: 'default' | 'horizontal'
+  /** Extra class on the info block (name, price, rating) — lets a page hide it
+   *  per breakpoint, e.g. the images-only dense grid on /category/v1 and v4. */
+  infoClassName?: string
+  /** Extra class on the Quick-Add button — same purpose as `infoClassName`. */
+  quickAddClassName?: string
 }
 
 export function ProductCard({
@@ -63,6 +68,8 @@ export function ProductCard({
   quickAddProduct,
   squareImage = false,
   layout = 'default',
+  infoClassName,
+  quickAddClassName,
 }: ProductCardProps) {
   const pathname = usePathname()
   const brand = getBrandFromPathname(pathname)
@@ -101,7 +108,7 @@ export function ProductCard({
         {quickAddProduct && (
           <button
             type="button"
-            className={styles.quickAddBtn}
+            className={quickAddClassName ? `${styles.quickAddBtn} ${quickAddClassName}` : styles.quickAddBtn}
             aria-label="Add to cart"
             onClick={(e) => {
               e.preventDefault()
@@ -114,7 +121,7 @@ export function ProductCard({
         )}
       </div>
 
-      <div className={styles.info}>
+      <div className={infoClassName ? `${styles.info} ${infoClassName}` : styles.info}>
         {swatches && swatches.length > 0 && (
           <ul className={styles.swatches} aria-label="Available materials">
             {swatches.map((color, i) => (

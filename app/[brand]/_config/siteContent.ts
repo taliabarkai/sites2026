@@ -49,6 +49,8 @@ export const DEFAULT_NAV_LINKS: NavLink[] = [
   },
   { label: 'Shop the Look', href: '/category/t3' },
   { label: 'Sale', href: '/category/t5' },
+  { label: 'PLP V1', href: '/category/v1' },
+  { label: 'PLP V4', href: '/category/v4' },
   {
     label: 'Design References',
     href: '#',
