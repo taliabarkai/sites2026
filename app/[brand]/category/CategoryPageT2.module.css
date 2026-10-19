@@ -210,7 +210,8 @@
 /* ── Sticky filter bar ────────────────────────────────────────────────────── */
 .filterBar {
   position: sticky;
-  top: 0;
+  top: var(--header-reveal-offset, 0px); /* sits under the revealed header */
+  transition: top var(--transition-base);
   z-index: 1;
   background: var(--colors-background);
 }

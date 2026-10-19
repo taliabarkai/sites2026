@@ -12,6 +12,16 @@ export interface NavLink {
   image?: { default: string; hover: string }
   /** Sub-links shown in a dropdown (desktop hover / mobile expand). */
   children?: NavLink[]
+  /**
+   * Titled link columns shown in a full-width mega menu on desktop hover
+   * (mobile: expandable section). Takes precedence over `children`.
+   */
+  groups?: NavGroup[]
+}
+
+export interface NavGroup {
+  title: string
+  links: NavLink[]
 }
 
 export interface FooterLink {
@@ -47,10 +57,32 @@ export const DEFAULT_NAV_LINKS: NavLink[] = [
       hover:   '/images/nav/new-in-hover.jpg',
     },
   },
+  {
+    label: 'Shop By',
+    href: '#shop-by',
+    groups: [
+      {
+        title: 'Category Page',
+        links: [
+          { label: 'Best Sellers - Current', href: '/category' },
+          { label: 'Best Sellers - V1', href: '/category/v1' },
+          { label: 'Best Sellers - V2', href: '/category/v2' },
+          { label: 'Best Sellers - V3', href: '/category/v3' },
+          { label: 'Best Sellers - V4', href: '/category/v4' },
+        ],
+      },
+      {
+        title: 'Category Layouts',
+        links: [
+          { label: 'New In', href: '/category/t4' },
+          { label: 'Shop the Look', href: '/category/t3' },
+          { label: 'Sale', href: '/category/t5' },
+        ],
+      },
+    ],
+  },
   { label: 'Shop the Look', href: '/category/t3' },
   { label: 'Sale', href: '/category/t5' },
-  { label: 'PLP V1', href: '/category/v1' },
-  { label: 'PLP V4', href: '/category/v4' },
   {
     label: 'Design References',
     href: '#',

@@ -116,7 +116,7 @@ function CategoryPageInner() {
 
   return (
     <div className={styles.page}>
-      <Header variant="white" brand={brand} navLinks={navLinks} topline={topline} sticky={false} />
+      <Header variant="white" brand={brand} navLinks={navLinks} topline={topline} revealOnScrollUp />
 
       <main id="main-content">
         <HighlightsBar items={highlights} showOnDesktop />

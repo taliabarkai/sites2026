@@ -128,7 +128,8 @@
 
 .toolbar {
   position: sticky;
-  top: 0;
+  top: var(--header-reveal-offset, 0px); /* sits under the revealed header */
+  transition: top var(--transition-base);
   z-index: var(--z-sticky);
   background: var(--colors-background);
 }
@@ -329,5 +330,153 @@
 
   .floatFilterBtn .badge {
     position: static;
+  }
+}
+
+/* ── V2: full-width three-part bar ────────────────────────────────────────── */
+
+.toolbarRuled {
+  border-top: var(--border-width) solid var(--border-color);
+  border-bottom: var(--border-width) solid var(--border-color);
+}
+
+.threePart {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: stretch;
+  height: 52px;
+}
+
+.threePartFilter,
+.threePartView {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xxs);
+  width: 100%;
+  height: 100%;
+  border: none;
+  background: var(--colors-background);
+  color: var(--colors-text);
+  white-space: nowrap;
+  cursor: pointer;
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  font-weight:    var(--typography-rules-text1-font-weight, normal);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+}
+
+.threePartFilter {
+  justify-content: flex-start;
+  padding: 0 0 0 var(--layout-page-margin);
+  border-right: var(--border-width) solid var(--border-color);
+}
+
+.threePartView {
+  justify-content: center;
+  padding: 0 var(--spacing-xxs);
+}
+
+.plainGroup {
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-xxs);
+  padding: 0 var(--spacing-sm);
+  border-right: var(--border-width) solid var(--border-color);
+}
+
+.plainIconBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 44px;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: var(--colors-text-secondary);
+  opacity: 0.6;
+  transition: color var(--transition-fast), opacity var(--transition-fast);
+}
+
+.plainIconBtnOn {
+  color: var(--colors-text);
+  opacity: 1;
+}
+
+.badgeInline {
+  position: static;
+}
+
+@media (min-width: 768px) {
+  .toolbarRuled {
+    border-top: none;
+    border-bottom: none;
+  }
+
+  .threePart {
+    display: flex;
+    padding: 0 var(--layout-page-margin);
+  }
+
+  .threePartFilter {
+    width: auto;
+    padding: 0;
+    border-right: none;
+  }
+
+  .threePartView {
+    width: auto;
+    margin-left: auto;
+    padding: 0 var(--spacing-sm);
+  }
+
+  .plainGroup {
+    align-self: center;
+    height: 24px;
+    gap: 2px;
+    padding: 0 0 0 var(--spacing-xs);
+    border-right: none;
+    border-left: var(--border-width) solid var(--border-color);
+  }
+
+  .plainGroup .plainIconBtn {
+    width: 30px;
+  }
+}
+
+/* ── V3: sticky filter + count + grid ─────────────────────────────────────── */
+
+.toolbarV3 {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+}
+
+.toolbarV3 > :first-child { justify-self: start; }
+.toolbarV3 > :last-child,
+.toolbarV3 > :nth-last-child(2) { justify-self: end; }
+
+.filterBtnLabeled {
+  padding: 0 var(--spacing-sm) 0 var(--spacing-xs);
+}
+
+.toolbarCount {
+  justify-self: center;
+  white-space: nowrap;
+}
+
+.textBtnWide {
+  padding: 0 var(--spacing-md);
+}
+
+@media (min-width: 768px) {
+  .toolbarV3 {
+    display: flex;
+  }
+
+  .toolbarCount {
+    margin-left: auto;
+    margin-right: var(--spacing-xxs);
   }
 }

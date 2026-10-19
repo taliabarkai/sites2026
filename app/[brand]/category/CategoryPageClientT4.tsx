@@ -284,7 +284,7 @@ function CategoryPageInnerT4() {
 
   return (
     <div className={baseStyles.page}>
-      <Header variant="white" brand={brand} navLinks={navLinks} topline={topline} sticky={false} />
+      <Header variant="white" brand={brand} navLinks={navLinks} topline={topline} revealOnScrollUp />
 
       <main id="main-content">
         <CategoryHero brand={brand} variant={getSeoCategoryVariant(brand)} title="New In" />

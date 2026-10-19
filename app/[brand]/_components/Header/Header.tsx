@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { DEFAULT_NAV_LINKS, DEFAULT_TOPLINE, type NavLink } from '../../_config/siteContent'
 import { Button } from '../Button'
 import * as oalIcons from '@/src/components/icons/oal'
@@ -20,6 +20,7 @@ import { getBrandFromPathname, getBrandHomePath, resolveBrand, type BrandKey } f
 import { useCart } from '../../_context/CartContext'
 import styles from './Header.module.css'
 import { useHeaderScroll } from './useHeaderScroll'
+import { useRevealOnScrollUp } from './useRevealOnScrollUp'
 
 const BRAND_ICONS = {
   oal: oalIcons,
@@ -62,6 +63,11 @@ export interface HeaderProps {
   topline?: ToplineProps
   sticky?: boolean
   /**
+   * Category pages: the header scrolls away with the page, then slides back in
+   * from the top whenever the user scrolls up. Overrides `sticky`.
+   */
+  revealOnScrollUp?: boolean
+  /**
    * Track My Order only: whether the default/error demo toggle belongs on
    * screen. The error it previews is a failed lookup, so it has nothing to
    * say once an order is found — the page passes false there.
@@ -75,6 +81,7 @@ export function Header({
   navLinks = DEFAULT_NAV_LINKS,
   topline = DEFAULT_TOPLINE,
   sticky = true,
+  revealOnScrollUp = false,
   showStateToggle = true,
 }: HeaderProps) {
   const pathname = usePathname()
@@ -105,8 +112,14 @@ export function Header({
     }
   }, [menuOpen])
 
+  const headerRef = useRef<HTMLElement>(null)
+  // Keep the header in view while its menu or drawer is open.
+  const headerHidden = useRevealOnScrollUp(revealOnScrollUp, headerRef, menuOpen)
+
   /* ── Checkout mode: logo only, horizontally centered ── */
-  const wrapperClass = sticky ? styles.wrapper : styles.wrapperStatic
+  const wrapperClass = revealOnScrollUp
+    ? `${styles.wrapperReveal} ${headerHidden ? styles.wrapperHidden : ''}`
+    : sticky ? styles.wrapper : styles.wrapperStatic
 
   /* Demo-only controls, on the two pages a phase actually changes. Rendered in
      both slots and switched by media query: the bar has room for them on
@@ -153,7 +166,7 @@ export function Header({
   ].join(' ')
 
   return (
-    <header className={wrapperClass}>
+    <header ref={headerRef} className={wrapperClass}>
       <div className={shellClass}>
         <Topline {...topline} />
         <div className={styles.bar}>
@@ -180,8 +193,36 @@ export function Header({
             <nav className={styles.desktopNav} aria-label="Primary">
               <ul className={styles.navList}>
                 {navLinks.filter(link => !link.desktopHidden).map((link) => (
-                  <li key={link.href} className={link.children ? styles.navItemHasSub : undefined}>
-                    {link.children ? (
+                  <li
+                    key={link.href}
+                    className={link.groups ? styles.navItemMega : link.children ? styles.navItemHasSub : undefined}
+                  >
+                    {link.groups ? (
+                      <>
+                        <button type="button" className={`${styles.navLink} ${styles.navTrigger}`} aria-haspopup="true">
+                          {link.label}
+                        </button>
+                        {/* Full-width mega menu — anchored to .bar, not the <li>. */}
+                        <div className={styles.megaMenu}>
+                          <div className={styles.megaInner}>
+                            {link.groups.map((group) => (
+                              <div key={group.title} className={styles.megaColumn}>
+                                <p className={styles.megaTitle}>{group.title}</p>
+                                <ul className={styles.megaList}>
+                                  {group.links.map((child) => (
+                                    <li key={child.href}>
+                                      <Link href={child.href} className={styles.megaLink}>
+                                        {child.label}
+                                      </Link>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </>
+                    ) : link.children ? (
                       <>
                         <button type="button" className={`${styles.navLink} ${styles.navTrigger}`} aria-haspopup="true">
                           {link.label}
@@ -269,7 +310,48 @@ export function Header({
             <ul className={styles.drawerList}>
               {navLinks.map((link) => (
                 <li key={link.href}>
-                  {link.children ? (
+                  {link.groups ? (
+                    <>
+                      <button
+                        type="button"
+                        className={`${styles.drawerLink} ${styles.drawerTrigger}`}
+                        aria-expanded={openDropdown === link.label}
+                        onClick={() =>
+                          setOpenDropdown((cur) => (cur === link.label ? null : link.label))
+                        }
+                      >
+                        {link.label}
+                        <span
+                          className={`${styles.drawerCaret} ${openDropdown === link.label ? styles.drawerCaretOpen : ''}`}
+                          aria-hidden="true"
+                        >
+                          <ChevronIcon size={18} />
+                        </span>
+                      </button>
+                      {openDropdown === link.label && (
+                        <div className={styles.drawerGroups}>
+                          {link.groups.map((group) => (
+                            <div key={group.title}>
+                              <p className={styles.drawerGroupTitle}>{group.title}</p>
+                              <ul className={styles.drawerSubList}>
+                                {group.links.map((child) => (
+                                  <li key={child.href}>
+                                    <Link
+                                      href={child.href}
+                                      className={styles.drawerSubLink}
+                                      onClick={() => setMenuOpen(false)}
+                                    >
+                                      {child.label}
+                                    </Link>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </>
+                  ) : link.children ? (
                     <>
                       <button
                         type="button"

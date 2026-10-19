@@ -281,7 +281,7 @@ function CategoryPageInnerT5() {
 
   return (
     <div className={styles.page}>
-      <Header variant="white" brand={brand} navLinks={navLinks} topline={topline} sticky={false} />
+      <Header variant="white" brand={brand} navLinks={navLinks} topline={topline} revealOnScrollUp />
 
       <main id="main-content">
         <CategoryHero

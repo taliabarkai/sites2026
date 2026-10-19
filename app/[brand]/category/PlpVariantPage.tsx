@@ -2,6 +2,8 @@
 
 // Shared body for the sticky-bar PLP prototypes ported from the design canvas:
 //   /category/v1 — sticky toolbar under the title (filter · image view · grid)
+//   /category/v2 — full-width three-part bar (filter/sort | grid | image view)
+//   /category/v3 — sticky filter + count + grid, floating Product / Model toggle
 //   /category/v4 — floating control bar pinned to the bottom of the viewport
 // Both reuse the existing FilterPanel (CategoryFilterPanel.tsx).
 
@@ -66,7 +68,7 @@ const priceOf = (p: ProductItem) => p.priceInCents ?? (Number((p.price ?? '').re
 type ImageView = 'product' | 'model'
 type MobileCols = 1 | 2 | 3
 
-export type PlpVariant = 'v1' | 'v4'
+export type PlpVariant = 'v1' | 'v2' | 'v3' | 'v4'
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
@@ -130,9 +132,15 @@ export function PlpVariantPage({ variant }: { variant: PlpVariant }) {
   // ── Shared controls ──
   const filterBadge = filterCount > 0 && <span className={styles.badge}>{filterCount}</span>
 
-  // V1 draws the grid buttons as a bordered segment in the toolbar; V4 as one of
-  // the floating groups.
-  const groupClass = variant === 'v4' ? styles.floatGroup : styles.segment
+  // Grid buttons come in three looks: a bordered segment (V1, V3), plain icons
+  // (V2) and a floating group (V4).
+  type GridLook = 'segment' | 'plain' | 'float'
+  const look: GridLook = variant === 'v4' ? 'float' : variant === 'v2' ? 'plain' : 'segment'
+  const groupClass = { segment: styles.segment, plain: styles.plainGroup, float: styles.floatGroup }[look]
+  const gridBtnClass = (on: boolean) =>
+    look === 'plain'
+      ? `${styles.plainIconBtn} ${on ? styles.plainIconBtnOn : ''}`
+      : `${styles.segmentBtn} ${styles.iconBtn} ${on ? styles.segmentBtnOn : ''}`
 
   const mobileGrid = (
     <div role="group" aria-label="Grid view" className={`${groupClass} flex md:hidden`}>
@@ -146,7 +154,7 @@ export function PlpVariantPage({ variant }: { variant: PlpVariant }) {
           type="button"
           aria-label={label}
           aria-pressed={mobileCols === cols}
-          className={`${styles.segmentBtn} ${styles.iconBtn} ${mobileCols === cols ? styles.segmentBtnOn : ''}`}
+          className={gridBtnClass(mobileCols === cols)}
           onClick={() => setMobileCols(cols)}
         >
           <Icon size={18} />
@@ -161,7 +169,7 @@ export function PlpVariantPage({ variant }: { variant: PlpVariant }) {
         type="button"
         aria-label="4 columns"
         aria-pressed={!desktopDense}
-        className={`${styles.segmentBtn} ${styles.iconBtn} ${!desktopDense ? styles.segmentBtnOn : ''}`}
+        className={gridBtnClass(!desktopDense)}
         onClick={() => setDesktopDense(false)}
       >
         <GridDoubleIcon size={18} />
@@ -170,12 +178,45 @@ export function PlpVariantPage({ variant }: { variant: PlpVariant }) {
         type="button"
         aria-label="5 columns, images only"
         aria-pressed={desktopDense}
-        className={`${styles.segmentBtn} ${styles.iconBtn} ${desktopDense ? styles.segmentBtnOn : ''}`}
+        className={gridBtnClass(desktopDense)}
         onClick={() => setDesktopDense(true)}
       >
         <GridTripleIcon size={18} />
       </button>
     </div>
+  )
+
+  // Single toggle button (V1, V2) — the label names the current view.
+  const viewToggleProps = {
+    type: 'button' as const,
+    'aria-pressed': view === 'model',
+    'aria-label': view === 'model'
+      ? `${modelLabel} view. Switch to product view`
+      : `Product view. Switch to ${modelLabel.toLowerCase()} view`,
+    onClick: () => setView((v) => (v === 'model' ? 'product' : 'model')),
+  }
+  const viewToggleLabel = view === 'model' ? modelLabel : 'Product'
+
+  // Two-button Product / Model segment (V3, V4).
+  const viewSegment = (extraBtnClass = '') => (
+    <>
+      <button
+        type="button"
+        aria-pressed={view === 'product'}
+        className={`${styles.segmentBtn} ${styles.textBtn} ${extraBtnClass} ${view === 'product' ? styles.segmentBtnOn : ''}`}
+        onClick={() => setView('product')}
+      >
+        Product
+      </button>
+      <button
+        type="button"
+        aria-pressed={view === 'model'}
+        className={`${styles.segmentBtn} ${styles.textBtn} ${extraBtnClass} ${view === 'model' ? styles.segmentBtnOn : ''}`}
+        onClick={() => setView('model')}
+      >
+        {modelLabel}
+      </button>
+    </>
   )
 
   const gridClasses = [
@@ -187,14 +228,14 @@ export function PlpVariantPage({ variant }: { variant: PlpVariant }) {
 
   return (
     <div className={styles.page}>
-      <Header variant="white" brand={brand} navLinks={navLinks} topline={topline} sticky={false} />
+      <Header variant="white" brand={brand} navLinks={navLinks} topline={topline} revealOnScrollUp />
 
-      <main id="main-content" className={variant === 'v4' ? styles.mainFloating : undefined}>
+      <main id="main-content" className={variant === 'v3' || variant === 'v4' ? styles.mainFloating : undefined}>
         {/* ── Title ── */}
         <section className={styles.intro} aria-label="Category">
           <div className={styles.titleRow}>
             <h1 className={styles.title}>Best Sellers</h1>
-            <span className={styles.count}>{countLabel}</span>
+            {variant !== 'v3' && <span className={styles.count}>{countLabel}</span>}
           </div>
           <p className={styles.description}>{PAGE_DESCRIPTION[brand]}</p>
         </section>
@@ -214,16 +255,54 @@ export function PlpVariantPage({ variant }: { variant: PlpVariant }) {
                 {filterBadge}
               </button>
 
-              <button
-                type="button"
-                className={`${styles.ctl} ${styles.viewToggle}`}
-                aria-pressed={view === 'model'}
-                aria-label={view === 'model' ? `${modelLabel} view. Switch to product view` : `Product view. Switch to ${modelLabel.toLowerCase()} view`}
-                onClick={() => setView((v) => (v === 'model' ? 'product' : 'model'))}
-              >
-                {view === 'model' ? modelLabel : 'Product'}
+              <button {...viewToggleProps} className={`${styles.ctl} ${styles.viewToggle}`}>
+                {viewToggleLabel}
               </button>
 
+              {mobileGrid}
+              {desktopGrid}
+            </div>
+          </div>
+        )}
+
+        {/* ── V2: full-width three-part bar ── */}
+        {variant === 'v2' && (
+          <div className={`${styles.toolbar} ${styles.toolbarRuled}`}>
+            <div className={styles.threePart}>
+              <button
+                type="button"
+                className={styles.threePartFilter}
+                aria-label={filterCount > 0 ? `Filter and sort, ${filterCount} active` : 'Filter and sort'}
+                onClick={() => setFilterPanelOpen(true)}
+              >
+                <FilterIcon size={22} />
+                <span>Filter/Sort</span>
+                {filterCount > 0 && <span className={`${styles.badge} ${styles.badgeInline}`}>{filterCount}</span>}
+              </button>
+              {mobileGrid}
+              <button {...viewToggleProps} className={styles.threePartView}>
+                {viewToggleLabel}
+              </button>
+              {desktopGrid}
+            </div>
+          </div>
+        )}
+
+        {/* ── V3: sticky filter + count + grid ── */}
+        {variant === 'v3' && (
+          <div className={styles.toolbar}>
+            <div className={`${styles.toolbarInner} ${styles.toolbarV3}`}>
+              <button
+                type="button"
+                className={`${styles.ctl} ${styles.filterBtnLabeled}`}
+                aria-label={filterCount > 0 ? `Filters, ${filterCount} active` : 'Filters'}
+                onClick={() => setFilterPanelOpen(true)}
+              >
+                <FilterIcon size={22} />
+                <span>Filters</span>
+                {filterBadge}
+              </button>
+              <span className={`${styles.count} ${styles.toolbarCount}`}>{countLabel}</span>
               {mobileGrid}
               {desktopGrid}
             </div>
@@ -302,23 +381,19 @@ export function PlpVariantPage({ variant }: { variant: PlpVariant }) {
           {desktopGrid}
 
           <div role="group" aria-label="Image display" className={`${styles.floatGroup} flex`}>
-            <button
-              type="button"
-              aria-pressed={view === 'product'}
-              className={`${styles.segmentBtn} ${styles.textBtn} ${view === 'product' ? styles.segmentBtnOn : ''}`}
-              onClick={() => setView('product')}
-            >
-              Product
-            </button>
-            <button
-              type="button"
-              aria-pressed={view === 'model'}
-              className={`${styles.segmentBtn} ${styles.textBtn} ${view === 'model' ? styles.segmentBtnOn : ''}`}
-              onClick={() => setView('model')}
-            >
-              {modelLabel}
-            </button>
+            {viewSegment()}
           </div>
+        </div>
+      )}
+
+      {/* ── V3: floating Product / Model toggle ── */}
+      {variant === 'v3' && (
+        <div
+          role="group"
+          aria-label="Image display"
+          className={`${styles.floatBar} ${styles.floatGroup} ${filterPanelOpen ? styles.floatBarHidden : ''}`}
+        >
+          {viewSegment(styles.textBtnWide)}
         </div>
       )}
 

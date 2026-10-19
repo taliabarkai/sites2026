@@ -9,6 +9,19 @@
   z-index: var(--z-header);
 }
 
+/* Category pages: sticky, but slid out of view while scrolling down and back
+   in on scroll up (see useRevealOnScrollUp). */
+.wrapperReveal {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-header);
+  transition: transform var(--transition-base);
+}
+
+.wrapperHidden {
+  transform: translateY(-100%);
+}
+
 .shell {
   display: flex;
   flex-direction: column;
@@ -20,6 +33,7 @@
 }
 
 .bar {
+  position: relative; /* anchors the full-width mega menu */
   margin: 0;
   padding: 0;
 }
@@ -32,6 +46,14 @@
 
 .transparent {
   background: transparent;
+  color: var(--colors-text);
+}
+
+/* Transparent header turns solid white while the full-width Shop By panel is
+   open, so the bar and the panel read as one surface. */
+.transparent:has(.navItemMega:hover),
+.transparent:has(.navItemMega:focus-within) {
+  background: var(--colors-background);
   color: var(--colors-text);
 }
 
@@ -690,4 +712,132 @@
   .demoBar {
     display: none;
   }
+}
+
+
+/* ── Mega menu (nav links with `groups`) ──────────────────────────────────── */
+/* The <li> stays static so the panel positions against .bar and spans the
+   full header width, like the live OAL "Shop By" menu. */
+
+.navItemMega {
+  position: static;
+}
+
+.navItemMega:hover .navCaret,
+.navItemMega:focus-within .navCaret {
+  transform: rotate(-90deg);
+}
+
+.megaMenu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: var(--z-header);
+  background: var(--colors-background);
+  color: var(--colors-text);
+  border-top: var(--border-width) solid var(--border-color);
+  box-shadow: var(--shadow-sm);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity var(--transition-fast), visibility var(--transition-fast);
+}
+
+/* Invisible bridge over the gap between the nav label and the panel, so the
+   pointer can travel down without the menu closing. Hidden with the panel. */
+.megaMenu::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 100%;
+  height: var(--spacing-xs);
+}
+
+/* Taller hit area on the trigger (no layout change) so it meets the bridge. */
+.navItemMega > .navTrigger {
+  padding-block: var(--spacing-md);
+  margin-block: calc(var(--spacing-md) * -1);
+}
+
+.navItemMega:hover .megaMenu,
+.navItemMega:focus-within .megaMenu {
+  opacity: 1;
+  visibility: visible;
+}
+
+.megaInner {
+  display: flex;
+  justify-content: center;
+  gap: var(--spacing-xxl);
+  max-width: var(--layout-max-width);
+  margin: 0 auto;
+  padding: var(--spacing-xl) var(--layout-page-margin) var(--spacing-xxl);
+}
+
+.megaColumn {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  min-width: 160px;
+}
+
+.megaTitle {
+  margin: 0;
+  font-family:    var(--typography-rules-headline8-font-family);
+  font-size:      var(--typography-rules-headline8-font-size);
+  line-height:    var(--typography-rules-headline8-line-height);
+  font-weight:    var(--typography-rules-headline8-font-weight, 600);
+  letter-spacing: var(--typography-rules-headline8-letter-spacing, normal);
+  text-transform: var(--nav-text-transform, var(--typography-rules-headline8-text-transform, none));
+  color: var(--colors-text);
+}
+
+.megaList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.megaLink {
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  font-weight:    var(--typography-rules-text1-font-weight, normal);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+  color: var(--colors-text);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.megaLink:hover,
+.megaLink:focus-visible {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+/* Mobile drawer: titled groups inside the expanded section */
+.drawerGroups {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xs) 0 var(--spacing-xs) var(--spacing-md);
+}
+
+.drawerGroupTitle {
+  margin: 0;
+  font-family:    var(--typography-rules-headline8-font-family);
+  font-size:      var(--typography-rules-headline8-font-size);
+  line-height:    var(--typography-rules-headline8-line-height);
+  font-weight:    var(--typography-rules-headline8-font-weight, 600);
+  letter-spacing: var(--typography-rules-headline8-letter-spacing, normal);
+  text-transform: var(--nav-text-transform, var(--typography-rules-headline8-text-transform, none));
+  color: var(--colors-text-secondary);
+}
+
+.drawerGroups .drawerSubList {
+  padding-left: 0;
 }
