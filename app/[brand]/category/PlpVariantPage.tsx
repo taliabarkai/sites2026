@@ -335,7 +335,8 @@ export function PlpVariantPage({ variant }: { variant: PlpVariant }) {
                   price={p.price ?? ''}
                   originalPrice={p.originalPrice}
                   defaultImage={showModel ? p.hoverImage! : p.image}
-                  hoverImage={showModel ? p.image : p.hoverImage}
+                  // Images-only 5-column grid: no hover swap, just the gallery.
+                  hoverImage={desktopDense ? undefined : showModel ? p.image : p.hoverImage}
                   href={`/${brand}${p.href}`}
                   quickAddProduct={toQuickAddProduct(p)}
                   swatches={brand !== 'lal' ? DEFAULT_PRODUCT_SWATCHES : undefined}
