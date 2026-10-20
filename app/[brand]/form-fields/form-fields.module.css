@@ -145,8 +145,8 @@
 
 /* ─── Error message ─────────────────────────────────────────────────────────── */
 
-/* 4px under the field — the shared --form-field-message-gap. Inside .state the
-   gap would otherwise be the 8px between a field and its state label. */
+/* Under the field by the shared --form-field-message-gap, not by .state's own
+   gap — the two are both 8px today, but the token is the one that counts. */
 .state > .message {
   margin-top: calc(var(--form-field-message-gap) - var(--spacing-xxs));
 }

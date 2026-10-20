@@ -363,9 +363,6 @@ export default function FormFieldsPage() {
           <State label="Checked">
             <Checkbox checked={checkedB} onChange={setCheckedB} icons={icons}>Yes, email me special offers</Checkbox>
           </State>
-          <State label="Disabled">
-            <Checkbox checked={false} onChange={noop} icons={icons} disabled>Billing same as shipping</Checkbox>
-          </State>
         </Specimen>
       </main>
 
