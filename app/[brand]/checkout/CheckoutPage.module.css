@@ -102,6 +102,62 @@
   }
 }
 
+/* ?fields=black — the split layout, for comparison with the default. Layout
+   only: the fields are the theme's own, the same as the default page. The
+   form drops its box and the page splits in two — a narrow white form on the
+   left, a surface-primary panel on the right holding a white summary card. */
+@media (min-width: 1024px) {
+  /* Two halves bleed to the viewport edges and run down to the footer. */
+  .splitLayoutPreview .main {
+    background: linear-gradient(
+      to right,
+      var(--colors-background) 50%,
+      var(--colors-surface-primary) 50%
+    );
+  }
+
+  .splitLayoutPreview .pageInner {
+    max-width: none;
+    padding: 0;
+  }
+
+  .splitLayoutPreview .layout {
+    grid-template-columns: 1fr 1fr;
+    column-gap: 0;
+    padding-top: var(--spacing-lg);
+  }
+
+  /* 480px of form, pulled in towards the split. */
+  .splitLayoutPreview .formCol {
+    justify-self: end;
+    width: 100%;
+    max-width: calc(480px + var(--spacing-lg) + var(--spacing-3xl));
+    padding-inline: var(--spacing-lg) var(--spacing-3xl);
+    box-sizing: border-box;
+  }
+
+  /* Top padding matches the summary card's, so the two headings line up. */
+  .splitLayoutPreview .leftCol {
+    border: none;
+    border-radius: 0;
+    padding: var(--spacing-lg) 0 0;
+  }
+
+  .splitLayoutPreview .rightCol {
+    justify-self: start;
+    width: 100%;
+    max-width: calc(480px + var(--spacing-3xl) + var(--spacing-lg));
+    padding-inline: var(--spacing-3xl) var(--spacing-lg);
+    box-sizing: border-box;
+  }
+
+  .splitLayoutPreview .rightCol .orderSummary {
+    background: var(--colors-background);
+    border: none;
+    padding: var(--spacing-lg);
+  }
+}
+
 /* ─── Right Column ───────────────────────────────────────────────────────────── */
 
 .rightCol {
@@ -221,13 +277,13 @@
 .fieldGroup {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-xxs);
+  gap: var(--spacing-xs);
 }
 
 .twoCol {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: var(--spacing-xxs);
+  gap: var(--spacing-xs);
 }
 
 /* ─── Field Wrap (positions icon absolutely inside) ──────────────────────────── */
@@ -3151,13 +3207,13 @@
 .cardFields {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-xxs);
+  gap: var(--spacing-xs);
   padding: 0 var(--spacing-xs) var(--spacing-xs);
 }
 
 .cardExpiryRow {
   display: flex;
-  gap: var(--spacing-xxs);
+  gap: var(--spacing-xs);
 }
 
 .cardExpiryRow .fieldWrap {

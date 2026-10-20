@@ -20,6 +20,8 @@
   --tgr-warning:     #f36641;
   --tgr-snow:        #f6f8fa;
   --tgr-option-grey: #cccccc;
+  --tgr-stone-grey:  #cccccc;
+  --tgr-graphite:    #707070;
 }
 
 /* ── Semantic tokens ──────────────────────────────────────────────────────── */
@@ -40,7 +42,7 @@
 
   /* Text */
   --colors-text:           var(--tgr-raisin);
-  --colors-text-secondary: var(--tgr-mid-grey);
+  --colors-text-secondary: var(--tgr-graphite);
   --colors-text-inverse:   var(--tgr-white);
   --colors-text-disabled:  var(--tgr-light-grey);
 
@@ -62,7 +64,7 @@
 
   /* Form fields */
   --form-field-background:   var(--tgr-white);
-  --form-field-border-color: var(--tgr-border-grey);
+  --form-field-border-color: var(--tgr-stone-grey);
   --form-input-placeholder:  var(--tgr-mid-grey);
   --field-min-height:        44px;
 
@@ -128,7 +130,7 @@
   --related-category-hover-text:  var(--colors-text-inverse);
 
   /* Form field extras */
-  --form-field-border-color-hover: var(--tgr-raisin);
+  --form-field-border-color-hover: var(--colors-text);
   --form-field-border-radius:      4px;
   /* Unselected product option tiles, pills and rows */
   --form-option-border-color: var(--tgr-option-grey);

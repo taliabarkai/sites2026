@@ -66,6 +66,7 @@ export function InputAction({
         </label>
         <input
           id={inputId}
+          data-focus-ring="none"
           type={inputType}
           placeholder={placeholder}
           value={value}

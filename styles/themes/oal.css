@@ -18,6 +18,8 @@
   --oal-green:      #2b8b68;
   --oal-red:        #8e0000;
   --oal-option-grey: #cccccc;
+  --oal-stone-grey:  #cccccc;
+  --oal-graphite:    #707070;
 }
 
 /* ── Semantic tokens ──────────────────────────────────────────────────────── */
@@ -38,7 +40,7 @@
 
   /* Text */
   --colors-text:          var(--oal-black);
-  --colors-text-secondary: var(--oal-dark-grey);
+  --colors-text-secondary: var(--oal-graphite);
   --colors-text-inverse:   var(--oal-white);
   --colors-text-disabled:  var(--oal-dark-grey);
 
@@ -60,7 +62,7 @@
 
   /* Form fields */
   --form-field-background:   var(--oal-white);
-  --form-field-border-color: var(--oal-light-grey);
+  --form-field-border-color: var(--oal-stone-grey);
   --form-input-placeholder:  var(--oal-mid-grey);
   --field-min-height:        44px;
 
@@ -128,8 +130,8 @@
   --related-category-hover-text:  var(--colors-text-inverse);
 
   /* Form field extras */
-  --form-field-border-color-hover: var(--oal-black);
-  --form-field-border-radius:      4px;
+  --form-field-border-color-hover: var(--colors-text);
+  --form-field-border-radius:      var(--radius-sm);  /* OAL is sharp — matches cart and checkout */
   /* Unselected product option tiles, pills and rows */
   --form-option-border-color: var(--oal-option-grey);
 

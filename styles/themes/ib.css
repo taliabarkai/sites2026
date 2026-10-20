@@ -22,6 +22,8 @@
   --ib-copper:      #a3754d;
   --ib-slate:       #808080;
   --ib-option-grey: #cccccc;
+  --ib-stone-grey:  #cccccc;
+  --ib-graphite:    #707070;
 }
 
 /* ── Semantic tokens ──────────────────────────────────────────────────────── */
@@ -42,7 +44,7 @@
 
   /* Text */
   --colors-text:           var(--ib-navy);
-  --colors-text-secondary: var(--ib-slate);
+  --colors-text-secondary: var(--ib-graphite);
   --colors-text-inverse:   var(--ib-white);
   --colors-text-disabled:  var(--ib-off-white);
 
@@ -63,8 +65,8 @@
   --footer-text-muted:            var(--ib-mid-grey);
 
   /* Form fields */
-  --form-field-background:   var(--ib-light-blue);
-  --form-field-border-color: var(--ib-grey);
+  --form-field-background:   var(--ib-white);
+  --form-field-border-color: var(--ib-stone-grey);
   --form-input-placeholder:  var(--ib-mid-grey);
   --field-min-height:        44px;
 
@@ -129,7 +131,7 @@
   --related-category-hover-text:  var(--colors-text-inverse);
 
   /* Form field extras */
-  --form-field-border-color-hover: var(--ib-navy);
+  --form-field-border-color-hover: var(--colors-text);
   --form-field-border-radius:      4px;
   /* Unselected product option tiles, pills and rows */
   --form-option-border-color: var(--ib-option-grey);

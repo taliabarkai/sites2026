@@ -3,7 +3,7 @@
 .field {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-xxxs);
+  gap: var(--form-field-message-gap);
 }
 
 /* Visually hidden, still announced. The design carries the name as in-field
@@ -44,11 +44,7 @@
   border-color: var(--form-field-border-color-hover);
 }
 
-.input:focus-visible {
-  border-color: var(--border-strong);
-  outline: var(--border-width) solid var(--border-strong);
-  outline-offset: -2px;
-}
+/* Focus ring comes from the shared field rule in globals.css. */
 
 .inputInvalid,
 .inputInvalid:hover {
@@ -94,7 +90,9 @@
 }
 
 .control:focus-within {
-  border-color: var(--border-strong);
+  border-color: var(--form-field-focus-ring-color);
+  outline: var(--form-field-focus-ring-width) solid var(--form-field-focus-ring-color);
+  outline-offset: var(--form-field-focus-ring-offset);
 }
 
 .controlInvalid,

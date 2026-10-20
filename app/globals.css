@@ -118,6 +118,26 @@ body {
   border-color: var(--form-field-border-color-hover);
 }
 
+/* Focus ring for every text field and dropdown on every page — one rule, so
+   none of them drifts: a 2px ring in the text colour, 1px clear of the border.
+   A field drawn inside a bordered wrapper marks itself data-focus-ring="none"
+   and the wrapper draws the same ring with the tokens below. */
+[data-theme] {
+  --form-field-focus-ring-width:  2px;
+  --form-field-focus-ring-offset: 1px;
+  --form-field-focus-ring-color:  var(--colors-text);
+  /* Field to its error or hint message, wherever one sits under a field (4px). */
+  --form-field-message-gap:       var(--spacing-xxxs);
+}
+
+[data-theme] input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([type="hidden"]):not([type="submit"]):not([type="button"]):not([type="reset"]):not([type="color"]):not([type="image"]):not([data-focus-ring="none"]):focus,
+[data-theme] select:not([data-focus-ring="none"]):focus,
+[data-theme] textarea:not([data-focus-ring="none"]):focus {
+  border-color: var(--form-field-focus-ring-color);
+  outline: var(--form-field-focus-ring-width) solid var(--form-field-focus-ring-color);
+  outline-offset: var(--form-field-focus-ring-offset);
+}
+
 /* Prevent iOS Safari from zooming on input focus — requires font-size ≥ 16px */
 @media screen and (max-width: 768px) {
   input:not([type="checkbox"]):not([type="radio"]),

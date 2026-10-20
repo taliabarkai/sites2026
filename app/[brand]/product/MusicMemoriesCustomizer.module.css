@@ -331,6 +331,12 @@
   font-family: inherit;
 }
 
+.frameTrigger:focus-visible {
+  border-color: var(--form-field-focus-ring-color);
+  outline: var(--form-field-focus-ring-width) solid var(--form-field-focus-ring-color);
+  outline-offset: var(--form-field-focus-ring-offset);
+}
+
 .frameTriggerInner {
   display: flex;
   align-items: center;

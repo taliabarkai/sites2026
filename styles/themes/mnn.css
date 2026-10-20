@@ -21,6 +21,8 @@
   --mnn-warning:    #ef7d60;
   --mnn-forest:     #09391e;
   --mnn-option-grey: #cccccc;
+  --mnn-stone-grey:  #cccccc;
+  --mnn-graphite:    #707070;
 }
 
 /* ── Semantic tokens ──────────────────────────────────────────────────────── */
@@ -41,7 +43,7 @@
 
   /* Text */
   --colors-text:           var(--mnn-black);
-  --colors-text-secondary: var(--mnn-mid-grey);
+  --colors-text-secondary: var(--mnn-graphite);
   --colors-text-inverse:   var(--mnn-white);
   --colors-text-disabled:  var(--mnn-light-grey);
 
@@ -62,8 +64,8 @@
   --footer-text-muted:            var(--mnn-mid-grey);
 
   /* Form fields */
-  --form-field-background:   var(--mnn-off-white);
-  --form-field-border-color: var(--mnn-grey);
+  --form-field-background:   var(--mnn-white);
+  --form-field-border-color: var(--mnn-stone-grey);
   --form-input-placeholder:  var(--mnn-mid-grey);
   --field-min-height:        44px;
 
@@ -152,7 +154,7 @@
   --related-category-hover-text:  var(--colors-text-inverse);
 
   /* Form field extras */
-  --form-field-border-color-hover: var(--mnn-black);
+  --form-field-border-color-hover: var(--colors-text);
   --form-field-border-radius:      4px;
   /* Unselected product option tiles, pills and rows */
   --form-option-border-color: var(--mnn-option-grey);

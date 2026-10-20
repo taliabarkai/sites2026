@@ -86,12 +86,12 @@
   border-color: var(--form-field-border-color-hover);
 }
 
-.select:focus-visible,
-.trigger:focus-visible,
-.input:focus-visible {
-  border-color: var(--colors-text);
-  outline: calc(var(--border-width) * 2) solid var(--colors-text);
-  outline-offset: calc(var(--border-width) * 2);
+/* The custom dropdown is a button, so it takes the shared field ring here;
+   the native select and input get it from globals.css. */
+.trigger:focus-visible {
+  border-color: var(--form-field-focus-ring-color);
+  outline: var(--form-field-focus-ring-width) solid var(--form-field-focus-ring-color);
+  outline-offset: var(--form-field-focus-ring-offset);
 }
 
 /* ── select ───────────────────────────────────────────────────────────────── */

@@ -58,6 +58,8 @@ export const Field = forwardRef<HTMLInputElement, FieldProps>(function Field({
          to sit centred or rise, and it only matches when a placeholder exists. */
       placeholder={floating ? ' ' : input.placeholder}
       className={`${floating ? styles.floatInput : styles.input} ${isInvalid ? styles.inputInvalid : ''}`}
+      /* The floating variant's .control wrapper carries the ring instead. */
+      data-focus-ring={floating ? 'none' : undefined}
       aria-invalid={isInvalid ? true : undefined}
       aria-describedby={described || undefined}
     />

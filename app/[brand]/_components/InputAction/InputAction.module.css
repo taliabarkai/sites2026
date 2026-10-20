@@ -18,7 +18,8 @@
 }
 
 .wrapper:focus-within {
-  outline: none;
+  outline: var(--form-field-focus-ring-width) solid var(--form-field-focus-ring-color);
+  outline-offset: var(--form-field-focus-ring-offset);
 }
 
 .wrapper[data-disabled] {
@@ -30,6 +31,11 @@
 :global([data-theme='oal']) .wrapper,
 :global([data-theme='oal']) .wrapper:hover:not([data-disabled]) {
   border-color: var(--colors-text-inverse);
+}
+
+/* …and a black ring would vanish against that footer. */
+:global([data-theme='oal']) .wrapper {
+  --form-field-focus-ring-color: var(--colors-text-inverse);
 }
 
 .input {
@@ -83,7 +89,7 @@
 }
 
 .message {
-  margin: var(--spacing-xxs) 0 0;
+  margin: var(--form-field-message-gap) 0 0;
   font-family:    var(--typography-rules-text3-font-family);
   font-size:      var(--typography-rules-text3-font-size);
   line-height:    var(--typography-rules-text3-line-height);

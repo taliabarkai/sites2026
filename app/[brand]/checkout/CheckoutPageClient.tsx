@@ -655,6 +655,11 @@ function CheckoutPageInner() {
   // to the submit response instead — see the TODO on the alert below.
   const isErrorPreview = searchParams.get('state') === 'error'
 
+  // Preview-only: ?fields=black shows the split layout — no box around the
+  // form, the summary on a tinted half — to compare against the default. The
+  // name is historical; the fields themselves are the theme's own.
+  const isSplitLayoutPreview = searchParams.get('fields') === 'black'
+
   /**
    * Full document load of the same checkout with `state` dropped, so the page
    * genuinely re-reads rather than re-rendering the stale view. A plain
@@ -1120,7 +1125,7 @@ function CheckoutPageInner() {
   }
 
   return (
-    <div className={styles.page}>
+    <div className={`${styles.page}${isSplitLayoutPreview ? ` ${styles.splitLayoutPreview}` : ''}`}>
 
       <div className={styles.checkoutHeaderWrap} data-sticky-top>
         <Header variant="white" brand={brand} navLinks={navLinks} topline={topline} />
