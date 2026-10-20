@@ -48,7 +48,8 @@ export const DEFAULT_TOPLINE = {
 export const DEFAULT_NAV_LINKS: NavLink[] = [
   // { label: 'Shop All', href: '/category' },
   // { label: 'Gifts', href: '/gifts' },
-  { label: 'Best Sellers', href: '/category' },
+  // V1 is the chosen category layout; Current and V1–V4 stay under Shop By.
+  { label: 'Best Sellers', href: '/category/v1' },
   {
     label: 'New In',
     href: '/category/t4',

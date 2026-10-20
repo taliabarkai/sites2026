@@ -16,6 +16,14 @@
   }
 }
 
+/* …from 768px when the slot is pinned (data-banner-fill) */
+@media (min-width: 768px) {
+  :global([data-banner-fill]) .touchOnly,
+  :global([data-banner-fill]) .hoverOnly {
+    height: 100%;
+  }
+}
+
 /* ── Desktop dots — hidden until the banner is hovered or focused into ────── */
 .pinLayer {
   position: absolute;

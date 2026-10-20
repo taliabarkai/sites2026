@@ -108,3 +108,20 @@
 .hideCtaOnHover:focus-within .cta {
   opacity: 0;
 }
+
+/* In a category grid slot pinned from tablet up (data-banner-fill), fill the
+   slot from 768px rather than 1440px. Anywhere else nothing changes. */
+@media (min-width: 768px) {
+  :global([data-banner-fill]) .root {
+    height: 100%;
+  }
+
+  :global([data-banner-fill]) .image {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+  }
+}

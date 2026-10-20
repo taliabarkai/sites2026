@@ -1,12 +1,11 @@
 'use client'
 
-import { useLayoutEffect, useRef, useState } from 'react'
+import { useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { useCart } from '../_context/CartContext'
 import { Footer } from '../_components/Footer'
 import { Header } from '../_components/Header'
 import { FloatingCart } from '../_components/FloatingCart'
-import { ProductCard, toQuickAddProduct } from '../_components/ProductCard'
 import { getBrandFromPathname } from '../_config/brands'
 import { prefixFooterColumns, prefixNavLinks, withBrandPrefix } from '../_config/brandPaths'
 import {
@@ -15,14 +14,13 @@ import {
   DEFAULT_TOPLINE,
 } from '../_config/siteContent'
 import styles from './CategoryPageT3.module.css'
-import baseStyles from './CategoryPage.module.css'
+import plpStyles from './PlpVariant.module.css'
+import { FilterPanel } from './CategoryFilterPanel'
+import { PlpEmpty, PlpGridCard, PlpToolbar, usePlpControls } from './PlpControls'
 import { getBrandProducts } from '../../../data/products/getBrandProducts'
-import { Button } from '../_components/Button'
-import { FilterChips } from '../_components/FilterChips'
 import type { ProductItem } from '../../../data/products'
 import { CategoryHero } from '../_components/CategoryHero'
 import { getSeoCategoryVariant } from '../../../data/seoCategories/variantConfig'
-import { tgrRatingProps } from './tgrProductRatings'
 import { HotspotImage } from '../_components/HotspotImage'
 import type { HotspotPinData } from '../_components/HotspotImage'
 import type { QuickAddProduct } from '../_components/QuickAddPanel'
@@ -45,64 +43,12 @@ const BRAND_ICONS = {
 
 // ─── Data — sourced from data/products registry ────────────────────────────
 
-const MATERIAL_FILTERS = [
-  { key: 'silver',  label: 'Silver',       swatchVar: 'var(--sterling-silver-925)' },
-  { key: 'vermeil', label: 'Gold Vermeil', swatchVar: 'var(--gold-vermeil-18k)' },
-  { key: 'solid',   label: 'Solid Gold',   swatchVar: 'var(--solid-gold-14k)' },
-  { key: 'white',   label: 'White Gold',   swatchVar: 'var(--white-gold-14k)' },
-] as const
-
-type MaterialKey = (typeof MATERIAL_FILTERS)[number]['key']
-
-const SORT_OPTIONS = [
-  { key: 'featured',    label: 'Featured' },
-  { key: 'price-asc',  label: 'Price: Low to high' },
-  { key: 'price-desc', label: 'Price: High to low' },
-] as const
-
-type SortKey = typeof SORT_OPTIONS[number]['key']
-
 const DEFAULT_PRODUCT_SWATCHES = [
   'var(--sterling-silver-925)',
   'var(--gold-vermeil-18k)',
   'var(--solid-gold-14k)',
   'var(--rose-gold-plating-18k)',
 ]
-
-// ─── T3: Rhythm group types ────────────────────────────────────────────────
-
-type RhythmGroup =
-  | { type: 'A'; cards: ProductItem[]; featured: ProductItem }
-  | { type: 'B'; cards: ProductItem[] }
-  | { type: 'C'; cards: ProductItem[]; featured: ProductItem }
-  | { type: 'D'; cards: ProductItem[]; featured: ProductItem }
-
-function buildRhythmGroups(allProducts: ProductItem[], featuredProducts: ProductItem[]): RhythmGroup[] {
-  const groups: RhythmGroup[] = []
-  let pi = 0
-
-  // Row 1: 4-slot banner (2 cols × 2 rows) + 4 cards
-  const g0 = allProducts.slice(pi, pi + 4)
-  if (g0.length > 0) { groups.push({ type: 'A', cards: g0, featured: featuredProducts[0] }); pi += g0.length }
-
-  // Row 2: 8 plain cards
-  const g1 = allProducts.slice(pi, pi + 8)
-  if (g1.length > 0) { groups.push({ type: 'B', cards: g1 }); pi += g1.length }
-
-  // Row 3: 2-slot banner (2 cols × 1 row) + 6 cards
-  const g2 = allProducts.slice(pi, pi + 6)
-  if (g2.length > 0) { groups.push({ type: 'D', cards: g2, featured: featuredProducts[0] }); pi += g2.length }
-
-  // Remaining products: plain 8-up rows
-  while (pi < allProducts.length) {
-    const cards = allProducts.slice(pi, pi + 8)
-    if (cards.length === 0) break
-    groups.push({ type: 'B', cards })
-    pi += cards.length
-  }
-
-  return groups
-}
 
 // ─── T3: Banner tile configs ───────────────────────────────────────────────
 
@@ -282,10 +228,10 @@ function pinsToLookItems(
 
 // ─── T3: Desktop banner height — end at the product images, not the card text ─
 //
-// From 1440px a banner spans N grid rows of product cards. Left to stretch, it
+// From 768px a banner spans N grid rows of product cards. Left to stretch, it
 // would run past the last row's product name and price; instead its height is
 // set so its bottom lines up with the bottom of that row's product images.
-// Below 1440px the banner is a full-width row sized by its image — untouched.
+// Below 768px the banner is a full-width row sized by its image — untouched.
 
 function useAlignBannerToCardImages(ref: React.RefObject<HTMLElement | null>) {
   useLayoutEffect(() => {
@@ -293,22 +239,30 @@ function useAlignBannerToCardImages(ref: React.RefObject<HTMLElement | null>) {
     const group = el?.parentElement
     if (!el || !group) return
 
-    const desktop = window.matchMedia('(min-width: 1440px)')
+    const desktop = window.matchMedia('(min-width: 768px)')
 
     const align = () => {
       el.style.height = ''
       el.style.alignSelf = ''
       if (!desktop.matches) return
 
+      // Rows spanned: "1 / 3" → 2; a lone start ("5", end "auto") or "span N".
       const { gridRowStart, gridRowEnd } = getComputedStyle(el)
-      const span = Number(gridRowEnd) - Number(gridRowStart)
+      const spanMatch = /^span (\d+)$/.exec(gridRowEnd)
+      const span = spanMatch ? Number(spanMatch[1])
+        : gridRowEnd === 'auto' ? 1
+        : Number(gridRowEnd) - Number(gridRowStart)
       if (!Number.isFinite(span) || span < 1) return
 
       const top = el.getBoundingClientRect().top
-      // One image per sibling card (the card's default image fills its frame).
+      // One image per sibling card: its largest, the product photo — not a
+      // badge or swatch that may come first in the markup.
+      const largestImage = (card: Element) => Array.from(card.querySelectorAll('img'))
+        .map((img) => img.getBoundingClientRect())
+        .reduce<DOMRect | undefined>((best, r) => (!best || r.width * r.height > best.width * best.height ? r : best), undefined)
       const images = Array.from(group.children)
         .filter((c) => c !== el)
-        .map((c) => c.querySelector('img')?.getBoundingClientRect())
+        .map(largestImage)
         .filter((r): r is DOMRect => Boolean(r) && r!.top >= top - 1)
       // Rows the banner spans, by distinct image top; take the last one's bottom.
       const rowTops = [...new Set(images.map((r) => Math.round(r.top)))].sort((a, b) => a - b)
@@ -372,7 +326,7 @@ function FeaturedCard({
       </div>
     )
     return (
-      <article ref={articleRef} className={`${styles.featuredCard} ${slotClassName}`}>
+      <article ref={articleRef} data-banner-fill className={`${styles.featuredCard} ${slotClassName}`}>
         {disableHotspots ? (
           <>
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -392,7 +346,7 @@ function FeaturedCard({
   // reveals the dots, each with a mini-card popover + Quick Add.
   if (config.type === 'hotspot' && stlVariant === 'v3' && onOpenShopTheLook) {
     return (
-      <article ref={articleRef} className={`${styles.featuredCard} ${slotClassName}`}>
+      <article ref={articleRef} data-banner-fill className={`${styles.featuredCard} ${slotClassName}`}>
         <ShopTheLookBannerV3
           image={config.image}
           imageAlt={config.imageAlt}
@@ -408,7 +362,7 @@ function FeaturedCard({
   // opens the v2 panel (image with dots + selected product).
   if (config.type === 'hotspot' && stlVariant === 'v2' && onOpenShopTheLook) {
     return (
-      <article ref={articleRef} className={`${styles.featuredCard} ${slotClassName}`}>
+      <article ref={articleRef} data-banner-fill className={`${styles.featuredCard} ${slotClassName}`}>
         <ShopTheLookBannerV1
           image={config.image}
           imageAlt={config.imageAlt}
@@ -425,7 +379,7 @@ function FeaturedCard({
   // Dots appear wherever Current has them; the wide banner keeps title + CTA.
   if (config.type === 'hotspot' && stlVariant === 'v1' && onOpenShopTheLook) {
     return (
-      <article ref={articleRef} className={`${styles.featuredCard} ${slotClassName}`}>
+      <article ref={articleRef} data-banner-fill className={`${styles.featuredCard} ${slotClassName}`}>
         <ShopTheLookBannerV1
           image={config.image}
           imageAlt={config.imageAlt}
@@ -440,7 +394,7 @@ function FeaturedCard({
 
   if (config.type === 'hotspot' && !disableHotspots) {
     return (
-      <article ref={articleRef} className={`${styles.featuredCard} ${slotClassName}`}>
+      <article ref={articleRef} data-banner-fill className={`${styles.featuredCard} ${slotClassName}`}>
         <HotspotImage
           src={config.image}
           alt={config.imageAlt}
@@ -454,7 +408,7 @@ function FeaturedCard({
 
   // Static banner (Tiles 1 & 3)
   return (
-    <article ref={articleRef} className={`${styles.featuredCard} ${slotClassName}`}>
+    <article ref={articleRef} data-banner-fill className={`${styles.featuredCard} ${slotClassName}`}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={config.image}
@@ -464,172 +418,6 @@ function FeaturedCard({
       />
       <p className={styles.bannerHeadline}>{config.headline}</p>
     </article>
-  )
-}
-
-// ─── Sub-components ───────────────────────────────────────────────────────────
-
-function FilterPanel({
-  isOpen,
-  onClose,
-  activeMaterials,
-  onToggleMaterial,
-  onClearAll,
-  sortKey,
-  onSortChange,
-  itemCount,
-  XIcon,
-  ChevronIcon,
-  CheckmarkIcon,
-}: {
-  isOpen: boolean
-  onClose: () => void
-  activeMaterials: Set<MaterialKey>
-  onToggleMaterial: (key: MaterialKey) => void
-  onClearAll: () => void
-  sortKey: SortKey
-  onSortChange: (key: SortKey) => void
-  itemCount: number
-  XIcon: React.ComponentType<{ size?: number }>
-  ChevronIcon: React.ComponentType<{ size?: number }>
-  CheckmarkIcon: React.ComponentType<{ size?: number }>
-}) {
-  const [sortExpanded, setSortExpanded] = useState(true)
-  const activeList = MATERIAL_FILTERS.filter(m => activeMaterials.has(m.key))
-  return (
-    <>
-      <div
-        className={`${styles.filterOverlay} ${isOpen ? styles.filterOverlayVisible : ''}`}
-        onClick={onClose}
-        aria-hidden="true"
-      />
-      <div
-        className={`${styles.filterPanel} ${isOpen ? styles.filterPanelOpen : ''}`}
-        role="dialog"
-        aria-label="Filters"
-        aria-modal="true"
-      >
-        <div className={styles.filterPanelHeader}>
-          <h2 className={styles.filterPanelTitle}>Filters</h2>
-          <button type="button" className={styles.filterPanelClose} aria-label="Close filters" onClick={onClose}>
-            <XIcon size={24} />
-          </button>
-        </div>
-        {activeList.length > 0 && (
-          <div className={baseStyles.filterActiveChips}>
-            <FilterChips
-              chips={activeList.map(m => ({ value: m.key, label: m.label }))}
-              onRemove={(value) => onToggleMaterial(value as MaterialKey)}
-              onClearAll={onClearAll}
-              XIcon={XIcon}
-            />
-          </div>
-        )}
-        <div className={styles.filterPanelBody}>
-          <div className={styles.filterSection}>
-            <button
-              type="button"
-              className={styles.filterSortHeader}
-              onClick={() => setSortExpanded(o => !o)}
-              aria-expanded={sortExpanded}
-            >
-              <span className={styles.filterSectionTitle}>Sort By:</span>
-              <span className={styles.filterSortValue}>
-                {SORT_OPTIONS.find(o => o.key === sortKey)?.label}
-                <span style={{ display: 'inline-flex', transform: sortExpanded ? 'rotate(-90deg)' : 'rotate(90deg)', transition: 'transform var(--transition-fast)' }}>
-                  <ChevronIcon size={24} />
-                </span>
-              </span>
-            </button>
-            {sortExpanded && (
-              <div className={styles.sortOptions} role="radiogroup" aria-label="Sort by">
-                {SORT_OPTIONS.map((opt) => (
-                  <label key={opt.key} className={styles.sortOption}>
-                    <input
-                      type="radio"
-                      name="sort"
-                      value={opt.key}
-                      checked={sortKey === opt.key}
-                      onChange={() => onSortChange(opt.key)}
-                      className={styles.sortOptionInput}
-                    />
-                    <span className={styles.sortOptionLabel}>{opt.label}</span>
-                  </label>
-                ))}
-              </div>
-            )}
-          </div>
-          <div className={styles.filterSection}>
-            <p className={styles.filterSectionTitle}>Materials</p>
-            <div className={styles.materialList}>
-              {MATERIAL_FILTERS.map((m) => {
-                const active = activeMaterials.has(m.key)
-                return (
-                  <button
-                    key={m.key}
-                    type="button"
-                    className={`${styles.materialItem} ${active ? styles.materialItemActive : ''}`}
-                    onClick={() => onToggleMaterial(m.key)}
-                    aria-pressed={active}
-                  >
-                    <span className={styles.materialSwatch} style={{ background: m.swatchVar }} aria-hidden="true" />
-                    <span className={styles.materialLabel}>{m.label}</span>
-                    {active && (
-                      <span className={baseStyles.materialCheck} aria-hidden="true">
-                        <CheckmarkIcon size={18} />
-                      </span>
-                    )}
-                  </button>
-                )
-              })}
-            </div>
-          </div>
-        </div>
-        <div className={baseStyles.filterPanelFooter}>
-          <Button variant="primary" className={baseStyles.filterViewItems} onClick={onClose}>
-            View Items ({itemCount})
-          </Button>
-        </div>
-      </div>
-    </>
-  )
-}
-
-
-function FilterBar({
-  itemCount,
-  onOpenFilters,
-  activeCount,
-  FilterIcon,
-  previewControl,
-}: {
-  itemCount: number
-  onOpenFilters: () => void
-  activeCount: number
-  FilterIcon: React.ComponentType<{ size?: number }>
-  /** Design-preview control shown beside the item count. */
-  previewControl?: React.ReactNode
-}) {
-  return (
-    <div className={styles.filterBar}>
-      <div className={styles.filterBarInner}>
-        <div className={styles.filterRight}>
-          <span className={styles.itemCountGroup}>
-            {previewControl}
-            <span className={styles.itemCount}>{itemCount} items</span>
-          </span>
-          <button
-            type="button"
-            className={styles.filtersTrigger}
-            onClick={onOpenFilters}
-            aria-label="Open filters"
-          >
-            <FilterIcon size={24} />
-            Filters{activeCount > 0 && <span className={baseStyles.filtersTriggerCount}>({activeCount})</span>}
-          </button>
-        </div>
-      </div>
-    </div>
   )
 }
 
@@ -647,33 +435,25 @@ function CategoryPageInnerT3({ initialStlVariant }: { initialStlVariant: StlVari
     contactHref: withBrandPrefix(brand, DEFAULT_TOPLINE.contactHref),
   }
 
-  const icons = BRAND_ICONS[brand]
-  const { FilterIcon, XIcon, ChevronIcon, CheckmarkIcon, StarIcon } = icons
-
-  // TGR only: derive star-rating props for a product card
-  const ratingProps = (p: ProductItem) => tgrRatingProps(brand, p, StarIcon)
-
-  const [activeMaterials, setActiveMaterials] = useState<Set<MaterialKey>>(new Set())
-  const toggleMaterial = (key: MaterialKey) => {
-    setActiveMaterials((prev) => {
-      const next = new Set(prev)
-      if (next.has(key)) next.delete(key)
-      else next.add(key)
-      return next
-    })
-  }
-  const clearAllMaterials = () => setActiveMaterials(new Set())
-
-  const [sortKey, setSortKey] = useState<SortKey>('featured')
-  const [filterPanelOpen, setFilterPanelOpen] = useState(false)
+  const { XIcon, ChevronIcon, CheckmarkIcon, StarIcon } = BRAND_ICONS[brand]
 
   const { items, isOpen, subtotal, closeCart, removeItem } = useCart()
   const router = useRouter()
 
-  const allBrandProducts = getBrandProducts(brand)
+  // The first three products feed the banner tiles; the rest fill the grid.
+  const allBrandProducts = useMemo(() => getBrandProducts(brand), [brand])
   const featuredProducts = allBrandProducts.slice(0, 3)
-  const products = allBrandProducts.slice(3)
-  const rhythmGroups = buildRhythmGroups(products, featuredProducts)
+  const gridProducts = useMemo(() => allBrandProducts.slice(3), [allBrandProducts])
+  const controls = usePlpControls(gridProducts)
+  const products = controls.filtered
+
+  // Banner order in the grid: 4 cards, the main banner (2×2 on the right),
+  // 8 cards, the wide banner (2 slots × 1 row), then the rest. The wide one
+  // only shows once there are enough pieces around it to fill its rows.
+  const leadCards = products.slice(0, 4)
+  const middleCards = products.slice(4, 12)
+  const showWideBanner = products.length >= 18
+  const tailCards = products.slice(12)
 
   // Shop The Look preview — the URL (?stl=v1 | current | v2 | v3 | v4) is the
   // source of truth, so a reload, a shared link or going Back (e.g. from V4's
@@ -702,12 +482,10 @@ function CategoryPageInnerT3({ initialStlVariant }: { initialStlVariant: StlVari
       <main id="main-content">
         <CategoryHero brand={brand} variant={getSeoCategoryVariant(brand)} title="Shop All" />
 
-        <FilterBar
-          itemCount={allBrandProducts.length}
-          onOpenFilters={() => setFilterPanelOpen(true)}
-          activeCount={activeMaterials.size}
-          FilterIcon={FilterIcon}
-          previewControl={
+        <PlpToolbar
+          brand={brand}
+          controls={controls}
+          extra={
             <VariantToggle
               label="Shop The Look banner preview"
               options={STL_VARIANT_OPTIONS}
@@ -717,128 +495,50 @@ function CategoryPageInnerT3({ initialStlVariant }: { initialStlVariant: StlVari
           }
         />
 
-        <section className={styles.productsSection} aria-label="Products">
-          <div className={styles.productsGridT2}>
-            {rhythmGroups.map((group, gi) => {
-              if (group.type === 'B') {
-                return (
-                  <div key={gi} className={styles.rhythmGroup}>
-                    {group.cards.map((p) => (
-                      <ProductCard
-                        key={p.id}
-                        name={p.name}
-                        price={p.price ?? ''}
-                        originalPrice={p.originalPrice}
-                        defaultImage={p.image}
-                        hoverImage={p.hoverImage}
-                        href={`/${brand}${p.href}`}
-                        quickAddProduct={toQuickAddProduct(p)}
-                        squareImage
-                        swatches={brand !== 'lal' ? DEFAULT_PRODUCT_SWATCHES : undefined}
-                        {...ratingProps(p)}
-                      />
-                    ))}
-                  </div>
-                )
-              }
+        <section className={plpStyles.productsSection} aria-label="Products">
+          <div className={`${controls.gridClassName} ${styles.stlGrid}`}>
+            {leadCards.map((p) => (
+              <PlpGridCard key={p.id} product={p} brand={brand} controls={controls} squareImage />
+            ))}
 
-              if (group.type === 'A') {
-                return (
-                  <div key={gi} className={styles.rhythmGroup}>
-                    {/* Featured RIGHT: cols 3–4 on desktop; pushed after cards on mobile via order:1 */}
-                    <FeaturedCard
-                      product={group.featured}
-                      swatches={brand !== 'lal' ? DEFAULT_PRODUCT_SWATCHES : undefined}
-                      slotClassName={styles.featuredCardRight}
-                      stlVariant={stlVariant}
-                      onOpenShopTheLook={openShopTheLook}
-                      shopTheLookHref={stlV4Href}
-                      productHref={stlV4ProductHref}
-                    />
-                    {group.cards.map((p) => (
-                      <ProductCard
-                        key={p.id}
-                        name={p.name}
-                        price={p.price ?? ''}
-                        originalPrice={p.originalPrice}
-                        defaultImage={p.image}
-                        hoverImage={p.hoverImage}
-                        href={`/${brand}${p.href}`}
-                        quickAddProduct={toQuickAddProduct(p)}
-                        squareImage
-                        swatches={brand !== 'lal' ? DEFAULT_PRODUCT_SWATCHES : undefined}
-                        {...ratingProps(p)}
-                      />
-                    ))}
-                  </div>
-                )
-              }
+            {/* Main banner — 2×2 on the right: cols 3–4 in the 4-up grid, 4–5 in
+                the 5-up images-only grid. A full-width row after 4 cards on mobile. */}
+            {featuredProducts[0] && products.length > 0 && (
+              <FeaturedCard
+                product={featuredProducts[0]}
+                swatches={brand !== 'lal' ? DEFAULT_PRODUCT_SWATCHES : undefined}
+                slotClassName={`${styles.stlSlotMain} ${controls.desktopDense ? styles.stlSlotMainDense : ''}`}
+                stlVariant={stlVariant}
+                onOpenShopTheLook={openShopTheLook}
+                shopTheLookHref={stlV4Href}
+                productHref={stlV4ProductHref}
+              />
+            )}
 
-              // Group D — wide banner (2 cols × 1 row) + 6 cards
-              if (group.type === 'D') {
-                return (
-                  <div key={gi} className={styles.rhythmGroup}>
-                    <FeaturedCard
-                      product={group.featured}
-                      swatches={brand !== 'lal' ? DEFAULT_PRODUCT_SWATCHES : undefined}
-                      slotClassName={styles.featuredCardWide}
-                      disableHotspots
-                      stlVariant={stlVariant}
-                      onOpenShopTheLook={openShopTheLook}
-                      shopTheLookHref={stlV4Href}
-                      productHref={stlV4ProductHref}
-                    />
-                    {group.cards.map((p) => (
-                      <ProductCard
-                        key={p.id}
-                        name={p.name}
-                        price={p.price ?? ''}
-                        originalPrice={p.originalPrice}
-                        defaultImage={p.image}
-                        hoverImage={p.hoverImage}
-                        href={`/${brand}${p.href}`}
-                        quickAddProduct={toQuickAddProduct(p)}
-                        squareImage
-                        swatches={brand !== 'lal' ? DEFAULT_PRODUCT_SWATCHES : undefined}
-                        {...ratingProps(p)}
-                      />
-                    ))}
-                  </div>
-                )
-              }
+            {middleCards.map((p) => (
+              <PlpGridCard key={p.id} product={p} brand={brand} controls={controls} squareImage />
+            ))}
 
-              // Group C — featured LEFT
-              return (
-                <div key={gi} className={styles.rhythmGroup}>
-                  {/* Featured LEFT: cols 1–2 on desktop; appears before cards on mobile */}
-                  <FeaturedCard
-                    product={group.featured}
-                    swatches={brand !== 'lal' ? DEFAULT_PRODUCT_SWATCHES : undefined}
-                    slotClassName={styles.featuredCardLeft}
-                    stlVariant={stlVariant}
-                    onOpenShopTheLook={openShopTheLook}
-                    shopTheLookHref={stlV4Href}
-                      productHref={stlV4ProductHref}
-                  />
-                  {group.cards.map((p) => (
-                    <ProductCard
-                      key={p.id}
-                      name={p.name}
-                      price={p.price ?? ''}
-                      originalPrice={p.originalPrice}
-                      defaultImage={p.image}
-                      hoverImage={p.hoverImage}
-                      href={`/${brand}${p.href}`}
-                      quickAddProduct={toQuickAddProduct(p)}
-                      squareImage
-                      swatches={brand !== 'lal' ? DEFAULT_PRODUCT_SWATCHES : undefined}
-                      {...ratingProps(p)}
-                    />
-                  ))}
-                </div>
-              )
-            })}
+            {/* Wide banner — 2 slots × 1 row on the left, at either grid size */}
+            {showWideBanner && (
+              <FeaturedCard
+                product={featuredProducts[0]}
+                swatches={brand !== 'lal' ? DEFAULT_PRODUCT_SWATCHES : undefined}
+                slotClassName={`${styles.stlSlotWide} ${controls.desktopDense ? styles.stlSlotWideDense : ''}`}
+                disableHotspots
+                stlVariant={stlVariant}
+                onOpenShopTheLook={openShopTheLook}
+                shopTheLookHref={stlV4Href}
+                productHref={stlV4ProductHref}
+              />
+            )}
+
+            {tailCards.map((p) => (
+              <PlpGridCard key={p.id} product={p} brand={brand} controls={controls} squareImage />
+            ))}
           </div>
+
+          {products.length === 0 && <PlpEmpty controls={controls} />}
         </section>
       </main>
 
@@ -855,14 +555,14 @@ function CategoryPageInnerT3({ initialStlVariant }: { initialStlVariant: StlVari
       />
 
       <FilterPanel
-        isOpen={filterPanelOpen}
-        onClose={() => setFilterPanelOpen(false)}
-        activeMaterials={activeMaterials}
-        onToggleMaterial={toggleMaterial}
-        onClearAll={clearAllMaterials}
-        sortKey={sortKey}
-        onSortChange={setSortKey}
-        itemCount={allBrandProducts.length}
+        isOpen={controls.filterPanelOpen}
+        onClose={() => controls.setFilterPanelOpen(false)}
+        activeMaterials={controls.activeMaterials}
+        onToggleMaterial={controls.toggleMaterial}
+        onClearAll={controls.clearAllMaterials}
+        sortKey={controls.sortKey}
+        onSortChange={controls.setSortKey}
+        itemCount={products.length}
         XIcon={XIcon}
         ChevronIcon={ChevronIcon}
         CheckmarkIcon={CheckmarkIcon}

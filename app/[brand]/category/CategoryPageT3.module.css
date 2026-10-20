@@ -344,18 +344,6 @@
 
 /* ── T3: Rhythm grid — identical structure to T2 ─────────────────────────── */
 
-.productsGridT2 {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-xxxs);
-}
-
-.rhythmGroup {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: var(--spacing-xxxs);
-}
-
 /* ── T3: Marketing banner — full-bleed editorial image, no product metadata ──
  *
  * The featured slot in T3 is a static editorial banner.
@@ -422,26 +410,52 @@
 }
 
 /* Group A: featured RIGHT on desktop → full-width row after the 4 cards on mobile */
-.featuredCardRight {
-  grid-column: 1 / -1;
-  order: 1;
+/* ── Banners in the V1 grid ──────────────────────────────────────────────────
+   One grid for the whole page (PlpVariant .grid). Banners are pinned to their
+   slots and the cards flow around them; dense packing back-fills any cell a
+   banner's row leaves open, so the grid never shows a hole. */
+.stlGrid {
+  grid-auto-flow: row dense;
 }
 
-/* Group C: featured LEFT on desktop → full-width row before the 4 cards on mobile */
-.featuredCardLeft {
+/* Mobile: each banner is a full-width row where it sits in the list —
+   after the first 4 cards, and after the next 8. */
+.stlSlotMain,
+.stlSlotWide {
   grid-column: 1 / -1;
-  order: 0;
 }
 
-/* Group D: wide banner — full-width on mobile, 2 cols × 1 row on desktop */
-.featuredCardWide {
-  grid-column: 1 / -1;
-  order: 0;
-}
+@media (min-width: 768px) {
+  /* Main banner: 2×2 on the right — 4 slots in the 4-up grid… */
+  .stlSlotMain {
+    grid-column: 3 / 5;
+    grid-row: 1 / 3;
+  }
 
-/* Group E trailing: auto-placed after the last product card */
-.featuredCardSingle {
-  /* no grid placement — auto-flows into the next available cell */
+  /* …and the same 4 slots, smaller, in the 5-up images-only grid. */
+  .stlSlotMainDense {
+    grid-column: 4 / 6;
+  }
+
+  /* Wide banner: 2 slots × 1 row on the left, after 3 rows of cards
+     (4-up: 4 + 8 cards above it; 5-up: 6 + 5 cards above it). */
+  .stlSlotWide {
+    grid-column: 1 / 3;
+    grid-row: 5 / 6;
+  }
+
+  .stlSlotWideDense {
+    grid-row: 4 / 5;
+  }
+
+  /* Plain-image banners fill the slot with a cover crop, like the others. */
+  .featuredCard[data-banner-fill] .bannerImage {
+    position: absolute;
+    inset: 0;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+  }
 }
 
 /* All banners: consistent headline size and padding on mobile */
@@ -451,48 +465,6 @@
     line-height: 3.2rem;
     padding-bottom: var(--spacing-sm);
     padding-left: var(--spacing-sm);
-  }
-}
-
-@media (min-width: 1440px) {
-  .productsGridT2 {
-    gap: var(--spacing-xxs);
-  }
-
-  .rhythmGroup {
-    grid-template-columns: repeat(4, 1fr);
-    gap: var(--spacing-xxs);
-  }
-
-  /* On desktop the card fills its 2-row grid allocation via CSS grid stretch */
-  .featuredCard {
-    aspect-ratio: unset;
-  }
-
-  /* Group A: featured spans cols 3–4, rows 1–2 */
-  .featuredCardRight {
-    order: 0;
-    grid-column: 3 / 5;
-    grid-row: 1 / 3;
-  }
-
-  /* Group C: featured spans cols 1–2, rows 1–2 */
-  .featuredCardLeft {
-    order: 0;
-    grid-column: 1 / 3;
-    grid-row: 1 / 3;
-  }
-
-  /* Group D: wide banner — spans cols 1–2, row 1 only (= 2 card slots side by side) */
-  .featuredCardWide {
-    order: 0;
-    grid-column: 1 / 3;
-    grid-row: 1 / 2;
-  }
-
-  /* Group E trailing: auto-placed, aspect-ratio matches a product card */
-  .featuredCardSingle {
-    aspect-ratio: 4 / 5;
   }
 }
 

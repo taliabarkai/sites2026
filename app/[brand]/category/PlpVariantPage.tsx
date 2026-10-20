@@ -7,21 +7,18 @@
 //   /category/v4 — floating control bar pinned to the bottom of the viewport
 // Both reuse the existing FilterPanel (CategoryFilterPanel.tsx).
 
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import { useCart } from '../_context/CartContext'
 import { Footer } from '../_components/Footer'
 import { Header } from '../_components/Header'
 import { FloatingCart } from '../_components/FloatingCart'
-import { ProductCard, toQuickAddProduct } from '../_components/ProductCard'
 import { getBrandFromPathname } from '../_config/brands'
 import { prefixFooterColumns, prefixNavLinks, withBrandPrefix } from '../_config/brandPaths'
 import { DEFAULT_FOOTER_COLUMNS, DEFAULT_NAV_LINKS, DEFAULT_TOPLINE } from '../_config/siteContent'
-import { DEFAULT_PRODUCT_SWATCHES } from '../_config/products'
 import { getBrandProducts } from '../../../data/products/getBrandProducts'
-import type { ProductItem } from '../../../data/products'
-import { tgrRatingProps } from './tgrProductRatings'
-import { FilterPanel, type MaterialKey, type SortKey } from './CategoryFilterPanel'
+import { FilterPanel } from './CategoryFilterPanel'
+import { PlpEmpty, PlpGridCard, PlpToolbar, usePlpControls } from './PlpControls'
 import * as oalIcons from '@/src/components/icons/oal'
 import * as mnnIcons from '@/src/components/icons/mnn'
 import * as tgrIcons from '@/src/components/icons/tgr'
@@ -43,29 +40,7 @@ const PAGE_DESCRIPTION: Record<string, string> = {
   mnn: 'Our most-loved pieces, all in one place.',
 }
 
-/** Name-based material matching — the catalog has no material field yet. */
-const MATERIAL_MATCHERS: Record<MaterialKey, RegExp> = {
-  'stainless-steel':   /stainless/i,
-  'sterling-silver':   /silver/i,
-  'gold-vermeil':      /(?<!rose )gold vermeil/i,
-  'gold-plated':       /(?<!rose )gold plat/i,
-  'yellow-gold':       /\b(10|14|18)k gold\b(?! plat)/i,
-  'rose-gold-vermeil': /rose gold vermeil/i,
-  'rose-gold-plating': /rose gold plat/i,
-  'rose-gold':         /rose gold/i,
-  'white-gold':        /white gold/i,
-  'mixed-metals':      /mixed metal/i,
-  'lab-diamond':       /diamond|moissanite/i,
-  'gemstones':         /birthstone|gemstone|emerald|enamel/i,
-  'pearls':            /pearl/i,
-}
-
-const priceOf = (p: ProductItem) => p.priceInCents ?? (Number((p.price ?? '').replace(/[^0-9.]/g, '')) * 100 || 0)
-
 // ─── Types ────────────────────────────────────────────────────────────────────
-
-type ImageView = 'product' | 'model'
-type MobileCols = 1 | 2 | 3
 
 export type PlpVariant = 'v1' | 'v2' | 'v3' | 'v4'
 
@@ -83,40 +58,19 @@ export function PlpVariantPage({ variant }: { variant: PlpVariant }) {
     contactHref: withBrandPrefix(brand, DEFAULT_TOPLINE.contactHref),
   }
 
-  const { FilterIcon, XIcon, ChevronIcon, CheckmarkIcon, StarIcon, GridSingleIcon, GridDoubleIcon, GridTripleIcon, ProductViewIcon, ModelViewIcon } = BRAND_ICONS[brand]
+  const { FilterIcon, XIcon, ChevronIcon, CheckmarkIcon, GridSingleIcon, GridDoubleIcon, GridTripleIcon } = BRAND_ICONS[brand]
 
   // LAL is wall art — the second view is the piece in a room, not on a model.
   const modelLabel = brand === 'lal' ? 'In Room' : 'On Model'
 
-  // ── View state ──
-  const [view, setView] = useState<ImageView>('product')
-  const [mobileCols, setMobileCols] = useState<MobileCols>(2)
-  const [desktopDense, setDesktopDense] = useState(false)
-
-  // ── Filter state (same shape as the Current page) ──
-  const [activeMaterials, setActiveMaterials] = useState<Set<MaterialKey>>(new Set())
-  const [sortKey, setSortKey] = useState<SortKey>('featured')
-  const [filterPanelOpen, setFilterPanelOpen] = useState(false)
-  const toggleMaterial = (key: MaterialKey) => {
-    setActiveMaterials((prev) => {
-      const next = new Set(prev)
-      if (next.has(key)) next.delete(key)
-      else next.add(key)
-      return next
-    })
-  }
-  const clearAllMaterials = () => setActiveMaterials(new Set())
-
-  const products = useMemo(() => {
-    let list = getBrandProducts(brand)
-    if (activeMaterials.size > 0) {
-      const matchers = [...activeMaterials].map((k) => MATERIAL_MATCHERS[k])
-      list = list.filter((p) => matchers.some((re) => re.test(p.name)))
-    }
-    if (sortKey === 'price-asc')  list = [...list].sort((a, b) => priceOf(a) - priceOf(b))
-    if (sortKey === 'price-desc') list = [...list].sort((a, b) => priceOf(b) - priceOf(a))
-    return list
-  }, [brand, activeMaterials, sortKey])
+  // ── View + filter state (shared with the other V1 category pages) ──
+  const allProducts = useMemo(() => getBrandProducts(brand), [brand])
+  const controls = usePlpControls(allProducts)
+  const {
+    view, setView, mobileCols, setMobileCols, desktopDense, setDesktopDense,
+    activeMaterials, toggleMaterial, clearAllMaterials, sortKey, setSortKey,
+    filterPanelOpen, setFilterPanelOpen, filtered: products,
+  } = controls
 
   const { items, isOpen, subtotal, closeCart, removeItem } = useCart()
   const router = useRouter()
@@ -214,13 +168,6 @@ export function PlpVariantPage({ variant }: { variant: PlpVariant }) {
     </>
   )
 
-  const gridClasses = [
-    styles.grid,
-    mobileCols === 1 && styles.gridMobile1,
-    mobileCols === 3 && styles.gridMobile3,
-    desktopDense && styles.gridDesktopDense,
-  ].filter(Boolean).join(' ')
-
   return (
     <div className={styles.page}>
       <Header variant="white" brand={brand} navLinks={navLinks} topline={topline} revealOnScrollUp />
@@ -236,31 +183,7 @@ export function PlpVariantPage({ variant }: { variant: PlpVariant }) {
         </section>
 
         {/* ── V1: sticky toolbar ── */}
-        {variant === 'v1' && (
-          <div className={styles.toolbar}>
-            <div className={styles.toolbarInner}>
-              <button
-                type="button"
-                className={`${styles.ctl} ${styles.filterBtn}`}
-                aria-label={filterCount > 0 ? `Filter and sort, ${filterCount} active` : 'Filter and sort'}
-                onClick={() => setFilterPanelOpen(true)}
-              >
-                <FilterIcon size={22} />
-                <span className="hidden md:inline">Filters</span>
-                {filterBadge}
-              </button>
-
-              <button {...viewToggleProps} className={`${styles.ctl} ${styles.viewToggle}`}>
-                {/* Icon names the current view; LAL (wall art) is text only. */}
-                {brand !== 'lal' && (view === 'model' ? <ModelViewIcon size={18} /> : <ProductViewIcon size={18} />)}
-                {view === 'model' ? `${modelLabel === 'On Model' ? 'Model' : modelLabel} View` : 'Product View'}
-              </button>
-
-              {mobileGrid}
-              {desktopGrid}
-            </div>
-          </div>
-        )}
+        {variant === 'v1' && <PlpToolbar brand={brand} controls={controls} />}
 
         {/* ── V2: full-width three-part bar ── */}
         {variant === 'v2' && (
@@ -315,37 +238,13 @@ export function PlpVariantPage({ variant }: { variant: PlpVariant }) {
 
         {/* ── Products ── */}
         <section aria-label="Products" className={styles.productsSection}>
-          <div className={`${gridClasses} ${view === 'model' ? styles.modelView : ''}`}>
-            {products.map((p) => {
-              const showModel = view === 'model' && !!p.hoverImage && p.hasModelImage !== false
-              return (
-                <ProductCard
-                  key={p.id}
-                  name={p.name}
-                  price={p.price ?? ''}
-                  originalPrice={p.originalPrice}
-                  defaultImage={showModel ? p.hoverImage! : p.image}
-                  // Images-only 5-column grid: no hover swap, just the gallery.
-                  hoverImage={desktopDense ? undefined : showModel ? p.image : p.hoverImage}
-                  href={`/${brand}${p.href}`}
-                  quickAddProduct={toQuickAddProduct(p)}
-                  swatches={brand !== 'lal' ? DEFAULT_PRODUCT_SWATCHES : undefined}
-                  infoClassName={styles.cardInfo}
-                  quickAddClassName={styles.cardQuickAdd}
-                  {...tgrRatingProps(brand, p, StarIcon)}
-                />
-              )
-            })}
+          <div className={controls.gridClassName}>
+            {products.map((p) => (
+              <PlpGridCard key={p.id} product={p} brand={brand} controls={controls} />
+            ))}
           </div>
 
-          {products.length === 0 && (
-            <div className={styles.empty}>
-              <p className={styles.emptyText}>No pieces match those filters</p>
-              <button type="button" className={styles.ctl} onClick={clearAllMaterials}>
-                Clear filters
-              </button>
-            </div>
-          )}
+          {products.length === 0 && <PlpEmpty controls={controls} />}
         </section>
       </main>
 
