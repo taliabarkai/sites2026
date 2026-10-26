@@ -79,6 +79,11 @@ const charm = (
 const shotsOf = (folder: 'product' | 'products', base: string, ...n: number[]) => n.map((i) => `${folder}/${base}-${i}`)
 
 export const nestedCharms: NestedCharm[] = [
+  // Not found on the CDN under a guessable name — the one shot is kept in the site
+  charm(109, 'The Classic 0.1ct Diamond Drop Charm - Gold Vermeil',
+    ['/images/charms/classic-diamond-drop-charm-gold-vermeil.webp'], 9500),
+  charm(110, 'But First Charm - Gold Plated',
+    shotsOf('product', 'but-first-charm-gold', 1, 2, 3), 4500),
   charm(101, 'Lock & Luna Heart Lifestones Charm, Gold',
     shotsOf('product', 'lock-luna-heart-lifestones-charm-gold', 3, 1, 2, 4, 5, 6), 10000, BIRTHSTONE),
   charm(102, 'Lock & Luna Heart Lifestones Charm, Silver',
@@ -98,9 +103,4 @@ export const nestedCharms: NestedCharm[] = [
   charm(108, 'Willow Disc Initial Charm, Silver Plated',
     [...shotsOf('products', 'willow-disc-initial-charm-sterling-silver', 1, 2),
      ...shotsOf('product', 'willow-disc-initial-charm-sterling-silver', 3)], 5500, INITIAL),
-  // Not found on the CDN under a guessable name — the one shot is kept in the site
-  charm(109, 'The Classic 0.1ct Diamond Drop Charm - Gold Vermeil',
-    ['/images/charms/classic-diamond-drop-charm-gold-vermeil.webp'], 9500),
-  charm(110, 'But First Charm - Gold Plated',
-    shotsOf('product', 'but-first-charm-gold', 1, 2, 3), 4500),
 ]
