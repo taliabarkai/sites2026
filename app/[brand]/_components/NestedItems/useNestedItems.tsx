@@ -5,7 +5,7 @@ import type { CartItem } from '../../_context/CartContext'
 import { QuickAddPanel } from '../QuickAddPanel'
 import type { QuickAddProduct } from '../QuickAddPanel'
 import { NestedItems, nestedItemKey } from './NestedItems'
-import { NestedItemsDrawer } from './NestedItemsDrawer'
+import { NestedItemsDrawer, withBundleDiscount } from './NestedItemsDrawer'
 import type { NestedItemsDisplay } from './NestedItemsDrawer'
 import type { NestedTriggerStyle } from '../../_config/demoParams'
 
@@ -53,7 +53,8 @@ export function useNestedItems(
   const [panelOpen, setPanelOpen] = useState(false)
 
   const checkedKeys = new Set(Object.keys(staged))
-  const stagedItems = Object.values(staged)
+  // The drawer's picks carry its 2+ discount into the subtotal and the bag
+  const stagedItems = display === 'drawer' ? withBundleDiscount(Object.values(staged)) : Object.values(staged)
   const stagedCount = stagedItems.length
   const nestedTotal = stagedItems.reduce((sum, it) => sum + it.price, 0)
 

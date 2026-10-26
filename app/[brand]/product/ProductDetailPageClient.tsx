@@ -18,7 +18,7 @@ import { FilterChips } from '../_components/FilterChips'
 import { ProductCard, toQuickAddProduct } from '../_components/ProductCard'
 import { QuickAddPanel } from '../_components/QuickAddPanel'
 import type { QuickAddProduct } from '../_components/QuickAddPanel'
-import { NestedItems, NestedItemsDrawer, nestedItemKey } from '../_components/NestedItems'
+import { NestedItems, NestedItemsDrawer, nestedItemKey, withBundleDiscount } from '../_components/NestedItems'
 import type { NestedItemsDisplay } from '../_components/NestedItems'
 import { ProductImageCarousel } from '../_components/ProductImageCarousel'
 import { ReviewPhotoLightbox } from '../_components/ReviewPhotoLightbox'
@@ -927,7 +927,8 @@ function ProductForm({ brand, product, icons, nestedItems = [], nestedDisplay = 
   const [panelOpen, setPanelOpen] = useState(false)
 
   const checkedKeys = new Set(Object.keys(staged))
-  const stagedItems = Object.values(staged)
+  // The drawer's picks carry its 2+ discount into the subtotal and the bag
+  const stagedItems = nestedDisplay === 'drawer' ? withBundleDiscount(Object.values(staged)) : Object.values(staged)
   const stagedCount = stagedItems.length
   const nestedTotal = stagedItems.reduce((sum, it) => sum + it.price, 0)
 

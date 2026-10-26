@@ -26,6 +26,24 @@ type Brand = keyof typeof BRAND_ICONS
 /** Thumbnails shown under the trigger before the rest collapse into "+N". */
 const MAX_TRIGGER_THUMBS = 4
 
+/** The drawer's offer: each charm 20% off once two or more are added. */
+const BUNDLE_MIN_ITEMS = 2
+const BUNDLE_DISCOUNT = 0.2
+
+/**
+ * The drawer's picks as they go in the bag: from two picks on, each one's
+ * selling price is cut by 20% and the old price kept as `originalPrice`, so
+ * the cart shows it crossed out.
+ */
+export function withBundleDiscount(items: CartItem[]): CartItem[] {
+  if (items.length < BUNDLE_MIN_ITEMS) return items
+  return items.map((item) => ({
+    ...item,
+    originalPrice: item.originalPrice ?? item.price,
+    price: Math.round(item.price * (1 - BUNDLE_DISCOUNT)),
+  }))
+}
+
 /** How a product shows its nested items: the inline card list, or a trigger that opens this drawer. */
 export type NestedItemsDisplay = 'inline' | 'drawer'
 
