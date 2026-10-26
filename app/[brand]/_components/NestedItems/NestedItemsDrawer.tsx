@@ -139,7 +139,7 @@ export function NestedItemsDrawer({ brand, items, staged, onStage, onUnstage, ti
   const picked = items.filter((item) => staged[nestedItemKey(item)])
   const isLink = triggerStyle === 'link'
   // One string for the trigger and the drawer footer, so it's translated once
-  const countText = `${picked.length}/${items.length} selected`
+  const countText = `${picked.length} selected`
   // Up to four thumbnails under the trigger, then a "+N" tile for the rest
   const shownPicks = picked.slice(0, MAX_TRIGGER_THUMBS)
   const morePicks = picked.length - shownPicks.length
