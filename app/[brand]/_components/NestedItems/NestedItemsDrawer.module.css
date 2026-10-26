@@ -451,14 +451,25 @@
 
 .checkbox {
   position: absolute;
-  top: var(--spacing-xxs);
-  right: var(--spacing-xxs);
+  /* A 40px tap area, centred where the 24px box sits (8px in from the corner) */
+  top: 0;
+  right: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: var(--spacing-md);
-  height: var(--spacing-md);
+  width: var(--spacing-xl);
+  height: var(--spacing-xl);
+  margin: 0;
+  padding: 0;
   color: var(--colors-text);
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.checkbox:focus-visible {
+  outline: calc(var(--border-width) * 2) solid var(--colors-text);
+  outline-offset: calc(var(--border-width) * -2);
 }
 
 /* Checked state — filled circle with an inverse checkmark, same footprint */

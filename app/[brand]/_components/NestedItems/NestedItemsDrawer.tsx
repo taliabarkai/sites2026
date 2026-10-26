@@ -149,11 +149,19 @@ export function NestedItemsDrawer({ brand, items, staged, onStage, onUnstage, ti
   const editorKey = editorItem ? nestedItemKey(editorItem) : null
   const editingStaged = Boolean(editorKey && staged[editorKey])
 
-  const handleCardClick = (item: QuickAddProduct) => {
+  // The checkbox: a pick comes off; otherwise it goes on (personalized first)
+  const handleCheckboxClick = (item: QuickAddProduct) => {
     const key = nestedItemKey(item)
     if (staged[key]) onUnstage(key)
     else if (isPersonalized(item)) personalize(item)
     else onStage(key, quickAddCartItem(item))
+  }
+
+  // The rest of the card: a personalized pick reopens its form; anything else
+  // acts as the checkbox
+  const handleCardClick = (item: QuickAddProduct) => {
+    if (staged[nestedItemKey(item)] && isPersonalized(item)) personalize(item)
+    else handleCheckboxClick(item)
   }
 
   const picked = items.filter((item) => staged[nestedItemKey(item)])
@@ -246,14 +254,14 @@ export function NestedItemsDrawer({ brand, items, staged, onStage, onUnstage, ti
                 const checked = Boolean(stagedItem)
                 const personalized = isPersonalized(item)
                 const img = item.images[0]
+                const editable = personalized && checked
+                const toggleLabel = `${checked ? 'Remove' : 'Add'} ${item.title}${personalized && !checked ? ', personalize first' : ''}`
 
                 return (
                   <div key={key} className={`${styles.card} ${checked ? styles.cardChecked : ''}`}>
                     <button
                       type="button"
-                      role="checkbox"
-                      aria-checked={checked}
-                      aria-label={`${checked ? 'Remove' : 'Add'} ${item.title}${personalized && !checked ? ', personalize first' : ''}`}
+                      aria-label={editable ? `Edit ${item.title}` : toggleLabel}
                       data-key={key}
                       className={styles.cardMain}
                       onClick={() => handleCardClick(item)}
@@ -262,17 +270,6 @@ export function NestedItemsDrawer({ brand, items, staged, onStage, onUnstage, ti
                         {img && (
                           // eslint-disable-next-line @next/next/no-img-element
                           <img src={img.src} alt="" className={styles.image} loading="lazy" />
-                        )}
-                      </span>
-
-                      {/* Visual checkbox indicator — top-right corner */}
-                      <span className={styles.checkbox} aria-hidden="true">
-                        {checked ? (
-                          <span className={styles.checkboxChecked}>
-                            <CheckmarkIcon size={12} />
-                          </span>
-                        ) : (
-                          <CheckboxIcon size={24} />
                         )}
                       </span>
 
@@ -285,18 +282,29 @@ export function NestedItemsDrawer({ brand, items, staged, onStage, onUnstage, ti
                           <span className={styles.price}>{fmt(stagedItem?.price ?? item.price, item.currency)}</span>
                         </span>
                       </span>
+
+                      {/* The whole card already opens the form; this says so */}
+                      {editable && <span className={styles.edit} aria-hidden="true">Edit</span>}
                     </button>
 
-                    {personalized && checked && (
-                      <button
-                        type="button"
-                        className={styles.edit}
-                        aria-label={`Edit ${item.title}`}
-                        onClick={() => personalize(item)}
-                      >
-                        Edit
-                      </button>
-                    )}
+                    {/* Its own control, top-right, so a personalized pick can
+                        still come off without reopening its form */}
+                    <button
+                      type="button"
+                      role="checkbox"
+                      aria-checked={checked}
+                      aria-label={toggleLabel}
+                      className={styles.checkbox}
+                      onClick={() => handleCheckboxClick(item)}
+                    >
+                      {checked ? (
+                        <span className={styles.checkboxChecked}>
+                          <CheckmarkIcon size={12} />
+                        </span>
+                      ) : (
+                        <CheckboxIcon size={24} />
+                      )}
+                    </button>
                   </div>
                 )
               })}
