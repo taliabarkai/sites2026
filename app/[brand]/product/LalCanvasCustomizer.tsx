@@ -42,6 +42,8 @@ interface LalCanvasCustomizerProps {
   nestedDisplay?: NestedItemsDisplay
   /** Drawer only: the trigger as a bordered field (default) or a text link. */
   nestedTriggerStyle?: NestedTriggerStyle
+  /** Drawer only: an optional line under the trigger's heading. */
+  nestedDescription?: string
   addItem: (item: CartItem) => void
   openCart: (added?: boolean) => void
   onLivePreviewChange?: (image: string | null) => void
@@ -206,7 +208,7 @@ async function composeFramedImage(opts: ComposeOpts): Promise<string> {
 }
 
 // ─── Main component ───────────────────────────────────────────────────────────
-export function LalCanvasCustomizer({ brand, product, icons, items, previewId, nestedItems = [], nestedDisplay = 'inline', nestedTriggerStyle, addItem, openCart, onLivePreviewChange }: LalCanvasCustomizerProps) {
+export function LalCanvasCustomizer({ brand, product, icons, items, previewId, nestedItems = [], nestedDisplay = 'inline', nestedTriggerStyle, nestedDescription, addItem, openCart, onLivePreviewChange }: LalCanvasCustomizerProps) {
   // Rating shown beside the price — same numbers the category card and the
   // PDP reviews section read from the product registry.
   const productRating = product.rating ?? 0
@@ -219,7 +221,7 @@ export function LalCanvasCustomizer({ brand, product, icons, items, previewId, n
   const RevisionsGlyph = RevisionsIcon ?? ClipboardCopyIcon
 
   // Nested Items — companion products staged above the Subtotal.
-  const nested = useNestedItems(brand, nestedItems, undefined, { display: nestedDisplay, triggerStyle: nestedTriggerStyle })
+  const nested = useNestedItems(brand, nestedItems, undefined, { display: nestedDisplay, triggerStyle: nestedTriggerStyle, description: nestedDescription })
 
   const [photoUrl, setPhotoUrl]   = useState<string | null>(null)
   const [photoName, setPhotoName] = useState<string>('')

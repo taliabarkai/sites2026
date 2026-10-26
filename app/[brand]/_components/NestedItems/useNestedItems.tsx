@@ -14,6 +14,8 @@ export interface UseNestedItemsOptions {
   display?: NestedItemsDisplay
   /** Drawer only: the trigger as a bordered field (default) or a text link. */
   triggerStyle?: NestedTriggerStyle
+  /** Drawer only: an optional line under the trigger's heading. */
+  description?: string
 }
 
 export interface UseNestedItemsResult {
@@ -44,7 +46,7 @@ export function useNestedItems(
   brand: string,
   items: QuickAddProduct[],
   title?: string,
-  { display = 'inline', triggerStyle }: UseNestedItemsOptions = {},
+  { display = 'inline', triggerStyle, description }: UseNestedItemsOptions = {},
 ): UseNestedItemsResult {
   const [staged, setStaged] = useState<Record<string, CartItem>>({})
   const [panelItem, setPanelItem] = useState<QuickAddProduct | null>(null)
@@ -83,6 +85,7 @@ export function useNestedItems(
       onStage={stage}
       onUnstage={unstage}
       title={title}
+      description={description}
       triggerStyle={triggerStyle}
     />
   ) : (

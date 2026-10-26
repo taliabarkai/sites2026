@@ -41,9 +41,17 @@
   padding: var(--spacing-xs) var(--spacing-xs) var(--spacing-xs) var(--spacing-sm);
 }
 
-/* Same rule as the Add to Bag button's label; takes the row's free space */
-.triggerText {
+/* The heading, and the optional description under it; takes the row's free space */
+.triggerLabel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xxxs);
   flex: 1;
+  min-width: 0;
+}
+
+/* Same rule as the Add to Bag button's label */
+.triggerText {
   font-family:    var(--typography-rules-button1-font-family);
   font-size:      var(--typography-rules-button1-font-size);
   line-height:    var(--typography-rules-button1-line-height);
@@ -117,6 +125,16 @@
   align-self: stretch;
   padding: 0;
   border-top: none;
+}
+
+/* Optional line under the heading (e.g. an offer) */
+.description {
+  font-family:    var(--typography-rules-text3-font-family);
+  font-size:      var(--typography-rules-text3-font-size);
+  line-height:    var(--typography-rules-text3-line-height);
+  font-weight:    var(--typography-rules-text3-font-weight, normal);
+  letter-spacing: var(--typography-rules-text3-letter-spacing, normal);
+  text-transform: var(--typography-rules-text3-text-transform, none);
 }
 
 /* "X/X selected" — between the title and the arrow, the footer's own string */

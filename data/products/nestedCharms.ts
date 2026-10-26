@@ -11,6 +11,9 @@ import type { QuickAddOption } from '../../app/[brand]/_components/QuickAddPanel
 // `href` only has to be unique — nested items are keyed by it, and the form's
 // "View Full Details" link is hidden in the drawer.
 
+/** The trigger's optional description line, under "Add More Charms". */
+export const NESTED_DRAWER_DESCRIPTION = 'Save 20% when you buy 2 or more charms'
+
 /** `gallery` — every shot of the charm, the card image first. */
 export type NestedCharm = ProductItem & { gallery: string[]; option?: QuickAddOption }
 

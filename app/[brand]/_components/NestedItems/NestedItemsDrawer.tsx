@@ -39,6 +39,8 @@ export interface NestedItemsDrawerProps {
   onUnstage: (key: string) => void
   /** The section heading — the trigger's text and the drawer's title. */
   title?: string
+  /** Optional line under the trigger's heading, e.g. an offer. */
+  description?: string
   /** The PDP trigger: a bordered field (default), or a text link with an arrow. */
   triggerStyle?: NestedTriggerStyle
 }
@@ -76,7 +78,7 @@ function quickAddCartItem(item: QuickAddProduct): CartItem {
  * its nested form (CTA "Add", no "View Full Details"), and is staged on Add;
  * "Edit" reopens it as it was, to Update. Tapping a staged card removes it.
  */
-export function NestedItemsDrawer({ brand, items, staged, onStage, onUnstage, title = 'Add More Charms', triggerStyle = 'field' }: NestedItemsDrawerProps) {
+export function NestedItemsDrawer({ brand, items, staged, onStage, onUnstage, title = 'Add More Charms', description, triggerStyle = 'field' }: NestedItemsDrawerProps) {
   const titleId = useId()
   const { ArrowIcon, XIcon, CheckboxIcon, CheckmarkIcon, ChevronIcon } = BRAND_ICONS[brand as Brand] ?? BRAND_ICONS.oal
 
@@ -153,11 +155,18 @@ export function NestedItemsDrawer({ brand, items, staged, onStage, onUnstage, ti
         className={isLink ? styles.linkBox : styles.triggerBox}
         aria-haspopup="dialog"
         aria-expanded={open}
-        aria-label={picked.length > 0 ? `${title}, ${countText}` : title}
+        aria-label={[title, description, picked.length > 0 && countText].filter(Boolean).join(', ')}
         onClick={() => setOpen(true)}
       >
         <span className={isLink ? styles.linkTrigger : styles.trigger}>
-          <span className={isLink ? styles.linkText : styles.triggerText}>{title}</span>
+          {isLink ? (
+            <span className={styles.linkText}>{title}</span>
+          ) : (
+            <span className={styles.triggerLabel}>
+              <span className={styles.triggerText}>{title}</span>
+              {description && <span className={styles.description}>{description}</span>}
+            </span>
+          )}
           {!isLink && picked.length > 0 && <span className={styles.triggerCount}>{countText}</span>}
           {isLink ? (
             // 24px icon area, 20px arrow inside it
@@ -171,6 +180,7 @@ export function NestedItemsDrawer({ brand, items, staged, onStage, onUnstage, ti
             <span className={`${styles.triggerCount} ${styles.linkCount}`}>{countText}</span>
           )}
         </span>
+        {isLink && description && <span className={styles.description}>{description}</span>}
 
         {picked.length > 0 && (
           <span className={`${styles.picks} ${isLink ? styles.picksLink : ''}`} aria-hidden="true">

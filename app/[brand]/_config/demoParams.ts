@@ -134,6 +134,24 @@ export function readNestedTriggerStyle(params: ReadableParams): NestedTriggerSty
 }
 
 /**
+ * Whether the drawer's PDP trigger shows its optional description line under
+ * the heading (`?desc=hide`).
+ */
+export const NESTED_DESCRIPTION_PARAM = 'desc'
+export const NESTED_DESCRIPTION_STATES = ['show', 'hide'] as const
+
+export type NestedDescriptionState = (typeof NESTED_DESCRIPTION_STATES)[number]
+
+export const DEFAULT_NESTED_DESCRIPTION_STATE: NestedDescriptionState = 'show'
+
+export function readNestedDescriptionState(params: ReadableParams): NestedDescriptionState {
+  const raw = params.get(NESTED_DESCRIPTION_PARAM)
+  return NESTED_DESCRIPTION_STATES.includes(raw as NestedDescriptionState)
+    ? (raw as NestedDescriptionState)
+    : DEFAULT_NESTED_DESCRIPTION_STATE
+}
+
+/**
  * A path with the current demo configuration attached.
  *
  * Every internal step has to carry these forward: the whole point is that one

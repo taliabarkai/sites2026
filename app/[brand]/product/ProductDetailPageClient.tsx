@@ -36,7 +36,7 @@ import {
 import type { MaterialSwatch } from '../_config/products'
 import { getBrandProducts } from '../../../data/products/getBrandProducts'
 import { getReviewSummary } from '../../../data/products/reviewSummary'
-import { nestedCharms } from '../../../data/products/nestedCharms'
+import { NESTED_DRAWER_DESCRIPTION, nestedCharms } from '../../../data/products/nestedCharms'
 import type { ProductItem } from '../../../data/products'
 import { LalCanvasCustomizer } from './LalCanvasCustomizer'
 import { getGiftOptions } from '../_config/giftOptions'
@@ -50,7 +50,7 @@ import { AIPreviewCustomizer } from '../_components/AIPreviewCustomizer'
 import { ProductOptions, useProductOptions } from '../_components/ProductOptions'
 import type { OptionGroup, SelectedOption } from '../_components/ProductOptions'
 import { OPTION_GROUPS, OPTIONS_SHOWCASE_PRODUCT_ID, optionsShowcaseProduct } from './[id]/_data/optionGroups'
-import { isNestedDrawerProduct, readNestedDrawerCount, readNestedTriggerStyle } from '../_config/demoParams'
+import { isNestedDrawerProduct, readNestedDescriptionState, readNestedDrawerCount, readNestedTriggerStyle } from '../_config/demoParams'
 import type { NestedTriggerStyle } from '../_config/demoParams'
 
 // LAL products that use the song-based Music Memories customizer
@@ -872,6 +872,8 @@ interface ProductFormProps {
   nestedDisplay?: NestedItemsDisplay
   /** Drawer only: the trigger as a bordered field (default) or a text link. */
   nestedTriggerStyle?: NestedTriggerStyle
+  /** Drawer only: an optional line under the trigger's heading. */
+  nestedDescription?: string
   onAddToBag: (
     selectedSwatchKey: MaterialSwatch['key'],
     engravedText: string,
@@ -889,7 +891,7 @@ interface ProductFormProps {
 
 const NO_OPTION_GROUPS: OptionGroup[] = []
 
-function ProductForm({ brand, product, icons, nestedItems = [], nestedDisplay = 'inline', nestedTriggerStyle, onAddToBag, optionGroups, onAddConfigured }: ProductFormProps) {
+function ProductForm({ brand, product, icons, nestedItems = [], nestedDisplay = 'inline', nestedTriggerStyle, nestedDescription, onAddToBag, optionGroups, onAddConfigured }: ProductFormProps) {
   const [selectedSwatchKey, setSelectedSwatchKey] = useState<MaterialSwatch['key']>(
     product.defaultSwatchKey ?? 'vermeil'
   )
@@ -1089,6 +1091,7 @@ function ProductForm({ brand, product, icons, nestedItems = [], nestedDisplay = 
           staged={staged}
           onStage={stage}
           onUnstage={unstage}
+          description={nestedDescription}
           triggerStyle={nestedTriggerStyle}
         />
       ) : (
@@ -1211,11 +1214,12 @@ function ProductDetailPageInner({ productId, previewId }: { productId: number; p
   const icons = BRAND_ICONS[brand]
 
   const [livePreview, setLivePreview] = useState<string | null>(null)
-  // The Drawer demo's charm count and trigger come from the header's demo
-  // controls (?charms=, ?trigger=)
+  // The Drawer demo's charm count, trigger and description come from the
+  // header's demo controls (?charms=, ?trigger=, ?desc=)
   const searchParams = useSearchParams()
   const nestedDrawerCount = readNestedDrawerCount(searchParams)
   const nestedTriggerStyle = readNestedTriggerStyle(searchParams)
+  const nestedDescription = readNestedDescriptionState(searchParams) === 'show' ? NESTED_DRAWER_DESCRIPTION : undefined
   const nestedDisplay: NestedItemsDisplay = isNestedDrawerProduct(brand, product.id) ? 'drawer' : 'inline'
 
   // Companion products for the Nested Items section, shaped for the quick-add
@@ -1351,6 +1355,7 @@ function ProductDetailPageInner({ productId, previewId }: { productId: number; p
               nestedItems={nestedItems}
               nestedDisplay={nestedDisplay}
               nestedTriggerStyle={nestedTriggerStyle}
+              nestedDescription={nestedDescription}
               addItem={addItem}
               openCart={openCart}
               onLivePreviewChange={setLivePreview}
@@ -1365,6 +1370,7 @@ function ProductDetailPageInner({ productId, previewId }: { productId: number; p
               nestedItems={nestedItems}
               nestedDisplay={nestedDisplay}
               nestedTriggerStyle={nestedTriggerStyle}
+              nestedDescription={nestedDescription}
               onAddToBag={handleAddToBag}
             />
           )}
