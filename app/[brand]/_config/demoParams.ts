@@ -27,12 +27,12 @@ export const STATE_PARAM           = 'state'
 /** Cart sizes the demo can be switched between. */
 export const DEMO_CART_SIZES = [1, 2, 3] as const
 
-/** The warranty add-on's two designs, owned by the floating cart's control. */
-export const WARRANTY_VARIANTS = ['v1', 'v2'] as const
+/** The warranty add-on — hidden, or one of its two designs — owned by the floating cart's control. */
+export const WARRANTY_VARIANTS = ['hidden', 'v1', 'v2'] as const
 
 export type WarrantyVariant = (typeof WARRANTY_VARIANTS)[number]
 
-export const DEFAULT_WARRANTY_VARIANT: WarrantyVariant = 'v1'
+export const DEFAULT_WARRANTY_VARIANT: WarrantyVariant = 'hidden'
 
 interface ReadableParams {
   get(name: string): string | null
@@ -93,6 +93,44 @@ export type TrackOrderState = (typeof TRACK_ORDER_STATES)[number]
 export function readTrackOrderState(params: ReadableParams): TrackOrderState {
   const value = params.get(STATE_PARAM)
   return value === 'error' || value === 'duplicate' ? value : 'default'
+}
+
+/**
+ * The nested items Drawer demo: the products that show it — product 15 on
+ * every brand, and product 18 on OAL — and how many companion products its
+ * drawer holds (`?charms=6`).
+ */
+export function isNestedDrawerProduct(brand: string, productId: number): boolean {
+  return productId === 15 || (brand === 'oal' && productId === 18)
+}
+
+export const NESTED_DRAWER_PARAM = 'charms'
+export const NESTED_DRAWER_COUNTS = [2, 3, 4, 5, 6, 7, 8, 9, 10] as const
+export const DEFAULT_NESTED_DRAWER_COUNT = 3
+
+export function readNestedDrawerCount(params: ReadableParams): number {
+  const raw = Number(params.get(NESTED_DRAWER_PARAM))
+  return NESTED_DRAWER_COUNTS.includes(raw as (typeof NESTED_DRAWER_COUNTS)[number])
+    ? raw
+    : DEFAULT_NESTED_DRAWER_COUNT
+}
+
+/**
+ * How the drawer's PDP trigger looks (`?trigger=link`): a bordered field, or a
+ * text link with an arrow, set like the field labels above it.
+ */
+export const NESTED_TRIGGER_PARAM = 'trigger'
+export const NESTED_TRIGGER_STYLES = ['field', 'link'] as const
+
+export type NestedTriggerStyle = (typeof NESTED_TRIGGER_STYLES)[number]
+
+export const DEFAULT_NESTED_TRIGGER_STYLE: NestedTriggerStyle = 'field'
+
+export function readNestedTriggerStyle(params: ReadableParams): NestedTriggerStyle {
+  const raw = params.get(NESTED_TRIGGER_PARAM)
+  return NESTED_TRIGGER_STYLES.includes(raw as NestedTriggerStyle)
+    ? (raw as NestedTriggerStyle)
+    : DEFAULT_NESTED_TRIGGER_STYLE
 }
 
 /**

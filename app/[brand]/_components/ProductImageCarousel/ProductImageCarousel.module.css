@@ -41,6 +41,11 @@
   aspect-ratio: 4 / 5;
 }
 
+/* …except in Quick Add (the peek variant), which is square on every brand */
+[data-theme] .peek .slide {
+  aspect-ratio: 1;
+}
+
 .image {
   position: absolute;
   inset: 0;

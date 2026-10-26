@@ -5,6 +5,16 @@ import type { CartItem } from '../../_context/CartContext'
 import { QuickAddPanel } from '../QuickAddPanel'
 import type { QuickAddProduct } from '../QuickAddPanel'
 import { NestedItems, nestedItemKey } from './NestedItems'
+import { NestedItemsDrawer } from './NestedItemsDrawer'
+import type { NestedItemsDisplay } from './NestedItemsDrawer'
+import type { NestedTriggerStyle } from '../../_config/demoParams'
+
+export interface UseNestedItemsOptions {
+  /** Inline card list (default) or one trigger that opens a multi-select drawer. */
+  display?: NestedItemsDisplay
+  /** Drawer only: the trigger as a bordered field (default) or a text link. */
+  triggerStyle?: NestedTriggerStyle
+}
 
 export interface UseNestedItemsResult {
   /** Renders the "Your Stack Starts Here" section + the (portaled) quick-add panel.
@@ -26,8 +36,16 @@ export interface UseNestedItemsResult {
  * product; unchecking removes it. Consumers add `nestedTotal` to their subtotal,
  * fold `stagedCount` into the CTA count, and add `stagedItems` alongside the main
  * product on add (then call `clear`).
+ *
+ * `display: 'drawer'` swaps the card list for one trigger that opens a
+ * multi-select drawer; the staged items work the same either way.
  */
-export function useNestedItems(brand: string, items: QuickAddProduct[], title?: string): UseNestedItemsResult {
+export function useNestedItems(
+  brand: string,
+  items: QuickAddProduct[],
+  title?: string,
+  { display = 'inline', triggerStyle }: UseNestedItemsOptions = {},
+): UseNestedItemsResult {
   const [staged, setStaged] = useState<Record<string, CartItem>>({})
   const [panelItem, setPanelItem] = useState<QuickAddProduct | null>(null)
   const [panelOpen, setPanelOpen] = useState(false)
@@ -37,21 +55,37 @@ export function useNestedItems(brand: string, items: QuickAddProduct[], title?: 
   const stagedCount = stagedItems.length
   const nestedTotal = stagedItems.reduce((sum, it) => sum + it.price, 0)
 
+  // Mark as a companion so it doesn't count as a standalone main item.
+  const stage = (key: string, cartItem: CartItem) =>
+    setStaged((prev) => ({ ...prev, [key]: { ...cartItem, isCompanion: true } }))
+
+  const unstage = (key: string) =>
+    setStaged((prev) => {
+      const next = { ...prev }
+      delete next[key]
+      return next
+    })
+
   const handleToggle = (item: QuickAddProduct, checked: boolean) => {
     if (checked) {
       setPanelItem(item)
       setPanelOpen(true)
     } else {
-      const key = nestedItemKey(item)
-      setStaged((prev) => {
-        const next = { ...prev }
-        delete next[key]
-        return next
-      })
+      unstage(nestedItemKey(item))
     }
   }
 
-  const ui = (
+  const ui = display === 'drawer' ? (
+    <NestedItemsDrawer
+      brand={brand}
+      items={items}
+      staged={staged}
+      onStage={stage}
+      onUnstage={unstage}
+      title={title}
+      triggerStyle={triggerStyle}
+    />
+  ) : (
     <>
       <NestedItems
         brand={brand}
@@ -67,11 +101,7 @@ export function useNestedItems(brand: string, items: QuickAddProduct[], title?: 
         ctaLabel="Add"
         showViewDetails={false}
         onAdd={(cartItem) => {
-          if (panelItem) {
-            const key = nestedItemKey(panelItem)
-            // Mark as a companion so it doesn't count as a standalone main item.
-            setStaged((prev) => ({ ...prev, [key]: { ...cartItem, isCompanion: true } }))
-          }
+          if (panelItem) stage(nestedItemKey(panelItem), cartItem)
         }}
       />
     </>

@@ -41,7 +41,7 @@ interface DropdownProps {
  * carries a transform, which makes a stacking context that would otherwise bury
  * this panel under the page's sticky chrome however high its z-index.
  */
-function Dropdown({ label, title, className, children }: DropdownProps) {
+export function Dropdown({ label, title, className, children }: DropdownProps) {
   const [open, setOpen] = useState(false)
   const [anchor, setAnchor] = useState<{ top: number; right: number } | null>(null)
   const panelRef   = useRef<HTMLDivElement>(null)

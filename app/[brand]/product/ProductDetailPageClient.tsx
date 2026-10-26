@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef, useCallback, useEffect } from 'react'
-import { notFound, usePathname, useRouter } from 'next/navigation'
+import { notFound, usePathname, useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import * as oalIcons from '@/src/components/icons/oal'
 import * as mnnIcons from '@/src/components/icons/mnn'
@@ -18,7 +18,8 @@ import { FilterChips } from '../_components/FilterChips'
 import { ProductCard, toQuickAddProduct } from '../_components/ProductCard'
 import { QuickAddPanel } from '../_components/QuickAddPanel'
 import type { QuickAddProduct } from '../_components/QuickAddPanel'
-import { NestedItems, nestedItemKey } from '../_components/NestedItems'
+import { NestedItems, NestedItemsDrawer, nestedItemKey } from '../_components/NestedItems'
+import type { NestedItemsDisplay } from '../_components/NestedItems'
 import { ProductImageCarousel } from '../_components/ProductImageCarousel'
 import { ReviewPhotoLightbox } from '../_components/ReviewPhotoLightbox'
 import type { ReviewPhoto } from '../_components/ReviewPhotoLightbox'
@@ -35,6 +36,7 @@ import {
 import type { MaterialSwatch } from '../_config/products'
 import { getBrandProducts } from '../../../data/products/getBrandProducts'
 import { getReviewSummary } from '../../../data/products/reviewSummary'
+import { nestedCharms } from '../../../data/products/nestedCharms'
 import type { ProductItem } from '../../../data/products'
 import { LalCanvasCustomizer } from './LalCanvasCustomizer'
 import { getGiftOptions } from '../_config/giftOptions'
@@ -48,6 +50,8 @@ import { AIPreviewCustomizer } from '../_components/AIPreviewCustomizer'
 import { ProductOptions, useProductOptions } from '../_components/ProductOptions'
 import type { OptionGroup, SelectedOption } from '../_components/ProductOptions'
 import { OPTION_GROUPS, OPTIONS_SHOWCASE_PRODUCT_ID, optionsShowcaseProduct } from './[id]/_data/optionGroups'
+import { isNestedDrawerProduct, readNestedDrawerCount, readNestedTriggerStyle } from '../_config/demoParams'
+import type { NestedTriggerStyle } from '../_config/demoParams'
 
 // LAL products that use the song-based Music Memories customizer
 // (Custom Canvas, Acrylic Wall Art, Metal Wall Art, Square Custom Canvas)
@@ -864,6 +868,10 @@ interface ProductFormProps {
   icons: (typeof BRAND_ICONS)[keyof typeof BRAND_ICONS]
   /** Companion / add-on products shown in the Nested Items section. */
   nestedItems?: QuickAddProduct[]
+  /** Inline card list (default) or one trigger that opens a multi-select drawer. */
+  nestedDisplay?: NestedItemsDisplay
+  /** Drawer only: the trigger as a bordered field (default) or a text link. */
+  nestedTriggerStyle?: NestedTriggerStyle
   onAddToBag: (
     selectedSwatchKey: MaterialSwatch['key'],
     engravedText: string,
@@ -881,7 +889,7 @@ interface ProductFormProps {
 
 const NO_OPTION_GROUPS: OptionGroup[] = []
 
-function ProductForm({ brand, product, icons, nestedItems = [], onAddToBag, optionGroups, onAddConfigured }: ProductFormProps) {
+function ProductForm({ brand, product, icons, nestedItems = [], nestedDisplay = 'inline', nestedTriggerStyle, onAddToBag, optionGroups, onAddConfigured }: ProductFormProps) {
   const [selectedSwatchKey, setSelectedSwatchKey] = useState<MaterialSwatch['key']>(
     product.defaultSwatchKey ?? 'vermeil'
   )
@@ -921,6 +929,16 @@ function ProductForm({ brand, product, icons, nestedItems = [], onAddToBag, opti
   const stagedCount = stagedItems.length
   const nestedTotal = stagedItems.reduce((sum, it) => sum + it.price, 0)
 
+  // Marked as a companion, so the cart treats it as part of the main item (no
+  // protection plan of its own) — the same as `useNestedItems` does.
+  const stage = (key: string, item: CartItem) => setStaged((prev) => ({ ...prev, [key]: { ...item, isCompanion: true } }))
+  const unstage = (key: string) =>
+    setStaged((prev) => {
+      const next = { ...prev }
+      delete next[key]
+      return next
+    })
+
   const handleToggle = (item: QuickAddProduct, checked: boolean) => {
     if (checked) {
       // Selecting opens the quick-add panel to configure the companion product.
@@ -928,12 +946,7 @@ function ProductForm({ brand, product, icons, nestedItems = [], onAddToBag, opti
       setPanelOpen(true)
     } else {
       // Unchecking removes it directly — no panel.
-      const key = nestedItemKey(item)
-      setStaged((prev) => {
-        const next = { ...prev }
-        delete next[key]
-        return next
-      })
+      unstage(nestedItemKey(item))
     }
   }
 
@@ -1069,12 +1082,23 @@ function ProductForm({ brand, product, icons, nestedItems = [], onAddToBag, opti
       )}
 
       {/* Nested Items — companion products, directly above the Subtotal */}
-      <NestedItems
-        brand={brand}
-        items={nestedItems}
-        checkedKeys={checkedKeys}
-        onToggle={handleToggle}
-      />
+      {nestedDisplay === 'drawer' ? (
+        <NestedItemsDrawer
+          brand={brand}
+          items={nestedItems}
+          staged={staged}
+          onStage={stage}
+          onUnstage={unstage}
+          triggerStyle={nestedTriggerStyle}
+        />
+      ) : (
+        <NestedItems
+          brand={brand}
+          items={nestedItems}
+          checkedKeys={checkedKeys}
+          onToggle={handleToggle}
+        />
+      )}
 
       {/* Subtotal */}
       <div className={styles.subtotalRow}>
@@ -1151,10 +1175,7 @@ function ProductForm({ brand, product, icons, nestedItems = [], onAddToBag, opti
         ctaLabel="Add"
         showViewDetails={false}
         onAdd={(cartItem) => {
-          if (panelItem) {
-            const key = nestedItemKey(panelItem)
-            setStaged((prev) => ({ ...prev, [key]: cartItem }))
-          }
+          if (panelItem) stage(nestedItemKey(panelItem), cartItem)
         }}
       />
     </section>
@@ -1190,13 +1211,31 @@ function ProductDetailPageInner({ productId, previewId }: { productId: number; p
   const icons = BRAND_ICONS[brand]
 
   const [livePreview, setLivePreview] = useState<string | null>(null)
+  // The Drawer demo's charm count and trigger come from the header's demo
+  // controls (?charms=, ?trigger=)
+  const searchParams = useSearchParams()
+  const nestedDrawerCount = readNestedDrawerCount(searchParams)
+  const nestedTriggerStyle = readNestedTriggerStyle(searchParams)
+  const nestedDisplay: NestedItemsDisplay = isNestedDrawerProduct(brand, product.id) ? 'drawer' : 'inline'
 
-  // Companion product for the Nested Items section — one other catalog item
-  // shaped for the quick-add panel (reuses the category-page adapter).
-  const nestedItems: QuickAddProduct[] = getBrandProducts(brand)
-    .filter((p) => p.id !== product.id)
-    .slice(0, 1)
-    .map(toQuickAddProduct)
+  // Companion products for the Nested Items section, shaped for the quick-add
+  // panel (reuses the category-page adapter). The inline list shows one other
+  // catalog item; the drawer shows the demo count of charms, each with its
+  // whole gallery. A charm carries its metal in its name, so the drawer asks
+  // only for its one choice; one with no choice has no options and adds on tap.
+  const nestedItems: QuickAddProduct[] = nestedDisplay === 'drawer'
+    ? nestedCharms
+        .slice(0, nestedDrawerCount)
+        .map((charm) => ({
+          ...toQuickAddProduct(charm),
+          images: charm.gallery.map((src) => ({ src, alt: charm.name })),
+          engraving: 'fields' as const,
+          options: charm.option ? [charm.option] : [],
+        }))
+    : getBrandProducts(brand)
+        .filter((p) => p.id !== product.id)
+        .slice(0, 1)
+        .map(toQuickAddProduct)
 
   const handleAddToBag = (
     swatchKey: MaterialSwatch['key'],
@@ -1302,22 +1341,30 @@ function ProductDetailPageInner({ productId, previewId }: { productId: number; p
             />
           ) : brand === 'lal' ? (
             <LalCanvasCustomizer
+              // A new charm count is a new demo: start the form and its picks over
+              key={nestedDisplay === 'drawer' ? nestedDrawerCount : undefined}
               brand={brand}
               product={product}
               icons={icons}
               items={items}
               previewId={previewId}
               nestedItems={nestedItems}
+              nestedDisplay={nestedDisplay}
+              nestedTriggerStyle={nestedTriggerStyle}
               addItem={addItem}
               openCart={openCart}
               onLivePreviewChange={setLivePreview}
             />
           ) : (
             <ProductForm
+              // A new charm count is a new demo: start the form and its picks over
+              key={nestedDisplay === 'drawer' ? nestedDrawerCount : undefined}
               brand={brand}
               product={product}
               icons={icons}
               nestedItems={nestedItems}
+              nestedDisplay={nestedDisplay}
+              nestedTriggerStyle={nestedTriggerStyle}
               onAddToBag={handleAddToBag}
             />
           )}

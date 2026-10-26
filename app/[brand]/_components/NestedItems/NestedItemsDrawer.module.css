@@ -1,0 +1,522 @@
+/* ── Nested Items, Drawer layout ──────────────────────────────────────────── */
+.section {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── PDP trigger: one field-like button — the row, then the picks once
+   something is added — so a click anywhere in it opens the drawer ─────────── */
+.triggerBox {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  color: var(--colors-text);
+  background: var(--form-field-background);
+  border: var(--border-width) solid var(--form-field-border-color);
+  border-radius: var(--form-field-border-radius);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color var(--transition-fast);
+}
+
+.triggerBox:hover {
+  border-color: var(--form-field-border-color-hover);
+}
+
+.triggerBox:focus-visible {
+  outline: var(--form-field-focus-ring-width) solid var(--form-field-focus-ring-color);
+  outline-offset: var(--form-field-focus-ring-offset);
+}
+
+.trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-xs);
+  width: 100%;
+  box-sizing: border-box;
+  min-height: var(--field-min-height);
+  padding: var(--spacing-xs) var(--spacing-xs) var(--spacing-xs) var(--spacing-sm);
+}
+
+/* Same rule as the Add to Bag button's label; takes the row's free space */
+.triggerText {
+  flex: 1;
+  font-family:    var(--typography-rules-button1-font-family);
+  font-size:      var(--typography-rules-button1-font-size);
+  line-height:    var(--typography-rules-button1-line-height);
+  font-weight:    var(--typography-rules-button1-font-weight, normal);
+  letter-spacing: var(--typography-rules-button1-letter-spacing, normal);
+  text-transform: var(--typography-rules-button1-text-transform, none);
+}
+
+/* ── PDP trigger, link style: the field label's type, an arrow beside it,
+   underlined on hover ───────────────────────────────────────────────────── */
+.linkBox {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--spacing-xxs);
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  color: var(--colors-text);
+  background: none;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+}
+
+.linkBox:hover .linkText {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.linkBox:focus-visible {
+  outline: calc(var(--border-width) * 2) solid var(--colors-text);
+  outline-offset: calc(var(--border-width) * 2);
+}
+
+.linkTrigger {
+  display: flex;
+  align-items: center;
+  align-self: stretch;
+  gap: var(--spacing-xxxs);
+  min-height: var(--spacing-xl);
+}
+
+/* The count sits at the row's far end, as on the field */
+.linkCount {
+  margin-left: auto;
+  padding-left: var(--spacing-xs);
+}
+
+.linkIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: var(--spacing-md);
+  height: var(--spacing-md);
+}
+
+/* Same rule as the field labels (e.g. Chain Length) */
+.linkText {
+  font-family:    var(--typography-rules-text2-font-family);
+  font-size:      var(--typography-rules-text2-font-size);
+  line-height:    var(--typography-rules-text2-line-height);
+  font-weight:    var(--typography-rules-text2-font-weight, normal);
+  letter-spacing: var(--typography-rules-text2-letter-spacing, normal);
+  text-transform: var(--typography-rules-text2-text-transform, none);
+}
+
+/* No box to sit inside, so the picks drop their divider and inset */
+.picks.picksLink {
+  align-self: stretch;
+  padding: 0;
+  border-top: none;
+}
+
+/* "X/X selected" — between the title and the arrow, the footer's own string */
+.triggerCount {
+  flex-shrink: 0;
+  color: var(--colors-text-secondary);
+  font-family:    var(--typography-rules-text3-font-family);
+  font-size:      var(--typography-rules-text3-font-size);
+  line-height:    var(--typography-rules-text3-line-height);
+  font-weight:    var(--typography-rules-text3-font-weight, normal);
+  letter-spacing: var(--typography-rules-text3-letter-spacing, normal);
+}
+
+/* The added charms: up to four thumbnails, then a "+N" tile. Five 56px tiles
+   fit a phone-width box; narrower, they shrink together and stay square. */
+.picks {
+  display: flex;
+  gap: var(--spacing-xxs);
+  width: 100%;
+  box-sizing: border-box;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-top: var(--border-width) solid var(--border-color);
+}
+
+.pickThumb,
+.pickMore {
+  display: block;
+  flex: 0 1 calc(var(--spacing-2xl) + var(--spacing-xxs));
+  min-width: 0;
+  aspect-ratio: 1;
+}
+
+.pickThumb {
+  background: var(--product-image-background-blend);
+}
+
+.pickMore {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: var(--border-width) solid var(--border-color);
+  color: var(--colors-text);
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  font-weight:    var(--typography-rules-text1-font-weight, normal);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+}
+
+/* ── Drawer: bottom sheet on mobile, right-hand drawer from 768px ─────────── */
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-overlay);
+  background: var(--colors-overlay);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition-base);
+}
+
+.backdropOpen {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.drawer {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: var(--z-modal);
+  display: flex;
+  flex-direction: column;
+  height: 90dvh;
+  /* Clips the editor while it waits off to the side */
+  overflow: hidden;
+  background: var(--colors-background);
+  border-radius: var(--radius-panel) var(--radius-panel) 0 0;
+  transform: translateY(100%);
+  transition: transform var(--transition-base);
+}
+
+.drawerOpen {
+  transform: translateY(0);
+}
+
+/* ── Editor: the Quick Add form, sliding in over the grid in the same panel ── */
+.editor {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  background: var(--colors-background);
+  border-radius: inherit;
+  /* Up from the bottom on mobile, like the sheet it covers */
+  transform: translateY(100%);
+  transition: transform var(--transition-base);
+}
+
+.editorOpen {
+  transform: translateY(0);
+}
+
+/* From the right in the desktop drawer */
+@media (min-width: 768px) {
+  .editor {
+    transform: translateX(100%);
+  }
+
+  .editorOpen {
+    transform: translateX(0);
+  }
+}
+
+/* Close — absolute top right, at the Quick Add panel's own close position */
+.editorClose {
+  position: absolute;
+  top: var(--spacing-sm);
+  right: var(--spacing-sm);
+  z-index: 1;
+}
+
+@media (min-width: 768px) {
+  .editorClose {
+    top: var(--spacing-md);
+    right: var(--spacing-md);
+  }
+}
+
+/* "‹ Back" — above the title. Pulled up by the 8px the header's top padding
+   exceeds the close button's inset, so the two share a row, and left so the
+   chevron sits on the content edge. */
+.editorBack {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xxxs);
+  height: var(--spacing-xl);
+  margin: calc(var(--spacing-xxs) * -1) 0 0 calc(var(--spacing-xxxs) * -1);
+  padding: 0;
+  color: var(--colors-text);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  font-weight:    var(--typography-rules-text1-font-weight, normal);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+}
+
+.editorBack:focus-visible {
+  outline: calc(var(--border-width) * 2) solid var(--colors-text);
+  outline-offset: calc(var(--border-width) * 2);
+}
+
+/* The brand chevron points forward; back mirrors it */
+.editorBackIcon {
+  display: inline-flex;
+  transform: rotate(180deg);
+}
+
+@media (min-width: 768px) {
+  .drawer {
+    top: 0;
+    left: auto;
+    bottom: auto;
+    width: min(56rem, 100vw);
+    height: 100vh;
+    border-radius: var(--radius-panel) 0 0 var(--radius-panel);
+    transform: translateX(100%);
+  }
+
+  .drawerOpen {
+    transform: translateX(0);
+  }
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-xxs);
+  flex-shrink: 0;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-bottom: var(--border-width) solid var(--border-color);
+}
+
+.title {
+  margin: 0;
+  color: var(--colors-text);
+  font-family:    var(--typography-rules-headline4-font-family);
+  font-size:      var(--typography-rules-headline4-font-size);
+  line-height:    var(--typography-rules-headline4-line-height);
+  font-weight:    var(--typography-rules-headline4-font-weight, normal);
+  letter-spacing: var(--typography-rules-headline4-letter-spacing, normal);
+  text-transform: var(--typography-rules-headline4-text-transform, none);
+}
+
+.iconBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: var(--spacing-xl);
+  height: var(--spacing-xl);
+  padding: 0;
+  color: var(--colors-text);
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.iconBtn:focus-visible {
+  outline: calc(var(--border-width) * 2) solid var(--colors-text);
+  outline-offset: calc(var(--border-width) * 2);
+}
+
+.body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-sm);
+  flex-shrink: 0;
+  padding: var(--spacing-xs) var(--spacing-md) var(--spacing-md);
+  border-top: var(--border-width) solid var(--border-color);
+}
+
+.count {
+  color: var(--colors-text);
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  font-weight:    var(--typography-rules-text1-font-weight, normal);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+}
+
+.doneBtn {
+  flex: none;
+  min-width: 14rem;
+}
+
+/* ── Grid of companion cards: 2 columns at every width ───────────────────── */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-content: start;
+  gap: var(--spacing-xs);
+}
+
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--colors-background);
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--radius-md);
+  transition: border-color var(--transition-fast);
+}
+
+.card:hover,
+.cardChecked {
+  border-color: var(--colors-text);
+}
+
+/* Fully clickable: image flush to the edges, checkbox top-right */
+.cardMain {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  color: var(--colors-text);
+  background: none;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+}
+
+.cardMain:focus-visible {
+  outline: calc(var(--border-width) * 2) solid var(--colors-text);
+  outline-offset: calc(var(--border-width) * -2);
+}
+
+/* Same treatment as the category product card: the brand's tint behind the
+   photo, multiplied through it (TGR, IB and MNN tint; OAL and LAL are clear) */
+.media {
+  display: block;
+  aspect-ratio: 1;
+  background: var(--product-image-background-blend);
+}
+
+.image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  mix-blend-mode: multiply;
+}
+
+.checkbox {
+  position: absolute;
+  top: var(--spacing-xxs);
+  right: var(--spacing-xxs);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--spacing-md);
+  height: var(--spacing-md);
+  color: var(--colors-text);
+}
+
+/* Checked state — filled circle with an inverse checkmark, same footprint */
+.checkboxChecked {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--spacing-sm);
+  height: var(--spacing-sm);
+  border-radius: var(--radius-full);
+  background: var(--colors-text);
+  color: var(--colors-text-inverse);
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xxxs);
+  padding: var(--spacing-xs);
+}
+
+.name {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  color: var(--colors-text);
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  font-weight:    var(--typography-rules-text1-font-weight, normal);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+}
+
+.priceRow {
+  display: flex;
+  align-items: baseline;
+  gap: var(--spacing-xxs);
+}
+
+.price {
+  color: var(--colors-price-selling);
+  font-family:    var(--typography-rules-text2-font-family);
+  font-size:      var(--typography-rules-text2-font-size);
+  line-height:    var(--typography-rules-text2-line-height);
+  font-weight:    var(--typography-rules-text2-font-weight, 600);
+  letter-spacing: var(--typography-rules-text2-letter-spacing, normal);
+}
+
+.priceOriginal {
+  color: var(--colors-text-secondary);
+  text-decoration: line-through;
+  font-family:    var(--typography-rules-text2-font-family);
+  font-size:      var(--typography-rules-text2-font-size);
+  line-height:    var(--typography-rules-text2-line-height);
+  font-weight:    var(--typography-rules-text2-font-weight, normal);
+  letter-spacing: var(--typography-rules-text2-letter-spacing, normal);
+}
+
+/* Edit / Remove links — text1 + underline. Bottom-right corner of the card;
+   the choice itself shows in the floating cart, not here. */
+.edit {
+  position: absolute;
+  /* With its padding, lines up with the card text's 12px inset */
+  right: var(--spacing-xxxs);
+  bottom: var(--spacing-xxs);
+  margin: 0;
+  padding: var(--spacing-xxxs) var(--spacing-xxs);
+  color: var(--colors-text);
+  background: none;
+  border: none;
+  text-decoration: underline;
+  cursor: pointer;
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  font-weight:    var(--typography-rules-text1-font-weight, normal);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+}

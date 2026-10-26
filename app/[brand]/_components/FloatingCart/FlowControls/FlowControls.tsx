@@ -189,7 +189,7 @@ export function FlowControls({ brand, onNavigate }: FlowControlsProps) {
                     aria-pressed={warranty === v}
                     onClick={() => setParams({ [WARRANTY_PARAM]: v })}
                   >
-                    {v.toUpperCase()}
+                    {v === 'hidden' ? 'Hidden' : v.toUpperCase()}
                   </button>
                 ))}
               </div>

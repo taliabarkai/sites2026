@@ -353,11 +353,13 @@ export function FloatingCart({
   const flow         = readFlow(searchParams)
   const flowConfig   = getFlowConfig(flow)
   // Owned by the header control, so the choice is linkable and survives a
-  // refresh like every other demo setting.
-  const planVariant  = readWarrantyVariant(searchParams) as PlanVariant
+  // refresh like every other demo setting. Hidden (the default) takes the
+  // add-on off every row.
+  const warrantyVariant = readWarrantyVariant(searchParams)
+  const planVariant: PlanVariant = warrantyVariant === 'v2' ? 'v2' : 'v1'
   // LAL sells canvases; no plan covers them, so the add-on is absent rather
   // than present and empty.
-  const showWarranty = getBrandFeatures(brand).warranty
+  const showWarranty = getBrandFeatures(brand).warranty && warrantyVariant !== 'hidden'
 
   const query = searchParams.toString()
   const nextStepHref = `/${brand}/${flowConfig.hasCartPage ? 'cart' : 'checkout'}${query ? `?${query}` : ''}`
@@ -482,7 +484,8 @@ export function FloatingCart({
                 onGenerateGiftNote={onGenerateGiftNote}
                 DropdownIcon={icons.DropdownIcon}
                 hasPlan={!!item.warranty}
-                showWarranty={showWarranty}
+                // A nested (companion) item rides on its main item — no plan of its own
+                showWarranty={showWarranty && !item.isCompanion}
                 onTogglePlan={() => toggleWarranty(item.id)}
                 onOpenCarePlan={() => setCarePlanItemId(item.id)}
                 ratingAbove={ratingAbove}

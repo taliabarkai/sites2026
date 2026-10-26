@@ -7,6 +7,8 @@ import type { ProductItem } from '../../../data/products'
 import lalLoader from '@/src/assets/icons/lal/LAL.gif'
 import { RevisionsNotice } from '../_components/RevisionsNotice'
 import { useNestedItems } from '../_components/NestedItems/useNestedItems'
+import type { NestedItemsDisplay } from '../_components/NestedItems'
+import type { NestedTriggerStyle } from '../_config/demoParams'
 import type { QuickAddProduct } from '../_components/QuickAddPanel'
 import pdp from './ProductDetailPage.module.css'
 import styles from './LalCanvasCustomizer.module.css'
@@ -36,6 +38,10 @@ interface LalCanvasCustomizerProps {
   items: CartItem[]
   previewId?: string
   nestedItems?: QuickAddProduct[]
+  /** Inline card list (default) or one trigger that opens a multi-select drawer. */
+  nestedDisplay?: NestedItemsDisplay
+  /** Drawer only: the trigger as a bordered field (default) or a text link. */
+  nestedTriggerStyle?: NestedTriggerStyle
   addItem: (item: CartItem) => void
   openCart: (added?: boolean) => void
   onLivePreviewChange?: (image: string | null) => void
@@ -200,7 +206,7 @@ async function composeFramedImage(opts: ComposeOpts): Promise<string> {
 }
 
 // ─── Main component ───────────────────────────────────────────────────────────
-export function LalCanvasCustomizer({ brand, product, icons, items, previewId, nestedItems = [], addItem, openCart, onLivePreviewChange }: LalCanvasCustomizerProps) {
+export function LalCanvasCustomizer({ brand, product, icons, items, previewId, nestedItems = [], nestedDisplay = 'inline', nestedTriggerStyle, addItem, openCart, onLivePreviewChange }: LalCanvasCustomizerProps) {
   // Rating shown beside the price — same numbers the category card and the
   // PDP reviews section read from the product registry.
   const productRating = product.rating ?? 0
@@ -213,7 +219,7 @@ export function LalCanvasCustomizer({ brand, product, icons, items, previewId, n
   const RevisionsGlyph = RevisionsIcon ?? ClipboardCopyIcon
 
   // Nested Items — companion products staged above the Subtotal.
-  const nested = useNestedItems(brand, nestedItems)
+  const nested = useNestedItems(brand, nestedItems, undefined, { display: nestedDisplay, triggerStyle: nestedTriggerStyle })
 
   const [photoUrl, setPhotoUrl]   = useState<string | null>(null)
   const [photoName, setPhotoName] = useState<string>('')

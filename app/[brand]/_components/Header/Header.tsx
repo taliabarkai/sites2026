@@ -14,6 +14,9 @@ import { SiteLogo } from '../SiteLogo'
 import { ThemeSwitcher } from '../ThemeSwitcher'
 import { CartSizeToggle } from './CartSizeToggle'
 import { TrackOrderStateToggle } from './TrackOrderStateToggle'
+import { NestedDrawerCountToggle } from './NestedDrawerCountToggle'
+import { NestedTriggerToggle } from './NestedTriggerToggle'
+import { isNestedDrawerProduct } from '../../_config/demoParams'
 import { FlowControls } from '../FloatingCart/FlowControls'
 import { Topline, type ToplineProps } from '../Topline'
 import { getBrandFromPathname, getBrandHomePath, resolveBrand, type BrandKey } from '../../_config/brands'
@@ -127,13 +130,17 @@ export function Header({
      directly under the bar, still at the top of the page. Only one slot is ever
      displayed, so the duplicate never reaches the accessibility tree. */
   const showTrackOrderToggle = isTrackOrder && showStateToggle
-  const demoControls = isCheckout || isCartPage || showTrackOrderToggle ? (
+  const productIdMatch = pathname.match(/\/product\/(\d+)$/)
+  const isNestedDrawerDemo = !!productIdMatch && isNestedDrawerProduct(brandSegment, Number(productIdMatch[1]))
+  const demoControls = isCheckout || isCartPage || showTrackOrderToggle || isNestedDrawerDemo ? (
     <>
-      {/* The phases do not reach Track My Order, so it gets only the one
-          control it has a state for. */}
-      {!isTrackOrder && <FlowControls brand={brandSegment} />}
+      {/* The phases only reach the cart and checkout. Track My Order and the
+          nested items Drawer product each get only their own controls. */}
+      {(isCheckout || isCartPage) && <FlowControls brand={brandSegment} />}
       {isCheckout && <CartSizeToggle className={styles.cartSizeToggle} />}
       {showTrackOrderToggle && <TrackOrderStateToggle className={styles.cartSizeToggle} />}
+      {isNestedDrawerDemo && <NestedTriggerToggle className={styles.cartSizeToggle} />}
+      {isNestedDrawerDemo && <NestedDrawerCountToggle className={styles.cartSizeToggle} />}
     </>
   ) : null
   const demoBar = demoControls && <div className={styles.demoBar}>{demoControls}</div>
