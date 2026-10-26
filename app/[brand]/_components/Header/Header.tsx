@@ -15,7 +15,6 @@ import { ThemeSwitcher } from '../ThemeSwitcher'
 import { CartSizeToggle } from './CartSizeToggle'
 import { TrackOrderStateToggle } from './TrackOrderStateToggle'
 import { NestedDrawerCountToggle } from './NestedDrawerCountToggle'
-import { NestedTriggerToggle } from './NestedTriggerToggle'
 import { NestedDescriptionToggle } from './NestedDescriptionToggle'
 import { isNestedDrawerProduct } from '../../_config/demoParams'
 import { FlowControls } from '../FloatingCart/FlowControls'
@@ -140,7 +139,6 @@ export function Header({
       {(isCheckout || isCartPage) && <FlowControls brand={brandSegment} />}
       {isCheckout && <CartSizeToggle className={styles.cartSizeToggle} />}
       {showTrackOrderToggle && <TrackOrderStateToggle className={styles.cartSizeToggle} />}
-      {isNestedDrawerDemo && <NestedTriggerToggle className={styles.cartSizeToggle} />}
       {isNestedDrawerDemo && <NestedDescriptionToggle className={styles.cartSizeToggle} />}
       {isNestedDrawerDemo && <NestedDrawerCountToggle className={styles.cartSizeToggle} />}
     </>

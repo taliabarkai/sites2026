@@ -7,13 +7,10 @@ import type { QuickAddProduct } from '../QuickAddPanel'
 import { NestedItems, nestedItemKey } from './NestedItems'
 import { NestedItemsDrawer, withBundleDiscount } from './NestedItemsDrawer'
 import type { NestedItemsDisplay } from './NestedItemsDrawer'
-import type { NestedTriggerStyle } from '../../_config/demoParams'
 
 export interface UseNestedItemsOptions {
   /** Inline card list (default) or one trigger that opens a multi-select drawer. */
   display?: NestedItemsDisplay
-  /** Drawer only: the trigger as a bordered field (default) or a text link. */
-  triggerStyle?: NestedTriggerStyle
   /** Drawer only: an optional line under the trigger's heading. */
   description?: string
 }
@@ -46,7 +43,7 @@ export function useNestedItems(
   brand: string,
   items: QuickAddProduct[],
   title?: string,
-  { display = 'inline', triggerStyle, description }: UseNestedItemsOptions = {},
+  { display = 'inline', description }: UseNestedItemsOptions = {},
 ): UseNestedItemsResult {
   const [staged, setStaged] = useState<Record<string, CartItem>>({})
   const [panelItem, setPanelItem] = useState<QuickAddProduct | null>(null)
@@ -87,7 +84,6 @@ export function useNestedItems(
       onUnstage={unstage}
       title={title}
       description={description}
-      triggerStyle={triggerStyle}
     />
   ) : (
     <>

@@ -116,24 +116,6 @@ export function readNestedDrawerCount(params: ReadableParams): number {
 }
 
 /**
- * How the drawer's PDP trigger looks (`?trigger=link`): a bordered field, or a
- * text link with an arrow, set like the field labels above it.
- */
-export const NESTED_TRIGGER_PARAM = 'trigger'
-export const NESTED_TRIGGER_STYLES = ['field', 'link'] as const
-
-export type NestedTriggerStyle = (typeof NESTED_TRIGGER_STYLES)[number]
-
-export const DEFAULT_NESTED_TRIGGER_STYLE: NestedTriggerStyle = 'field'
-
-export function readNestedTriggerStyle(params: ReadableParams): NestedTriggerStyle {
-  const raw = params.get(NESTED_TRIGGER_PARAM)
-  return NESTED_TRIGGER_STYLES.includes(raw as NestedTriggerStyle)
-    ? (raw as NestedTriggerStyle)
-    : DEFAULT_NESTED_TRIGGER_STYLE
-}
-
-/**
  * Whether the drawer's PDP trigger shows its optional description line under
  * the heading (`?desc=hide`).
  */

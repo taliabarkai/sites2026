@@ -50,8 +50,7 @@ import { AIPreviewCustomizer } from '../_components/AIPreviewCustomizer'
 import { ProductOptions, useProductOptions } from '../_components/ProductOptions'
 import type { OptionGroup, SelectedOption } from '../_components/ProductOptions'
 import { OPTION_GROUPS, OPTIONS_SHOWCASE_PRODUCT_ID, optionsShowcaseProduct } from './[id]/_data/optionGroups'
-import { isNestedDrawerProduct, readNestedDescriptionState, readNestedDrawerCount, readNestedTriggerStyle } from '../_config/demoParams'
-import type { NestedTriggerStyle } from '../_config/demoParams'
+import { isNestedDrawerProduct, readNestedDescriptionState, readNestedDrawerCount } from '../_config/demoParams'
 
 // LAL products that use the song-based Music Memories customizer
 // (Custom Canvas, Acrylic Wall Art, Metal Wall Art, Square Custom Canvas)
@@ -870,8 +869,6 @@ interface ProductFormProps {
   nestedItems?: QuickAddProduct[]
   /** Inline card list (default) or one trigger that opens a multi-select drawer. */
   nestedDisplay?: NestedItemsDisplay
-  /** Drawer only: the trigger as a bordered field (default) or a text link. */
-  nestedTriggerStyle?: NestedTriggerStyle
   /** Drawer only: an optional line under the trigger's heading. */
   nestedDescription?: string
   onAddToBag: (
@@ -891,7 +888,7 @@ interface ProductFormProps {
 
 const NO_OPTION_GROUPS: OptionGroup[] = []
 
-function ProductForm({ brand, product, icons, nestedItems = [], nestedDisplay = 'inline', nestedTriggerStyle, nestedDescription, onAddToBag, optionGroups, onAddConfigured }: ProductFormProps) {
+function ProductForm({ brand, product, icons, nestedItems = [], nestedDisplay = 'inline', nestedDescription, onAddToBag, optionGroups, onAddConfigured }: ProductFormProps) {
   const [selectedSwatchKey, setSelectedSwatchKey] = useState<MaterialSwatch['key']>(
     product.defaultSwatchKey ?? 'vermeil'
   )
@@ -1093,7 +1090,6 @@ function ProductForm({ brand, product, icons, nestedItems = [], nestedDisplay = 
           onStage={stage}
           onUnstage={unstage}
           description={nestedDescription}
-          triggerStyle={nestedTriggerStyle}
         />
       ) : (
         <NestedItems
@@ -1215,11 +1211,10 @@ function ProductDetailPageInner({ productId, previewId }: { productId: number; p
   const icons = BRAND_ICONS[brand]
 
   const [livePreview, setLivePreview] = useState<string | null>(null)
-  // The Drawer demo's charm count, trigger and description come from the
-  // header's demo controls (?charms=, ?trigger=, ?desc=)
+  // The Drawer demo's charm count and description come from the header's
+  // demo controls (?charms=, ?desc=)
   const searchParams = useSearchParams()
   const nestedDrawerCount = readNestedDrawerCount(searchParams)
-  const nestedTriggerStyle = readNestedTriggerStyle(searchParams)
   const nestedDescription = readNestedDescriptionState(searchParams) === 'show' ? NESTED_DRAWER_DESCRIPTION : undefined
   const nestedDisplay: NestedItemsDisplay = isNestedDrawerProduct(brand, product.id) ? 'drawer' : 'inline'
 
@@ -1355,7 +1350,6 @@ function ProductDetailPageInner({ productId, previewId }: { productId: number; p
               previewId={previewId}
               nestedItems={nestedItems}
               nestedDisplay={nestedDisplay}
-              nestedTriggerStyle={nestedTriggerStyle}
               nestedDescription={nestedDescription}
               addItem={addItem}
               openCart={openCart}
@@ -1370,7 +1364,6 @@ function ProductDetailPageInner({ productId, previewId }: { productId: number; p
               icons={icons}
               nestedItems={nestedItems}
               nestedDisplay={nestedDisplay}
-              nestedTriggerStyle={nestedTriggerStyle}
               nestedDescription={nestedDescription}
               onAddToBag={handleAddToBag}
             />
