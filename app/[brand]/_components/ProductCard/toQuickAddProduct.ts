@@ -21,7 +21,8 @@ function priceStringToCents(value?: string): number | undefined {
 export function toQuickAddProduct(product: ProductItem): QuickAddProduct {
   const images = [
     { src: product.image, alt: product.name },
-    ...(product.hoverImage ? [{ src: product.hoverImage, alt: product.name }] : []),
+    // The hover image is the on-model shot (unless the product says otherwise)
+    ...(product.hoverImage ? [{ src: product.hoverImage, alt: product.name, onModel: product.hasModelImage !== false }] : []),
   ]
 
   return {
@@ -40,7 +41,7 @@ export function toQuickAddProduct(product: ProductItem): QuickAddProduct {
         values: [
           { label: 'Gold Vermeil', value: 'vermeil', color: 'var(--gold-vermeil-18k)', price: 0 },
           { label: 'Sterling Silver', value: 'silver', color: 'var(--sterling-silver-925)', price: -1000 },
-          { label: 'Solid 14k Gold', value: 'solid-14k', color: 'var(--solid-gold-14k)', price: 5000 },
+          { label: '14K Solid Gold', value: 'solid-14k', color: 'var(--solid-gold-14k)', price: 5000 },
           { label: 'Rose Gold', value: 'rose', color: 'var(--rose-gold-14k)', price: 1500 },
         ],
       },

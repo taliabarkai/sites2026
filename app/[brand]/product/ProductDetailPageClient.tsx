@@ -17,7 +17,7 @@ import { Button } from '../_components/Button'
 import { FilterChips } from '../_components/FilterChips'
 import { ProductCard, toQuickAddProduct } from '../_components/ProductCard'
 import { QuickAddPanel } from '../_components/QuickAddPanel'
-import type { QuickAddProduct } from '../_components/QuickAddPanel'
+import type { QuickAddFormValues, QuickAddProduct } from '../_components/QuickAddPanel'
 import { NestedItems, NestedItemsDrawer, nestedItemKey, withBundleDiscount } from '../_components/NestedItems'
 import type { NestedItemsDisplay } from '../_components/NestedItems'
 import { ProductImageCarousel } from '../_components/ProductImageCarousel'
@@ -29,6 +29,8 @@ import { DEFAULT_FOOTER_COLUMNS, DEFAULT_NAV_LINKS, DEFAULT_TOPLINE } from '../_
 import {
   DEFAULT_PRODUCT_SWATCHES,
   MATERIAL_SWATCHES,
+  BRAND_PACKAGING_IMAGES,
+  titleForMetal,
   CHAIN_LENGTHS,
   DEFAULT_CHAIN_LENGTH,
   MAX_ENGRAVE_CHARS,
@@ -43,6 +45,7 @@ import { getGiftOptions } from '../_config/giftOptions'
 import { GiftOptionsInfoPanel } from '../_components/cart/GiftingOptions'
 import { PanelPortal } from '../_components/PanelPortal'
 import { StickyCustomizeBar } from '../_components/StickyCustomizeBar'
+import { StickyProductBar } from '../_components/StickyProductBar'
 import { TranslationAdvisor } from '../_components/TranslationAdvisor'
 import type { TranslationAdvisorVariant } from '../_components/TranslationAdvisor'
 import { MusicMemoriesCustomizer } from './MusicMemoriesCustomizer'
@@ -50,7 +53,7 @@ import { AIPreviewCustomizer } from '../_components/AIPreviewCustomizer'
 import { ProductOptions, useProductOptions } from '../_components/ProductOptions'
 import type { OptionGroup, SelectedOption } from '../_components/ProductOptions'
 import { OPTION_GROUPS, OPTIONS_SHOWCASE_PRODUCT_ID, optionsShowcaseProduct } from './[id]/_data/optionGroups'
-import { isNestedDrawerProduct, readNestedDescriptionState, readNestedDrawerCount } from '../_config/demoParams'
+import { isNestedDrawerProduct, isStickyPersonalizeProduct, isTwoStepProduct, readNestedDescriptionState, readNestedDrawerCount } from '../_config/demoParams'
 
 // LAL products that use the song-based Music Memories customizer
 // (Custom Canvas, Acrylic Wall Art, Metal Wall Art, Square Custom Canvas)
@@ -639,22 +642,31 @@ function ReviewsSection({
 // ─── Mobile swipeable gallery ─────────────────────────────────────────────────
 
 /** Mobile PDP image gallery — the shared carousel, hidden on desktop via CSS. */
-function MobileGallery({ images, livePreview }: { images: string[]; livePreview?: string | null }) {
-  return <ProductImageCarousel images={images} livePreview={livePreview} className={styles.mobileGallery} />
+function MobileGallery({ images, modelImages, livePreview }: { images: string[]; modelImages: string[]; livePreview?: string | null }) {
+  return <ProductImageCarousel images={images} modelImages={modelImages} livePreview={livePreview} className={styles.mobileGallery} />
+}
+
+/** A gallery image's class — packshots blend onto the tint, on-model shots don't. */
+function galleryImageClass(base: string, src: string, modelImages: string[]): string {
+  return modelImages.includes(src) ? `${base} ${styles.galleryModelImage}` : base
 }
 
 // ─── Desktop 2×2 static grid (non-OAL) ───────────────────────────────────────
 
-function DesktopGallery({ images, name }: { images: string[]; name: string }) {
-  const gridImages = [...images, ...images].slice(0, 4)
+// `rootRef` — the gallery's own box, for the desktop sticky bar to watch
+type GalleryRootRef = React.RefObject<HTMLDivElement | null>
+
+function DesktopGallery({ images, modelImages, name, rootRef }: { images: string[]; modelImages: string[]; name: string; rootRef?: GalleryRootRef }) {
+  // At least a full 2×2 — short galleries repeat; longer ones show every image
+  const gridImages = images.length >= 4 ? images : [...images, ...images].slice(0, 4)
   return (
-    <div className={styles.desktopGallery}>
+    <div ref={rootRef} className={styles.desktopGallery}>
       {gridImages.map((src, i) => (
         <div key={i} className={styles.desktopGridCell}>
           <img
             src={src}
             alt={i === 0 ? name : ''}
-            className={styles.desktopGridImage}
+            className={galleryImageClass(styles.desktopGridImage, src, modelImages)}
             loading={i === 0 ? 'eager' : 'lazy'}
           />
         </div>
@@ -665,7 +677,7 @@ function DesktopGallery({ images, name }: { images: string[]; name: string }) {
 
 // ─── OAL: sticky-left hero + vertical scroll right ────────────────────────────
 
-function LALDesktopGallery({ images, name, livePreview }: { images: string[]; name: string; livePreview?: string | null }) {
+function LALDesktopGallery({ images, modelImages, name, livePreview, rootRef }: { images: string[]; modelImages: string[]; name: string; livePreview?: string | null; rootRef?: GalleryRootRef }) {
   const [activeIdx, setActiveIdx] = useState(0)
   const hadPreview = useRef(false)
   const allImages = livePreview ? [livePreview, ...images] : images
@@ -679,7 +691,7 @@ function LALDesktopGallery({ images, name, livePreview }: { images: string[]; na
   const showRibbon = !!livePreview && activeIdx === 0
 
   return (
-    <div className={styles.lalGallery}>
+    <div ref={rootRef} className={styles.lalGallery}>
       {/* Thumbnails — left column */}
       <div className={styles.lalThumbCol}>
         {allImages.map((src, i) => (
@@ -690,25 +702,25 @@ function LALDesktopGallery({ images, name, livePreview }: { images: string[]; na
             className={`${styles.lalThumb} ${i === activeIdx ? styles.lalThumbActive : ''}`}
             aria-label={`View image ${i + 1}`}
           >
-            <img src={src} alt="" aria-hidden="true" className={styles.oalGalleryImage} loading="lazy" />
+            <img src={src} alt="" aria-hidden="true" className={galleryImageClass(styles.oalGalleryImage, src, modelImages)} loading="lazy" />
           </button>
         ))}
       </div>
       {/* Main image — right */}
       <div className={styles.lalMainCell}>
         {showRibbon && <span className={styles.livePreviewRibbon}>Live Preview</span>}
-        <img src={allImages[activeIdx]} alt={name} className={styles.oalGalleryImage} loading="eager" />
+        <img src={allImages[activeIdx]} alt={name} className={galleryImageClass(styles.oalGalleryImage, allImages[activeIdx], modelImages)} loading="eager" />
       </div>
     </div>
   )
 }
 
-function OALDesktopGallery({ images, name }: { images: string[]; name: string }) {
+function OALDesktopGallery({ images, modelImages, name, rootRef }: { images: string[]; modelImages: string[]; name: string; rootRef?: GalleryRootRef }) {
   const scrollImages = [images[1], images[0], images[1]]
   return (
-    <div className={styles.oalGallery}>
+    <div ref={rootRef} className={styles.oalGallery}>
       <div className={styles.oalMainCell}>
-        <img src={images[0]} alt={name} className={styles.oalGalleryImage} loading="eager" />
+        <img src={images[0]} alt={name} className={galleryImageClass(styles.oalGalleryImage, images[0], modelImages)} loading="eager" />
       </div>
       <div className={styles.oalScrollCol}>
         {scrollImages.map((src, i) => (
@@ -716,7 +728,7 @@ function OALDesktopGallery({ images, name }: { images: string[]; name: string })
             <img
               src={src}
               alt=""
-              className={styles.oalGalleryImage}
+              className={galleryImageClass(styles.oalGalleryImage, src, modelImages)}
               loading={i === 0 ? 'eager' : 'lazy'}
             />
           </div>
@@ -884,11 +896,95 @@ interface ProductFormProps {
    */
   optionGroups?: OptionGroup[]
   onAddConfigured?: (price: number, selectedOptions: SelectedOption[], isPersonalized: boolean, nestedCartItems: CartItem[]) => void
+  /**
+   * Two-step flow: the page leaves the selections out, and "Personalize & Add
+   * to Bag" (sticky on mobile) opens them in the Quick Add panel, no gallery.
+   */
+  twoStep?: boolean
+  /**
+   * Sticky-personalize flow: the selections stay on the page, and the sticky
+   * "Personalize & Add to Bag" opens just the personalisation in the Quick Add
+   * panel — the metal stays the page's.
+   */
+  stickyPersonalize?: boolean
+  /** The desktop gallery beside the form — the desktop sticky bar comes up once it's passed. */
+  galleryRef?: GalleryRootRef
 }
 
 const NO_OPTION_GROUPS: OptionGroup[] = []
 
-function ProductForm({ brand, product, icons, nestedItems = [], nestedDisplay = 'inline', nestedDescription, onAddToBag, optionGroups, onAddConfigured }: ProductFormProps) {
+// Two-step flow, step 2: the product's Quick Add form without its gallery,
+// asking the way the PDP does. Its metal picker is built from the PDP's own
+// swatches (and drawn like them, priced), so the keys and prices match the
+// swatches left on the page and the two stay in step; the chain length is the
+// PDP's dropdown of the PDP's lengths.
+function toPersonalizeProduct(product: ProductItem): QuickAddProduct {
+  const base = toQuickAddProduct(product)
+  return {
+    ...base,
+    hideGallery: true,
+    options: base.options.map((opt) => {
+      if (opt.type === 'swatch') {
+        return {
+          ...opt,
+          name: METAL_OPTION,
+          showPrices: true,
+          values: MATERIAL_SWATCHES.map((s) => ({ label: s.label, value: s.key, color: s.color, price: s.priceOffset })),
+        }
+      }
+      if (opt.name === CHAIN_LENGTH_OPTION) {
+        return { ...opt, type: 'dropdown' as const, values: CHAIN_LENGTHS.map((len) => ({ label: len, value: len })) }
+      }
+      return opt
+    }),
+  }
+}
+
+const METAL_OPTION = 'Metal Type'
+const CHAIN_LENGTH_OPTION = 'Chain Length'
+const INSCRIPTION_OPTION = 'Inscription'
+
+// Sticky-personalize flow: the panel asks only what the page's form does past
+// the metal — the inscription (required, to personalise) and the chain length
+// — priced and titled for the metal already picked on the page.
+function toPersonalizationOnlyProduct(product: ProductItem, price: number, metal: MaterialSwatch['key']): QuickAddProduct {
+  return {
+    ...toQuickAddProduct(product),
+    title: titleForMetal(product.name, metal),
+    price,
+    hideGallery: true,
+    engraving: 'fields',
+    options: [
+      { name: INSCRIPTION_OPTION, type: 'text-input', maxLength: MAX_ENGRAVE_CHARS, placeholder: 'e.g. Sofia' },
+      { name: CHAIN_LENGTH_OPTION, type: 'dropdown', values: CHAIN_LENGTHS.map((len) => ({ label: len, value: len })) },
+    ],
+  }
+}
+
+// Two-step flow's nested offer: a second of the same necklace at half price —
+// the base and every option's price halved and the full price crossed out. It
+// opens like step 2 itself: selections only, no gallery.
+const SECOND_NECKLACE_DISCOUNT = 0.5
+const SECOND_NECKLACE_TITLE = 'Buy a second necklace at 50% off'
+
+function toSecondNecklace(product: ProductItem): QuickAddProduct {
+  const base = toPersonalizeProduct(product)
+  const discount = (cents: number) => Math.round(cents * (1 - SECOND_NECKLACE_DISCOUNT))
+  return {
+    ...base,
+    // Its own nested-item key, apart from the main product's url
+    pdpUrl: `${base.pdpUrl}#second`,
+    price: discount(base.price),
+    salePrice: base.price,
+    ribbon: '50% off',
+    options: base.options.map((opt) => ({
+      ...opt,
+      values: opt.values?.map((v) => ({ ...v, price: v.price != null ? discount(v.price) : v.price })),
+    })),
+  }
+}
+
+function ProductForm({ brand, product, icons, nestedItems = [], nestedDisplay = 'inline', nestedDescription, onAddToBag, optionGroups, onAddConfigured, twoStep = false, stickyPersonalize = false, galleryRef }: ProductFormProps) {
   const [selectedSwatchKey, setSelectedSwatchKey] = useState<MaterialSwatch['key']>(
     product.defaultSwatchKey ?? 'vermeil'
   )
@@ -912,6 +1008,9 @@ function ProductForm({ brand, product, icons, nestedItems = [], nestedDisplay = 
   // Sticky "continue customization" bar watches the CTA and returns here.
   const addToBagRef = useRef<HTMLDivElement>(null)
   const formPanelRef = useRef<HTMLElement>(null)
+  // Sticky-personalize: the selections after the metal start here — the bars
+  // step aside from here down to the CTA, which does their job in that stretch
+  const selectionsStartRef = useRef<HTMLDivElement>(null)
 
   // Translation Advisor treatment — demo toggle, IB only.
   const [advisorVariant, setAdvisorVariant] = useState<TranslationAdvisorVariant>(() => lastAdvisorVariant)
@@ -922,6 +1021,46 @@ function ProductForm({ brand, product, icons, nestedItems = [], nestedDisplay = 
   const [staged, setStaged] = useState<Record<string, CartItem>>({})
   const [panelItem, setPanelItem] = useState<QuickAddProduct | null>(null)
   const [panelOpen, setPanelOpen] = useState(false)
+
+  // Two-step flow — step 2 is the product's own Quick Add form, selections only.
+  // The metal is chosen on the page or in the panel and mirrored both ways; the
+  // panel's other choices are kept so reopening it picks up where it was.
+  const [personalizeOpen, setPersonalizeOpen] = useState(false)
+  const personalizeProduct = twoStep ? toPersonalizeProduct(product) : null
+  // The panel's nested offer — the second necklace, in place of the page's companions
+  const offerItems = twoStep ? [toSecondNecklace(product)] : nestedItems
+  // Once added, the card names the metal it was personalised in
+  const offerCards = offerItems.map((it) => {
+    const added = staged[nestedItemKey(it)]
+    return added ? { ...it, title: added.name } : it
+  })
+  const metalOptionName = personalizeProduct?.options.find((o) => o.type === 'swatch')?.name ?? 'Metal'
+  const [personalizeValues, setPersonalizeValues] = useState<QuickAddFormValues>({ selectedOptions: {}, names: [''] })
+  // Bumped when the page's metal changes, so the panel starts over from it
+  const [personalizeKey, setPersonalizeKey] = useState(0)
+  const personalizeInitial: QuickAddFormValues = {
+    ...personalizeValues,
+    // The PDP's default length until one is picked; the page's metal always
+    selectedOptions: { [CHAIN_LENGTH_OPTION]: DEFAULT_CHAIN_LENGTH, ...personalizeValues.selectedOptions, [metalOptionName]: selectedSwatchKey },
+  }
+  const handlePageSwatch = (key: MaterialSwatch['key']) => {
+    setSelectedSwatchKey(key)
+    if (twoStep) setPersonalizeKey((k) => k + 1)
+  }
+  // Step 2's Add to Bag — the configured product plus any nested items picked
+  // in the panel, then the bag opens (the panel closes itself)
+  const { addItem, openCart } = useCart()
+  const handlePersonalizeAdd = (item: CartItem) => {
+    addItem(item)
+    stagedItems.forEach((it) => addItem(it))
+    setStaged({})
+    openCart(true)
+  }
+  const handlePersonalizeChange = (values: QuickAddFormValues) => {
+    setPersonalizeValues(values)
+    const metal = values.selectedOptions[metalOptionName] as MaterialSwatch['key'] | undefined
+    if (metal && metal !== selectedSwatchKey) setSelectedSwatchKey(metal)
+  }
 
   const checkedKeys = new Set(Object.keys(staged))
   // The drawer's picks carry its 2+ discount into the subtotal and the bag
@@ -939,10 +1078,14 @@ function ProductForm({ brand, product, icons, nestedItems = [], nestedDisplay = 
       return next
     })
 
+  // Bumped on every pick, so the companion's panel starts over from its defaults
+  const [nestedFormKey, setNestedFormKey] = useState(0)
+
   const handleToggle = (item: QuickAddProduct, checked: boolean) => {
     if (checked) {
       // Selecting opens the quick-add panel to configure the companion product.
       setPanelItem(item)
+      setNestedFormKey((k) => k + 1)
       setPanelOpen(true)
     } else {
       // Unchecking removes it directly — no panel.
@@ -955,6 +1098,32 @@ function ProductForm({ brand, product, icons, nestedItems = [], nestedDisplay = 
   const subtotalValue = (usesOptions ? options.subtotal : currentPrice) + nestedTotal
   // N = 1 (main product) + staged nested items.
   const ctaLabel = stagedCount === 0 ? 'Add to Bag' : `Add ${1 + stagedCount} Items to bag`
+  // The personalize flows' panel CTAs carry the bag total — what the picks
+  // cost, a discounted companion at its price paid — after an em dash (the
+  // page's own CTAs don't). Whole dollars unless a half-price option leaves
+  // cents, so it matches the bag.
+  const subtotalLabel = Number.isInteger(subtotalValue / 100)
+    ? formatPrice(subtotalValue)
+    : `$${(subtotalValue / 100).toFixed(2)}`
+  const withTotal = (label: string) => `${label} — ${subtotalLabel}`
+  const personalizeLabel = 'Personalize & Add to Bag'
+
+  // Sticky-personalize flow — the panel opens from the page's inscription and
+  // chain length (a fresh form each time) and writes every change back, so
+  // its Add to Bag is the page's own
+  const [quickPersonalizeOpen, setQuickPersonalizeOpen] = useState(false)
+  const [quickPersonalizeKey, setQuickPersonalizeKey] = useState(0)
+  const openQuickPersonalize = () => {
+    setQuickPersonalizeKey((k) => k + 1)
+    setQuickPersonalizeOpen(true)
+  }
+  const quickPersonalizeProduct = stickyPersonalize
+    ? toPersonalizationOnlyProduct(product, currentPrice, selectedSwatchKey)
+    : null
+  const handleQuickPersonalizeChange = (values: QuickAddFormValues) => {
+    setEngravedText(values.selectedOptions[INSCRIPTION_OPTION] ?? '')
+    setChainLength(values.selectedOptions[CHAIN_LENGTH_OPTION] ?? DEFAULT_CHAIN_LENGTH)
+  }
 
   const handleMainAdd = () => {
     if (usesOptions) {
@@ -997,7 +1166,8 @@ function ProductForm({ brand, product, icons, nestedItems = [], nestedDisplay = 
         </nav>
 
         <div className={styles.productTitlePriceGroup}>
-          <h1 className={styles.productTitle}>{product.name}</h1>
+          {/* Follows the metal picked, unless the config-driven options own the form */}
+          <h1 className={styles.productTitle}>{usesOptions ? product.name : titleForMetal(product.name, selectedSwatchKey)}</h1>
           <div className={styles.priceRow}>
             <span className={styles.priceCurrent}>{currentPrice > 0 ? formatPrice(currentPrice) : product.price ?? ''}</span>
           </div>
@@ -1010,7 +1180,15 @@ function ProductForm({ brand, product, icons, nestedItems = [], nestedDisplay = 
         />
       </div>
 
-      {usesOptions ? (
+      {twoStep ? (
+        /* Two-step: the metal stays on the page; the rest is in the panel */
+        <SwatchSelector
+          swatches={MATERIAL_SWATCHES}
+          basePrice={product.priceInCents ?? 0}
+          selectedKey={selectedSwatchKey}
+          onSelect={handlePageSwatch}
+        />
+      ) : usesOptions ? (
         <ProductOptions
           groups={optionGroups}
           options={options}
@@ -1028,7 +1206,7 @@ function ProductForm({ brand, product, icons, nestedItems = [], nestedDisplay = 
         />
 
         {/* Engrave input */}
-        <div className={styles.fieldGroup}>
+        <div ref={selectionsStartRef} className={styles.fieldGroup}>
           <div className={styles.fieldLabelRow}>
             <label className={styles.fieldLabel} htmlFor="engrave-input">
               Inscription:
@@ -1082,7 +1260,7 @@ function ProductForm({ brand, product, icons, nestedItems = [], nestedDisplay = 
       )}
 
       {/* Nested Items — companion products, directly above the Subtotal */}
-      {nestedDisplay === 'drawer' ? (
+      {twoStep ? null : nestedDisplay === 'drawer' ? (
         <NestedItemsDrawer
           brand={brand}
           items={nestedItems}
@@ -1100,25 +1278,62 @@ function ProductForm({ brand, product, icons, nestedItems = [], nestedDisplay = 
         />
       )}
 
-      {/* Subtotal */}
-      <div className={styles.subtotalRow}>
-        <span className={styles.subtotalLabel}>Subtotal</span>
-        <span className={styles.subtotalValue}>{formatPrice(subtotalValue)}</span>
-      </div>
+      {twoStep ? (
+        <>
+          {/* Step 1 — the inline CTA under the metal, and (mobile) the sticky bar
+              whenever it is off screen: up on landing, aside while the CTA shows,
+              back once it's scrolled past. Both open step 2. */}
+          <div ref={addToBagRef}>
+            <Button
+              variant="add-to-cart"
+              className={styles.addToBagBtn}
+              onClick={() => setPersonalizeOpen(true)}
+            >
+              {personalizeLabel}
+            </Button>
+          </div>
+          <StickyCustomizeBar
+            watch={addToBagRef}
+            showBelowFold
+            label={personalizeLabel}
+            onClick={() => setPersonalizeOpen(true)}
+          />
+        </>
+      ) : (
+        <>
+          {/* Subtotal */}
+          <div className={styles.subtotalRow}>
+            <span className={styles.subtotalLabel}>Subtotal</span>
+            <span className={styles.subtotalValue}>{formatPrice(subtotalValue)}</span>
+          </div>
 
-      {/* CTA */}
-      <div ref={addToBagRef}>
-        <Button
-          variant="add-to-cart"
-          className={styles.addToBagBtn}
-          onClick={handleMainAdd}
-        >
-          {ctaLabel}
-        </Button>
-      </div>
+          {/* CTA */}
+          <div ref={addToBagRef}>
+            <Button
+              variant="add-to-cart"
+              className={styles.addToBagBtn}
+              onClick={handleMainAdd}
+            >
+              {ctaLabel}
+            </Button>
+          </div>
 
-      {/* Every brand gets the sticky bar; the advisor above is IB-only */}
-      <StickyCustomizeBar watch={addToBagRef} target={formPanelRef} />
+          {/* Every brand gets the sticky bar; the advisor above is IB-only.
+              Sticky-personalize: up from landing, aside while the Add to Bag
+              shows, back once it's passed — and it opens the panel. */}
+          {stickyPersonalize ? (
+            <StickyCustomizeBar
+              watch={addToBagRef}
+              watchFrom={selectionsStartRef}
+              showBelowFold
+              label={personalizeLabel}
+              onClick={openQuickPersonalize}
+            />
+          ) : (
+            <StickyCustomizeBar watch={addToBagRef} target={formPanelRef} />
+          )}
+        </>
+      )}
 
       {/* Trust badges */}
       <TrustBadges
@@ -1174,10 +1389,98 @@ function ProductForm({ brand, product, icons, nestedItems = [], nestedDisplay = 
         onClose={() => setPanelOpen(false)}
         ctaLabel="Add"
         showViewDetails={false}
+        formKey={nestedFormKey}
+        // The two-step offer asks like step 2: silver and the PDP's default chain length
+        initialValues={twoStep ? { selectedOptions: { [METAL_OPTION]: 'silver', [CHAIN_LENGTH_OPTION]: DEFAULT_CHAIN_LENGTH }, names: [''] } : undefined}
         onAdd={(cartItem) => {
-          if (panelItem) stage(nestedItemKey(panelItem), cartItem)
+          if (!panelItem) return
+          // A discounted item carries its full price into the bag, crossed out there too
+          const fullPrice = panelItem.salePrice != null
+            ? Math.round(cartItem.price / (panelItem.price / panelItem.salePrice))
+            : undefined
+          stage(nestedItemKey(panelItem), fullPrice != null ? { ...cartItem, originalPrice: fullPrice } : cartItem)
         }}
       />
+
+      {/* Two-step flow, step 2 — the selections, then the nested items offer
+          (a pick opens its own panel on top, as on the page); adds it all to
+          the bag and opens it */}
+      {/* Desktop, both personalize flows: once the gallery has scrolled past (so
+          the sticky form column has too), a bottom bar with the title and price
+          and the CTA that opens the flow's panel */}
+      {(twoStep || stickyPersonalize) && (
+        <StickyProductBar
+          watch={galleryRef ?? formPanelRef}
+          hideOver={stickyPersonalize ? { from: selectionsStartRef, to: addToBagRef } : undefined}
+          title={titleForMetal(product.name, selectedSwatchKey)}
+          price={formatPrice(currentPrice)}
+          label={personalizeLabel}
+          onClick={twoStep ? () => setPersonalizeOpen(true) : openQuickPersonalize}
+        />
+      )}
+
+      {/* Sticky-personalize flow — the inscription and chain length (no metal),
+          then the page's companions; adds the page's whole configuration */}
+      {stickyPersonalize && (
+        <QuickAddPanel
+          isOpen={quickPersonalizeOpen}
+          product={quickPersonalizeProduct}
+          onClose={() => setQuickPersonalizeOpen(false)}
+          showViewDetails={false}
+          ctaLabel={withTotal(ctaLabel)}
+          onAdd={handleMainAdd}
+          // The page's own companions, sharing its picks — checked here or on
+          // the page, it's the same item either way
+          afterOptions={
+            nestedDisplay === 'drawer' ? (
+              <NestedItemsDrawer
+                brand={brand}
+                items={nestedItems}
+                staged={staged}
+                onStage={stage}
+                onUnstage={unstage}
+                description={nestedDescription}
+              />
+            ) : (
+              <NestedItems
+                brand={brand}
+                items={nestedItems}
+                checkedKeys={checkedKeys}
+                onToggle={handleToggle}
+              />
+            )
+          }
+          initialValues={{
+            selectedOptions: { [INSCRIPTION_OPTION]: engravedText, [CHAIN_LENGTH_OPTION]: chainLength },
+            names: [''],
+          }}
+          onChange={handleQuickPersonalizeChange}
+          formKey={quickPersonalizeKey}
+        />
+      )}
+
+      {twoStep && (
+        <QuickAddPanel
+          isOpen={personalizeOpen}
+          product={personalizeProduct}
+          onClose={() => setPersonalizeOpen(false)}
+          showViewDetails={false}
+          ctaLabel={withTotal(ctaLabel)}
+          onAdd={handlePersonalizeAdd}
+          afterOptions={
+            <NestedItems
+              brand={brand}
+              title={SECOND_NECKLACE_TITLE}
+              items={offerCards}
+              checkedKeys={checkedKeys}
+              onToggle={handleToggle}
+            />
+          }
+          initialValues={personalizeInitial}
+          onChange={handlePersonalizeChange}
+          formKey={personalizeKey}
+        />
+      )}
     </section>
   )
 }
@@ -1204,13 +1507,24 @@ function ProductDetailPageInner({ productId, previewId }: { productId: number; p
     getBrandProducts(brand).find((p) => p.id === productId) ?? (isOptionsShowcase ? optionsShowcaseProduct : undefined)
   if (!product) notFound()
 
-  const images = product.hoverImage
-    ? [product.image, product.hoverImage]
-    : [product.image]
+  const images = [
+    product.image,
+    ...(product.hoverImage ? [product.hoverImage] : []),
+    ...(product.galleryImages ?? []).map((g) => g.src),
+    // The brand's packaging always comes last
+    ...(BRAND_PACKAGING_IMAGES[brand] ? [BRAND_PACKAGING_IMAGES[brand]] : []),
+  ]
+  // On-model shots (the hover image, unless marked otherwise) stay untinted
+  const modelImages = [
+    ...(product.hoverImage && product.hasModelImage !== false ? [product.hoverImage] : []),
+    ...(product.galleryImages ?? []).filter((g) => g.onModel).map((g) => g.src),
+  ]
   const { items, isOpen, subtotal, closeCart, removeItem, addItem, openCart } = useCart()
   const icons = BRAND_ICONS[brand]
 
   const [livePreview, setLivePreview] = useState<string | null>(null)
+  // The desktop gallery — the desktop sticky bar comes up once it's scrolled past
+  const galleryRef = useRef<HTMLDivElement>(null)
   // The Drawer demo's charm count and description come from the header's
   // demo controls (?charms=, ?desc=)
   const searchParams = useSearchParams()
@@ -1252,7 +1566,7 @@ function ProductDetailPageInner({ productId, previewId }: { productId: number; p
     ]
     addItem({
       id: `${product.id}-${swatchKey}-${Date.now()}`,
-      name: product.name,
+      name: titleForMetal(product.name, swatchKey),
       price,
       originalPrice: undefined,
       image: product.image,
@@ -1306,16 +1620,16 @@ function ProductDetailPageInner({ productId, previewId }: { productId: number; p
         ) : (
         <>
         {/* Mobile gallery — hidden on desktop */}
-        <MobileGallery images={images} livePreview={livePreview} />
+        <MobileGallery images={images} modelImages={modelImages} livePreview={livePreview} />
 
         {/* Two-column layout on desktop, single column on mobile */}
         <div className={styles.layout}>
           {/* Left: gallery — LAL: thumbnails left; OAL: sticky+scroll; TGR/others: 2×2 grid */}
           {brand === 'lal'
-            ? <LALDesktopGallery images={images} name={product.name} livePreview={livePreview} />
+            ? <LALDesktopGallery images={images} modelImages={modelImages} name={product.name} livePreview={livePreview} rootRef={galleryRef} />
             : brand === 'oal'
-              ? <OALDesktopGallery images={images} name={product.name} />
-              : <DesktopGallery images={images} name={product.name} />
+              ? <OALDesktopGallery images={images} modelImages={modelImages} name={product.name} rootRef={galleryRef} />
+              : <DesktopGallery images={images} modelImages={modelImages} name={product.name} rootRef={galleryRef} />
           }
 
           {/* Right / main: product form — LAL music memories / canvas customizer, else jewelry form */}
@@ -1366,6 +1680,9 @@ function ProductDetailPageInner({ productId, previewId }: { productId: number; p
               nestedDisplay={nestedDisplay}
               nestedDescription={nestedDescription}
               onAddToBag={handleAddToBag}
+              twoStep={isTwoStepProduct(brand, product.id)}
+              stickyPersonalize={isStickyPersonalizeProduct(brand, product.id)}
+              galleryRef={galleryRef}
             />
           )}
         </div>

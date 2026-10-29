@@ -18,11 +18,17 @@
   transform: translateY(0);
 }
 
+/* The bar's own height — its padding, the button and the top border */
+.spacer {
+  height: calc(var(--buttons-primary-min-height) + 2 * var(--spacing-sm) + var(--border-width));
+}
+
 /* Mobile only. On desktop the customisation panel sits beside the gallery and
    stays in reach, so the bar has nothing to bring back. Hidden in CSS rather
    than skipped in JS so the server and client render the same markup. */
 @media (min-width: 1024px) {
-  .bar {
+  .bar,
+  .spacer {
     display: none;
   }
 }

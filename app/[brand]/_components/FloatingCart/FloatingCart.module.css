@@ -240,6 +240,13 @@
   background-color: var(--product-image-background-blend);
 }
 
+@media (max-width: 767px) {
+  .itemImageWrap {
+    width: 100px;
+    height: 100px;
+  }
+}
+
 .itemImage {
   width: 100%;
   height: 100%;
@@ -311,9 +318,11 @@
 
 .itemPriceRow {
   display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: var(--spacing-xs);
+  /* On sale: the selling price on top, the crossed-out price below it (the
+     markup keeps the original first, for the `+ .itemPrice` colour rule) */
+  flex-direction: column-reverse;
+  align-items: flex-end;
+  gap: var(--spacing-xxxs);
   /* Right-aligned in the top row, never shrunk, never wraps mid-price */
   margin-left: auto;
   flex: 0 0 auto;

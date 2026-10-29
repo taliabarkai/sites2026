@@ -151,6 +151,12 @@
     display: none;
   }
 
+  /* The tint behind each image (not the column, so the gaps stay clear) */
+  .desktopImageCell {
+    flex-shrink: 0;
+    background: var(--colors-card-image-bg);
+  }
+
   .desktopImageEl {
     display: block;
     width: 100%;
@@ -158,6 +164,7 @@
     aspect-ratio: 1 / 1; /* square for all brands */
     object-fit: cover;
     object-position: center;
+    mix-blend-mode: multiply;
   }
 }
 
@@ -251,8 +258,9 @@
 /* Price — matches PDP .priceRow / .priceOriginal / .priceCurrent */
 .priceRow {
   display: flex;
-  align-items: baseline;
-  gap: var(--spacing-xxs);
+  /* On sale: the selling price on top, the crossed-out price below it */
+  flex-direction: column-reverse;
+  align-items: flex-start;
   margin-bottom: var(--spacing-xxxs);
 }
 
@@ -355,6 +363,8 @@
   aspect-ratio: 1 / 1; /* square for all brands */
   object-fit: cover;
   object-position: center;
+  /* Every panel image picks up its box's card-image tint, as the product card does */
+  mix-blend-mode: multiply;
 }
 
 /* ── Mini image gallery — mobile only ────────────────────────────────────── */
@@ -393,6 +403,13 @@
   aspect-ratio: 1 / 1; /* square for all brands */
   object-fit: cover;
   object-position: center;
+  mix-blend-mode: multiply;
+}
+
+/* On-model shots are lifestyle photos — the tint is for packshots only (after
+   every panel image rule, so it wins at equal specificity) */
+.imageModel {
+  mix-blend-mode: normal;
 }
 
 /* ── Options ──────────────────────────────────────────────────────────────── */
@@ -436,6 +453,76 @@
 
 .swatchSelected {
   box-shadow: 0 0 0 1px var(--colors-background), 0 0 0 2px var(--colors-text);
+}
+
+/* ── Priced swatches — the PDP's metal picker (bold label, 36px swatches with
+      their price below), for `showPrices` swatch options ───────────────────── */
+.pricedSwatchLabel {
+  margin: 0;
+  font-family:    var(--typography-rules-text2-font-family);
+  font-size:      var(--typography-rules-text2-font-size);
+  line-height:    var(--typography-rules-text2-line-height);
+  font-weight:    var(--typography-rules-text2-font-weight);
+  letter-spacing: var(--typography-rules-text2-letter-spacing, normal);
+  color: var(--colors-text);
+}
+
+.pricedSwatchValue {
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  font-weight:    var(--typography-rules-text1-font-weight, normal);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+}
+
+.pricedSwatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+  /* The PDP's 12px label-to-swatches gap (the option group's own is 8px) */
+  margin-top: var(--spacing-xxxs);
+}
+
+.pricedSwatch {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-xxs);
+  padding: 0;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--colors-text);
+  text-align: center;
+}
+
+.pricedSwatchCircle {
+  display: block;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-full);
+  border: var(--border-width) solid var(--border-color);
+  flex-shrink: 0;
+  transition: box-shadow var(--transition-fast);
+}
+
+/* Pointer devices only — on touch, a tapped swatch would keep the hover ring */
+@media (hover: hover) {
+  .pricedSwatch:hover .pricedSwatchCircle {
+    box-shadow: 0 0 0 2px var(--colors-background), 0 0 0 3px var(--colors-text-secondary);
+  }
+}
+
+.pricedSwatchSelected .pricedSwatchCircle {
+  box-shadow: 0 0 0 2px var(--colors-background), 0 0 0 3px var(--colors-text);
+}
+
+.pricedSwatchPrice {
+  font-family:    var(--typography-rules-text3-font-family);
+  font-size:      var(--typography-rules-text3-font-size);
+  line-height:    var(--typography-rules-text3-line-height);
+  font-weight:    var(--typography-rules-text3-font-weight, normal);
+  letter-spacing: var(--typography-rules-text3-letter-spacing, normal);
 }
 
 .pills { display: flex; flex-wrap: wrap; gap: var(--spacing-xxs); }
@@ -541,6 +628,12 @@
 /* Flows inline below the last selection (not pinned to the bottom).
    Horizontal padding comes from the scrollArea; a top margin separates it
    from the options above. */
+/* A host's block after the last selection (e.g. nested items) — set off from
+   the options by the same 24px the footer keeps */
+.afterOptions {
+  margin-top: var(--spacing-md);
+}
+
 .footer {
   margin-top: var(--spacing-md);
   display: flex;

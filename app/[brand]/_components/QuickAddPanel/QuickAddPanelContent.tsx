@@ -1,9 +1,10 @@
 'use client'
 
-import { useState, type ReactNode } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { usePathname } from 'next/navigation'
 import { useCart } from '../../_context/CartContext'
 import { getBrandFromPathname } from '../../_config/brands'
+import { titleForMetal } from '../../_config/products'
 import { Button } from '../Button'
 import { PanelPortal } from '../PanelPortal'
 import { ProductImageCarousel } from '../ProductImageCarousel'
@@ -38,6 +39,8 @@ export interface QuickAddPanelContentProps {
   onAdd?: (item: CartItem, values: QuickAddFormValues) => void
   /** Choices to open with instead of the defaults — reopening an item already added. */
   initialValues?: QuickAddFormValues
+  /** Called with the form's choices whenever they change — a host mirroring them. */
+  onChange?: (values: QuickAddFormValues) => void
   /** Leaves the form once the item is added: the panel closes, a host view goes back. */
   onDone: () => void
   /**
@@ -47,6 +50,8 @@ export interface QuickAddPanelContentProps {
   embedded?: boolean
   /** Drawn above the title — a host view's back button. */
   headerStart?: ReactNode
+  /** Drawn after the last selection, above the CTA — e.g. a nested items offer. */
+  afterOptions?: ReactNode
 }
 
 function fmt(cents: number, currency = '$'): string {
@@ -87,7 +92,7 @@ function defaultSelections(product: QuickAddProduct): Record<string, string> {
  * items drawer renders it in place of its grid. Mount it per product (keyed by
  * title): it starts from `initialValues`, or the defaults.
  */
-export function QuickAddPanelContent({ product, ctaLabel, showViewDetails, onAdd, initialValues, onDone, embedded = false, headerStart }: QuickAddPanelContentProps) {
+export function QuickAddPanelContent({ product, ctaLabel, showViewDetails, onAdd, initialValues, onChange, onDone, embedded = false, headerStart, afterOptions }: QuickAddPanelContentProps) {
   const { addItem, openCart } = useCart()
   const pathname = usePathname()
   const brand = getBrandFromPathname(pathname)
@@ -95,7 +100,8 @@ export function QuickAddPanelContent({ product, ctaLabel, showViewDetails, onAdd
   const { StarIcon, ChevronIcon } = BRAND_ICONS[brand as keyof typeof BRAND_ICONS] ?? BRAND_ICONS.oal
 
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>(
-    () => initialValues?.selectedOptions ?? defaultSelections(product)
+    // A partial set (say, only the metal a host already chose) keeps the defaults for the rest
+    () => ({ ...defaultSelections(product), ...initialValues?.selectedOptions })
   )
   const [imageIdx, setImageIdx] = useState(0)
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null)
@@ -126,6 +132,12 @@ export function QuickAddPanelContent({ product, ctaLabel, showViewDetails, onAdd
   const select = (name: string, value: string) =>
     setSelectedOptions(prev => ({ ...prev, [name]: value }))
 
+  // Report every change to a host that mirrors the choices (e.g. the PDP's metal)
+  useEffect(() => {
+    onChange?.({ selectedOptions, names })
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only the choices drive it
+  }, [selectedOptions, names])
+
   const totalPrice = product.options.reduce((acc, opt) => {
     const val = opt.values?.find(v => v.value === selectedOptions[opt.name])
     return acc + (val?.price ?? 0)
@@ -133,8 +145,15 @@ export function QuickAddPanelContent({ product, ctaLabel, showViewDetails, onAdd
 
   const pdpHref = `/${brand}${product.pdpUrl}`
 
+  // The title follows the metal picked ("… in Silver Finish" → "… in Rose Gold Plating")
+  const metalOption = product.options.find(o => o.type === 'swatch')
+  const title = titleForMetal(product.title, metalOption && selectedOptions[metalOption.name])
+
   const { hideGallery, isSingleImage, useCarousel, hideGalleryOnMobile } = quickAddLayout(product, embedded)
   const carouselSrcs = product.images.map((im) => im.src)
+  const modelSrcs = product.images.filter((im) => im.onModel).map((im) => im.src)
+  // Packshots blend onto the tint; on-model shots are left as they are
+  const imageClass = (base: string, onModel?: boolean) => (onModel ? `${base} ${styles.imageModel}` : base)
 
   const handleAddToBag = () => {
     // Validation — every visible name (or text) field is required. Block Add
@@ -162,7 +181,7 @@ export function QuickAddPanelContent({ product, ctaLabel, showViewDetails, onAdd
 
     const cartItem: CartItem = {
       id: `quickadd-${product.title.replace(/\s+/g, '-').toLowerCase()}-${Date.now()}`,
-      name: product.title,
+      name: title,
       price: totalPrice,
       originalPrice: product.salePrice ? product.price : undefined,
       image: product.images[0]?.src ?? '',
@@ -189,7 +208,42 @@ export function QuickAddPanelContent({ product, ctaLabel, showViewDetails, onAdd
   // Renders a single product option (swatch / pills / text-input / dropdown).
   const renderOption = (opt: QuickAddOption) => (
     <div key={opt.name} className={styles.optionGroup}>
-      {opt.type === 'swatch' && (
+      {/* The PDP's metal picker — each swatch with its full price below */}
+      {opt.type === 'swatch' && opt.showPrices && (
+        <>
+          <p className={styles.pricedSwatchLabel}>
+            {opt.name}:{' '}
+            <span className={styles.pricedSwatchValue}>
+              {opt.values?.find(v => v.value === selectedOptions[opt.name])?.label}
+            </span>
+          </p>
+          <div className={styles.pricedSwatches}>
+            {opt.values?.map(v => {
+              const variantPrice = fmt(product.price + (v.price ?? 0), product.currency)
+              const isSelected = selectedOptions[opt.name] === v.value
+              return (
+                <button
+                  key={v.value}
+                  type="button"
+                  aria-pressed={isSelected}
+                  aria-label={`${v.label}, ${variantPrice}`}
+                  className={`${styles.pricedSwatch} ${isSelected ? styles.pricedSwatchSelected : ''}`}
+                  onClick={() => select(opt.name, v.value)}
+                >
+                  <span
+                    className={styles.pricedSwatchCircle}
+                    style={{ background: v.color ?? 'var(--colors-surface-secondary)' }}
+                    aria-hidden="true"
+                  />
+                  <span className={styles.pricedSwatchPrice}>{variantPrice}</span>
+                </button>
+              )
+            })}
+          </div>
+        </>
+      )}
+
+      {opt.type === 'swatch' && !opt.showPrices && (
         <>
           <p className={styles.optionLabel}>
             {opt.name}
@@ -376,14 +430,15 @@ export function QuickAddPanelContent({ product, ctaLabel, showViewDetails, onAdd
         {!useCarousel && !isSingleImage && !hideGallery && (
           <div className={styles.desktopImage} aria-hidden="true">
             {product.images.map((img, i) => (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                key={i}
-                src={img.src}
-                alt={img.alt}
-                className={styles.desktopImageEl}
-                loading={i === 0 ? 'eager' : 'lazy'}
-              />
+              <div key={i} className={styles.desktopImageCell}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={img.src}
+                  alt={img.alt}
+                  className={imageClass(styles.desktopImageEl, img.onModel)}
+                  loading={i === 0 ? 'eager' : 'lazy'}
+                />
+              </div>
             ))}
           </div>
         )}
@@ -396,7 +451,7 @@ export function QuickAddPanelContent({ product, ctaLabel, showViewDetails, onAdd
           <div className={`${styles.header} ${headerStart ? styles.headerWithStart : ''}`}>
             {headerStart}
             <div className={styles.headerText}>
-              <h2 className={styles.title}>{product.title}</h2>
+              <h2 className={styles.title}>{title}</h2>
               <div className={styles.priceRow}>
                 {product.salePrice && (
                   <span className={styles.priceOriginal}>{fmt(product.salePrice, product.currency)}</span>
@@ -428,7 +483,7 @@ export function QuickAddPanelContent({ product, ctaLabel, showViewDetails, onAdd
                 <img
                   src={product.images[0].src}
                   alt={product.images[0].alt}
-                  className={styles.singleImageEl}
+                  className={imageClass(styles.singleImageEl, product.images[0].onModel)}
                   loading="eager"
                 />
               </div>
@@ -439,6 +494,7 @@ export function QuickAddPanelContent({ product, ctaLabel, showViewDetails, onAdd
             {useCarousel && !hideGallery && (
               <ProductImageCarousel
                 images={carouselSrcs}
+                modelImages={modelSrcs}
                 peek
                 showProgress={false}
                 className={`${styles.panelCarousel} ${hideGalleryOnMobile ? styles.hideOnMobile : ''}`}
@@ -457,7 +513,7 @@ export function QuickAddPanelContent({ product, ctaLabel, showViewDetails, onAdd
                     aria-label={`View larger image of ${img.alt}`}
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={img.src} alt={img.alt} className={styles.galleryImg} loading="lazy" />
+                    <img src={img.src} alt={img.alt} className={imageClass(styles.galleryImg, img.onModel)} loading="lazy" />
                   </button>
                 ))}
               </div>
@@ -473,6 +529,8 @@ export function QuickAddPanelContent({ product, ctaLabel, showViewDetails, onAdd
                 .filter(o => o.type !== 'swatch' && (!usesNameFields || o.type !== 'text-input'))
                 .map(renderOption)}
             </div>
+
+            {afterOptions && <div className={styles.afterOptions}>{afterOptions}</div>}
 
             {/* Footer — flows inline below the last selection (not pinned to the bottom) */}
             <div className={styles.footer}>

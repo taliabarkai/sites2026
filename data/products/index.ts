@@ -17,6 +17,9 @@ export type ProductItem = {
   /** false when `hoverImage` is not an on-model shot — the Model View on the
    *  category pages then keeps showing the product shot. Defaults to true. */
   hasModelImage?: boolean
+  /** More PDP gallery images, after `image` and `hoverImage`. `onModel` marks a
+   *  lifestyle shot, shown as it is rather than blended onto the image tint. */
+  galleryImages?: { src: string; onModel?: boolean }[]
 }
 
 export type BrandProducts = Record<BrandKey, ProductItem[]>
@@ -62,8 +65,13 @@ const tgrProducts: ProductItem[] = [
   { id: 1 , name: 'Balance Link Chain Necklace in Sterling Silver', image: '/images/products/tgr/tgr-01-product.jpg', hoverImage: '/images/products/tgr/tgr-01-model.jpg', href: '/product/1', price: '$140', priceInCents: 14000, rating: 4.5, reviewCount: 137, defaultSwatchKey: 'silver' },
   { id: 2 , name: 'The Keepsake Oval Photo Necklace in Gold', image: '/images/products/tgr/tgr-02-product.jpg', hoverImage: '/images/products/tgr/tgr-02-model.jpg', href: '/product/2', price: '$110', priceInCents: 11000, rating: 4.6, reviewCount: 234, defaultSwatchKey: 'vermeil' },
   { id: 3 , name: 'Personalized Classic Name Necklace in 18K Gold Plating', image: '/images/products/tgr/tgr-03-product.jpg', hoverImage: '/images/products/tgr/tgr-03-model.jpg', href: '/product/3', price: '$150', priceInCents: 15000, rating: 4.7, reviewCount: 331, defaultSwatchKey: 'vermeil' },
-  { id: 4 , name: 'Heritage Multiple Name Necklace in Silver Finish', image: '/images/products/tgr/tgr-04-product.jpg', hoverImage: '/images/products/tgr/tgr-04-model.jpg', href: '/product/4', price: '$190', priceInCents: 19000, rating: 4.8, reviewCount: 428, defaultSwatchKey: 'silver' },
-  { id: 5 , name: '18K Gold Plated Silver Carrie Name Necklace', image: '/images/products/tgr/tgr-05-product.jpg', hoverImage: '/images/products/tgr/tgr-05-model.jpg', href: '/product/5', price: '$95', priceInCents: 9500, rating: 4.9, reviewCount: 65, defaultSwatchKey: 'vermeil' },
+  { id: 4 , name: 'Heritage Multiple Name Necklace in Silver Finish', image: '/images/products/tgr/tgr-04-product.jpg', hoverImage: '/images/products/tgr/tgr-04-model.jpg', href: '/product/4', price: '$190', priceInCents: 19000, rating: 4.8, reviewCount: 428, defaultSwatchKey: 'silver',
+    galleryImages: [
+      { src: '/images/products/tgr/tgr-04-lifestyle.webp', onModel: true },
+      { src: '/images/products/tgr/tgr-04-product-2.webp' },
+      { src: '/images/products/tgr/tgr-04-diamonds.webp' },
+    ] },
+  { id: 5 , name: 'Carrie Name Necklace in Sterling Silver', image: '/images/products/tgr/tgr-05-product.jpg', hoverImage: '/images/products/tgr/tgr-05-model.jpg', href: '/product/5', price: '$95', priceInCents: 9500, rating: 4.9, reviewCount: 65, defaultSwatchKey: 'silver' },
   { id: 6 , name: 'Nova Birthstone Necklace with Engraved Names in 18K Gold Plating', image: '/images/products/tgr/tgr-06-product.jpg', hoverImage: '/images/products/tgr/tgr-06-model.jpg', href: '/product/6', price: '$100', priceInCents: 10000, rating: 4.4, reviewCount: 162, defaultSwatchKey: 'vermeil' },
   { id: 8 , name: 'Coco Hexagon Ring', image: '/images/products/tgr/tgr-08-product.jpg', hoverImage: '/images/products/tgr/tgr-08-model.jpg', href: '/product/8', price: '$105', priceInCents: 10500, rating: 4.6, reviewCount: 356, defaultSwatchKey: 'vermeil' },
   { id: 9 , name: 'Heart to Heart Engravable Necklace in Sterling Silver with Diamond', image: '/images/products/tgr/tgr-09-product.jpg', hoverImage: '/images/products/tgr/tgr-09-model.jpg', href: '/product/9', price: '$145', priceInCents: 14500, rating: 4.7, reviewCount: 453, defaultSwatchKey: 'silver' },

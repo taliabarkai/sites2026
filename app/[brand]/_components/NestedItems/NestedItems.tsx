@@ -69,6 +69,7 @@ export function NestedItems({ brand, items, checkedKeys, onToggle, title = 'Your
             </span>
 
             <span className={styles.info}>
+              {item.ribbon && <span className={styles.ribbon}>{item.ribbon}</span>}
               <span className={styles.name}>{item.title}</span>
               <span className={styles.priceRow}>
                 {item.salePrice != null && (

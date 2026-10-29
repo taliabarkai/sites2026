@@ -1,0 +1,78 @@
+/* ─── Sticky product bar (desktop) ──────────────────────────────────────────────
+   Slides up from the bottom once the gallery has scrolled past: title and price
+   stacked on the left, the CTA on the right.                                   */
+
+.bar {
+  /* Desktop only — mobile has StickyCustomizeBar. Hidden in CSS rather than
+     skipped in JS so the server and client render the same markup. */
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .bar {
+    display: block;
+    position: fixed;
+    inset: auto 0 0 0;
+    z-index: var(--z-sticky);
+    box-sizing: border-box;
+    padding: var(--spacing-sm) var(--layout-page-margin);
+    background: var(--colors-background);
+    border-top: var(--border-width) solid var(--border-color);
+    box-shadow: var(--shadow-sm);
+    transform: translateY(100%);
+    transition: transform var(--transition-base);
+  }
+
+  .barVisible {
+    transform: translateY(0);
+  }
+}
+
+.inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+  max-width: var(--layout-max-width);
+  margin: 0 auto;
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xxxs);
+  min-width: 0;
+}
+
+/* Product name — the PDP title's own scale */
+.title {
+  margin: 0;
+  font-family:    var(--typography-rules-headline4-font-family);
+  font-size:      var(--typography-rules-headline4-font-size);
+  line-height:    var(--typography-rules-headline4-line-height);
+  font-weight:    var(--typography-rules-headline4-font-weight, normal);
+  letter-spacing: var(--typography-rules-headline4-letter-spacing, normal);
+  text-transform: var(--typography-rules-headline4-text-transform, none);
+  color: var(--colors-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Selling price — the PDP price's own scale */
+.price {
+  margin: 0;
+  font-family:    var(--typography-rules-headline12-font-family);
+  font-size:      var(--typography-rules-headline12-font-size);
+  line-height:    var(--typography-rules-headline12-line-height);
+  font-weight:    var(--typography-rules-headline12-font-weight, normal);
+  letter-spacing: var(--typography-rules-headline12-letter-spacing, normal);
+  text-transform: var(--typography-rules-headline12-text-transform, none);
+  color: var(--colors-price-selling);
+}
+
+.button {
+  flex-shrink: 0;
+  /* The form column's CTA width, so the label never crowds */
+  min-width: 360px;
+}

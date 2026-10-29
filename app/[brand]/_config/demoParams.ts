@@ -104,6 +104,24 @@ export function isNestedDrawerProduct(brand: string, productId: number): boolean
   return productId === 15 || (brand === 'oal' && productId === 18)
 }
 
+/**
+ * The two-step PDP demo: the page shows the product without its selections,
+ * and a sticky "Personalize & Add to Bag" opens them in the Quick Add panel
+ * (no gallery). TGR product 4 only while the flow is being finalised.
+ */
+export function isTwoStepProduct(brand: string, productId: number): boolean {
+  return brand === 'tgr' && productId === 4
+}
+
+/**
+ * The sticky-personalize PDP demo: the selections stay on the page, and the
+ * same sticky "Personalize & Add to Bag" opens just the personalisation (no
+ * metal) in the Quick Add panel. TGR product 5 only, beside product 4's flow.
+ */
+export function isStickyPersonalizeProduct(brand: string, productId: number): boolean {
+  return brand === 'tgr' && productId === 5
+}
+
 export const NESTED_DRAWER_PARAM = 'charms'
 export const NESTED_DRAWER_COUNTS = [2, 3, 4, 5, 6, 7, 8, 9, 10] as const
 export const DEFAULT_NESTED_DRAWER_COUNT = 3

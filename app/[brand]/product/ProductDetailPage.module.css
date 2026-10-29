@@ -6,6 +6,16 @@
   min-height: 100vh;
 }
 
+/* globals.css derives --sticky-top on :root, where --layout-header-height
+   (declared on the [data-theme] wrapper) doesn't resolve — so `top` fell back
+   to `auto` and the sticky form column scrolled away with the gallery.
+   Redeclared inside the theme, as the cart and checkout do. */
+@media (min-width: 1024px) {
+  .page {
+    --sticky-top: calc(var(--layout-header-height) + var(--spacing-md));
+  }
+}
+
 /* ── Mobile swipeable gallery ─────────────────────────────────────────────── */
 .mobileGallery {
   position: relative;
@@ -180,6 +190,8 @@
   height: 100%;
   object-fit: cover;
   display: block;
+  /* Picks up the cell's card-image tint, as the product card does */
+  mix-blend-mode: multiply;
 }
 
 .desktopGridCell {
@@ -283,6 +295,14 @@
   height: 100%;
   object-fit: cover;
   display: block;
+  /* Picks up the cell's card-image tint, as the product card does */
+  mix-blend-mode: multiply;
+}
+
+/* On-model shots are lifestyle photos — the tint is for packshots only (after
+   both gallery image rules, so it wins at equal specificity) */
+.galleryModelImage {
+  mix-blend-mode: normal;
 }
 
 /* ── Product form panel ───────────────────────────────────────────────────── */

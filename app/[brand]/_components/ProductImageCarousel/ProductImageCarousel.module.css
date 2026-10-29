@@ -53,6 +53,13 @@
   height: 100%;
   object-fit: cover;
   display: block;
+  /* Picks up the slide's card-image tint, as the product card does */
+  mix-blend-mode: multiply;
+}
+
+/* On-model shots are lifestyle photos — the tint is for packshots only */
+.imageModel {
+  mix-blend-mode: normal;
 }
 
 .progressTrack {

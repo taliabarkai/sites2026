@@ -14,13 +14,15 @@ export interface ProductImageCarouselProps {
   peek?: boolean
   /** Show the progress bar below the track. Defaults to true. */
   showProgress?: boolean
+  /** On-model shots among `images` — shown as they are, not blended onto the tint. */
+  modelImages?: string[]
 }
 
 /**
  * Horizontally scrollable image carousel with snap slides and a progress bar.
  * Shared between the PDP mobile gallery and the QuickAdd panel's ≤4-image variant.
  */
-export function ProductImageCarousel({ images, livePreview, className, peek = false, showProgress = true }: ProductImageCarouselProps) {
+export function ProductImageCarousel({ images, livePreview, className, peek = false, showProgress = true, modelImages = [] }: ProductImageCarouselProps) {
   const [activeIdx, setActiveIdx] = useState(0)
   const trackRef = useRef<HTMLDivElement>(null)
   const allImages = livePreview ? [livePreview, ...images] : images
@@ -45,7 +47,7 @@ export function ProductImageCarousel({ images, livePreview, className, peek = fa
             <img
               src={src}
               alt=""
-              className={styles.image}
+              className={`${styles.image} ${modelImages.includes(src) ? styles.imageModel : ''}`}
               loading={i === 0 ? 'eager' : 'lazy'}
             />
           </div>

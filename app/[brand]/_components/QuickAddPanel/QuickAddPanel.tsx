@@ -5,6 +5,7 @@ import { createPortal } from 'react-dom'
 import { usePanelLayer, layerZIndex } from '../PanelStack'
 import { QuickAddPanelContent, quickAddLayout } from './QuickAddPanelContent'
 import styles from './QuickAddPanel.module.css'
+import type { ReactNode } from 'react'
 import type { CartItem } from '../../_context/CartContext'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -17,6 +18,11 @@ export interface QuickAddOption {
   values?: { label: string; value: string; price?: number; color?: string; image?: string }[]
   maxLength?: number
   placeholder?: string
+  /**
+   * Swatches only: the PDP's metal picker — a bold "Name:" label, larger
+   * swatches, and each one's full price below it.
+   */
+  showPrices?: boolean
 }
 
 export interface QuickAddProduct {
@@ -26,9 +32,12 @@ export interface QuickAddProduct {
   currency?: string
   rating?: number
   reviewCount?: number
-  images: { src: string; alt: string }[]
+  /** `onModel` — a lifestyle shot, shown as it is rather than blended onto the tint. */
+  images: { src: string; alt: string; onModel?: boolean }[]
   pdpUrl: string          // relative path, e.g. /product/24
   options: QuickAddOption[]
+  /** A short tag on its nested items card — an offer, say "50% off". */
+  ribbon?: string
   /** Hide the panel's image gallery on mobile (images still show on desktop). */
   hideGalleryOnMobile?: boolean
   /** Hide the panel's image gallery entirely (all breakpoints) — options only. */
@@ -63,6 +72,14 @@ export interface QuickAddPanelProps {
   onAdd?: (item: CartItem) => void
   /** Show the "View Full Details" link. Hidden for nested items (bound to the main product). */
   showViewDetails?: boolean
+  /** Choices the form opens with instead of the defaults. */
+  initialValues?: QuickAddFormValues
+  /** Called with the form's choices whenever they change. */
+  onChange?: (values: QuickAddFormValues) => void
+  /** Change it to start the form over from `initialValues` (it otherwise starts over per product). */
+  formKey?: string | number
+  /** Drawn after the last selection, above the CTA — e.g. a nested items offer. */
+  afterOptions?: ReactNode
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -71,7 +88,7 @@ export interface QuickAddPanelProps {
  * The Quick Add panel — the slide-in shell (backdrop, panel, close button)
  * around the Quick Add form (`QuickAddPanelContent`).
  */
-export function QuickAddPanel({ isOpen, onClose, product, closeButtonRef, ctaLabel = 'Add to Bag', onAdd, showViewDetails = true }: QuickAddPanelProps) {
+export function QuickAddPanel({ isOpen, onClose, product, closeButtonRef, ctaLabel = 'Add to Bag', onAdd, showViewDetails = true, initialValues, onChange, formKey, afterOptions }: QuickAddPanelProps) {
   const internalCloseRef = useRef<HTMLButtonElement>(null)
   const closeRef = closeButtonRef ?? internalCloseRef
   const panelRef = useRef<HTMLDivElement>(null)
@@ -134,14 +151,17 @@ export function QuickAddPanel({ isOpen, onClose, product, closeButtonRef, ctaLab
           ✕
         </button>
 
-        {/* The form starts over whenever the product changes */}
+        {/* The form starts over whenever the product (or the host's formKey) changes */}
         {product && (
           <QuickAddPanelContent
-            key={product.title}
+            key={`${product.title}-${formKey ?? ''}`}
             product={product}
             ctaLabel={ctaLabel}
             showViewDetails={showViewDetails}
             onAdd={onAdd}
+            initialValues={initialValues}
+            onChange={onChange}
+            afterOptions={afterOptions}
             onDone={onClose}
           />
         )}

@@ -23,9 +23,38 @@ export interface MaterialSwatch {
 export const MATERIAL_SWATCHES: MaterialSwatch[] = [
   { key: 'silver',    label: 'Sterling Silver',  shortLabel: 'Silver',        color: 'var(--sterling-silver-925)',   priceOffset: 0     },
   { key: 'vermeil',   label: 'Gold Vermeil 18k',  shortLabel: 'Gold Vermeil',  color: 'var(--gold-vermeil-18k)',      priceOffset: 1000  },
-  { key: 'solid-14k', label: 'Solid Gold 14k',    shortLabel: 'Solid 14k',     color: 'var(--solid-gold-14k)',        priceOffset: 5000  },
+  { key: 'solid-14k', label: '14K Solid Gold',    shortLabel: 'Solid 14k',     color: 'var(--solid-gold-14k)',        priceOffset: 5000  },
   { key: 'rose',      label: 'Rose Gold 18k',     shortLabel: 'Rose Gold',     color: 'var(--rose-gold-plating-18k)', priceOffset: 1500  },
 ]
+
+/**
+ * The brand's packaging shot, closing every PDP gallery. Keyed by brand rather
+ * than stored on products: the TGR catalog is shared with IB and MNN, and the
+ * box carries the Theo Grace name.
+ */
+export const BRAND_PACKAGING_IMAGES: Partial<Record<string, string>> = {
+  tgr: '/images/products/tgr/tgr-packaging.webp',
+}
+
+/** How a silver title names its finish — "… in Silver Finish", "… in Sterling Silver". */
+const SILVER_FINISHES = ['Silver Finish', 'Sterling Silver']
+
+/**
+ * The finish a silver title names instead, for each other metal. Picking one
+ * renames the title to match (picking silver keeps the title's own wording);
+ * titles that name some other finish, or none, are left as they are.
+ */
+const FINISH_NAMES: Record<Exclude<MaterialSwatch['key'], 'silver'>, string> = {
+  vermeil:     '18K Gold Vermeil',
+  'solid-14k': '14K Solid Gold',
+  rose:        'Rose Gold Plating',
+}
+
+export function titleForMetal(title: string, metalKey?: string): string {
+  const finish = FINISH_NAMES[metalKey as keyof typeof FINISH_NAMES]
+  const silver = SILVER_FINISHES.find((s) => title.includes(s))
+  return finish && silver ? title.replace(silver, finish) : title
+}
 
 export const CHAIN_LENGTHS = ['14"', '16"', '18"', '20"', '24"']
 export const DEFAULT_CHAIN_LENGTH = '18"'

@@ -61,6 +61,8 @@
   height: 100%;
   object-fit: cover;
   object-position: center;
+  /* Picks up the media box's card-image tint, as the product card does */
+  mix-blend-mode: multiply;
 }
 
 /* ── Name + price ─────────────────────────────────────────────────────────── */
@@ -72,6 +74,21 @@
   gap: var(--spacing-xxs);
   /* keep the name clear of the absolute checkbox in the top-right corner */
   padding-right: calc(var(--spacing-md) * 2);
+}
+
+/* An offer tag above the name (e.g. "50% off") — the brand's ribbon */
+.ribbon {
+  align-self: flex-start;
+  padding: var(--spacing-xxxs) var(--spacing-xxs);
+  border-radius: var(--ribbon-border-radius);
+  background: var(--ribbon-background);
+  color: var(--ribbon-text);
+  font-family:    var(--typography-rules-ribbons1-font-family);
+  font-size:      var(--typography-rules-ribbons1-font-size);
+  line-height:    var(--typography-rules-ribbons1-line-height);
+  font-weight:    var(--typography-rules-ribbons1-font-weight, normal);
+  letter-spacing: var(--typography-rules-ribbons1-letter-spacing, normal);
+  text-transform: var(--typography-rules-ribbons1-text-transform, none);
 }
 
 .name {
@@ -86,8 +103,9 @@
 
 .priceRow {
   display: flex;
-  align-items: baseline;
-  gap: var(--spacing-xxs);
+  /* On sale: the selling price on top, the crossed-out price below it */
+  flex-direction: column-reverse;
+  align-items: flex-start;
 }
 
 .price {
