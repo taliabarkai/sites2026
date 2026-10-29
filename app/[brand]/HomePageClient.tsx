@@ -10,6 +10,7 @@ import {
 } from './_config/siteContent'
 import { prefixFooterColumns, prefixNavLinks, withBrandPrefix } from './_config/brandPaths'
 import { BRAND_HIGHLIGHTS } from './_config/highlights'
+import { getCategoryTiles } from './_config/categoryTiles'
 import { useCart } from './_context/CartContext'
 import { Footer } from './_components/Footer'
 import { Header } from './_components/Header'
@@ -66,12 +67,7 @@ function HomePageInner() {
   // 'text-below'    — title + CTA below the image, with page-margin padding (all other brands)
   const promoVariant: 'text-on-image' | 'text-below' = brand === 'oal' ? 'text-on-image' : 'text-below'
 
-  const CATEGORY_TILES = [
-    { label: 'Necklaces', href: `/${brand}/category`, image: 'https://cdn.oakandluna.com/digital-asset/banners/NECKLACES_banner_HP_OAL.jpg' },
-    { label: 'Bracelets', href: `/${brand}/category`, image: 'https://cdn.oakandluna.com/digital-asset/banners/Bracelets-banner_HP_OAL.jpg' },
-    { label: 'Earrings',  href: `/${brand}/category`, image: 'https://cdn.oakandluna.com/digital-asset/banners/EARRINGS_banner_HP_OAL.jpg' },
-    { label: 'Rings',     href: `/${brand}/category`, image: 'https://cdn.oakandluna.com/digital-asset/banners/RINGS-banner_HP_OAL.jpg' },
-  ]
+  const CATEGORY_TILES = getCategoryTiles(brand)
 
   // Mobile highlights bar — per-brand story-style shortcuts, all pointing at
   // the category page.

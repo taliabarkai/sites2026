@@ -12,6 +12,7 @@ import * as lalIcons from '@/src/components/icons/lal'
 import * as ibIcons from '@/src/components/icons/ib'
 import { SiteLogo } from '../SiteLogo'
 import { ThemeSwitcher } from '../ThemeSwitcher'
+import { MenuCategoryCarousel } from '../MenuCategoryCarousel'
 import { CartSizeToggle } from './CartSizeToggle'
 import { TrackOrderStateToggle } from './TrackOrderStateToggle'
 import { NestedDrawerCountToggle } from './NestedDrawerCountToggle'
@@ -106,7 +107,7 @@ export function Header({
   const isSolid = variant === 'white' || isScrolled
 
   const icons = BRAND_ICONS[brandSegment]
-  const { HamburgerIcon, XIcon, MagnifyingGlassIcon, PersonIcon, ShoppingBagIcon, ChevronIcon } = icons
+  const { HamburgerIcon, XIcon, MagnifyingGlassIcon, PersonIcon, ShoppingBagIcon, ChevronIcon, PlusMinusIcon } = icons
 
   useEffect(() => {
     document.body.style.overflow = menuOpen ? 'hidden' : ''
@@ -304,7 +305,9 @@ export function Header({
           />
           <nav className={styles.drawer} aria-label="Mobile">
             <div className={styles.drawerHeader}>
-              <span className={styles.drawerTitle}>Menu</span>
+              <Link href={logoHref} className={styles.drawerLogo} aria-label="Home" onClick={() => setMenuOpen(false)}>
+                <SiteLogo brand={brandSegment} />
+              </Link>
               <button
                 type="button"
                 className={styles.iconButton}
@@ -329,10 +332,10 @@ export function Header({
                       >
                         {link.label}
                         <span
-                          className={`${styles.drawerCaret} ${openDropdown === link.label ? styles.drawerCaretOpen : ''}`}
+                          className={`${styles.drawerToggleIcon} ${openDropdown === link.label ? styles.drawerToggleIconOpen : ''}`}
                           aria-hidden="true"
                         >
-                          <ChevronIcon size={18} />
+                          <PlusMinusIcon size={24} />
                         </span>
                       </button>
                       {openDropdown === link.label && (
@@ -370,10 +373,10 @@ export function Header({
                       >
                         {link.label}
                         <span
-                          className={`${styles.drawerCaret} ${openDropdown === link.label ? styles.drawerCaretOpen : ''}`}
+                          className={`${styles.drawerToggleIcon} ${openDropdown === link.label ? styles.drawerToggleIconOpen : ''}`}
                           aria-hidden="true"
                         >
-                          <ChevronIcon size={18} />
+                          <PlusMinusIcon size={24} />
                         </span>
                       </button>
                       {openDropdown === link.label && (
@@ -415,6 +418,11 @@ export function Header({
                 </li>
               ))}
             </ul>
+            <MenuCategoryCarousel
+              brand={brandSegment}
+              className={styles.drawerCarousel}
+              onNavigate={() => setMenuOpen(false)}
+            />
           </nav>
         </>
       )}

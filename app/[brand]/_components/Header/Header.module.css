@@ -524,6 +524,15 @@
   background: var(--colors-surface-primary);
   color: var(--colors-text);
   box-shadow: var(--shadow-md);
+  /* The links plus the category carousel can outgrow a short screen. */
+  overflow-y: auto;
+}
+
+/* Same rhythm as the links: the last row's bottom padding plus this equals
+   one row's top + bottom padding, so the heading sits one link-gap below. */
+.drawerCarousel {
+  flex-shrink: 0;
+  margin-top: var(--spacing-xs);
 }
 
 .drawerHeader {
@@ -533,35 +542,35 @@
   margin-bottom: var(--spacing-md);
 }
 
-.drawerTitle {
-  font-family:    var(--typography-rules-headline11-font-family);
-  font-size:      var(--typography-rules-headline11-font-size);
-  line-height:    var(--typography-rules-headline11-line-height);
-  font-weight:    var(--typography-rules-headline11-font-weight, normal);
-  letter-spacing: var(--typography-rules-headline11-letter-spacing, normal);
-  text-transform: var(--typography-rules-headline11-text-transform, none);
+/* Same mark as the header bar, linking home. */
+.drawerLogo {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  color: inherit;
 }
 
 .drawerList {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-xs);
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
+/* Top-level rows: the desktop nav's type (uppercase where the brand sets
+   --nav-text-transform), no dividers — the row padding alone spaces them. */
 .drawerLink {
   display: block;
   padding: var(--spacing-xs) 0;
-  font-family:    var(--typography-rules-paragraph4-font-family);
-  font-size:      var(--typography-rules-paragraph4-font-size);
-  line-height:    var(--typography-rules-paragraph4-line-height);
-  font-weight:    var(--typography-rules-paragraph4-font-weight, normal);
-  letter-spacing: var(--typography-rules-paragraph4-letter-spacing, normal);
+  font-family:    var(--typography-rules-headline8-font-family);
+  font-size:      var(--typography-rules-headline8-font-size);
+  line-height:    var(--typography-rules-headline8-line-height);
+  font-weight:    var(--typography-rules-headline8-font-weight, normal);
+  letter-spacing: var(--typography-rules-headline8-letter-spacing, normal);
+  text-transform: var(--nav-text-transform, var(--typography-rules-headline8-text-transform, none));
   text-decoration: none;
   color: var(--colors-text);
-  border-bottom: 1px solid var(--border-color);
 }
 
 .drawerCta {
@@ -577,20 +586,25 @@
   width: 100%;
   background: none;
   border: none;
-  border-bottom: 1px solid var(--border-color);
   cursor: pointer;
   text-align: left;
 }
 
-.drawerCaret {
+.drawerToggleIcon {
   display: inline-flex;
   align-items: center;
-  transform: rotate(90deg);
+}
+
+/* Plus → minus: every brand's PlusMinusIcon draws its vertical bar as the
+   first path, so collapsing that path leaves the minus. */
+.drawerToggleIcon svg path:first-child {
+  transform-box: fill-box;
+  transform-origin: center;
   transition: transform var(--transition-fast);
 }
 
-.drawerCaretOpen {
-  transform: rotate(-90deg);
+.drawerToggleIconOpen svg path:first-child {
+  transform: scaleY(0);
 }
 
 .drawerSubList {

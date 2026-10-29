@@ -1,0 +1,97 @@
+/* ── Mobile menu category carousel ─────────────────────────────────────── */
+
+.title {
+  margin: 0 0 var(--spacing-sm);
+  font-family:    var(--typography-rules-headline8-font-family);
+  font-size:      var(--typography-rules-headline8-font-size);
+  line-height:    var(--typography-rules-headline8-line-height);
+  font-weight:    var(--typography-rules-headline8-font-weight, normal);
+  letter-spacing: var(--typography-rules-headline8-letter-spacing, normal);
+  text-transform: var(--typography-rules-headline8-text-transform, none);
+  color: var(--colors-text);
+}
+
+/* Demo swap control — looks like the plain heading it sits in. */
+.titleButton {
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+/* Sale view: the label sits under the banner instead of a heading above it.
+   .title sets the type; its own margin is swapped for one on top. */
+.saleLabel {
+  margin: var(--spacing-sm) 0 0;
+}
+
+/* Bleeds past the drawer's side padding so tiles scroll to its edges; the
+   same padding comes back inside the track as the first/last tile's inset. */
+.track {
+  display: flex;
+  gap: var(--spacing-xxxs);
+  margin: 0 calc(-1 * var(--spacing-sm));
+  padding: 0 var(--spacing-sm);
+  list-style: none;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: var(--spacing-sm);
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.track::-webkit-scrollbar {
+  display: none;
+}
+
+.slide {
+  flex: 0 0 calc((100% - var(--spacing-sm)) / 2.25);
+  min-width: 0;
+  scroll-snap-align: start;
+}
+
+.tile {
+  position: relative;
+  display: block;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  background: var(--colors-card-image-bg);
+  text-decoration: none;
+}
+
+/* Single landscape banner, the full width of the drawer's content. */
+.saleBanner {
+  position: relative;
+  display: block;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  background: var(--colors-card-image-bg);
+  text-decoration: none;
+}
+
+.image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.label {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  padding: var(--spacing-xs);
+  font-family:    var(--typography-rules-headline8-font-family);
+  font-size:      var(--typography-rules-headline8-font-size);
+  line-height:    var(--typography-rules-headline8-line-height);
+  font-weight:    var(--typography-rules-headline8-font-weight, normal);
+  letter-spacing: var(--typography-rules-headline8-letter-spacing, normal);
+  text-transform: var(--typography-rules-headline8-text-transform, none);
+  color: var(--colors-text);
+}
