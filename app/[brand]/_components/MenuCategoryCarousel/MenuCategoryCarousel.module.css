@@ -23,10 +23,19 @@
   cursor: pointer;
 }
 
-/* Sale view: the label sits under the banner instead of a heading above it.
-   .title sets the type; its own margin is swapped for one on top. */
+/* Sale view: the label sits over the banner's lower left corner, where the
+   tiles put theirs, in place of a heading above it. .title sets the type. */
+.saleBannerWrap {
+  position: relative;
+}
+
 .saleLabel {
-  margin: var(--spacing-sm) 0 0;
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  margin: 0;
+  padding: var(--spacing-xs);
+  color: var(--colors-text-inverse);
 }
 
 /* Bleeds past the drawer's side padding so tiles scroll to its edges; the

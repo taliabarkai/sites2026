@@ -25,8 +25,8 @@ const SALE_BANNER = {
  * corner, about 2.25 tiles in view. The row bleeds to the drawer's edges.
  *
  * Demo: clicking the heading swaps the row for a single landscape banner with
- * a Shop Sale label below it in place of the heading; clicking that label
- * swaps back.
+ * a Shop Sale label over its lower left corner in place of the heading;
+ * clicking that label swaps back.
  */
 export function MenuCategoryCarousel({ brand, title = 'Shop by Category', onNavigate, className }: MenuCategoryCarouselProps) {
   const titleId = useId()
@@ -36,10 +36,10 @@ export function MenuCategoryCarousel({ brand, title = 'Shop by Category', onNavi
   return (
     <section className={className} aria-labelledby={titleId}>
       {showSale ? (
-        <>
+        <div className={styles.saleBannerWrap}>
           <Link href={`/${brand}/category/t5`} className={styles.saleBanner} onClick={onNavigate}>
-            {/* No label over the image — the one below names it. The alt
-                still gives the link its accessible name. */}
+            {/* The label over the image is the swap button, not part of this
+                link (a button can't sit inside a link) — the alt names it. */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={SALE_BANNER.image} alt={SALE_BANNER.label} className={styles.image} loading="lazy" />
           </Link>
@@ -53,7 +53,7 @@ export function MenuCategoryCarousel({ brand, title = 'Shop by Category', onNavi
               {SALE_BANNER.label}
             </button>
           </p>
-        </>
+        </div>
       ) : (
         <>
           <h2 id={titleId} className={styles.title}>
