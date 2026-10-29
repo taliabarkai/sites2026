@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Button } from '../Button'
 import { PanelPortal } from '../PanelPortal'
 import { useScrollRange } from '../../_lib/useScrollRange'
@@ -34,7 +34,9 @@ export function StickyProductBar({ watch, hideOver, title, price, label, onClick
   const [pastWatch, setPastWatch] = useState(false)
   const range = useScrollRange(hideOver?.from, hideOver?.to ?? watch)
   const visible = pastWatch && range !== 'in'
-  const barRef = useRef<HTMLDivElement>(null)
+  // A callback ref, held in state: the bar renders inside the portal, which only
+  // mounts after this component does — so its element arrives a render later
+  const [bar, setBar] = useState<HTMLDivElement | null>(null)
   // The bar's own height, held after the footer so it never covers the page's
   // last lines. Measured rather than derived: the title and price can wrap.
   const [spacerHeight, setSpacerHeight] = useState(0)
@@ -50,19 +52,21 @@ export function StickyProductBar({ watch, hideOver, title, price, label, onClick
   }, [watch])
 
   useEffect(() => {
-    const bar = barRef.current
     if (!bar) return
-    // Zero below desktop, where the bar is display: none
-    const observer = new ResizeObserver(() => setSpacerHeight(bar.offsetHeight))
+    // Zero below desktop, where the bar is display: none. Measured once now as
+    // well — the observer's first report waits for a rendered frame.
+    const measure = () => setSpacerHeight(bar.offsetHeight)
+    measure()
+    const observer = new ResizeObserver(measure)
     observer.observe(bar)
     return () => observer.disconnect()
-  }, [])
+  }, [bar])
 
   return (
     <PanelPortal>
       <div aria-hidden="true" style={{ height: spacerHeight }} />
       <div
-        ref={barRef}
+        ref={setBar}
         className={`${styles.bar} ${visible ? styles.barVisible : ''}`}
         inert={!visible}
       >

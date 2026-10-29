@@ -15,7 +15,8 @@
     inset: auto 0 0 0;
     z-index: var(--z-sticky);
     box-sizing: border-box;
-    padding: var(--spacing-sm) var(--layout-page-margin);
+    /* 24px top and bottom — room for the PDP-sized title and price */
+    padding: var(--spacing-md) var(--layout-page-margin);
     background: var(--colors-background);
     border-top: var(--border-width) solid var(--border-color);
     box-shadow: var(--shadow-sm);
@@ -40,7 +41,7 @@
 .info {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-xxxs);
+  gap: var(--spacing-xxs);
   min-width: 0;
 }
 
