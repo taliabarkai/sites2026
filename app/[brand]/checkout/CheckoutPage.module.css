@@ -3437,3 +3437,33 @@
   flex-shrink: 0;
   color: var(--colors-error);
 }
+
+/* Outdated line: text colour, not error red — it asks for a choice, nothing failed. */
+.itemUpdateIcon {
+  display: inline-flex;
+  flex-shrink: 0;
+  color: var(--colors-text);
+}
+
+/* The flag's own action, styled as the bag's Edit / Remove links. */
+.itemUpdateLink {
+  margin-left: var(--spacing-xxxs);
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--colors-text);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+  text-transform: var(--typography-rules-text1-text-transform, none);
+  font-weight:    var(--typography-rules-text1-font-weight, normal);
+}
+
+.itemUpdateLink:focus-visible {
+  outline: calc(var(--border-width) * 2) solid var(--colors-text);
+  outline-offset: calc(var(--border-width) * 2);
+}

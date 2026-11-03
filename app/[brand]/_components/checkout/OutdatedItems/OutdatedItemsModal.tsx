@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useId, useRef, useState } from 'react'
+import { forwardRef, useEffect, useId, useImperativeHandle, useRef, useState } from 'react'
 
 import type { IconProps } from '@/src/components/icons/Icon'
 import type { CartItem, SelectedOption } from '../../../_context/CartContext'
@@ -29,6 +29,8 @@ export interface OutdatedItemsModalProps {
    * left in the bag): the host closes the popup and takes the shopper to pay.
    */
   onContinue:  () => void
+  /** The X, Escape or the scrim: the popup closes and the lines wait in the order summary. */
+  onDismiss:   () => void
   /** Where "Continue shopping" goes once every line has been removed. */
   shopHref:    string
   /**
@@ -39,6 +41,11 @@ export interface OutdatedItemsModalProps {
   /** Told when the item editor opens or closes — the popup steps aside meanwhile. */
   onEditingChange?: (editing: boolean) => void
   icons:       OutdatedItemsIcons
+}
+
+/** Lets the order summary's "Update" open the item editor for one line. */
+export interface OutdatedItemsModalHandle {
+  edit: (itemId: string) => void
 }
 
 function formatPrice(cents: number): string {
@@ -75,14 +82,13 @@ function toDisplayOptions(product: QuickAddProduct, options: SelectedOption[]): 
  * "Edit Item" mode — with the line's choices filled in and only the changed
  * option left to pick. Saving brings the shopper straight back here.
  *
- * It cannot be closed: the outdated state is this popup, with nothing shown
- * inline on the page. The only ways out are its own actions — fix or remove
- * every line, then Continue (or Continue shopping, once the bag is empty).
+ * It can be dismissed: the lines then wait in the order summary, each with
+ * its own Update, and any attempt to pay brings the popup back.
  */
-export function OutdatedItemsModal({
-  open, entries, cartItems, resolutions, onFix, onRemove, onContinue,
+export const OutdatedItemsModal = forwardRef<OutdatedItemsModalHandle, OutdatedItemsModalProps>(function OutdatedItemsModal({
+  open, entries, cartItems, resolutions, onFix, onRemove, onContinue, onDismiss,
   shopHref, icons, clearHeader = false, onEditingChange,
-}: OutdatedItemsModalProps) {
+}, ref) {
   const { WarningIcon, CheckmarkIcon, XIcon } = icons
   const titleId = useId()
 
@@ -92,6 +98,8 @@ export function OutdatedItemsModal({
   const [editorEntry, setEditorEntry] = useState<OutdatedItem | undefined>()
   /** How many items the current run of the button walks — the "of 2" in "1 of 2 items". */
   const [runTotal, setRunTotal] = useState(0)
+  /** Opened from the order summary rather than the popup: one line, and back to the page after. */
+  const [inline, setInline] = useState(false)
 
   const lines = entries
     .map(entry => ({ entry, item: cartItems.find(i => i.id === entry.itemId) }))
@@ -119,12 +127,22 @@ export function OutdatedItemsModal({
     setEditingId(entry.itemId)
   }
 
+  useImperativeHandle(ref, () => ({
+    edit: itemId => {
+      const entry = fixables.find(e => e.itemId === itemId)
+      if (!entry) return
+      setInline(true)
+      setRunTotal(1)
+      startEditing(entry)
+    },
+  }))
+
   /** The editor closing: on to the next line after an Update, else back to the popup (Cancel, X). */
   const stopEditing = () => {
     const next = nextRef.current
     nextRef.current = undefined
     if (next) startEditing(next)
-    else setEditingId(undefined)
+    else { setEditingId(undefined); setInline(false) }
   }
 
   const saveEdit = (updated: CartItem) => {
@@ -134,7 +152,8 @@ export function OutdatedItemsModal({
     const selected = toDisplayOptions(entry.editor.product, updated.selectedOptions ?? [])
     const change   = selected.find(o => o.label === option) ?? { label: option, value: '' }
     onFix(entry.itemId, updated.price, selected, change)
-    nextRef.current = fixables.find(e => e.itemId !== entry.itemId)
+    // From the order summary, just this line; from the popup, on to the next.
+    nextRef.current = inline ? undefined : fixables.find(e => e.itemId !== entry.itemId)
   }
 
   const left = pending.length
@@ -158,10 +177,7 @@ export function OutdatedItemsModal({
       <Modal
         // Hidden while the editor is up, and never shown settled — it closes itself.
         open={open && editingId === undefined && !settled}
-        // Never called: without a close button, Escape or the scrim, only the
-        // popup's own actions lead out of it.
-        onClose={() => {}}
-        dismissible={false}
+        onClose={onDismiss}
         centered
         labelledBy={titleId}
         closeIcon={<XIcon size={24} />}
@@ -247,11 +263,12 @@ export function OutdatedItemsModal({
       </Modal>
 
       {/* The item editor — the cart drawer's Edit Item panel. Always mounted so
-          it slides. Update moves on to the next line, or closes after the last;
-          Cancel and X return to the popup. */}
+          it slides. From the popup, Update moves on to the next line, or closes
+          after the last, and Cancel and X return to the popup. From the order
+          summary it edits that one line and closes back to the page. */}
       <QuickAddPanel
         mode="edit"
-        isOpen={open && editingId !== undefined}
+        isOpen={editingId !== undefined && (open || inline)}
         onClose={stopEditing}
         product={editorEntry?.editor?.product ?? null}
         initialValues={editorEntry?.editor?.values}
@@ -260,11 +277,11 @@ export function OutdatedItemsModal({
           ? {
               option: editorEntry.issue.option,
               // Items already fixed this run, plus this one.
-              progress: { current: runTotal - fixables.length + 1, total: runTotal },
+              progress: inline ? undefined : { current: runTotal - fixables.length + 1, total: runTotal },
             }
           : undefined}
         onAdd={saveEdit}
       />
     </>
   )
-}
+})

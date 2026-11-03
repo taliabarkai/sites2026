@@ -29,7 +29,7 @@ import { GiftingSection as GiftingSectionV2 } from '../_components/cart/GiftingV
 import { Usps } from '../_components/cart/Usps'
 import type { GiftItem } from '../_components/cart/GiftingV2'
 import { CheckoutConflictAlert } from '../_components/checkout/CheckoutConflictAlert'
-import { OutdatedItemsModal, useOutdatedItems } from '../_components/checkout/OutdatedItems'
+import { OutdatedItemsModal, useOutdatedItems, type OutdatedItemsModalHandle } from '../_components/checkout/OutdatedItems'
 import { areOptionsItemBound, findOptionForItem } from '../_components/cart/GiftingOptions'
 import type { GiftAssignment, GiftOption } from '../_components/cart/GiftingOptions'
 import styles from './CheckoutPage.module.css'
@@ -285,9 +285,11 @@ interface CheckoutItemRowProps {
   gift?:          { name: string; price: number }
   /** Out of stock: an "Item Unavailable" line heads it, as in the cart. */
   unavailable?:   boolean
+  /** Outdated and not yet fixed: a "Quick update needed" line heads it, its "Update item" opening the item editor. */
+  onUpdate?:      () => void
 }
 
-function CheckoutItemRow({ item, icons, showGuarantee, onAddGift, gift, unavailable }: CheckoutItemRowProps) {
+function CheckoutItemRow({ item, icons, showGuarantee, onAddGift, gift, unavailable, onUpdate }: CheckoutItemRowProps) {
   const [detailsOpen, setDetailsOpen] = useState(false)
   const hasOptions = item.selectedOptions && item.selectedOptions.length > 0
   const { ChevronIcon, GiftIcon, WarningIcon } = icons
@@ -313,6 +315,16 @@ function CheckoutItemRow({ item, icons, showGuarantee, onAddGift, gift, unavaila
         <p className={styles.itemUnavailable}>
           <span className={styles.itemUnavailableIcon} aria-hidden="true"><WarningIcon size={24} /></span>
           Item Unavailable
+        </p>
+      )}
+      {!unavailable && onUpdate && (
+        <p className={styles.itemUnavailable}>
+          <span className={styles.itemUpdateIcon} aria-hidden="true"><WarningIcon size={24} /></span>
+          {/* Worded as the popup is — its title, and its button. */}
+          Quick update needed
+          <button type="button" className={styles.itemUpdateLink} onClick={onUpdate}>
+            Update item<span className="sr-only">: {item.name}</span>
+          </button>
         </p>
       )}
       <div className={styles.checkoutItemRow}>
@@ -476,9 +488,12 @@ interface OrderSummaryProps {
   uspsWarranty?:        boolean
   /** Lines that are out of stock, flagged "Item Unavailable". */
   unavailableIds?:      Set<string>
+  /** Outdated lines still to fix, flagged "Quick update needed" — each "Update item" opens the editor. */
+  outdatedIds?:         Set<string>
+  onUpdateItem?:        (itemId: string) => void
 }
 
-function OrderSummary({ items, icons, showDetails, subtotal = 0, selectedShipping = 'free', hideHeader, hideBenefits, taxAmount, orderTotalDisplay, onOpenGiftModal, giftByItemId, giftTotal = 0, giftCount = 0, collapsibleItems, defaultItemsOpen = false, showPromo = true, showUsps, uspsWarranty = true, unavailableIds }: OrderSummaryProps) {
+function OrderSummary({ items, icons, showDetails, subtotal = 0, selectedShipping = 'free', hideHeader, hideBenefits, taxAmount, orderTotalDisplay, onOpenGiftModal, giftByItemId, giftTotal = 0, giftCount = 0, collapsibleItems, defaultItemsOpen = false, showPromo = true, showUsps, uspsWarranty = true, unavailableIds, outdatedIds, onUpdateItem }: OrderSummaryProps) {
   const [promoCode,    setPromoCode]    = useState('')
   const [promoApplied, setPromoApplied] = useState(false)
   const [appliedCode,  setAppliedCode]  = useState('')
@@ -552,10 +567,10 @@ function OrderSummary({ items, icons, showDetails, subtotal = 0, selectedShippin
 
       {/* Kept in the DOM while closed so the button's aria-controls always
           resolves; [hidden] is honoured by the rule beside .summaryItems. */}
-      {/* With an unavailable line, a rule between lines keeps each flag with its own item. */}
+      {/* With a flagged line, a rule between lines keeps each flag with its own item. */}
       <div
         id={itemsId}
-        className={`${styles.summaryItems}${unavailableIds?.size ? ` ${styles.summaryItemsDivided}` : ''}`}
+        className={`${styles.summaryItems}${unavailableIds?.size || outdatedIds?.size ? ` ${styles.summaryItemsDivided}` : ''}`}
         hidden={collapsibleItems && !itemsOpen}
       >
         {items.map(item => (
@@ -567,6 +582,7 @@ function OrderSummary({ items, icons, showDetails, subtotal = 0, selectedShippin
             onAddGift={onOpenGiftModal ? () => onOpenGiftModal(item.id) : undefined}
             gift={giftByItemId?.[item.id]}
             unavailable={unavailableIds?.has(item.id)}
+            onUpdate={onUpdateItem && outdatedIds?.has(item.id) ? () => onUpdateItem(item.id) : undefined}
           />
         ))}
       </div>
@@ -1108,18 +1124,22 @@ function CheckoutPageInner() {
   /** The item editor is up over the popup — its scrim covers the header too. */
   const [outdatedEditing, setOutdatedEditing] = useState(false)
 
-  // The outdated state *is* the popup: it opens as soon as a line is outdated
-  // and cannot be dismissed — only fixing or removing every line, then
-  // Continue, closes it. Nothing about it is shown inline on the page.
+  /** Opens the item editor for one line, from its "Update" in the order summary. */
+  const outdatedModalRef = useRef<OutdatedItemsModalHandle>(null)
+
+  // The popup opens as soon as a line is outdated — again with each new
+  // scenario. It can be dismissed: the lines then wait in the order summary,
+  // flagged "Quick update needed", and trying to pay brings the popup back.
   useEffect(() => {
     if (hasOutdated) setOutdatedOpen(true)
-  }, [hasOutdated])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hasOutdated, brand, searchParams])
 
   /**
-   * Every way of starting payment goes through here — a backstop, since the
-   * popup already covers the page while a line is outdated. The check is
-   * synchronous on purpose: Apple Pay and Google Pay sheets must start inside
-   * the tap itself, with no request in between.
+   * Every way of starting payment goes through here: with a line still
+   * outdated, it reopens the popup instead. The check is synchronous on
+   * purpose: Apple Pay and Google Pay sheets must start inside the tap
+   * itself, with no request in between.
    */
   const guardPayment = (pay: () => void) => {
     if (hasOutdated) { setOutdatedOpen(true); return }
@@ -1251,7 +1271,10 @@ function CheckoutPageInner() {
     giftByItemId,
     giftTotal,
     giftCount: giftAssignments.length,
-    unavailableIds: new Set(oosIds),
+    // Option 1's unavailable lines, too, once the popup is dismissed.
+    unavailableIds: new Set([...oosIds, ...outdated.pending.filter(e => e.issue.kind === 'unavailable').map(e => e.itemId)]),
+    outdatedIds:    new Set(outdated.pending.filter(e => e.issue.kind !== 'unavailable').map(e => e.itemId)),
+    onUpdateItem:   (itemId: string) => outdatedModalRef.current?.edit(itemId),
   }
 
   return (
@@ -1907,15 +1930,17 @@ function CheckoutPageInner() {
                     variant="primary"
                     onClick={() => guardPayment(() => completeStep(4))}
                     /* A stale checkout cannot be submitted: the newer session has
-                       already saved different data, so the order must be re-read. */
-                    disabled={
+                       already saved different data, so the order must be re-read.
+                       With a line still outdated it stays live, so the tap can
+                       bring the outdated-items popup back. */
+                    disabled={!hasOutdated && (
                       isErrorPreview ||
                       hasOos ||
                       paymentMethod === null ||
                       (paymentMethod === 'credit-card' && (!cardNumber.trim() || !cardCvv.trim() || !cardName.trim()))
-                    }
-                    aria-disabled={isErrorPreview || hasOos || undefined}
-                    className={`${styles.placeOrderButton}${isErrorPreview || hasOos ? ` ${styles.placeOrderButtonBlocked}` : ''}`}
+                    )}
+                    aria-disabled={(!hasOutdated && (isErrorPreview || hasOos)) || undefined}
+                    className={`${styles.placeOrderButton}${!hasOutdated && (isErrorPreview || hasOos) ? ` ${styles.placeOrderButtonBlocked}` : ''}`}
                     style={
                       paymentMethod === 'paypal'   ? { background: '#0070BA', color: '#fff', borderColor: '#0070BA' } :
                       paymentMethod === 'applepay' ? { background: '#000000', color: '#fff', borderColor: '#000000' } :
@@ -1989,6 +2014,7 @@ function CheckoutPageInner() {
       </main>
 
       <OutdatedItemsModal
+        ref={outdatedModalRef}
         open={outdatedShown}
         entries={outdated.entries}
         cartItems={cartItems}
@@ -1996,6 +2022,7 @@ function CheckoutPageInner() {
         onFix={outdated.fix}
         onRemove={outdated.remove}
         onContinue={continueAfterOutdated}
+        onDismiss={() => setOutdatedOpen(false)}
         shopHref={`/${brand}`}
         icons={icons}
         clearHeader
