@@ -32,6 +32,12 @@ export interface CheckoutConflictAlertProps {
    */
   stacked?:     boolean
   /**
+   * 'neutral' — a white surface with a red border and red icon, and the
+   * action as a text link, for a notice that asks for an action rather than
+   * reporting a failure (out of stock).
+   */
+  tone?:        'error' | 'neutral'
+  /**
    * The primary instance announces itself as a live region and pulls focus.
    * A repeat of the same alert further down the page must set this false:
    * two live regions would have a screen reader read the conflict twice, and
@@ -62,6 +68,7 @@ export function CheckoutConflictAlert({
   onAction,
   actionLabel,
   stacked = false,
+  tone = 'error',
   announce = true,
   className,
 }: CheckoutConflictAlertProps) {
@@ -105,7 +112,12 @@ export function CheckoutConflictAlert({
   }
 
   /* Design-system button, recoloured to the error red via the module class. */
-  const button = (
+  const button = tone === 'neutral' ? (
+    // Neutral: a text link — the alert informs, and removing is the quiet way on.
+    <Button variant="link" className={styles.actionLink} onClick={onAction ?? handleRefresh}>
+      {onAction ? actionLabel : 'Refresh page'}
+    </Button>
+  ) : (
     <Button
       variant="primary"
       className={styles.button}
@@ -125,7 +137,7 @@ export function CheckoutConflictAlert({
       // repeat is a plain labelled group so its button stays reachable.
       {...(announce ? { role: 'alert', tabIndex: -1 } : { role: 'group' })}
       aria-labelledby={titleId}
-      className={[styles.alert, stacked && styles.alertStacked, className].filter(Boolean).join(' ')}
+      className={[styles.alert, stacked && styles.alertStacked, tone === 'neutral' && styles.alertNeutral, className].filter(Boolean).join(' ')}
     >
       <div className={styles.body}>
         {/* Decorative: the title and message already carry the meaning. Sized in

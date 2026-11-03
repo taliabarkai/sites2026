@@ -1336,6 +1336,7 @@ function CheckoutPageInner() {
                     actionLabel={OOS_ALERT.action(oosIds.length)}
                     onAction={() => setOosRemoved(true)}
                     stacked
+                    tone="neutral"
                   />
                 </div>
               )}

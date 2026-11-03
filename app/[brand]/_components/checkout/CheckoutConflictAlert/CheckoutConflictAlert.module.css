@@ -178,3 +178,29 @@
     align-self: flex-start;
   }
 }
+
+/* Neutral tone: a white surface outlined in the error red, the red icon, and
+   the action as an underlined text link rather than a red button. */
+.alertNeutral {
+  background: var(--colors-background);
+  border: var(--border-width) solid var(--colors-error);
+}
+
+/* Doubled to outrank the Button link variant's own type. */
+.actionLink.actionLink {
+  align-self: flex-start;
+  margin-top: var(--spacing-xxs);
+  color: var(--colors-text);
+  text-underline-offset: 3px;
+  font-family:    var(--typography-rules-text2-font-family);
+  font-size:      var(--typography-rules-text2-font-size);
+  line-height:    var(--typography-rules-text2-line-height);
+  letter-spacing: var(--typography-rules-text2-letter-spacing, normal);
+  text-transform: var(--typography-rules-text2-text-transform, none);
+  font-weight:    var(--typography-rules-text2-font-weight, normal);
+}
+
+.actionLink.actionLink:focus-visible {
+  outline: 2px solid var(--colors-text);
+  outline-offset: 2px;
+}
