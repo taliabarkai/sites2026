@@ -20,7 +20,16 @@ export type ProductItem = {
   /** More PDP gallery images, after `image` and `hoverImage`. `onModel` marks a
    *  lifestyle shot, shown as it is rather than blended onto the image tint. */
   galleryImages?: { src: string; onModel?: boolean }[]
+  /** Each metal's own product shots, for a gallery that follows the metal
+   *  picked. A metal with none of its own shows `image` and `hoverImage`. */
+  metalImages?: Partial<Record<ProductMaterialKey, string[]>>
+  /** The product's own materials, in order, with their full prices — in place
+   *  of the standard four. The first should be the base (`priceInCents`). */
+  materials?: { key: ProductMaterialKey; label: string; price: number }[]
 }
+
+/** A material a product can list (matches the PDP's material catalog). */
+type ProductMaterialKey = 'silver' | 'vermeil' | 'solid-14k' | 'rose' | 'gold-plated' | 'rose-plated' | 'solid-10k'
 
 export type BrandProducts = Record<BrandKey, ProductItem[]>
 
@@ -74,7 +83,14 @@ const tgrProducts: ProductItem[] = [
   { id: 5 , name: 'Carrie Name Necklace in Sterling Silver', image: '/images/products/tgr/tgr-05-product.jpg', hoverImage: '/images/products/tgr/tgr-05-model.jpg', href: '/product/5', price: '$95', priceInCents: 9500, rating: 4.9, reviewCount: 65, defaultSwatchKey: 'silver' },
   { id: 6 , name: 'Nova Birthstone Necklace with Engraved Names in 18K Gold Plating', image: '/images/products/tgr/tgr-06-product.jpg', hoverImage: '/images/products/tgr/tgr-06-model.jpg', href: '/product/6', price: '$100', priceInCents: 10000, rating: 4.4, reviewCount: 162, defaultSwatchKey: 'vermeil' },
   { id: 8 , name: 'Coco Hexagon Ring', image: '/images/products/tgr/tgr-08-product.jpg', hoverImage: '/images/products/tgr/tgr-08-model.jpg', href: '/product/8', price: '$105', priceInCents: 10500, rating: 4.6, reviewCount: 356, defaultSwatchKey: 'vermeil' },
-  { id: 9 , name: 'Heart to Heart Engravable Necklace in Sterling Silver with Diamond', image: '/images/products/tgr/tgr-09-product.jpg', hoverImage: '/images/products/tgr/tgr-09-model.jpg', href: '/product/9', price: '$145', priceInCents: 14500, rating: 4.7, reviewCount: 453, defaultSwatchKey: 'silver' },
+  { id: 9 , name: 'Heart to Heart Engravable Necklace in Sterling Silver with Diamond', image: '/images/products/tgr/tgr-09-product.jpg', hoverImage: '/images/products/tgr/tgr-09-model.jpg', href: '/product/9', price: '$83', priceInCents: 8300, rating: 4.7, reviewCount: 453, defaultSwatchKey: 'silver',
+    materials: [
+      { key: 'silver',      label: 'Silver',                price: 8300 },
+      { key: 'gold-plated', label: 'Gold Plated',           price: 9800 },
+      { key: 'vermeil',     label: 'Gold Vermeil',          price: 15400 },
+      { key: 'rose-plated', label: 'Rose Gold Plated',      price: 9800 },
+      { key: 'solid-10k',   label: '10K Solid Yellow Gold', price: 54000 },
+    ] },
   { id: 10, name: 'Blooming Birth Flower Name Necklace with Birthstone in Sterling Silver', image: '/images/products/tgr/tgr-10-product.jpg', hoverImage: '/images/products/tgr/tgr-10-model.jpg', href: '/product/10', price: '$180', priceInCents: 18000, rating: 4.8, reviewCount: 90, defaultSwatchKey: 'silver' },
   { id: 11, name: 'Sweetheart Necklace with Engraved Beads in Gold Plating', image: '/images/products/tgr/tgr-11-product.jpg', hoverImage: '/images/products/tgr/tgr-11-model.jpg', href: '/product/11', price: '$95', priceInCents: 9500, rating: 4.9, reviewCount: 187, defaultSwatchKey: 'vermeil' },
   { id: 12, name: 'Engraved 3D Bar Necklace in Gold Plating', image: '/images/products/tgr/tgr-12-product.jpg', hoverImage: '/images/products/tgr/tgr-12-model.jpg', href: '/product/12', price: '$170', priceInCents: 17000, rating: 4.4, reviewCount: 284, defaultSwatchKey: 'vermeil' },

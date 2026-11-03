@@ -161,7 +161,9 @@ export function QuickAddPanelContent({ product, ctaLabel, showViewDetails, onAdd
   const pdpHref = `/${brand}${product.pdpUrl}`
 
   // The title follows the metal picked ("… in Silver Finish" → "… in Rose Gold Plating")
-  const metalOption = product.options.find(o => o.type === 'swatch')
+  // The metal — swatches, or the material carousel — comes first and names the title
+  const isMetal = (o: QuickAddOption) => o.type === 'swatch' || o.type === 'material-carousel'
+  const metalOption = product.options.find(isMetal)
   const title = titleForMetal(product.title, metalOption && selectedOptions[metalOption.name])
 
   const { hideGallery, isSingleImage, useCarousel, hideGalleryOnMobile } = quickAddLayout(product, embedded)
@@ -189,7 +191,11 @@ export function QuickAddPanelContent({ product, ctaLabel, showViewDetails, onAdd
     // The dynamic name fields replace the product's own text-input engraving.
     const selectedOptionsList = product.options
       .filter(opt => !usesNameFields || opt.type !== 'text-input')
-      .map(opt => ({ label: opt.name, value: (selectedOptions[opt.name] ?? '').trim() }))
+      // A picked value goes in by its label ("Gold Vermeil", not "vermeil")
+      .map(opt => {
+        const raw = (selectedOptions[opt.name] ?? '').trim()
+        return { label: opt.name, value: opt.values?.find(v => v.value === raw)?.label ?? raw }
+      })
       .filter(o => o.value)
 
     const nameOptions = trimmedNames.map((n, i) => ({ label: `Name ${i + 1}`, value: n }))
@@ -294,6 +300,31 @@ export function QuickAddPanelContent({ product, ctaLabel, showViewDetails, onAdd
         </>
       )}
 
+      {/* The PDP's material carousel — each tile the full price in that material,
+          with everything else as picked */}
+      {opt.type === 'material-carousel' && (() => {
+        const pickedPrice = opt.values?.find(v => v.value === selectedOptions[opt.name])?.price ?? 0
+        return (
+          <OptionRadioGroup
+            group={{
+              id: opt.name,
+              label: opt.label ?? opt.name,
+              display: 'carousel',
+              tile: 'standard',
+              values: (opt.values ?? []).map(v => ({
+                id: v.value,
+                label: v.label,
+                image: v.image,
+                swatchColor: v.color,
+                priceLabel: fmt(totalPrice - pickedPrice + (v.price ?? 0), product.currency),
+              })),
+            }}
+            value={selectedOptions[opt.name] ?? ''}
+            onChange={id => select(opt.name, id)}
+          />
+        )
+      })()}
+
       {/* Open grid, standard image — the PDP options' own grid, so the tiles,
           the radio group and its arrow-key focus all match the product page */}
       {opt.type === 'grid' && (
@@ -301,7 +332,7 @@ export function QuickAddPanelContent({ product, ctaLabel, showViewDetails, onAdd
           group={{
             id: opt.name,
             label: opt.name,
-            display: 'grid',
+            display: opt.carousel ? 'carousel' : 'grid',
             tile: 'standard',
             values: (opt.values ?? []).map(v => ({ id: v.value, label: v.label, image: v.image, swatchColor: v.color })),
           }}
@@ -579,10 +610,11 @@ export function QuickAddPanelContent({ product, ctaLabel, showViewDetails, onAdd
                 (The product's own text-input engraving is replaced by the name
                 fields, unless the product asks for its own fields instead.) */}
             <div className={styles.options}>
-              {product.options.filter(o => o.type === 'swatch').map(renderOption)}
+              {product.options.filter(isMetal).map(renderOption)}
+              {product.options.filter(o => !isMetal(o) && o.beforeNames).map(renderOption)}
               {usesNameFields && namesSection}
               {product.options
-                .filter(o => o.type !== 'swatch' && (!usesNameFields || o.type !== 'text-input'))
+                .filter(o => !isMetal(o) && !o.beforeNames && (!usesNameFields || o.type !== 'text-input'))
                 .map(renderOption)}
             </div>
 

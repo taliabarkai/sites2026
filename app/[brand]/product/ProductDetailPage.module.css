@@ -654,6 +654,24 @@
   outline: none;
 }
 
+/* A required field left empty (the shortcut flow's inscription) — over the
+   input's own hover and focus borders */
+.textInput.textInputError,
+.textInput.textInputError:hover,
+.textInput.textInputError:focus {
+  border-color: var(--colors-error);
+}
+
+.errorMsg {
+  margin: 0;
+  font-family:    var(--typography-rules-text3-font-family);
+  font-size:      var(--typography-rules-text3-font-size);
+  line-height:    var(--typography-rules-text3-line-height);
+  font-weight:    var(--typography-rules-text3-font-weight, normal);
+  letter-spacing: var(--typography-rules-text3-letter-spacing, normal);
+  color: var(--colors-error);
+}
+
 .textInput::placeholder {
   color: var(--form-input-placeholder);
 }
@@ -744,6 +762,51 @@
 /* ── Add to Bag CTA ───────────────────────────────────────────────────────── */
 .addToBagBtn {
   width: 100%;
+}
+
+/* ── Personalize-now's material carousel — 16px from the header's divider to
+      its label's text: the form's 24px gap, less the 16px wanted, less the
+      half of the arrows' 32px row the label sits centred in ───────────────── */
+.materialPicker {
+  margin-top: calc(
+    var(--spacing-sm) - var(--spacing-md)
+    - (var(--spacing-lg) - var(--typography-rules-text2-line-height)) / 2
+  );
+}
+
+/* ── Save flow — the saved personalisation above Add to Bag ───────────────── */
+.personalizeBlock {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.savedPersonalization {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xxs);
+  padding: var(--spacing-sm);
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: var(--colors-surface-primary);
+}
+
+.savedList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xxxs);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.savedLine {
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  font-weight:    var(--typography-rules-text1-font-weight, normal);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+  color: var(--colors-text-secondary);
 }
 
 /* ── Product carousel (Best Sellers on PDP) ──────────────────────────────── */

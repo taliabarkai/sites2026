@@ -12,8 +12,10 @@ export interface Product {
   defaultSwatchKey: 'silver' | 'vermeil' | 'solid-14k' | 'rose'
 }
 
+export type MaterialKey = 'silver' | 'vermeil' | 'solid-14k' | 'rose' | 'gold-plated' | 'rose-plated' | 'solid-10k'
+
 export interface MaterialSwatch {
-  key: 'silver' | 'vermeil' | 'solid-14k' | 'rose'
+  key: MaterialKey
   label: string
   shortLabel: string
   color: string
@@ -27,6 +29,35 @@ export const MATERIAL_SWATCHES: MaterialSwatch[] = [
   { key: 'rose',      label: 'Rose Gold 18k',     shortLabel: 'Rose Gold',     color: 'var(--rose-gold-plating-18k)', priceOffset: 1500  },
 ]
 
+/** Each material's swatch color — the shared material tokens. */
+const MATERIAL_COLORS: Record<MaterialKey, string> = {
+  silver:        'var(--sterling-silver-925)',
+  vermeil:       'var(--gold-vermeil-18k)',
+  'solid-14k':   'var(--solid-gold-14k)',
+  rose:          'var(--rose-gold-plating-18k)',
+  'gold-plated': 'var(--gold-plating-18k)',
+  'rose-plated': 'var(--rose-gold-plating-18k)',
+  'solid-10k':   'var(--solid-gold-10k)',
+}
+
+/**
+ * The product's own materials where it lists them (labels and full prices),
+ * else the standard four — as swatches priced against its base price.
+ */
+export function materialSwatchesFor(product: {
+  priceInCents?: number
+  materials?: { key: MaterialKey; label: string; price: number }[]
+}): MaterialSwatch[] {
+  if (!product.materials?.length) return MATERIAL_SWATCHES
+  return product.materials.map((m) => ({
+    key: m.key,
+    label: m.label,
+    shortLabel: m.label,
+    color: MATERIAL_COLORS[m.key],
+    priceOffset: m.price - (product.priceInCents ?? 0),
+  }))
+}
+
 /**
  * The brand's packaging shot, closing every PDP gallery. Keyed by brand rather
  * than stored on products: the TGR catalog is shared with IB and MNN, and the
@@ -36,6 +67,22 @@ export const BRAND_PACKAGING_IMAGES: Partial<Record<string, string>> = {
   tgr: '/images/products/tgr/tgr-packaging.webp',
 }
 
+/**
+ * Diamond shapes — a price-setting choice on diamond pieces.
+ */
+export interface DiamondShape {
+  key: 'round' | 'heart' | 'pear'
+  label: string
+  image: string
+  priceOffset: number
+}
+
+export const DIAMOND_SHAPES: DiamondShape[] = [
+  { key: 'round', label: 'Round', image: '/images/diamonds/round.jpg', priceOffset: 0    },
+  { key: 'heart', label: 'Heart', image: '/images/diamonds/heart.jpg', priceOffset: 3000 },
+  { key: 'pear',  label: 'Pear',  image: '/images/diamonds/pear.jpg',  priceOffset: 2000 },
+]
+
 /** How a silver title names its finish — "… in Silver Finish", "… in Sterling Silver". */
 const SILVER_FINISHES = ['Silver Finish', 'Sterling Silver']
 
@@ -44,10 +91,13 @@ const SILVER_FINISHES = ['Silver Finish', 'Sterling Silver']
  * renames the title to match (picking silver keeps the title's own wording);
  * titles that name some other finish, or none, are left as they are.
  */
-const FINISH_NAMES: Record<Exclude<MaterialSwatch['key'], 'silver'>, string> = {
-  vermeil:     '18K Gold Vermeil',
-  'solid-14k': '14K Solid Gold',
-  rose:        'Rose Gold Plating',
+const FINISH_NAMES: Record<Exclude<MaterialKey, 'silver'>, string> = {
+  vermeil:       '18K Gold Vermeil',
+  'solid-14k':   '14K Solid Gold',
+  rose:          'Rose Gold Plating',
+  'gold-plated': 'Gold Plating',
+  'rose-plated': 'Rose Gold Plating',
+  'solid-10k':   '10K Solid Yellow Gold',
 }
 
 export function titleForMetal(title: string, metalKey?: string): string {

@@ -344,6 +344,21 @@
   width: calc(var(--spacing-xxl) + var(--spacing-xl));
 }
 
+/* Standard-image carousels (the material picker): 104px tiles, wide enough
+   that no label rewraps when it turns bold on selection — so the row's height
+   never jumps — and 8px between them */
+.carousel.tiles_standard {
+  gap: var(--spacing-xxs);
+}
+
+.carousel.tiles_standard .slot {
+  width: calc(var(--spacing-xxxl) + var(--spacing-lg));
+  /* …giving up to 4px each (labels still don't rewrap at 100px) where that's
+     all it takes for the row to fit — so a row that nearly fits shows no arrows */
+  flex: 0 1 auto;
+  min-width: calc(var(--spacing-xxxl) + var(--spacing-lg) - var(--spacing-xxxs));
+}
+
 /* Image tiles in one row share the tallest one's height */
 .carousel.tiles_standard .slot,
 .carousel.tiles_big .slot {
@@ -355,10 +370,17 @@
   height: 100%;
 }
 
+/* Standard-image carousel tiles: 12px above and below (the sides keep the
+   tile's 8px, so the label's width — and where it wraps — is unchanged) */
+.carousel.tiles_standard .slot > * {
+  padding-block: var(--spacing-xs);
+}
+
 .arrows {
   display: flex;
   flex-shrink: 0;
-  gap: var(--spacing-xxxs);
+  /* Flush — the 32px buttons around smaller icons already set them apart */
+  gap: 0;
 }
 
 .arrow {
@@ -403,8 +425,11 @@
   grid-template-columns: repeat(auto-fill, minmax(var(--option-tile-min), 1fr));
 }
 
+/* 8px between tiles — the standard-image carousel's gap, so the diamond grid
+   and the material carousel above it space alike */
 .grid_standard {
   --option-tile-min: calc(var(--spacing-xxl) + var(--spacing-lg));
+  gap: var(--spacing-xxs);
 }
 
 .grid_big {

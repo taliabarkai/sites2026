@@ -258,9 +258,9 @@
 /* Price — matches PDP .priceRow / .priceOriginal / .priceCurrent */
 .priceRow {
   display: flex;
-  /* On sale: the selling price on top, the crossed-out price below it */
-  flex-direction: column-reverse;
-  align-items: flex-start;
+  /* On sale: one row, the crossed-out price, then the selling price */
+  align-items: baseline;
+  gap: var(--spacing-xxs);
   margin-bottom: var(--spacing-xxxs);
 }
 
@@ -432,6 +432,17 @@
   line-height: var(--typography-rules-text1-line-height);
   font-weight: var(--typography-rules-text1-font-weight, normal);
   color: var(--colors-text);
+}
+
+/* TGR: every field label (Inscription, Chain Length, the names…) takes the
+   option groups' label scale — the weight of "Select material:" */
+[data-theme="tgr"] .optionLabel {
+  font-family:    var(--typography-rules-text2-font-family);
+  font-size:      var(--typography-rules-text2-font-size);
+  line-height:    var(--typography-rules-text2-line-height);
+  font-weight:    var(--typography-rules-text2-font-weight, normal);
+  letter-spacing: var(--typography-rules-text2-letter-spacing, normal);
+  text-transform: var(--typography-rules-text2-text-transform, none);
 }
 
 .optionValue {

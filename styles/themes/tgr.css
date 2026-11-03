@@ -113,6 +113,9 @@
   --colors-price-sale:    var(--tgr-red);
   --colors-star-filled:   var(--tgr-raisin);
 
+  /* Option tiles — the picked tile is light grey, not the warm neutral */
+  --option-tile-selected-background: var(--tgr-light-grey);
+
   /* Cards */
   --colors-card-image-bg: var(--tgr-snow);
   --product-image-background-blend: var(--tgr-snow);

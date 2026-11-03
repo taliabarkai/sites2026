@@ -39,17 +39,32 @@
 
 .tile:hover:not(.selected):not(.disabled) {
   border-color: var(--colors-text-secondary);
-  background: var(--colors-surface-secondary);
+  background: var(--option-tile-selected-background, var(--colors-surface-secondary));
 }
 
+/* A brand can tint the picked tile apart from its secondary surface (TGR: grey) */
 .selected {
   border-color: var(--border-strong);
-  background: var(--colors-surface-secondary);
+  background: var(--option-tile-selected-background, var(--colors-surface-secondary));
 }
 
 .selected .label {
   font-family: var(--typography-rules-text2-font-family);
   font-weight: var(--typography-rules-text2-font-weight, 600);
+}
+
+/* Standard tiles: the selected label turns bold, which runs ~2% wider — so an
+   unselected label wraps in 97.5% of the width, breaking where its bold self
+   would, and a label never rewraps (say, "Sterling Silver" onto two lines) as
+   it's picked */
+.standard:not(.selected) .label {
+  max-width: 97.5%;
+}
+
+/* …of the tile's own width: the copy spans it, so the percentage never resolves
+   against the label itself (which, in a grid tile, broke it letter by letter) */
+.standard .copy {
+  align-self: stretch;
 }
 
 .tile:focus-visible {
@@ -74,6 +89,27 @@
 .label {
   overflow-wrap: break-word;
   hyphens: manual;
+}
+
+/* No image and no color: an outlined empty circle, no sheen */
+.standard .emptyMedia {
+  box-shadow: inset 0 0 0 var(--border-width) var(--border-color);
+}
+
+.standard .emptyMedia .image {
+  background-image: none;
+}
+
+/* A full price under the label (a material's) — the label's own size and color,
+   bold with it when selected */
+.price {
+  margin-top: var(--spacing-xxxs);
+  color: var(--colors-text);
+}
+
+.selected .price {
+  font-family: var(--typography-rules-text2-font-family);
+  font-weight: var(--typography-rules-text2-font-weight, 600);
 }
 
 .delta {
@@ -117,6 +153,29 @@
   height: var(--spacing-2xl);
   border-radius: var(--radius-sm);
   overflow: hidden;
+}
+
+/* A color with no photo (a metal) is a 36px round swatch, with a diagonal
+   sheen so it reads as metal — the material picker's icon size */
+.standard .swatchMedia {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-full);
+}
+
+.standard .swatchMedia .image {
+  background-image: linear-gradient(
+    135deg,
+    transparent 15%,
+    color-mix(in srgb, var(--colors-background) 60%, transparent) 50%,
+    transparent 85%
+  );
+}
+
+/* Packshots on white (a diamond, a flower) take on the tile's own fill —
+   hover and selected included — rather than sitting in a white square */
+.standard .image {
+  mix-blend-mode: multiply;
 }
 
 /* ── big: a large image (circle or square) above the label ────────────────── */

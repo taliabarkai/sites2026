@@ -17,7 +17,8 @@ import { Button } from '../_components/Button'
 import { FilterChips } from '../_components/FilterChips'
 import { ProductCard, toQuickAddProduct } from '../_components/ProductCard'
 import { QuickAddPanel } from '../_components/QuickAddPanel'
-import type { QuickAddFormValues, QuickAddProduct } from '../_components/QuickAddPanel'
+import type { QuickAddFormValues, QuickAddOption, QuickAddProduct } from '../_components/QuickAddPanel'
+import { OptionRadioGroup } from '../_components/ProductOptions/OptionRadioGroup'
 import { NestedItems, NestedItemsDrawer, nestedItemKey, withBundleDiscount } from '../_components/NestedItems'
 import type { NestedItemsDisplay } from '../_components/NestedItems'
 import { ProductImageCarousel } from '../_components/ProductImageCarousel'
@@ -28,14 +29,15 @@ import { prefixFooterColumns, prefixNavLinks, withBrandPrefix } from '../_config
 import { DEFAULT_FOOTER_COLUMNS, DEFAULT_NAV_LINKS, DEFAULT_TOPLINE } from '../_config/siteContent'
 import {
   DEFAULT_PRODUCT_SWATCHES,
-  MATERIAL_SWATCHES,
+  materialSwatchesFor,
   BRAND_PACKAGING_IMAGES,
+  DIAMOND_SHAPES,
   titleForMetal,
   CHAIN_LENGTHS,
   DEFAULT_CHAIN_LENGTH,
   MAX_ENGRAVE_CHARS,
 } from '../_config/products'
-import type { MaterialSwatch } from '../_config/products'
+import type { DiamondShape, MaterialSwatch } from '../_config/products'
 import { getBrandProducts } from '../../../data/products/getBrandProducts'
 import { getReviewSummary } from '../../../data/products/reviewSummary'
 import { NESTED_DRAWER_DESCRIPTION, nestedCharms } from '../../../data/products/nestedCharms'
@@ -53,7 +55,8 @@ import { AIPreviewCustomizer } from '../_components/AIPreviewCustomizer'
 import { ProductOptions, useProductOptions } from '../_components/ProductOptions'
 import type { OptionGroup, SelectedOption } from '../_components/ProductOptions'
 import { OPTION_GROUPS, OPTIONS_SHOWCASE_PRODUCT_ID, optionsShowcaseProduct } from './[id]/_data/optionGroups'
-import { isNestedDrawerProduct, isStickyPersonalizeProduct, isTwoStepProduct, readNestedDescriptionState, readNestedDrawerCount } from '../_config/demoParams'
+import { isNestedDrawerProduct, personalizeFlowFor, readNestedDescriptionState, readNestedDrawerCount } from '../_config/demoParams'
+import type { DiamondSetting, PersonalizeFields, PersonalizeFlow } from '../_config/demoParams'
 
 // LAL products that use the song-based Music Memories customizer
 // (Custom Canvas, Acrylic Wall Art, Metal Wall Art, Square Custom Canvas)
@@ -896,100 +899,189 @@ interface ProductFormProps {
    */
   optionGroups?: OptionGroup[]
   onAddConfigured?: (price: number, selectedOptions: SelectedOption[], isPersonalized: boolean, nestedCartItems: CartItem[]) => void
-  /**
-   * Two-step flow: the page leaves the selections out, and "Personalize & Add
-   * to Bag" (sticky on mobile) opens them in the Quick Add panel, no gallery.
-   */
-  twoStep?: boolean
-  /**
-   * Sticky-personalize flow: the selections stay on the page, and the sticky
-   * "Personalize & Add to Bag" opens just the personalisation in the Quick Add
-   * panel — the metal stays the page's.
-   */
-  stickyPersonalize?: boolean
+  /** A personalize-flow demo (see `PersonalizeFlow`) in place of the standard form. */
+  flow?: PersonalizeFlow
   /** The desktop gallery beside the form — the desktop sticky bar comes up once it's passed. */
   galleryRef?: GalleryRootRef
 }
 
 const NO_OPTION_GROUPS: OptionGroup[] = []
 
-// Two-step flow, step 2: the product's Quick Add form without its gallery,
-// asking the way the PDP does. Its metal picker is built from the PDP's own
-// swatches (and drawn like them, priced), so the keys and prices match the
-// swatches left on the page and the two stay in step; the chain length is the
-// PDP's dropdown of the PDP's lengths.
-function toPersonalizeProduct(product: ProductItem): QuickAddProduct {
-  const base = toQuickAddProduct(product)
-  return {
-    ...base,
-    hideGallery: true,
-    options: base.options.map((opt) => {
-      if (opt.type === 'swatch') {
-        return {
-          ...opt,
-          name: METAL_OPTION,
-          showPrices: true,
-          values: MATERIAL_SWATCHES.map((s) => ({ label: s.label, value: s.key, color: s.color, price: s.priceOffset })),
-        }
-      }
-      if (opt.name === CHAIN_LENGTH_OPTION) {
-        return { ...opt, type: 'dropdown' as const, values: CHAIN_LENGTHS.map((len) => ({ label: len, value: len })) }
-      }
-      return opt
-    }),
-  }
-}
-
 const METAL_OPTION = 'Metal Type'
+const DIAMOND_OPTION = 'Diamond Shape'
 const CHAIN_LENGTH_OPTION = 'Chain Length'
 const INSCRIPTION_OPTION = 'Inscription'
 
-// Sticky-personalize flow: the panel asks only what the page's form does past
-// the metal — the inscription (required, to personalise) and the chain length
-// — priced and titled for the metal already picked on the page.
-function toPersonalizationOnlyProduct(product: ProductItem, price: number, metal: MaterialSwatch['key']): QuickAddProduct {
+const CHAIN_LENGTH_DROPDOWN: QuickAddOption = {
+  name: CHAIN_LENGTH_OPTION,
+  type: 'dropdown',
+  values: CHAIN_LENGTHS.map((len) => ({ label: len, value: len })),
+}
+
+// Personalize-now flow: the PDP's metal picker as the options' standard-image
+// carousel — each metal's own shot where the product has one, else its swatch,
+// and its full price (with the diamond picked, where there is one)
+function metalCarouselGroup(product: ProductItem, extra: number) {
+  const base = (product.priceInCents ?? 0) + extra
+  return {
+    id: 'metal-type',
+    label: 'Select material:',
+    display: 'carousel' as const,
+    tile: 'standard' as const,
+    values: materialSwatchesFor(product).map((s) => ({
+      id: s.key,
+      label: s.label,
+      image: product.metalImages?.[s.key]?.[0],
+      swatchColor: s.color,
+      priceLabel: formatPrice(base + s.priceOffset),
+    })),
+  }
+}
+
+// The PDP's diamond shape picker — the options' standard-image carousel, like
+// the material's (on desktop the tiles fit, so it shows no arrows)
+const DIAMOND_SHAPE_GROUP = {
+  id: 'diamond-shape',
+  label: 'Diamond shape:',
+  display: 'carousel' as const,
+  tile: 'standard' as const,
+  values: DIAMOND_SHAPES.map((d) => ({ id: d.key, label: d.label, image: d.image })),
+}
+
+// The personalize panels: just the personalisation — the names (a count and a
+// field per name) or one inscription field, then the chain length — priced and
+// titled for the metal (and diamond) already picked on the page.
+function toPersonalizationPanel(
+  product: ProductItem,
+  price: number,
+  metal: MaterialSwatch['key'],
+  fields: PersonalizeFields,
+): QuickAddProduct {
   return {
     ...toQuickAddProduct(product),
     title: titleForMetal(product.name, metal),
     price,
     hideGallery: true,
-    engraving: 'fields',
-    options: [
-      { name: INSCRIPTION_OPTION, type: 'text-input', maxLength: MAX_ENGRAVE_CHARS, placeholder: 'e.g. Sofia' },
-      { name: CHAIN_LENGTH_OPTION, type: 'dropdown', values: CHAIN_LENGTHS.map((len) => ({ label: len, value: len })) },
-    ],
+    engraving: fields === 'names' ? 'names' : 'fields',
+    options: fields === 'names'
+      ? [CHAIN_LENGTH_DROPDOWN]
+      : [
+          { name: INSCRIPTION_OPTION, type: 'text-input', maxLength: MAX_ENGRAVE_CHARS, placeholder: 'e.g. Sofia' },
+          CHAIN_LENGTH_DROPDOWN,
+        ],
   }
 }
 
-// Two-step flow's nested offer: a second of the same necklace at half price —
-// the base and every option's price halved and the full price crossed out. It
-// opens like step 2 itself: selections only, no gallery.
+// Two-step flow's nested offer: a second of the same necklace at half price.
+// It's a necklace of its own, so it asks for its own metal (and diamond)
+// beside the personalisation — every price halved, the full price crossed out.
 const SECOND_NECKLACE_DISCOUNT = 0.5
 const SECOND_NECKLACE_TITLE = 'Buy a second necklace at 50% off'
 
-function toSecondNecklace(product: ProductItem): QuickAddProduct {
-  const base = toPersonalizeProduct(product)
-  const discount = (cents: number) => Math.round(cents * (1 - SECOND_NECKLACE_DISCOUNT))
+// An optional diamond's "None" — the last tile, an empty circle, the default
+const NO_DIAMOND = 'none'
+type DiamondChoice = DiamondShape['key'] | typeof NO_DIAMOND
+
+// The diamond shape as a Quick Add option — the carousel of image tiles, each
+// priced by its offset, then "None" where the diamond is optional — drawn
+// above the names, so the price-setting choices come first
+function diamondQuickAddOption(setting: DiamondSetting): QuickAddOption[] {
+  if (!setting) return []
+  return [{
+    name: DIAMOND_OPTION,
+    type: 'grid',
+    carousel: true,
+    beforeNames: true,
+    values: [
+      ...DIAMOND_SHAPES.map((d) => ({ label: d.label, value: d.key, image: d.image, price: d.priceOffset })),
+      ...(setting === 'optional' ? [{ label: 'None', value: NO_DIAMOND, price: 0 }] : []),
+    ],
+  }]
+}
+
+// Personalize-now flow: everything but the metal (the page's) in the Quick Add
+// panel, with the gallery — the diamond shape, then the personalisation —
+// priced and titled for the page's metal. The gallery is that metal's own
+// shots where the product has them.
+function toConfigurationPanel(
+  product: ProductItem,
+  metal: MaterialSwatch['key'],
+  fields: PersonalizeFields,
+  diamondShape: DiamondSetting,
+): QuickAddProduct {
+  const swatch = materialSwatchesFor(product).find((s) => s.key === metal)!
+  const base = toPersonalizationPanel(product, (product.priceInCents ?? 0) + swatch.priceOffset, metal, fields)
+  const metalShots = product.metalImages?.[metal]
   return {
     ...base,
+    hideGallery: false,
+    images: metalShots?.length
+      ? metalShots.map((src) => ({ src, alt: base.title }))
+      : toQuickAddProduct(product).images,
+    options: [...diamondQuickAddOption(diamondShape), ...base.options],
+  }
+}
+
+// `metalStyle` matches the page's own picker: the priced swatches, or (where
+// the page has it) the material carousel
+function toSecondNecklace(
+  product: ProductItem,
+  fields: PersonalizeFields,
+  diamondShape: DiamondSetting,
+  metalStyle: 'swatches' | 'carousel',
+): QuickAddProduct {
+  const base = toPersonalizationPanel(product, product.priceInCents ?? 0, 'silver', fields)
+  const discount = (cents: number) => Math.round(cents * (1 - SECOND_NECKLACE_DISCOUNT))
+  const priceSetting: QuickAddOption[] = [
+    {
+      name: METAL_OPTION,
+      ...(metalStyle === 'carousel'
+        ? { type: 'material-carousel' as const, label: 'Select material:' }
+        : { type: 'swatch' as const, showPrices: true }),
+      values: materialSwatchesFor(product).map((s) => ({ label: s.label, value: s.key, color: s.color, price: s.priceOffset })),
+    },
+    ...diamondQuickAddOption(diamondShape),
+  ]
+  return {
+    ...base,
+    // Untitled by metal here — the panel renames it for the metal it picks
+    title: product.name,
     // Its own nested-item key, apart from the main product's url
     pdpUrl: `${base.pdpUrl}#second`,
     price: discount(base.price),
     salePrice: base.price,
     ribbon: '50% off',
-    options: base.options.map((opt) => ({
+    options: [...priceSetting, ...base.options].map((opt) => ({
       ...opt,
       values: opt.values?.map((v) => ({ ...v, price: v.price != null ? discount(v.price) : v.price })),
     })),
   }
 }
 
-function ProductForm({ brand, product, icons, nestedItems = [], nestedDisplay = 'inline', nestedDescription, onAddToBag, optionGroups, onAddConfigured, twoStep = false, stickyPersonalize = false, galleryRef }: ProductFormProps) {
+function ProductForm({ brand, product, icons, nestedItems = [], nestedDisplay = 'inline', nestedDescription, onAddToBag, optionGroups, onAddConfigured, flow, galleryRef }: ProductFormProps) {
+  // Personalize-now is the two-step flow with the whole configuration in its panel
+  const personalizeNow = flow?.kind === 'personalize-now'
+  const twoStep = flow?.kind === 'two-step' || personalizeNow
+  const shortcut = flow?.kind === 'shortcut'
+  const saveFlow = flow?.kind === 'save'
+  const fields: PersonalizeFields = flow && flow.kind !== 'shortcut' ? flow.fields : 'inscription'
+  const diamondSetting: DiamondSetting = (flow && flow.kind !== 'shortcut' && flow.diamondShape) || false
+  const hasDiamond = Boolean(diamondSetting)
   const [selectedSwatchKey, setSelectedSwatchKey] = useState<MaterialSwatch['key']>(
     product.defaultSwatchKey ?? 'vermeil'
   )
   const [engravedText, setEngravedText] = useState('')
+  // Shortcut flow: the inscription is required on the page too, as in its panel —
+  // a blocked Add to Bag marks the field
+  const [inscriptionError, setInscriptionError] = useState(false)
   const [chainLength, setChainLength] = useState(DEFAULT_CHAIN_LENGTH)
+  // Diamond pieces' shape — price-setting, so it stays on the page beside the metal
+  const [diamondKey, setDiamondKey] = useState<DiamondChoice>(
+    diamondSetting === 'optional' ? NO_DIAMOND : DIAMOND_SHAPES[0].key,
+  )
+  // None when the diamond is optional and left off — no price, no bag line
+  const diamond = hasDiamond ? DIAMOND_SHAPES.find((d) => d.key === diamondKey) : undefined
+  const diamondOffset = diamond?.priceOffset ?? 0
 
   // Config-driven options — one state for every group, the price and the subtotal
   const usesOptions = optionGroups !== undefined
@@ -1022,44 +1114,35 @@ function ProductForm({ brand, product, icons, nestedItems = [], nestedDisplay = 
   const [panelItem, setPanelItem] = useState<QuickAddProduct | null>(null)
   const [panelOpen, setPanelOpen] = useState(false)
 
-  // Two-step flow — step 2 is the product's own Quick Add form, selections only.
-  // The metal is chosen on the page or in the panel and mirrored both ways; the
-  // panel's other choices are kept so reopening it picks up where it was.
+  // Two-step flow — step 2 is the personalisation in the Quick Add panel; what
+  // the shopper enters there is kept, so reopening it picks up where it was
   const [personalizeOpen, setPersonalizeOpen] = useState(false)
-  const personalizeProduct = twoStep ? toPersonalizeProduct(product) : null
   // The panel's nested offer — the second necklace, in place of the page's companions
-  const offerItems = twoStep ? [toSecondNecklace(product)] : nestedItems
+  const offerItems = twoStep
+    ? [toSecondNecklace(product, fields, diamondSetting, personalizeNow ? 'carousel' : 'swatches')]
+    : nestedItems
   // Once added, the card names the metal it was personalised in
   const offerCards = offerItems.map((it) => {
     const added = staged[nestedItemKey(it)]
     return added ? { ...it, title: added.name } : it
   })
-  const metalOptionName = personalizeProduct?.options.find((o) => o.type === 'swatch')?.name ?? 'Metal'
   const [personalizeValues, setPersonalizeValues] = useState<QuickAddFormValues>({ selectedOptions: {}, names: [''] })
-  // Bumped when the page's metal changes, so the panel starts over from it
-  const [personalizeKey, setPersonalizeKey] = useState(0)
   const personalizeInitial: QuickAddFormValues = {
     ...personalizeValues,
-    // The PDP's default length until one is picked; the page's metal always
-    selectedOptions: { [CHAIN_LENGTH_OPTION]: DEFAULT_CHAIN_LENGTH, ...personalizeValues.selectedOptions, [metalOptionName]: selectedSwatchKey },
+    // The PDP's default length until one is picked; personalize-now's diamond
+    // is always the page's
+    selectedOptions: {
+      [CHAIN_LENGTH_OPTION]: DEFAULT_CHAIN_LENGTH,
+      ...personalizeValues.selectedOptions,
+      ...(personalizeNow && hasDiamond ? { [DIAMOND_OPTION]: diamondKey } : {}),
+    },
   }
-  const handlePageSwatch = (key: MaterialSwatch['key']) => {
-    setSelectedSwatchKey(key)
-    if (twoStep) setPersonalizeKey((k) => k + 1)
-  }
-  // Step 2's Add to Bag — the configured product plus any nested items picked
-  // in the panel, then the bag opens (the panel closes itself)
-  const { addItem, openCart } = useCart()
-  const handlePersonalizeAdd = (item: CartItem) => {
-    addItem(item)
-    stagedItems.forEach((it) => addItem(it))
-    setStaged({})
-    openCart(true)
-  }
+  // Personalize-now: the diamond picked in the panel is mirrored on the page,
+  // so the page's price follows it
   const handlePersonalizeChange = (values: QuickAddFormValues) => {
     setPersonalizeValues(values)
-    const metal = values.selectedOptions[metalOptionName] as MaterialSwatch['key'] | undefined
-    if (metal && metal !== selectedSwatchKey) setSelectedSwatchKey(metal)
+    const shape = values.selectedOptions[DIAMOND_OPTION] as DiamondChoice | undefined
+    if (personalizeNow && shape && shape !== diamondKey) setDiamondKey(shape)
   }
 
   const checkedKeys = new Set(Object.keys(staged))
@@ -1093,8 +1176,12 @@ function ProductForm({ brand, product, icons, nestedItems = [], nestedDisplay = 
     }
   }
 
-  const selectedSwatch = MATERIAL_SWATCHES.find((s) => s.key === selectedSwatchKey)!
-  const currentPrice = usesOptions ? options.itemPrice : (product.priceInCents ?? 0) + selectedSwatch.priceOffset
+  // The product's own materials where it lists them, else the standard four
+  const swatches = materialSwatchesFor(product)
+  const selectedSwatch = swatches.find((s) => s.key === selectedSwatchKey) ?? swatches[0]
+  const currentPrice = usesOptions
+    ? options.itemPrice
+    : (product.priceInCents ?? 0) + selectedSwatch.priceOffset + diamondOffset
   const subtotalValue = (usesOptions ? options.subtotal : currentPrice) + nestedTotal
   // N = 1 (main product) + staged nested items.
   const ctaLabel = stagedCount === 0 ? 'Add to Bag' : `Add ${1 + stagedCount} Items to bag`
@@ -1106,7 +1193,49 @@ function ProductForm({ brand, product, icons, nestedItems = [], nestedDisplay = 
     ? formatPrice(subtotalValue)
     : `$${(subtotalValue / 100).toFixed(2)}`
   const withTotal = (label: string) => `${label} — ${subtotalLabel}`
-  const personalizeLabel = 'Personalize & Add to Bag'
+  // The page's own CTA in the personalize flows opens the panel; it reads as
+  // plain Add to Bag, or Personalize Now where the panel holds everything
+  const personalizeLabel = personalizeNow ? 'Personalize Now' : 'Add to Bag'
+
+  // The personalize flows' add: the page's price-setting choices, then the
+  // personalisation the panel built — with any companions picked, then the bag
+  const priceSettingOptions: SelectedOption[] = [
+    { label: 'Material', value: selectedSwatch.label },
+    ...(diamond ? [{ label: DIAMOND_OPTION, value: diamond.label }] : []),
+  ]
+  const { addItem, openCart } = useCart()
+  const addPersonalized = (personalization: SelectedOption[]) => {
+    addItem({
+      id: `${product.id}-${Date.now()}`,
+      name: titleForMetal(product.name, selectedSwatchKey),
+      price: currentPrice,
+      originalPrice: undefined,
+      image: product.image,
+      isPersonalized: personalization.length > 0,
+      rating: product.rating,
+      reviewCount: product.reviewCount,
+      selectedOptions: [...priceSettingOptions, ...personalization],
+    })
+    stagedItems.forEach((it) => addItem(it))
+    setStaged({})
+    openCart(true)
+  }
+  // Two-step: the panel's Add to Bag. The diamond, picked in personalize-now's
+  // panel, is already among the page's price-setting choices
+  const handlePersonalizeAdd = (item: CartItem) =>
+    addPersonalized((item.selectedOptions ?? []).filter((o) => o.label !== DIAMOND_OPTION))
+
+  // Save flow — "Add Personalization" opens the personalisation (a fresh form
+  // from what's saved, each time); Save keeps it on the page, summarised and
+  // editable. Add to Bag sits below either way — personalising is optional
+  const [saveOpen, setSaveOpen] = useState(false)
+  const [saveKey, setSaveKey] = useState(0)
+  const [saved, setSaved] = useState<{ values: QuickAddFormValues; lines: SelectedOption[] } | null>(null)
+  const openSavePanel = () => {
+    setSaveKey((k) => k + 1)
+    setSaveOpen(true)
+  }
+  const handleSavedAdd = () => addPersonalized(saved?.lines ?? [])
 
   // Sticky-personalize flow — the panel opens from the page's inscription and
   // chain length (a fresh form each time) and writes every change back, so
@@ -1117,15 +1246,28 @@ function ProductForm({ brand, product, icons, nestedItems = [], nestedDisplay = 
     setQuickPersonalizeKey((k) => k + 1)
     setQuickPersonalizeOpen(true)
   }
-  const quickPersonalizeProduct = stickyPersonalize
-    ? toPersonalizationOnlyProduct(product, currentPrice, selectedSwatchKey)
+  const quickPersonalizeProduct = shortcut
+    ? toPersonalizationPanel(product, currentPrice, selectedSwatchKey, 'inscription')
     : null
+  // The two-step and save flows' panel — the same personalisation-only form
+  const personalizeProduct = personalizeNow
+    ? toConfigurationPanel(product, selectedSwatchKey, fields, diamondSetting)
+    : twoStep || saveFlow
+      ? toPersonalizationPanel(product, currentPrice, selectedSwatchKey, fields)
+      : null
   const handleQuickPersonalizeChange = (values: QuickAddFormValues) => {
     setEngravedText(values.selectedOptions[INSCRIPTION_OPTION] ?? '')
     setChainLength(values.selectedOptions[CHAIN_LENGTH_OPTION] ?? DEFAULT_CHAIN_LENGTH)
   }
 
   const handleMainAdd = () => {
+    if (shortcut && !engravedText.trim()) {
+      setInscriptionError(true)
+      const input = document.getElementById('engrave-input')
+      input?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      input?.focus({ preventScroll: true })
+      return
+    }
     if (usesOptions) {
       const personalized = Boolean(engravingGroupId && options.state.text[engravingGroupId]?.trim())
       onAddConfigured?.(options.subtotal, options.selectedOptions, personalized, stagedItems)
@@ -1180,14 +1322,36 @@ function ProductForm({ brand, product, icons, nestedItems = [], nestedDisplay = 
         />
       </div>
 
-      {twoStep ? (
-        /* Two-step: the metal stays on the page; the rest is in the panel */
-        <SwatchSelector
-          swatches={MATERIAL_SWATCHES}
-          basePrice={product.priceInCents ?? 0}
-          selectedKey={selectedSwatchKey}
-          onSelect={handlePageSwatch}
-        />
+      {twoStep || saveFlow ? (
+        /* Two-step and save: the price-setting choices stay on the page — the
+           metal, and the diamond shape where there is one; the rest is in the
+           panel. Personalize-now keeps only the metal, as a standard-image
+           carousel. */
+        <>
+          {personalizeNow ? (
+            <div className={styles.materialPicker}>
+              <OptionRadioGroup
+                group={metalCarouselGroup(product, diamondOffset)}
+                value={selectedSwatchKey}
+                onChange={(id) => setSelectedSwatchKey(id as MaterialSwatch['key'])}
+              />
+            </div>
+          ) : (
+            <SwatchSelector
+              swatches={swatches}
+              basePrice={(product.priceInCents ?? 0) + diamondOffset}
+              selectedKey={selectedSwatchKey}
+              onSelect={setSelectedSwatchKey}
+            />
+          )}
+          {hasDiamond && !personalizeNow && (
+            <OptionRadioGroup
+              group={DIAMOND_SHAPE_GROUP}
+              value={diamondKey}
+              onChange={(id) => setDiamondKey(id as DiamondShape['key'])}
+            />
+          )}
+        </>
       ) : usesOptions ? (
         <ProductOptions
           groups={optionGroups}
@@ -1199,7 +1363,7 @@ function ProductForm({ brand, product, icons, nestedItems = [], nestedDisplay = 
         <>
         {/* Swatch selector */}
         <SwatchSelector
-          swatches={MATERIAL_SWATCHES}
+          swatches={swatches}
           basePrice={product.priceInCents ?? 0}
           selectedKey={selectedSwatchKey}
           onSelect={setSelectedSwatchKey}
@@ -1223,10 +1387,18 @@ function ProductForm({ brand, product, icons, nestedItems = [], nestedDisplay = 
               value={engravedText}
               maxLength={MAX_ENGRAVE_CHARS}
               placeholder="e.g. Sofia"
-              className={styles.textInput}
+              className={`${styles.textInput} ${inscriptionError && !engravedText.trim() ? styles.textInputError : ''}`}
+              required={shortcut || undefined}
+              aria-invalid={(inscriptionError && !engravedText.trim()) || undefined}
+              aria-describedby={inscriptionError && !engravedText.trim() ? 'engrave-input-error' : undefined}
               onChange={(e) => setEngravedText(e.target.value)}
             />
           </div>
+          {inscriptionError && !engravedText.trim() && (
+            <p id="engrave-input-error" className={styles.errorMsg}>
+              Please enter Inscription.
+            </p>
+          )}
 
           {/* v2 belongs to this field, so it sits inside the group and picks up
               its 8px gap rather than the form panel's 24px. IB-only. */}
@@ -1260,7 +1432,7 @@ function ProductForm({ brand, product, icons, nestedItems = [], nestedDisplay = 
       )}
 
       {/* Nested Items — companion products, directly above the Subtotal */}
-      {twoStep ? null : nestedDisplay === 'drawer' ? (
+      {twoStep || saveFlow ? null : nestedDisplay === 'drawer' ? (
         <NestedItemsDrawer
           brand={brand}
           items={nestedItems}
@@ -1278,11 +1450,50 @@ function ProductForm({ brand, product, icons, nestedItems = [], nestedDisplay = 
         />
       )}
 
-      {twoStep ? (
+      {saveFlow ? (
         <>
-          {/* Step 1 — the inline CTA under the metal, and (mobile) the sticky bar
-              whenever it is off screen: up on landing, aside while the CTA shows,
-              back once it's scrolled past. Both open step 2. */}
+          {/* Save flow — Add Personalization (once saved, the saved
+              personalisation, which Edit reopens) above Add to Bag, which adds
+              with or without it. The sticky bar is Add to Bag, like the two-step's. */}
+          <div ref={addToBagRef} className={styles.personalizeBlock}>
+            {saved ? (
+              <div className={styles.savedPersonalization}>
+                <div className={styles.fieldLabelRow}>
+                  <span className={styles.fieldLabel}>Personalization</span>
+                  <button type="button" className={styles.fieldLabelLink} onClick={openSavePanel}>
+                    Edit
+                  </button>
+                </div>
+                <ul className={styles.savedList}>
+                  {saved.lines.map((line) => (
+                    <li key={line.label} className={styles.savedLine}>
+                      {line.label}: {line.value}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : (
+              <Button variant="secondary" className={styles.addToBagBtn} onClick={openSavePanel}>
+                Add Personalization
+              </Button>
+            )}
+            <Button variant="add-to-cart" className={styles.addToBagBtn} onClick={handleSavedAdd}>
+              Add to Bag
+            </Button>
+          </div>
+          <StickyCustomizeBar
+            watch={addToBagRef}
+            showBelowFold
+            label="Add to Bag"
+            onClick={handleSavedAdd}
+          />
+        </>
+      ) : twoStep ? (
+        <>
+          {/* Step 1 — the inline CTA under the price-setting choices, and
+              (mobile) the sticky bar whenever it is off screen: up on landing,
+              aside while the CTA shows, back once it's scrolled past. Both open
+              step 2. */}
           <div ref={addToBagRef}>
             <Button
               variant="add-to-cart"
@@ -1321,7 +1532,7 @@ function ProductForm({ brand, product, icons, nestedItems = [], nestedDisplay = 
           {/* Every brand gets the sticky bar; the advisor above is IB-only.
               Sticky-personalize: up from landing, aside while the Add to Bag
               shows, back once it's passed — and it opens the panel. */}
-          {stickyPersonalize ? (
+          {shortcut ? (
             <StickyCustomizeBar
               watch={addToBagRef}
               watchFrom={selectionsStartRef}
@@ -1390,8 +1601,16 @@ function ProductForm({ brand, product, icons, nestedItems = [], nestedDisplay = 
         ctaLabel="Add"
         showViewDetails={false}
         formKey={nestedFormKey}
-        // The two-step offer asks like step 2: silver and the PDP's default chain length
-        initialValues={twoStep ? { selectedOptions: { [METAL_OPTION]: 'silver', [CHAIN_LENGTH_OPTION]: DEFAULT_CHAIN_LENGTH }, names: [''] } : undefined}
+        // The two-step offer opens at silver, the PDP's default chain length, and
+        // no diamond where it's optional
+        initialValues={twoStep ? {
+          selectedOptions: {
+            [METAL_OPTION]: 'silver',
+            [CHAIN_LENGTH_OPTION]: DEFAULT_CHAIN_LENGTH,
+            ...(diamondSetting === 'optional' ? { [DIAMOND_OPTION]: NO_DIAMOND } : {}),
+          },
+          names: [''],
+        } : undefined}
         onAdd={(cartItem) => {
           if (!panelItem) return
           // A discounted item carries its full price into the bag, crossed out there too
@@ -1402,26 +1621,26 @@ function ProductForm({ brand, product, icons, nestedItems = [], nestedDisplay = 
         }}
       />
 
-      {/* Two-step flow, step 2 — the selections, then the nested items offer
-          (a pick opens its own panel on top, as on the page); adds it all to
-          the bag and opens it */}
-      {/* Desktop, both personalize flows: once the gallery has scrolled past (so
-          the sticky form column has too), a bottom bar with the title and price
-          and the CTA that opens the flow's panel */}
-      {(twoStep || stickyPersonalize) && (
+      {/* Desktop, every personalize flow: once the gallery has scrolled past, a
+          bottom bar with the title and price and the flow's next step */}
+      {flow && (
         <StickyProductBar
           watch={galleryRef ?? formPanelRef}
-          hideOver={stickyPersonalize ? { from: selectionsStartRef, to: addToBagRef } : undefined}
+          hideOver={shortcut ? { from: selectionsStartRef, to: addToBagRef } : undefined}
           title={titleForMetal(product.name, selectedSwatchKey)}
           price={formatPrice(currentPrice)}
           label={personalizeLabel}
-          onClick={twoStep ? () => setPersonalizeOpen(true) : openQuickPersonalize}
+          onClick={
+            saveFlow ? handleSavedAdd
+            : twoStep ? () => setPersonalizeOpen(true)
+            : openQuickPersonalize
+          }
         />
       )}
 
       {/* Sticky-personalize flow — the inscription and chain length (no metal),
           then the page's companions; adds the page's whole configuration */}
-      {stickyPersonalize && (
+      {shortcut && (
         <QuickAddPanel
           isOpen={quickPersonalizeOpen}
           product={quickPersonalizeProduct}
@@ -1459,6 +1678,9 @@ function ProductForm({ brand, product, icons, nestedItems = [], nestedDisplay = 
         />
       )}
 
+      {/* Two-step flow, step 2 — the personalisation, then the nested offer (a
+          pick opens its own panel on top, as on the page); adds it all to the
+          bag and opens it */}
       {twoStep && (
         <QuickAddPanel
           isOpen={personalizeOpen}
@@ -1478,7 +1700,20 @@ function ProductForm({ brand, product, icons, nestedItems = [], nestedDisplay = 
           }
           initialValues={personalizeInitial}
           onChange={handlePersonalizeChange}
-          formKey={personalizeKey}
+        />
+      )}
+
+      {/* Save flow — the personalisation alone; Save keeps it on the page */}
+      {saveFlow && (
+        <QuickAddPanel
+          isOpen={saveOpen}
+          product={personalizeProduct}
+          onClose={() => setSaveOpen(false)}
+          showViewDetails={false}
+          ctaLabel="Save"
+          onAdd={(item, values) => setSaved({ values, lines: item.selectedOptions ?? [] })}
+          initialValues={saved?.values ?? { selectedOptions: { [CHAIN_LENGTH_OPTION]: DEFAULT_CHAIN_LENGTH }, names: [''] }}
+          formKey={saveKey}
         />
       )}
     </section>
@@ -1557,7 +1792,7 @@ function ProductDetailPageInner({ productId, previewId }: { productId: number; p
     chainLength: string,
     nestedCartItems: CartItem[] = []
   ) => {
-    const swatch = MATERIAL_SWATCHES.find((s) => s.key === swatchKey)!
+    const swatch = materialSwatchesFor(product).find((s) => s.key === swatchKey)!
     const price = (product.priceInCents ?? 0) + swatch.priceOffset
     const selectedOptions = [
       { label: 'Material', value: swatch.label },
@@ -1680,8 +1915,7 @@ function ProductDetailPageInner({ productId, previewId }: { productId: number; p
               nestedDisplay={nestedDisplay}
               nestedDescription={nestedDescription}
               onAddToBag={handleAddToBag}
-              twoStep={isTwoStepProduct(brand, product.id)}
-              stickyPersonalize={isStickyPersonalizeProduct(brand, product.id)}
+              flow={personalizeFlowFor(brand, product.id)}
               galleryRef={galleryRef}
             />
           )}

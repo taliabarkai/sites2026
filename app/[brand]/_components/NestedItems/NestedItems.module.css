@@ -99,13 +99,19 @@
   font-weight:    var(--typography-rules-text1-font-weight, normal);
   letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
   color: var(--colors-text);
+  /* Two lines at most, the rest cut with an ellipsis */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
 }
 
 .priceRow {
   display: flex;
-  /* On sale: the selling price on top, the crossed-out price below it */
-  flex-direction: column-reverse;
-  align-items: flex-start;
+  /* On sale: one row, the crossed-out price, then the selling price */
+  align-items: baseline;
+  gap: var(--spacing-xxs);
 }
 
 .price {

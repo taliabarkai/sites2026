@@ -153,21 +153,41 @@ export function isNestedDrawerProduct(brand: string, productId: number): boolean
 }
 
 /**
- * The two-step PDP demo: the page shows the product without its selections,
- * and a sticky "Personalize & Add to Bag" opens them in the Quick Add panel
- * (no gallery). TGR product 4 only while the flow is being finalised.
+ * The PDP's personalize-flow demos — TGR products only, while the flows are
+ * being finalised. "Price-setting choices" are the metal, and the diamond
+ * shape on products that have one: they stay on the page, since they move the
+ * price; the panels hold only the personalisation.
  */
-export function isTwoStepProduct(brand: string, productId: number): boolean {
-  return brand === 'tgr' && productId === 4
-}
+export type PersonalizeFlow =
+  /** The page keeps the price-setting choices; a sticky Add to Bag opens the
+   *  personalisation, and a second necklace at 50% off, in the Quick Add panel. */
+  | { kind: 'two-step'; fields: PersonalizeFields; diamondShape?: DiamondSetting }
+  /** The full form stays on the page; the sticky Add to Bag opens just the
+   *  personalisation, mirrored with the page. */
+  | { kind: 'shortcut' }
+  /** The page keeps the price-setting choices; "Add Personalization" (above
+   *  Add to Bag, which adds without it) opens the personalisation to save. */
+  | { kind: 'save'; fields: PersonalizeFields; diamondShape?: DiamondSetting }
+  /** The page keeps only the metal, as a standard-image carousel; "Personalize
+   *  Now" opens the rest — diamond shape, personalisation, the 50% offer — in
+   *  the Quick Add panel, its gallery included. */
+  | { kind: 'personalize-now'; fields: PersonalizeFields; diamondShape?: DiamondSetting }
 
-/**
- * The sticky-personalize PDP demo: the selections stay on the page, and the
- * same sticky "Personalize & Add to Bag" opens just the personalisation (no
- * metal) in the Quick Add panel. TGR product 5 only, beside product 4's flow.
- */
-export function isStickyPersonalizeProduct(brand: string, productId: number): boolean {
-  return brand === 'tgr' && productId === 5
+/** `names`: a number-of-names selector and a field per name. `inscription`: one engraving field. */
+export type PersonalizeFields = 'names' | 'inscription'
+
+/** A diamond shape to pick: `true` — one of the shapes; `'optional'` — the shapes, then "None", the default. */
+export type DiamondSetting = boolean | 'optional'
+
+export function personalizeFlowFor(brand: string, productId: number): PersonalizeFlow | undefined {
+  if (brand !== 'tgr') return undefined
+  switch (productId) {
+    case 4:  return { kind: 'personalize-now', fields: 'names', diamondShape: 'optional' }
+    case 5:  return { kind: 'shortcut' }
+    case 9:  return { kind: 'personalize-now', fields: 'inscription', diamondShape: true }
+    case 10: return { kind: 'save', fields: 'inscription', diamondShape: true }
+    default: return undefined
+  }
 }
 
 export const NESTED_DRAWER_PARAM = 'charms'

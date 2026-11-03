@@ -49,6 +49,10 @@ export function OptionTile({
 }: OptionTileProps) {
   const stateProps = role === 'radio' ? { 'aria-checked': selected } : { 'aria-selected': selected }
   const delta = value.priceDelta ? `+${formatPrice(value.priceDelta)}` : null
+  // A photo-less value in a standard tile is a color swatch — a metal, say — or,
+  // with no color either, an empty circle (a "None")
+  const isSwatch = tile === 'standard' && !value.image
+  const isEmpty = isSwatch && !value.swatchColor
 
   const className = [
     styles.tile,
@@ -80,12 +84,15 @@ export function OptionTile({
       onKeyDown={onKeyDown}
     >
       {tile !== 'text' && (
-        <span className={styles.media} aria-hidden="true">
+        <span
+          className={`${styles.media} ${isSwatch ? styles.swatchMedia : ''} ${isEmpty ? styles.emptyMedia : ''}`}
+          aria-hidden="true"
+        >
           {value.image ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={value.image} alt="" className={styles.image} loading="lazy" />
           ) : (
-            <span className={styles.image} style={{ background: value.swatchColor }} />
+            <span className={styles.image} style={{ backgroundColor: value.swatchColor }} />
           )}
         </span>
       )}
@@ -93,7 +100,9 @@ export function OptionTile({
       {tile !== 'image-only' && (
         <span className={styles.copy}>
           <span className={styles.label}>{value.label}</span>
-          {delta && <span className={styles.delta}>{delta}</span>}
+          {value.priceLabel
+            ? <span className={styles.price}>{value.priceLabel}</span>
+            : delta && <span className={styles.delta}>{delta}</span>}
         </span>
       )}
 

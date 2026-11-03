@@ -16,6 +16,8 @@ export interface OptionValue {
   swatchColor?: string
   /** Added to the item price when selected, in cents. */
   priceDelta?: number
+  /** Shown under the label in place of the +delta — say, a material's full price. */
+  priceLabel?: string
   disabled?: boolean
 }
 

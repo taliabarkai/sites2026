@@ -12,8 +12,18 @@ import type { CartItem } from '../../_context/CartContext'
 
 export interface QuickAddOption {
   name: string
-  /** `grid` — an open grid of tiles, each an image over its label (the PDP's standard-image grid). */
-  type: 'swatch' | 'dropdown' | 'pills' | 'text-input' | 'grid' | 'list-dropdown'
+  /**
+   * `grid` — an open grid of tiles, each an image over its label (the PDP's standard-image grid).
+   * `material-carousel` — the PDP's material picker: a standard-image carousel
+   * of swatches, each tile with the item's full price in that material.
+   */
+  type: 'swatch' | 'material-carousel' | 'dropdown' | 'pills' | 'text-input' | 'grid' | 'list-dropdown'
+  /** Shown over the option in place of `name` (which still names it in the bag). */
+  label?: string
+  /** Drawn above the number-of-names selector rather than after the names. */
+  beforeNames?: boolean
+  /** `grid` only: lay the tiles out as a carousel instead (one swipeable row). */
+  carousel?: boolean
   /** `image` is a grid tile's picture (a gem, say). */
   values?: { label: string; value: string; price?: number; color?: string; image?: string }[]
   maxLength?: number
@@ -67,9 +77,10 @@ export interface QuickAddPanelProps {
   /**
    * When provided, replaces the default "add to cart + open cart" behavior with
    * this callback (used by Nested Items to stage a companion product instead of
-   * dropping it straight into the bag). Receives the fully configured cart item.
+   * dropping it straight into the bag). Receives the fully configured cart item,
+   * and the choices that built it.
    */
-  onAdd?: (item: CartItem) => void
+  onAdd?: (item: CartItem, values: QuickAddFormValues) => void
   /** Show the "View Full Details" link. Hidden for nested items (bound to the main product). */
   showViewDetails?: boolean
   /** Choices the form opens with instead of the defaults. */
