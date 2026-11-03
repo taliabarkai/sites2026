@@ -19,6 +19,14 @@
   position: static !important;
 }
 
+/* Outdated-items preview: above the popup's scrim (--z-overlay) and below its
+   panel (--z-modal), so the demo toggles stay usable. Doubled to beat the
+   desktop sticky rule below; the page is scroll-locked meanwhile anyway. */
+.checkoutHeaderWrap.checkoutHeaderAboveOverlay {
+  position: relative;
+  z-index: calc(var(--z-overlay) + 1);
+}
+
 @media (min-width: 1024px) {
   .checkoutHeaderWrap {
     position: sticky;
@@ -1830,6 +1838,13 @@
   display: none;
 }
 
+/* Divided (an item is unavailable): a rule between items, so an
+   "Item Unavailable" flag reads as belonging to the item under it. */
+.summaryItemsDivided > .checkoutItem + .checkoutItem {
+  padding-top: var(--spacing-sm);
+  border-top: var(--border-width) solid var(--border-color);
+}
+
 .checkoutItem {
   display: flex;
   flex-direction: column;
@@ -3397,4 +3412,28 @@
    already the only evidence there is a markdown. */
 .priceOriginal + .priceSelling {
   color: var(--colors-price-sale);
+}
+
+/* ─── Out of stock ──────────────────────────────────────────────────────────
+   The "Item Unavailable" line above an out-of-stock summary item — the cart
+   page's own flag: error-red icon, text2. */
+
+.itemUnavailable {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xxs);
+  margin: 0 0 var(--spacing-xs);
+  color: var(--colors-text);
+  font-family:    var(--typography-rules-text2-font-family);
+  font-size:      var(--typography-rules-text2-font-size);
+  line-height:    var(--typography-rules-text2-line-height);
+  letter-spacing: var(--typography-rules-text2-letter-spacing, normal);
+  text-transform: var(--typography-rules-text2-text-transform, none);
+  font-weight:    var(--typography-rules-text2-font-weight, normal);
+}
+
+.itemUnavailableIcon {
+  display: inline-flex;
+  flex-shrink: 0;
+  color: var(--colors-error);
 }

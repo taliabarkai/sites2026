@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useCallback, useEffect, useId, useRef, useState } from 'react'
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import * as oalIcons from '@/src/components/icons/oal'
 import * as mnnIcons from '@/src/components/icons/mnn'
@@ -14,20 +14,22 @@ import { Button } from '../_components/Button'
 import { CheckoutFooter } from '../_components/CheckoutFooter'
 import { Checkbox } from '../_components/Checkbox'
 import { Header } from '../_components/Header'
-import { useCart, WARRANTY_CENTS, promotionalDiscount } from '../_context/CartContext'
+import { useCart, WARRANTY_CENTS, cartSubtotal, promotionalDiscount } from '../_context/CartContext'
 import { createPlacedOrder, savePlacedOrder, DEMO_CONTACT } from '../_context/placedOrder'
 import { getBrandFromPathname, BRANDS, BRAND_GIFT_CONFIG, type BrandKey } from '../_config/brands'
 import { prefixNavLinks, withBrandPrefix } from '../_config/brandPaths'
 import { DEFAULT_NAV_LINKS, DEFAULT_TOPLINE } from '../_config/siteContent'
 import { getGiftOptions, type BrandGiftOption } from '../_config/giftOptions'
 import { getDemoCartItems, ERROR_PREVIEW_CART_SIZE } from '../_config/demoCart'
-import { readCartSize, readFlow, readGiftingVariant } from '../_config/demoParams'
+import { oosScenarioCount, readCartSize, readFlow, readGiftingVariant, readIsOosState, readIsOutdatedState, readOosScenario } from '../_config/demoParams'
+import { getOutdatedPreview, readOutdatedScenario, splitsUnavailable } from '../_config/outdatedPreview'
 import { getBrandFeatures, getFlowConfig, getFlowSteps } from '../_config/flow'
 import { GiftingOptions } from '../_components/cart/GiftingOptions'
 import { GiftingSection as GiftingSectionV2 } from '../_components/cart/GiftingV2'
 import { Usps } from '../_components/cart/Usps'
 import type { GiftItem } from '../_components/cart/GiftingV2'
 import { CheckoutConflictAlert } from '../_components/checkout/CheckoutConflictAlert'
+import { OutdatedItemsModal, useOutdatedItems } from '../_components/checkout/OutdatedItems'
 import { areOptionsItemBound, findOptionForItem } from '../_components/cart/GiftingOptions'
 import type { GiftAssignment, GiftOption } from '../_components/cart/GiftingOptions'
 import styles from './CheckoutPage.module.css'
@@ -68,6 +70,14 @@ const BRAND_ICONS: Record<string, BrandIcons> = {
  * The markup below is intentionally kept — flip this to true to bring it back.
  */
 const SHOW_EXPRESS_CHECKOUT = false
+
+/** The unavailable-items alert — the cart page's copy as one paragraph, saying "bag" as checkout does. */
+const OOS_ALERT = {
+  title:   'Unavailable items in your bag',
+  message: 'We’re sorry to inform you that one or more items in your bag are no longer available.',
+  /** "Remove Item" for one unavailable line, "Remove Items" for several. */
+  action:  (count: number) => count === 1 ? 'Remove Item' : 'Remove Items',
+}
 
 function formatPrice(cents: number): string {
   const dollars = cents / 100
@@ -273,12 +283,14 @@ interface CheckoutItemRowProps {
   onAddGift?:     () => void
   /** Packaging applied to this item, shown as an "Includes:" line below it. */
   gift?:          { name: string; price: number }
+  /** Out of stock: an "Item Unavailable" line heads it, as in the cart. */
+  unavailable?:   boolean
 }
 
-function CheckoutItemRow({ item, icons, showGuarantee, onAddGift, gift }: CheckoutItemRowProps) {
+function CheckoutItemRow({ item, icons, showGuarantee, onAddGift, gift, unavailable }: CheckoutItemRowProps) {
   const [detailsOpen, setDetailsOpen] = useState(false)
   const hasOptions = item.selectedOptions && item.selectedOptions.length > 0
-  const { ChevronIcon, GiftIcon } = icons
+  const { ChevronIcon, GiftIcon, WarningIcon } = icons
 
   /** What this line carries besides the product itself, in the order added. */
   const addOns: { key: string; name: string; price: number; icon?: React.ReactNode }[] = []
@@ -297,6 +309,12 @@ function CheckoutItemRow({ item, icons, showGuarantee, onAddGift, gift }: Checko
       {/* Spans the row rather than sitting beside the image, so the promise
           reads as a banner over the whole line item. */}
       {showGuarantee && <p className={styles.deliveryGuarantee}>Guaranteed to arrive by Christmas</p>}
+      {unavailable && (
+        <p className={styles.itemUnavailable}>
+          <span className={styles.itemUnavailableIcon} aria-hidden="true"><WarningIcon size={24} /></span>
+          Item Unavailable
+        </p>
+      )}
       <div className={styles.checkoutItemRow}>
         <div className={styles.itemImageWrap}>
           <img src={item.image} alt={item.name} className={styles.itemImage} />
@@ -456,9 +474,11 @@ interface OrderSummaryProps {
   showUsps?:            boolean
   /** Dropped on brands whose products no plan covers. */
   uspsWarranty?:        boolean
+  /** Lines that are out of stock, flagged "Item Unavailable". */
+  unavailableIds?:      Set<string>
 }
 
-function OrderSummary({ items, icons, showDetails, subtotal = 0, selectedShipping = 'free', hideHeader, hideBenefits, taxAmount, orderTotalDisplay, onOpenGiftModal, giftByItemId, giftTotal = 0, giftCount = 0, collapsibleItems, defaultItemsOpen = false, showPromo = true, showUsps, uspsWarranty = true }: OrderSummaryProps) {
+function OrderSummary({ items, icons, showDetails, subtotal = 0, selectedShipping = 'free', hideHeader, hideBenefits, taxAmount, orderTotalDisplay, onOpenGiftModal, giftByItemId, giftTotal = 0, giftCount = 0, collapsibleItems, defaultItemsOpen = false, showPromo = true, showUsps, uspsWarranty = true, unavailableIds }: OrderSummaryProps) {
   const [promoCode,    setPromoCode]    = useState('')
   const [promoApplied, setPromoApplied] = useState(false)
   const [appliedCode,  setAppliedCode]  = useState('')
@@ -532,7 +552,12 @@ function OrderSummary({ items, icons, showDetails, subtotal = 0, selectedShippin
 
       {/* Kept in the DOM while closed so the button's aria-controls always
           resolves; [hidden] is honoured by the rule beside .summaryItems. */}
-      <div id={itemsId} className={styles.summaryItems} hidden={collapsibleItems && !itemsOpen}>
+      {/* With an unavailable line, a rule between lines keeps each flag with its own item. */}
+      <div
+        id={itemsId}
+        className={`${styles.summaryItems}${unavailableIds?.size ? ` ${styles.summaryItemsDivided}` : ''}`}
+        hidden={collapsibleItems && !itemsOpen}
+      >
         {items.map(item => (
           <CheckoutItemRow
             key={item.id}
@@ -541,6 +566,7 @@ function OrderSummary({ items, icons, showDetails, subtotal = 0, selectedShippin
             showGuarantee={selectedShipping === 'standard'}
             onAddGift={onOpenGiftModal ? () => onOpenGiftModal(item.id) : undefined}
             gift={giftByItemId?.[item.id]}
+            unavailable={unavailableIds?.has(item.id)}
           />
         ))}
       </div>
@@ -660,6 +686,17 @@ function CheckoutPageInner() {
   // name is historical; the fields themselves are the theme's own.
   const isSplitLayoutPreview = searchParams.get('fields') === 'black'
 
+  // Preview-only: ?state=outdated flags bag lines that no longer match their
+  // product. Wired to the demo scenarios in _config/outdatedPreview; the real
+  // list comes from the cart validation response.
+  const isOutdatedPreview = readIsOutdatedState(searchParams)
+  const outdatedScenario  = readOutdatedScenario(searchParams)
+
+  // Preview-only: ?state=oos marks the bag's first line (or first two,
+  // ?oos=two) out of stock.
+  const isOosPreview = readIsOosState(searchParams)
+  const oosCount     = isOosPreview ? oosScenarioCount(readOosScenario(searchParams)) : 0
+
   /**
    * Full document load of the same checkout with `state` dropped, so the page
    * genuinely re-reads rather than re-rendering the stale view. A plain
@@ -681,7 +718,38 @@ function CheckoutPageInner() {
     contactHref: withBrandPrefix(brand, DEFAULT_TOPLINE.contactHref),
   }
 
-  const { items, subtotal, replaceItems } = useCart()
+  const { items: cartItems, replaceItems } = useCart()
+
+  const previewEntries = useMemo(
+    () => isOutdatedPreview ? getOutdatedPreview(cartItems, outdatedScenario) : [],
+    [isOutdatedPreview, outdatedScenario, cartItems],
+  )
+  // Option 2 splits the bag: the popup asks only for updates, and unavailable
+  // lines get the inline out-of-stock alert once it closes.
+  const splitUnavailable = isOutdatedPreview && splitsUnavailable(outdatedScenario)
+  const outdatedEntries = useMemo(
+    () => splitUnavailable ? previewEntries.filter(e => e.issue.kind !== 'unavailable') : previewEntries,
+    [splitUnavailable, previewEntries],
+  )
+  const inlineUnavailableIds = splitUnavailable
+    ? previewEntries.filter(e => e.issue.kind === 'unavailable').map(e => e.itemId)
+    : []
+  // Brand, bag size and state all live in the URL, so any toggle starts the scenario over.
+  const outdated    = useOutdatedItems(cartItems, outdatedEntries, `${brand}?${searchParams.toString()}`)
+  /** The bag as checkout shows it: outdated lines with their fixes and removals applied. */
+  // Out of stock (preview): held over the bag like the outdated fixes, so the
+  // demo re-sync can't put a removed line back. Any toggle starts it over.
+  const oosLineIds = [...cartItems.slice(0, oosCount).map(item => item.id), ...inlineUnavailableIds]
+  const [oosRemoved, setOosRemoved] = useState(false)
+  useEffect(() => { setOosRemoved(false) }, [brand, searchParams])
+
+  const items       = outdated.items.filter(item => !(oosRemoved && oosLineIds.includes(item.id)))
+  /** Out-of-stock lines still in the bag: while any are, lead with the alert and hold payment. */
+  const oosIds      = oosRemoved ? [] : oosLineIds.filter(id => items.some(item => item.id === id))
+  const hasOos      = oosIds.length > 0
+  const subtotal    = cartSubtotal(items)
+  /** Payment cannot start while this is true — card, PayPal, Apple Pay, Google Pay. */
+  const hasOutdated = outdated.pending.length > 0
 
   const giftingVariant = readGiftingVariant(searchParams)
   const flow       = readFlow(searchParams)
@@ -982,15 +1050,28 @@ function CheckoutPageInner() {
     fillDemoDetails()
   }, [isErrorPreview, fillDemoDetails])
 
+  // The outdated preview is a returning shopper (often from an abandoned-cart
+  // email): their details are already in, and they land on Payment. Fixing the
+  // bag drops them straight back there.
+  useEffect(() => {
+    if (!isOutdatedPreview && !isOosPreview) return
+    fillDemoDetails()
+    setCompletedSteps(new Set(visibleSteps.filter(n => n !== PAYMENT_STEP)))
+    setActiveSteps(new Set([PAYMENT_STEP]))
+    // visibleSteps is rebuilt each render from the flow; the flow is in the URL,
+    // so a change to it re-runs this through searchParams.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOutdatedPreview, isOosPreview, fillDemoDetails, searchParams])
+
   // Opened straight from a shared ?state=error link the bag is empty, which
   // would render the conflict over a $0 order. Fill it to the same size the
   // toggle pins the preview to. Only ever seeds an empty cart.
   useEffect(() => {
     // `?items=` is explicit and the demo controls own it, so this only covers
     // the older shape of the link, where the bag size was left unsaid.
-    if (!isErrorPreview || items.length > 0 || readCartSize(searchParams) !== null) return
+    if (!(isErrorPreview || isOutdatedPreview || isOosPreview) || cartItems.length > 0 || readCartSize(searchParams) !== null) return
     replaceItems(getDemoCartItems(brand as BrandKey).slice(0, ERROR_PREVIEW_CART_SIZE))
-  }, [isErrorPreview, items.length, replaceItems, brand, searchParams])
+  }, [isErrorPreview, isOutdatedPreview, isOosPreview, cartItems.length, replaceItems, brand, searchParams])
 
   const { DropdownIcon, TooltipIcon, CheckmarkIcon, CheckboxIcon, LockIcon, XIcon, CouponIcon, ShippingIcon, ReturnIcon, WarrantyIcon, ChevronIcon } = icons
 
@@ -1019,6 +1100,54 @@ function CheckoutPageInner() {
   const giftedSubtotal = subtotal + giftTotal
   const taxAmount      = isCompleted(1) ? Math.round(giftedSubtotal * 0.08) : null
   const orderTotal     = giftedSubtotal + shippingCost - discountAmount + (taxAmount ?? 0)
+
+  // ── Outdated items ──────────────────────────────────────────────────────────
+  const [outdatedOpen, setOutdatedOpen] = useState(false)
+  /** Only in the outdated preview: switching state away closes it with the scenario. */
+  const outdatedShown = outdatedOpen && isOutdatedPreview
+  /** The item editor is up over the popup — its scrim covers the header too. */
+  const [outdatedEditing, setOutdatedEditing] = useState(false)
+
+  // The outdated state *is* the popup: it opens as soon as a line is outdated
+  // and cannot be dismissed — only fixing or removing every line, then
+  // Continue, closes it. Nothing about it is shown inline on the page.
+  useEffect(() => {
+    if (hasOutdated) setOutdatedOpen(true)
+  }, [hasOutdated])
+
+  /**
+   * Every way of starting payment goes through here — a backstop, since the
+   * popup already covers the page while a line is outdated. The check is
+   * synchronous on purpose: Apple Pay and Google Pay sheets must start inside
+   * the tap itself, with no request in between.
+   */
+  const guardPayment = (pay: () => void) => {
+    if (hasOutdated) { setOutdatedOpen(true); return }
+    if (hasOos) return
+    pay()
+  }
+
+  /** Back to where the shopper was — the Payment section, or whichever step is open — clear of the sticky bars. */
+  const continueAfterOutdated = () => {
+    setOutdatedOpen(false)
+    const step = isActive(PAYMENT_STEP) ? PAYMENT_STEP : [...activeSteps][0] ?? CONTACT_STEP
+    // After the modal hands focus back, which would otherwise win the scroll.
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      // Something still unavailable (Option 2): to its alert, the next thing
+      // to deal with. Otherwise to the step — data-step carries the number the
+      // shopper reads, not the step's identity.
+      const target = (hasOos
+        ? document.querySelector('[data-oos-alert]')
+        : document.querySelector(`[data-step="${stepLabel(step)}"]`)) as HTMLElement | null
+      if (!target) return
+      let stickyHeight = 0
+      document.querySelectorAll('[data-sticky-top]').forEach(el => {
+        stickyHeight += (el as HTMLElement).getBoundingClientRect().height
+      })
+      const top = target.getBoundingClientRect().top + window.scrollY - stickyHeight - 16
+      window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' })
+    }))
+  }
 
   /**
    * Express Apple Pay authorized. Folds the cart and whatever the shopper has
@@ -1122,12 +1251,18 @@ function CheckoutPageInner() {
     giftByItemId,
     giftTotal,
     giftCount: giftAssignments.length,
+    unavailableIds: new Set(oosIds),
   }
 
   return (
     <div className={`${styles.page}${isSplitLayoutPreview ? ` ${styles.splitLayoutPreview}` : ''}`}>
 
-      <div className={styles.checkoutHeaderWrap} data-sticky-top>
+      {/* Preview-only: the header — and the demo toggles in it — rises above the
+          popup's scrim, so brand, items and state can still be switched. */}
+      <div
+        className={`${styles.checkoutHeaderWrap}${outdatedShown && !outdatedEditing ? ` ${styles.checkoutHeaderAboveOverlay}` : ''}`}
+        data-sticky-top
+      >
         <Header variant="white" brand={brand} navLinks={navLinks} topline={topline} />
       </div>
 
@@ -1188,6 +1323,23 @@ function CheckoutPageInner() {
                 />
               )}
 
+              {/* Out of stock: the error alert's own UI, the cart page's copy,
+                  and a way forward — remove the line, then pay. */}
+              {hasOos && (
+                // Marked so the outdated popup (Option 2) can hand off to it.
+                <div data-oos-alert>
+                  <CheckoutConflictAlert
+                    icons={icons}
+                    className={styles.conflictAlert}
+                    title={OOS_ALERT.title}
+                    message={OOS_ALERT.message}
+                    actionLabel={OOS_ALERT.action(oosIds.length)}
+                    onAction={() => setOosRemoved(true)}
+                    stacked
+                  />
+                </div>
+              )}
+
               <div className={styles.leftCol}>
 
               {/* Step breadcrumb — hidden via CSS, kept for accessibility */}
@@ -1218,7 +1370,7 @@ function CheckoutPageInner() {
                   <section className={styles.expressCheckout}>
                     <p className={styles.expressTitle}>Express Checkout</p>
                     <div className={styles.expressButtons}>
-                      <button type="button" className={styles.expressBtn} aria-label="Pay with Apple Pay" onClick={handleApplePaySuccess}>
+                      <button type="button" className={styles.expressBtn} aria-label="Pay with Apple Pay" onClick={() => guardPayment(handleApplePaySuccess)}>
                         <img src="/images/payment/ApplePay.svg" alt="Apple Pay" height={20} style={{ filter: 'invert(1)' }} />
                       </button>
                     </div>
@@ -1752,16 +1904,17 @@ function CheckoutPageInner() {
                 <div className={styles.placeOrderSection}>
                   <Button
                     variant="primary"
-                    onClick={() => completeStep(4)}
+                    onClick={() => guardPayment(() => completeStep(4))}
                     /* A stale checkout cannot be submitted: the newer session has
                        already saved different data, so the order must be re-read. */
                     disabled={
                       isErrorPreview ||
+                      hasOos ||
                       paymentMethod === null ||
                       (paymentMethod === 'credit-card' && (!cardNumber.trim() || !cardCvv.trim() || !cardName.trim()))
                     }
-                    aria-disabled={isErrorPreview || undefined}
-                    className={`${styles.placeOrderButton}${isErrorPreview ? ` ${styles.placeOrderButtonBlocked}` : ''}`}
+                    aria-disabled={isErrorPreview || hasOos || undefined}
+                    className={`${styles.placeOrderButton}${isErrorPreview || hasOos ? ` ${styles.placeOrderButtonBlocked}` : ''}`}
                     style={
                       paymentMethod === 'paypal'   ? { background: '#0070BA', color: '#fff', borderColor: '#0070BA' } :
                       paymentMethod === 'applepay' ? { background: '#000000', color: '#fff', borderColor: '#000000' } :
@@ -1833,6 +1986,20 @@ function CheckoutPageInner() {
 
         </div>
       </main>
+
+      <OutdatedItemsModal
+        open={outdatedShown}
+        entries={outdated.entries}
+        cartItems={cartItems}
+        resolutions={outdated.resolutions}
+        onFix={outdated.fix}
+        onRemove={outdated.remove}
+        onContinue={continueAfterOutdated}
+        shopHref={`/${brand}`}
+        icons={icons}
+        clearHeader
+        onEditingChange={setOutdatedEditing}
+      />
 
       <CheckoutFooter brand={brand as BrandKey} />
     </div>

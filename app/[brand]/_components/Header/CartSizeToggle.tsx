@@ -20,8 +20,26 @@ import {
   readFlow,
   readGiftingVariant,
   readIsErrorState,
+  readIsOosState,
+  readIsOutdatedState,
+  readOosScenario,
+  OOS_SCENARIOS,
+  OOS_SCENARIO_LABELS,
+  OOS_SCENARIO_PARAM,
+  DEFAULT_OOS_SCENARIO,
+  oosScenarioSize,
+  type OosScenario,
   readIsSaleState,
 } from '../../_config/demoParams'
+import {
+  OUTDATED_SCENARIOS,
+  OUTDATED_SCENARIO_LABELS,
+  OUTDATED_SCENARIO_PARAM,
+  DEFAULT_OUTDATED_SCENARIO,
+  outdatedScenarioSize,
+  readOutdatedScenario,
+  type OutdatedScenario,
+} from '../../_config/outdatedPreview'
 import styles from './Header.module.css'
 
 interface DropdownProps {
@@ -118,7 +136,8 @@ export function Dropdown({ label, title, className, children }: DropdownProps) {
  *  · Gifting — the design being compared, so it stays open as a segmented
  *    control. Absent in the flows that gift on the cart page instead.
  *  · Items — how many lines are in the bag.
- *  · Page state — normal, or the checkout's error preview.
+ *  · Page state — normal, or one of the checkout's previews (sale, error,
+ *    outdated items).
  *
  * All of it lives in the URL (`?gifting=v2&items=3&state=error`) so a
  * configuration can be linked rather than described, and each control writes
@@ -137,6 +156,10 @@ export function CartSizeToggle({ className }: { className?: string }) {
   const giftingInCheckout = getFlowConfig(readFlow(searchParams)).gifting === 'checkout'
   const isError = readIsErrorState(searchParams)
   const isSale  = readIsSaleState(searchParams)
+  const isOutdated = readIsOutdatedState(searchParams)
+  const isOos      = readIsOosState(searchParams)
+  const oosScenario = readOosScenario(searchParams)
+  const outdatedScenario = readOutdatedScenario(searchParams)
   const urlSize = readCartSize(searchParams)
 
   // The bag is the brand's own, so the gifting section sees that brand's items
@@ -165,6 +188,24 @@ export function CartSizeToggle({ className }: { className?: string }) {
   const showError = () => setParams({
     [CART_SIZE_PARAM]: String(ERROR_PREVIEW_CART_SIZE),
     [STATE_PARAM]:     'error',
+    [OUTDATED_SCENARIO_PARAM]: null,
+    [OOS_SCENARIO_PARAM]: null,
+  })
+
+  // Each outdated scenario pins the bag to the lines it describes.
+  const showOutdated = (scenario: OutdatedScenario = DEFAULT_OUTDATED_SCENARIO) => setParams({
+    [CART_SIZE_PARAM]:         String(outdatedScenarioSize(scenario)),
+    [STATE_PARAM]:             'outdated',
+    [OUTDATED_SCENARIO_PARAM]: scenario,
+    [OOS_SCENARIO_PARAM]:      null,
+  })
+
+  // Likewise each OOS scenario: its unavailable lines plus one in stock.
+  const showOos = (scenario: OosScenario = DEFAULT_OOS_SCENARIO) => setParams({
+    [CART_SIZE_PARAM]:         String(oosScenarioSize(scenario)),
+    [STATE_PARAM]:             'oos',
+    [OOS_SCENARIO_PARAM]:      scenario,
+    [OUTDATED_SCENARIO_PARAM]: null,
   })
 
   return (
@@ -208,7 +249,7 @@ export function CartSizeToggle({ className }: { className?: string }) {
 
       {/* ── Normal, the error preview, or a line marked down ── */}
       <Dropdown
-        label={isError ? 'Error' : isSale ? 'Sale' : 'Normal'}
+        label={isError ? 'Error' : isSale ? 'Sale' : isOutdated ? 'Outdated' : isOos ? 'OOS' : 'Normal'}
         title="Page state"
         className={className}
       >
@@ -216,8 +257,8 @@ export function CartSizeToggle({ className }: { className?: string }) {
           <div className={styles.scenarioRow}>
             <button
               type="button"
-              aria-pressed={!isError && !isSale}
-              onClick={() => { setParams({ [STATE_PARAM]: null }); close() }}
+              aria-pressed={!isError && !isSale && !isOutdated && !isOos}
+              onClick={() => { setParams({ [STATE_PARAM]: null, [OUTDATED_SCENARIO_PARAM]: null, [OOS_SCENARIO_PARAM]: null }); close() }}
             >
               Normal
             </button>
@@ -225,7 +266,7 @@ export function CartSizeToggle({ className }: { className?: string }) {
               type="button"
               aria-label="Preview the cart with an item on sale"
               aria-pressed={isSale}
-              onClick={() => { setParams({ [STATE_PARAM]: 'sale' }); close() }}
+              onClick={() => { setParams({ [STATE_PARAM]: 'sale', [OUTDATED_SCENARIO_PARAM]: null, [OOS_SCENARIO_PARAM]: null }); close() }}
             >
               Sale
             </button>
@@ -237,9 +278,65 @@ export function CartSizeToggle({ className }: { className?: string }) {
             >
               Error
             </button>
+            <button
+              type="button"
+              aria-label="Preview the checkout with outdated items"
+              aria-pressed={isOutdated}
+              onClick={() => { showOutdated(); close() }}
+            >
+              Outdated
+            </button>
+            <button
+              type="button"
+              aria-label="Preview the checkout with an out-of-stock item"
+              aria-pressed={isOos}
+              onClick={() => { showOos(); close() }}
+            >
+              OOS
+            </button>
           </div>
         )}
       </Dropdown>
+
+      {/* ── Outdated only: which lines are out of date ── */}
+      {isOutdated && (
+        <Dropdown label={OUTDATED_SCENARIO_LABELS[outdatedScenario]} title="Outdated scenario" className={className}>
+          {close => (
+            <div className={`${styles.scenarioRow} ${styles.scenarioList}`}>
+              {OUTDATED_SCENARIOS.map(scenario => (
+                <button
+                  key={scenario}
+                  type="button"
+                  aria-pressed={outdatedScenario === scenario}
+                  onClick={() => { showOutdated(scenario); close() }}
+                >
+                  {OUTDATED_SCENARIO_LABELS[scenario]}
+                </button>
+              ))}
+            </div>
+          )}
+        </Dropdown>
+      )}
+
+      {/* ── OOS only: how many lines are out of stock ── */}
+      {isOos && (
+        <Dropdown label={OOS_SCENARIO_LABELS[oosScenario]} title="Out-of-stock scenario" className={className}>
+          {close => (
+            <div className={`${styles.scenarioRow} ${styles.scenarioList}`}>
+              {OOS_SCENARIOS.map(scenario => (
+                <button
+                  key={scenario}
+                  type="button"
+                  aria-pressed={oosScenario === scenario}
+                  onClick={() => { showOos(scenario); close() }}
+                >
+                  {OOS_SCENARIO_LABELS[scenario]}
+                </button>
+              ))}
+            </div>
+          )}
+        </Dropdown>
+      )}
     </div>
   )
 }

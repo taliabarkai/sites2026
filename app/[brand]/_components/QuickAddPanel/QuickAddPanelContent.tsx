@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { usePathname } from 'next/navigation'
 import { useCart } from '../../_context/CartContext'
 import { getBrandFromPathname } from '../../_config/brands'
@@ -9,6 +9,7 @@ import { Button } from '../Button'
 import { PanelPortal } from '../PanelPortal'
 import { ProductImageCarousel } from '../ProductImageCarousel'
 import { closeAllPanels } from '../PanelStack'
+import { OptionDropdown } from '../ProductOptions/OptionDropdown'
 import { OptionRadioGroup } from '../ProductOptions/OptionRadioGroup'
 import * as oalIcons from '@/src/components/icons/oal'
 import * as mnnIcons from '@/src/components/icons/mnn'
@@ -17,7 +18,7 @@ import * as lalIcons from '@/src/components/icons/lal'
 import * as ibIcons  from '@/src/components/icons/ib'
 import styles from './QuickAddPanel.module.css'
 import type { CartItem } from '../../_context/CartContext'
-import type { QuickAddFormValues, QuickAddOption, QuickAddProduct } from './QuickAddPanel'
+import type { QuickAddAttention, QuickAddFormValues, QuickAddOption, QuickAddProduct } from './QuickAddPanel'
 
 // Brand-scoped icons — resolved at runtime per the icon rules (never hardcode a brand).
 const BRAND_ICONS = {
@@ -52,6 +53,10 @@ export interface QuickAddPanelContentProps {
   headerStart?: ReactNode
   /** Drawn after the last selection, above the CTA — e.g. a nested items offer. */
   afterOptions?: ReactNode
+  /** 'edit': Cancel beside the CTA, which waits until something has changed. */
+  mode?: 'add' | 'edit'
+  /** An option to choose again, opened empty and flagged. */
+  attention?: QuickAddAttention
 }
 
 function fmt(cents: number, currency = '$'): string {
@@ -92,17 +97,19 @@ function defaultSelections(product: QuickAddProduct): Record<string, string> {
  * items drawer renders it in place of its grid. Mount it per product (keyed by
  * title): it starts from `initialValues`, or the defaults.
  */
-export function QuickAddPanelContent({ product, ctaLabel, showViewDetails, onAdd, initialValues, onChange, onDone, embedded = false, headerStart, afterOptions }: QuickAddPanelContentProps) {
+export function QuickAddPanelContent({ product, ctaLabel, showViewDetails, onAdd, initialValues, onChange, onDone, embedded = false, headerStart, afterOptions, mode = 'add', attention }: QuickAddPanelContentProps) {
+  const isEdit = mode === 'edit'
   const { addItem, openCart } = useCart()
   const pathname = usePathname()
   const brand = getBrandFromPathname(pathname)
   // Brand icons the form needs (star rating + select chevron).
-  const { StarIcon, ChevronIcon } = BRAND_ICONS[brand as keyof typeof BRAND_ICONS] ?? BRAND_ICONS.oal
+  const { StarIcon, ChevronIcon, WarningIcon } = BRAND_ICONS[brand as keyof typeof BRAND_ICONS] ?? BRAND_ICONS.oal
 
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>(
     // A partial set (say, only the metal a host already chose) keeps the defaults for the rest
     () => ({ ...defaultSelections(product), ...initialValues?.selectedOptions })
   )
+  const attentionRef = useRef<HTMLDivElement>(null)
   const [imageIdx, setImageIdx] = useState(0)
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null)
 
@@ -131,6 +138,14 @@ export function QuickAddPanelContent({ product, ctaLabel, showViewDetails, onAdd
 
   const select = (name: string, value: string) =>
     setSelectedOptions(prev => ({ ...prev, [name]: value }))
+
+  // The flagged option may sit below the gallery — bring it into view on open.
+  useEffect(() => {
+    if (!attention) return
+    const t = setTimeout(() => attentionRef.current?.scrollIntoView({ block: 'center', behavior: 'smooth' }), 300)
+    return () => clearTimeout(t)
+    // The form is remounted per item, so this runs once per flagged option.
+  }, [attention?.option])
 
   // Report every change to a host that mirrors the choices (e.g. the PDP's metal)
   useEffect(() => {
@@ -197,6 +212,11 @@ export function QuickAddPanelContent({ product, ctaLabel, showViewDetails, onAdd
       onDone()
       return
     }
+    // Edit mode only ever hands the item back — it is already in the bag.
+    if (isEdit) {
+      onDone()
+      return
+    }
     addItem(cartItem)
     onDone()
     // Close any panel this one is stacked on (e.g. Shop The Look) so the bag
@@ -207,7 +227,12 @@ export function QuickAddPanelContent({ product, ctaLabel, showViewDetails, onAdd
 
   // Renders a single product option (swatch / pills / text-input / dropdown).
   const renderOption = (opt: QuickAddOption) => (
-    <div key={opt.name} className={styles.optionGroup}>
+    <div
+      key={opt.name}
+      ref={attention?.option === opt.name ? attentionRef : undefined}
+      className={`${styles.optionGroup} ${attention?.option === opt.name ? styles.optionGroupAttention : ''}`}
+    >
+
       {/* The PDP's metal picker — each swatch with its full price below */}
       {opt.type === 'swatch' && opt.showPrices && (
         <>
@@ -282,6 +307,22 @@ export function QuickAddPanelContent({ product, ctaLabel, showViewDetails, onAdd
           }}
           value={selectedOptions[opt.name] ?? ''}
           onChange={id => select(opt.name, id)}
+        />
+      )}
+
+      {/* The PDP's list dropdown — rows under a trigger, any price change shown */}
+      {opt.type === 'list-dropdown' && (
+        <OptionDropdown
+          group={{
+            id: opt.name,
+            label: `Select ${opt.name}`,
+            display: 'list-dropdown',
+            tile: opt.values?.some(v => v.image) ? 'standard' : 'text',
+            values: (opt.values ?? []).map(v => ({ id: v.value, label: v.label, image: v.image, priceDelta: v.price })),
+          }}
+          value={selectedOptions[opt.name] ?? ''}
+          onChange={id => select(opt.name, id)}
+          basePrice={product.price}
         />
       )}
 
@@ -361,6 +402,7 @@ export function QuickAddPanelContent({ product, ctaLabel, showViewDetails, onAdd
           </div>
         </>
       )}
+
     </div>
   )
 
@@ -448,8 +490,22 @@ export function QuickAddPanelContent({ product, ctaLabel, showViewDetails, onAdd
           {/* Title + price + review — pinned at the top of the right column (outside
               the scroll area) so it stays visible while the gallery and options
               scroll under it. */}
-          <div className={`${styles.header} ${headerStart ? styles.headerWithStart : ''}`}>
+          <div className={`${styles.header} ${(headerStart || attention) ? styles.headerWithStart : ''}`}>
             {headerStart}
+            {/* An outdated item: the review notice heads the panel, level with
+                the close button, in the popup's own line-message style. Generic,
+                so it reads right whatever changed. */}
+            {attention && !headerStart && (
+              <p className={styles.attentionHeader} role="note">
+                <span className={styles.attentionHeaderIcon} aria-hidden="true"><WarningIcon size={24} /></span>
+                Please review your selections
+                {attention.progress && attention.progress.total > 1 && (
+                  <span className={styles.attentionProgress}>
+                    ({attention.progress.current} of {attention.progress.total} items)
+                  </span>
+                )}
+              </p>
+            )}
             <div className={styles.headerText}>
               <h2 className={styles.title}>{title}</h2>
               <div className={styles.priceRow}>
@@ -533,21 +589,37 @@ export function QuickAddPanelContent({ product, ctaLabel, showViewDetails, onAdd
             {afterOptions && <div className={styles.afterOptions}>{afterOptions}</div>}
 
             {/* Footer — flows inline below the last selection (not pinned to the bottom) */}
-            <div className={styles.footer}>
+            {!isEdit && (
+              <div className={styles.footer}>
+                <Button
+                  variant="add-to-cart"
+                  className={styles.addToBagBtn}
+                  onClick={handleAddToBag}
+                >
+                  {ctaLabel}
+                </Button>
+                {showViewDetails && (
+                  <a href={pdpHref} className={styles.viewDetails} onClick={onDone}>
+                    View Full Details
+                  </a>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Edit mode — Cancel and Update pinned under the form, as in the cart drawer */}
+          {isEdit && (
+            <div className={styles.editFooter}>
+              <Button variant="link" onClick={onDone}>Cancel</Button>
               <Button
                 variant="add-to-cart"
-                className={styles.addToBagBtn}
+                className={styles.updateBtn}
                 onClick={handleAddToBag}
               >
                 {ctaLabel}
               </Button>
-              {showViewDetails && (
-                <a href={pdpHref} className={styles.viewDetails} onClick={onDone}>
-                  View Full Details
-                </a>
-              )}
             </div>
-          </div>
+          )}
         </div>
       </div>
 

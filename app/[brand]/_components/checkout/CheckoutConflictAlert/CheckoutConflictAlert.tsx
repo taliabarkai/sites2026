@@ -15,9 +15,22 @@ export interface CheckoutConflictAlertProps {
   icons:     CheckoutConflictAlertIcons
   /** Overridable so a real 409 response can supply the server's own copy. */
   title?:    string
-  message?:  string
+  /** One paragraph, or several (each its own line, as the OOS alert's two). */
+  message?:  string | string[]
   /** Defaults to a full page reload, which is what re-reads the newer checkout. */
   onRefresh?: () => void
+  /**
+   * A different way forward than re-reading the page — the OOS alert's
+   * "Remove Item(s)". Given, the button runs it straight away, with no
+   * refreshing state, and reads `actionLabel`.
+   */
+  onAction?:    () => void
+  actionLabel?: string
+  /**
+   * Button under the copy, in line with it, rather than parked on the right
+   * from 768px — for longer copy that should run the alert's full width.
+   */
+  stacked?:     boolean
   /**
    * The primary instance announces itself as a live region and pulls focus.
    * A repeat of the same alert further down the page must set this false:
@@ -46,6 +59,9 @@ export function CheckoutConflictAlert({
   title   = DEFAULT_TITLE,
   message = DEFAULT_MESSAGE,
   onRefresh,
+  onAction,
+  actionLabel,
+  stacked = false,
   announce = true,
   className,
 }: CheckoutConflictAlertProps) {
@@ -88,6 +104,20 @@ export function CheckoutConflictAlert({
     })
   }
 
+  /* Design-system button, recoloured to the error red via the module class. */
+  const button = (
+    <Button
+      variant="primary"
+      className={styles.button}
+      onClick={onAction ?? handleRefresh}
+      disabled={isRefreshing}
+      aria-live="polite"
+      leadingIcon={isRefreshing ? <span className={styles.spinner} aria-hidden="true" /> : undefined}
+    >
+      {onAction ? actionLabel : isRefreshing ? 'Refreshing' : 'Refresh page'}
+    </Button>
+  )
+
   return (
     <div
       ref={ref}
@@ -95,7 +125,7 @@ export function CheckoutConflictAlert({
       // repeat is a plain labelled group so its button stays reachable.
       {...(announce ? { role: 'alert', tabIndex: -1 } : { role: 'group' })}
       aria-labelledby={titleId}
-      className={[styles.alert, className].filter(Boolean).join(' ')}
+      className={[styles.alert, stacked && styles.alertStacked, className].filter(Boolean).join(' ')}
     >
       <div className={styles.body}>
         {/* Decorative: the title and message already carry the meaning. Sized in
@@ -106,21 +136,14 @@ export function CheckoutConflictAlert({
 
         <div className={styles.text}>
           <h2 id={titleId} className={styles.title}>{title}</h2>
-          <p className={styles.message}>{message}</p>
+          {(Array.isArray(message) ? message : [message]).map(paragraph => (
+            <p key={paragraph} className={styles.message}>{paragraph}</p>
+          ))}
+          {stacked && button}
         </div>
       </div>
 
-      {/* Design-system button, recoloured to the error red via the module class. */}
-      <Button
-        variant="primary"
-        className={styles.button}
-        onClick={handleRefresh}
-        disabled={isRefreshing}
-        aria-live="polite"
-        leadingIcon={isRefreshing ? <span className={styles.spinner} aria-hidden="true" /> : undefined}
-      >
-        {isRefreshing ? 'Refreshing' : 'Refresh page'}
-      </Button>
+      {!stacked && button}
     </div>
   )
 }

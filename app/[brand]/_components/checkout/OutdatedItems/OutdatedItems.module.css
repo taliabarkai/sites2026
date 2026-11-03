@@ -1,0 +1,219 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   Outdated items — the checkout popup.
+
+   Mobile-first. The popup is the design-system Modal, so it is already a
+   bottom sheet on mobile and a centred dialog from 768px; this file only
+   narrows it and lays out the lines.
+
+   The warning tint is mixed from --colors-warning, the way the conflict alert
+   mixes its tint from --colors-error, rather than a new hex.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Doubled class: wins over Modal's own .panel regardless of stylesheet order. */
+.dialog.dialog {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  /* 24px all round, at every size — the Modal's own is taller at the top and bottom. */
+  padding: var(--spacing-md);
+}
+
+/* Preview-only: a centred panel this short stays clear of the demo header
+   lifted above the scrim — 80px (72 + 8) spare above and below, inside the
+   overlay's own 24px. */
+.dialog.dialogClearHeader {
+  max-height: calc(100% - 2 * (var(--spacing-xxxl) + var(--spacing-xxs)));
+}
+
+/* ── Header ─────────────────────────────────────────────────────────────── */
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-xs);
+}
+
+/* 36px (24 + 12), the conflict alert's icon size. Text colour, not error
+   red: the popup informs, it doesn't report a failure. */
+.headerIcon {
+  display: inline-flex;
+  flex-shrink: 0;
+  color: var(--colors-text);
+}
+
+.headerIcon svg {
+  width:  calc(var(--spacing-md) + var(--spacing-xs));
+  height: calc(var(--spacing-md) + var(--spacing-xs));
+}
+
+.headerText {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xxs);
+  min-width: 0;
+}
+
+.title {
+  margin: 0;
+  color: var(--colors-text);
+  font-family:    var(--typography-rules-headline4-font-family);
+  font-size:      var(--typography-rules-headline4-font-size);
+  line-height:    var(--typography-rules-headline4-line-height);
+  letter-spacing: var(--typography-rules-headline4-letter-spacing, normal);
+  text-transform: var(--typography-rules-headline4-text-transform, none);
+  font-weight:    var(--typography-rules-headline4-font-weight, normal);
+}
+
+.subtitle {
+  margin: 0;
+  color: var(--colors-text);
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+  text-transform: var(--typography-rules-text1-text-transform, none);
+  font-weight:    var(--typography-rules-text1-font-weight, normal);
+}
+
+/* ── Lines ──────────────────────────────────────────────────────────────── */
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* One bag line, laid out as the cart's out-of-stock item: the message on
+   its own row above the product — no card around it, and no rule between
+   lines: the list's gap sets them apart. */
+.line {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.notice {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xxs);
+  margin: 0;
+  color: var(--colors-text);
+  font-family:    var(--typography-rules-text2-font-family);
+  font-size:      var(--typography-rules-text2-font-size);
+  line-height:    var(--typography-rules-text2-line-height);
+  letter-spacing: var(--typography-rules-text2-letter-spacing, normal);
+  text-transform: var(--typography-rules-text2-text-transform, none);
+  font-weight:    var(--typography-rules-text2-font-weight, normal);
+}
+
+.noticeIcon {
+  display: inline-flex;
+  flex-shrink: 0;
+  color: var(--colors-error);
+}
+
+.noticeFixed .noticeIcon {
+  color: var(--colors-success);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+/* 80px, from the spacing scale (72 + 8). */
+.image {
+  flex-shrink: 0;
+  width:  calc(var(--spacing-xxxl) + var(--spacing-xxs));
+  height: calc(var(--spacing-xxxl) + var(--spacing-xxs));
+  object-fit: cover;
+  background: var(--colors-card-image-bg);
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.name {
+  margin: 0;
+  color: var(--colors-text);
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+  text-transform: var(--typography-rules-text1-text-transform, none);
+  font-weight:    var(--typography-rules-text1-font-weight, normal);
+}
+
+.price {
+  flex-shrink: 0;
+  /* Centred with the image and the name, like the rest of the row. */
+  color: var(--colors-text);
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+  text-transform: var(--typography-rules-text1-text-transform, none);
+  font-weight:    var(--typography-rules-text1-font-weight, normal);
+}
+
+/* The line's action link — styled as the cart drawer's own item actions. */
+.links {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.link {
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--colors-text);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  font-family:    var(--typography-rules-text2-font-family);
+  font-size:      var(--typography-rules-text2-font-size);
+  line-height:    var(--typography-rules-text2-line-height);
+  letter-spacing: var(--typography-rules-text2-letter-spacing, normal);
+  text-transform: var(--typography-rules-text2-text-transform, none);
+  font-weight:    var(--typography-rules-text2-font-weight, normal);
+}
+
+.link:focus-visible {
+  outline: calc(var(--border-width) * 2) solid var(--colors-text);
+  outline-offset: calc(var(--border-width) * 2);
+}
+
+/* ── Footer ─────────────────────────────────────────────────────────────────
+   Sticks to the bottom of the popup so the way forward stays in reach however
+   long the list is. Set off by the dialog's gap alone — no rule above it. */
+
+.footer {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--spacing-xs);
+  background: var(--colors-background);
+}
+
+.footerButton.footerButton {
+  width: 100%;
+}
+
+@media (min-width: 768px) {
+  /* 460px (1rem = 10px) — a single column of lines, not the Modal's 800px default. */
+  .dialog.dialog {
+    max-width: 46rem;
+  }
+}

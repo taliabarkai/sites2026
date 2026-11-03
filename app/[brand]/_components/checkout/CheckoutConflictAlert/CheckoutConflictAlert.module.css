@@ -52,6 +52,11 @@
   min-width: 0;
 }
 
+/* Several paragraphs read as separate lines, not one run-on block. */
+.message + .message {
+  margin-top: var(--spacing-xs);
+}
+
 /* Black, not red: red is reserved for the icon and the button. */
 .title {
   margin: 0;
@@ -149,4 +154,27 @@
   border-color: var(--colors-error);
   color: var(--colors-text-inverse);
   cursor: progress;
+}
+
+/* Stacked: the button sits under the last paragraph, inside the text column,
+   so the copy runs the full width at every size. Full width on mobile like the
+   row layout's; from 768px its natural width, left-aligned with the copy. */
+/* 12px between the title and the copy; the button keeps 20px (12 + 8) above it. */
+.alertStacked .text {
+  gap: var(--spacing-xs);
+}
+
+/* 4px down, so the title's first line sits level with the icon. */
+.alertStacked .title {
+  padding-top: var(--spacing-xxxs);
+}
+
+.alertStacked .button.button {
+  margin-top: var(--spacing-xxs);
+}
+
+@media (min-width: 768px) {
+  .alertStacked .button.button {
+    align-self: flex-start;
+  }
 }

@@ -129,10 +129,11 @@
 
 /* Portalled to the theme root and pinned in viewport coordinates, so no
    ancestor's stacking context can bury it under the page's sticky chrome.
-   Above the header and the sticky bars, below overlays and modals. */
+   Above modals too, like the phase control's panel: a demo scenario has to be
+   switchable while a preview's popup (outdated items) is open. */
 .scenarioPanel {
   position: fixed;
-  z-index: var(--z-cart);
+  z-index: var(--z-toast);
   display: flex;
   flex-direction: column;
   gap: var(--spacing-xxxs);
@@ -155,6 +156,12 @@
   display: flex;
   align-items: center;
   gap: var(--spacing-xxxs);
+}
+
+/* A stack of longer labels — the outdated scenarios. */
+.scenarioList {
+  flex-direction: column;
+  align-items: stretch;
 }
 
 .scenarioRow button {

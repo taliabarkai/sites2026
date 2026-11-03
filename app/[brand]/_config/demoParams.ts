@@ -81,6 +81,54 @@ export function readIsSaleState(params: ReadableParams): boolean {
 }
 
 /**
+ * The outdated-items preview: some bag lines no longer match their product,
+ * so checkout opens the popup and blocks payment until each is fixed or
+ * removed. Same `state` key, so it excludes the error and sale previews.
+ */
+export function readIsOutdatedState(params: ReadableParams): boolean {
+  return params.get(STATE_PARAM) === 'outdated'
+}
+
+/**
+ * The out-of-stock preview: one line in the bag is no longer available, so
+ * checkout leads with the unavailable-items alert and payment waits until it
+ * is removed. Same `state` key as the other previews.
+ */
+export function readIsOosState(params: ReadableParams): boolean {
+  return params.get(STATE_PARAM) === 'oos'
+}
+
+/**
+ * How many lines are out of stock (`?oos=two`), read alongside `?state=oos`.
+ * The bag always keeps one line in stock past them, so there is still
+ * something to pay for once they are removed.
+ */
+export const OOS_SCENARIO_PARAM = 'oos'
+export const OOS_SCENARIOS = ['one', 'two'] as const
+export type OosScenario = (typeof OOS_SCENARIOS)[number]
+export const DEFAULT_OOS_SCENARIO: OosScenario = 'one'
+
+export const OOS_SCENARIO_LABELS: Record<OosScenario, string> = {
+  one: '1 unavailable',
+  two: '2 unavailable',
+}
+
+/** Out-of-stock lines per scenario — always the first ones in the bag. */
+export function oosScenarioCount(scenario: OosScenario): number {
+  return scenario === 'two' ? 2 : 1
+}
+
+/** The bag a scenario pins: its out-of-stock lines, plus one in stock. */
+export function oosScenarioSize(scenario: OosScenario): number {
+  return oosScenarioCount(scenario) + 1
+}
+
+export function readOosScenario(params: ReadableParams): OosScenario {
+  const raw = params.get(OOS_SCENARIO_PARAM)
+  return OOS_SCENARIOS.includes(raw as OosScenario) ? (raw as OosScenario) : DEFAULT_OOS_SCENARIO
+}
+
+/**
  * Track My Order previews three outcomes rather than two, so it reads the
  * same key for a value rather than a flag. `readIsErrorState` stays as it is
  * for checkout, which only knows "error" — a `duplicate` there reads as no

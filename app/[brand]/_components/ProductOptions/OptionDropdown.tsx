@@ -36,6 +36,7 @@ export function OptionDropdown({ group, value, onChange, basePrice }: OptionDrop
   const [open, setOpen] = useState(false)
   const rootRef = useRef<HTMLDivElement>(null)
   const triggerRef = useRef<HTMLButtonElement>(null)
+  const listRef = useRef<HTMLDivElement>(null)
 
   const selectedIndex = Math.max(0, group.values.findIndex((v) => v.id === value))
   const selected = group.values[selectedIndex]
@@ -53,6 +54,9 @@ export function OptionDropdown({ group, value, onChange, basePrice }: OptionDrop
   useEffect(() => {
     if (!open) return
     setFocusIndex(selectedIndex)
+    // The whole list into view first: inside a scrolling panel (Quick Add's
+    // editor) it would otherwise open under the pinned footer.
+    listRef.current?.scrollIntoView({ block: 'nearest' })
     const el = refs.current[selectedIndex]
     el?.focus({ preventScroll: true })
     el?.scrollIntoView({ block: 'nearest' })
@@ -135,6 +139,7 @@ export function OptionDropdown({ group, value, onChange, basePrice }: OptionDrop
 
         {open && (
           <div
+            ref={listRef}
             id={listId}
             role="listbox"
             aria-labelledby={labelId}

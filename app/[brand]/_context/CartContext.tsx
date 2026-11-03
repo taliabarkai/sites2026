@@ -60,6 +60,21 @@ export interface CartItem {
 export const WARRANTY_CENTS = 1500
 
 /**
+ * The pre-discount sum: a markdown is shown on its own line below, so
+ * counting the sale price here too would take it twice. Identical to the
+ * old arithmetic for any bag with nothing marked down.
+ *
+ * Exported so a page showing the bag with pending edits over it (checkout's
+ * outdated-items preview) totals it the same way the cart does.
+ */
+export function cartSubtotal(items: CartItem[]): number {
+  return items.reduce(
+    (sum, item) => sum + (item.originalPrice ?? item.price) + (item.warranty ? WARRANTY_CENTS : 0),
+    0,
+  )
+}
+
+/**
  * What the bag's markdowns are worth, in cents.
  *
  * Zero whenever nothing carries an `originalPrice`, which is every bag that is
@@ -141,13 +156,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setItems(prev => prev.map(item => item.id === id ? { ...item, warranty: !item.warranty } : item))
   }, [])
 
-  /* The pre-discount sum: a markdown is shown on its own line below, so
-     counting the sale price here too would take it twice. Identical to the
-     old arithmetic for any bag with nothing marked down. */
-  const subtotal = items.reduce(
-    (sum, item) => sum + (item.originalPrice ?? item.price) + (item.warranty ? WARRANTY_CENTS : 0),
-    0,
-  )
+  const subtotal = cartSubtotal(items)
 
   return (
     <CartContext.Provider value={{

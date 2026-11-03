@@ -13,7 +13,7 @@ import type { CartItem } from '../../_context/CartContext'
 export interface QuickAddOption {
   name: string
   /** `grid` — an open grid of tiles, each an image over its label (the PDP's standard-image grid). */
-  type: 'swatch' | 'dropdown' | 'pills' | 'text-input' | 'grid'
+  type: 'swatch' | 'dropdown' | 'pills' | 'text-input' | 'grid' | 'list-dropdown'
   /** `image` is a grid tile's picture (a gem, say). */
   values?: { label: string; value: string; price?: number; color?: string; image?: string }[]
   maxLength?: number
@@ -80,6 +80,26 @@ export interface QuickAddPanelProps {
   formKey?: string | number
   /** Drawn after the last selection, above the CTA — e.g. a nested items offer. */
   afterOptions?: ReactNode
+  /**
+   * 'edit' reopens an item already in the bag — the cart drawer's Edit, or
+   * fixing an outdated item at checkout. Same panel, header and form as
+   * Quick Add; the CTA becomes Update — always active, since every option
+   * opens preselected or prefilled — with Cancel beside it.
+   */
+  mode?: 'add' | 'edit'
+  /** One option the shopper must choose again — see QuickAddAttention. */
+  attention?: QuickAddAttention
+}
+
+/**
+ * An option the item went out of date on (a value removed, a new required
+ * option). It opens preselected like every other option and is scrolled into
+ * view, and the panel is headed by "Please review your selections"
+ */
+export interface QuickAddAttention {
+  option: string
+  /** Walking several items in turn: where this one falls, shown beside the notice. */
+  progress?: { current: number; total: number }
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -88,7 +108,8 @@ export interface QuickAddPanelProps {
  * The Quick Add panel — the slide-in shell (backdrop, panel, close button)
  * around the Quick Add form (`QuickAddPanelContent`).
  */
-export function QuickAddPanel({ isOpen, onClose, product, closeButtonRef, ctaLabel = 'Add to Bag', onAdd, showViewDetails = true, initialValues, onChange, formKey, afterOptions }: QuickAddPanelProps) {
+export function QuickAddPanel({ isOpen, onClose, product, closeButtonRef, ctaLabel, onAdd, showViewDetails = true, initialValues, onChange, formKey, afterOptions, mode = 'add', attention }: QuickAddPanelProps) {
+  const isEdit = mode === 'edit'
   const internalCloseRef = useRef<HTMLButtonElement>(null)
   const closeRef = closeButtonRef ?? internalCloseRef
   const panelRef = useRef<HTMLDivElement>(null)
@@ -138,8 +159,9 @@ export function QuickAddPanel({ isOpen, onClose, product, closeButtonRef, ctaLab
         className={`${styles.panel} ${isOpen ? styles.panelOpen : ''} ${layout?.singleColumn ? styles.panelSingle : ''} ${(layout?.hideGalleryOnMobile || layout?.hideGallery) ? styles.panelHugMobile : ''}`}
         role="dialog"
         aria-modal="true"
-        aria-label="Add to Bag"
+        aria-label={isEdit ? 'Edit item' : 'Add to Bag'}
       >
+
         {/* Close button — plain X, absolute top-right of the panel */}
         <button
           ref={closeRef}
@@ -156,8 +178,10 @@ export function QuickAddPanel({ isOpen, onClose, product, closeButtonRef, ctaLab
           <QuickAddPanelContent
             key={`${product.title}-${formKey ?? ''}`}
             product={product}
-            ctaLabel={ctaLabel}
-            showViewDetails={showViewDetails}
+            ctaLabel={ctaLabel ?? (isEdit ? 'Update' : 'Add to Bag')}
+            showViewDetails={showViewDetails && !isEdit}
+            mode={mode}
+            attention={attention}
             onAdd={onAdd}
             initialValues={initialValues}
             onChange={onChange}

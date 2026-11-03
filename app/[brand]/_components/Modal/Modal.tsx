@@ -16,6 +16,13 @@ interface ModalProps {
   className?: string
   /** Rendered inside the panel, before the children — the close button sits over it. */
   closeIcon: ReactNode
+  /**
+   * False for a dialog the shopper must act in to leave: no close button, and
+   * neither Escape nor the scrim closes it. Its own actions call onClose.
+   */
+  dismissible?: boolean
+  /** Float in the middle on mobile too, inset by the page gutter, instead of a bottom sheet. */
+  centered?: boolean
 }
 
 const FOCUSABLE =
@@ -30,7 +37,7 @@ const FOCUSABLE =
  * there, and a modal mounted outside it loses every colour and radius.
  */
 export function Modal({
-  open, onClose, labelledBy, children, closeLabel = 'Close', className, closeIcon,
+  open, onClose, labelledBy, children, closeLabel = 'Close', className, closeIcon, dismissible = true, centered = false,
 }: ModalProps) {
   const panelRef = useRef<HTMLDivElement>(null)
   /* Whatever had focus when the modal opened, so it can be given back. */
@@ -60,7 +67,7 @@ export function Modal({
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         event.stopPropagation()
-        onClose()
+        if (dismissible) onClose()
         return
       }
       if (event.key !== 'Tab') return
@@ -84,14 +91,17 @@ export function Modal({
 
     document.addEventListener('keydown', onKeyDown, true)
     return () => document.removeEventListener('keydown', onKeyDown, true)
-  }, [open, onClose])
+  }, [open, onClose, dismissible])
 
   if (!open) return null
 
   return (
     <PanelPortal>
       {/* The scrim closes on click; the panel stops the click reaching it. */}
-      <div className={styles.overlay} onMouseDown={onClose}>
+      <div
+        className={[styles.overlay, centered && styles.overlayCentered].filter(Boolean).join(' ')}
+        onMouseDown={dismissible ? onClose : undefined}
+      >
         <div
           ref={panelRef}
           role="dialog"
@@ -100,9 +110,11 @@ export function Modal({
           className={[styles.panel, className].filter(Boolean).join(' ')}
           onMouseDown={event => event.stopPropagation()}
         >
-          <button type="button" className={styles.close} aria-label={closeLabel} onClick={onClose}>
-            {closeIcon}
-          </button>
+          {dismissible && (
+            <button type="button" className={styles.close} aria-label={closeLabel} onClick={onClose}>
+              {closeIcon}
+            </button>
+          )}
           {children}
         </div>
       </div>

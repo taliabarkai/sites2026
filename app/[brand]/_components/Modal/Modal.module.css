@@ -51,6 +51,18 @@
   outline-offset: 2px;
 }
 
+/* Centred at every size: floats mid-screen on mobile, 24px from each edge,
+   rounded all round rather than rising from the bottom. */
+.overlayCentered {
+  align-items: center;
+  padding: var(--spacing-md);
+}
+
+.overlayCentered .panel {
+  max-height: 100%;
+  border-radius: var(--radius-panel);
+}
+
 @media (min-width: 768px) {
   .overlay {
     align-items: center;
