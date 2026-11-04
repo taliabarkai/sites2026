@@ -1195,7 +1195,11 @@ function ProductForm({ brand, product, icons, nestedItems = [], nestedDisplay = 
   const withTotal = (label: string) => `${label} — ${subtotalLabel}`
   // The page's own CTA in the personalize flows opens the panel; it reads as
   // plain Add to Bag, or Personalize Now where the panel holds everything
-  const personalizeLabel = personalizeNow ? 'Personalize Now' : 'Add to Bag'
+  const personalizeLabel = flow?.kind === 'personalize-now' ? flow.cta ?? 'Personalize Now' : 'Add to Bag'
+  // The two-step panel's Add to Bag — with the bag total, unless the flow says not
+  const personalizePanelCta = flow?.kind === 'personalize-now' && flow.panelTotal === false
+    ? ctaLabel
+    : withTotal(ctaLabel)
 
   // The personalize flows' add: the page's price-setting choices, then the
   // personalisation the panel built — with any companions picked, then the bag
@@ -1687,7 +1691,7 @@ function ProductForm({ brand, product, icons, nestedItems = [], nestedDisplay = 
           product={personalizeProduct}
           onClose={() => setPersonalizeOpen(false)}
           showViewDetails={false}
-          ctaLabel={withTotal(ctaLabel)}
+          ctaLabel={personalizePanelCta}
           onAdd={handlePersonalizeAdd}
           afterOptions={
             <NestedItems

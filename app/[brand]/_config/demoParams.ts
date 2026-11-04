@@ -171,7 +171,15 @@ export type PersonalizeFlow =
   /** The page keeps only the metal, as a standard-image carousel; "Personalize
    *  Now" opens the rest — diamond shape, personalisation, the 50% offer — in
    *  the Quick Add panel, its gallery included. */
-  | { kind: 'personalize-now'; fields: PersonalizeFields; diamondShape?: DiamondSetting }
+  | {
+      kind: 'personalize-now'
+      fields: PersonalizeFields
+      diamondShape?: DiamondSetting
+      /** The page's CTA (and sticky bars). Defaults to "Personalize Now". */
+      cta?: string
+      /** The panel's Add to Bag carries the bag total after an em dash. Defaults to true. */
+      panelTotal?: boolean
+    }
 
 /** `names`: a number-of-names selector and a field per name. `inscription`: one engraving field. */
 export type PersonalizeFields = 'names' | 'inscription'
@@ -182,7 +190,7 @@ export type DiamondSetting = boolean | 'optional'
 export function personalizeFlowFor(brand: string, productId: number): PersonalizeFlow | undefined {
   if (brand !== 'tgr') return undefined
   switch (productId) {
-    case 4:  return { kind: 'personalize-now', fields: 'names', diamondShape: 'optional' }
+    case 4:  return { kind: 'personalize-now', fields: 'names', diamondShape: 'optional', cta: 'Personalize & Add to Bag', panelTotal: false }
     case 5:  return { kind: 'shortcut' }
     case 9:  return { kind: 'personalize-now', fields: 'inscription', diamondShape: true }
     case 10: return { kind: 'save', fields: 'inscription', diamondShape: true }
