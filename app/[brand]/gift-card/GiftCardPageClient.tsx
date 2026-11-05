@@ -150,7 +150,7 @@ export default function GiftCardPageClient() {
   const { items, isOpen, subtotal, addItem, openCart, closeCart, removeItem } = useCart()
   const brand = getBrandFromPathname(pathname)
   const brandLabel = BRANDS.find((item) => item.key === brand)?.label ?? ''
-  const { FileUploadIcon } = BRAND_ICONS[brand]
+  const { FileUploadIcon, XIcon } = BRAND_ICONS[brand]
 
   const navLinks = prefixNavLinks(brand, DEFAULT_NAV_LINKS)
   const footerColumns = prefixFooterColumns(brand, DEFAULT_FOOTER_COLUMNS)
@@ -207,11 +207,11 @@ export default function GiftCardPageClient() {
   // artwork, or the brand's default gallery image.
   const galleryImage =
     designId === 'custom' && upload
-      ? { src: upload.url, alt: 'Your photo for the gift card', contain: true }
+      ? { src: upload.url, alt: 'Your photo on the gift card', photo: true }
       : design?.galleryImages?.[brand]
-        ? { src: design.galleryImages[brand]!, alt: `${design.message} gift card`, contain: false }
+        ? { src: design.galleryImages[brand]!, alt: `${design.message} gift card`, photo: false }
         : GIFT_CARD_GALLERY_IMAGES[brand]
-          ? { ...GIFT_CARD_GALLERY_IMAGES[brand]!, contain: false }
+          ? { ...GIFT_CARD_GALLERY_IMAGES[brand]!, photo: false }
           : null
 
   const amountCents = useMemo(() => {
@@ -322,16 +322,27 @@ export default function GiftCardPageClient() {
 
       <main id="main-content" className={styles.main}>
         <div className={styles.layout}>
+          {/* ── Title — above the gallery on mobile, atop the form on desktop ─ */}
+          <div className={styles.titleColumn}>
+            <h1 id="gift-card-form-title" className={styles.formTitle}>Create Your Digital Gift Card</h1>
+          </div>
+
           {/* ── Gallery — sticky on desktop ────────────────────────────────── */}
           {galleryImage ? (
             <div className={joinClasses(styles.previewColumn, styles.galleryColumn)}>
               <div className={styles.gallerySticky}>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={galleryImage.src}
-                  alt={galleryImage.alt}
-                  className={joinClasses(styles.galleryImage, galleryImage.contain && styles.galleryImageContain)}
-                />
+                {galleryImage.photo ? (
+                  // An uploaded photo, cropped to fill a landscape card.
+                  <div className={styles.photoStage}>
+                    <span className={styles.photoCard}>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={galleryImage.src} alt={galleryImage.alt} className={styles.photoCardImage} />
+                    </span>
+                  </div>
+                ) : (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={galleryImage.src} alt={galleryImage.alt} className={styles.galleryImage} />
+                )}
               </div>
             </div>
           ) : (
@@ -358,10 +369,6 @@ export default function GiftCardPageClient() {
           {/* ── Form panel ─────────────────────────────────────────────────── */}
           <div className={styles.formColumn}>
             <form className={styles.form} onSubmit={handleSubmit} noValidate aria-labelledby="gift-card-form-title">
-              <header className={styles.formHeader}>
-                <h1 id="gift-card-form-title" className={styles.formTitle}>Create Your Digital Gift Card</h1>
-              </header>
-
               {/* Design */}
               <fieldset className={styles.section}>
                 <legend className={styles.sectionTitle}>Pick a Card</legend>
@@ -397,33 +404,58 @@ export default function GiftCardPageClient() {
                   ))}
                   {/* Sixth slot: upload a photo. Once there, it is a design like the rest. */}
                   {upload ? (
-                    <label className={styles.designOption}>
-                      <input
-                        type="radio"
-                        name="design"
-                        value="custom"
-                        className={styles.visuallyHiddenInput}
-                        checked={designId === 'custom'}
-                        onChange={() => setDesignId('custom')}
-                      />
-                      {hasArtwork ? (
-                        <span
-                          className={joinClasses(
-                            styles.designTile,
-                            styles.designTilePhoto,
-                            squareTiles && styles.designTileSquare,
-                          )}
-                        >
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img src={upload.url} alt="" className={styles.designTileImage} />
-                        </span>
-                      ) : (
-                        <span className={styles.designTile}>
-                          <CardFace design={null} image={upload.url} brandLabel={brandLabel} size="tile" />
-                        </span>
-                      )}
-                      <span className={styles.srOnly}>Your photo</span>
-                    </label>
+                    // The uploaded photo: a design like the rest, plus a remove
+                    // button on the tile and a Replace link under it.
+                    <div className={styles.designOption}>
+                      <label className={styles.designOptionLabel}>
+                        <input
+                          type="radio"
+                          name="design"
+                          value="custom"
+                          className={styles.visuallyHiddenInput}
+                          checked={designId === 'custom'}
+                          onChange={() => setDesignId('custom')}
+                        />
+                        {hasArtwork ? (
+                          <span
+                            className={joinClasses(
+                              styles.designTile,
+                              styles.designTilePhoto,
+                              squareTiles && styles.designTileSquare,
+                            )}
+                          >
+                            <span className={styles.photoStage}>
+                              <span className={styles.photoCard}>
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img src={upload.url} alt="" className={styles.photoCardImage} />
+                              </span>
+                            </span>
+                          </span>
+                        ) : (
+                          <span className={styles.designTile}>
+                            <CardFace design={null} image={upload.url} brandLabel={brandLabel} size="tile" />
+                          </span>
+                        )}
+                        <span className={styles.srOnly}>Your photo</span>
+                      </label>
+                      <button
+                        type="button"
+                        className={styles.removePhoto}
+                        onClick={removeUpload}
+                        aria-label="Remove your photo"
+                      >
+                        <XIcon size={16} />
+                      </button>
+                      <label className={styles.replaceLink}>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className={styles.visuallyHiddenInput}
+                          onChange={handleUpload}
+                        />
+                        Replace
+                      </label>
+                    </div>
                   ) : (
                     <label className={styles.designOption}>
                       <input
@@ -442,23 +474,6 @@ export default function GiftCardPageClient() {
                   )}
                 </div>
 
-                {upload && (
-                  <div className={styles.uploadRow}>
-                    <label className={styles.uploadButton}>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        className={styles.visuallyHiddenInput}
-                        onChange={handleUpload}
-                      />
-                      <FileUploadIcon size={20} />
-                      <span>Replace image</span>
-                    </label>
-                    <button type="button" className={styles.textLink} onClick={removeUpload}>
-                      Remove
-                    </button>
-                  </div>
-                )}
               </fieldset>
 
               {/* Amount */}
@@ -541,10 +556,13 @@ export default function GiftCardPageClient() {
               <fieldset
                 id={fieldId('method')}
                 className={styles.section}
-                aria-describedby={`${fieldId('method')}-hint`}
               >
-                <legend className={styles.sectionTitle}>How Would You Like to Send It?</legend>
-                <p id={`${fieldId('method')}-hint`} className={styles.stepHint}>Select all that apply</p>
+                {/* The hint rides in the legend, so it is read with the question and
+                    wraps under it only when the line runs out. */}
+                <legend className={styles.sectionTitle}>
+                  How Would You Like to Send It?{' '}
+                  <span className={styles.titleHint}>(select all that apply)</span>
+                </legend>
                 {/* Chips like the amounts, but checkboxes: any combination is allowed. */}
                 <div className={styles.methodGrid}>
                   {SEND_METHODS.map((option) => (

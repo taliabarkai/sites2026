@@ -30,6 +30,8 @@
 /* ═══ Layout ═════════════════════════════════════════════════════════════════ */
 
 .layout {
+  /* Side gutter for the title and form, shared with the carousels' edge bleed. */
+  --form-gutter: var(--spacing-md);
   display: flex;
   flex-direction: column;
   width: 100%;
@@ -83,14 +85,66 @@
   object-fit: cover;
 }
 
-/* An uploaded photo is shown whole, not cropped to the gallery's shape. */
-.galleryImageContain {
-  object-fit: contain;
+/* An uploaded photo: cropped to fill a landscape card, posed like the card
+   mockups. Measured off them: landscape card art tilted ~61°, its long side
+   about 69% of the square frame, centred just above the middle, with a wide
+   soft floor shadow under the lower corner. The stage is a size container, so
+   cqmax units hold those proportions in a square tile and in the gallery,
+   where the square mockups are cropped to fill by height. */
+.photoStage {
+  position: relative;
+  container-type: size;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: var(--colors-surface-primary);
+}
+
+.photoStage::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: 12cqmax;
+  width: 50cqmax;
+  height: 5cqmax;
+  border-radius: var(--radius-full);
+  background: var(--colors-overlay);
+  filter: blur(2.5cqmax);
+  opacity: 0.45;
+  transform: translateX(-50%);
+}
+
+.photoCard {
+  position: relative;
+  z-index: var(--z-raised);
+  display: block;
+  flex-shrink: 0;
+  width: 69cqmax;
+  aspect-ratio: 1.586 / 1;
+  overflow: hidden;
+  /* Scales with the card, as the mockups' corners do, at any size. */
+  border-radius: 3.5cqmax;
+  box-shadow: var(--shadow-md);
+  transform: translateY(-3cqmax) rotate(-61deg);
+}
+
+.photoCardImage {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Page title. DOM order is title, gallery, form: on mobile that stacks the
+   title above the gallery; on desktop the grid puts it atop the form column. */
+.titleColumn {
+  padding: var(--spacing-md) var(--form-gutter);
 }
 
 .formColumn {
-  /* Side gutter for the form, shared with the card carousel's edge bleed. */
-  --form-gutter: var(--spacing-md);
   padding: var(--spacing-md) var(--form-gutter) var(--spacing-xxl);
 }
 
@@ -244,12 +298,6 @@
 
 /* ═══ Form header ═══════════════════════════════════════════════════════════ */
 
-.formHeader {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-xxxs);
-}
-
 .formTitle {
   margin: 0;
   color: var(--colors-text);
@@ -334,6 +382,55 @@
   cursor: pointer;
 }
 
+/* The uploaded tile's radio and picture; the remove button and Replace link
+   sit beside it in the same option rather than inside the label. */
+.designOptionLabel {
+  display: block;
+  cursor: pointer;
+}
+
+.removePhoto {
+  position: absolute;
+  top: var(--spacing-xxxs);
+  right: var(--spacing-xxxs);
+  z-index: var(--z-raised);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--spacing-md);
+  height: var(--spacing-md);
+  padding: 0;
+  background: var(--colors-background);
+  border: 0;
+  border-radius: var(--radius-full);
+  box-shadow: var(--shadow-sm);
+  color: var(--colors-text);
+  cursor: pointer;
+}
+
+.removePhoto:focus-visible {
+  outline: 2px solid var(--colors-text);
+  outline-offset: 2px;
+}
+
+.replaceLink {
+  display: inline-block;
+  margin-top: var(--spacing-xxs);
+  color: var(--colors-text);
+  text-decoration: underline;
+  cursor: pointer;
+  font-family:    var(--typography-rules-text3-font-family);
+  font-size:      var(--typography-rules-text3-font-size);
+  line-height:    var(--typography-rules-text3-line-height);
+  font-weight:    var(--typography-rules-text3-font-weight, normal);
+  letter-spacing: var(--typography-rules-text3-letter-spacing, normal);
+}
+
+.replaceLink:focus-within {
+  outline: 2px solid var(--colors-text);
+  outline-offset: 2px;
+}
+
 .designTile {
   display: block;
   border-radius: 0;
@@ -400,49 +497,6 @@
   font-weight:    var(--typography-rules-caption2-font-weight, normal);
   letter-spacing: var(--typography-rules-caption2-letter-spacing, normal);
   text-transform: var(--typography-rules-caption2-text-transform, none);
-}
-
-.uploadRow {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-sm);
-}
-
-.uploadButton {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  gap: var(--spacing-xxs);
-  color: var(--colors-text);
-  cursor: pointer;
-  font-family:    var(--typography-rules-text1-font-family);
-  font-size:      var(--typography-rules-text1-font-size);
-  line-height:    var(--typography-rules-text1-line-height);
-  font-weight:    var(--typography-rules-text1-font-weight, normal);
-  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
-}
-
-.uploadButton:hover span {
-  text-decoration: underline;
-}
-
-.uploadButton:focus-within {
-  outline: 2px solid var(--colors-text);
-  outline-offset: 2px;
-}
-
-.textLink {
-  padding: 0;
-  background: none;
-  border: 0;
-  color: var(--colors-text);
-  text-decoration: underline;
-  cursor: pointer;
-  font-family:    var(--typography-rules-text1-font-family);
-  font-size:      var(--typography-rules-text1-font-size);
-  line-height:    var(--typography-rules-text1-line-height);
-  font-weight:    var(--typography-rules-text1-font-weight, normal);
-  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
 }
 
 /* ═══ Amount ═════════════════════════════════════════════════════════════════ */
@@ -570,15 +624,11 @@
   cursor: default;
 }
 
-/* Sits just under its step title, tighter than the title-to-chips gap. */
-.stepHint {
-  margin: calc(var(--spacing-xxs) * -1) 0 0;
+.titleHint {
   color: var(--colors-text-secondary);
-  font-family:    var(--typography-rules-text3-font-family);
-  font-size:      var(--typography-rules-text3-font-size);
-  line-height:    var(--typography-rules-text3-line-height);
-  font-weight:    var(--typography-rules-text3-font-weight, normal);
-  letter-spacing: var(--typography-rules-text3-letter-spacing, normal);
+  font-family:    var(--typography-rules-text1-font-family);
+  font-weight:    var(--typography-rules-text1-font-weight, normal);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
 }
 
 /* ═══ Fields ═════════════════════════════════════════════════════════════════ */
@@ -730,6 +780,7 @@
     overflow: visible;
   }
 
+  .titleColumn,
   .formColumn {
     width: 100%;
     max-width: calc(var(--spacing-xxxl) * 8);
@@ -754,7 +805,23 @@
     /* 50 / 50 — the gallery column is close to square at common desktop
        sizes, so the square card mockups fill it without losing top or bottom. */
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    grid-template-areas: "preview form";
+    grid-template-rows: auto 1fr;
+    grid-template-areas:
+      "preview title"
+      "preview form";
+  }
+
+  /* Same width and centring as the form below it, so their left edges match. */
+  .titleColumn {
+    grid-area: title;
+    max-width: none;
+    margin: 0;
+    padding: var(--spacing-xl) var(--spacing-lg) 0;
+  }
+
+  .formTitle {
+    max-width: calc(var(--spacing-xxxl) * 7);
+    margin: 0 auto;
   }
 
   .previewColumn {
@@ -783,7 +850,7 @@
     grid-area: form;
     max-width: none;
     margin: 0;
-    padding: var(--spacing-xl) var(--spacing-lg) var(--spacing-xxl);
+    padding: var(--spacing-lg) var(--spacing-lg) var(--spacing-xxl);
     background: var(--colors-background);
   }
 
