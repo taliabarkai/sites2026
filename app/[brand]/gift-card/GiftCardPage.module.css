@@ -1,0 +1,796 @@
+/* Gift card page — gallery + form.
+   Mobile: one column, gallery above the form.
+   Desktop (lg): gallery pinned on the left (50%), form on the right (50%). */
+
+.page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: var(--colors-background);
+}
+
+.main {
+  flex: 1;
+  width: 100%;
+}
+
+.srOnly,
+.visuallyHiddenInput {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ═══ Layout ═════════════════════════════════════════════════════════════════ */
+
+.layout {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: var(--layout-content-width);
+  margin: 0 auto;
+}
+
+.previewColumn {
+  padding: var(--spacing-md) var(--layout-page-margin) 0;
+}
+
+.previewSticky {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.previewCard {
+  width: 100%;
+  max-width: calc(var(--spacing-xxxl) * 7);
+}
+
+.previewCaption {
+  margin: 0;
+  color: var(--colors-text-secondary);
+  text-align: center;
+  font-family:    var(--typography-rules-caption1-font-family);
+  font-size:      var(--typography-rules-caption1-font-size);
+  line-height:    var(--typography-rules-caption1-line-height);
+  font-weight:    var(--typography-rules-caption1-font-weight, normal);
+  letter-spacing: var(--typography-rules-caption1-letter-spacing, normal);
+}
+
+/* Gallery image — full bleed on mobile, square like the artwork. */
+.galleryColumn {
+  padding: 0;
+}
+
+.gallerySticky {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  background: var(--colors-surface-primary);
+}
+
+.galleryImage {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* An uploaded photo is shown whole, not cropped to the gallery's shape. */
+.galleryImageContain {
+  object-fit: contain;
+}
+
+.formColumn {
+  /* Side gutter for the form, shared with the card carousel's edge bleed. */
+  --form-gutter: var(--spacing-md);
+  padding: var(--spacing-md) var(--form-gutter) var(--spacing-xxl);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);   /* 24px between steps on mobile, 32px from tablet */
+}
+
+/* ═══ Card face (text placeholder for the artwork) ═══════════════════════════ */
+
+.cardFace {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 100%;
+  aspect-ratio: 1.586 / 1;
+  box-sizing: border-box;
+  overflow: hidden;
+  isolation: isolate;
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--radius-xl);
+}
+
+.cardFacePreview {
+  padding: var(--spacing-md);
+  box-shadow: var(--shadow-md);
+}
+
+.cardFaceTile {
+  padding: var(--spacing-xxs);
+  border-radius: 0;
+}
+
+.toneSolid {
+  background: var(--colors-brand-default-primary);
+  border-color: var(--colors-brand-default-primary);
+  color: var(--colors-text-inverse);
+}
+
+.toneTinted {
+  background: var(--colors-surface-primary);
+  color: var(--colors-text);
+}
+
+.toneOutline {
+  background: var(--colors-background);
+  border-color: var(--border-strong);
+  color: var(--colors-text);
+}
+
+/* Uploaded photo — a scrim keeps the brand name and amount legible on any image. */
+.tonePhoto {
+  background: var(--colors-surface-primary);
+  color: var(--colors-text-inverse);
+}
+
+.tonePhoto::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, var(--colors-overlay), transparent 55%, var(--colors-overlay));
+}
+
+.cardArtwork {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.cardBrand,
+.cardMessage,
+.cardFooter {
+  position: relative;
+  z-index: var(--z-raised);
+}
+
+.cardBrand {
+  align-self: flex-start;
+  font-family:    var(--typography-rules-headline8-font-family);
+  font-size:      var(--typography-rules-headline8-font-size);
+  line-height:    var(--typography-rules-headline8-line-height);
+  font-weight:    var(--typography-rules-headline8-font-weight, normal);
+  letter-spacing: var(--typography-rules-headline8-letter-spacing, normal);
+  text-transform: var(--typography-rules-headline8-text-transform, none);
+}
+
+.cardMessage {
+  align-self: center;
+  text-align: center;
+  font-family:    var(--typography-rules-headline3-font-family);
+  font-size:      var(--typography-rules-headline3-font-size);
+  line-height:    var(--typography-rules-headline3-line-height);
+  font-weight:    var(--typography-rules-headline3-font-weight, normal);
+  letter-spacing: var(--typography-rules-headline3-letter-spacing, normal);
+  text-transform: var(--typography-rules-headline3-text-transform, none);
+}
+
+.cardFooter {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--spacing-xs);
+}
+
+.cardRecipient {
+  font-family:    var(--typography-rules-text3-font-family);
+  font-size:      var(--typography-rules-text3-font-size);
+  line-height:    var(--typography-rules-text3-line-height);
+  font-weight:    var(--typography-rules-text3-font-weight, normal);
+  letter-spacing: var(--typography-rules-text3-letter-spacing, normal);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cardAmount {
+  font-family:    var(--typography-rules-headline4-font-family);
+  font-size:      var(--typography-rules-headline4-font-size);
+  line-height:    var(--typography-rules-headline4-line-height);
+  font-weight:    var(--typography-rules-headline4-font-weight, normal);
+  letter-spacing: var(--typography-rules-headline4-letter-spacing, normal);
+  text-transform: var(--typography-rules-headline4-text-transform, none);
+}
+
+/* Tile scale — same layout, smaller type. A tile has no footer, so the
+   message centres in the space under the brand name. */
+.cardFaceTile .cardBrand {
+  font-family:    var(--typography-rules-text8-font-family);
+  font-size:      var(--typography-rules-text8-font-size);
+  line-height:    var(--typography-rules-text8-line-height);
+  font-weight:    var(--typography-rules-text8-font-weight, normal);
+  letter-spacing: var(--typography-rules-text8-letter-spacing, normal);
+  text-transform: var(--typography-rules-text8-text-transform, none);
+}
+
+.cardFaceTile .cardMessage {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  font-family:    var(--typography-rules-caption2-font-family);
+  font-size:      var(--typography-rules-caption2-font-size);
+  line-height:    var(--typography-rules-caption2-line-height);
+  font-weight:    var(--typography-rules-caption2-font-weight, normal);
+  letter-spacing: var(--typography-rules-caption2-letter-spacing, normal);
+  text-transform: var(--typography-rules-caption2-text-transform, none);
+}
+
+/* ═══ Form header ═══════════════════════════════════════════════════════════ */
+
+.formHeader {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xxxs);
+}
+
+.formTitle {
+  margin: 0;
+  color: var(--colors-text);
+  font-family:    var(--typography-rules-headline4-font-family);
+  font-size:      var(--typography-rules-headline4-font-size);
+  line-height:    var(--typography-rules-headline4-line-height);
+  font-weight:    var(--typography-rules-headline4-font-weight, normal);
+  letter-spacing: var(--typography-rules-headline4-letter-spacing, normal);
+  text-transform: var(--typography-rules-headline4-text-transform, none);
+}
+
+/* ═══ Sections ═══════════════════════════════════════════════════════════════ */
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+/* Floated, a legend stops sitting on the fieldset's edge and lays out as a
+   normal flex item, so the section's gap and padding apply to it. */
+.section > legend {
+  float: left;
+  width: 100%;
+  padding: 0;
+}
+
+.sectionTitle {
+  margin: 0;
+  color: var(--colors-text);
+  font-family:    var(--typography-rules-text2-font-family);
+  font-size:      var(--typography-rules-text2-font-size);
+  line-height:    var(--typography-rules-text2-line-height);
+  font-weight:    var(--typography-rules-text2-font-weight, normal);
+  letter-spacing: var(--typography-rules-text2-letter-spacing, normal);
+  text-transform: var(--typography-rules-text2-text-transform, none);
+}
+
+/* ═══ Design picker ══════════════════════════════════════════════════════════ */
+
+/* Scrolls sideways on narrow screens, with no visible scrollbar. The padding
+   leaves room for the selected ring, which overflow would otherwise clip, and
+   the matching negative margin keeps the tiles lined up with the title.
+   scroll-padding stops snapping from scrolling the first ring out of view. */
+.designRow {
+  display: flex;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xxs);
+  margin: calc(var(--spacing-xxs) * -1);
+  /* On phones the strip runs off the right edge of the screen rather than
+     stopping at the page margin; the matching padding lets the last tile
+     scroll fully clear of the edge. */
+  margin-right: calc(var(--form-gutter) * -1);
+  padding-right: var(--form-gutter);
+  /* The selected ring reaches 4px past its tile. Starting the row flush with
+     the title and inset by that 4px puts the ring's outer edge on the title's
+     left line, so a selected first tile never pokes out past it. */
+  margin-left: 0;
+  padding-left: var(--spacing-xxxs);
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  scroll-padding-inline: var(--spacing-xxxs) var(--spacing-xxs);
+  scrollbar-width: none;
+}
+
+.designRow::-webkit-scrollbar {
+  display: none;
+}
+
+.designOption {
+  position: relative;
+  /* Three tiles and a quarter of the fourth, at any phone width, so the
+     carousel always shows there is more to swipe to. The visible strip runs
+     from the first tile to the screen edge: the row's content plus its right
+     padding, which is the form gutter. */
+  flex: 0 0 calc((100% + var(--form-gutter) - var(--spacing-xs) * 3) / 3.25);
+  scroll-snap-align: start;
+  cursor: pointer;
+}
+
+.designTile {
+  display: block;
+  border-radius: 0;
+  transition: box-shadow var(--transition-fast);
+}
+
+/* Artwork tiles: card-shaped for flat card art, square for a mockup crop. */
+.designTilePhoto {
+  aspect-ratio: 1.586 / 1;
+  overflow: hidden;
+  box-sizing: border-box;
+  background: var(--colors-surface-primary);
+  border: var(--border-width) solid var(--border-color);
+}
+
+.designTileImage {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.designTileSquare {
+  aspect-ratio: 1 / 1;
+}
+
+/* The upload slot matches the photo tiles beside it. */
+.designRowSquare .uploadTile {
+  aspect-ratio: 1 / 1;
+}
+
+.designOption:hover .designTile {
+  box-shadow: 0 0 0 2px var(--colors-background), 0 0 0 3px var(--border-color);
+}
+
+.visuallyHiddenInput:checked + .designTile {
+  box-shadow: 0 0 0 2px var(--colors-background), 0 0 0 4px var(--border-strong);
+}
+
+.visuallyHiddenInput:focus-visible + .designTile {
+  outline: 2px solid var(--colors-text);
+  outline-offset: 6px;
+}
+
+/* Upload slot — the shape of a design tile, dashed to read as an empty slot. */
+.uploadTile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-xxxs);
+  width: 100%;
+  aspect-ratio: 1.586 / 1;
+  box-sizing: border-box;
+  padding: var(--spacing-xxs);
+  background: var(--colors-background);
+  border: var(--border-width) dashed var(--border-strong);
+  border-radius: 0;
+  color: var(--colors-text);
+  text-align: center;
+  font-family:    var(--typography-rules-caption2-font-family);
+  font-size:      var(--typography-rules-caption2-font-size);
+  line-height:    var(--typography-rules-caption2-line-height);
+  font-weight:    var(--typography-rules-caption2-font-weight, normal);
+  letter-spacing: var(--typography-rules-caption2-letter-spacing, normal);
+  text-transform: var(--typography-rules-caption2-text-transform, none);
+}
+
+.uploadRow {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.uploadButton {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xxs);
+  color: var(--colors-text);
+  cursor: pointer;
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  font-weight:    var(--typography-rules-text1-font-weight, normal);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+}
+
+.uploadButton:hover span {
+  text-decoration: underline;
+}
+
+.uploadButton:focus-within {
+  outline: 2px solid var(--colors-text);
+  outline-offset: 2px;
+}
+
+.textLink {
+  padding: 0;
+  background: none;
+  border: 0;
+  color: var(--colors-text);
+  text-decoration: underline;
+  cursor: pointer;
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  font-weight:    var(--typography-rules-text1-font-weight, normal);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+}
+
+/* ═══ Amount ═════════════════════════════════════════════════════════════════ */
+
+/* Chips hug their label. On phones they stay on one line and slide sideways,
+   running off the right edge like the card carousel; from tablet up they
+   wrap instead. The 4px padding/margin pair leaves room for the focus ring,
+   which the scroll container would otherwise clip, without moving the chips. */
+.amountGrid,
+.methodGrid {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: var(--spacing-xxs);
+  margin: calc(var(--spacing-xxxs) * -1) calc(var(--form-gutter) * -1) calc(var(--spacing-xxxs) * -1) calc(var(--spacing-xxxs) * -1);
+  padding: var(--spacing-xxxs) var(--form-gutter) var(--spacing-xxxs) var(--spacing-xxxs);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.amountGrid::-webkit-scrollbar,
+.methodGrid::-webkit-scrollbar {
+  display: none;
+}
+
+.amountGrid > .amountOption,
+.methodGrid > .amountOption {
+  flex-shrink: 0;
+}
+
+.amountOption {
+  position: relative;
+  cursor: pointer;
+}
+
+.amountTile {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--field-min-height);
+  padding: 0 var(--spacing-sm);
+  box-sizing: border-box;
+  white-space: nowrap;
+  background: var(--form-field-background);
+  border: var(--border-width) solid var(--form-option-border-color, var(--form-field-border-color));
+  border-radius: var(--form-field-border-radius, var(--radius-sm));
+  color: var(--colors-text);
+  font-family:    var(--typography-rules-text2-font-family);
+  font-size:      var(--typography-rules-text2-font-size);
+  line-height:    var(--typography-rules-text2-line-height);
+  font-weight:    var(--typography-rules-text2-font-weight, normal);
+  letter-spacing: var(--typography-rules-text2-letter-spacing, normal);
+  transition:
+    background   var(--transition-fast),
+    border-color var(--transition-fast),
+    color        var(--transition-fast);
+}
+
+.amountOption:hover .amountTile {
+  border-color: var(--colors-text);
+}
+
+.visuallyHiddenInput:checked + .amountTile {
+  background: var(--colors-text);
+  border-color: var(--colors-text);
+  color: var(--colors-text-inverse);
+}
+
+.visuallyHiddenInput:focus-visible + .amountTile {
+  outline: 2px solid var(--colors-text);
+  outline-offset: 2px;
+}
+
+.prefixControl {
+  display: flex;
+  align-items: center;
+  min-height: var(--field-min-height);
+  background: var(--form-field-background);
+  border: var(--border-width) solid var(--form-field-border-color);
+  border-radius: var(--form-field-border-radius, var(--radius-sm));
+  transition: border-color var(--transition-fast);
+}
+
+.prefixControl:hover {
+  border-color: var(--form-field-border-color-hover, var(--colors-text));
+}
+
+.prefixControl:focus-within {
+  border-color: var(--form-field-focus-ring-color);
+  outline: var(--form-field-focus-ring-width) solid var(--form-field-focus-ring-color);
+  outline-offset: var(--form-field-focus-ring-offset);
+}
+
+.prefix {
+  padding-left: var(--spacing-xs);
+  color: var(--colors-text-secondary);
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+}
+
+.prefixInput {
+  flex: 1;
+  min-width: 0;
+  min-height: calc(var(--field-min-height) - var(--border-width) * 2);
+  padding: 0 var(--spacing-xs) 0 var(--spacing-xxxs);
+  background: transparent;
+  border: 0;
+  outline: none;
+  color: var(--colors-text);
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+}
+
+.prefixInput::placeholder {
+  color: var(--form-input-placeholder, var(--colors-text-secondary));
+}
+
+/* ═══ Send method ════════════════════════════════════════════════════════════ */
+
+/* Chips share the amount tiles' look and layout (see .amountGrid). */
+
+/* The locked email chip: selected look, no invitation to click it. */
+.amountOption:has(.visuallyHiddenInput[aria-disabled="true"]) {
+  cursor: default;
+}
+
+/* Sits just under its step title, tighter than the title-to-chips gap. */
+.stepHint {
+  margin: calc(var(--spacing-xxs) * -1) 0 0;
+  color: var(--colors-text-secondary);
+  font-family:    var(--typography-rules-text3-font-family);
+  font-size:      var(--typography-rules-text3-font-size);
+  line-height:    var(--typography-rules-text3-line-height);
+  font-weight:    var(--typography-rules-text3-font-weight, normal);
+  letter-spacing: var(--typography-rules-text3-letter-spacing, normal);
+}
+
+/* ═══ Fields ═════════════════════════════════════════════════════════════════ */
+
+/* A field labelled by its step title — the question names the field. */
+.titledField {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+/* Messages sit close under their field, not a full step-gap away. */
+.titledField .error,
+.titledField .hint {
+  margin-top: calc(var(--spacing-xxs) * -1);
+}
+
+.fieldGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xxxs);
+}
+
+.label {
+  color: var(--colors-text);
+  font-family:    var(--typography-rules-text3-font-family);
+  font-size:      var(--typography-rules-text3-font-size);
+  line-height:    var(--typography-rules-text3-line-height);
+  font-weight:    var(--typography-rules-text3-font-weight, normal);
+  letter-spacing: var(--typography-rules-text3-letter-spacing, normal);
+}
+
+.input,
+.textarea {
+  width: 100%;
+  box-sizing: border-box;
+  background: var(--form-field-background);
+  border: var(--border-width) solid var(--form-field-border-color);
+  border-radius: var(--form-field-border-radius, var(--radius-sm));
+  color: var(--colors-text);
+  font-family: var(--typography-rules-text1-font-family);
+  font-size:   var(--typography-rules-text1-font-size);
+  line-height: var(--typography-rules-text1-line-height);
+  outline: none;
+  transition: border-color var(--transition-fast);
+}
+
+.input {
+  min-height: var(--field-min-height);
+  padding: 0 var(--spacing-xs);
+}
+
+.textarea {
+  display: block;
+  /* Bottom padding clears the count. No resize grip: it would sit under it. */
+  padding: var(--spacing-xs) var(--spacing-xs) calc(var(--spacing-xs) * 2 + var(--typography-rules-text3-line-height));
+  resize: none;
+}
+
+.textareaWrap {
+  position: relative;
+}
+
+.counterInside {
+  position: absolute;
+  right: var(--spacing-xs);
+  bottom: var(--spacing-xs);
+  pointer-events: none;
+  color: var(--colors-text-secondary);
+  font-family:    var(--typography-rules-text3-font-family);
+  font-size:      var(--typography-rules-text3-font-size);
+  line-height:    var(--typography-rules-text3-line-height);
+  font-weight:    var(--typography-rules-text3-font-weight, normal);
+  letter-spacing: var(--typography-rules-text3-letter-spacing, normal);
+}
+
+.input::placeholder,
+.textarea::placeholder {
+  color: var(--form-input-placeholder, var(--colors-text-secondary));
+}
+
+.input:hover,
+.textarea:hover {
+  border-color: var(--form-field-border-color-hover, var(--colors-text));
+}
+
+/* Focus ring comes from the shared field rule in globals.css. */
+
+.inputInvalid,
+.inputInvalid:hover {
+  border-color: var(--colors-error);
+}
+
+.error,
+.hint {
+  margin: var(--spacing-xxxs) 0 0;
+  font-family:    var(--typography-rules-text3-font-family);
+  font-size:      var(--typography-rules-text3-font-size);
+  line-height:    var(--typography-rules-text3-line-height);
+  font-weight:    var(--typography-rules-text3-font-weight, normal);
+  letter-spacing: var(--typography-rules-text3-letter-spacing, normal);
+}
+
+.error {
+  color: var(--colors-error);
+}
+
+.hint {
+  color: var(--colors-text-secondary);
+}
+
+/* ═══ Actions ════════════════════════════════════════════════════════════════ */
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.actionButton {
+  width: 100%;
+}
+
+/* ═══ Tablet ═════════════════════════════════════════════════════════════════ */
+
+@media (min-width: 768px) {
+  .form {
+    gap: var(--spacing-lg);
+  }
+
+  .amountGrid,
+  .methodGrid {
+    flex-wrap: wrap;
+    margin: 0;
+    padding: 0;
+    overflow: visible;
+  }
+
+  .previewColumn {
+    padding-top: var(--spacing-xl);
+  }
+
+  /* Every design plus the upload slot on one row, no sideways scroll. */
+  .designRow {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    margin-right: calc(var(--spacing-xxs) * -1);
+    padding-right: var(--spacing-xxs);
+    overflow: visible;
+  }
+
+  .formColumn {
+    width: 100%;
+    max-width: calc(var(--spacing-xxxl) * 8);
+    margin: 0 auto;
+    box-sizing: border-box;
+  }
+}
+
+/* ═══ Desktop — gallery pinned left, form right ══════════════════════════════ */
+
+@media (min-width: 1024px) {
+  /* globals.css derives --sticky-top on :root, where the theme's header height
+     isn't defined yet — re-derive it here, as the PDP and checkout do. */
+  .page {
+    --sticky-top: calc(var(--layout-header-height) + var(--spacing-xl));
+  }
+
+  /* Full width, so the form column runs to the page edge. */
+  .layout {
+    max-width: none;
+    display: grid;
+    /* 50 / 50 — the gallery column is close to square at common desktop
+       sizes, so the square card mockups fill it without losing top or bottom. */
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-areas: "preview form";
+  }
+
+  .previewColumn {
+    grid-area: preview;
+    padding: var(--spacing-xxl) var(--layout-page-margin);
+  }
+
+  .previewSticky {
+    position: sticky;
+    top: var(--sticky-top);
+  }
+
+  /* The gallery fills the column and the viewport under the header. */
+  .galleryColumn {
+    padding: 0;
+  }
+
+  .gallerySticky {
+    position: sticky;
+    top: var(--layout-header-height);
+    aspect-ratio: auto;
+    height: calc(100dvh - var(--layout-header-height));
+  }
+
+  .formColumn {
+    grid-area: form;
+    max-width: none;
+    margin: 0;
+    padding: var(--spacing-xl) var(--spacing-lg) var(--spacing-xxl);
+    background: var(--colors-background);
+  }
+
+  /* Form content keeps a readable width, centred in its column. */
+  .form {
+    max-width: calc(var(--spacing-xxxl) * 7);
+    margin: 0 auto;
+  }
+
+}
