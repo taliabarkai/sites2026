@@ -40,7 +40,7 @@ export const GIFT_CARD_DESIGNS: GiftCardDesign[] = [
 ]
 
 /** Preset amounts, in cents. */
-export const GIFT_CARD_AMOUNTS = [10000, 15000, 25000, 30000]
+export const GIFT_CARD_AMOUNTS = [10000, 25000, 30000]
 
 /** Custom amount bounds, in whole dollars. */
 export const GIFT_CARD_CUSTOM_MIN = 10

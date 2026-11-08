@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useId, useMemo, useState } from 'react'
+import { useEffect, useId, useMemo, useRef, useState } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import * as oalIcons from '@/src/components/icons/oal'
 import * as mnnIcons from '@/src/components/icons/mnn'
@@ -11,6 +11,7 @@ import { Header } from '../_components/Header'
 import { Footer } from '../_components/Footer'
 import { Button } from '../_components/Button'
 import { FloatingCart } from '../_components/FloatingCart'
+import { Checkbox } from '../_components/Checkbox'
 import { BRANDS, getBrandFromPathname } from '../_config/brands'
 import { prefixFooterColumns, prefixNavLinks, withBrandPrefix } from '../_config/brandPaths'
 import { DEFAULT_FOOTER_COLUMNS, DEFAULT_NAV_LINKS, DEFAULT_TOPLINE } from '../_config/siteContent'
@@ -41,6 +42,19 @@ const SEND_METHODS: Array<{ id: SendMethod; label: string; locked?: boolean }> =
   { id: 'email', label: 'Send by email', locked: true },
   { id: 'link',  label: 'Get a link' },
   { id: 'print', label: 'Print at home' },
+]
+
+/** The uploaded photo card's tilt, matching .photoCard's rotate() in the CSS. */
+const PHOTO_CARD_TILT_DEG = 61
+/** How far one arrow press moves the photo, in object-position percent. */
+const PHOTO_NUDGE_STEP = 10
+const BACK_TEXT_MAX = 80
+
+const NUDGES = [
+  { label: 'Move photo up',    x: 0,  y: -1, turn: styles.chevronUp },
+  { label: 'Move photo left',  x: -1, y: 0,  turn: styles.chevronLeft },
+  { label: 'Move photo right', x: 1,  y: 0,  turn: undefined },
+  { label: 'Move photo down',  x: 0,  y: 1,  turn: styles.chevronDown },
 ]
 
 function formatPrice(cents: number): string {
@@ -150,7 +164,8 @@ export default function GiftCardPageClient() {
   const { items, isOpen, subtotal, addItem, openCart, closeCart, removeItem } = useCart()
   const brand = getBrandFromPathname(pathname)
   const brandLabel = BRANDS.find((item) => item.key === brand)?.label ?? ''
-  const { FileUploadIcon, XIcon } = BRAND_ICONS[brand]
+  const icons = BRAND_ICONS[brand]
+  const { ChevronIcon, FileUploadIcon, XIcon } = icons
 
   const navLinks = prefixNavLinks(brand, DEFAULT_NAV_LINKS)
   const footerColumns = prefixFooterColumns(brand, DEFAULT_FOOTER_COLUMNS)
@@ -167,6 +182,18 @@ export default function GiftCardPageClient() {
   // ── Form state ────────────────────────────────────────────────────────────
   const [designId, setDesignId]         = useState<string>(GIFT_CARD_DESIGNS[0].id)
   const [upload, setUpload]             = useState<{ url: string; name: string } | null>(null)
+  // Where the uploaded photo sits in its card, as object-position percentages.
+  const [photoPos, setPhotoPos]         = useState({ x: 50, y: 50 })
+  const [addBackText, setAddBackText]   = useState(false)
+  const [backText, setBackText]         = useState('')
+  const [showBack, setShowBack]         = useState(false)
+  // An in-progress drag on the gallery photo: where it started, and how far the
+  // cropped photo overflows its card on each axis (the room it has to move).
+  const photoDrag = useRef<{
+    startX: number; startY: number
+    startPos: { x: number; y: number }
+    overflowX: number; overflowY: number
+  } | null>(null)
   const [amountChoice, setAmountChoice] = useState<number | 'custom' | null>(null)
   const [customAmount, setCustomAmount] = useState('')
   const [methods, setMethods]           = useState<SendMethod[]>(['email'])
@@ -235,6 +262,7 @@ export default function GiftCardPageClient() {
     const file = event.target.files?.[0]
     if (!file) return
     setUpload({ url: URL.createObjectURL(file), name: file.name })
+    setPhotoPos({ x: 50, y: 50 })
     setDesignId('custom')
     // Reset so choosing the same file again still fires a change.
     event.target.value = ''
@@ -242,7 +270,64 @@ export default function GiftCardPageClient() {
 
   function removeUpload() {
     setUpload(null)
+    setAddBackText(false)
+    setBackText('')
+    setShowBack(false)
     setDesignId(GIFT_CARD_DESIGNS[0].id)
+  }
+
+  // The arrows move the photo in its own frame: up is towards the top of the
+  // picture, whatever the card's tilt. The photo is cropped to cover, so only
+  // the axis it overflows on visibly moves.
+  function nudgePhoto(dx: number, dy: number) {
+    const clamp = (value: number) => Math.min(100, Math.max(0, value))
+    // Moving the picture right means showing more of its left side.
+    setPhotoPos((prev) => ({
+      x: clamp(prev.x - dx * PHOTO_NUDGE_STEP),
+      y: clamp(prev.y - dy * PHOTO_NUDGE_STEP),
+    }))
+  }
+
+  // Dragging the photo: the picture follows the pointer exactly. The card is
+  // tilted, so the pointer's screen movement is turned into the card's own
+  // axes, then into object-position percent of the photo's overflow.
+  function startPhotoDrag(event: React.PointerEvent<HTMLSpanElement>) {
+    const face = event.currentTarget
+    const img = face.querySelector('img')
+    if (!img || !img.naturalWidth) return
+    const boxW = face.offsetWidth
+    const boxH = face.offsetHeight
+    const scale = Math.max(boxW / img.naturalWidth, boxH / img.naturalHeight)
+    photoDrag.current = {
+      startX: event.clientX,
+      startY: event.clientY,
+      startPos: photoPos,
+      overflowX: img.naturalWidth * scale - boxW,
+      overflowY: img.naturalHeight * scale - boxH,
+    }
+    face.setPointerCapture(event.pointerId)
+  }
+
+  function movePhotoDrag(event: React.PointerEvent<HTMLSpanElement>) {
+    const drag = photoDrag.current
+    if (!drag) return
+    const screenX = event.clientX - drag.startX
+    const screenY = event.clientY - drag.startY
+    const angle = (PHOTO_CARD_TILT_DEG * Math.PI) / 180
+    const localX = Math.cos(angle) * screenX - Math.sin(angle) * screenY
+    const localY = Math.sin(angle) * screenX + Math.cos(angle) * screenY
+    const clamp = (value: number) => Math.min(100, Math.max(0, value))
+    setPhotoPos({
+      x: drag.overflowX > 0 ? clamp(drag.startPos.x - (localX / drag.overflowX) * 100) : drag.startPos.x,
+      y: drag.overflowY > 0 ? clamp(drag.startPos.y - (localY / drag.overflowY) * 100) : drag.startPos.y,
+    })
+  }
+
+  function endPhotoDrag(event: React.PointerEvent<HTMLSpanElement>) {
+    photoDrag.current = null
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId)
+    }
   }
 
   function toggleMethod(id: SendMethod, on: boolean) {
@@ -296,6 +381,7 @@ export default function GiftCardPageClient() {
       { label: 'To', value: recipientName.trim() },
       ...(askRecipientEmail ? [{ label: 'Email', value: recipientEmail.trim() }] : []),
       ...(message.trim() ? [{ label: 'Message', value: message.trim() }] : []),
+      ...(usingUpload && addBackText && backText.trim() ? [{ label: 'Back of card', value: backText.trim() }] : []),
     ]
 
     addItem({
@@ -332,12 +418,49 @@ export default function GiftCardPageClient() {
             <div className={joinClasses(styles.previewColumn, styles.galleryColumn)}>
               <div className={styles.gallerySticky}>
                 {galleryImage.photo ? (
-                  // An uploaded photo, cropped to fill a landscape card.
+                  // An uploaded photo, cropped to fill a landscape card. The card
+                  // has a back (the optional text) and flips to show it while the
+                  // text field has focus.
                   <div className={styles.photoStage}>
-                    <span className={styles.photoCard}>
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={galleryImage.src} alt={galleryImage.alt} className={styles.photoCardImage} />
+                    <span className={joinClasses(styles.photoCard, styles.photoCard3d)}>
+                      <span className={joinClasses(styles.cardFlip, showBack && styles.cardFlipped)}>
+                        <span
+                          className={styles.cardSideFront}
+                          onPointerDown={startPhotoDrag}
+                          onPointerMove={movePhotoDrag}
+                          onPointerUp={endPhotoDrag}
+                          onPointerCancel={endPhotoDrag}
+                        >
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={galleryImage.src}
+                            alt={galleryImage.alt}
+                            draggable={false}
+                            className={styles.photoCardImage}
+                            style={{ objectPosition: `${photoPos.x}% ${photoPos.y}%` }}
+                          />
+                        </span>
+                        <span className={styles.cardSideBack} aria-hidden={!showBack}>
+                          <span className={styles.cardBackText}>{backText}</span>
+                        </span>
+                      </span>
                     </span>
+
+                    {!showBack && (
+                      <div className={styles.nudgePad} role="group" aria-label="Move your photo">
+                        {NUDGES.map((nudge) => (
+                          <button
+                            key={nudge.label}
+                            type="button"
+                            className={styles.nudgeButton}
+                            onClick={() => nudgePhoto(nudge.x, nudge.y)}
+                            aria-label={nudge.label}
+                          >
+                            <ChevronIcon size={16} className={nudge.turn} />
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 ) : (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -429,7 +552,12 @@ export default function GiftCardPageClient() {
                             <span className={styles.photoStage}>
                               <span className={styles.photoCard}>
                                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                                <img src={upload.url} alt="" className={styles.photoCardImage} />
+                                <img
+                                  src={upload.url}
+                                  alt=""
+                                  className={styles.photoCardImage}
+                                  style={{ objectPosition: `${photoPos.x}% ${photoPos.y}%` }}
+                                />
                               </span>
                             </span>
                           </span>
@@ -476,83 +604,128 @@ export default function GiftCardPageClient() {
                   )}
                 </div>
 
+                {/* Text for the back of a photo card. */}
+                {upload && designId === 'custom' && (
+                  <div className={styles.backTextGroup}>
+                    <Checkbox
+                      checked={addBackText}
+                      onChange={(on) => {
+                        setAddBackText(on)
+                        if (!on) setShowBack(false)
+                      }}
+                      icons={icons}
+                    >
+                      Add text
+                    </Checkbox>
+                    {addBackText && (
+                      <div className={styles.textareaWrap}>
+                        <label htmlFor={fieldId('backText')} className={styles.srOnly}>
+                          Text for the back of the card
+                        </label>
+                        <textarea
+                          id={fieldId('backText')}
+                          className={styles.textarea}
+                          rows={2}
+                          maxLength={BACK_TEXT_MAX}
+                          value={backText}
+                          placeholder="Text for the back of the card"
+                          onFocus={() => setShowBack(true)}
+                          onBlur={() => setShowBack(false)}
+                          onChange={(event) => {
+                            setBackText(event.target.value)
+                            setShowBack(true)
+                          }}
+                          aria-describedby={`${fieldId('backText')}-count`}
+                        />
+                        <span id={`${fieldId('backText')}-count`} className={styles.counterInside}>
+                          {backText.length} / {BACK_TEXT_MAX}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
 
               {/* Amount */}
               <div
                 className={styles.section}
-                role="radiogroup"
+                role="group"
                 aria-labelledby={fieldId('amount-title')}
                 aria-describedby={errors.amount ? `${fieldId('amount')}-error` : undefined}
               >
                 <p id={fieldId('amount-title')} className={styles.sectionTitle}>Choose an Amount</p>
-                <div className={styles.amountGrid}>
-                  {GIFT_CARD_AMOUNTS.map((cents, index) => (
-                    <label key={cents} className={styles.amountOption}>
+                {/* Mobile: chips slide sideways, the custom field drops below them.
+                    Tablet up: the grid dissolves into this row (display: contents),
+                    so the field sits after Custom and wraps only when out of room. */}
+                <div className={styles.amountRow}>
+                  <div className={styles.amountGrid}>
+                    {GIFT_CARD_AMOUNTS.map((cents, index) => (
+                      <label key={cents} className={styles.amountOption}>
+                        <input
+                          // The first option takes focus when no amount is chosen.
+                          id={index === 0 ? fieldId('amount') : undefined}
+                          type="radio"
+                          name="amount"
+                          value={cents}
+                          className={styles.visuallyHiddenInput}
+                          checked={amountChoice === cents}
+                          onChange={() => {
+                            setAmountChoice(cents)
+                            clearError('amount')
+                            clearError('customAmount')
+                          }}
+                        />
+                        <span className={styles.amountTile}>{formatPrice(cents)}</span>
+                      </label>
+                    ))}
+                    <label className={styles.amountOption}>
                       <input
-                        // The first option takes focus when no amount is chosen.
-                        id={index === 0 ? fieldId('amount') : undefined}
                         type="radio"
                         name="amount"
-                        value={cents}
+                        value="custom"
                         className={styles.visuallyHiddenInput}
-                        checked={amountChoice === cents}
+                        checked={amountChoice === 'custom'}
                         onChange={() => {
-                          setAmountChoice(cents)
+                          setAmountChoice('custom')
                           clearError('amount')
-                          clearError('customAmount')
+                          requestAnimationFrame(() => document.getElementById(fieldId('customAmount'))?.focus())
                         }}
                       />
-                      <span className={styles.amountTile}>{formatPrice(cents)}</span>
+                      <span className={styles.amountTile}>Custom</span>
                     </label>
-                  ))}
-                  <label className={styles.amountOption}>
-                    <input
-                      type="radio"
-                      name="amount"
-                      value="custom"
-                      className={styles.visuallyHiddenInput}
-                      checked={amountChoice === 'custom'}
-                      onChange={() => {
-                        setAmountChoice('custom')
-                        clearError('amount')
-                        requestAnimationFrame(() => document.getElementById(fieldId('customAmount'))?.focus())
-                      }}
-                    />
-                    <span className={styles.amountTile}>Custom amount</span>
-                  </label>
-                </div>
-                {errors.amount && (
-                  <p id={`${fieldId('amount')}-error`} className={styles.error}>{errors.amount}</p>
-                )}
-
-                {amountChoice === 'custom' && (
-                  <div className={styles.fieldGroup}>
-                    <label htmlFor={fieldId('customAmount')} className={styles.label}>
-                      Amount (${GIFT_CARD_CUSTOM_MIN}–${GIFT_CARD_CUSTOM_MAX})
-                    </label>
-                    <div className={joinClasses(styles.prefixControl, errors.customAmount && styles.inputInvalid)}>
+                  </div>
+                  {/* Sized for four digits. */}
+                  {amountChoice === 'custom' && (
+                    <div className={joinClasses(styles.prefixControl, styles.customAmount, errors.customAmount && styles.inputInvalid)}>
+                      <label htmlFor={fieldId('customAmount')} className={styles.srOnly}>
+                        Custom amount in dollars
+                      </label>
                       <span className={styles.prefix} aria-hidden="true">$</span>
                       <input
                         id={fieldId('customAmount')}
                         type="text"
                         inputMode="numeric"
+                        maxLength={4}
                         data-focus-ring="none"
                         className={styles.prefixInput}
                         value={customAmount}
-                        placeholder="e.g. 200"
+                        placeholder="Amount"
                         onChange={(event) => {
-                          setCustomAmount(event.target.value.replace(/[^\d.]/g, ''))
+                          setCustomAmount(event.target.value.replace(/\D/g, ''))
                           clearError('customAmount')
                         }}
                         aria-invalid={errors.customAmount ? true : undefined}
                         aria-describedby={errors.customAmount ? `${fieldId('customAmount')}-error` : undefined}
                       />
                     </div>
-                    {errors.customAmount && (
-                      <p id={`${fieldId('customAmount')}-error`} className={styles.error}>{errors.customAmount}</p>
-                    )}
-                  </div>
+                  )}
+                </div>
+                {errors.amount && (
+                  <p id={`${fieldId('amount')}-error`} className={styles.error}>{errors.amount}</p>
+                )}
+
+                {errors.customAmount && (
+                  <p id={`${fieldId('customAmount')}-error`} className={styles.error}>{errors.customAmount}</p>
                 )}
               </div>
 
