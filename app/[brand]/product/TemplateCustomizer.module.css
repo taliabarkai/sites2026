@@ -194,6 +194,23 @@
   border-radius: calc(var(--radius-md) - var(--border-width)) calc(var(--radius-md) - var(--border-width)) 0 0;
 }
 
+/* The step card, every brand: no frame around the fields — the tabs keep a
+   box of their own and the fields run the column's full width under them */
+.card.cardOpen {
+  border: none;
+  border-radius: 0;
+  background: transparent;
+}
+
+.card.cardOpen > .tabs:first-child {
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--radius-md);
+}
+
+.card.cardOpen > .cardBody {
+  padding: var(--spacing-md) 0 0;
+}
+
 .cardBody {
   display: flex;
   flex-direction: column;
@@ -895,4 +912,45 @@
   display: flex;
   padding-top: var(--spacing-md);
   border-top: var(--border-width) solid var(--border-color);
+}
+
+/* A fixed answer, stated rather than asked: the field's label over a box
+   drawn like the other fields — same border and height — but not a control */
+.fixedField {
+  display: flex;
+  flex-direction: column;
+  /* The same label-to-box gap as the option fields */
+  gap: var(--spacing-xxs);
+}
+
+.fixedLabel {
+  margin: 0;
+  color: var(--colors-text);
+  font-family:    var(--typography-rules-text2-font-family);
+  font-size:      var(--typography-rules-text2-font-size);
+  line-height:    var(--typography-rules-text2-line-height);
+  font-weight:    var(--typography-rules-text2-font-weight, normal);
+  letter-spacing: var(--typography-rules-text2-letter-spacing, normal);
+  text-transform: var(--typography-rules-text2-text-transform, none);
+}
+
+.fixedValue {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  min-height: var(--field-min-height);
+  margin: 0;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  color: var(--colors-text);
+  background: var(--form-field-background);
+  border: var(--border-width) solid var(--form-field-border-color);
+  border-radius: var(--form-field-border-radius);
+  cursor: default;
+  user-select: none;
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  font-weight:    var(--typography-rules-text1-font-weight, normal);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+  text-transform: var(--typography-rules-text1-text-transform, none);
 }

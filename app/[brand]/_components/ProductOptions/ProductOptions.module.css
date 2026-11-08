@@ -455,6 +455,11 @@
   --option-tile-min: calc(var(--spacing-xxl) + var(--spacing-xl));
 }
 
+/* Text tiles (Stone, Shape, Size…): 8px apart, as the image tiles are */
+.grid_text {
+  gap: var(--spacing-xxs);
+}
+
 .grid_standard .slot,
 .grid_big .slot {
   display: flex;

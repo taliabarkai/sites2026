@@ -121,6 +121,26 @@ export interface Field {
    * the cart and the preview read it as text.
    */
   keyboard?: boolean
+  /** proposed: a text field that takes letters only (no digits, spaces or symbols). */
+  lettersOnly?: boolean
+  /** proposed: typed text is shown and kept in capitals (initials). */
+  uppercase?: boolean
+  /**
+   * proposed: the price grows with the text — `cents` for every character
+   * past the first `included` (Inez: each initial after the first).
+   */
+  pricePerCharacter?: { included: number; cents: number }
+  /**
+   * proposed: a longer minimum while another choice holds — Inez's stones sit
+   * between the initials, so a stone needs at least two. `message` is the
+   * error shown when it's short.
+   */
+  minLengthWhen?: { when: VisibleWhen; min: number; message: string }
+  /**
+   * proposed: one fixed answer, stated and not asked ("Chain length: One
+   * size"). The field's first value is the answer; it still goes in the cart.
+   */
+  fixed?: boolean
 }
 
 // ─── Live preview ───────────────────────────────────────────────────────────
@@ -180,6 +200,8 @@ export interface PlaceholderSpec {
     /** `single`: the values joined on one line. `stack`: one line per repeated value. */
     layout?: 'single' | 'stack'
     uppercase?: boolean
+    /** proposed: one piece per character of the text ("LBD" → L, B, D) — initials typed in one field. */
+    perCharacter?: boolean
     /**
      * proposed: a stone set on the chain between consecutive values (`single`
      * layout) — Inez's initials. The first source whose field has a value in
@@ -253,6 +275,11 @@ export interface Flow {
    * product opens on when the link doesn't name one. Default V1.
    */
   defaultPlacement?: PersonalizePlacement
+  /**
+   * mockup-only: V5's (Jewelry) own tabs, in order, when the default split —
+   * Personalize (the text and its count), then Customize (the rest) — doesn't fit.
+   */
+  jewelrySteps?: PresentationStep[]
 }
 
 // ─── Template ───────────────────────────────────────────────────────────────

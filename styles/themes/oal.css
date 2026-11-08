@@ -116,6 +116,8 @@
   /* Cards */
   --colors-card-image-bg: var(--oal-white);
   --product-image-background-blend: transparent;
+  /* The live preview's ground: the light grey the product photos are shot on */
+  --live-preview-background: var(--oal-off-white);
 
   /* SEO category pills */
   --related-category-background:  var(--oal-light-grey);

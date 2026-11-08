@@ -2,16 +2,17 @@ import type { PdpTemplate } from '../pdpTemplate'
 
 /**
  * OAL Inez Initial Necklace — the layered preview. The finish, the initials
- * and the stone all change the image, so this is
- * the template that proves the preview is state, not text.
+ * and the stone all change the image, so this is the template that proves
+ * the preview is state, not text.
  *
- * Opens on V5 (Jewelry): the finish (OAL's word for the metal) on the page; Personalize holds the stone
- * (with or without — with one, at least two initials, the stones between
- * them), how many initials and each initial (a dropdown with a letter
- * keyboard); Customize the stone's kind (a gemstone: ruby, black moissanite or
- * emerald; a diamond: its size and shape). One chain size, no heart; the
- * preview sets the chosen stone on the chain between the initials. Values and prices are placeholders
- * until pulled from the live PDP (oakandluna.com/products/inez-initial-heart-necklace-with-diamond-gold-vermeil).
+ * Opens on V5 (Jewelry): the finish (OAL's word for the metal) on the page;
+ * then Personalize — the initials, typed in one field (1–5 letters, each one
+ * a piece on the chain in the preview) and the chain length, stated (one
+ * size) — and Customize: the stone between the initials (none, a gemstone —
+ * ruby, emerald or black moissanite — or a diamond: its shape, then its
+ * size), then Add to bag. Initials come first: how many there are decides
+ * how many stones fit between them. Values and prices are placeholders until
+ * pulled from the live PDP (oakandluna.com/products/inez-initial-heart-necklace-with-diamond-gold-vermeil).
  */
 export const oalInez: PdpTemplate = {
   schemaVersion: 1,
@@ -20,14 +21,16 @@ export const oalInez: PdpTemplate = {
   brand: 'oal',
   sku: 'OAL-INEZ-INITIAL-HEART', // TODO: real SKU
   productId: 9,
-  summary: 'Initial necklace on V5: initials picked from a letter keyboard, with a gemstone or diamond between them (2+ initials) or none',
+  summary: 'Initial necklace on V5: 1–5 initials in one field, then no stone, a gemstone or a diamond between them',
 
   gallery: { desktop: 'heroGridPhotoFirst', mobile: 'carousel' },
 
-  // V5 (its default) splits these itself: Personalize holds the stone (with or
-  // without), the count and the initials; Customize the stone's kind. These steps are V1–V4's, with the stone on the page.
+  // V1–V4's one step: every field, in page order. Behind the Personalize row
+  // (V1, V4) the finish stays on the page (flow.entryFieldIds);
+  // on the page (V2, V3) they all show here. V5, its default, has its own
+  // tabs: flow.jewelrySteps.
   steps: [
-    { label: 'Personalize', hint: 'Initials & stone', fieldIds: [307, 305, 308, 310, 303, 311] },
+    { label: 'Personalize', hint: 'Initials & stone', fieldIds: [301, 305, 306, 302, 310, 311, 303] },
   ],
 
   fields: [
@@ -42,76 +45,63 @@ export const oalInez: PdpTemplate = {
       ],
     },
     {
-      // First in Personalize: a stone sits between initials, so it decides the count
-      fieldId: 302, name: 'Stone', cartName: 'Stone', type: 'selection', displayType: 'grid', order: 2, isRequired: true,
-      pricing: 'delta', affectsPreview: true, defaultValueId: 'with', showPriceDelta: false,
-      values: [
-        { id: 'with',    label: 'With stone',    priceDelta: 0 },
-        { id: 'without', label: 'Without stone', priceDelta: -3000 },
-      ],
-    },
-    {
-      // How many initials: with a stone it's at least two (the stones sit between them)
-      fieldId: 307, name: 'Select number of initials (1-5)', cartName: 'Initials', type: 'selection', displayType: 'visual_dropdown_list', order: 3, isRequired: true,
-      pricing: 'delta', affectsPreview: true, defaultValueId: '2',
-      values: [
-        { id: '1', label: '1 initial',  priceDelta: 0, visibleWhen: { fieldId: 302, valueIds: ['without'] } },
-        { id: '2', label: '2 initials', priceDelta: 2500 },
-        { id: '3', label: '3 initials', priceDelta: 5000 },
-        { id: '4', label: '4 initials', priceDelta: 7500 },
-        { id: '5', label: '5 initials', priceDelta: 10000 },
-      ],
-    },
-    {
-      // Each initial picked from a letter keyboard under its own dropdown
-      fieldId: 305, name: 'Initial', cartName: 'Initial', type: 'text', displayType: 'text', order: 4, isRequired: true,
-      textMinLength: 1, textMaxLength: 1, keyboard: true,
+      // The initials, in one field: letters only, in capitals, 1–5. The first
+      // is in the price; each one after adds $25. A stone sits between
+      // initials, so with one there must be at least two.
+      fieldId: 305, name: 'Your initials', cartName: 'Initials', type: 'text', displayType: 'text', order: 2, isRequired: true,
+      textMinLength: 1, textMaxLength: 5, placeholder: 'e.g. LBD', lettersOnly: true, uppercase: true,
+      note: { text: 'Up to 5 letters, +$25 for each initial after the first' },
+      pricePerCharacter: { included: 1, cents: 2500 },
+      minLengthWhen: { when: { fieldId: 302, valueIds: ['gemstone', 'diamond'] }, min: 2, message: 'Add at least 2 initials for a stone between them' },
       pricing: 'none', affectsPreview: true,
-      repeat: { countFieldId: 307, min: 1, max: 5, labelPattern: '{nth} initial' },
     },
     {
-      // Customize: which kind of stone — each kind then shows its own choices
-      fieldId: 308, name: 'Stone type', cartName: 'Stone Type', type: 'selection', displayType: 'grid', order: 5, isRequired: true,
-      pricing: 'none', affectsPreview: true, defaultValueId: 'diamond',
-      visibleWhen: { fieldId: 302, valueIds: ['with'] },
+      // One size: stated, not asked
+      fieldId: 306, name: 'Chain length', cartName: 'Chain Length', type: 'selection', displayType: 'text', order: 3, isRequired: true,
+      pricing: 'none', affectsPreview: false, defaultValueId: 'one-size', fixed: true,
+      values: [{ id: 'one-size', label: 'One Size' }],
+    },
+    {
+      // The stone set between the initials — each kind then shows its own choices
+      fieldId: 302, name: 'Stone', cartName: 'Stone', type: 'selection', displayType: 'grid', order: 4, isRequired: true,
+      pricing: 'delta', affectsPreview: true, defaultValueId: 'diamond', showPriceDelta: false,
       values: [
-        { id: 'gemstone', label: 'Gemstone' },
-        { id: 'diamond',  label: 'Diamond' },
+        { id: 'none',     label: 'No stone', priceDelta: -3000 },
+        { id: 'gemstone', label: 'Gemstone', priceDelta: 0 },
+        { id: 'diamond',  label: 'Diamond',  priceDelta: 0 },
       ],
     },
     {
       // Gem swatches, named beside the label ("Gemstone — Ruby")
-      fieldId: 310, name: 'Gemstone', cartName: 'Gemstone', type: 'selection', displayType: 'visual', order: 6, isRequired: true,
+      fieldId: 310, name: 'Gemstone', cartName: 'Gemstone', type: 'selection', displayType: 'visual', order: 5, isRequired: true,
       pricing: 'none', affectsPreview: true, defaultValueId: 'ruby',
-      visibleWhen: [{ fieldId: 302, valueIds: ['with'] }, { fieldId: 308, valueIds: ['gemstone'] }],
+      visibleWhen: { fieldId: 302, valueIds: ['gemstone'] },
       values: [
         { id: 'ruby',             label: 'Ruby',             image: '/images/birthstones/july-ruby.png' },
-        { id: 'black-moissanite', label: 'Black Moissanite', image: '/images/gems/black-moissanite.png' },
         { id: 'emerald',          label: 'Emerald',          image: '/images/birthstones/may-emerald.png' },
+        { id: 'black-moissanite', label: 'Black Moissanite', image: '/images/gems/black-moissanite.png' },
       ],
     },
     {
-      fieldId: 303, name: 'Diamond size', cartName: 'Diamond Size', type: 'selection', displayType: 'grid', order: 7, isRequired: true,
-      pricing: 'delta', affectsPreview: true, defaultValueId: '0.05', showPriceDelta: false,
-      visibleWhen: [{ fieldId: 302, valueIds: ['with'] }, { fieldId: 308, valueIds: ['diamond'] }],
-      values: [
-        // Text only: the sizes as text tiles, no picture
-        { id: '0.05', label: '0.05CT', priceDelta: 0 },
-        { id: '0.10', label: '0.10CT', priceDelta: 4000 },
-      ],
-    },
-    {
-      // Text tiles (no pictures)
-      fieldId: 311, name: 'Diamond shape', cartName: 'Diamond Shape', type: 'selection', displayType: 'grid', order: 8, isRequired: true,
+      // The diamond's shape, then its size — text tiles (no pictures)
+      fieldId: 311, name: 'Shape', cartName: 'Diamond Shape', type: 'selection', displayType: 'grid', order: 6, isRequired: true,
       pricing: 'none', affectsPreview: true, defaultValueId: 'round',
-      visibleWhen: [{ fieldId: 302, valueIds: ['with'] }, { fieldId: 308, valueIds: ['diamond'] }],
+      visibleWhen: { fieldId: 302, valueIds: ['diamond'] },
       values: [
-        { id: 'emerald', label: 'Emerald' },
         { id: 'round',   label: 'Round' },
         { id: 'oval',    label: 'Oval' },
+        { id: 'emerald', label: 'Emerald cut' },
       ],
     },
-    // No chain length: Inez comes in one size
+    {
+      fieldId: 303, name: 'Size', cartName: 'Diamond Size', type: 'selection', displayType: 'grid', order: 7, isRequired: true,
+      pricing: 'delta', affectsPreview: true, defaultValueId: '0.05', showPriceDelta: false,
+      visibleWhen: { fieldId: 302, valueIds: ['diamond'] },
+      values: [
+        { id: '0.05', label: '0.05ct', priceDelta: 0 },
+        { id: '0.10', label: '0.10ct', priceDelta: 4000 },
+      ],
+    },
   ],
 
   livePreview: {
@@ -132,8 +122,8 @@ export const oalInez: PdpTemplate = {
         chain: { style: 'cable' },
         text: [
           {
-            // Wide enough for five initials with a stone between each pair
-            fieldId: 305, font: "'Cormorant Garamond', serif", box: { x: 0.14, y: 0.45, w: 0.72, h: 0.14 }, uppercase: true,
+            // Strung on the drawn necklace: the box's top is the necklace's lowest point, its height the letters' size
+            fieldId: 305, font: "'Cormorant Garamond', serif", box: { x: 0.14, y: 0.6, w: 0.72, h: 0.14 }, uppercase: true, perCharacter: true,
             // The stone on the chain between the initials: the gemstone's
             // picture, or the diamond's cut (scaled by its carat). Without a
             // stone neither field is in the preview, so none is drawn.
@@ -157,8 +147,15 @@ export const oalInez: PdpTemplate = {
   flow: {
     // V5 (Jewelry) unless the link names another version
     defaultPlacement: 'jewelry',
-    // Material and the stone (with or without) stay on the page above the CTA in V1–V4; the steps hold the rest
-    entryFieldIds: [301, 302],
+    // V5's tabs: Personalize first — the initials decide how many stones fit
+    // between them — then Customize, the stone, and Add to bag
+    jewelrySteps: [
+      { label: 'Personalize', fieldIds: [305, 306] },
+      { label: 'Customize',   fieldIds: [302, 310, 311, 303] },
+    ],
+    // Only the finish stays on the page above the CTA in V1 / V4: the stone goes
+    // behind the row with its shape and size, after the initials
+    entryFieldIds: [301],
     entryCta: 'Personalize',
     // The Personalize card's line: initials and stones, not a script name
     personalizeRow: { title: 'Personalize Yours', description: 'Choose your initials and stones' },

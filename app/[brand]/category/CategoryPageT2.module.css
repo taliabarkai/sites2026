@@ -377,10 +377,6 @@
   background-color: var(--colors-surface-primary);
 }
 
-[data-theme="oal"] .featuredCardImageWrap {
-  aspect-ratio: 4/5;
-}
-
 /* Group A: featured RIGHT on desktop → full-width row after the 4 cards on mobile */
 .featuredCardRight {
   grid-column: 1 / -1;

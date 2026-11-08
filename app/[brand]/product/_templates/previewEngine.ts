@@ -30,7 +30,8 @@ export function readPreviewColors(el: Element | null): PreviewColors {
   const css = el ? getComputedStyle(el) : null
   const v = (name: string, fallback: string) => css?.getPropertyValue(name).trim() || fallback
   return {
-    surface: v('--colors-card-image-bg', v('--colors-surface-primary', 'Canvas')),
+    // A theme can give the preview its photos' own ground (OAL's light grey)
+    surface: v('--live-preview-background', v('--colors-card-image-bg', v('--colors-surface-primary', 'Canvas'))),
     text: v('--colors-text', 'CanvasText'),
   }
 }
@@ -145,13 +146,19 @@ function resolveStone(sep: StoneSeparator | undefined, input: PreviewInput): { l
 }
 
 /** A stone placed in the render: its centre and diameter, and what it is. */
-interface StonePlacement { x: number; y: number; d: number; look: StoneLook }
+interface StonePlacement { x: number; y: number; d: number; look: StoneLook; angle?: number }
 
 /** Product content, not UI: a diamond's body, its facet lines and its edge. */
 const DIAMOND = { light: '#FFFFFF', body: '#E4E9EF', facet: '#B9C2CC' }
 
 /** A diamond cut drawn in SVG, in a thin setting of the metal. */
 function diamondSvg(p: StonePlacement, metal: string, id: number): string {
+  if (!('cut' in p.look)) return ''
+  // Turned with the chain it's set in
+  return `<g transform="rotate(${(p.angle ?? 0).toFixed(1)} ${p.x.toFixed(1)} ${p.y.toFixed(1)})">${diamondShape(p, metal, id)}</g>`
+}
+
+function diamondShape(p: StonePlacement, metal: string, id: number): string {
   if (!('cut' in p.look)) return ''
   const { x, y, d } = p
   const r = d / 2
@@ -188,13 +195,10 @@ function diamondSvg(p: StonePlacement, metal: string, id: number): string {
 
 // ─── SVG layers ─────────────────────────────────────────────────────────────
 
-/** What one text layer contributes: its letters, the stones between them, and where a chain would hang. */
+/** What one text layer contributes: its letters, and where a chain would hang. */
 interface LayerOut {
   glyphs: string[]
   ends: [Pt, Pt] | null
-  stones: StonePlacement[]
-  /** Short strands between letters and stones (drawn with the chain). */
-  links: [Pt, Pt][]
 }
 
 /** Text for one layer: `stack` one line per value, else joined on one line. */
@@ -217,93 +221,170 @@ function cssFontLayer(layer: NonNullable<PlaceholderSpec['text']>[number], value
   })
   const pad = SIZE * 0.015
   const cy = y + h / 2
-  return { glyphs, ends: [{ x: x + w / 2 - widest / 2 - pad, y: cy }, { x: x + w / 2 + widest / 2 + pad, y: cy }], stones: [], links: [] }
+  return { glyphs, ends: [{ x: x + w / 2 - widest / 2 - pad, y: cy }, { x: x + w / 2 + widest / 2 + pad, y: cy }] }
 }
+
+// ─── One curved necklace: the letters and stones strung along it ───────────
 
 /** Width of one capital, as a share of the font size, for spacing letters one by one. */
 const CAP_WIDTH = 0.66
-/** The chain-and-stone gap between two letters, as a share of the font size. */
-const STONE_GAP = 1.15
+/** Chain between two letters, as a share of the font size: longer with a stone set in it. */
+const LINK_GAP = { stone: 1.0, plain: 0.5 }
 
-/**
- * One line of letters with a stone on the chain between each pair: each
- * letter hangs from the chain, the stone sits a little lower at the middle.
- */
-function stonedLayer(layer: NonNullable<PlaceholderSpec['text']>[number], values: string[], fill: string, stone: { look: StoneLook; scale: number }): LayerOut {
-  const x = layer.box.x * SIZE
-  const y = layer.box.y * SIZE
-  const w = layer.box.w * SIZE
-  const h = layer.box.h * SIZE
-  const n = values.length
-  const size = Math.max(10, Math.min(h * 0.82, w / (n * CAP_WIDTH + (n - 1) * STONE_GAP)))
-  const letterW = size * CAP_WIDTH
-  const gap = size * STONE_GAP
-  const total = n * letterW + (n - 1) * gap
-  const cy = y + h / 2
-  // Small next to the letters, as on the real piece; a bigger carat a little bigger
-  const d = Math.min(gap * 0.3, size * 0.22) * stone.scale
-  const glyphs: string[] = []
-  const stones: StonePlacement[] = []
-  const links: [Pt, Pt][] = []
-  let left = x + (w - total) / 2
-  values.forEach((v, i) => {
-    const lx = left + letterW / 2
-    glyphs.push(
-      `<text x="${lx.toFixed(1)}" y="${cy.toFixed(1)}" text-anchor="middle" dominant-baseline="central" font-family="${esc(layer.font)}" font-size="${size.toFixed(1)}" fill="${esc(fill)}">${esc(v)}</text>`,
-    )
-    left += letterW
-    if (i < n - 1) {
-      const sx = left + gap / 2
-      const sy = cy + size * 0.12
-      stones.push({ x: sx, y: sy, d, look: stone.look })
-      const wide = 'cut' in stone.look && stone.look.cut !== 'round' ? d * 0.65 : d / 2
-      links.push([{ x: left + size * 0.04, y: cy - size * 0.05 }, { x: sx - wide, y: sy }])
-      links.push([{ x: sx + wide, y: sy }, { x: left + gap - size * 0.04, y: cy - size * 0.05 }])
-      left += gap
-    }
-  })
-  const pad = SIZE * 0.012
-  return { glyphs, ends: [{ x: x + (w - total) / 2 - pad, y: cy }, { x: x + (w + total) / 2 + pad, y: cy }], stones, links }
+/** A curve sampled by arc length: points, running length, and the point and angle at any length. */
+function sampledCurve(points: Pt[]) {
+  const cum = [0]
+  for (let i = 1; i < points.length; i++) cum.push(cum[i - 1] + Math.hypot(points[i].x - points[i - 1].x, points[i].y - points[i - 1].y))
+  const length = cum[cum.length - 1]
+  const at = (s: number): { p: Pt; angle: number } => {
+    const t = Math.max(0, Math.min(length, s))
+    let i = 1
+    while (i < cum.length - 1 && cum[i] < t) i++
+    const a = points[i - 1]
+    const b = points[i]
+    const f = (t - cum[i - 1]) / (cum[i] - cum[i - 1] || 1)
+    return { p: { x: a.x + (b.x - a.x) * f, y: a.y + (b.y - a.y) * f }, angle: (Math.atan2(b.y - a.y, b.x - a.x) * 180) / Math.PI }
+  }
+  return { length, at }
 }
 
 /**
- * The spec's text layers — and the chain under them, when `withChain` — as
- * one transparent SVG at SIZE×SIZE; plus the gem pictures to draw on top
- * (an SVG drawn as an image can't load pictures of its own).
+ * The necklace: one cubic curve from high on the left, down through a
+ * rounded bottom at `bottomY`, and back up on the right — the drape of a
+ * chain worn around the neck, not two strands meeting at a pendant.
+ */
+function necklaceCurve(bottomY: number) {
+  const top = -SIZE * 0.02
+  const left = SIZE * 0.1
+  const right = SIZE * 0.9
+  // The cubic's lowest point (t = ½) is (P0 + 3·P1 + 3·P2 + P3) / 8 — solve for the controls' height
+  const c = (8 * bottomY - 2 * top) / 6
+  const p0 = { x: left, y: top }
+  // Controls out past the ends: the sides fall almost straight, the bottom is broad and shallow
+  const p1 = { x: left - SIZE * 0.06, y: c }
+  const p2 = { x: right + SIZE * 0.06, y: c }
+  const p3 = { x: right, y: top }
+  const pts = Array.from({ length: 1201 }, (_, i) => {
+    const t = i / 1200
+    const u = 1 - t
+    return {
+      x: u ** 3 * p0.x + 3 * u * u * t * p1.x + 3 * u * t * t * p2.x + t ** 3 * p3.x,
+      y: u ** 3 * p0.y + 3 * u * u * t * p1.y + 3 * u * t * t * p2.y + t ** 3 * p3.y,
+    }
+  })
+  return sampledCurve(pts)
+}
+
+/** Cable links along the curve, leaving out the stretches a stone takes. */
+function chainAlong(curve: ReturnType<typeof sampledCurve>, gaps: [number, number][], color: string, gauge: Gauge): string {
+  const { link, wire } = gauge
+  const step = link * 0.78
+  const links: string[] = []
+  let n = 0
+  for (let s = link / 2; s < curve.length - link / 2; s += step) {
+    // No link centred inside a stone: the last one reaches up to its setting
+    if (gaps.some(([a, b]) => s > a && s < b)) continue
+    const { p, angle } = curve.at(s)
+    const ry = n++ % 2 === 0 ? link * 0.32 : wire * 0.6
+    links.push(
+      `<ellipse cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" rx="${(link / 2).toFixed(1)}" ry="${ry.toFixed(1)}" ` +
+      `transform="rotate(${angle.toFixed(1)} ${p.x.toFixed(1)} ${p.y.toFixed(1)})" fill="none" stroke="${esc(color)}" stroke-width="${wire.toFixed(2)}"/>`,
+    )
+  }
+  return links.join('')
+}
+
+/**
+ * The letters strung on the necklace, centred at its bottom: each one hangs
+ * with its top on the chain and turns with the curve, so the chain runs
+ * right up to its corners. A stone, when there is one, is set in the chain
+ * between each pair.
+ */
+function necklaceLayer(
+  layer: NonNullable<PlaceholderSpec['text']>[number], values: string[], fill: string,
+  stone: { look: StoneLook; scale: number } | null,
+): { glyphs: string[]; stones: StonePlacement[]; chain: string } {
+  const h = layer.box.h * SIZE
+  const curve = necklaceCurve(layer.box.y * SIZE)
+  const n = values.length
+  const gapShare = stone ? LINK_GAP.stone : LINK_GAP.plain
+  // Letters as large as the box allows, the whole row kept to the lower part of the curve
+  const size = Math.max(10, Math.min(h * 0.6, (curve.length * 0.28) / (n * CAP_WIDTH + (n - 1) * gapShare)))
+  const letterW = size * CAP_WIDTH
+  const gap = size * gapShare
+  const total = n * letterW + (n - 1) * gap
+  const d = Math.min(gap * 0.32, size * 0.22) * (stone?.scale ?? 1)
+  const glyphs: string[] = []
+  const stones: StonePlacement[] = []
+  const gaps: [number, number][] = []
+  let s = (curve.length - total) / 2
+  values.forEach((v, i) => {
+    const mid = s + letterW / 2
+    const { p, angle } = curve.at(mid)
+    // The chain runs on across the letter's top, so whatever its shape (an A's
+    // point, an L's stem) the letter hangs touching it
+    glyphs.push(
+      `<g transform="translate(${p.x.toFixed(1)} ${p.y.toFixed(1)}) rotate(${angle.toFixed(1)})">` +
+      `<text x="0" y="${(size * 0.3).toFixed(1)}" text-anchor="middle" dominant-baseline="central" font-family="${esc(layer.font)}" font-size="${size.toFixed(1)}" fill="${esc(fill)}">${esc(v)}</text></g>`,
+    )
+    s += letterW
+    if (i < n - 1 && stone) {
+      const at = curve.at(s + gap / 2)
+      stones.push({ x: at.p.x, y: at.p.y, d, look: stone.look, angle: at.angle })
+      const half = 'cut' in stone.look && stone.look.cut !== 'round' ? d * 0.65 : d / 2
+      gaps.push([s + gap / 2 - half * 0.9, s + gap / 2 + half * 0.9])
+    }
+    if (i < n - 1) s += gap
+  })
+  return { glyphs, stones, chain: chainAlong(curve, gaps, fill, GAUGE) }
+}
+
+/**
+ * The spec's text layers — and the chain, when `withChain` — as one
+ * transparent SVG at SIZE×SIZE; plus the gem pictures to draw on top (an
+ * SVG drawn as an image can't load pictures of its own). With the drawn
+ * chain the letters (and any stones) are strung on one curved necklace;
+ * over a real product photo they're set as plain text in their box.
  */
 function buildLayers(spec: PlaceholderSpec, input: PreviewInput, fill: string, withChain: boolean): { svg: string; gems: StonePlacement[] } {
   const glyphs: string[] = []
   const stoneSvg: string[] = []
   const gems: StonePlacement[] = []
-  const links: [Pt, Pt][] = []
-  // Where the chain hangs to: the first text layer that has text
+  let chain = ''
+  // Where a plain chain hangs to: the first text layer that has text
   let ends: [Pt, Pt] | null = null
+  const strung = withChain && !!spec.chain
   for (const layer of spec.text ?? []) {
-    const raw = (input.texts[layer.fieldId] ?? []).map((t) => t.trim()).filter(Boolean)
+    const typed = (input.texts[layer.fieldId] ?? []).map((t) => t.trim()).filter(Boolean)
+    // Initials typed in one field become one piece each
+    const raw = layer.perCharacter ? typed.join('').replace(/\s/g, '').split('') : typed
     const values = layer.uppercase ? raw.map((t) => t.toUpperCase()) : raw
     if (values.length === 0) continue
-    const stone = layer.layout !== 'stack' && values.length > 1 ? resolveStone(layer.separator, input) : null
-    const out = stone ? stonedLayer(layer, values, fill, stone) : cssFontLayer(layer, values, fill)
+    if (strung && layer.layout !== 'stack' && !chain) {
+      const stone = values.length > 1 ? resolveStone(layer.separator, input) : null
+      const out = necklaceLayer(layer, values, fill, stone)
+      glyphs.push(...out.glyphs)
+      chain = out.chain
+      out.stones.forEach((p) => {
+        if ('cut' in p.look) stoneSvg.push(diamondSvg(p, fill, stoneSvg.length))
+        else {
+          // A gem sits in a bezel of the metal
+          stoneSvg.push(`<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="${(p.d * 0.62).toFixed(1)}" fill="${esc(fill)}"/>`)
+          gems.push(p)
+        }
+      })
+      continue
+    }
+    const out = cssFontLayer(layer, values, fill)
     glyphs.push(...out.glyphs)
-    links.push(...out.links)
-    out.stones.forEach((p, i) => {
-      if ('cut' in p.look) stoneSvg.push(diamondSvg(p, fill, stoneSvg.length + i))
-      else {
-        // A gem sits in a bezel of the metal
-        stoneSvg.push(`<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="${(p.d * 0.62).toFixed(1)}" fill="${esc(fill)}"/>`)
-        gems.push(p)
-      }
-    })
     ends = ends ?? out.ends
   }
-  const pendant = pendantBox(spec)
-  const chainEnds = ends ?? (pendant ? boxEnds(pendant) : null)
-  const small: Gauge = { link: GAUGE.link * 0.7, wire: GAUGE.wire * 0.85 }
-  const chain = withChain && spec.chain && chainEnds
-    ? cableChainSvg(chainEnds[0], chainEnds[1], fill, GAUGE) +
-      // Between letters and stones: a short, slightly sagging strand
-      links.map(([a, b]) => cableStrand(a, { x: (a.x + b.x) / 2, y: Math.max(a.y, b.y) + SIZE * 0.008 }, b, fill, small)).join('')
-    : ''
+  if (strung && !chain) {
+    // Nothing strung yet: the plain chain down to the text, or the pendant
+    const pendant = pendantBox(spec)
+    const chainEnds = ends ?? (pendant ? boxEnds(pendant) : null)
+    if (chainEnds) chain = cableChainSvg(chainEnds[0], chainEnds[1], fill, GAUGE)
+  }
   const svg =
     `<svg xmlns="http://www.w3.org/2000/svg" width="${SIZE}" height="${SIZE}" viewBox="0 0 ${SIZE} ${SIZE}">` +
     `<g>${chain}</g><g>${glyphs.join('')}</g><g>${stoneSvg.join('')}</g></svg>`

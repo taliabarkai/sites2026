@@ -742,6 +742,8 @@ function HeroGridGallery({ images, modelImages, name, rootRef, livePreview, ribb
   useEffect(() => {
     const el = heroRef.current
     if (!livePreview || !el || el.offsetParent === null) return // hidden below desktop
+    // While the steps are open the preview is pinned in view: the page never moves
+    if (getComputedStyle(el).position === 'sticky') return
     // Distance from the hero to its resting place under the sticky header (negative: scrolled past)
     const offset = () => el.getBoundingClientRect().top - (parseFloat(getComputedStyle(el).scrollMarginTop) || 0)
     if (offset() >= -1 || glideRef.current !== null) return
@@ -784,10 +786,13 @@ function HeroGridGallery({ images, modelImages, name, rootRef, livePreview, ribb
 
   return (
     <div ref={rootRef} className={styles.heroGridGallery}>
-      <div ref={heroRef} className={`${styles.desktopGridCell} ${styles.heroGridHero}`}>
-        <RibbonStack items={ribbons} />
-        {livePreview && previewNote && <div className={styles.livePreviewNote}>{previewNote}</div>}
-        <img src={hero} alt={name} className={galleryImageClass(styles.desktopGridImage, hero, modelImages)} loading="eager" />
+      {/* The hero in a row of its own, which holds it pinned beside the open steps */}
+      <div className={styles.heroGridHeroSlot}>
+        <div ref={heroRef} className={`${styles.desktopGridCell} ${styles.heroGridHero}`}>
+          <RibbonStack items={ribbons} />
+          {livePreview && previewNote && <div className={styles.livePreviewNote}>{previewNote}</div>}
+          <img src={hero} alt={name} className={galleryImageClass(styles.desktopGridImage, hero, modelImages)} loading="eager" />
+        </div>
       </div>
       {rest.map((src, i) => (
         <div key={`${src.slice(0, 64)}-${i}`} className={styles.desktopGridCell}>

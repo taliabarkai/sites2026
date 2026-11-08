@@ -16,7 +16,7 @@ import type { PersonalizePlacement } from '../_config/demoParams'
 import { materialLabel } from '../_config/brands'
 import { fieldById, stepFields, type Field, type FieldDisplayType, type PdpTemplate, type PresentationStep } from './_templates'
 import {
-  allGroups, cartOptions, derivedText, groupId, groupsForField, isVisible, offeredValues, missingRequired, parsePriceLabel, previewInput, previewKey, summaryLines, templatePrice, textValues,
+  allGroups, cartOptions, derivedText, groupId, groupsForField, isVisible, offeredValues, tooShort, missingRequired, parsePriceLabel, previewInput, previewKey, summaryLines, templatePrice, textValues,
 } from './_templates/fieldState'
 import { blankPreview, debounceFor, isRemote, readPreviewColors, renderPreview } from './_templates/previewEngine'
 import pdp from './ProductDetailPage.module.css'
@@ -163,7 +163,12 @@ export function TemplateCustomizer({
   const options: ProductOptionsController = {
     ...base,
     choose: (id, valueId) => { base.choose(id, valueId); if (entered || inline) setStarted(true) },
-    setText: (id, value) => {
+    setText: (id, raw) => {
+      // Initials-style fields keep letters only, in capitals
+      const field = fieldById(template, Number(/^f(\d+)/.exec(id)?.[1]))
+      let value = raw
+      if (field?.lettersOnly) value = value.replace(/[^\p{L}]/gu, '')
+      if (field?.uppercase) value = value.toUpperCase()
       base.setText(id, value)
       if (value.trim()) setStarted(true)
       setErrors((e) => (e.includes(id) ? e.filter((x) => x !== id) : e))
@@ -248,16 +253,11 @@ export function TemplateCustomizer({
   // …and its panel holds only the rest: the personalization fields
   // V5's two steps: the name (and a count that repeats it), then everything else
   const jewelrySteps = useMemo(() => {
+    // A template can lay V5's tabs out itself (Inez: Customize, then Personalize)
+    if (template.flow.jewelrySteps) return template.flow.jewelrySteps
     const byOrder = [...template.fields].sort((a, b) => a.order - b.order)
     const countIds = new Set(byOrder.filter((f) => f.repeat).map((f) => f.repeat!.countFieldId))
-    // …and whatever decides which counts are offered (Inez: a stone means 2+ initials), ahead of it
-    const gateIds = new Set(
-      byOrder.filter((f) => countIds.has(f.fieldId)).flatMap((f) => (f.values ?? []).flatMap((v) => {
-        const w = v.visibleWhen
-        return w ? (Array.isArray(w) ? w : [w]).map((c) => c.fieldId) : []
-      })),
-    )
-    const first = byOrder.filter((f) => f.type === 'text' || countIds.has(f.fieldId) || gateIds.has(f.fieldId)).map((f) => f.fieldId)
+    const first = byOrder.filter((f) => f.type === 'text' || countIds.has(f.fieldId)).map((f) => f.fieldId)
     const rest = byOrder.filter((f) => !first.includes(f.fieldId)).map((f) => f.fieldId)
     const two: PresentationStep[] = [{ label: 'Personalize', fieldIds: first }, { label: 'Customize', fieldIds: rest }]
     return two
@@ -316,7 +316,36 @@ export function TemplateCustomizer({
   }, [cardOpen])
 
   // Opens on step 1 the first time; reopening resumes where the shopper was
-  const enter = () => { setEntered(true); setStarted(true) }
+  // Desktop: opening the steps from further down the page goes back up to the
+  // top, where the gallery (pinned to its first image, the live preview) and
+  // the steps start side by side
+  const scrollUpOnOpen = useRef(false)
+  const enter = () => {
+    setEntered(true)
+    setStarted(true)
+    scrollUpOnOpen.current = !isMobile
+  }
+  // Desktop, steps open: the page's layout learns the steps' height
+  // (--steps-height), which holds the gallery's preview pinned beside them
+  useEffect(() => {
+    const el = rootRef.current
+    const layout = el?.parentElement
+    if (!cardOpen || !el || !layout) return
+    const sync = () => layout.style.setProperty('--steps-height', `${el.offsetHeight}px`)
+    sync()
+    const ro = new ResizeObserver(sync)
+    ro.observe(el)
+    return () => { ro.disconnect(); layout.style.removeProperty('--steps-height') }
+  }, [cardOpen])
+  // …once the page has re-laid itself out for the open steps: a smooth
+  // scroll started in the same frame as that change is cancelled by it
+  useEffect(() => {
+    if (!cardOpen || !scrollUpOnOpen.current) return
+    scrollUpOnOpen.current = false
+    if (window.scrollY <= 0) return
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' })
+  }, [cardOpen])
 
   // "From $X" until the steps open, when a later choice can still add to the price
   const entryIds = new Set(entryFields.map((f) => f.fieldId))
@@ -422,15 +451,16 @@ export function TemplateCustomizer({
 
   // ── Validation + add to bag ─────────────────────────────────────────────────
   /** Flags empty required inputs in the given steps; returns the first step that has one. */
-  const validate = (stepIndexes: number[]): number | null => {
-    const missing = stepIndexes.flatMap((i) => missingRequired(template, stepFields(template, steps[i]), state))
+  const validate = (stepIndexes: number[], opts?: { conditional?: boolean }): number | null => {
+    const missing = stepIndexes.flatMap((i) => missingRequired(template, stepFields(template, steps[i]), state, opts))
     setErrors(missing)
     if (missing.length === 0) return null
-    return stepIndexes.find((i) => missingRequired(template, stepFields(template, steps[i]), state).length > 0) ?? null
+    return stepIndexes.find((i) => missingRequired(template, stepFields(template, steps[i]), state, opts).length > 0) ?? null
   }
 
   const handleNext = () => {
-    if (validate([stepIdx]) !== null) return
+    // A minimum that hangs on a later choice (2 initials for a stone) waits for Add to bag
+    if (validate([stepIdx], { conditional: false }) !== null) return
     setStepIdx((i) => Math.min(steps.length - 1, i + 1))
   }
 
@@ -542,6 +572,17 @@ export function TemplateCustomizer({
     // so the input never remounts (and the keyboard stays up) as it comes and goes
     const previewSlot = tapMode && tapFields.includes(field) && !opts?.inPanel
 
+    // A fixed answer, stated rather than asked: the field's label over a box
+    // that looks like the other fields but can't be changed ("One Size")
+    if (field.fixed) {
+      return (
+        <div key={field.fieldId} className={styles.fixedField}>
+          <p className={styles.fixedLabel}>{field.name}</p>
+          <p className={styles.fixedValue} aria-readonly="true">{field.values?.[0]?.label}</p>
+        </div>
+      )
+    }
+
     if (field.derivedFrom) {
       return (
         <div key={field.fieldId} className={styles.derived}>
@@ -567,7 +608,12 @@ export function TemplateCustomizer({
         : g,
     )
     const slots = Object.fromEntries(
-      fieldGroups.filter((g) => errors.includes(g.id)).map((g) => [g.id, <p key="err" className={styles.error} role="alert">Please fill in {g.label.toLowerCase()}</p>]),
+      fieldGroups.filter((g) => errors.includes(g.id)).map((g) => {
+        // Filled in but short of a conditional minimum: say why (a stone needs two initials)
+        const text = (state.text[g.id] ?? '').trim()
+        const message = text && field.minLengthWhen && tooShort(field, text, state) ? field.minLengthWhen.message : `Please fill in ${g.label.toLowerCase()}`
+        return [g.id, <p key="err" className={styles.error} role="alert">{message}</p>]
+      }),
     )
     return (
       <div key={field.fieldId} className={styles.field} data-field-id={field.fieldId}>
@@ -594,6 +640,12 @@ export function TemplateCustomizer({
         {field.note && (
           <p className={`${styles.note} ${field.note.tone === 'warning' ? styles.noteWarning : ''}`}>{field.note.text}</p>
         )}
+        {/* This choice raises another field's minimum and that field is short:
+            say so here (a stone needs a second initial to sit between) */}
+        {template.fields
+          .filter((t) => t.minLengthWhen && (Array.isArray(t.minLengthWhen.when) ? t.minLengthWhen.when : [t.minLengthWhen.when]).some((c) => c.fieldId === field.fieldId))
+          .filter((t) => textValues(template, t, state).some((v) => v.trim() && tooShort(t, v.trim(), state)))
+          .map((t) => <p key={t.fieldId} className={`${styles.note} ${styles.noteWarning}`}>{t.minLengthWhen!.message}</p>)}
       </div>
     )
   }
@@ -889,7 +941,8 @@ export function TemplateCustomizer({
                     </button>
                   </div>
                 )}
-                <div className={styles.card}>
+                {/* No frame: the tabs in their own box, the fields full width under them (as LAL) */}
+                <div className={`${styles.card} ${styles.cardOpen}`}>
                   {stepHeader}
                   <div className={styles.cardBody} role="tabpanel">
                     {renderStep(stepIdx)}

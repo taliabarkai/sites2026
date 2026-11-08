@@ -135,6 +135,12 @@ export function templatePrice(template: PdpTemplate, state: OptionsState, fallba
     if (f.pricing === 'base') { price += parsePriceLabel(v.priceLabel); hasBase = true }
     if (f.pricing === 'delta') price += v.priceDelta ?? 0
   }
+  // Text priced by its length (each initial past the first)
+  for (const f of template.fields) {
+    if (!f.pricePerCharacter || !isVisible(f, state)) continue
+    const length = textValues(template, f, state).join('').replace(/\s/g, '').length
+    price += Math.max(0, length - f.pricePerCharacter.included) * f.pricePerCharacter.cents
+  }
   return hasBase ? price : fallbackBase + price
 }
 
@@ -152,12 +158,26 @@ export function textValues(template: PdpTemplate, field: Field, state: OptionsSt
 }
 
 /** Required text inputs (by group id) that are still empty among the given fields. */
-export function missingRequired(template: PdpTemplate, fields: Field[], state: OptionsState): string[] {
+/**
+ * `conditional: false` skips the conditional minimums — moving on to the next
+ * step mid-flow, before the choice they hang on (the stone) has been made.
+ */
+export function missingRequired(template: PdpTemplate, fields: Field[], state: OptionsState, opts: { conditional?: boolean } = {}): string[] {
+  const conditional = opts.conditional ?? true
   return fields
     .filter((f) => isTextField(f) && f.isRequired && isVisible(f, state))
-    .flatMap((f) => groupsForField(template, f, state))
-    .filter((g) => !(state.text[g.id] ?? '').trim())
-    .map((g) => g.id)
+    .flatMap((f) => groupsForField(template, f, state).map((g) => ({ f, g })))
+    .filter(({ f, g }) => {
+      const text = (state.text[g.id] ?? '').trim()
+      return !text || (conditional && tooShort(f, text, state))
+    })
+    .map(({ g }) => g.id)
+}
+
+/** A text that's there but under the field's conditional minimum (a stone needs two initials). */
+export function tooShort(field: Field, text: string, state: OptionsState): boolean {
+  const rule = field.minLengthWhen
+  return !!rule && conditionHolds(rule.when, state) && text.replace(/\s/g, '').length < rule.min
 }
 
 /** The cart line's options, in field order, labelled with each field's cartName. */

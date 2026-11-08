@@ -66,10 +66,6 @@
   background-color: var(--colors-card-image-bg);
 }
 
-[data-theme="oal"] .gallerySlide {
-  aspect-ratio: 4/5;
-}
-
 .galleryImage {
   position: absolute;
   inset: 0;
@@ -149,13 +145,14 @@
   }
 }
 
-/* 1024–1439px: bounded container — gallery AR caps height, right col scrolls */
+/* 1024–1439px: bounded container — gallery AR caps height, right col scrolls.
+   5:3 = a square main image (3 wide) beside a column 2 wide, the same height */
 @media (min-width: 1024px) and (max-width: 1439px) {
   .oalGallery {
     display: grid;
     grid-template-columns: 3fr 2fr;
     gap: 4px;
-    aspect-ratio: 4/3;
+    aspect-ratio: 5/3;
   }
 }
 
@@ -167,11 +164,12 @@
     gap: 4px;
     align-items: start;
   }
+  /* Square main image; the column beside it (2 wide) matches its height */
   .oalMainCell {
-    aspect-ratio: 4/5;
+    aspect-ratio: 1;
   }
   .oalScrollCol {
-    aspect-ratio: 8/15;
+    aspect-ratio: 2/3;
   }
 }
 
@@ -196,7 +194,7 @@
 .oalScrollCell {
   position: relative;
   flex-shrink: 0;
-  aspect-ratio: 4/5;
+  aspect-ratio: 1;
   overflow: hidden;
   background-color: var(--colors-card-image-bg);
 }
@@ -301,10 +299,6 @@
   line-height:    var(--typography-rules-ribbons1-line-height);
   font-weight:    var(--typography-rules-ribbons1-font-weight, 700);
   letter-spacing: var(--typography-rules-ribbons1-letter-spacing, normal);
-}
-
-[data-theme="oal"] .desktopGridCell {
-  aspect-ratio: 4/5;
 }
 
 .desktopGridImage {
@@ -1754,29 +1748,27 @@
   scroll-margin-top: var(--sticky-top);
 }
 
-/* Desktop, the personalization open (the details column unpinned): the
-   gallery keeps only its first image — the photo, or the preview once it's
-   the shopper's — and pins it under the header beside the steps until the
-   column's end scrolls past */
+/* The hero's own row: just the hero, until the steps open (below) */
+.heroGridHeroSlot {
+  grid-column: 1 / -1;
+}
+
+/* Desktop, the personalization open (the details column unpinned): only the
+   first image — the live preview — is pinned under the header, for as long
+   as the steps' column runs (its row is held that tall); then it lets go and
+   the rest of the gallery follows under it at full size. Nothing cropped, no
+   scrolling inside the gallery. */
 @media (min-width: 1024px) {
-  .layout:has(.formPanelUnpinned) > .heroGridGallery {
+  .layout:has(.formPanelUnpinned) .heroGridHeroSlot {
+    min-height: var(--steps-height, auto);
+  }
+
+  .layout:has(.formPanelUnpinned) .heroGridHeroSlot > .heroGridHero {
     position: sticky;
     top: var(--sticky-top);
   }
-
-  .layout:has(.formPanelUnpinned) > .heroGridGallery > :not(.heroGridHero) {
-    display: none;
-  }
-
-  /* A short window still shows the whole image */
-  .layout:has(.formPanelUnpinned) > .heroGridGallery > .heroGridHero {
-    max-height: calc(100vh - var(--sticky-top) - var(--spacing-md));
-  }
-
-  .layout:has(.formPanelUnpinned) > .heroGridGallery > .heroGridHero .desktopGridImage {
-    object-fit: contain;
-  }
 }
+
 
 /* Live-preview (template) pages, every gallery: gallery and form split the
    width 50/50; the form hugs the gallery (100px in) and the leftover white
