@@ -12,6 +12,7 @@ import { Footer } from '../_components/Footer'
 import { Button } from '../_components/Button'
 import { FloatingCart } from '../_components/FloatingCart'
 import { Checkbox } from '../_components/Checkbox'
+import { SiteLogo } from '../_components/SiteLogo'
 import { BRANDS, getBrandFromPathname } from '../_config/brands'
 import { prefixFooterColumns, prefixNavLinks, withBrandPrefix } from '../_config/brandPaths'
 import { DEFAULT_FOOTER_COLUMNS, DEFAULT_NAV_LINKS, DEFAULT_TOPLINE } from '../_config/siteContent'
@@ -46,16 +47,75 @@ const SEND_METHODS: Array<{ id: SendMethod; label: string; locked?: boolean }> =
 
 /** The uploaded photo card's tilt, matching .photoCard's rotate() in the CSS. */
 const PHOTO_CARD_TILT_DEG = 61
-/** How far one arrow press moves the photo, in object-position percent. */
-const PHOTO_NUDGE_STEP = 10
+/** The card's width over its height, matching .photoCard's aspect-ratio. */
+const CARD_RATIO = 1.586
+const ZOOM_MIN = 1
+const ZOOM_MAX = 3
+const ZOOM_STEP = 0.25
 const BACK_TEXT_MAX = 80
 
-const NUDGES = [
-  { label: 'Move photo up',    x: 0,  y: -1, turn: styles.chevronUp },
-  { label: 'Move photo left',  x: -1, y: 0,  turn: styles.chevronLeft },
-  { label: 'Move photo right', x: 1,  y: 0,  turn: undefined },
-  { label: 'Move photo down',  x: 0,  y: 1,  turn: styles.chevronDown },
-]
+// ─── Photo framing ────────────────────────────────────────────────────────────
+// The uploaded photo is drawn at its "cover" size (just big enough to fill the
+// card), then moved, turned and zoomed with one transform. Sizes below are in
+// card widths, so the same frame renders identically in the gallery and the tile.
+
+interface PhotoFrame {
+  /** Offset from centre, as a fraction of the card's width / height. */
+  tx: number
+  ty: number
+  zoom: number
+  /** Quarter turns: 0, 90, 180 or 270. */
+  rot: number
+}
+
+const DEFAULT_FRAME: PhotoFrame = { tx: 0, ty: 0, zoom: 1, rot: 0 }
+const CARD_W = 1
+const CARD_H = 1 / CARD_RATIO
+
+const clampTo = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value))
+
+/** The photo's size when cropped to cover the card, in card widths. */
+function coverSize(natural: { w: number; h: number }) {
+  const scale = Math.max(CARD_W / natural.w, CARD_H / natural.h)
+  return { w: natural.w * scale, h: natural.h * scale }
+}
+
+/** Total scale: the zoom, plus whatever a quarter turn needs to still fill the card. */
+function frameScale(frame: PhotoFrame, cover: { w: number; h: number }) {
+  const turned = frame.rot % 180 !== 0
+  const fill = turned ? Math.max(1, CARD_W / cover.h, CARD_H / cover.w) : 1
+  return frame.zoom * fill
+}
+
+/** Keeps the photo covering the card: offsets can't open a gap at any edge. */
+function clampFrame(frame: PhotoFrame, cover: { w: number; h: number } | null): PhotoFrame {
+  if (!cover) return frame
+  const scale = frameScale(frame, cover)
+  const turned = frame.rot % 180 !== 0
+  const extentX = scale * (turned ? cover.h : cover.w)
+  const extentY = scale * (turned ? cover.w : cover.h)
+  const maxX = Math.max(0, (extentX - CARD_W) / 2) / CARD_W
+  const maxY = Math.max(0, (extentY - CARD_H) / 2) / CARD_H
+  return { ...frame, tx: clampTo(frame.tx, -maxX, maxX), ty: clampTo(frame.ty, -maxY, maxY) }
+}
+
+/** Inline style for the photo inside a card face; plain cover until it has loaded. */
+function photoStyle(frame: PhotoFrame, cover: { w: number; h: number } | null): React.CSSProperties | undefined {
+  if (!cover) return undefined
+  // translate() percentages are of the image's own size, so convert from card fractions.
+  const offsetX = (frame.tx * CARD_W / cover.w) * 100
+  const offsetY = (frame.ty * CARD_H / cover.h) * 100
+  return {
+    position: 'absolute',
+    left: '50%',
+    top: '50%',
+    width: `${(cover.w / CARD_W) * 100}%`,
+    height: `${(cover.h / CARD_H) * 100}%`,
+    maxWidth: 'none',
+    objectFit: 'fill',
+    transform: `translate(-50%, -50%) translate(${offsetX}%, ${offsetY}%) rotate(${frame.rot}deg) scale(${frameScale(frame, cover)})`,
+  }
+}
 
 function formatPrice(cents: number): string {
   const dollars = cents / 100
@@ -165,7 +225,7 @@ export default function GiftCardPageClient() {
   const brand = getBrandFromPathname(pathname)
   const brandLabel = BRANDS.find((item) => item.key === brand)?.label ?? ''
   const icons = BRAND_ICONS[brand]
-  const { ChevronIcon, FileUploadIcon, XIcon } = icons
+  const { FileUploadIcon, RotateIcon, XIcon, ZoomInIcon, ZoomOutIcon } = icons
 
   const navLinks = prefixNavLinks(brand, DEFAULT_NAV_LINKS)
   const footerColumns = prefixFooterColumns(brand, DEFAULT_FOOTER_COLUMNS)
@@ -182,18 +242,14 @@ export default function GiftCardPageClient() {
   // ── Form state ────────────────────────────────────────────────────────────
   const [designId, setDesignId]         = useState<string>(GIFT_CARD_DESIGNS[0].id)
   const [upload, setUpload]             = useState<{ url: string; name: string } | null>(null)
-  // Where the uploaded photo sits in its card, as object-position percentages.
-  const [photoPos, setPhotoPos]         = useState({ x: 50, y: 50 })
+  // How the uploaded photo is framed in its card, and its natural size once loaded.
+  const [photoFrame, setPhotoFrame]     = useState<PhotoFrame>(DEFAULT_FRAME)
+  const [photoNatural, setPhotoNatural] = useState<{ w: number; h: number } | null>(null)
   const [addBackText, setAddBackText]   = useState(false)
   const [backText, setBackText]         = useState('')
   const [showBack, setShowBack]         = useState(false)
-  // An in-progress drag on the gallery photo: where it started, and how far the
-  // cropped photo overflows its card on each axis (the room it has to move).
-  const photoDrag = useRef<{
-    startX: number; startY: number
-    startPos: { x: number; y: number }
-    overflowX: number; overflowY: number
-  } | null>(null)
+  // An in-progress drag on the gallery photo: where the pointer and frame started.
+  const photoDrag = useRef<{ startX: number; startY: number; startFrame: PhotoFrame } | null>(null)
   const [amountChoice, setAmountChoice] = useState<number | 'custom' | null>(null)
   const [customAmount, setCustomAmount] = useState('')
   const [methods, setMethods]           = useState<SendMethod[]>(['email'])
@@ -262,7 +318,8 @@ export default function GiftCardPageClient() {
     const file = event.target.files?.[0]
     if (!file) return
     setUpload({ url: URL.createObjectURL(file), name: file.name })
-    setPhotoPos({ x: 50, y: 50 })
+    setPhotoFrame(DEFAULT_FRAME)
+    setPhotoNatural(null)
     setDesignId('custom')
     // Reset so choosing the same file again still fires a change.
     event.target.value = ''
@@ -276,51 +333,45 @@ export default function GiftCardPageClient() {
     setDesignId(GIFT_CARD_DESIGNS[0].id)
   }
 
-  // The arrows move the photo in its own frame: up is towards the top of the
-  // picture, whatever the card's tilt. The photo is cropped to cover, so only
-  // the axis it overflows on visibly moves.
-  function nudgePhoto(dx: number, dy: number) {
-    const clamp = (value: number) => Math.min(100, Math.max(0, value))
-    // Moving the picture right means showing more of its left side.
-    setPhotoPos((prev) => ({
-      x: clamp(prev.x - dx * PHOTO_NUDGE_STEP),
-      y: clamp(prev.y - dy * PHOTO_NUDGE_STEP),
-    }))
+  const hasBackText = addBackText && backText.trim().length > 0
+  const photoCover = photoNatural ? coverSize(photoNatural) : null
+  const framedPhotoStyle = photoStyle(photoFrame, photoCover)
+
+  function notePhotoSize(event: React.SyntheticEvent<HTMLImageElement>) {
+    const img = event.currentTarget
+    if (img.naturalWidth) setPhotoNatural({ w: img.naturalWidth, h: img.naturalHeight })
   }
 
+  function updateFrame(change: (prev: PhotoFrame) => PhotoFrame) {
+    setPhotoFrame((prev) => clampFrame(change(prev), photoCover))
+  }
+
+  const zoomPhoto = (step: number) =>
+    updateFrame((prev) => ({ ...prev, zoom: clampTo(prev.zoom + step, ZOOM_MIN, ZOOM_MAX) }))
+
+  const rotatePhoto = () => updateFrame((prev) => ({ ...prev, rot: (prev.rot + 90) % 360 }))
+
   // Dragging the photo: the picture follows the pointer exactly. The card is
-  // tilted, so the pointer's screen movement is turned into the card's own
-  // axes, then into object-position percent of the photo's overflow.
+  // tilted, so the pointer's screen movement is turned into the card's own axes.
   function startPhotoDrag(event: React.PointerEvent<HTMLSpanElement>) {
-    const face = event.currentTarget
-    const img = face.querySelector('img')
-    if (!img || !img.naturalWidth) return
-    const boxW = face.offsetWidth
-    const boxH = face.offsetHeight
-    const scale = Math.max(boxW / img.naturalWidth, boxH / img.naturalHeight)
-    photoDrag.current = {
-      startX: event.clientX,
-      startY: event.clientY,
-      startPos: photoPos,
-      overflowX: img.naturalWidth * scale - boxW,
-      overflowY: img.naturalHeight * scale - boxH,
-    }
-    face.setPointerCapture(event.pointerId)
+    photoDrag.current = { startX: event.clientX, startY: event.clientY, startFrame: photoFrame }
+    event.currentTarget.setPointerCapture(event.pointerId)
   }
 
   function movePhotoDrag(event: React.PointerEvent<HTMLSpanElement>) {
     const drag = photoDrag.current
     if (!drag) return
+    const face = event.currentTarget
     const screenX = event.clientX - drag.startX
     const screenY = event.clientY - drag.startY
     const angle = (PHOTO_CARD_TILT_DEG * Math.PI) / 180
     const localX = Math.cos(angle) * screenX - Math.sin(angle) * screenY
     const localY = Math.sin(angle) * screenX + Math.cos(angle) * screenY
-    const clamp = (value: number) => Math.min(100, Math.max(0, value))
-    setPhotoPos({
-      x: drag.overflowX > 0 ? clamp(drag.startPos.x - (localX / drag.overflowX) * 100) : drag.startPos.x,
-      y: drag.overflowY > 0 ? clamp(drag.startPos.y - (localY / drag.overflowY) * 100) : drag.startPos.y,
-    })
+    setPhotoFrame(clampFrame({
+      ...drag.startFrame,
+      tx: drag.startFrame.tx + localX / face.offsetWidth,
+      ty: drag.startFrame.ty + localY / face.offsetHeight,
+    }, photoCover))
   }
 
   function endPhotoDrag(event: React.PointerEvent<HTMLSpanElement>) {
@@ -437,30 +488,72 @@ export default function GiftCardPageClient() {
                             alt={galleryImage.alt}
                             draggable={false}
                             className={styles.photoCardImage}
-                            style={{ objectPosition: `${photoPos.x}% ${photoPos.y}%` }}
+                            style={framedPhotoStyle}
+                            onLoad={notePhotoSize}
                           />
                         </span>
-                        <span className={styles.cardSideBack} aria-hidden={!showBack}>
-                          <span className={styles.cardBackText}>{backText}</span>
+                        <span
+                          className={joinClasses(styles.cardSideBack, hasBackText && styles.cardSideBackWithText)}
+                          aria-hidden={!showBack}
+                        >
+                          {/* Logo alone: centred. With text: the text takes the centre
+                              and the logo drops to the bottom edge, a quarter smaller. */}
+                          {hasBackText && <span className={styles.cardBackText}>{backText}</span>}
+                          <SiteLogo brand={brand} className={styles.cardBackLogo} />
                         </span>
                       </span>
                     </span>
 
+                    {/* Photo tools, bottom-left: zoom and turn. Moving is by drag. */}
                     {!showBack && (
-                      <div className={styles.nudgePad} role="group" aria-label="Move your photo">
-                        {NUDGES.map((nudge) => (
-                          <button
-                            key={nudge.label}
-                            type="button"
-                            className={styles.nudgeButton}
-                            onClick={() => nudgePhoto(nudge.x, nudge.y)}
-                            aria-label={nudge.label}
-                          >
-                            <ChevronIcon size={16} className={nudge.turn} />
-                          </button>
-                        ))}
+                      <div className={styles.photoTools} role="group" aria-label="Adjust your photo">
+                        <button
+                          type="button"
+                          className={styles.photoTool}
+                          onClick={() => zoomPhoto(ZOOM_STEP)}
+                          disabled={photoFrame.zoom >= ZOOM_MAX}
+                          aria-label="Zoom in"
+                        >
+                          <ZoomInIcon size={24} />
+                        </button>
+                        <button
+                          type="button"
+                          className={styles.photoTool}
+                          onClick={() => zoomPhoto(-ZOOM_STEP)}
+                          disabled={photoFrame.zoom <= ZOOM_MIN}
+                          aria-label="Zoom out"
+                        >
+                          <ZoomOutIcon size={24} />
+                        </button>
+                        <button
+                          type="button"
+                          className={styles.photoTool}
+                          onClick={rotatePhoto}
+                          aria-label="Rotate photo"
+                        >
+                          <RotateIcon size={24} />
+                        </button>
                       </div>
                     )}
+
+                    {/* Front | Back, bottom-right. Also mirrors the flip that happens
+                        on its own while the back text is being typed. */}
+                    <div className={styles.sideToggle} role="group" aria-label="Card side">
+                      {([
+                        { label: 'Front', back: false },
+                        { label: 'Back',  back: true },
+                      ] as const).map((side) => (
+                        <button
+                          key={side.label}
+                          type="button"
+                          className={joinClasses(styles.sideToggleButton, showBack === side.back && styles.sideToggleActive)}
+                          aria-pressed={showBack === side.back}
+                          onClick={() => setShowBack(side.back)}
+                        >
+                          {side.label}
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 ) : (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -556,7 +649,8 @@ export default function GiftCardPageClient() {
                                   src={upload.url}
                                   alt=""
                                   className={styles.photoCardImage}
-                                  style={{ objectPosition: `${photoPos.x}% ${photoPos.y}%` }}
+                                  style={framedPhotoStyle}
+                                  onLoad={notePhotoSize}
                                 />
                               </span>
                             </span>

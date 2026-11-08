@@ -179,16 +179,42 @@
 }
 
 .cardSideBack {
+  /* Margins scale with the card, like its corners. */
+  --card-back-margin: 5cqmax;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 6cqmax;
+  padding: var(--card-back-margin);
   box-sizing: border-box;
   background: var(--colors-background);
   color: var(--colors-text);
   transform: rotateY(180deg);
 }
 
+/* The brand logo in the middle of the back, sized to the card. Scoped under
+   the back face so it outranks SiteLogo's own fixed header height. */
+.cardSideBack .cardBackLogo {
+  width: 24cqmax;
+  max-width: none;
+  height: auto;
+}
+
+/* Room for the logo below, so long text never runs into it. */
+.cardSideBackWithText {
+  padding-bottom: calc(var(--card-back-margin) * 2 + 5cqmax);
+}
+
+/* ...and the logo moves to the bottom edge, centred, inside the same margin
+   as the sides, at three quarters of its size. */
+.cardSideBackWithText .cardBackLogo {
+  position: absolute;
+  left: 50%;
+  bottom: var(--card-back-margin);
+  width: calc(24cqmax * 0.75);
+  transform: translateX(-50%);
+}
+
+/* With text, the text takes the centre of the back... */
 .cardBackText {
   max-width: 100%;
   text-align: center;
@@ -208,57 +234,89 @@
   }
 }
 
-/* Arrow pad for moving the photo inside its card: a round control with the
-   arrows in a cross. Bottom-right on phones, top-right on desktop. */
-.nudgePad {
-  /* 24px cells: a compact 72px pad at every size. */
-  --nudge-cell: var(--spacing-md);
+/* Photo tools (zoom in, zoom out, rotate) in the gallery's bottom-left:
+   round white buttons. Moving the photo is by dragging it. */
+.photoTools {
+  --photo-control: var(--spacing-xl);
+  position: absolute;
+  left: var(--spacing-sm);
+  bottom: var(--spacing-sm);
+  z-index: var(--z-raised);
+  display: flex;
+  gap: var(--spacing-xxs);
+}
+
+.photoTool {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--photo-control);
+  height: var(--photo-control);
+  padding: 0;
+  background: var(--colors-background);
+  border: 0;
+  border-radius: var(--radius-full);
+  box-shadow: var(--shadow-md);
+  color: var(--colors-text);
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.photoTool:hover:not(:disabled) {
+  background: var(--colors-surface-primary);
+}
+
+.photoTool:disabled {
+  color: var(--colors-text-disabled);
+  cursor: not-allowed;
+}
+
+.photoTool:focus-visible {
+  outline: 2px solid var(--colors-text);
+  outline-offset: 2px;
+}
+
+/* Front | Back switch in the gallery's bottom-right, styled like the photo
+   tools' card: white, raised, the same height as the round buttons. */
+.sideToggle {
   position: absolute;
   right: var(--spacing-sm);
   bottom: var(--spacing-sm);
   z-index: var(--z-raised);
-  display: grid;
-  grid-template-columns: repeat(3, var(--nudge-cell));
-  grid-template-rows: repeat(3, var(--nudge-cell));
-  grid-template-areas:
-    ".    up    ."
-    "left .     right"
-    ".    down  .";
+  display: inline-flex;
+  align-items: stretch;
+  height: var(--spacing-xl);
+  padding: var(--spacing-xxxs);
+  box-sizing: border-box;
   background: var(--colors-background);
-  border-radius: var(--radius-full);
+  border-radius: var(--radius-xl);
   box-shadow: var(--shadow-md);
 }
 
-.nudgeButton {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-  background: none;
+.sideToggleButton {
+  padding: 0 var(--spacing-sm);
+  background: transparent;
   border: 0;
-  border-radius: var(--radius-full);
+  border-radius: var(--radius-lg);
   color: var(--colors-text);
   cursor: pointer;
-  transition: background var(--transition-fast);
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  font-weight:    var(--typography-rules-text1-font-weight, normal);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+  transition: background var(--transition-fast), color var(--transition-fast);
 }
 
-.nudgeButton:nth-child(1) { grid-area: up; }
-.nudgeButton:nth-child(2) { grid-area: left; }
-.nudgeButton:nth-child(3) { grid-area: right; }
-.nudgeButton:nth-child(4) { grid-area: down; }
-
-.nudgeButton:hover {
-  background: var(--colors-surface-primary);
+.sideToggleActive {
+  background: var(--colors-text);
+  color: var(--colors-text-inverse);
 }
 
-.nudgeButton:focus-visible {
+.sideToggleButton:focus-visible {
   outline: 2px solid var(--colors-text);
-  outline-offset: -2px;
+  outline-offset: 2px;
 }
-
-.chevronUp    { transform: rotate(-90deg); }
-.chevronDown  { transform: rotate(90deg); }
-.chevronLeft  { transform: rotate(180deg); }
 
 /* "Add text" under the card picker, shown once a photo is uploaded. */
 .backTextGroup {
@@ -909,11 +967,16 @@
     gap: var(--spacing-lg);
   }
 
-  /* Desktop: top-right, since the gallery's bottom starts below the fold. */
-  .nudgePad {
-    top: var(--spacing-md);
+  .sideToggle {
     right: var(--spacing-md);
-    bottom: auto;
+    bottom: var(--spacing-md);
+    height: calc(var(--spacing-xl) + var(--spacing-xxs));
+  }
+
+  .photoTools {
+    --photo-control: calc(var(--spacing-xl) + var(--spacing-xxs));
+    left: var(--spacing-md);
+    bottom: var(--spacing-md);
   }
 
   .amountGrid,
@@ -1000,6 +1063,13 @@
   .previewSticky {
     position: sticky;
     top: var(--sticky-top);
+  }
+
+  /* The gallery's bottom starts a topline's height below the fold at the top
+     of the page, so the photo controls sit that much higher. */
+  .photoTools,
+  .sideToggle {
+    bottom: calc(var(--spacing-md) + var(--topline-height, 0px));
   }
 
   /* The gallery fills the column and the viewport under the header. */

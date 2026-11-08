@@ -29,12 +29,12 @@ export interface GiftCardDesign {
 }
 
 export const GIFT_CARD_DESIGNS: GiftCardDesign[] = [
+  { id: 'merry-christmas', message: 'Merry Christmas', tone: 'outline',
+    galleryImages: { oal: '/images/gift-card/oal-merry-christmas.png' } },
   { id: 'happy-birthday',  message: 'Happy Birthday',  tone: 'solid',
     galleryImages: { oal: '/images/gift-card/oal-happy-birthday.png' } },
   { id: 'happy-holidays',  message: 'Happy Holidays',  tone: 'tinted',
     galleryImages: { oal: '/images/gift-card/oal-happy-holidays-v2.png' } },
-  { id: 'merry-christmas', message: 'Merry Christmas', tone: 'outline',
-    galleryImages: { oal: '/images/gift-card/oal-merry-christmas.png' } },
   { id: 'i-love-you',      message: 'I Love You',      tone: 'solid',
     galleryImages: { oal: '/images/gift-card/oal-i-love-you.png' } },
 ]
