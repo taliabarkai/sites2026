@@ -369,6 +369,11 @@
   gap: var(--spacing-xxs);
 }
 
+/* Text tiles in a carousel (Inez's number of initials): 8px apart, as in the grid */
+.carousel.tiles_text {
+  gap: var(--spacing-xxs);
+}
+
 .carousel.tiles_standard .slot {
   width: calc(var(--spacing-xxxl) + var(--spacing-lg));
   /* …giving up to 4px each (labels still don't rewrap at 100px) where that's

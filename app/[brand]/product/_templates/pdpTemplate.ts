@@ -121,6 +121,11 @@ export interface Field {
    * the cart and the preview read it as text.
    */
   keyboard?: boolean
+  /**
+   * proposed: the text's length is set by another field — a "number of
+   * initials" dropdown: the field takes exactly that many characters.
+   */
+  lengthFrom?: number
   /** proposed: a text field that takes letters only (no digits, spaces or symbols). */
   lettersOnly?: boolean
   /** proposed: typed text is shown and kept in capitals (initials). */

@@ -77,9 +77,16 @@ function textGroup(field: Field, unit?: number): TextInputGroup {
  * expands to its count). `displayType` overrides the field's own — a step's
  * `display` entry.
  */
+/** A text field's set length (`lengthFrom`): the count chosen in its dropdown. */
+export const setLength = (template: PdpTemplate, field: Field, state: OptionsState): number | null =>
+  field.lengthFrom ? countOf(template, state, field.lengthFrom) || null : null
+
 export function groupsForField(template: PdpTemplate, field: Field, state: OptionsState, displayType?: FieldDisplayType): OptionGroup[] {
   if (isDerived(field)) return []
   if (isTextField(field)) {
+    // Exactly as many characters as the count field says ("LBD" for 3 initials)
+    const n = setLength(template, field, state)
+    if (n) return [{ ...textGroup(field), maxLength: n, placeholder: field.placeholder ? field.placeholder.replace(/[A-Z]+/, (m) => m.padEnd(n, 'MAJKS').slice(0, n)) : undefined }]
     if (!field.repeat) return [textGroup(field)]
     return Array.from({ length: repeatCount(template, field, state) }, (_, i) => textGroup(field, i + 1))
   }
@@ -169,9 +176,15 @@ export function missingRequired(template: PdpTemplate, fields: Field[], state: O
     .flatMap((f) => groupsForField(template, f, state).map((g) => ({ f, g })))
     .filter(({ f, g }) => {
       const text = (state.text[g.id] ?? '').trim()
-      return !text || (conditional && tooShort(f, text, state))
+      return !text || shortOfSetLength(template, f, text, state) || (conditional && tooShort(f, text, state))
     })
     .map(({ g }) => g.id)
+}
+
+/** Fewer characters than the count field asks for (2 letters typed, 3 initials chosen). */
+export function shortOfSetLength(template: PdpTemplate, field: Field, text: string, state: OptionsState): boolean {
+  const n = setLength(template, field, state)
+  return !!n && text.replace(/\s/g, '').length < n
 }
 
 /** A text that's there but under the field's conditional minimum (a stone needs two initials). */

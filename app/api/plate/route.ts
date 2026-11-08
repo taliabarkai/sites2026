@@ -6,7 +6,7 @@
  * here (necklace-studio/HANDOFF.md §5.2). Solves and renders on a cache miss
  * (~0.1 s), then serves from disk.
  */
-import { BadRequest, ensurePlate, parsePlateRequest } from '@/necklace-studio/engine/service.ts'
+import { BadRequest, ensurePlate, parsePlateRequest, readPlateFile } from '@/necklace-studio/engine/service.ts'
 import { COATINGS, type Coating } from '@/necklace-studio/engine/render/sprite.ts'
 import { NECKLACE_PROFILES } from '../_necklace/profiles'
 
@@ -22,8 +22,13 @@ export async function GET(req: Request) {
     const r = parsePlateRequest(new URLSearchParams({ ...profile, coating, name: q.get('name') ?? '' }))
     const t0 = performance.now()
     const { key, sidecar, cached } = await ensurePlate(r)
+    // The sprite rides along as a data URL: on a serverless host a second
+    // request for /api/plate/file can land on another instance that never
+    // rendered it (each has its own temp dir)
+    const png = readPlateFile(key, 'png')
+    const spriteUrl = png ? `data:image/png;base64,${png.toString('base64')}` : `/api/plate/file?key=${key}&ext=png`
     return Response.json(
-      { ...sidecar, spriteUrl: `/api/plate/file?key=${key}&ext=png`, glbUrl: `/api/plate/file?key=${key}&ext=glb` },
+      { ...sidecar, spriteUrl, glbUrl: `/api/plate/file?key=${key}&ext=glb` },
       { headers: { 'Cache-Control': 'public, max-age=31536000, immutable', 'X-Solve-Ms': (performance.now() - t0).toFixed(1), 'X-Cache': cached ? 'HIT' : 'MISS' } },
     )
   } catch (e) {

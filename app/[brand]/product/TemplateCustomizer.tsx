@@ -16,7 +16,7 @@ import type { PersonalizePlacement } from '../_config/demoParams'
 import { materialLabel } from '../_config/brands'
 import { fieldById, stepFields, type Field, type FieldDisplayType, type PdpTemplate, type PresentationStep } from './_templates'
 import {
-  allGroups, cartOptions, derivedText, groupId, groupsForField, isVisible, offeredValues, tooShort, missingRequired, parsePriceLabel, previewInput, previewKey, summaryLines, templatePrice, textValues,
+  allGroups, cartOptions, derivedText, groupId, groupsForField, isVisible, offeredValues, setLength, shortOfSetLength, tooShort, missingRequired, parsePriceLabel, previewInput, previewKey, summaryLines, templatePrice, textValues,
 } from './_templates/fieldState'
 import { blankPreview, debounceFor, isRemote, readPreviewColors, renderPreview } from './_templates/previewEngine'
 import pdp from './ProductDetailPage.module.css'
@@ -152,6 +152,18 @@ export function TemplateCustomizer({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- only a change in what's offered drives it
   }, [offerKey])
+  // A smaller count trims the text to fit (3 initials typed, then 2 chosen: "LBD" → "LB")
+  const lengthKey = template.fields.map((f) => setLength(template, f, state) ?? '').join('|')
+  const setTextBase = base.setText
+  useEffect(() => {
+    for (const f of template.fields) {
+      const n = setLength(template, f, state)
+      const id = groupId(f.fieldId)
+      const text = state.text[id] ?? ''
+      if (n && text.length > n) setTextBase(id, text.slice(0, n))
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only a change of count drives it
+  }, [lengthKey])
   const [errors, setErrors] = useState<string[]>([])
   // The preview starts with the shopper's first selection and stays from then
   // on — on a stepped page, once they open the steps (as MM does): picking a
@@ -184,7 +196,7 @@ export function TemplateCustomizer({
   // ── V5, OAL only: an optional diamond accent ──
   const [diamondAccent, setDiamondAccent] = useState(false)
   // …unless the product asks for its stones itself (Inez)
-  const accentOffered = placement === 'jewelry' && brand === 'oal' && !template.fields.some((f) => /stone|diamond/i.test(f.cartName))
+  const accentOffered = (placement === 'jewelry' || placement === 'panel-c') && brand === 'oal' && !template.fields.some((f) => /stone|diamond/i.test(f.cartName))
 
   // ── Nested item (demo toggle): a second necklace at 50% off, above Add to Bag ──
   // Its panel's image becomes the necklace with the name typed there, in its material
@@ -223,13 +235,16 @@ export function TemplateCustomizer({
   const { flow, livePreview } = template
   // The Personalize toggle: "panel" puts the personalization behind a row that
   // opens the panel at every width; "page" puts every field on the page
-  // V1 and V4 put the personalization behind the panel
-  const rowMode = placement === 'panel' || placement === 'panel-c'
-  // V4: no Save step — the page's one CTA opens the panel, and the panel adds to bag
+  // V1 puts the personalization behind the Personalize row (and its panel)
+  const rowMode = placement === 'panel'
+  // V4: the page's one CTA — Personalize Now / Continue Personalizing — opens
+  // the same two steps as V5; only that entry differs
   const buyInPanel = placement === 'panel-c'
-  // V5 (Jewelry): Music Memories' two-step flow — Personalize, then Customize
-  // and Add to bag — in a sheet on mobile, inline tabs on desktop
-  const jewelry = placement === 'jewelry'
+  // V5 (Jewelry), and V4: Music Memories' two-step flow — Personalize, then
+  // Customize and Add to bag — in a sheet on mobile, inline tabs on desktop
+  const jewelry = placement === 'jewelry' || buyInPanel
+  // V5's own entry: the "Personalize yours" card (V4 has its CTA instead)
+  const jewelryCard = placement === 'jewelry'
   // v3: the page as "On page"; on mobile, typing happens in the panel
   const tapPanel = placement === 'panel-v3'
   const tapMode = tapPanel && isMobile
@@ -368,6 +383,10 @@ export function TemplateCustomizer({
         texts: Object.fromEntries(
           Object.entries(shopperInput.texts).map(([id, values]) => {
             const names = sample[Number(id)] ?? []
+            // A field sized by a count takes the sample for that count (Inez: A, OL, OAL…)
+            const field = fieldById(template, Number(id))
+            const n = field ? setLength(template, field, state) : null
+            if (n && names.length) return [id, [names[Math.min(n, names.length) - 1]]]
             return [id, names.length ? values.map((_, i) => names[i % names.length]) : values]
           }),
         ),
@@ -401,8 +420,11 @@ export function TemplateCustomizer({
     // V4 has no Save: the shopper's own name counts as soon as the panel closes on it
     // Desktop, while the card is open: the gallery beside it is the preview, so it follows the typing
     const live = buyInPanel || !isMobile || !(rowMode || tapMode)
-    onPersonalizedChange?.(live ? hasText : isSaved)
-  }, [rowMode, tapMode, buyInPanel, isMobile, entered, isSaved, hasText, onPersonalizedChange, galleryFrozen])
+    // Desktop, steps open (the live preview mode): the gallery leads with the
+    // preview from the start — the sample (Inez: "A") until the shopper types
+    const sampleShown = !!livePreview.sampleText && cardOpen
+    onPersonalizedChange?.(live ? hasText || sampleShown : isSaved)
+  }, [rowMode, tapMode, buyInPanel, isMobile, entered, isSaved, hasText, onPersonalizedChange, galleryFrozen, cardOpen, livePreview.sampleText])
   const engine = livePreview.engine
 
   const [preview, setPreview] = useState<string | null>(null)
@@ -488,7 +510,7 @@ export function TemplateCustomizer({
 
   /** Desktop V1 / V4: closing the inline fields keeps them — V1 shows them as saved. */
   const finishCloseInline = () => {
-    if (rowMode && !buyInPanel && missingRequired(template, panelFields, state).length === 0) setSaved(true)
+    if (rowMode && missingRequired(template, panelFields, state).length === 0) setSaved(true)
     setClosingInline(false)
     setEntered(false)
     setReturnedToCta(true)
@@ -598,7 +620,7 @@ export function TemplateCustomizer({
       const picked = summaryLines(template, [field], state)[0]?.value
       field = { ...field, name: picked && !materialImageOnly ? `${materialLabel(brand)}: ${picked}` : materialLabel(brand) }
     }
-    if (jewelry && field.type === 'text' && !field.note && field.textMaxLength && !field.keyboard) {
+    if (jewelry && field.type === 'text' && !field.note && field.textMaxLength && !field.keyboard && !field.lengthFrom) {
       field = { ...field, note: { text: `Letters only, up to ${field.textMaxLength} characters` } }
     }
     // Demo toggle: the material as the carousel's standard image-only tiles
@@ -611,7 +633,10 @@ export function TemplateCustomizer({
       fieldGroups.filter((g) => errors.includes(g.id)).map((g) => {
         // Filled in but short of a conditional minimum: say why (a stone needs two initials)
         const text = (state.text[g.id] ?? '').trim()
-        const message = text && field.minLengthWhen && tooShort(field, text, state) ? field.minLengthWhen.message : `Please fill in ${g.label.toLowerCase()}`
+        const n = setLength(template, field, state)
+        const message = text && n && shortOfSetLength(template, field, text, state)
+          ? `Please enter ${n} letters` // 3 initials chosen, 2 typed
+          : text && field.minLengthWhen && tooShort(field, text, state) ? field.minLengthWhen.message : `Please fill in ${g.label.toLowerCase()}`
         return [g.id, <p key="err" className={styles.error} role="alert">{message}</p>]
       }),
     )
@@ -685,11 +710,6 @@ export function TemplateCustomizer({
     ) : (
       <Button variant="primary" className={styles.cta} onClick={handleNext}>Next: {steps[stepIdx + 1]?.label}</Button>
     )
-  ) : lastStep && buyInPanel ? (
-    <>
-      {nested.ui}
-      <Button variant="add-to-cart" className={styles.cta} onClick={handleAddToBag}>{addLabel}</Button>
-    </>
   ) : lastStep && rowMode ? (
     <Button variant="primary" className={styles.cta} onClick={handleSave}>Save</Button>
   ) : lastStep ? (
@@ -840,7 +860,7 @@ export function TemplateCustomizer({
               </button>
             )}
             {pageEntryFields.map((f) => renderField(f))}
-            {jewelry && !cardOpen ? (
+            {jewelryCard && !cardOpen ? (
               /* V5: the entry card — no section title; the card or the sticky CTA opens the flow */
               <div ref={ctaRef}>
                 <button type="button" className={styles.personalizeRow} onClick={enter} aria-haspopup="dialog">
@@ -853,9 +873,8 @@ export function TemplateCustomizer({
                 </button>
               </div>
             ) : rowMode && cardOpen ? (
-              /* V1 / V4 on desktop, opened: a card with Back and the fields, then
-                 Add to Bag (V1: the page's; V4: its own). It opens out of the
-                 button it replaces rather than jumping in */
+              /* V1 on desktop, opened: a card with the fields, then the page's
+                 Add to Bag. It opens out of the row it replaces rather than jumping in */
               <div
                 ref={inlineOpenRef}
                 className={closingInline ? styles.inlineOpenExit : styles.inlineOpenEnter}
@@ -863,13 +882,13 @@ export function TemplateCustomizer({
               >
                 <div className={styles.rowGroup}>
                 <div className={styles.card}>
-                  {/* Tabs for several steps; one step gets a title strip with the wand and
-                      an X that closes back to the page (V1: "Add Personalization"; V4: its step) */}
+                  {/* Tabs for several steps; one step gets a title strip with the wand
+                      ("Add Personalization") and an X that closes back to the page */}
                   {steps.length > 1 ? stepHeader : (
                     <div className={`${styles.stepHeader} ${styles.inlineOpenHeader} ${styles.inlineOpenHeaderTinted}`}>
                       <span className={styles.inlineOpenTitle}>
                         <AiMagicIcon size={24} />
-                        {buyInPanel ? steps[0].label : 'Add Personalization'}
+                        Add Personalization
                       </span>
                       {/* Closes back to the row / Personalize Now, entries kept */}
                       <button type="button" className={styles.inlineOpenClose} onClick={closeInline} aria-label="Close personalization">
@@ -882,7 +901,7 @@ export function TemplateCustomizer({
                   </div>
                 </div>
                 </div>
-                {!lastStep ? stepCta : buyInPanel ? stepCta : (
+                {!lastStep ? stepCta : (
                   <>
                     {nested.ui}
                     <div ref={ctaRef}>
@@ -891,9 +910,9 @@ export function TemplateCustomizer({
                   </>
                 )}
               </div>
-            ) : buyInPanel ? (
-              /* V4: one CTA — the panel holds the name, the chain and Add to Bag.
-                 Closed with a name in it, it picks up where the shopper left off. */
+            ) : buyInPanel && !cardOpen ? (
+              /* V4: one CTA opens V5's two steps (a sheet on mobile, tabs on
+                 desktop). Closed with a name in it, it picks up where the shopper left off. */
               <>
                 <div ref={ctaRef} className={returnedToCta ? styles.ctaReturn : undefined}>
                   <Button variant="add-to-cart" className={styles.cta} onClick={enter} aria-haspopup="dialog" leadingIcon={<AiMagicIcon size={24} />}>{personalizeNowLabel}</Button>
@@ -965,7 +984,7 @@ export function TemplateCustomizer({
           watch={ctaRef}
           target={rootRef}
           onClick={inline ? undefined : buyInPanel || jewelry ? enter : rowMode ? handleAddToBag : enter}
-          label={inline ? undefined : jewelry ? 'Personalize now' : buyInPanel ? personalizeNowLabel : rowMode ? addLabel : entryCta}
+          label={inline ? undefined : buyInPanel ? personalizeNowLabel : jewelry ? 'Personalize now' : rowMode ? addLabel : entryCta}
         />
       )}
 
@@ -1004,7 +1023,7 @@ export function TemplateCustomizer({
         <CustomizerPanel
           open={usePanel && entered}
           onClose={() => setEntered(false)}
-          ariaLabel={rowMode ? rowCopy.title : jewelry ? 'Personalize yours' : entryCta}
+          ariaLabel={rowMode ? rowCopy.title : jewelryCard ? 'Personalize yours' : buyInPanel ? 'Personalize' : entryCta}
           desktop="hidden"
           closeIcon={<XIcon size={20} />}
           // V5: no title bar — the preview runs to the top, a 44px X over its corner

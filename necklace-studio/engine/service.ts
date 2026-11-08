@@ -14,6 +14,7 @@
 import { createHash } from 'node:crypto';
 import { mkdirSync, readFileSync, readdirSync, writeFileSync, existsSync, renameSync } from 'node:fs';
 import { join } from 'node:path';
+import { tmpdir } from 'node:os';
 import { tgCarrie } from './products/tg-carrie/index.ts';
 import { solvePlate } from './plate/solve.ts';
 import { renderSprite, COATINGS, type Coating, type SpriteSidecar } from './render/sprite.ts';
@@ -25,7 +26,11 @@ import { STUDIO_ROOT } from './root.ts';
 /** Bump when a change here alters any output byte. */
 export const ENGINE_VERSION = 4;
 
-const CACHE = join(STUDIO_ROOT, '.cache', 'studio');
+// Serverless hosts (Vercel) only let a function write under the temp dir;
+// the deployed project folder is read-only. Only the path changes.
+const CACHE = process.env.VERCEL || process.env.STUDIO_CACHE_TMP
+  ? join(tmpdir(), 'necklace-studio')
+  : join(STUDIO_ROOT, '.cache', 'studio');
 const DATA = join(STUDIO_ROOT, 'engine', 'products', 'tg-carrie', 'data');
 
 let dataHash: string | null = null;

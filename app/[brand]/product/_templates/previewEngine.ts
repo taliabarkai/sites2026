@@ -307,12 +307,15 @@ function necklaceLayer(
   const h = layer.box.h * SIZE
   const curve = necklaceCurve(layer.box.y * SIZE)
   const n = values.length
+  // One initial with a stone: the stone sits on the chain beside it (the pair centred)
+  const lone = !!stone && n === 1
   const gapShare = stone ? LINK_GAP.stone : LINK_GAP.plain
   // Letters as large as the box allows, the whole row kept to the lower part of the curve
-  const size = Math.max(10, Math.min(h * 0.6, (curve.length * 0.28) / (n * CAP_WIDTH + (n - 1) * gapShare)))
+  const gapsCount = lone ? 1 : n - 1
+  const size = Math.max(10, Math.min(h * 0.6, (curve.length * 0.28) / (n * CAP_WIDTH + gapsCount * gapShare)))
   const letterW = size * CAP_WIDTH
   const gap = size * gapShare
-  const total = n * letterW + (n - 1) * gap
+  const total = n * letterW + gapsCount * gap
   const d = Math.min(gap * 0.32, size * 0.22) * (stone?.scale ?? 1)
   const glyphs: string[] = []
   const stones: StonePlacement[] = []
@@ -328,7 +331,7 @@ function necklaceLayer(
       `<text x="0" y="${(size * 0.3).toFixed(1)}" text-anchor="middle" dominant-baseline="central" font-family="${esc(layer.font)}" font-size="${size.toFixed(1)}" fill="${esc(fill)}">${esc(v)}</text></g>`,
     )
     s += letterW
-    if (i < n - 1 && stone) {
+    if ((i < n - 1 || lone) && stone) {
       const at = curve.at(s + gap / 2)
       stones.push({ x: at.p.x, y: at.p.y, d, look: stone.look, angle: at.angle })
       const half = 'cut' in stone.look && stone.look.cut !== 'round' ? d * 0.65 : d / 2
@@ -361,7 +364,7 @@ function buildLayers(spec: PlaceholderSpec, input: PreviewInput, fill: string, w
     const values = layer.uppercase ? raw.map((t) => t.toUpperCase()) : raw
     if (values.length === 0) continue
     if (strung && layer.layout !== 'stack' && !chain) {
-      const stone = values.length > 1 ? resolveStone(layer.separator, input) : null
+      const stone = resolveStone(layer.separator, input)
       const out = necklaceLayer(layer, values, fill, stone)
       glyphs.push(...out.glyphs)
       chain = out.chain
