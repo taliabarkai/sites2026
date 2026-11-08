@@ -49,9 +49,9 @@ export const oalInez: PdpTemplate = {
     {
       // How many initials, as a carousel of text tiles: the field below takes
       // exactly that many letters. The first is in the price; each one after
-      // adds $25 — the price moves, the tiles don't show it
+      // adds $25, shown on the tile: "2 initials (+$25)"
       fieldId: 307, name: 'Select number of initials (1-5)', cartName: 'Number of Initials', type: 'selection', displayType: 'carousel', order: 2, isRequired: true,
-      pricing: 'delta', affectsPreview: false, defaultValueId: '1', showPriceDelta: false,
+      pricing: 'delta', affectsPreview: false, defaultValueId: '1',
       values: [
         { id: '1', label: '1 initial',  priceDelta: 0 },
         { id: '2', label: '2 initials', priceDelta: 2500 },

@@ -13,10 +13,10 @@ import { StickyCustomizeBar } from '../_components/StickyCustomizeBar'
 import { useNestedItems } from '../_components/NestedItems/useNestedItems'
 import { SECOND_ITEM_TITLE, secondItemOffer, secondItemPreviewInput } from './_templates/secondItem'
 import type { PersonalizePlacement } from '../_config/demoParams'
-import { materialLabel } from '../_config/brands'
+import { materialLabel, startingAtPricing } from '../_config/brands'
 import { fieldById, stepFields, type Field, type FieldDisplayType, type PdpTemplate, type PresentationStep } from './_templates'
 import {
-  allGroups, cartOptions, derivedText, groupId, groupsForField, isVisible, offeredValues, setLength, shortOfSetLength, tooShort, missingRequired, parsePriceLabel, previewInput, previewKey, summaryLines, templatePrice, textValues,
+  allGroups, cartOptions, derivedText, startingPrice, groupId, groupsForField, isVisible, offeredValues, setLength, shortOfSetLength, tooShort, missingRequired, parsePriceLabel, previewInput, previewKey, summaryLines, templatePrice, textValues,
 } from './_templates/fieldState'
 import { blankPreview, debounceFor, isRemote, readPreviewColors, renderPreview } from './_templates/previewEngine'
 import pdp from './ProductDetailPage.module.css'
@@ -367,7 +367,13 @@ export function TemplateCustomizer({
   const canAddCost = template.fields.some((f) => !entryIds.has(f.fieldId) && f.values?.some((v) => (v.priceDelta ?? 0) > 0))
   const shownFull = fullPrice
   const pricePrefix = !inline && !started && canAddCost ? 'From ' : ''
-  const priceLabel = `${pricePrefix}${formatPrice(salePercent ? onSale(shownFull) : shownFull)}`
+  // OAL: one "Starting at" price that never moves (the cheapest finish, no
+  // add-ons); the running total is on Add to bag
+  const startingAt = startingAtPricing(brand)
+  const startFull = startingPrice(template, product.priceInCents ?? 0)
+  const priceLabel = startingAt
+    ? `Starting at ${formatPrice(salePercent ? onSale(startFull) : startFull)}`
+    : `${pricePrefix}${formatPrice(salePercent ? onSale(shownFull) : shownFull)}`
 
   // ── Live preview ────────────────────────────────────────────────────────────
   const shopperInput = previewInput(template, state)
@@ -626,7 +632,12 @@ export function TemplateCustomizer({
     // Demo toggle: the material as the carousel's standard image-only tiles
     const fieldGroups = groupsForField(template, field, state, displayType).map((g) =>
       materialImageOnly && field.pricing === 'base' && g.kind === 'choice'
-        ? { ...g, display: 'carousel' as const, tile: 'image-only' as const, size: 'sm' as const, priceBelow: true }
+        ? { ...g, display: 'carousel' as const, tile: 'image-only' as const, size: 'sm' as const, priceBelow: !startingAt }
+        : g,
+    ).map((g) =>
+      // OAL: no prices on the finishes — the page says "Starting at", Add to bag the total
+      startingAt && field.pricing === 'base' && g.kind === 'choice'
+        ? { ...g, values: g.values.map((v) => ({ ...v, priceLabel: undefined })) }
         : g,
     )
     const slots = Object.fromEntries(
@@ -763,7 +774,7 @@ export function TemplateCustomizer({
           <h1 className={pdp.productTitle}>{product.name}</h1>
           <div className={pdp.priceRow}>
             {/* On sale: the full price crossed out, the selling price, "Save N%" */}
-            {salePercent > 0 && <span className={pdp.priceOriginal}>{formatPrice(shownFull)}</span>}
+            {salePercent > 0 && <span className={pdp.priceOriginal}>{formatPrice(startingAt ? startFull : shownFull)}</span>}
             <span className={`${pdp.priceCurrent} ${salePercent > 0 ? pdp.priceOnSale : ''}`} aria-live="polite">{priceLabel}</span>
             {salePercent > 0 && <span className={pdp.priceSave}>Save {salePercent}%</span>}
           </div>

@@ -128,6 +128,14 @@
   font-weight:    var(--typography-rules-text3-font-weight, normal);
 }
 
+/* A text tile's difference, on the label's line in the muted color — regular
+   weight even when the tile is selected and its label goes bold */
+.deltaInline {
+  color: var(--colors-text-secondary);
+  font-family:    var(--typography-rules-text1-font-family);
+  font-weight:    var(--typography-rules-text1-font-weight, normal);
+}
+
 /* ── Media ────────────────────────────────────────────────────────────────── */
 .media {
   display: block;

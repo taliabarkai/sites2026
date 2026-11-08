@@ -119,3 +119,10 @@ export function getBrandGiftAssets(brand: BrandKey): GiftAssets | null {
 
 /** What the metal choice is called on the PDP and in the bag: OAL says "Finish". */
 export const materialLabel = (brand: string): 'Finish' | 'Material' => (brand === 'oal' ? 'Finish' : 'Material')
+
+/**
+ * OAL's product pages state one "Starting at" price (the cheapest finish, no
+ * add-ons) and keep prices off the finish swatches; the running total is on
+ * Add to bag. The other brands show the live price and each finish's price.
+ */
+export const startingAtPricing = (brand: string): boolean => brand === 'oal'

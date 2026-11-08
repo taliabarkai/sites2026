@@ -151,6 +151,28 @@ export function templatePrice(template: PdpTemplate, state: OptionsState, fallba
   return hasBase ? price : fallbackBase + price
 }
 
+/**
+ * The lowest the product can cost: the cheapest base value with the cheapest
+ * value of every price-moving field (a field shown only on some choice may be
+ * left out, so it never adds to the floor). No text-length charges.
+ */
+export function startingPrice(template: PdpTemplate, fallbackBase = 0): number {
+  let price = 0
+  let hasBase = false
+  for (const f of template.fields) {
+    const values = f.values ?? []
+    if (f.pricing === 'base' && values.length) {
+      price += Math.min(...values.map((v) => parsePriceLabel(v.priceLabel)))
+      hasBase = true
+    }
+    if (f.pricing === 'delta' && values.length) {
+      const min = Math.min(...values.map((v) => v.priceDelta ?? 0))
+      price += f.visibleWhen ? Math.min(0, min) : min
+    }
+  }
+  return hasBase ? price : fallbackBase + price
+}
+
 // ─── Read-backs ─────────────────────────────────────────────────────────────
 
 export function derivedText(template: PdpTemplate, field: Field, state: OptionsState): string | null {

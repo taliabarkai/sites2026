@@ -101,10 +101,14 @@ export function OptionTile({
 
       {tile !== 'image-only' && (
         <span className={styles.copy}>
-          <span className={styles.label}>{value.label}</span>
+          <span className={styles.label}>
+            {value.label}
+            {/* Text tiles keep the difference on the label's line: "2 initials (+$25)" */}
+            {tile === 'text' && !value.priceLabel && delta && <span className={styles.deltaInline}> ({delta})</span>}
+          </span>
           {value.priceLabel
             ? <span className={styles.price}>{value.priceLabel}</span>
-            : delta && <span className={styles.delta}>{delta}</span>}
+            : tile !== 'text' && delta && <span className={styles.delta}>{delta}</span>}
         </span>
       )}
 
