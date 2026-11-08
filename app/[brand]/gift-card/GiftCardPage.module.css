@@ -321,14 +321,6 @@
   border: 0;
 }
 
-/* Floated, a legend stops sitting on the fieldset's edge and lays out as a
-   normal flex item, so the section's gap and padding apply to it. */
-.section > legend {
-  float: left;
-  width: 100%;
-  padding: 0;
-}
-
 .sectionTitle {
   margin: 0;
   color: var(--colors-text);

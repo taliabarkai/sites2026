@@ -370,8 +370,10 @@ export default function GiftCardPageClient() {
           <div className={styles.formColumn}>
             <form className={styles.form} onSubmit={handleSubmit} noValidate aria-labelledby="gift-card-form-title">
               {/* Design */}
-              <fieldset className={styles.section}>
-                <legend className={styles.sectionTitle}>Pick a Card</legend>
+              {/* Groups, not fieldsets: iOS Safari won't lay a legend out as a flex
+                  item, so a fieldset step loses the spacing every other step has. */}
+              <div className={styles.section} role="radiogroup" aria-labelledby={fieldId('design-title')}>
+                <p id={fieldId('design-title')} className={styles.sectionTitle}>Pick a Card</p>
                 <div className={joinClasses(styles.designRow, squareTiles && styles.designRowSquare)}>
                   {GIFT_CARD_DESIGNS.map((item) => (
                     <label key={item.id} className={styles.designOption}>
@@ -474,14 +476,16 @@ export default function GiftCardPageClient() {
                   )}
                 </div>
 
-              </fieldset>
+              </div>
 
               {/* Amount */}
-              <fieldset
+              <div
                 className={styles.section}
+                role="radiogroup"
+                aria-labelledby={fieldId('amount-title')}
                 aria-describedby={errors.amount ? `${fieldId('amount')}-error` : undefined}
               >
-                <legend className={styles.sectionTitle}>Choose an Amount</legend>
+                <p id={fieldId('amount-title')} className={styles.sectionTitle}>Choose an Amount</p>
                 <div className={styles.amountGrid}>
                   {GIFT_CARD_AMOUNTS.map((cents, index) => (
                     <label key={cents} className={styles.amountOption}>
@@ -550,19 +554,21 @@ export default function GiftCardPageClient() {
                     )}
                   </div>
                 )}
-              </fieldset>
+              </div>
 
               {/* Send method — pick any combination */}
-              <fieldset
+              <div
                 id={fieldId('method')}
                 className={styles.section}
+                role="group"
+                aria-labelledby={fieldId('method-title')}
               >
-                {/* The hint rides in the legend, so it is read with the question and
+                {/* The hint rides in the title, so it is read with the question and
                     wraps under it only when the line runs out. */}
-                <legend className={styles.sectionTitle}>
+                <p id={fieldId('method-title')} className={styles.sectionTitle}>
                   How Would You Like to Send It?{' '}
                   <span className={styles.titleHint}>(select all that apply)</span>
-                </legend>
+                </p>
                 {/* Chips like the amounts, but checkboxes: any combination is allowed. */}
                 <div className={styles.methodGrid}>
                   {SEND_METHODS.map((option) => (
@@ -581,7 +587,7 @@ export default function GiftCardPageClient() {
                     </label>
                   ))}
                 </div>
-              </fieldset>
+              </div>
 
               {/* Recipient */}
               <div className={styles.section}>
