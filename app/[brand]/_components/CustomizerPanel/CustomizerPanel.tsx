@@ -19,8 +19,18 @@ interface CustomizerPanelProps {
   fitContent?: boolean
   /** When true, the close button is a plain white X (no circular background) for dark content. */
   closeOnDark?: boolean
+  /** `large`: a 44×44 close, for a sheet whose preview runs to its top edge. */
+  closeSize?: 'default' | 'large'
   /** When false, clicking the backdrop / pressing Escape won't close the sheet (default true). */
   dismissible?: boolean
+  /**
+   * Desktop: `hidden` (default) — callers keep their own desktop layout.
+   * `drawer` — the same panel slides in from the right at the floating
+   * cart's width.
+   */
+  desktop?: 'hidden' | 'drawer'
+  /** When true, the preview fills the sheet's width edge to edge (no padding, no height cap) — like the mobile gallery. */
+  previewFullBleed?: boolean
   children: React.ReactNode
 }
 
@@ -34,7 +44,7 @@ interface CustomizerPanelProps {
  * side-by-side layout and simply never set `open` on desktop.
  */
 export function CustomizerPanel({
-  open, onClose, preview, footer, closeIcon, ariaLabel = 'Customize', scrollResetKey, fitContent, closeOnDark, dismissible = true, children,
+  open, onClose, preview, footer, closeIcon, ariaLabel = 'Customize', scrollResetKey, fitContent, closeOnDark, closeSize = 'default', dismissible = true, desktop = 'hidden', previewFullBleed, children,
 }: CustomizerPanelProps) {
   const bodyRef = useRef<HTMLDivElement>(null)
 
@@ -60,10 +70,10 @@ export function CustomizerPanel({
   }, [open, dismissible, onClose])
 
   return (
-    <div className={`${styles.root} ${open ? styles.rootOpen : ''}`} aria-hidden={!open}>
+    <div className={`${styles.root} ${desktop === 'drawer' ? styles.rootDrawer : ''} ${open ? styles.rootOpen : ''}`} aria-hidden={!open}>
       <div className={styles.backdrop} onClick={dismissible ? onClose : undefined} />
       <div className={`${styles.panel} ${open ? styles.panelOpen : ''} ${fitContent ? styles.panelFit : ''}`} role="dialog" aria-modal="true" aria-label={ariaLabel}>
-        <button type="button" className={`${styles.close} ${closeOnDark ? styles.closeOnDark : ''}`} aria-label="Close" onClick={onClose}>
+        <button type="button" className={`${styles.close} ${closeOnDark ? styles.closeOnDark : ''} ${closeSize === 'large' ? styles.closeLarge : ''}`} aria-label="Close" onClick={onClose}>
           {closeIcon ?? (
             <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none">
               <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
@@ -71,7 +81,7 @@ export function CustomizerPanel({
           )}
         </button>
 
-        {preview !== undefined && <div className={styles.previewArea}>{preview}</div>}
+        {preview !== undefined && <div className={`${styles.previewArea} ${previewFullBleed ? styles.previewAreaFull : ''}`}>{preview}</div>}
 
         <div className={styles.body} ref={bodyRef}>{children}</div>
 

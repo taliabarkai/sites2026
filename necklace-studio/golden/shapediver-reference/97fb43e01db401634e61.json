@@ -1,0 +1,60 @@
+{
+  "name": "Charlotte",
+  "letterMm": 9.5,
+  "coating": "GP",
+  "options": {
+    "letterMm": "9.5"
+  },
+  "nameOptions": {},
+  "spriteWidthPx": 945,
+  "spriteHeightPx": 202,
+  "mmPerPx": 0.05,
+  "letteringMm": {
+    "w": 46.035099029541016,
+    "h": 8.880878210067749
+  },
+  "productId": "tg-carrie",
+  "attachMm": [
+    {
+      "x": -21.722558975219727,
+      "y": 2.7583654932677746
+    },
+    {
+      "x": 21.722111701965332,
+      "y": 2.18524207174778
+    }
+  ],
+  "attachPx": [
+    {
+      "x": 38.04882049560547,
+      "y": 45.83269013464496
+    },
+    {
+      "x": 906.9422340393066,
+      "y": 57.29515856504486
+    }
+  ],
+  "anchorStrategy": "ring-signature",
+  "plateMm": {
+    "w": 46.035099029541016,
+    "h": 8.880878210067749
+  },
+  "ringSpanMm": 43.44845084356125,
+  "letteringCentrePx": {
+    "x": 472.5,
+    "y": 101.00000000000045
+  },
+  "loopCentresPx": [
+    {
+      "x": 36.57755775577558,
+      "y": 68.43894389438944
+    },
+    {
+      "x": 907.3266666666667,
+      "y": 79.87833333333333
+    }
+  ],
+  "pipelineVersion": 4,
+  "sourceVersion": "940779bd449745435ed6e7023e05f361",
+  "spriteUrl": "/plates/tg-carrie/97fb43e01db401634e61.png"
+}

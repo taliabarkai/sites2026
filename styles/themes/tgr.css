@@ -130,6 +130,11 @@
   /* Share the Love panel — order confirmation */
   --share-panel-background:       var(--tgr-alice-blue);
 
+  /* Personalize row (PDP) — its fill runs start → white → end; its border is one colour, fading mid-way */
+  --personalize-fill-start: var(--tgr-alice-blue);
+  --personalize-fill-end:   var(--tgr-alice-blue);
+  --personalize-border:     var(--tgr-icon-blue);
+
   --related-category-hover-text:  var(--colors-text-inverse);
 
   /* Form field extras */

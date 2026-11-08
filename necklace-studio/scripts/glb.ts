@@ -1,0 +1,16 @@
+import { writeFileSync } from 'node:fs';
+import { NodeIO } from '@gltf-transform/core';
+import { tgCarrie } from '../engine/products/tg-carrie/index.ts';
+import { solvePlate } from '../engine/plate/solve.ts';
+import { plateGlb, linksGlb } from '../engine/render/mesh.ts';
+const [name = 'Charlotte', preset = 'LC_7.5', out = 'plate.glb'] = process.argv.slice(2);
+const p = tgCarrie();
+const t0 = performance.now();
+const glb = await plateGlb(solvePlate(p, name, preset));
+console.log(`${name} glb ${(performance.now() - t0).toFixed(1)}ms ${glb.length} B`);
+writeFileSync(out, glb);
+const doc = await new NodeIO().readBinary(glb);
+for (const m of doc.getRoot().listMeshes()) for (const pr of m.listPrimitives()) console.log(' mesh', m.getName(), 'verts', pr.getAttribute('POSITION')!.getCount(), 'tris', pr.getIndices()!.getCount() / 3);
+console.log(' nodes', doc.getRoot().listNodes().map((n) => `${n.getName()}${n.getMesh() ? '' : '@' + n.getTranslation().map((v) => v.toFixed(2))}`).join(', '));
+const l = await linksGlb({ chainLink: p.chainLink, connectionLink: p.connectionLink });
+console.log(' links glb', l.length, 'B');

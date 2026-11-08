@@ -80,7 +80,10 @@ const tgrProducts: ProductItem[] = [
       { src: '/images/products/tgr/tgr-04-product-2.webp' },
       { src: '/images/products/tgr/tgr-04-diamonds.webp' },
     ] },
-  { id: 5 , name: 'Carrie Name Necklace in Sterling Silver', image: '/images/products/tgr/tgr-05-product.jpg', hoverImage: '/images/products/tgr/tgr-05-model.jpg', href: '/product/5', price: '$95', priceInCents: 9500, rating: 4.9, reviewCount: 65, defaultSwatchKey: 'silver' },
+  { id: 5 , name: 'Carrie Name Necklace in Sterling Silver', image: '/images/products/tgr/tgr-05-product.jpg', hoverImage: '/images/products/tgr/tgr-05-model.jpg', href: '/product/5', price: '$95', priceInCents: 9500, rating: 4.9, reviewCount: 65, defaultSwatchKey: 'silver',
+    galleryImages: [
+      { src: '/images/products/tgr/tgr-05-lena.webp' },
+    ] },
   { id: 6 , name: 'Nova Birthstone Necklace with Engraved Names in 18K Gold Plating', image: '/images/products/tgr/tgr-06-product.jpg', hoverImage: '/images/products/tgr/tgr-06-model.jpg', href: '/product/6', price: '$100', priceInCents: 10000, rating: 4.4, reviewCount: 162, defaultSwatchKey: 'vermeil' },
   { id: 8 , name: 'Coco Hexagon Ring', image: '/images/products/tgr/tgr-08-product.jpg', hoverImage: '/images/products/tgr/tgr-08-model.jpg', href: '/product/8', price: '$105', priceInCents: 10500, rating: 4.6, reviewCount: 356, defaultSwatchKey: 'vermeil' },
   { id: 9 , name: 'Heart to Heart Engravable Necklace in Sterling Silver with Diamond', image: '/images/products/tgr/tgr-09-product.jpg', hoverImage: '/images/products/tgr/tgr-09-model.jpg', href: '/product/9', price: '$83', priceInCents: 8300, rating: 4.7, reviewCount: 453, defaultSwatchKey: 'silver',

@@ -1,0 +1,74 @@
+:root {
+  --bg: #fbfaf8;
+  --panel: #ffffff;
+  --ink: #1d1d1f;
+  --muted: #6e6e73;
+  --line: #e4e1dc;
+  --accent: #8a6a2f;
+  --accent-ink: #ffffff;
+  --error: #b42318;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --bg: #111214;
+    --panel: #1a1b1e;
+    --ink: #f2f2f2;
+    --muted: #a1a1a6;
+    --line: #2c2d31;
+    --accent: #c9a25a;
+    --accent-ink: #111214;
+    --error: #ff8a80;
+  }
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: var(--bg); color: var(--ink); font: 14px/1.45 ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif; }
+.studio { display: grid; grid-template-columns: 320px 1fr; height: 100vh; }
+.panel { padding: 24px 20px; border-right: 1px solid var(--line); background: var(--panel); overflow-y: auto; }
+.panel h1 { font-size: 18px; margin: 0 0 6px; letter-spacing: -0.01em; }
+.sub { color: var(--muted); margin: 0 0 18px; font-size: 13px; }
+.group { display: block; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin: 18px 0 8px; }
+.row { display: flex; gap: 6px; margin-bottom: 6px; }
+input, select { width: 100%; padding: 9px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--ink); font: inherit; }
+input:focus, select:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+button { font: inherit; cursor: pointer; border-radius: 8px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); padding: 8px 10px; }
+button.ghost { background: transparent; }
+button.add { width: 100%; color: var(--accent); }
+.seg { display: flex; gap: 6px; flex-wrap: wrap; }
+.seg button { flex: 1; min-width: 60px; }
+.seg button.on { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.status { color: var(--muted); font-size: 12px; margin-top: 18px; }
+.error { color: var(--error); font-size: 13px; }
+.stage { position: relative; overflow: hidden; touch-action: none; cursor: grab; }
+.stage:active { cursor: grabbing; }
+.stage canvas { position: absolute; inset: 0; }
+.hint { position: absolute; bottom: 12px; left: 0; right: 0; text-align: center; color: var(--muted); font-size: 12px; pointer-events: none; }
+@media (max-width: 760px) {
+  .studio { grid-template-columns: 1fr; grid-template-rows: auto 60vh; height: auto; }
+  .panel { border-right: 0; border-bottom: 1px solid var(--line); padding: 16px; }
+  .stage { height: 60vh; }
+}
+.studio { grid-template-columns: 360px 1fr; }
+button.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+button:disabled { opacity: 0.5; cursor: default; }
+.row > button { white-space: nowrap; }
+.note { color: var(--muted); font-size: 12px; margin: 4px 0 0; }
+.settings { margin-top: 18px; border-top: 1px solid var(--line); }
+.sgroup { border-bottom: 1px solid var(--line); }
+.shead { width: 100%; display: flex; justify-content: space-between; border: 0; background: transparent; padding: 12px 2px; font-weight: 600; font-size: 13px; }
+.chev { color: var(--muted); }
+.param { padding: 6px 2px 10px; }
+.param.off { opacity: 0.55; }
+.plabel { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; font-size: 12px; margin-bottom: 5px; }
+.tags { display: flex; gap: 4px; flex-shrink: 0; }
+.tag { font-size: 10px; padding: 1px 6px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); white-space: nowrap; }
+.tag.warn { color: var(--error); border-color: currentColor; }
+.tag.src { opacity: 0.8; }
+.phelp { font-size: 11px; color: var(--muted); margin-top: 4px; }
+.num { display: flex; align-items: center; gap: 6px; }
+.num input[type='range'] { flex: 1; padding: 0; accent-color: var(--accent); }
+.num input[type='number'] { width: 76px; flex: none; padding: 5px 6px; }
+.unit { font-size: 11px; color: var(--muted); white-space: nowrap; }
+.param input[type='checkbox'] { width: auto; accent-color: var(--accent); }
+.hint.taut { color: var(--accent); font-weight: 600; }
+.zoom { position: absolute; top: 12px; right: 12px; display: flex; gap: 4px; z-index: 2; }
+.zoom button { min-width: 36px; padding: 6px 10px; background: var(--panel); font-variant-numeric: tabular-nums; }

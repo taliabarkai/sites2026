@@ -57,6 +57,14 @@
    unselected label wraps in 97.5% of the width, breaking where its bold self
    would, and a label never rewraps (say, "Sterling Silver" onto two lines) as
    it's picked */
+/* Tiles with a swatch or image: content runs from the top, so every icon in a
+   row lines up whatever the length of its label */
+.standard,
+.big {
+  justify-content: flex-start;
+  padding-top: var(--spacing-sm);
+}
+
 .standard:not(.selected) .label {
   max-width: 97.5%;
 }
@@ -163,7 +171,8 @@
   border-radius: var(--radius-full);
 }
 
-.standard .swatchMedia .image {
+.standard .swatchMedia .image,
+.image-only .swatchMedia .image {
   background-image: linear-gradient(
     135deg,
     transparent 15%,

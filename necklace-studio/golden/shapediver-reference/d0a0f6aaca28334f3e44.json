@@ -1,0 +1,60 @@
+{
+  "name": "Merav",
+  "letterMm": 9.5,
+  "coating": "GP",
+  "options": {
+    "letterMm": "9.5"
+  },
+  "nameOptions": {},
+  "spriteWidthPx": 747,
+  "spriteHeightPx": 200,
+  "mmPerPx": 0.05,
+  "letteringMm": {
+    "w": 36.14019012451172,
+    "h": 8.758320569992065
+  },
+  "productId": "tg-carrie",
+  "attachMm": [
+    {
+      "x": -16.675880432128906,
+      "y": 3.1944057047367096
+    },
+    {
+      "x": 16.77468967437744,
+      "y": 2.1691621840000153
+    }
+  ],
+  "attachPx": [
+    {
+      "x": 39.982391357421875,
+      "y": 36.11188590526625
+    },
+    {
+      "x": 708.9937934875488,
+      "y": 56.616756320000135
+    }
+  ],
+  "anchorStrategy": "ring-signature",
+  "plateMm": {
+    "w": 36.14019012451172,
+    "h": 8.758320569992065
+  },
+  "ringSpanMm": 33.46627802321478,
+  "letteringCentrePx": {
+    "x": 373.5,
+    "y": 100.00000000000044
+  },
+  "loopCentresPx": [
+    {
+      "x": 38.54785478547855,
+      "y": 58.636963696369634
+    },
+    {
+      "x": 709.4420529801324,
+      "y": 79.25
+    }
+  ],
+  "pipelineVersion": 4,
+  "sourceVersion": "a010f2dc4aea9368ae93053ab5e297de",
+  "spriteUrl": "/plates/tg-carrie/d0a0f6aaca28334f3e44.png"
+}

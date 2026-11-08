@@ -71,6 +71,10 @@ html {
   /* The phase control changes the whole journey, so it is tinted apart from
      the other demo pills. Soft enough to read as chrome under any brand. */
   --demo-phase-background: #E6F2F1;
+  /* The review chips on the mobile announcement bar: soft purple, so they're
+     spotted on landing */
+  --demo-chip-background:  #ECE6FB;
+  --demo-chip-border:      #D8CDF5;
 
   /* ── Material colors (universal product attributes — not brand-themed) ── */
   --sterling-silver-925:   #CBCBCB;

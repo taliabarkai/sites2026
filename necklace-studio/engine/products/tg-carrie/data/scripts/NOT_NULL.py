@@ -1,0 +1,1 @@
+items = [i for i in items if i]

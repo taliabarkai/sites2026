@@ -1,0 +1,60 @@
+{
+  "name": "T",
+  "letterMm": 7.5,
+  "coating": "GP",
+  "options": {
+    "letterMm": "7.5"
+  },
+  "nameOptions": {},
+  "spriteWidthPx": 241,
+  "spriteHeightPx": 167,
+  "mmPerPx": 0.05,
+  "letteringMm": {
+    "w": 10.821699619293213,
+    "h": 7.145876169204712
+  },
+  "productId": "tg-carrie",
+  "attachMm": [
+    {
+      "x": -4.115386564284563,
+      "y": 3.0345279574394226
+    },
+    {
+      "x": 4.115421295166016,
+      "y": 3.476872133091092
+    }
+  ],
+  "attachPx": [
+    {
+      "x": 38.19226871430874,
+      "y": 22.80944085121199
+    },
+    {
+      "x": 202.8084259033203,
+      "y": 13.962557338178598
+    }
+  ],
+  "anchorStrategy": "ring-signature",
+  "plateMm": {
+    "w": 10.821699619293213,
+    "h": 7.145876169204712
+  },
+  "ringSpanMm": 8.24268562963106,
+  "letteringCentrePx": {
+    "x": 120.5,
+    "y": 83.50000000000044
+  },
+  "loopCentresPx": [
+    {
+      "x": 36.75,
+      "y": 45.44205298013245
+    },
+    {
+      "x": 203.23636363636365,
+      "y": 36.51570247933884
+    }
+  ],
+  "pipelineVersion": 4,
+  "sourceVersion": "a27d188b16dd35c01af0358bb7f9a943",
+  "spriteUrl": "/plates/tg-carrie/cf2ffed4b45ed15dd2e7.png"
+}

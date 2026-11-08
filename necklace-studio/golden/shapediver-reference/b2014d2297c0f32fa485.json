@@ -1,0 +1,60 @@
+{
+  "name": "Julia",
+  "letterMm": 6,
+  "coating": "GP",
+  "options": {
+    "letterMm": "6"
+  },
+  "nameOptions": {},
+  "spriteWidthPx": 394,
+  "spriteHeightPx": 187,
+  "mmPerPx": 0.05,
+  "letteringMm": {
+    "w": 18.464467525482178,
+    "h": 8.105117321014404
+  },
+  "productId": "tg-carrie",
+  "attachMm": [
+    {
+      "x": -6.595508098602295,
+      "y": 3.8513051085174084
+    },
+    {
+      "x": 7.9368579387664795,
+      "y": 3.653661549091339
+    }
+  ],
+  "attachPx": [
+    {
+      "x": 65.0898380279541,
+      "y": 16.473897829652273
+    },
+    {
+      "x": 355.7371587753296,
+      "y": 20.42676901817366
+    }
+  ],
+  "anchorStrategy": "ring-signature",
+  "plateMm": {
+    "w": 18.464467525482178,
+    "h": 8.105117321014404
+  },
+  "ringSpanMm": 14.533709974423326,
+  "letteringCentrePx": {
+    "x": 197,
+    "y": 93.50000000000044
+  },
+  "loopCentresPx": [
+    {
+      "x": 63.74086378737542,
+      "y": 39.061461794019934
+    },
+    {
+      "x": 356.0535117056856,
+      "y": 43
+    }
+  ],
+  "pipelineVersion": 4,
+  "sourceVersion": "c8b5b53f71c50dedb9a40d67a9b6a9a9",
+  "spriteUrl": "/plates/tg-carrie/b2014d2297c0f32fa485.png"
+}

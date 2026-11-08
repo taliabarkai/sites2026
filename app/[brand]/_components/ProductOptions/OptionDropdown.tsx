@@ -7,6 +7,7 @@ import { OptionThumb } from './OptionThumb'
 import { OptionTile } from './OptionTile'
 import { useOptionIcons } from './useOptionIcons'
 import { useRovingFocus } from './useRovingFocus'
+import { revealInList, useDropDirection } from './useDropDirection'
 import styles from './ProductOptions.module.css'
 
 export interface OptionDropdownProps {
@@ -54,13 +55,13 @@ export function OptionDropdown({ group, value, onChange, basePrice }: OptionDrop
   useEffect(() => {
     if (!open) return
     setFocusIndex(selectedIndex)
-    // The whole list into view first: inside a scrolling panel (Quick Add's
-    // editor) it would otherwise open under the pinned footer.
-    listRef.current?.scrollIntoView({ block: 'nearest' })
+    // The list opens up or down to fit (useDropDirection) rather than moving
+    // the page; only the list itself scrolls to the selected row
     const el = refs.current[selectedIndex]
     el?.focus({ preventScroll: true })
-    el?.scrollIntoView({ block: 'nearest' })
+    revealInList(listRef.current, el)
   }, [open, selectedIndex, setFocusIndex, refs])
+  const dir = useDropDirection(open, triggerRef, listRef)
 
   // A click anywhere outside closes it
   useEffect(() => {
@@ -119,7 +120,7 @@ export function OptionDropdown({ group, value, onChange, basePrice }: OptionDrop
         <button
           ref={triggerRef}
           type="button"
-          className={`${styles.trigger} ${open ? styles.triggerOpen : ''}`}
+          className={`${styles.trigger} ${open ? (dir === 'up' ? styles.triggerOpenUp : styles.triggerOpen) : ''}`}
           aria-haspopup="listbox"
           aria-expanded={open}
           aria-controls={open ? listId : undefined}
@@ -143,7 +144,7 @@ export function OptionDropdown({ group, value, onChange, basePrice }: OptionDrop
             id={listId}
             role="listbox"
             aria-labelledby={labelId}
-            className={isPanel ? `${styles.panel} ${styles[`panel_${tile}`]}` : styles.list}
+            className={`${isPanel ? `${styles.panel} ${styles[`panel_${tile}`]}` : styles.list} ${dir === 'up' ? styles.listUp : ''}`}
           >
             {group.values.map((v, i) =>
               isPanel ? (

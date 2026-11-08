@@ -1,0 +1,116 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   Option Categories — every product option picker, state by state.
+
+   The pickers are the live ProductOptions components; this file only lays
+   them out, the same way the Form Fields page does.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: var(--colors-background);
+}
+
+.content {
+  flex: 1;
+  width: 100%;
+  max-width: var(--layout-container-wide);
+  margin: 0 auto;
+  padding: var(--spacing-xl) var(--layout-page-margin) var(--spacing-xxl);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xxl);
+}
+
+.pageTitle {
+  margin: 0 0 var(--spacing-xxs);
+  font-family:    var(--typography-rules-headline2-font-family);
+  font-size:      var(--typography-rules-headline2-font-size);
+  line-height:    var(--typography-rules-headline2-line-height);
+  font-weight:    var(--typography-rules-headline2-font-weight, normal);
+  letter-spacing: var(--typography-rules-headline2-letter-spacing, normal);
+  text-transform: var(--typography-rules-headline2-text-transform, none);
+  color: var(--colors-text);
+}
+
+.intro {
+  margin: 0;
+  max-width: 60ch;
+  font-family:    var(--typography-rules-paragraph2-font-family);
+  font-size:      var(--typography-rules-paragraph2-font-size);
+  line-height:    var(--typography-rules-paragraph2-line-height);
+  font-weight:    var(--typography-rules-paragraph2-font-weight, normal);
+  letter-spacing: var(--typography-rules-paragraph2-letter-spacing, normal);
+  color: var(--colors-text-secondary);
+}
+
+/* ─── Section per field type ────────────────────────────────────────────────── */
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.sectionHead {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xxxs);
+  padding-bottom: var(--spacing-xs);
+  border-bottom: var(--border-width) solid var(--border-color);
+}
+
+.sectionTitle {
+  margin: 0;
+  font-family:    var(--typography-rules-headline6-font-family);
+  font-size:      var(--typography-rules-headline6-font-size);
+  line-height:    var(--typography-rules-headline6-line-height);
+  font-weight:    var(--typography-rules-headline6-font-weight, normal);
+  letter-spacing: var(--typography-rules-headline6-letter-spacing, normal);
+  text-transform: var(--typography-rules-headline6-text-transform, none);
+  color: var(--colors-text);
+}
+
+.sectionNote {
+  margin: 0;
+  font-family:    var(--typography-rules-text3-font-family);
+  font-size:      var(--typography-rules-text3-font-size);
+  line-height:    var(--typography-rules-text3-line-height);
+  font-weight:    var(--typography-rules-text3-font-weight, normal);
+  letter-spacing: var(--typography-rules-text3-letter-spacing, normal);
+  color: var(--colors-text-secondary);
+}
+
+/* One column on a phone, as many ~420px columns as fit above that — a
+   carousel needs room for its arrows and a few tiles. */
+.states {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--spacing-lg) var(--spacing-md);
+  align-items: start;
+}
+
+@media (min-width: 768px) {
+  .states {
+    grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+  }
+}
+
+.state {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xxs);
+  min-width: 0;
+}
+
+.stateLabel {
+  margin: 0;
+  font-family:    var(--typography-rules-text3-font-family);
+  font-size:      var(--typography-rules-text3-font-size);
+  line-height:    var(--typography-rules-text3-line-height);
+  font-weight:    var(--typography-rules-text3-font-weight, normal);
+  letter-spacing: var(--typography-rules-text3-letter-spacing, normal);
+  color: var(--colors-text-secondary);
+}

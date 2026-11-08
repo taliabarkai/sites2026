@@ -38,6 +38,8 @@ export interface ChoiceGroup {
   imageShape?: 'circle' | 'square'
   /** Show each value's full price (item base + delta) on the right — the material picker. */
   showPrice?: boolean
+  /** Image-only tiles: each value's price label under its swatch (the PDP's metal picker). */
+  priceBelow?: boolean
 }
 
 export interface TextInputGroup {
@@ -47,6 +49,8 @@ export interface TextInputGroup {
   maxLength: number
   placeholder?: string
   required?: boolean
+  /** One letter, picked from a keyboard that drops down under the field instead of typed. */
+  keyboard?: boolean
 }
 
 export interface AddonItem {

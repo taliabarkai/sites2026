@@ -1,0 +1,60 @@
+{
+  "name": "Anna",
+  "letterMm": 7.5,
+  "coating": "GP",
+  "options": {
+    "letterMm": "7.5"
+  },
+  "nameOptions": {},
+  "spriteWidthPx": 548,
+  "spriteHeightPx": 165,
+  "mmPerPx": 0.05,
+  "letteringMm": {
+    "w": 26.155426025390625,
+    "h": 7.027275085449219
+  },
+  "productId": "tg-carrie",
+  "attachMm": [
+    {
+      "x": -11.78227162361145,
+      "y": 2.7416041744872928
+    },
+    {
+      "x": 11.782240390777588,
+      "y": 2.458934798836708
+    }
+  ],
+  "attachPx": [
+    {
+      "x": 38.354567527770996,
+      "y": 27.667916510254585
+    },
+    {
+      "x": 509.64480781555176,
+      "y": 33.32130402326628
+    }
+  ],
+  "anchorStrategy": "ring-signature",
+  "plateMm": {
+    "w": 26.155426025390625,
+    "h": 7.027275085449219
+  },
+  "ringSpanMm": 23.566207341280357,
+  "letteringCentrePx": {
+    "x": 274,
+    "y": 82.50000000000044
+  },
+  "loopCentresPx": [
+    {
+      "x": 36.998338870431894,
+      "y": 50.25249169435216
+    },
+    {
+      "x": 510.02003338898163,
+      "y": 55.95826377295492
+    }
+  ],
+  "pipelineVersion": 4,
+  "sourceVersion": "ac8d089c56a048ed38769189f5359224",
+  "spriteUrl": "/plates/tg-carrie/9ddbd6fb0f0d5ccc1458.png"
+}

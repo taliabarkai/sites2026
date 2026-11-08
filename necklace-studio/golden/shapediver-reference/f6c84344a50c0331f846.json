@@ -1,0 +1,60 @@
+{
+  "name": "Mia",
+  "letterMm": 7.5,
+  "coating": "GP",
+  "options": {
+    "letterMm": "7.5"
+  },
+  "nameOptions": {},
+  "spriteWidthPx": 405,
+  "spriteHeightPx": 163,
+  "mmPerPx": 0.05,
+  "letteringMm": {
+    "w": 19.020418643951416,
+    "h": 6.931741237640381
+  },
+  "productId": "tg-carrie",
+  "attachMm": [
+    {
+      "x": -8.214766502380371,
+      "y": 3.015939775854349
+    },
+    {
+      "x": 8.214844465255737,
+      "y": 2.45748171210289
+    }
+  ],
+  "attachPx": [
+    {
+      "x": 38.20466995239258,
+      "y": 21.181204482913472
+    },
+    {
+      "x": 366.79688930511475,
+      "y": 32.350365757942654
+    }
+  ],
+  "anchorStrategy": "ring-signature",
+  "plateMm": {
+    "w": 19.020418643951416,
+    "h": 6.931741237640381
+  },
+  "ringSpanMm": 16.439099487406168,
+  "letteringCentrePx": {
+    "x": 202.5,
+    "y": 81.50000000000045
+  },
+  "loopCentresPx": [
+    {
+      "x": 36.82392026578073,
+      "y": 43.73255813953488
+    },
+    {
+      "x": 367.1903171953255,
+      "y": 54.939899833055094
+    }
+  ],
+  "pipelineVersion": 4,
+  "sourceVersion": "5d0e8fd0c4c9e5d393dc4e3c0243d71c",
+  "spriteUrl": "/plates/tg-carrie/f6c84344a50c0331f846.png"
+}

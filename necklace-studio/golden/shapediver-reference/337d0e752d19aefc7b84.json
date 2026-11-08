@@ -1,0 +1,60 @@
+{
+  "name": "Assaf",
+  "letterMm": 7.5,
+  "coating": "GP",
+  "options": {
+    "letterMm": "7.5"
+  },
+  "nameOptions": {},
+  "spriteWidthPx": 552,
+  "spriteHeightPx": 210,
+  "mmPerPx": 0.05,
+  "letteringMm": {
+    "w": 26.396934509277344,
+    "h": 9.291093945503235
+  },
+  "productId": "tg-carrie",
+  "attachMm": [
+    {
+      "x": -11.903091192245483,
+      "y": 3.817451260983944
+    },
+    {
+      "x": 11.903059005737305,
+      "y": 3.8996748477220535
+    }
+  ],
+  "attachPx": [
+    {
+      "x": 37.93817615509033,
+      "y": 28.65097478032156
+    },
+    {
+      "x": 514.0611801147461,
+      "y": 27.00650304555937
+    }
+  ],
+  "anchorStrategy": "ring-signature",
+  "plateMm": {
+    "w": 26.396934509277344,
+    "h": 9.291093945503235
+  },
+  "ringSpanMm": 23.806292192761394,
+  "letteringCentrePx": {
+    "x": 276,
+    "y": 105.00000000000044
+  },
+  "loopCentresPx": [
+    {
+      "x": 36.54635761589404,
+      "y": 51.25496688741722
+    },
+    {
+      "x": 514.4354304635762,
+      "y": 49.604304635761586
+    }
+  ],
+  "pipelineVersion": 4,
+  "sourceVersion": "cb24683b117991ce714b14317c042328",
+  "spriteUrl": "/plates/tg-carrie/337d0e752d19aefc7b84.png"
+}

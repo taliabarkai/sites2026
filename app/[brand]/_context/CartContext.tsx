@@ -1,6 +1,6 @@
 'use client'
 
-import React, { createContext, useCallback, useContext, useEffect, useState } from 'react'
+import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react'
 
 import type { BrandGiftOption } from '../_config/giftOptions'
 
@@ -136,8 +136,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     } catch { /* ignore quota errors */ }
   }, [items])
 
+  // Newest first: an added item goes to the top of the bag. Several added in
+  // one go (a product and its nested items) stay together, in the order added.
+  const addBatch = useRef(0)
   const addItem = useCallback((item: CartItem) => {
-    setItems(prev => [...prev, item])
+    const at = addBatch.current++
+    if (at === 0) queueMicrotask(() => { addBatch.current = 0 })
+    setItems(prev => [...prev.slice(0, at), item, ...prev.slice(at)])
   }, [])
 
   const replaceItems = useCallback((next: CartItem[]) => {

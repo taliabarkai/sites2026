@@ -70,6 +70,16 @@
   overflow: hidden;
 }
 
+/* Floating over the image, inset from the bottom and both sides */
+.progressFloating {
+  position: absolute;
+  left: var(--spacing-sm);
+  right: var(--spacing-sm);
+  bottom: var(--spacing-sm);
+  z-index: var(--z-raised);
+  width: auto;
+}
+
 .progressBar {
   position: absolute;
   top: 0;
@@ -87,11 +97,82 @@
   padding: var(--spacing-xxs) var(--spacing-sm);
   background: var(--colors-brand-default-primary);
   color: var(--colors-text);
-  text-transform: uppercase;
+  /* The brand's ribbon case: Title Case on TGR, uppercase elsewhere */
+  text-transform: var(--typography-rules-ribbons1-text-transform, uppercase);
   border-radius: var(--ribbon-border-radius, var(--radius-sm));
   font-family:    var(--typography-rules-ribbons1-font-family, var(--font-family-main-bold));
   font-size:      var(--typography-rules-ribbons1-font-size);
   line-height:    var(--typography-rules-ribbons1-line-height);
   font-weight:    var(--typography-rules-ribbons1-font-weight, 700);
-  letter-spacing: var(--typography-rules-ribbons1-letter-spacing, 0.04em);
+  letter-spacing: var(--typography-rules-ribbons1-letter-spacing, normal);
+}
+
+/* Over the live-preview slide, bottom-left — a disclaimer, a loading state */
+.livePreviewOverlay {
+  position: absolute;
+  left: var(--spacing-sm);
+  right: var(--spacing-sm);
+  bottom: var(--spacing-md);
+  z-index: var(--z-raised);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xxs);
+  pointer-events: none;
+}
+
+/* Live-preview ribbon in the theme's ribbon colors — legible on every brand (template PDPs) */
+.livePreviewRibbonThemed {
+  background: var(--ribbon-background);
+  color: var(--ribbon-text);
+}
+
+/* Template PDPs: the ribbons stacked top left — personalization, then badges */
+.ribbonStack {
+  position: absolute;
+  top: var(--spacing-sm);
+  left: var(--spacing-sm);
+  z-index: var(--z-raised);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--spacing-xxs);
+}
+
+.ribbonStack > .livePreviewRibbon {
+  position: static;
+}
+
+/* A ribbon with an icon before its text (the personalization badge) */
+.ribbonWithIcon {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xxxs);
+  /* As the Personalize row: a soft gradient fill inside a 1px air-blue
+     border that fades toward the middle (TGR) — padding less the border, so
+     it stays the size of the other ribbons */
+  padding: calc(var(--spacing-xxs) - var(--border-width)) calc(var(--spacing-sm) - var(--border-width));
+  border: var(--border-width) solid transparent;
+  background:
+    linear-gradient(90deg,
+      color-mix(in srgb, var(--personalize-fill-start) 60%, var(--colors-background)),
+      var(--colors-background) 55%,
+      var(--personalize-fill-end)) padding-box,
+    linear-gradient(90deg,
+      var(--personalize-border),
+      color-mix(in srgb, var(--personalize-border) 30%, var(--colors-background)) 55%,
+      var(--personalize-border)) border-box;
+  color: var(--colors-text);
+}
+
+/* The 20px icon hangs into the padding, so this badge keeps the others' height */
+.ribbonWithIcon svg {
+  flex: none;
+  margin-block: calc(-1 * var(--spacing-xxxs) / 2);
+}
+
+
+/* The sale badge, in the sale color */
+.ribbonSale {
+  background: var(--colors-price-sale);
+  color: var(--colors-text-inverse);
 }

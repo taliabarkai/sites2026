@@ -125,6 +125,11 @@
   /* Share the Love panel — order confirmation */
   --share-panel-background:       var(--colors-surface-secondary);
 
+  /* Personalize row (PDP) — its fill runs start → white → end; its border is one colour, fading mid-way */
+  --personalize-fill-start: var(--colors-surface-secondary);
+  --personalize-fill-end:   var(--colors-surface-primary);
+  --personalize-border:     var(--colors-text-secondary);
+
   --related-category-hover-text:  var(--lal-black);
 
   /* Form field extras */

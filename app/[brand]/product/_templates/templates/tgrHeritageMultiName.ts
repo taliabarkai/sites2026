@@ -1,10 +1,10 @@
 import type { PdpTemplate } from '../pdpTemplate'
 
 /**
- * TGR Heritage Multiple Name Necklace — the heavy form. Material and diamond
- * size set the price and stay in step 1; the name count, the names and the
- * chain length are step 2. The count also decides how many diamonds there are
- * (count − 1), which the page states but never asks.
+ * TGR Heritage Multiple Name Necklace — the heavy form, on the MM flow: the
+ * material on the page, then Personalize (name count, names) and Customize
+ * (material, diamond size, chain length). The count also decides how many
+ * diamonds there are (count − 1), which the page states but never asks.
  *
  * Material and diamond values and prices are from the live PDP screenshot
  * (Nov 2026). Base images are placeholders.
@@ -18,11 +18,13 @@ export const tgrHeritageMultiName: PdpTemplate = {
   productId: 4,
   summary: 'Two-step multi-name necklace: 2–5 names stacked, diamonds between, preview re-lays out per name',
 
-  gallery: { desktop: 'grid', mobile: 'carousel' },
+  gallery: { desktop: 'heroGridPhotoFirst', mobile: 'carousel' },
 
+  // Follows the MM flow: material on the page, then Personalize (the names)
+  // and Customize (material again as a compact swatch row, diamond, chain).
   steps: [
-    { label: 'Design',  hint: 'Material & diamonds', fieldIds: [201, 202] },
-    { label: 'Names',   hint: 'Names & chain',       fieldIds: [203, 204, 205, 206] },
+    { label: 'Personalize', hint: 'Names',                      fieldIds: [203, 204, 205] },
+    { label: 'Customize',   hint: 'Material, diamonds & chain', fieldIds: [201, 202, 206], display: { 201: 'visual' } },
   ],
 
   fields: [
@@ -38,20 +40,20 @@ export const tgrHeritageMultiName: PdpTemplate = {
     },
     {
       fieldId: 202, name: 'Select diamond size', cartName: 'Diamond', type: 'selection', displayType: 'grid', order: 2, isRequired: true,
-      pricing: 'delta', affectsPreview: true, defaultValueId: '0.05',
+      // Not drawn by the studio yet (stones are deferred in its HANDOFF), so no re-render
+      pricing: 'delta', affectsPreview: false, defaultValueId: '0.05', showPriceDelta: false,
       tooltip: 'Carat weight per diamond. Larger stones sit slightly higher on the plate.',
       values: [
-        { id: '0.05', label: '0.05CT', image: '/images/tgr/diamond-0.05.png', priceDelta: 0 },
-        { id: '0.10', label: '0.10CT', image: '/images/tgr/diamond-0.10.png', priceDelta: 4000 },  // TODO: real deltas
-        { id: '0.30', label: '0.30CT', image: '/images/tgr/diamond-0.30.png', priceDelta: 12000 },
-        { id: 'none', label: 'None',   priceDelta: 0 },
+        { id: '0.05', label: '0.05CT', image: '/images/tgr/diamond-0.05.webp', priceDelta: 0 },
+        { id: '0.10', label: '0.10CT', image: '/images/tgr/diamond-0.10.webp', priceDelta: 4000 },  // TODO: real deltas
+        { id: '0.30', label: '0.30CT', image: '/images/tgr/diamond-0.30.webp', priceDelta: 12000 },
+        { id: 'none', label: 'None',   image: '/images/tgr/diamond-none.webp', priceDelta: 0 },
       ],
     },
     {
       fieldId: 203, name: 'Select number of names (2-5)', cartName: 'Names', type: 'selection', displayType: 'visual_dropdown_list', order: 3, isRequired: true,
       pricing: 'delta', affectsPreview: true, defaultValueId: '2',
       note: { text: 'Names are placed from left to right', tone: 'warning' },
-      helpLink: 'Inscriptions Guide',
       values: [
         { id: '2', label: '2 Names + 1 Diamond',  priceDelta: 0 },
         { id: '3', label: '3 Names + 2 Diamonds', priceDelta: 3000 },
@@ -85,37 +87,28 @@ export const tgrHeritageMultiName: PdpTemplate = {
 
   livePreview: {
     enabled: true,
-    galleryPlacement: 'first',
-    ribbon: 'Live Preview',
-    disclaimer: 'Preview is approximate',
+    // The preview is the main image: the names in the product photo until the shopper types
+    galleryPlacement: 'replaceHero',
+    ribbon: 'Your Personalization',
+    sampleText: { 204: ['Jake', 'Emma', 'Alice', 'Sage', 'Mia'] },
+    // One Carrie plate per name on one chain, from the Name Necklace Studio.
+    // The studio doesn't set stones yet, so the diamonds aren't drawn.
     engine: {
-      kind: 'placeholder',
-      spec: {
-        base: {
-          fieldId: 201,
-          images: {
-            'gold-plated':      '/images/tgr/preview/heritage-gold.png',
-            'gold-vermeil':     '/images/tgr/preview/heritage-gold.png',
-            'rose-gold-plated': '/images/tgr/preview/heritage-rose.png',
-            'solid-gold-10k':   '/images/tgr/preview/heritage-gold.png',
-          },
-        },
-        // One line per name, left to right along the chain, diamonds drawn between.
-        text: [
-          { fieldId: 204, font: "'Pinyon Script', cursive", box: { x: 0.12, y: 0.44, w: 0.76, h: 0.12 }, layout: 'stack' },
-        ],
-        overlays: [
-          { fieldId: 202, images: { '0.05': '/images/tgr/preview/dia-s.png', '0.10': '/images/tgr/preview/dia-m.png', '0.30': '/images/tgr/preview/dia-l.png' }, box: { x: 0.12, y: 0.44, w: 0.76, h: 0.12 } },
-        ],
-      },
+      kind: 'necklaceStudio',
+      textFieldId: 204,
+      materialFieldId: 201,
+      coatings: { 'gold-plated': 'GP', 'gold-vermeil': 'VMGP', 'rose-gold-plated': 'RGP', 'solid-gold-10k': 'GP' },
+      defaultCoating: 'VMGP',
     },
   },
 
   flow: {
+    // Only the material sits on the page before Personalize
+    entryFieldIds: [201],
     entryCta: 'Personalize',
     container: { desktop: 'card', mobile: 'panel' },
     completion: 'addToBag',
-    nextCta: 'Continue to {next}',
+    nextCta: 'Continue to {next} →',
     stickyBar: true,
   },
 }

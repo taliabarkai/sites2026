@@ -1,0 +1,60 @@
+{
+  "name": "Yossi",
+  "letterMm": 7.5,
+  "coating": "GP",
+  "options": {
+    "letterMm": "7.5"
+  },
+  "nameOptions": {},
+  "spriteWidthPx": 467,
+  "spriteHeightPx": 161,
+  "mmPerPx": 0.05,
+  "letteringMm": {
+    "w": 22.10614776611328,
+    "h": 6.804628133773804
+  },
+  "productId": "tg-carrie",
+  "attachMm": [
+    {
+      "x": -9.757602214813232,
+      "y": 3.170401219278574
+    },
+    {
+      "x": 9.757725715637207,
+      "y": 2.935226798057556
+    }
+  ],
+  "attachPx": [
+    {
+      "x": 38.34795570373535,
+      "y": 17.09197561442896
+    },
+    {
+      "x": 428.65451431274414,
+      "y": 21.795464038849317
+    }
+  ],
+  "anchorStrategy": "ring-signature",
+  "plateMm": {
+    "w": 22.10614776611328,
+    "h": 6.804628133773804
+  },
+  "ringSpanMm": 19.516744893588573,
+  "letteringCentrePx": {
+    "x": 233.5,
+    "y": 80.50000000000044
+  },
+  "loopCentresPx": [
+    {
+      "x": 36.92845257903494,
+      "y": 39.72046589018303
+    },
+    {
+      "x": 429.07154742096503,
+      "y": 44.27953410981697
+    }
+  ],
+  "pipelineVersion": 4,
+  "sourceVersion": "b613e5f3997a1603555d4a251bddd753",
+  "spriteUrl": "/plates/tg-carrie/aad8b9f57160fa84244a.png"
+}

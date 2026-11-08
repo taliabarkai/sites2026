@@ -93,6 +93,7 @@ export const DEFAULT_NAV_LINKS: NavLink[] = [
       { label: 'Panel Examples', href: '/panel-examples' },
       { label: 'Highlights Bar', href: '/highlights-examples' },
       { label: 'Form Fields', href: '/form-fields' },
+      { label: 'Option Categories', href: '/option-categories' },
       { label: 'Design Systems', href: '/styleguide' },
     ],
   },

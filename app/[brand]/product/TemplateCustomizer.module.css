@@ -1,0 +1,898 @@
+/* Template-driven customizer — one set of styles for inline, card and panel
+   flows. Brand values come from the theme; nothing here is per brand. */
+
+.customizer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  color: var(--colors-text);
+}
+
+.cta {
+  width: 100%;
+}
+
+/* The header moved above the gallery (V2): the options start their own gap below it */
+.customizerHeaderless {
+  padding-top: var(--spacing-md);
+}
+
+/* ── Fields ──────────────────────────────────────────────────────────────── */
+
+.stepFields {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.field {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xxs);
+}
+
+/* Help link and tooltip sit on the label's line, right-aligned */
+.fieldAside {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: var(--z-raised);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xxs);
+}
+
+.helpLink {
+  color: var(--colors-text);
+  text-decoration: underline;
+  font-family:    var(--typography-rules-links1-font-family);
+  font-size:      var(--typography-rules-links1-font-size);
+  line-height:    var(--typography-rules-links1-line-height);
+  letter-spacing: var(--typography-rules-links1-letter-spacing, normal);
+  font-weight:    var(--typography-rules-links1-font-weight, normal);
+}
+
+.tooltipWrap {
+  position: relative;
+  display: inline-flex;
+}
+
+.tooltipButton {
+  display: inline-flex;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--colors-text-secondary);
+  cursor: pointer;
+}
+
+.tooltip {
+  position: absolute;
+  top: calc(100% + var(--spacing-xxxs));
+  right: 0;
+  z-index: var(--z-tooltip);
+  width: 24rem;
+  padding: var(--spacing-xs);
+  border-radius: var(--radius-sm);
+  background: var(--colors-background);
+  box-shadow: var(--shadow-md);
+  color: var(--colors-text);
+  font-family:    var(--typography-rules-text3-font-family);
+  font-size:      var(--typography-rules-text3-font-size);
+  line-height:    var(--typography-rules-text3-line-height);
+  letter-spacing: var(--typography-rules-text3-letter-spacing, normal);
+  font-weight:    var(--typography-rules-text3-font-weight, normal);
+}
+
+.note,
+.error,
+.derivedValue {
+  margin: 0;
+  font-family:    var(--typography-rules-text3-font-family);
+  font-size:      var(--typography-rules-text3-font-size);
+  line-height:    var(--typography-rules-text3-line-height);
+  letter-spacing: var(--typography-rules-text3-letter-spacing, normal);
+  font-weight:    var(--typography-rules-text3-font-weight, normal);
+}
+
+.note {
+  color: var(--colors-text-secondary);
+}
+
+.noteWarning {
+  color: var(--colors-warning);
+}
+
+.error {
+  margin-top: var(--spacing-xxxs);
+  color: var(--colors-error);
+}
+
+/* Derived (read-only) value — "4 diamonds between the names" */
+.derived {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xxxs);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-sm);
+  background: var(--colors-surface-primary);
+}
+
+.derivedLabel {
+  margin: 0;
+  color: var(--colors-text-secondary);
+  font-family:    var(--typography-rules-caption1-font-family);
+  font-size:      var(--typography-rules-caption1-font-size);
+  line-height:    var(--typography-rules-caption1-line-height);
+  letter-spacing: var(--typography-rules-caption1-letter-spacing, normal);
+  text-transform: var(--typography-rules-caption1-text-transform, none);
+  font-weight:    var(--typography-rules-caption1-font-weight, normal);
+}
+
+/* ── Inline flow ─────────────────────────────────────────────────────────── */
+
+.inlineStep {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.inlineStepTitle {
+  margin: 0;
+  font-family:    var(--typography-rules-headline6-font-family);
+  font-size:      var(--typography-rules-headline6-font-size);
+  line-height:    var(--typography-rules-headline6-line-height);
+  letter-spacing: var(--typography-rules-headline6-letter-spacing, normal);
+  text-transform: var(--typography-rules-headline6-text-transform, none);
+  font-weight:    var(--typography-rules-headline6-font-weight, normal);
+}
+
+/* ── Card flow ───────────────────────────────────────────────────────────── */
+
+.back {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xxs);
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--colors-text);
+  cursor: pointer;
+  font-family:    var(--typography-rules-text2-font-family);
+  font-size:      var(--typography-rules-text2-font-size);
+  line-height:    var(--typography-rules-text2-line-height);
+  letter-spacing: var(--typography-rules-text2-letter-spacing, normal);
+  font-weight:    var(--typography-rules-text2-font-weight, normal);
+}
+
+.backIcon {
+  display: inline-flex;
+  /* The brand chevron points right; Back points left */
+  transform: rotate(180deg);
+}
+
+/* Subtotal row above the last step's Add to Bag */
+.finalCta {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+
+.card {
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: var(--colors-background);
+  /* Not clipped: an open dropdown (the initials' keyboard) hangs out past the card */
+}
+
+/* The tabs' fill is rounded into the card's top corners instead */
+.card > .tabs:first-child {
+  overflow: hidden;
+  border-radius: calc(var(--radius-md) - var(--border-width)) calc(var(--radius-md) - var(--border-width)) 0 0;
+}
+
+.cardBody {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md) var(--spacing-sm);
+}
+
+/* ── Step tabs (card and panel) ──────────────────────────────────────────── */
+
+/* One step: its label and hint, no tabs */
+.stepHeader {
+  display: grid;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-bottom: var(--border-width) solid var(--border-color);
+}
+
+.tabs {
+  display: grid;
+  border-bottom: var(--border-width) solid var(--border-color);
+}
+
+.stepHeader .tabTitle,
+.stepHeader .tabSub {
+  grid-column: 1;
+}
+
+.tab {
+  display: grid;
+  /* Number and label centred in their column, so the two tabs read evenly */
+  grid-template-columns: auto auto;
+  justify-content: center;
+  column-gap: var(--spacing-xs);
+  align-items: center;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border: none;
+  border-bottom: 2px solid transparent;
+  background: var(--colors-surface-primary);
+  color: var(--colors-text-secondary);
+  text-align: left;
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.tabActive {
+  background: var(--colors-background);
+  border-bottom-color: var(--buttons-primary-background);
+  color: var(--colors-text);
+}
+
+.tabStep {
+  grid-row: 1 / span 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--spacing-md);
+  height: var(--spacing-md);
+  border: var(--border-width) solid currentColor;
+  border-radius: var(--radius-full);
+  font-family:    var(--typography-rules-caption1-font-family);
+  font-size:      var(--typography-rules-caption1-font-size);
+  line-height:    var(--typography-rules-caption1-line-height);
+  font-weight:    var(--typography-rules-caption1-font-weight, normal);
+}
+
+/* A tab with no hint line: the number spans just the label's row, so the two
+   sit on one centre line (otherwise it spans an empty second row) */
+.tab:not(:has(.tabSub)) .tabStep {
+  grid-row: auto;
+}
+
+.tabActive .tabStep {
+  border-color: var(--buttons-primary-background);
+  background: var(--buttons-primary-background);
+  color: var(--buttons-primary-text);
+}
+
+.tabTitle {
+  grid-column: 2;
+  font-family:    var(--typography-rules-text2-font-family);
+  font-size:      var(--typography-rules-text2-font-size);
+  line-height:    var(--typography-rules-text2-line-height);
+  letter-spacing: var(--typography-rules-text2-letter-spacing, normal);
+  font-weight:    var(--typography-rules-text2-font-weight, normal);
+}
+
+.tabSub {
+  grid-column: 2;
+  color: var(--colors-text-secondary);
+  font-family:    var(--typography-rules-text3-font-family);
+  font-size:      var(--typography-rules-text3-font-size);
+  line-height:    var(--typography-rules-text3-line-height);
+  letter-spacing: var(--typography-rules-text3-letter-spacing, normal);
+  font-weight:    var(--typography-rules-text3-font-weight, normal);
+}
+
+/* ── Panel flow (mobile) ─────────────────────────────────────────────────── */
+
+.panelBody {
+  padding-top: var(--spacing-md);
+}
+
+.panelPreview {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  /* The gallery's frame: the card-image tint, multiplied into the image */
+  background-color: var(--colors-card-image-bg);
+}
+
+.panelPreviewImg {
+  display: block;
+  mix-blend-mode: multiply;
+  max-height: 40vh;
+  max-width: 100%;
+  aspect-ratio: 1;
+  object-fit: contain;
+}
+
+
+/* The tap panel's preview: the gallery's square, edge to edge */
+.panelPreviewFull {
+  display: block;
+  mix-blend-mode: multiply;
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+}
+
+.panelPreviewNote {
+  position: absolute;
+  left: var(--spacing-xxs);
+  right: var(--spacing-xxs);
+  bottom: var(--spacing-xxs);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--spacing-xxs);
+  pointer-events: none;
+}
+
+/* ── Preview note (gallery slot + panel) ─────────────────────────────────── */
+
+.previewDisclaimer,
+.previewLoading {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xxs);
+  padding: var(--spacing-xxxs) var(--spacing-xxs);
+  border-radius: var(--radius-sm);
+  background: var(--colors-background);
+  color: var(--colors-text-secondary);
+  font-family:    var(--typography-rules-caption1-font-family);
+  font-size:      var(--typography-rules-caption1-font-size);
+  line-height:    var(--typography-rules-caption1-line-height);
+  letter-spacing: var(--typography-rules-caption1-letter-spacing, normal);
+  font-weight:    var(--typography-rules-caption1-font-weight, normal);
+}
+
+.previewLoading {
+  color: var(--colors-text);
+}
+
+.spinner {
+  width: var(--spacing-xs);
+  height: var(--spacing-xs);
+  border: 2px solid var(--border-color);
+  border-top-color: var(--colors-text);
+  border-radius: var(--radius-full);
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spinner { animation: none; }
+}
+
+
+/* ── The "Personalize" row (personalization behind a panel) ────────────────── */
+.personalizeRow {
+  display: flex;
+  align-items: center;
+  /* The text sits right against the icon's column; it keeps its own space before the arrow */
+  gap: 0;
+  width: 100%;
+  padding: var(--spacing-xs) var(--spacing-xxs);
+  /* Fill: baby blue → white → alice blue (TGR). Border: air blue only,
+     fading toward the middle. The fill paints the padding box; the border's
+     gradient shows through the transparent 1px border. */
+  --row-border-blue: linear-gradient(90deg,
+    var(--personalize-border),
+    color-mix(in srgb, var(--personalize-border) 30%, var(--colors-background)) 55%,
+    var(--personalize-border));
+  --row-border: var(--row-border-blue);
+  border: var(--border-width) solid transparent;
+  border-radius: var(--radius-md);
+  background:
+    linear-gradient(90deg,
+      color-mix(in srgb, var(--personalize-fill-start) 60%, var(--colors-background)),
+      var(--colors-background) 55%,
+      var(--personalize-fill-end)) padding-box,
+    var(--row-border) border-box;
+  color: var(--colors-text);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color var(--transition-fast);
+}
+
+/* Desktop: the plain grey border, the blue one on hover (mobile keeps the blue) */
+@media (min-width: 1024px) {
+  .personalizeRow {
+    --row-border: linear-gradient(var(--border-color), var(--border-color));
+  }
+
+  .personalizeRow:hover {
+    --row-border: var(--row-border-blue);
+  }
+}
+
+
+
+.personalizeRow:hover .rowChevron {
+  transform: translateX(var(--spacing-xxxs));
+}
+
+.personalizeRow:focus-visible {
+  outline: 2px solid var(--colors-text);
+  outline-offset: 2px;
+}
+
+.rowIcon {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 6.4rem;
+  /* No tile of its own: the icon sits straight on the row's gradient, and the
+     row is only as tall as its one line of text needs */
+}
+
+
+
+
+.rowText {
+  flex: 1;
+  min-width: 0;
+  padding-right: var(--spacing-sm);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xxxs);
+}
+
+.rowTitle {
+  font-family:    var(--typography-rules-text2-font-family);
+  font-size:      var(--typography-rules-text2-font-size);
+  line-height:    var(--typography-rules-text2-line-height);
+  letter-spacing: var(--typography-rules-text2-letter-spacing, normal);
+  font-weight:    var(--typography-rules-text2-font-weight, normal);
+}
+
+.rowSub {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--colors-text);
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+  font-weight:    var(--typography-rules-text1-font-weight, normal);
+}
+
+.rowChevron {
+  flex: 0 0 auto;
+  display: inline-flex;
+  padding-right: var(--spacing-xs);
+  color: var(--colors-text);
+  transition: transform var(--transition-fast);
+}
+
+/* ── v3: the saved name with a Preview button beside it ─────────────────────── */
+.previewRow {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--spacing-xxs);
+}
+
+.previewRowField {
+  flex: 1;
+  min-width: 0;
+}
+
+.previewButton {
+  flex: 0 0 auto;
+  min-height: var(--field-min-height);
+}
+
+/* v3 and V1 panels: Save sits in the body, so the body keeps clear of the phone's home bar */
+.tapPanelBody {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Saved: "Modify" in place of the chevron */
+.rowModify {
+  flex: 0 0 auto;
+  align-self: center;
+  padding-right: var(--spacing-xs);
+  color: var(--colors-text);
+  text-decoration: underline;
+  font-family:    var(--typography-rules-links1-font-family);
+  font-size:      var(--typography-rules-links1-font-size);
+  line-height:    var(--typography-rules-links1-line-height);
+  letter-spacing: var(--typography-rules-links1-letter-spacing, normal);
+  font-weight:    var(--typography-rules-links1-font-weight, normal);
+}
+
+
+
+/* ── Added to your bag (as Music Memories, in the brand's UI) ─────────────── */
+.addedCard {
+  display: flex;
+  flex-direction: column;
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: var(--colors-background);
+  overflow: hidden;
+}
+
+.addedHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-bottom: var(--border-width) solid var(--border-color);
+}
+
+.addedCheck {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--spacing-md);
+  height: var(--spacing-md);
+  border-radius: var(--radius-full);
+  background: var(--colors-text);
+  color: var(--colors-text-inverse);
+}
+
+.addedTitle {
+  font-family:    var(--typography-rules-text2-font-family);
+  font-size:      var(--typography-rules-text2-font-size);
+  line-height:    var(--typography-rules-text2-line-height);
+  letter-spacing: var(--typography-rules-text2-letter-spacing, normal);
+  font-weight:    var(--typography-rules-text2-font-weight, normal);
+}
+
+.addedItem {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  width: 100%;
+  padding: var(--spacing-sm);
+  border: none;
+  background: none;
+  color: var(--colors-text);
+  text-align: left;
+  cursor: pointer;
+}
+
+.addedItem:focus-visible {
+  outline: 2px solid var(--colors-text);
+  outline-offset: -2px;
+}
+
+/* The gallery's frame: card-image tint, multiplied into the image */
+.addedThumb {
+  flex: none;
+  width: 6.4rem;
+  height: 6.4rem;
+  background-color: var(--colors-card-image-bg);
+  overflow: hidden;
+}
+
+.addedThumb img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  mix-blend-mode: multiply;
+}
+
+.addedText {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xxxs);
+}
+
+.addedName {
+  overflow-wrap: anywhere;
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+  font-weight:    var(--typography-rules-text1-font-weight, normal);
+}
+
+.addedSub {
+  color: var(--colors-text-secondary);
+  font-family:    var(--typography-rules-text3-font-family);
+  font-size:      var(--typography-rules-text3-font-size);
+  line-height:    var(--typography-rules-text3-line-height);
+  letter-spacing: var(--typography-rules-text3-letter-spacing, normal);
+  font-weight:    var(--typography-rules-text3-font-weight, normal);
+}
+
+.addedChevron {
+  flex: none;
+  display: flex;
+  /* The brand chevron points right: down while closed, up when open */
+  transform: rotate(90deg);
+  transition: transform var(--transition-base);
+}
+
+.addedChevronOpen {
+  transform: rotate(-90deg);
+}
+
+.addedDetails {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--spacing-xs);
+  margin: 0 var(--spacing-sm) var(--spacing-sm);
+  padding-top: var(--spacing-xs);
+  border-top: var(--border-width) solid var(--border-color);
+}
+
+.addedRows {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xxxs);
+  min-width: 0;
+  margin: 0;
+}
+
+.addedRow {
+  display: flex;
+  gap: var(--spacing-xxs);
+}
+
+.addedKey {
+  font-family:    var(--typography-rules-text4-font-family);
+  font-size:      var(--typography-rules-text4-font-size);
+  line-height:    var(--typography-rules-text4-line-height);
+  letter-spacing: var(--typography-rules-text4-letter-spacing, normal);
+  font-weight:    var(--typography-rules-text4-font-weight, normal);
+}
+
+.addedValue {
+  margin: 0;
+  color: var(--colors-text-secondary);
+  font-family:    var(--typography-rules-text3-font-family);
+  font-size:      var(--typography-rules-text3-font-size);
+  line-height:    var(--typography-rules-text3-line-height);
+  letter-spacing: var(--typography-rules-text3-letter-spacing, normal);
+  font-weight:    var(--typography-rules-text3-font-weight, normal);
+}
+
+.addedEdit {
+  flex-shrink: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--colors-text);
+  text-decoration: underline;
+  cursor: pointer;
+  font-family:    var(--typography-rules-links1-font-family);
+  font-size:      var(--typography-rules-links1-font-size);
+  line-height:    var(--typography-rules-links1-line-height);
+  letter-spacing: var(--typography-rules-links1-letter-spacing, normal);
+  font-weight:    var(--typography-rules-links1-font-weight, normal);
+}
+
+
+/* V1: the Personalize row under its section title, as the option groups are */
+.rowGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xxs);
+}
+
+.rowGroupLabel {
+  margin: 0;
+  color: var(--colors-text);
+  font-family:    var(--typography-rules-text2-font-family);
+  font-size:      var(--typography-rules-text2-font-size);
+  line-height:    var(--typography-rules-text2-line-height);
+  font-weight:    var(--typography-rules-text2-font-weight, normal);
+  letter-spacing: var(--typography-rules-text2-letter-spacing, normal);
+  text-transform: var(--typography-rules-text2-text-transform, none);
+}
+
+
+/* Desktop V1 / V4, opened: Back and the fields inside the card, 24px all round */
+.cardBody.inlineOpenBody {
+  padding: var(--spacing-md);
+}
+
+/* Desktop V4, opened: the one step's title strip — the wand, its label, 24px in from the sides as the fields are */
+.stepHeader.inlineOpenHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xs) var(--spacing-md);
+}
+
+/* The title strip's close, top right */
+.inlineOpenClose {
+  display: inline-flex;
+  padding: var(--spacing-xxxs);
+  margin-right: calc(-1 * var(--spacing-xxxs));
+  border: none;
+  background: none;
+  color: var(--colors-text);
+  cursor: pointer;
+}
+
+.inlineOpenClose:focus-visible {
+  outline: 2px solid var(--colors-text);
+  outline-offset: 2px;
+}
+
+.inlineOpenTitle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xxs);
+  font-family:    var(--typography-rules-text2-font-family);
+  font-size:      var(--typography-rules-text2-font-size);
+  line-height:    var(--typography-rules-text2-line-height);
+  letter-spacing: var(--typography-rules-text2-letter-spacing, normal);
+  font-weight:    var(--typography-rules-text2-font-weight, normal);
+}
+
+/* ── V5 (Jewelry) ────────────────────────────────────────────────────────── */
+
+/* The preview with its caption under it (step 2) */
+.panelPreviewStack {
+  flex-direction: column;
+}
+
+.previewCaption {
+  margin: 0;
+  padding: var(--spacing-xxs) var(--spacing-sm);
+  text-align: center;
+  color: var(--colors-text-secondary);
+  background: var(--colors-background);
+  font-family:    var(--typography-rules-text3-font-family);
+  font-size:      var(--typography-rules-text3-font-size);
+  line-height:    var(--typography-rules-text3-line-height);
+  letter-spacing: var(--typography-rules-text3-letter-spacing, normal);
+  font-weight:    var(--typography-rules-text3-font-weight, normal);
+}
+
+/* Customize's footer: a square back arrow, then Add to bag */
+.jewelryFooter {
+  display: flex;
+  gap: var(--spacing-xs);
+  width: 100%;
+}
+
+.jewelryFooter .cta {
+  flex: 1;
+}
+
+.stepBackSquare {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--buttons-primary-min-height, 4.8rem);
+  min-height: var(--buttons-primary-min-height, 4.8rem);
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--radius-sm);
+  background: var(--colors-background);
+  color: var(--colors-text);
+  cursor: pointer;
+}
+
+.stepBackSquare:focus-visible {
+  outline: 2px solid var(--colors-text);
+  outline-offset: 2px;
+}
+
+/* The brand arrow points right; back points left */
+.stepBackIcon {
+  display: inline-flex;
+  transform: rotate(180deg);
+}
+
+/* OAL: "Add a diamond accent", its price on the right */
+.accentRow {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+}
+
+.accentRow input {
+  width: 2rem;
+  height: 2rem;
+  margin: 0;
+  accent-color: var(--colors-text);
+}
+
+.accentLabel,
+.accentPrice {
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+  font-weight:    var(--typography-rules-text1-font-weight, normal);
+}
+
+.accentLabel {
+  flex: 1;
+}
+
+/* The sheet's tabs: the light grey border on every side, as the fields have */
+.panelTabs .tabs {
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+/* Desktop V1 / V4: the opened fields grow out of the button's height and fade
+   in, so the page below slides down with them instead of jumping */
+.inlineOpenEnter {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  /* Only while it opens: once done, nothing is capped or clipped (the
+     dropdowns and tooltips inside need to overflow) */
+  animation: inlineOpen 360ms linear backwards;
+}
+
+@keyframes inlineOpen {
+  from { max-height: var(--buttons-primary-min-height, 4.8rem); opacity: 0; clip-path: inset(0); }
+  60%  { opacity: 1; }
+  to   { max-height: var(--open-h, 100rem); opacity: 1; clip-path: inset(0); }
+}
+
+/* Closing: the same motion in reverse, folding back to the button's height */
+.inlineOpenExit {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  animation: inlineClose 360ms linear forwards;
+}
+
+@keyframes inlineClose {
+  from { max-height: var(--open-h, 100rem); opacity: 1; clip-path: inset(0); }
+  40%  { opacity: 1; }
+  to   { max-height: var(--buttons-primary-min-height, 4.8rem); opacity: 0; clip-path: inset(0); }
+}
+
+/* …and the button it folds into fades back in */
+.ctaReturn {
+  animation: ctaReturn 200ms linear backwards;
+}
+
+@keyframes ctaReturn {
+  from { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .inlineOpenEnter,
+  .inlineOpenExit,
+  .ctaReturn { animation: none; }
+}
+
+/* V1 / V4 desktop: the title strip in the Personalize row's blue gradient, so
+   the opened card reads as the row (or CTA) it came from */
+.stepHeader.inlineOpenHeaderTinted {
+  background: linear-gradient(90deg,
+    color-mix(in srgb, var(--personalize-fill-start) 60%, var(--colors-background)),
+    var(--colors-background) 55%,
+    var(--personalize-fill-end));
+}
+
+/* V5 desktop, opened: a rule across the column, then Back (as Music Memories) */
+.backRule {
+  display: flex;
+  padding-top: var(--spacing-md);
+  border-top: var(--border-width) solid var(--border-color);
+}

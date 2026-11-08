@@ -44,7 +44,6 @@
   align-items: center;
   justify-content: space-between;
   gap: var(--spacing-sm);
-  min-height: var(--spacing-lg);
 }
 
 .visuallyHidden {
@@ -185,6 +184,14 @@
   border-bottom-right-radius: 0;
 }
 
+/* Opened upward: the trigger squares its top instead, to meet the list above it */
+.triggerOpenUp,
+.triggerOpenUp:hover {
+  border-color: var(--colors-text);
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
 .chevron {
   display: flex;
   flex-shrink: 0;
@@ -215,6 +222,17 @@
   border-top-color: var(--border-color);
   border-radius: 0 0 var(--form-field-border-radius) var(--form-field-border-radius);
   box-shadow: var(--shadow-md);
+}
+
+/* Opened upward (no room below): the same list, sitting on top of the trigger */
+.listUp {
+  top: auto;
+  bottom: 100%;
+  margin-top: 0;
+  margin-bottom: calc(var(--border-width) * -1);
+  border-top-color: var(--colors-text);
+  border-bottom-color: var(--border-color);
+  border-radius: var(--form-field-border-radius) var(--form-field-border-radius) 0 0;
 }
 
 /* List: rows with dividers; selected row is highlighted and bold */
@@ -388,7 +406,8 @@
   align-items: center;
   justify-content: center;
   width: var(--spacing-lg);
-  height: var(--spacing-lg);
+  /* 24px tall, so the label row is the label's height rather than the buttons' 32px */
+  height: var(--spacing-md);
   padding: 0;
   color: var(--colors-text);
   background: none;
@@ -766,4 +785,27 @@
   font-weight:    var(--typography-rules-paragraph2-font-weight, normal);
   letter-spacing: var(--typography-rules-paragraph2-letter-spacing, normal);
   text-transform: var(--typography-rules-paragraph2-text-transform, none);
+}
+
+/* Image-only swatches with their price underneath (the material picker) */
+.slot:has(.slotPrice) {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-xxs);
+}
+
+.slotPrice {
+  color: var(--colors-text);
+  white-space: nowrap;
+  font-family:    var(--typography-rules-text3-font-family);
+  font-size:      var(--typography-rules-text3-font-size);
+  line-height:    var(--typography-rules-text3-line-height);
+  letter-spacing: var(--typography-rules-text3-letter-spacing, normal);
+  font-weight:    var(--typography-rules-text3-font-weight, normal);
+}
+
+.slotPriceSelected {
+  font-family: var(--typography-rules-text4-font-family);
+  font-weight: var(--typography-rules-text4-font-weight, 600);
 }

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useCallback, useEffect } from 'react'
+import { createContext, useContext, useState, useRef, useCallback, useEffect, useMemo } from 'react'
 import { notFound, usePathname, useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import * as oalIcons from '@/src/components/icons/oal'
@@ -24,7 +24,7 @@ import type { NestedItemsDisplay } from '../_components/NestedItems'
 import { ProductImageCarousel } from '../_components/ProductImageCarousel'
 import { ReviewPhotoLightbox } from '../_components/ReviewPhotoLightbox'
 import type { ReviewPhoto } from '../_components/ReviewPhotoLightbox'
-import { getBrandFromPathname } from '../_config/brands'
+import { getBrandFromPathname, materialLabel } from '../_config/brands'
 import { prefixFooterColumns, prefixNavLinks, withBrandPrefix } from '../_config/brandPaths'
 import { DEFAULT_FOOTER_COLUMNS, DEFAULT_NAV_LINKS, DEFAULT_TOPLINE } from '../_config/siteContent'
 import {
@@ -47,15 +47,20 @@ import { getGiftOptions } from '../_config/giftOptions'
 import { GiftOptionsInfoPanel } from '../_components/cart/GiftingOptions'
 import { PanelPortal } from '../_components/PanelPortal'
 import { StickyCustomizeBar } from '../_components/StickyCustomizeBar'
+import { useIsMobile } from '../_components/CustomizerPanel'
 import { StickyProductBar } from '../_components/StickyProductBar'
 import { TranslationAdvisor } from '../_components/TranslationAdvisor'
 import type { TranslationAdvisorVariant } from '../_components/TranslationAdvisor'
 import { MusicMemoriesCustomizer } from './MusicMemoriesCustomizer'
+import { LivePreviewNote, TemplateCustomizer } from './TemplateCustomizer'
+import { SliderGallery } from './SliderGallery'
+import { renderedTemplateFor, type GalleryDisplay } from './_templates'
+import { withExternalEngine } from './_templates/previewEngine'
 import { AIPreviewCustomizer } from '../_components/AIPreviewCustomizer'
 import { ProductOptions, useProductOptions } from '../_components/ProductOptions'
 import type { OptionGroup, SelectedOption } from '../_components/ProductOptions'
 import { OPTION_GROUPS, OPTIONS_SHOWCASE_PRODUCT_ID, optionsShowcaseProduct } from './[id]/_data/optionGroups'
-import { isNestedDrawerProduct, personalizeFlowFor, readNestedDescriptionState, readNestedDrawerCount } from '../_config/demoParams'
+import { isNestedDrawerProduct, personalizeFlowFor, readGalleryLayout, readNestedDescriptionState, readPersonalizePlacement, readNestedItemOn, readMaterialDisplay, readNestedDrawerCount } from '../_config/demoParams'
 import type { DiamondSetting, PersonalizeFields, PersonalizeFlow } from '../_config/demoParams'
 
 // LAL products that use the song-based Music Memories customizer
@@ -645,8 +650,36 @@ function ReviewsSection({
 // ─── Mobile swipeable gallery ─────────────────────────────────────────────────
 
 /** Mobile PDP image gallery — the shared carousel, hidden on desktop via CSS. */
-function MobileGallery({ images, modelImages, livePreview }: { images: string[]; modelImages: string[]; livePreview?: string | null }) {
-  return <ProductImageCarousel images={images} modelImages={modelImages} livePreview={livePreview} className={styles.mobileGallery} />
+function MobileGallery({ images, modelImages, livePreview, ribbons, previewNote, floatingProgress }: { images: string[]; modelImages: string[]; livePreview?: string | null; ribbons?: string[]; previewNote?: React.ReactNode; floatingProgress?: boolean }) {
+  const ribbonIcon = useContext(RibbonIconContext)
+  return <ProductImageCarousel images={images} modelImages={modelImages} livePreview={livePreview} livePreviewRibbons={ribbons} ribbonIcon={ribbonIcon} saleRibbons={ribbonIcon?.sale} livePreviewOverlay={previewNote} progressPlacement={floatingProgress ? 'floating' : 'below'} className={styles.mobileGallery} />
+}
+
+/**
+ * The ribbons on a template PDP's main image, stacked top left in the theme's
+ * ribbon colors: "Your Personalization" (once personalized) above the
+ * product's own badges ("15% off").
+ */
+/** An icon drawn before one ribbon's text — the personalization badge's wand. */
+type RibbonIcon = { on: string; icon: React.ReactNode; sale?: string[] }
+// Provided by the page (the template's ribbon + the brand's wand), so every
+// desktop gallery's ribbon stack picks it up without threading a prop through each
+const RibbonIconContext = createContext<RibbonIcon | undefined>(undefined)
+
+function RibbonStack({ items }: { items?: string[] }) {
+  if (!items?.length) return null
+  const ri = useContext(RibbonIconContext)
+  // Stacked top left: the personalization badge (with its wand) above the product's own
+  return (
+    <div className={styles.ribbonStack}>
+      {items.map((text) => (
+        <span key={text} className={`${styles.livePreviewRibbon} ${styles.livePreviewRibbonThemed} ${ri?.on === text ? styles.ribbonWithIcon : ''} ${ri?.sale?.includes(text) ? styles.ribbonSale : ''}`}>
+          {ri?.on === text && ri.icon}
+          {text}
+        </span>
+      ))}
+    </div>
+  )
 }
 
 /** A gallery image's class — packshots blend onto the tint, on-model shots don't. */
@@ -659,13 +692,20 @@ function galleryImageClass(base: string, src: string, modelImages: string[]): st
 // `rootRef` — the gallery's own box, for the desktop sticky bar to watch
 type GalleryRootRef = React.RefObject<HTMLDivElement | null>
 
-function DesktopGallery({ images, modelImages, name, rootRef }: { images: string[]; modelImages: string[]; name: string; rootRef?: GalleryRootRef }) {
+function DesktopGallery({ images, modelImages, name, rootRef, livePreview, ribbons, previewNote }: {
+  images: string[]; modelImages: string[]; name: string; rootRef?: GalleryRootRef
+  /** A live-preview image, drawn in the first cell with its ribbons (template PDPs). */
+  livePreview?: string | null; ribbons?: string[]; previewNote?: React.ReactNode
+}) {
+  const withPreview = livePreview ? [livePreview, ...images] : images
   // At least a full 2×2 — short galleries repeat; longer ones show every image
-  const gridImages = images.length >= 4 ? images : [...images, ...images].slice(0, 4)
+  const gridImages = withPreview.length >= 4 ? withPreview : [...withPreview, ...withPreview].slice(0, 4)
   return (
     <div ref={rootRef} className={styles.desktopGallery}>
       {gridImages.map((src, i) => (
         <div key={i} className={styles.desktopGridCell}>
+          {livePreview && i === 0 && <RibbonStack items={ribbons} />}
+          {livePreview && i === 0 && previewNote && <div className={styles.livePreviewNote}>{previewNote}</div>}
           <img
             src={src}
             alt={i === 0 ? name : ''}
@@ -678,9 +718,195 @@ function DesktopGallery({ images, modelImages, name, rootRef }: { images: string
   )
 }
 
+// ─── Hero grid: first image full width, the rest two across (template PDPs) ──
+
+/**
+ * The live preview, once there is one, takes the full-width hero with its
+ * ribbon and pushes the default first image down into the grid.
+ */
+function HeroGridGallery({ images, modelImages, name, rootRef, livePreview, ribbons, previewNote }: {
+  images: string[]; modelImages: string[]; name: string; rootRef?: GalleryRootRef
+  livePreview?: string | null; ribbons?: string[]; previewNote?: React.ReactNode
+}) {
+  const [hero, ...rest] = livePreview ? [livePreview, ...images] : images
+  const heroRef = useRef<HTMLDivElement>(null)
+  const glideRef = useRef<number | null>(null)
+
+  // Typing while scrolled down brings the preview back into focus: when it
+  // updates and the hero has scrolled up under the header, glide back to it.
+  // The form column is sticky, so the field being typed in stays in view.
+  //
+  // The glide is driven frame by frame and re-aims at the hero every frame:
+  // the first preview pushes an image into the grid, and that layout shift
+  // cancels a native smooth scroll. A wheel or touch hands control back.
+  useEffect(() => {
+    const el = heroRef.current
+    if (!livePreview || !el || el.offsetParent === null) return // hidden below desktop
+    // Distance from the hero to its resting place under the sticky header (negative: scrolled past)
+    const offset = () => el.getBoundingClientRect().top - (parseFloat(getComputedStyle(el).scrollMarginTop) || 0)
+    if (offset() >= -1 || glideRef.current !== null) return
+
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      window.scrollTo(0, window.scrollY + offset())
+      return
+    }
+
+    const DURATION = 520
+    const from = window.scrollY
+    const start = performance.now()
+    const stop = () => {
+      if (glideRef.current !== null) cancelAnimationFrame(glideRef.current)
+      glideRef.current = null
+      window.removeEventListener('wheel', stop)
+      window.removeEventListener('touchstart', stop)
+    }
+    const step = (now: number) => {
+      const t = Math.min(1, (now - start) / DURATION)
+      const eased = 1 - (1 - t) ** 3 // ease-out
+      const target = window.scrollY + offset()
+      window.scrollTo(0, from + (target - from) * eased)
+      if (t < 1) glideRef.current = requestAnimationFrame(step)
+      else stop()
+    }
+    window.addEventListener('wheel', stop, { passive: true })
+    window.addEventListener('touchstart', stop, { passive: true })
+    glideRef.current = requestAnimationFrame(step)
+    // A page that isn't being painted (a background or unfocused window) gets
+    // no frames: land on the hero directly rather than leave it out of focus
+    // (Not cleared on the next preview: typing keeps updating it mid-glide.)
+    setTimeout(() => {
+      if (!el.isConnected || glideRef.current === null || window.scrollY !== from) return
+      stop()
+      window.scrollTo(0, window.scrollY + offset())
+    }, 150)
+  }, [livePreview])
+  useEffect(() => () => { if (glideRef.current !== null) cancelAnimationFrame(glideRef.current) }, [])
+
+  return (
+    <div ref={rootRef} className={styles.heroGridGallery}>
+      <div ref={heroRef} className={`${styles.desktopGridCell} ${styles.heroGridHero}`}>
+        <RibbonStack items={ribbons} />
+        {livePreview && previewNote && <div className={styles.livePreviewNote}>{previewNote}</div>}
+        <img src={hero} alt={name} className={galleryImageClass(styles.desktopGridImage, hero, modelImages)} loading="eager" />
+      </div>
+      {rest.map((src, i) => (
+        <div key={`${src.slice(0, 64)}-${i}`} className={styles.desktopGridCell}>
+          <img src={src} alt="" className={galleryImageClass(styles.desktopGridImage, src, modelImages)} loading="lazy" />
+        </div>
+      ))}
+    </div>
+  )
+}
+
+// ─── Overlay thumbnails: one full-width image, thumbnails floating over it ────
+
+function OverlayThumbsGallery({ images, modelImages, name, rootRef, livePreview, ribbons, previewNote }: {
+  images: string[]; modelImages: string[]; name: string; rootRef?: GalleryRootRef
+  livePreview?: string | null; ribbons?: string[]; previewNote?: React.ReactNode
+}) {
+  const [activeIdx, setActiveIdx] = useState(0)
+  const hadPreview = useRef(false)
+  const trackRef = useRef<HTMLDivElement>(null)
+  const allImages = livePreview ? [livePreview, ...images] : images
+
+  /** Slides the track to image `i` (thumbnails, the preview's first appearance). */
+  const goTo = useCallback((i: number, smooth = true) => {
+    const track = trackRef.current
+    if (!track) return
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    track.scrollTo({ left: i * track.clientWidth, behavior: smooth && !reduce ? 'smooth' : 'auto' })
+    setActiveIdx(i)
+  }, [])
+
+  // Jump to the live preview the first time it appears, as the LAL gallery does
+  useEffect(() => {
+    if (livePreview && !hadPreview.current) { goTo(0, false); hadPreview.current = true }
+    if (!livePreview) hadPreview.current = false
+  }, [livePreview, goTo])
+
+  // Swiping (a trackpad, or scrolling sideways) moves the active thumbnail with it
+  const onScroll = () => {
+    const track = trackRef.current
+    if (!track || !track.clientWidth) return
+    const i = Math.round(track.scrollLeft / track.clientWidth)
+    if (i !== activeIdx) setActiveIdx(i)
+  }
+
+  // A mouse drags the strip like a finger would, then settles on the nearest image
+  const drag = useRef<{ x: number; left: number; moved: boolean } | null>(null)
+  const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    const track = trackRef.current
+    if (e.pointerType !== 'mouse' || e.button !== 0 || !track) return
+    drag.current = { x: e.clientX, left: track.scrollLeft, moved: false }
+    track.style.scrollSnapType = 'none'
+    track.setPointerCapture(e.pointerId)
+  }
+  const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    const track = trackRef.current
+    if (!drag.current || !track) return
+    const dx = e.clientX - drag.current.x
+    if (Math.abs(dx) > 3) drag.current.moved = true
+    track.scrollLeft = drag.current.left - dx
+  }
+  const onPointerUp = () => {
+    const track = trackRef.current
+    if (!drag.current || !track) return
+    const start = Math.round(drag.current.left / track.clientWidth)
+    const dx = drag.current.left - track.scrollLeft
+    drag.current = null
+    track.style.scrollSnapType = ''
+    // A short flick is enough to change image; otherwise it settles back
+    const step = Math.abs(dx) > track.clientWidth * 0.15 ? (dx < 0 ? 1 : -1) : 0
+    goTo(Math.max(0, Math.min(allImages.length - 1, start + step)))
+  }
+
+  return (
+    <div ref={rootRef} className={styles.overlayGallery}>
+      <div
+        ref={trackRef}
+        className={`${styles.overlayMain} ${styles.overlayTrack}`}
+        onScroll={onScroll}
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={onPointerUp}
+        onPointerCancel={onPointerUp}
+        aria-roledescription="carousel"
+        aria-label={`${name} images`}
+      >
+        {allImages.map((src, i) => (
+          <div key={i} className={styles.overlaySlide} aria-roledescription="slide" aria-label={`Image ${i + 1} of ${allImages.length}`}>
+            {/* The ribbons and note ride on the live preview's own slide */}
+            {i === 0 && livePreview && <RibbonStack items={ribbons} />}
+            {i === 0 && livePreview && previewNote && <div className={styles.livePreviewNote}>{previewNote}</div>}
+            <img src={src} alt={i === 0 ? name : ''} draggable={false} className={galleryImageClass(styles.desktopGridImage, src, modelImages)} loading={i === 0 ? 'eager' : 'lazy'} />
+          </div>
+        ))}
+      </div>
+      <div className={styles.overlayThumbs}>
+        {allImages.map((thumb, i) => (
+          <button
+            key={i}
+            type="button"
+            onClick={() => goTo(i)}
+            className={`${styles.lalThumb} ${styles.overlayThumb} ${i === activeIdx ? styles.lalThumbActive : ''}`}
+            aria-label={`View image ${i + 1}`}
+            aria-pressed={i === activeIdx}
+          >
+            <img src={thumb} alt="" aria-hidden="true" className={galleryImageClass(styles.oalGalleryImage, thumb, modelImages)} loading="lazy" />
+          </button>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 // ─── OAL: sticky-left hero + vertical scroll right ────────────────────────────
 
-function LALDesktopGallery({ images, modelImages, name, livePreview, rootRef }: { images: string[]; modelImages: string[]; name: string; livePreview?: string | null; rootRef?: GalleryRootRef }) {
+function LALDesktopGallery({ images, modelImages, name, livePreview, rootRef, ribbons, previewNote }: {
+  images: string[]; modelImages: string[]; name: string; livePreview?: string | null; rootRef?: GalleryRootRef
+  /** Template PDPs: a ribbon stack in the theme's colors, and a note on the preview. MM passes neither ("Live Preview"). */
+  ribbons?: string[]; previewNote?: React.ReactNode
+}) {
   const [activeIdx, setActiveIdx] = useState(0)
   const hadPreview = useRef(false)
   const allImages = livePreview ? [livePreview, ...images] : images
@@ -711,7 +937,10 @@ function LALDesktopGallery({ images, modelImages, name, livePreview, rootRef }: 
       </div>
       {/* Main image — right */}
       <div className={styles.lalMainCell}>
-        {showRibbon && <span className={styles.livePreviewRibbon}>Live Preview</span>}
+        {showRibbon && (ribbons
+          ? <RibbonStack items={ribbons} />
+          : <span className={styles.livePreviewRibbon}>Live Preview</span>)}
+        {showRibbon && previewNote && <div className={styles.livePreviewNote}>{previewNote}</div>}
         <img src={allImages[activeIdx]} alt={name} className={galleryImageClass(styles.oalGalleryImage, allImages[activeIdx], modelImages)} loading="eager" />
       </div>
     </div>
@@ -865,6 +1094,34 @@ function TrustBadges({
   )
 }
 
+/** The four USPs with their gift-options panel — under a CTA outside ProductForm (template PDPs). */
+function UspBadges({ brand, icons }: { brand: string; icons: (typeof BRAND_ICONS)[keyof typeof BRAND_ICONS] }) {
+  const [giftInfoOpen, setGiftInfoOpen] = useState(false)
+  return (
+    <>
+      <TrustBadges
+        ShippingIcon={icons.ShippingIcon}
+        ReturnIcon={icons.ReturnIcon}
+        WarrantyIcon={icons.WarrantyIcon}
+        GiftIcon={icons.GiftIcon}
+        onSeeGiftDetails={() => setGiftInfoOpen(true)}
+      />
+      {giftInfoOpen && (
+        <GiftOptionsInfoPanel
+          options={getGiftOptions(brand).map(o => ({
+            id:          o.id,
+            name:        o.name,
+            description: o.description,
+            price:       o.price,
+            imageUrl:    o.image,
+          }))}
+          onClose={() => setGiftInfoOpen(false)}
+        />
+      )}
+    </>
+  )
+}
+
 /**
  * Which Translation Advisor treatment to show (demo toggle, IB only).
  * v1 — floating launcher in the corner. v2 — inline under the engrave field.
@@ -921,11 +1178,11 @@ const CHAIN_LENGTH_DROPDOWN: QuickAddOption = {
 // Personalize-now flow: the PDP's metal picker as the options' standard-image
 // carousel — each metal's own shot where the product has one, else its swatch,
 // and its full price (with the diamond picked, where there is one)
-function metalCarouselGroup(product: ProductItem, extra: number) {
+function metalCarouselGroup(product: ProductItem, extra: number, brand: string) {
   const base = (product.priceInCents ?? 0) + extra
   return {
     id: 'metal-type',
-    label: 'Select material:',
+    label: `Select ${materialLabel(brand).toLowerCase()}:`,
     display: 'carousel' as const,
     tile: 'standard' as const,
     values: materialSwatchesFor(product).map((s) => ({
@@ -1029,6 +1286,7 @@ function toSecondNecklace(
   fields: PersonalizeFields,
   diamondShape: DiamondSetting,
   metalStyle: 'swatches' | 'carousel',
+  brand: string,
 ): QuickAddProduct {
   const base = toPersonalizationPanel(product, product.priceInCents ?? 0, 'silver', fields)
   const discount = (cents: number) => Math.round(cents * (1 - SECOND_NECKLACE_DISCOUNT))
@@ -1036,7 +1294,7 @@ function toSecondNecklace(
     {
       name: METAL_OPTION,
       ...(metalStyle === 'carousel'
-        ? { type: 'material-carousel' as const, label: 'Select material:' }
+        ? { type: 'material-carousel' as const, label: `Select ${materialLabel(brand).toLowerCase()}:` }
         : { type: 'swatch' as const, showPrices: true }),
       values: materialSwatchesFor(product).map((s) => ({ label: s.label, value: s.key, color: s.color, price: s.priceOffset })),
     },
@@ -1119,7 +1377,7 @@ function ProductForm({ brand, product, icons, nestedItems = [], nestedDisplay = 
   const [personalizeOpen, setPersonalizeOpen] = useState(false)
   // The panel's nested offer — the second necklace, in place of the page's companions
   const offerItems = twoStep
-    ? [toSecondNecklace(product, fields, diamondSetting, personalizeNow ? 'carousel' : 'swatches')]
+    ? [toSecondNecklace(product, fields, diamondSetting, personalizeNow ? 'carousel' : 'swatches', brand)]
     : nestedItems
   // Once added, the card names the metal it was personalised in
   const offerCards = offerItems.map((it) => {
@@ -1204,7 +1462,7 @@ function ProductForm({ brand, product, icons, nestedItems = [], nestedDisplay = 
   // The personalize flows' add: the page's price-setting choices, then the
   // personalisation the panel built — with any companions picked, then the bag
   const priceSettingOptions: SelectedOption[] = [
-    { label: 'Material', value: selectedSwatch.label },
+    { label: materialLabel(brand), value: selectedSwatch.label },
     ...(diamond ? [{ label: DIAMOND_OPTION, value: diamond.label }] : []),
   ]
   const { addItem, openCart } = useCart()
@@ -1335,7 +1593,7 @@ function ProductForm({ brand, product, icons, nestedItems = [], nestedDisplay = 
           {personalizeNow ? (
             <div className={styles.materialPicker}>
               <OptionRadioGroup
-                group={metalCarouselGroup(product, diamondOffset)}
+                group={metalCarouselGroup(product, diamondOffset, brand)}
                 value={selectedSwatchKey}
                 onChange={(id) => setSelectedSwatchKey(id as MaterialSwatch['key'])}
               />
@@ -1762,6 +2020,8 @@ function ProductDetailPageInner({ productId, previewId }: { productId: number; p
   const icons = BRAND_ICONS[brand]
 
   const [livePreview, setLivePreview] = useState<string | null>(null)
+  const [livePreviewLoading, setLivePreviewLoading] = useState(false)
+  const [previewPersonalized, setPreviewPersonalized] = useState(false)
   // The desktop gallery — the desktop sticky bar comes up once it's scrolled past
   const galleryRef = useRef<HTMLDivElement>(null)
   // The Drawer demo's charm count and description come from the header's
@@ -1770,6 +2030,127 @@ function ProductDetailPageInner({ productId, previewId }: { productId: number; p
   const nestedDrawerCount = readNestedDrawerCount(searchParams)
   const nestedDescription = readNestedDescriptionState(searchParams) === 'show' ? NESTED_DRAWER_DESCRIPTION : undefined
   const nestedDisplay: NestedItemsDisplay = isNestedDrawerProduct(brand, product.id) ? 'drawer' : 'inline'
+
+  // A PDP template drives the page when this product has one (a bespoke
+  // customizer opts out in the template itself). `?engine=external` swaps the
+  // preview engine for the simulated external one, to review its loading state.
+  const baseTemplate = isOptionsShowcase ? undefined : renderedTemplateFor(brand, product.id)
+  const engineParam = searchParams.get('engine')
+  const template = useMemo(
+    () => (baseTemplate && engineParam === 'external' ? withExternalEngine(baseTemplate) : baseTemplate),
+    [baseTemplate, engineParam],
+  )
+
+  // Gallery: the template picks the desktop layout and where the preview goes;
+  // without one, each brand keeps its own layout.
+  // The header's gallery toggle (?gallery=) overrides the template's own choice
+  const galleryOverride = template ? readGalleryLayout(searchParams)?.display : undefined
+  // TGR and OAL lead every desktop PDP with Hero + grid (photo first)
+  const desktopGallery: GalleryDisplay = galleryOverride
+    ?? (brand === 'tgr' || brand === 'oal' ? 'heroGridPhotoFirst' : template?.gallery.desktop)
+    ?? (brand === 'lal' ? 'sideScroll' : 'grid')
+  // `replaceHero`: the preview takes the first photo's place — that photo is
+  // for category pages; the PDP leads with the preview itself
+  // The Personalize toggle (?personalize=): "In panel" keeps the product's
+  // photos in the gallery until the shopper saves a personalization; then the
+  // preview is pushed in front of them
+  // "In panel v3" does the same on mobile, until the shopper types their own name
+  const placement = template ? readPersonalizePlacement(searchParams, template.flow.defaultPlacement) : undefined
+  const isMobile = useIsMobile()
+  // Every version leads with the product's own photo; the preview is pushed in
+  // front once it's the shopper's own — typed (desktop, V2) or saved (mobile V1, V3)
+  const behindRow = !!template
+  // V2 (mobile): the product header moves above the gallery — the customizer
+  // keeps drawing it (the price is live) into this slot
+  // …and V2 (Preview in gallery) uses the same header-above layout
+  const headerAbove = placement === 'page' && isMobile
+  const [headerSlot, setHeaderSlot] = useState<HTMLDivElement | null>(null)
+  // The mobile gallery's box (it lands just under the site header when scrolled to)
+  const mobileGalleryRef = useRef<HTMLDivElement>(null)
+  // V2 on mobile: the gallery sticks under the header while the shopper fills in
+  // the form below it — the preview updates in view as they type — and leaves
+  // with the Add to Bag button once that scrolls up to it
+  const stickyGallery = placement === 'page' && isMobile && !!template
+  useEffect(() => {
+    const el = mobileGalleryRef.current
+    if (!stickyGallery || !el) return
+    const update = () => {
+      const header = document.querySelector('header')
+      const top = Math.max(0, header ? header.getBoundingClientRect().bottom : 0)
+      el.style.top = `${top}px`
+      // A focused field scrolls into view below the gallery, not behind it
+      document.documentElement.style.scrollPaddingTop = `${top + el.offsetHeight}px`
+      const cta = document.querySelector('#buy-box [data-main-cta]')
+      if (!cta) { el.style.transform = ''; return }
+      // Once the button comes within the form's own gap of the gallery's bottom
+      // edge, they scroll away together — keeping that gap between them
+      const gap = parseFloat(getComputedStyle(cta.parentElement ?? cta).rowGap) || 0
+      const overlap = cta.getBoundingClientRect().top - gap - (top + el.offsetHeight)
+      el.style.transform = overlap < 0 ? `translateY(${overlap}px)` : ''
+    }
+    update()
+    window.addEventListener('scroll', update, { passive: true })
+    window.addEventListener('resize', update)
+    return () => {
+      window.removeEventListener('scroll', update)
+      window.removeEventListener('resize', update)
+      el.style.top = ''
+      el.style.transform = ''
+      document.documentElement.style.scrollPaddingTop = ''
+    }
+  }, [stickyGallery])
+  // Added to your bag (as Music Memories): the preview stays, its ribbon goes.
+  // Personalize Another starts the customizer over — a fresh one, back at the top.
+  const [addedToBag, setAddedToBag] = useState(false)
+  const [customizerRun, setCustomizerRun] = useState(0)
+  const nestedOn = readNestedItemOn(searchParams)
+  // Switching versions starts the page over, at the top
+  const versionKey = placement ?? ''
+  const lastVersion = useRef(versionKey)
+  useEffect(() => {
+    if (lastVersion.current === versionKey) return
+    lastVersion.current = versionKey
+    setAddedToBag(false)
+    window.scrollTo(0, 0)
+  }, [versionKey])
+  const personalizeAnother = useCallback(() => {
+    setCustomizerRun((n) => n + 1)
+    setAddedToBag(false)
+    window.scrollTo({ top: 0, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' })
+  }, [])
+  // The product's photos stay in place; the preview is added in front of them
+  const galleryImages = images
+  const slotPreview = behindRow ? (previewPersonalized ? livePreview : null) : livePreview
+  // With a sample name, the badge waits until the shopper has typed their own
+  const previewRibbon = template
+    ? (addedToBag || (template.livePreview.sampleText && !previewPersonalized) ? '' : template.livePreview.ribbon ?? '')
+    : undefined
+  // Stacked top left: the personalization ribbon, then the product's own badges
+  // The personalization badge takes the product badge's place (the sale is
+  // already shown by the price); without it, the product's own badges show
+  const previewRibbons = template ? (previewRibbon ? [previewRibbon] : template.gallery.badges ?? []) : undefined
+  // The personalization badge carries the brand's wand
+  const ribbonIcon = template
+    ? {
+        on: template.livePreview.ribbon ?? '',
+        icon: <icons.AiMagicIcon size={20} />,
+        // On sale, the product's badges ("15% off") are drawn in the sale color
+        sale: template.sale ? template.gallery.badges : undefined,
+      }
+    : undefined
+
+  // Hero + grid (photo first): the product's own photo leads until the
+  // shopper types; then the live preview is pushed in above it as the hero.
+  // The other layouts follow the template (sample name from page load).
+  const photoFirst = desktopGallery === 'heroGridPhotoFirst'
+  const heroPreview = photoFirst ? (previewPersonalized ? livePreview : null) : slotPreview
+  const heroImages = photoFirst ? images : galleryImages
+  // On the preview: its ribbon stack. On the photo: the product's badges only.
+  const heroRibbons = heroPreview ? previewRibbons : template?.gallery.badges
+
+  const previewNote = template
+    ? <LivePreviewNote disclaimer={template.livePreview.disclaimer} loading={livePreviewLoading} />
+    : undefined
 
   // Companion products for the Nested Items section, shaped for the quick-add
   // panel (reuses the category-page adapter). The inline list shows one other
@@ -1799,7 +2180,7 @@ function ProductDetailPageInner({ productId, previewId }: { productId: number; p
     const swatch = materialSwatchesFor(product).find((s) => s.key === swatchKey)!
     const price = (product.priceInCents ?? 0) + swatch.priceOffset
     const selectedOptions = [
-      { label: 'Material', value: swatch.label },
+      { label: materialLabel(brand), value: swatch.label },
       { label: 'Chain Length', value: chainLength },
       ...(engravedText.trim() ? [{ label: 'Engraving', value: engravedText.trim() }] : []),
     ]
@@ -1846,6 +2227,7 @@ function ProductDetailPageInner({ productId, previewId }: { productId: number; p
       <Header variant="white" brand={brand} navLinks={navLinks} topline={topline} />
 
       <main id="main-content">
+        <RibbonIconContext.Provider value={ribbonIcon}>
         {brand === 'lal' && !isOptionsShowcase && AI_PREVIEW_PRODUCT_IDS.has(product.id) ? (
           /* Pop Your Memories — AI-preview customizer owns its own preview + layout */
           <AIPreviewCustomizer
@@ -1858,17 +2240,36 @@ function ProductDetailPageInner({ productId, previewId }: { productId: number; p
           />
         ) : (
         <>
+        {/* V2: breadcrumbs, title, price and reviews above the gallery (mobile) */}
+        {headerAbove && <div ref={setHeaderSlot} className={styles.headerAbove} />}
+
         {/* Mobile gallery — hidden on desktop */}
-        <MobileGallery images={images} modelImages={modelImages} livePreview={livePreview} />
+        {/* Template PDPs: the pagination bar floats over the image */}
+        <div ref={mobileGalleryRef} className={`${styles.mobileGalleryAnchor} ${stickyGallery ? styles.mobileGallerySticky : ''}`}>
+          <MobileGallery
+            images={galleryImages}
+            modelImages={modelImages}
+            livePreview={slotPreview}
+            ribbons={previewRibbons}
+            previewNote={previewNote}
+            floatingProgress={!!template}
+          />
+        </div>
 
         {/* Two-column layout on desktop, single column on mobile */}
-        <div className={styles.layout}>
-          {/* Left: gallery — LAL: thumbnails left; OAL: sticky+scroll; TGR/others: 2×2 grid */}
-          {brand === 'lal'
-            ? <LALDesktopGallery images={images} modelImages={modelImages} name={product.name} livePreview={livePreview} rootRef={galleryRef} />
-            : brand === 'oal'
-              ? <OALDesktopGallery images={images} modelImages={modelImages} name={product.name} rootRef={galleryRef} />
-              : <DesktopGallery images={images} modelImages={modelImages} name={product.name} rootRef={galleryRef} />
+        <div className={`${styles.layout} ${!template && desktopGallery !== 'heroGridPhotoFirst' ? '' : desktopGallery === 'slider' ? styles.layoutSlider : styles.layoutLivePreview} ${(template || desktopGallery === 'heroGridPhotoFirst') && (desktopGallery === 'heroGrid' || desktopGallery === 'heroGridPhotoFirst' || desktopGallery === 'overlayThumbs') ? styles.layoutCenteredForm : ''} ${desktopGallery === 'overlayThumbs' ? styles.layoutOverlay : ''}`}>
+          {/* Left: gallery — sideScroll (LAL): thumbnails left; heroGrid (template PDPs): one full-width image, then two across; stickyHero (OAL): sticky+scroll; grid/default (TGR, others): 2×2 */}
+          {desktopGallery === 'sideScroll'
+            ? <LALDesktopGallery images={galleryImages} modelImages={modelImages} name={product.name} livePreview={slotPreview} rootRef={galleryRef} ribbons={template ? previewRibbons : undefined} previewNote={template ? previewNote : undefined} />
+            : desktopGallery === 'slider'
+              ? <SliderGallery images={galleryImages} modelImages={modelImages} name={product.name} rootRef={galleryRef} livePreview={slotPreview} ribbons={previewRibbons} ribbonIcon={ribbonIcon} previewNote={previewNote} skipTo="buy-box" icons={icons} />
+            : desktopGallery === 'overlayThumbs'
+              ? <OverlayThumbsGallery images={galleryImages} modelImages={modelImages} name={product.name} rootRef={galleryRef} livePreview={slotPreview} ribbons={previewRibbons} previewNote={previewNote} />
+            : desktopGallery === 'heroGrid' || desktopGallery === 'heroGridPhotoFirst'
+              ? <HeroGridGallery images={heroImages} modelImages={modelImages} name={product.name} rootRef={galleryRef} livePreview={heroPreview} ribbons={heroRibbons} previewNote={previewNote} />
+            : desktopGallery === 'stickyHero'
+              ? <OALDesktopGallery images={galleryImages} modelImages={modelImages} name={product.name} rootRef={galleryRef} />
+              : <DesktopGallery images={galleryImages} modelImages={modelImages} name={product.name} rootRef={galleryRef} livePreview={template ? slotPreview : undefined} ribbons={previewRibbons} previewNote={previewNote} />
           }
 
           {/* Right / main: product form — LAL music memories / canvas customizer, else jewelry form */}
@@ -1881,6 +2282,29 @@ function ProductDetailPageInner({ productId, previewId }: { productId: number; p
               onAddToBag={handleAddToBag}
               optionGroups={OPTION_GROUPS}
               onAddConfigured={handleAddConfigured}
+            />
+          ) : template ? (
+            <TemplateCustomizer
+              // A different engine is a different demo: start the form over
+              // A different version is a fresh demo: nothing saved carries over (the
+              // nested item on/off only shows or hides the offer, keeping the rest)
+              key={`${template.id}-${template.livePreview.engine.kind}-${placement ?? 'default'}-${customizerRun}`}
+              brand={brand}
+              template={template}
+              product={product}
+              icons={icons}
+              addItem={addItem}
+              openCart={openCart}
+              onLivePreviewChange={setLivePreview}
+              onLivePreviewLoadingChange={setLivePreviewLoading}
+              onPersonalizedChange={setPreviewPersonalized}
+              placement={placement}
+              headerSlot={headerAbove ? headerSlot : null}
+              onAddedChange={setAddedToBag}
+              nestedOffer={nestedOn}
+              materialImageOnly={readMaterialDisplay(searchParams, brand) === 'image'}
+              onPersonalizeAnother={personalizeAnother}
+              belowCta={<UspBadges brand={brand} icons={icons} />}
             />
           ) : brand === 'lal' && MUSIC_MEMORIES_PRODUCT_IDS.has(product.id) ? (
             <MusicMemoriesCustomizer
@@ -1939,6 +2363,7 @@ function ProductDetailPageInner({ productId, previewId }: { productId: number; p
           productRating={product.rating ?? 0}
           productReviewCount={product.reviewCount ?? 0}
         />
+        </RibbonIconContext.Provider>
       </main>
 
       <Footer columns={footerColumns} />

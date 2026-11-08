@@ -1,0 +1,60 @@
+{
+  "name": "tetet",
+  "letterMm": 7.5,
+  "coating": "GP",
+  "options": {
+    "letterMm": "7.5"
+  },
+  "nameOptions": {},
+  "spriteWidthPx": 442,
+  "spriteHeightPx": 166,
+  "mmPerPx": 0.05,
+  "letteringMm": {
+    "w": 20.86749267578125,
+    "h": 7.056420922279358
+  },
+  "productId": "tg-carrie",
+  "attachMm": [
+    {
+      "x": -9.138412714004517,
+      "y": 3.08663422614336
+    },
+    {
+      "x": 9.138386726379395,
+      "y": 3.0043432414531708
+    }
+  ],
+  "attachPx": [
+    {
+      "x": 38.23174571990967,
+      "y": 21.267315477133238
+    },
+    {
+      "x": 403.7677345275879,
+      "y": 22.913135170937025
+    }
+  ],
+  "anchorStrategy": "ring-signature",
+  "plateMm": {
+    "w": 20.86749267578125,
+    "h": 7.056420922279358
+  },
+  "ringSpanMm": 18.27698469633815,
+  "letteringCentrePx": {
+    "x": 221,
+    "y": 83.00000000000044
+  },
+  "loopCentresPx": [
+    {
+      "x": 36.86833333333333,
+      "y": 43.85166666666667
+    },
+    {
+      "x": 404.22425249169436,
+      "y": 45.48671096345515
+    }
+  ],
+  "pipelineVersion": 4,
+  "sourceVersion": "a5659096b0faeb9724a561a9723bb46f",
+  "spriteUrl": "/plates/tg-carrie/a7181e30df7469c7b3dc.png"
+}

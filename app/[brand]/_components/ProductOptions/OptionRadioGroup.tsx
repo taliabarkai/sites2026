@@ -1,6 +1,6 @@
 'use client'
 
-import { useId } from 'react'
+import { useId, useState } from 'react'
 import type { ChoiceGroup } from './types'
 import { GroupLabel } from './GroupLabel'
 import { OptionTile } from './OptionTile'
@@ -27,8 +27,17 @@ export function OptionRadioGroup({ group, value, onChange }: { group: ChoiceGrou
     onMove: (i) => onChange(group.values[i].id),
   })
 
+  // Image-only tiles carry no names: hovering one (a mouse) names it beside the label
+  const [hoverId, setHoverId] = useState<string | null>(null)
+  const nameOnHover = tile === 'image-only'
+
   const tiles = group.values.map((v, i) => (
-    <div key={v.id} className={styles.slot}>
+    <div
+      key={v.id}
+      className={styles.slot}
+      onMouseEnter={nameOnHover ? () => setHoverId(v.id) : undefined}
+      onMouseLeave={nameOnHover ? () => setHoverId((h) => (h === v.id ? null : h)) : undefined}
+    >
       <OptionTile
         ref={roving.register(i)}
         value={v}
@@ -44,10 +53,14 @@ export function OptionRadioGroup({ group, value, onChange }: { group: ChoiceGrou
         }}
         onKeyDown={(e) => roving.onKeyDown(e, i)}
       />
+      {tile === 'image-only' && group.priceBelow && v.priceLabel && (
+        <span className={`${styles.slotPrice} ${v.id === value ? styles.slotPriceSelected : ''}`} aria-hidden="true">{v.priceLabel}</span>
+      )}
     </div>
   ))
 
-  const label = <GroupLabel id={labelId} group={group} valueLabel={group.values[selectedIndex]?.label} />
+  const hovered = hoverId ? group.values.find((v) => v.id === hoverId) : undefined
+  const label = <GroupLabel id={labelId} group={group} valueLabel={(hovered ?? group.values[selectedIndex])?.label} />
   const rowProps = { role: 'radiogroup', 'aria-labelledby': labelId }
   const sizeClass = tile === 'image-only' ? styles[`tiles_image-only_${group.size ?? 'sm'}`] : styles[`tiles_${tile}`]
 

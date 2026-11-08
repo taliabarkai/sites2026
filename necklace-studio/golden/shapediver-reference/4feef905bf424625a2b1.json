@@ -1,0 +1,60 @@
+{
+  "name": "Danie",
+  "letterMm": 7.5,
+  "coating": "GP",
+  "options": {
+    "letterMm": "7.5"
+  },
+  "nameOptions": {},
+  "spriteWidthPx": 536,
+  "spriteHeightPx": 165,
+  "mmPerPx": 0.05,
+  "letteringMm": {
+    "w": 25.586278915405273,
+    "h": 7.01254677772522
+  },
+  "productId": "tg-carrie",
+  "attachMm": [
+    {
+      "x": -11.497764825820923,
+      "y": 2.614855984225869
+    },
+    {
+      "x": 11.497755527496338,
+      "y": 2.2320744395256042
+    }
+  ],
+  "attachPx": [
+    {
+      "x": 38.04470348358154,
+      "y": 30.202880315483057
+    },
+    {
+      "x": 497.95511054992676,
+      "y": 37.858511209488356
+    }
+  ],
+  "anchorStrategy": "ring-signature",
+  "plateMm": {
+    "w": 25.586278915405273,
+    "h": 7.01254677772522
+  },
+  "ringSpanMm": 22.998706007747295,
+  "letteringCentrePx": {
+    "x": 268,
+    "y": 82.50000000000044
+  },
+  "loopCentresPx": [
+    {
+      "x": 36.54380165289256,
+      "y": 52.732231404958675
+    },
+    {
+      "x": 498.37520661157026,
+      "y": 60.424793388429755
+    }
+  ],
+  "pipelineVersion": 4,
+  "sourceVersion": "74b0bc906b23091e3c4332c949e576c2",
+  "spriteUrl": "/plates/tg-carrie/4feef905bf424625a2b1.png"
+}

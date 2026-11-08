@@ -116,3 +116,6 @@ export function getGiftOptionsMode(brand: BrandKey): 'single' | 'multiple' {
 export function getBrandGiftAssets(brand: BrandKey): GiftAssets | null {
   return BRAND_GIFT_CONFIG[brand].assets
 }
+
+/** What the metal choice is called on the PDP and in the bag: OAL says "Finish". */
+export const materialLabel = (brand: string): 'Finish' | 'Material' => (brand === 'oal' ? 'Finish' : 'Material')

@@ -17,6 +17,8 @@ export const lalMusicMemories: PdpTemplate = {
   sku: '100-35-10251-62',
   productId: 1,
   summary: 'Two-step canvas customizer with a composited live preview (shipped POC)',
+  // MusicMemoriesCustomizer still draws this page; the template documents it.
+  renderer: 'bespoke',
 
   gallery: { desktop: 'sideScroll', mobile: 'carousel' },
 
@@ -76,7 +78,7 @@ export const lalMusicMemories: PdpTemplate = {
   livePreview: {
     enabled: true,
     galleryPlacement: 'first',
-    ribbon: 'Live Preview',
+    ribbon: 'Your Personalization',
     engine: {
       kind: 'placeholder',
       spec: {

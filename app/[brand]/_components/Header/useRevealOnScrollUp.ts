@@ -34,9 +34,18 @@ export function useRevealOnScrollUp(
     let frame = 0
     let isHidden = false
 
+    // The header's on-screen height. It sticks at a negative `top`
+    // (the topline scrolls away, only the bar stays), so once scrolled the
+    // visible part is shorter than offsetHeight.
+    const visibleHeight = () => {
+      const header = headerRef.current
+      if (!header) return 0
+      const stickTop = parseFloat(getComputedStyle(header).top) || 0
+      return header.offsetHeight + Math.max(Math.min(stickTop, 0), -window.scrollY)
+    }
+
     const publish = (nextHidden: boolean) => {
-      const height = headerRef.current?.offsetHeight ?? 0
-      root.style.setProperty(HEADER_REVEAL_OFFSET_VAR, nextHidden ? '0px' : `${height}px`)
+      root.style.setProperty(HEADER_REVEAL_OFFSET_VAR, nextHidden ? '0px' : `${visibleHeight()}px`)
       if (nextHidden !== isHidden) {
         isHidden = nextHidden
         setHidden(nextHidden)

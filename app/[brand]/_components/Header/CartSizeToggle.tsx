@@ -61,13 +61,18 @@ interface DropdownProps {
  */
 export function Dropdown({ label, title, className, children }: DropdownProps) {
   const [open, setOpen] = useState(false)
-  const [anchor, setAnchor] = useState<{ top: number; right: number } | null>(null)
+  // Desktop: the panel's right edge under the trigger's (the chips sit at the
+  // bar's right). Mobile: centred under it — the chips are centred there.
+  const [anchor, setAnchor] = useState<{ top: number; right?: number; centre?: number } | null>(null)
   const panelRef   = useRef<HTMLDivElement>(null)
   const triggerRef = useRef<HTMLButtonElement>(null)
 
   const measure = useCallback(() => {
     const r = triggerRef.current?.getBoundingClientRect()
-    if (r) setAnchor({ top: r.bottom + 8, right: window.innerWidth - r.right })
+    if (!r) return
+    setAnchor(window.innerWidth < 1024
+      ? { top: r.bottom + 8, centre: r.left + r.width / 2 }
+      : { top: r.bottom + 8, right: window.innerWidth - r.right })
   }, [])
 
   useEffect(() => {
@@ -118,7 +123,9 @@ export function Dropdown({ label, title, className, children }: DropdownProps) {
           <div
             ref={panelRef}
             className={styles.scenarioPanel}
-            style={{ top: anchor.top, right: anchor.right }}
+            style={anchor.centre !== undefined
+              ? { top: anchor.top, left: anchor.centre, transform: 'translateX(-50%)' }
+              : { top: anchor.top, right: anchor.right }}
             role="group"
             aria-label={title}
           >

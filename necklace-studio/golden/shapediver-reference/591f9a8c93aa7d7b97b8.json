@@ -1,0 +1,60 @@
+{
+  "name": "Sharon",
+  "letterMm": 7.5,
+  "coating": "GP",
+  "options": {
+    "letterMm": "7.5"
+  },
+  "nameOptions": {},
+  "spriteWidthPx": 614,
+  "spriteHeightPx": 165,
+  "mmPerPx": 0.05,
+  "letteringMm": {
+    "w": 29.452119827270508,
+    "h": 7.029346942901611
+  },
+  "productId": "tg-carrie",
+  "attachMm": [
+    {
+      "x": -13.43058729171753,
+      "y": 2.5243104295805097
+    },
+    {
+      "x": 13.430760383605957,
+      "y": 2.154855579137802
+    }
+  ],
+  "attachPx": [
+    {
+      "x": 38.388254165649414,
+      "y": 32.01379140839025
+    },
+    {
+      "x": 575.6152076721191,
+      "y": 39.4028884172444
+    }
+  ],
+  "anchorStrategy": "ring-signature",
+  "plateMm": {
+    "w": 29.452119827270508,
+    "h": 7.029346942901611
+  },
+  "ringSpanMm": 26.8638883228233,
+  "letteringCentrePx": {
+    "x": 307,
+    "y": 82.50000000000044
+  },
+  "loopCentresPx": [
+    {
+      "x": 36.93,
+      "y": 54.635
+    },
+    {
+      "x": 576.02,
+      "y": 62.01166666666666
+    }
+  ],
+  "pipelineVersion": 4,
+  "sourceVersion": "4c45dd415ce754c689f28f881e5731c9",
+  "spriteUrl": "/plates/tg-carrie/591f9a8c93aa7d7b97b8.png"
+}

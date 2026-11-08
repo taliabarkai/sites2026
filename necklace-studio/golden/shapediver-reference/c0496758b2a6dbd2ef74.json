@@ -1,0 +1,60 @@
+{
+  "name": "Thea",
+  "letterMm": 6,
+  "coating": "GP",
+  "options": {
+    "letterMm": "6"
+  },
+  "nameOptions": {},
+  "spriteWidthPx": 383,
+  "spriteHeightPx": 142,
+  "mmPerPx": 0.05,
+  "letteringMm": {
+    "w": 17.929242610931396,
+    "h": 5.883295178413391
+  },
+  "productId": "tg-carrie",
+  "attachMm": [
+    {
+      "x": -7.669160842895508,
+      "y": 2.8456199280917645
+    },
+    {
+      "x": 7.669220209121704,
+      "y": 2.2944324016571045
+    }
+  ],
+  "attachPx": [
+    {
+      "x": 38.116783142089844,
+      "y": 14.087601438165152
+    },
+    {
+      "x": 344.8844041824341,
+      "y": 25.11135196685835
+    }
+  ],
+  "anchorStrategy": "ring-signature",
+  "plateMm": {
+    "w": 17.929242610931396,
+    "h": 5.883295178413391
+  },
+  "ringSpanMm": 15.348281369136345,
+  "letteringCentrePx": {
+    "x": 191.5,
+    "y": 71.00000000000044
+  },
+  "loopCentresPx": [
+    {
+      "x": 36.67218543046358,
+      "y": 36.61423841059602
+    },
+    {
+      "x": 345.3592715231788,
+      "y": 47.66556291390729
+    }
+  ],
+  "pipelineVersion": 4,
+  "sourceVersion": "54b7898da5e568a6e834cc8f9635e5a0",
+  "spriteUrl": "/plates/tg-carrie/c0496758b2a6dbd2ef74.png"
+}

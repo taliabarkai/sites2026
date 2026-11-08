@@ -1,0 +1,55 @@
+/* LetterKeyboard — the A–Z grid that drops down under an initial's field.
+   The trigger and the dropdown frame are ProductOptions' own (.trigger, .list). */
+
+.placeholder {
+  color: var(--form-input-placeholder);
+}
+
+/* The frame grows to the keyboard: no list height cap, no scrolling.
+   A to Z in rows of ten from the left; the last row is short on the right. */
+.keyboard {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  gap: var(--spacing-xxxs);
+  max-height: none;
+  overflow: visible;
+  padding: var(--spacing-xs);
+}
+
+.key {
+  /* Taller than wide, like a phone keyboard's keys, so each is an easy tap */
+  height: var(--spacing-xl);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 0;
+  color: var(--colors-text);
+  background: var(--form-field-background);
+  border: var(--border-width) solid var(--form-field-border-color);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-family:    var(--typography-rules-text2-font-family);
+  font-size:      var(--typography-rules-text2-font-size);
+  line-height:    var(--typography-rules-text2-line-height);
+  font-weight:    var(--typography-rules-text2-font-weight, normal);
+  letter-spacing: var(--typography-rules-text2-letter-spacing, normal);
+  text-transform: var(--typography-rules-text2-text-transform, none);
+  transition: border-color var(--transition-fast), background var(--transition-fast);
+}
+
+.key:hover {
+  border-color: var(--form-field-border-color-hover);
+}
+
+.key:focus-visible {
+  outline: var(--form-field-focus-ring-width) solid var(--form-field-focus-ring-color);
+  outline-offset: var(--form-field-focus-ring-offset);
+}
+
+.keySelected,
+.keySelected:hover {
+  color: var(--colors-text-inverse);
+  background: var(--colors-text);
+  border-color: var(--colors-text);
+}

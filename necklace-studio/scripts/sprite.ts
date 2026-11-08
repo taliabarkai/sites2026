@@ -1,0 +1,12 @@
+import { writeFileSync } from 'node:fs';
+import { tgCarrie } from '../engine/products/tg-carrie/index.ts';
+import { solvePlate } from '../engine/plate/solve.ts';
+import { renderSprite, type Coating } from '../engine/render/sprite.ts';
+const [name = 'Charlotte', preset = 'LC_7.5', coating = 'GP', out = 'sprite.png'] = process.argv.slice(2);
+const t0 = performance.now();
+const plate = solvePlate(tgCarrie(), name, preset);
+const t1 = performance.now();
+const { png, sidecar } = await renderSprite(plate, { coating: coating as Coating });
+const t2 = performance.now();
+writeFileSync(out, png);
+console.log(`${name} ${preset} solve ${(t1 - t0).toFixed(1)}ms render ${(t2 - t1).toFixed(1)}ms ${sidecar.widthPx}x${sidecar.heightPx} ${png.length} B attach`, sidecar.attachPx.map(p=>`(${p.x.toFixed(1)},${p.y.toFixed(1)})`).join(' '));

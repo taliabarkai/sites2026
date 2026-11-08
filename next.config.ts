@@ -32,6 +32,11 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: 'cdn.israelblessing.com', pathname: '/digital-asset/**' },
     ],
   },
+  // Name Necklace Studio (necklace-studio/): its native / UMD packages stay
+  // plain Node requires on the server, and the engine reads its extracted
+  // product data from disk at runtime (see necklace-studio/HANDOFF.md)
+  serverExternalPackages: ['sharp', '@gltf-transform/core', 'clipper-lib', 'earcut'],
+  outputFileTracingIncludes: { '/api/**': ['./necklace-studio/engine/products/**/data/*.json'] },
 }
 
 export default nextConfig

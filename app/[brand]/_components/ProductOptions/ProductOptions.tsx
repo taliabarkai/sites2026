@@ -8,6 +8,7 @@ import { OptionDrawer } from './OptionDrawer'
 import { OptionDropdown } from './OptionDropdown'
 import { OptionRadioGroup } from './OptionRadioGroup'
 import { OptionSelect } from './OptionSelect'
+import { LetterKeyboard } from './LetterKeyboard'
 import { TextInputOption } from './TextInputOption'
 import styles from './ProductOptions.module.css'
 
@@ -31,6 +32,14 @@ export function ProductOptions({ groups, options, basePrice, slots }: ProductOpt
   return (
     <div className={styles.root}>
       {groups.map((group) => {
+        if (group.kind === 'text-input' && group.keyboard) {
+          return (
+            <LetterKeyboard key={group.id} group={group} value={state.text[group.id] ?? ''} onChange={(v) => setText(group.id, v)}>
+              {slots?.[group.id]}
+            </LetterKeyboard>
+          )
+        }
+
         if (group.kind === 'text-input') {
           return (
             <TextInputOption key={group.id} group={group} value={state.text[group.id] ?? ''} onChange={(v) => setText(group.id, v)}>

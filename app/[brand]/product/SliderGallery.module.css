@@ -1,0 +1,236 @@
+/* Desktop slider gallery: one square image at a time in a column sized to
+   the image, beside the buy box. Desktop only — mobile keeps the carousel. */
+
+.root {
+  display: none;
+  /* Fast start, soft stop — every motion in the gallery */
+  --gallery-ease: cubic-bezier(0.5, 0, 0, 1);
+  /* One square image: as tall as the space under the header, never more
+     than 60% of the window — the gallery column is exactly this wide */
+  --gallery-slide: min(calc(100vh - var(--sticky-top)), 60vw);
+}
+
+@media (min-width: 1024px) {
+  .root {
+    display: block;
+    position: sticky;
+    top: var(--sticky-top);
+    /* The page grid's first column, sized to the image; the buy box beside it */
+    grid-column: 1;
+    width: var(--gallery-slide);
+    grid-row: 1;
+    align-self: start;
+    min-width: 0;
+  }
+}
+
+/* ── Strip ─────────────────────────────────────────────────────────────── */
+
+.track {
+  display: flex;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  cursor: none;
+}
+
+.track::-webkit-scrollbar {
+  display: none;
+}
+
+/* Square, edge to edge: no gap, no radius. */
+/* One square slide at a time, filling the column — no peek */
+.slide {
+  position: relative;
+  flex: 0 0 100%;
+  width: 100%;
+  height: var(--gallery-slide);
+  overflow: hidden;
+  scroll-snap-align: start;
+  background-color: var(--colors-card-image-bg);
+  cursor: none;
+  transition: width 0.25s var(--gallery-ease);
+}
+
+.slide:focus-visible {
+  outline: 2px solid var(--colors-text);
+  outline-offset: -2px;
+}
+
+.image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* Packshots pick up the slide's tint, as the other galleries do */
+  mix-blend-mode: multiply;
+  user-select: none;
+  /* The zoom animates; the pan (transform-origin) tracks the mouse directly */
+  transition: transform 0.5s var(--gallery-ease);
+}
+
+.imageModel {
+  mix-blend-mode: normal;
+}
+
+/* ── Live preview slide ────────────────────────────────────────────────── */
+
+/* Stacked top left: personalization, then the product's badges */
+.ribbonStack {
+  position: absolute;
+  top: var(--spacing-sm);
+  left: var(--spacing-sm);
+  z-index: var(--z-raised);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--spacing-xxs);
+}
+
+.ribbon {
+  padding: var(--spacing-xxs) var(--spacing-sm);
+  border-radius: var(--ribbon-border-radius, var(--radius-sm));
+  background: var(--ribbon-background);
+  color: var(--ribbon-text);
+  /* The brand's ribbon case: Title Case on TGR, uppercase elsewhere */
+  text-transform: var(--typography-rules-ribbons1-text-transform, uppercase);
+  font-family:    var(--typography-rules-ribbons1-font-family, var(--font-family-main-bold));
+  font-size:      var(--typography-rules-ribbons1-font-size);
+  line-height:    var(--typography-rules-ribbons1-line-height);
+  font-weight:    var(--typography-rules-ribbons1-font-weight, 700);
+  letter-spacing: var(--typography-rules-ribbons1-letter-spacing, normal);
+}
+
+.note {
+  position: absolute;
+  left: var(--spacing-sm);
+  bottom: var(--spacing-sm);
+  z-index: var(--z-raised);
+  display: flex;
+  gap: var(--spacing-xxs);
+  pointer-events: none;
+}
+
+/* ── Arrows: one frosted pill, bottom-right of the visible strip ───────── */
+
+.arrows {
+  position: absolute;
+  right: var(--spacing-md);
+  bottom: var(--spacing-md);
+  z-index: var(--z-raised);
+  display: flex;
+  overflow: hidden;
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--colors-background) 80%, transparent);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.2rem;
+  height: 3.2rem;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--colors-text);
+  cursor: pointer;
+  transition: opacity 0.125s var(--gallery-ease);
+}
+
+/* The two halves of the pill */
+.arrow + .arrow {
+  border-left: var(--border-width) solid var(--border-color);
+}
+
+.arrow:focus-visible {
+  outline: 2px solid var(--colors-text);
+  outline-offset: -2px;
+}
+
+.prevIcon {
+  display: inline-flex;
+  transform: rotate(180deg);
+}
+
+/* ── Cursor: a frosted circle showing what a click does ────────────────── */
+
+.cursor {
+  position: fixed;
+  top: -2.8rem;
+  left: -2.8rem;
+  z-index: var(--z-tooltip);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 5.6rem;
+  height: 5.6rem;
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--colors-background) 80%, transparent);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  color: var(--colors-text);
+  pointer-events: none;
+}
+
+/* ── Skip link: hidden until focused ───────────────────────────────────── */
+
+.skip {
+  position: absolute;
+  top: var(--spacing-sm);
+  left: var(--spacing-sm);
+  z-index: var(--z-tooltip);
+  padding: var(--spacing-xxs) var(--spacing-sm);
+  border-radius: var(--radius-sm);
+  background: var(--colors-background);
+  color: var(--colors-text);
+  transform: translateY(-200%);
+  font-family:    var(--typography-rules-links1-font-family);
+  font-size:      var(--typography-rules-links1-font-size);
+  line-height:    var(--typography-rules-links1-line-height);
+  font-weight:    var(--typography-rules-links1-font-weight, normal);
+}
+
+.skip:focus {
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .slide,
+  .image,
+  .arrow {
+    transition: none;
+  }
+}
+
+/* A ribbon with an icon before its text (the personalization badge) */
+.ribbonWithIcon {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xxxs);
+  /* As the Personalize row: a soft gradient fill inside a 1px air-blue
+     border that fades toward the middle (TGR) — padding less the border, so
+     it stays the size of the other ribbons */
+  padding: calc(var(--spacing-xxs) - var(--border-width)) calc(var(--spacing-sm) - var(--border-width));
+  border: var(--border-width) solid transparent;
+  background:
+    linear-gradient(90deg,
+      color-mix(in srgb, var(--personalize-fill-start) 60%, var(--colors-background)),
+      var(--colors-background) 55%,
+      var(--personalize-fill-end)) padding-box,
+    linear-gradient(90deg,
+      var(--personalize-border),
+      color-mix(in srgb, var(--personalize-border) 30%, var(--colors-background)) 55%,
+      var(--personalize-border)) border-box;
+  color: var(--colors-text);
+}
+
+/* The 20px icon hangs into the padding, so this badge keeps the others' height */
+.ribbonWithIcon svg {
+  flex: none;
+  margin-block: calc(-1 * var(--spacing-xxxs) / 2);
+}
+

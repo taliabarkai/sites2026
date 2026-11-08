@@ -1,0 +1,60 @@
+{
+  "name": "Daniella",
+  "letterMm": 6,
+  "coating": "GP",
+  "options": {
+    "letterMm": "6"
+  },
+  "nameOptions": {},
+  "spriteWidthPx": 609,
+  "spriteHeightPx": 138,
+  "mmPerPx": 0.05,
+  "letteringMm": {
+    "w": 29.241162300109863,
+    "h": 5.650921821594238
+  },
+  "productId": "tg-carrie",
+  "attachMm": [
+    {
+      "x": -13.325150966644287,
+      "y": 2.5639269798994064
+    },
+    {
+      "x": 13.325144290924072,
+      "y": 2.4106591790914536
+    }
+  ],
+  "attachPx": [
+    {
+      "x": 37.99698066711426,
+      "y": 17.721460402012312
+    },
+    {
+      "x": 571.0028858184814,
+      "y": 20.78681641817137
+    }
+  ],
+  "anchorStrategy": "ring-signature",
+  "plateMm": {
+    "w": 29.241162300109863,
+    "h": 5.650921821594238
+  },
+  "ringSpanMm": 26.650735981100695,
+  "letteringCentrePx": {
+    "x": 304.5,
+    "y": 69.00000000000044
+  },
+  "loopCentresPx": [
+    {
+      "x": 36.58181818181818,
+      "y": 40.33388429752066
+    },
+    {
+      "x": 571.4579901153213,
+      "y": 43.41021416803954
+    }
+  ],
+  "pipelineVersion": 4,
+  "sourceVersion": "c9f40e12a48b0e519f167760f37ef753",
+  "spriteUrl": "/plates/tg-carrie/f74677843c2717f95bc2.png"
+}

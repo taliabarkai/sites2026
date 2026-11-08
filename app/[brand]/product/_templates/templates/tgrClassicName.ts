@@ -12,11 +12,14 @@ export const tgrClassicName: PdpTemplate = {
   enabled: true,
   id: 'tgr-classic-name',
   brand: 'tgr',
+  // IB and MNN share TGR's catalog in the mockup, so they get Carrie too
+  alsoOn: ['ib', 'mnn'],
   sku: 'TGR-CLASSIC-COCKTAIL-NAME', // TODO: real SKU
   productId: 5,
   summary: 'Single-step name necklace: metal, name, chain length — preview updates as you type',
 
-  gallery: { desktop: 'grid', mobile: 'carousel' },
+  gallery: { desktop: 'heroGridPhotoFirst', mobile: 'carousel', badges: ['15% off'] },
+  sale: { percent: 15 },
 
   steps: [
     { label: 'Personalize', fieldIds: [101, 102, 103] },
@@ -27,16 +30,16 @@ export const tgrClassicName: PdpTemplate = {
       fieldId: 101, name: 'Select material', cartName: 'Material', type: 'selection', displayType: 'carousel', order: 1, isRequired: true,
       pricing: 'base', affectsPreview: true, defaultValueId: 'gold-vermeil',
       values: [
+        { id: 'sterling-silver',  label: 'Sterling Silver',      swatchColor: '#C9C9C9', priceLabel: '$90' },
         { id: 'gold-plated',      label: 'Gold Plated',          swatchColor: '#E6C458', priceLabel: '$147' },
         { id: 'gold-vermeil',     label: 'Gold Vermeil',         swatchColor: '#E6C458', priceLabel: '$199' },
-        { id: 'rose-gold-plated', label: 'Rose Gold Plated',     swatchColor: '#E8B4A0', priceLabel: '$147' },
         { id: 'solid-gold-10k',   label: '10K Solid Yellow Gold', swatchColor: '#D4AF37', priceLabel: '$612' },
       ],
     },
     {
       fieldId: 102, name: 'Your name', cartName: 'Name', type: 'text', displayType: 'text', order: 2, isRequired: true,
-      textMinLength: 1, textMaxLength: 12, placeholder: 'e.g. Sofia',
-      pricing: 'none', affectsPreview: true, helpLink: 'Inscriptions Guide',
+      textMinLength: 1, textMaxLength: 12, placeholder: 'e.g. Carrie',
+      pricing: 'none', affectsPreview: true,
     },
     {
       fieldId: 103, name: 'Chain length', cartName: 'Chain Length', type: 'selection', displayType: 'text', order: 3, isRequired: true,
@@ -52,30 +55,23 @@ export const tgrClassicName: PdpTemplate = {
 
   livePreview: {
     enabled: true,
-    galleryPlacement: 'first',
-    ribbon: 'Live Preview',
-    disclaimer: 'Preview is approximate',
+    // The preview is the main image: "Carrie" (as in the product photo) until the shopper types
+    galleryPlacement: 'replaceHero',
+    ribbon: 'Your Personalization',
+    sampleText: { 102: ['Carrie'] },
+    // The Carrie plate from the Name Necklace Studio, in the material's plating
     engine: {
-      kind: 'placeholder',
-      spec: {
-        base: {
-          fieldId: 101,
-          images: {
-            'gold-plated':      '/images/tgr/preview/classic-name-gold.png',
-            'gold-vermeil':     '/images/tgr/preview/classic-name-gold.png',
-            'rose-gold-plated': '/images/tgr/preview/classic-name-rose.png',
-            'solid-gold-10k':   '/images/tgr/preview/classic-name-gold.png',
-          },
-        },
-        text: [
-          { fieldId: 102, font: "'Pinyon Script', cursive", box: { x: 0.25, y: 0.42, w: 0.5, h: 0.16 }, layout: 'single' },
-        ],
-      },
+      kind: 'necklaceStudio',
+      textFieldId: 102,
+      materialFieldId: 101,
+      coatings: { 'sterling-silver': 'SR', 'gold-plated': 'GP', 'gold-vermeil': 'VMGP', 'solid-gold-10k': 'GP' },
+      defaultCoating: 'VMGP',
     },
   },
 
   flow: {
     container: { desktop: 'inline', mobile: 'inline' },
+    personalizeRow: { title: 'Personalize Yours', description: 'See your name in our signature script' },
     completion: 'addToBag',
     stickyBar: true,
   },

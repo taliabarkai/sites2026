@@ -1,0 +1,60 @@
+{
+  "name": "Yoni",
+  "letterMm": 7.5,
+  "coating": "GP",
+  "options": {
+    "letterMm": "7.5"
+  },
+  "nameOptions": {},
+  "spriteWidthPx": 437,
+  "spriteHeightPx": 161,
+  "mmPerPx": 0.05,
+  "letteringMm": {
+    "w": 20.600719451904297,
+    "h": 6.804619550704956
+  },
+  "productId": "tg-carrie",
+  "attachMm": [
+    {
+      "x": -9.00496768951416,
+      "y": 3.170398646965623
+    },
+    {
+      "x": 9.004913806915283,
+      "y": 2.9352242201566696
+    }
+  ],
+  "attachPx": [
+    {
+      "x": 38.4006462097168,
+      "y": 17.092027060687982
+    },
+    {
+      "x": 398.59827613830566,
+      "y": 21.795515596867048
+    }
+  ],
+  "anchorStrategy": "ring-signature",
+  "plateMm": {
+    "w": 20.600719451904297,
+    "h": 6.804619550704956
+  },
+  "ringSpanMm": 18.011416893916383,
+  "letteringCentrePx": {
+    "x": 218.5,
+    "y": 80.50000000000044
+  },
+  "loopCentresPx": [
+    {
+      "x": 36.97674418604651,
+      "y": 39.71594684385382
+    },
+    {
+      "x": 399.02,
+      "y": 44.32333333333333
+    }
+  ],
+  "pipelineVersion": 4,
+  "sourceVersion": "ae9720f024736e15878c8169f8605db3",
+  "spriteUrl": "/plates/tg-carrie/8192e2706c11581fa3bf.png"
+}

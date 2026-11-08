@@ -238,3 +238,96 @@ export function withDemoParams(path: string, params: ReadableParams & { toString
   const query = params.toString()
   return query ? `${path}?${query}` : path
 }
+
+// ─── Live-preview gallery layout ──────────────────────────────────────────────
+
+/**
+ * Demo control for template PDPs: which desktop gallery the page draws
+ * (`?gallery=overlay`). Without it, the page uses its template's
+ * `gallery.desktop`. Mobile is always the carousel.
+ */
+export const GALLERY_PARAM = 'gallery'
+
+export const GALLERY_LAYOUTS = [
+  { value: 'thumbnails', display: 'sideScroll',    label: 'Side thumbnails' },
+  { value: 'hero-grid-photo', display: 'heroGridPhotoFirst', label: 'Hero + grid (photo first)' },
+  { value: 'overlay',    display: 'overlayThumbs', label: 'Overlay thumbnails' },
+] as const
+
+export type GalleryLayout = (typeof GALLERY_LAYOUTS)[number]
+
+export function readGalleryLayout(params: ReadableParams): GalleryLayout | undefined {
+  const raw = params.get(GALLERY_PARAM)
+  return GALLERY_LAYOUTS.find((l) => l.value === raw)
+}
+
+// ─── Live-preview personalization placement ───────────────────────────────────
+
+/**
+ * Demo control for template PDPs: personalize on the page, or behind a
+ * "Personalize" row that opens a panel (`?personalize=panel`) — a bottom sheet
+ * on mobile, a drawer from the right on desktop. Unset, the page follows its
+ * template's own flow.
+ */
+/**
+ * Template PDPs: the nested item — a second of the same necklace at 50% off,
+ * shown just above Add to Bag (`?nested=on`). Off by default.
+ */
+export const NESTED_ITEM_PARAM = 'nested'
+export const NESTED_ITEM_STATES = [
+  { value: 'off', label: 'Off' },
+  { value: 'on',  label: 'On' },
+] as const
+
+export function readNestedItemOn(params: ReadableParams): boolean {
+  return params.get(NESTED_ITEM_PARAM) === 'on'
+}
+
+/**
+ * Template PDPs: how the material picker draws — the standard carousel tiles
+ * (swatch, name, price) or the carousel's standard image-only tiles (swatches
+ * alone, the picked one named beside the label) (`?material=image`).
+ */
+export const MATERIAL_DISPLAY_PARAM = 'material'
+export const MATERIAL_DISPLAYS = [
+  { value: 'carousel', label: 'Carousel' },
+  { value: 'image',    label: 'Carousel – Standard image only' },
+] as const
+export type MaterialDisplay = (typeof MATERIAL_DISPLAYS)[number]['value']
+
+/** OAL opens on the image-only tiles; every other brand on the carousel. */
+export const defaultMaterialDisplay = (brand: string): MaterialDisplay => (brand === 'oal' ? 'image' : 'carousel')
+
+export function readMaterialDisplay(params: ReadableParams, brand = ''): MaterialDisplay {
+  const raw = params.get(MATERIAL_DISPLAY_PARAM)
+  return MATERIAL_DISPLAYS.find((d) => d.value === raw)?.value ?? defaultMaterialDisplay(brand)
+}
+
+export const PERSONALIZE_PARAM = 'personalize'
+
+export const PERSONALIZE_PLACEMENTS = [
+  // V1: personalization behind the Personalize row; the panel saves it into the gallery
+  { value: 'panel',    label: 'V1', description: 'Current layout', desktopNote: undefined },
+  // V2: every field on the page, the preview in the gallery; on mobile the
+  // breadcrumbs, title, price and reviews sit above the gallery (the new layout)
+  // On desktop V2 and V3 are one layout (every field inline) — the menu says so there
+  { value: 'page',     label: 'V2', description: 'Gallery Preview + New Layout', desktopNote: 'Desktop: same as V3' },
+  // V3 (mobile): the fields stay on the page; tapping the name opens the panel, already typing
+  { value: 'panel-v3', label: 'V3', description: 'Text field opens panel', desktopNote: 'Desktop: same as V2' },
+  // V4: one CTA on the page (Personalize Now); the panel adds to bag itself — no Save step
+  { value: 'panel-c',  label: 'V4', description: 'Personalize Now', desktopNote: undefined },
+  // V5: the Music Memories two-step flow for jewelry — Personalize (the name),
+  // then Customize (material, chain, add-ons) and Add to bag; a sheet on
+  // mobile, the same tabs inline on desktop
+  { value: 'jewelry',  label: 'V5', description: 'Jewelry', desktopNote: undefined },
+] as const
+
+export type PersonalizePlacement = (typeof PERSONALIZE_PLACEMENTS)[number]['value']
+
+/** Template PDPs open on V1 unless the link names another version (or the template its own). */
+export const DEFAULT_PERSONALIZE_PLACEMENT: PersonalizePlacement = 'panel'
+
+export function readPersonalizePlacement(params: ReadableParams, templateDefault?: PersonalizePlacement): PersonalizePlacement {
+  const raw = params.get(PERSONALIZE_PARAM)
+  return PERSONALIZE_PLACEMENTS.find((f) => f.value === raw)?.value ?? templateDefault ?? DEFAULT_PERSONALIZE_PLACEMENT
+}

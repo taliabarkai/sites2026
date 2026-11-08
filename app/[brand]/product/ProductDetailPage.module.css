@@ -21,6 +21,24 @@
   position: relative;
 }
 
+/* V2 on mobile: the gallery stays in view under the header while the form
+   scrolls beneath it (its top and its exit are set from the page's script) */
+.mobileGallerySticky {
+  position: sticky;
+  z-index: var(--z-sticky);
+  background: var(--colors-background);
+}
+
+/* Where "scroll to the gallery" lands: just under the site header */
+.mobileGalleryAnchor {
+  scroll-margin-top: var(--layout-header-height);
+}
+
+/* V2 (mobile): the product header above the gallery */
+.headerAbove {
+  padding: 0 var(--layout-page-margin) var(--spacing-md);
+}
+
 @media (min-width: 1024px) {
   .mobileGallery {
     display: none;
@@ -275,13 +293,14 @@
   padding: var(--spacing-xxs) var(--spacing-sm);
   background: var(--colors-brand-default-primary);
   color: var(--colors-text);
-  text-transform: uppercase;
+  /* The brand's ribbon case: Title Case on TGR, uppercase elsewhere */
+  text-transform: var(--typography-rules-ribbons1-text-transform, uppercase);
   border-radius: var(--ribbon-border-radius, var(--radius-sm));
   font-family:    var(--typography-rules-ribbons1-font-family, var(--font-family-main-bold));
   font-size:      var(--typography-rules-ribbons1-font-size);
   line-height:    var(--typography-rules-ribbons1-line-height);
   font-weight:    var(--typography-rules-ribbons1-font-weight, 700);
-  letter-spacing: var(--typography-rules-ribbons1-letter-spacing, 0.04em);
+  letter-spacing: var(--typography-rules-ribbons1-letter-spacing, normal);
 }
 
 [data-theme="oal"] .desktopGridCell {
@@ -330,6 +349,13 @@
     position: sticky;
     top: var(--sticky-top);
   }
+
+  /* The personalization opened (template PDPs): the column scrolls with the
+     page so every step's fields can be reached, however tall it gets */
+  .formPanel.formPanelUnpinned {
+    position: relative;
+    top: auto;
+  }
 }
 
 /* ── Breadcrumb ───────────────────────────────────────────────────────────── */
@@ -377,12 +403,19 @@
 }
 
 /* ── Product header group (breadcrumb + title+price + stars) ─────────────── */
+/* No divider under the stars: the form's own 24px gap (or LAL's margin below)
+   is the space between the rating and the first selection, on every PDP */
 .productHeader {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-sm);
-  padding-block: var(--spacing-sm);
-  border-bottom: var(--border-width) solid var(--border-color);
+  padding-top: var(--spacing-sm);
+}
+
+/* Anything the header carries below the stars (LAL's revisions notice) keeps
+   the same 24px from the rating: the header's 16px gap plus 8px */
+.productHeader > .ratingRow ~ * {
+  margin-top: calc(var(--spacing-md) - var(--spacing-sm));
 }
 
 /* LAL: space between the header divider and the Add photo step */
@@ -396,12 +429,6 @@
   gap: var(--spacing-xxs);
 }
 
-@media (min-width: 1024px) {
-  .productHeader {
-    padding-block: none;
-  }
-}
-
 /* ── Title ────────────────────────────────────────────────────────────────── */
 .productTitle {
   margin: 0;
@@ -412,7 +439,6 @@
   letter-spacing: var(--typography-rules-headline4-letter-spacing, normal);
   text-transform: var(--typography-rules-headline4-text-transform, none);
   color: var(--colors-text);
-  max-width: 360px;
 }
 
 /* ── Price ────────────────────────────────────────────────────────────────── */
@@ -439,6 +465,24 @@
   font-weight:    var(--typography-rules-headline12-font-weight);
   letter-spacing: var(--typography-rules-headline12-letter-spacing, normal);
   color: var(--colors-price-selling);
+}
+
+/* On sale: the selling price and its "Save N%" tag in the sale color */
+.priceOnSale {
+  color: var(--colors-price-sale);
+}
+
+.priceSave {
+  align-self: center;
+  padding: var(--spacing-xxxs) var(--spacing-xs);
+  border-radius: var(--radius-full);
+  background: var(--colors-price-sale);
+  color: var(--colors-text-inverse);
+  font-family:    var(--typography-rules-text4-font-family);
+  font-size:      var(--typography-rules-text4-font-size);
+  line-height:    var(--typography-rules-text4-line-height);
+  letter-spacing: var(--typography-rules-text4-letter-spacing, normal);
+  font-weight:    var(--typography-rules-text4-font-weight, normal);
 }
 
 /* ── Star rating ──────────────────────────────────────────────────────────── */
@@ -1653,4 +1697,266 @@
 .reviewCardThumbMore:focus-visible {
   outline: 2px solid var(--colors-text);
   outline-offset: 2px;
+}
+
+/* Over the live-preview cell, bottom-left — a disclaimer, a loading state (template PDPs) */
+.livePreviewNote {
+  position: absolute;
+  left: var(--spacing-sm);
+  right: var(--spacing-sm);
+  bottom: var(--spacing-sm);
+  z-index: var(--z-raised);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xxs);
+  pointer-events: none;
+}
+
+/* Live-preview ribbon in the theme's ribbon colors — legible on every brand (template PDPs) */
+.livePreviewRibbonThemed {
+  background: var(--ribbon-background);
+  color: var(--ribbon-text);
+}
+
+/* Template PDPs: the ribbons stacked top left — personalization, then badges */
+.ribbonStack {
+  position: absolute;
+  top: var(--spacing-sm);
+  left: var(--spacing-sm);
+  z-index: var(--z-raised);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--spacing-xxs);
+}
+
+.ribbonStack > .livePreviewRibbon {
+  position: static;
+}
+
+/* ── Hero grid: first image full width, the rest two across (template PDPs) ── */
+.heroGridGallery {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .heroGridGallery {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px;
+    align-content: start;
+  }
+}
+
+.heroGridHero {
+  grid-column: 1 / -1;
+  /* Scrolling back to the live preview lands just under the sticky header */
+  scroll-margin-top: var(--sticky-top);
+}
+
+/* Desktop, the personalization open (the details column unpinned): the
+   gallery keeps only its first image — the photo, or the preview once it's
+   the shopper's — and pins it under the header beside the steps until the
+   column's end scrolls past */
+@media (min-width: 1024px) {
+  .layout:has(.formPanelUnpinned) > .heroGridGallery {
+    position: sticky;
+    top: var(--sticky-top);
+  }
+
+  .layout:has(.formPanelUnpinned) > .heroGridGallery > :not(.heroGridHero) {
+    display: none;
+  }
+
+  /* A short window still shows the whole image */
+  .layout:has(.formPanelUnpinned) > .heroGridGallery > .heroGridHero {
+    max-height: calc(100vh - var(--sticky-top) - var(--spacing-md));
+  }
+
+  .layout:has(.formPanelUnpinned) > .heroGridGallery > .heroGridHero .desktopGridImage {
+    object-fit: contain;
+  }
+}
+
+/* Live-preview (template) pages, every gallery: gallery and form split the
+   width 50/50; the form hugs the gallery (100px in) and the leftover white
+   space sits on the right */
+@media (min-width: 1024px) {
+  .layout.layoutLivePreview {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    column-gap: 0;
+    padding-right: 0;
+  }
+
+  /* Hero + grid and Overlay thumbnails: the form sits centred in its half
+     instead of hugging the gallery — same 500px content width, equal space
+     either side */
+  .layoutLivePreview.layoutCenteredForm > .formPanel {
+    justify-self: center;
+    max-width: calc(50rem + 2 * var(--spacing-xl));
+    padding-left: var(--spacing-xl);
+    padding-right: var(--spacing-xl);
+  }
+
+  .layoutLivePreview > .formPanel {
+    justify-self: start;
+    width: 100%;
+    max-width: calc(50rem + var(--spacing-xxl) + var(--spacing-xl));
+    padding-left: calc(var(--spacing-xxl) + var(--spacing-xl)); /* 100px */
+  }
+
+  /* Side thumbnails in a 50% column: the main image fills what's left beside
+     the rail instead of sizing to the viewport height */
+  .layoutLivePreview .lalMainCell {
+    flex: 1;
+    min-width: 0;
+    height: auto;
+    max-height: none;
+  }
+}
+
+/* Overlay thumbnails: the gallery is one square as tall as the screen below
+   the header, its column that wide (not half the page) — narrowing only when
+   the window can't spare it (at most 60% of the width); the form takes the rest */
+@media (min-width: 1024px) {
+  .layout.layoutLivePreview.layoutOverlay {
+    --overlay-size: min(calc(100vh - var(--layout-header-height) - var(--topline-height)), 60vw);
+    grid-template-columns: var(--overlay-size) minmax(0, 1fr);
+  }
+
+  .layoutOverlay .overlayGallery {
+    width: var(--overlay-size);
+  }
+}
+
+/* ── Overlay thumbnails: one full-width image, a thumbnail column over it ─── */
+.overlayGallery {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .overlayGallery {
+    display: block;
+    position: sticky;
+    top: calc(var(--layout-header-height) + var(--topline-height));
+    align-self: start;
+  }
+}
+
+.overlayMain {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 1;
+  background-color: var(--colors-card-image-bg);
+}
+
+/* The images as a strip that swipes sideways, one square at a time */
+.overlayTrack {
+  display: flex;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  cursor: grab;
+}
+
+.overlayTrack::-webkit-scrollbar {
+  display: none;
+}
+
+.overlaySlide {
+  position: relative;
+  flex: 0 0 100%;
+  aspect-ratio: 1;
+  scroll-snap-align: start;
+  overflow: hidden;
+}
+
+.overlaySlide img {
+  user-select: none;
+}
+
+/* The thumbnails: a row along the bottom, centred over the image (the gallery is sticky, so it anchors them) */
+.overlayThumbs {
+  position: absolute;
+  bottom: var(--spacing-md);
+  left: 50%;
+  z-index: var(--z-raised);
+  display: flex;
+  flex-direction: row;
+  gap: var(--spacing-xs);
+  max-width: calc(100% - 2 * var(--spacing-md));
+  /* Room for the thumbnails' shadows inside the scrolling row */
+  padding: var(--spacing-xxxs);
+  overflow-x: auto;
+  scrollbar-width: none;
+  transform: translateX(-50%);
+}
+
+.lalThumb.overlayThumb {
+  flex-shrink: 0;
+  width: 6.4rem;
+  height: 6.4rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.lalThumbActive.overlayThumb {
+  box-shadow: inset 0 0 0 2px var(--colors-background), var(--shadow-sm);
+}
+
+/* Slider gallery pages: the gallery column is one square image wide; the buy
+   box takes the rest, its content centred at the same 500px as the other
+   live-preview layouts */
+@media (min-width: 1024px) {
+  .layout.layoutSlider {
+    grid-template-columns: auto minmax(0, 1fr);
+    column-gap: 0;
+    max-width: none;
+    padding-right: 0;
+  }
+
+  .layoutSlider > .formPanel {
+    grid-column: 2;
+    justify-self: center;
+    width: 100%;
+    max-width: calc(50rem + 2 * var(--spacing-xl));
+    padding-left: var(--spacing-xl);
+    padding-right: var(--spacing-xl);
+  }
+}
+
+/* A ribbon with an icon before its text (the personalization badge) */
+.ribbonWithIcon {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xxxs);
+  /* As the Personalize row: a soft gradient fill inside a 1px air-blue
+     border that fades toward the middle (TGR) — padding less the border, so
+     it stays the size of the other ribbons */
+  padding: calc(var(--spacing-xxs) - var(--border-width)) calc(var(--spacing-sm) - var(--border-width));
+  border: var(--border-width) solid transparent;
+  background:
+    linear-gradient(90deg,
+      color-mix(in srgb, var(--personalize-fill-start) 60%, var(--colors-background)),
+      var(--colors-background) 55%,
+      var(--personalize-fill-end)) padding-box,
+    linear-gradient(90deg,
+      var(--personalize-border),
+      color-mix(in srgb, var(--personalize-border) 30%, var(--colors-background)) 55%,
+      var(--personalize-border)) border-box;
+  color: var(--colors-text);
+}
+
+/* The 20px icon hangs into the padding, so this badge keeps the others' height */
+.ribbonWithIcon svg {
+  flex: none;
+  margin-block: calc(-1 * var(--spacing-xxxs) / 2);
+}
+
+
+/* The sale badge on the gallery photo, in the sale color */
+.ribbonSale {
+  background: var(--colors-price-sale);
+  color: var(--colors-text-inverse);
 }

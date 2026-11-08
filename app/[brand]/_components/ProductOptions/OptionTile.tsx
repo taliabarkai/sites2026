@@ -53,6 +53,8 @@ export function OptionTile({
   // with no color either, an empty circle (a "None")
   const isSwatch = tile === 'standard' && !value.image
   const isEmpty = isSwatch && !value.swatchColor
+  // Image-only color swatches (metals) get the same sheen as the standard ones
+  const isColorDot = tile === 'image-only' && !value.image && !!value.swatchColor
 
   const className = [
     styles.tile,
@@ -85,7 +87,7 @@ export function OptionTile({
     >
       {tile !== 'text' && (
         <span
-          className={`${styles.media} ${isSwatch ? styles.swatchMedia : ''} ${isEmpty ? styles.emptyMedia : ''}`}
+          className={`${styles.media} ${isSwatch || isColorDot ? styles.swatchMedia : ''} ${isEmpty ? styles.emptyMedia : ''}`}
           aria-hidden="true"
         >
           {value.image ? (

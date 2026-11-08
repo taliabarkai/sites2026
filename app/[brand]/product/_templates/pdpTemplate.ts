@@ -12,6 +12,8 @@
  * back to the BOS is a diff, not a translation. See docs/pdp-template-handoff.md.
  */
 
+import type { PersonalizePlacement } from '../../_config/demoParams'
+
 // ─── Catalog 2.0 vocabulary (kept verbatim) ─────────────────────────────────
 
 /** Catalog 2.0 `GalleryDisplay`, plus two proposed values the brands already use. */
@@ -20,6 +22,10 @@ export type GalleryDisplay =
   | 'sideScroll'   // thumbnails in a rail beside the main image (LAL)
   | 'stickyHero'   // proposed: sticky hero left, vertical scroll column right (OAL)
   | 'grid'         // proposed: 2×2 static grid (TGR today)
+  | 'heroGrid'     // proposed: first image full width, the rest two across — the live preview takes the hero
+  | 'heroGridPhotoFirst' // proposed: heroGrid led by the product photo; the preview is pushed in above it once the shopper types
+  | 'overlayThumbs' // proposed: one full-width image, a thumbnail column floating over its left edge
+  | 'slider'       // proposed: full-width strip of viewport-height slides under a floating buy box, click to zoom
 
 /** Catalog 2.0 `ProductFieldType`. */
 export type FieldType = 'text' | 'selection' | 'upload' | 'image_customization' | 'template_customization' | 'multi_select'
@@ -33,6 +39,12 @@ export interface PresentationStep {
   fieldIds: number[]
   /** proposed: one line under the step label (MM shows "Song, names & date"). */
   hint?: string
+  /**
+   * proposed: how a field draws in this step when it differs from its own
+   * `displayType` — material as a compact swatch row inside a step while the
+   * page shows it as full tiles.
+   */
+  display?: Record<number, FieldDisplayType>
 }
 
 // ─── Fields ─────────────────────────────────────────────────────────────────
@@ -50,7 +62,12 @@ export interface FieldValue {
   /** A small line under the label: "(Most Popular)". */
   hint?: string
   disabled?: boolean
+  /** proposed: offer this value only while another field has one of these values ("1 initial" only without a stone). */
+  visibleWhen?: VisibleWhen
 }
+
+/** A condition on other fields' values; a list means all of them must hold. */
+export type VisibleWhen = { fieldId: number; valueIds: string[] } | { fieldId: number; valueIds: string[] }[]
 
 /**
  * A catalog field as the page sees it. The first block is Catalog 2.0's
@@ -78,6 +95,8 @@ export interface Field {
   note?: { text: string; tone?: 'default' | 'warning' }
   /** Tooltip content behind a "?" beside the label. */
   tooltip?: string
+  /** `false` hides each value's "+$40" on the tile; the price still moves. Default true. */
+  showPriceDelta?: boolean
 
   // proposed: things the page needs that Catalog 2.0 does not carry yet
   /** How the field moves the price. `base`: its value *is* the price (material). `delta`: adds to it. */
@@ -95,7 +114,13 @@ export interface Field {
    */
   derivedFrom?: { fieldId: number; label: (count: number) => string }
   /** Show this field only when another field has one of these values. */
-  visibleWhen?: { fieldId: number; valueIds: string[] }
+  visibleWhen?: VisibleWhen
+  /**
+   * proposed: a one-letter text field picked rather than typed — a dropdown
+   * that opens a letter keyboard (OAL's initials). Still `type: 'text'`, so
+   * the cart and the preview read it as text.
+   */
+  keyboard?: boolean
 }
 
 // ─── Live preview ───────────────────────────────────────────────────────────
@@ -111,6 +136,36 @@ export interface Field {
 export type PreviewEngine =
   | { kind: 'placeholder'; spec: PlaceholderSpec }
   | { kind: 'external'; endpoint: string; simulatedLatencyMs?: number }
+  | NecklaceStudioEngine
+
+/** The Name Necklace Studio's plating codes (necklace-studio/engine/render/sprite.ts). */
+export type StudioCoating = 'GP' | 'SR' | 'RGP' | 'VMGP' | 'VMRGP'
+
+/**
+ * proposed: the Name Necklace Studio (necklace-studio/, see its HANDOFF.md) —
+ * each name's plate solved on the server from the real lettering, hung on a
+ * simulated chain in the browser. The page sends only the SKU, the names and
+ * the coating; the SKU's model settings stay on the server.
+ */
+export interface NecklaceStudioEngine {
+  kind: 'necklaceStudio'
+  /** The name field; a repeated field gives one plate per name (multi-name). */
+  textFieldId: number
+  /** The material field, and its values' plating. */
+  materialFieldId: number
+  coatings: Record<string, StudioCoating>
+  /** For a material missing from `coatings`. */
+  defaultCoating: StudioCoating
+}
+
+/** A stone: a picture of the gem, or a diamond cut the renderer draws itself. */
+export type StoneLook = { image: string } | { cut: 'round' | 'oval' | 'emerald' }
+
+export interface StoneSeparator {
+  sources: { fieldId: number; stones: Record<string, StoneLook> }[]
+  /** A field that scales the stone (carat): value id → size multiplier. */
+  size?: { fieldId: number; scale: Record<string, number> }
+}
 
 export interface PlaceholderSpec {
   /** Base product shot per value of one field (per metal, per heart color…). */
@@ -118,13 +173,27 @@ export interface PlaceholderSpec {
   /** Text layers: which field's text goes where, in which font. */
   text?: {
     fieldId: number
+    /** CSS font the text is drawn in. */
     font: string
     /** As fractions of the base image, so the same spec works at any size. */
     box: { x: number; y: number; w: number; h: number }
-    /** `stack`: one line per repeated value (multi-name). */
+    /** `single`: the values joined on one line. `stack`: one line per repeated value. */
     layout?: 'single' | 'stack'
     uppercase?: boolean
+    /**
+     * proposed: a stone set on the chain between consecutive values (`single`
+     * layout) — Inez's initials. The first source whose field has a value in
+     * the preview input picks the stone, so a hidden field (no stone, or the
+     * other kind of stone) adds none.
+     */
+    separator?: StoneSeparator
   }[]
+  /**
+   * mockup-only: a drawn chain in the selected metal's color, hung from the top
+   * of the image to the pendant (the first overlay's box, else the first text
+   * box). Drawn only while the base image is missing.
+   */
+  chain?: { style: 'cable' }
   /** Image layers swapped by a field value (diamond size, heart color). */
   overlays?: { fieldId: number; images: Record<string, string>; box: { x: number; y: number; w: number; h: number } }[]
 }
@@ -134,7 +203,19 @@ export interface LivePreview {
   engine: PreviewEngine
   /** `first`: prepended as slot 0 with a ribbon (LAL today). `replaceHero`: swaps the main image. */
   galleryPlacement: 'first' | 'replaceHero'
+  /**
+   * Shown on the preview once the shopper has personalized it ("Your
+   * Personalization"). Without `sampleText`, shown whenever the preview is.
+   */
   ribbon?: string
+  /**
+   * proposed: what the preview draws before the shopper types — the name in
+   * the product's own photo, per text field (a repeat takes as many as it
+   * needs). With it, the preview IS the main image from page load (pair with
+   * `replaceHero`): the product's first photo only appears on category pages,
+   * and clearing the name returns to this sample rather than to the photo.
+   */
+  sampleText?: Record<number, string[]>
   /** Shown while the engine is rendering (external) or always (placeholder). */
   disclaimer?: string
 }
@@ -162,6 +243,16 @@ export interface Flow {
   nextCta?: string
   /** Sticky bottom bar on mobile once the page's CTA scrolls away. */
   stickyBar?: boolean
+  /**
+   * proposed: the "Personalize" row that opens the panel when the
+   * personalization lives behind it (the demo's "In panel" placement).
+   */
+  personalizeRow?: { title: string; description: string }
+  /**
+   * mockup-only: the personalize version (the header's demo toggle) this
+   * product opens on when the link doesn't name one. Default V1.
+   */
+  defaultPlacement?: PersonalizePlacement
 }
 
 // ─── Template ───────────────────────────────────────────────────────────────
@@ -175,14 +266,39 @@ export interface PdpTemplate {
   // mockup-only identity
   id: string
   brand: 'oal' | 'tgr' | 'lal' | 'ib' | 'mnn'
+  /**
+   * mockup-only: other themes that render this template on the same product
+   * id — IB and MNN share TGR's catalog in the mockup, so they reuse Carrie.
+   */
+  alsoOn?: PdpTemplate['brand'][]
   sku: string
   /** The product in the mockup's registry (data/products). */
   productId: number
   /** One line for the index page. */
   summary: string
+  /**
+   * mockup-only: who draws the page. `template` (default) renders from this
+   * config; `bespoke` keeps a hand-built customizer and the template is
+   * documentation only (MM, until it is ported).
+   */
+  renderer?: 'template' | 'bespoke'
 
   // Catalog 2.0 `EditorPresentation`, with `galleryDisplay` split per viewport (proposed)
-  gallery: { desktop: GalleryDisplay; mobile: 'carousel' }
+  gallery: {
+    desktop: GalleryDisplay
+    mobile: 'carousel'
+    /**
+     * proposed: product ribbons on the main image (a promotion, "15% off"),
+     * in the ribbon colors, stacked under the live preview's own ribbon.
+     */
+    badges?: string[]
+  }
+  /**
+   * proposed: a promotion on the whole product — the selling price is this
+   * much off every material's price, shown beside the crossed-out price with
+   * a "Save N%" tag (and the gallery badge drawn in the sale color).
+   */
+  sale?: { percent: number }
   steps: PresentationStep[]
 
   fields: Field[]

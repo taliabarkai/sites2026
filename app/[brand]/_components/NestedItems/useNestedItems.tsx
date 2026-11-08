@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import type { CartItem } from '../../_context/CartContext'
 import { QuickAddPanel } from '../QuickAddPanel'
-import type { QuickAddProduct } from '../QuickAddPanel'
+import type { QuickAddFormValues, QuickAddProduct } from '../QuickAddPanel'
 import { NestedItems, nestedItemKey } from './NestedItems'
 import { NestedItemsDrawer, withBundleDiscount } from './NestedItemsDrawer'
 import type { NestedItemsDisplay } from './NestedItemsDrawer'
@@ -13,6 +13,10 @@ export interface UseNestedItemsOptions {
   display?: NestedItemsDisplay
   /** Drawer only: an optional line under the trigger's heading. */
   description?: string
+  /** The quick-add panel's choices as the shopper makes them (a live preview, say). */
+  onPanelChange?: (item: QuickAddProduct, values: QuickAddFormValues) => void
+  /** An item was unchecked — its choices are dropped (the host can reset what it drew from them). */
+  onUnstage?: (item: QuickAddProduct) => void
 }
 
 export interface UseNestedItemsResult {
@@ -43,7 +47,7 @@ export function useNestedItems(
   brand: string,
   items: QuickAddProduct[],
   title?: string,
-  { display = 'inline', description }: UseNestedItemsOptions = {},
+  { display = 'inline', description, onPanelChange, onUnstage }: UseNestedItemsOptions = {},
 ): UseNestedItemsResult {
   const [staged, setStaged] = useState<Record<string, CartItem>>({})
   const [panelItem, setPanelItem] = useState<QuickAddProduct | null>(null)
@@ -66,12 +70,17 @@ export function useNestedItems(
       return next
     })
 
+  // Bumped when an item is unchecked, so its quick-add form starts over next time
+  const [formRun, setFormRun] = useState(0)
+
   const handleToggle = (item: QuickAddProduct, checked: boolean) => {
     if (checked) {
       setPanelItem(item)
       setPanelOpen(true)
     } else {
       unstage(nestedItemKey(item))
+      setFormRun((n) => n + 1)
+      onUnstage?.(item)
     }
   }
 
@@ -96,7 +105,10 @@ export function useNestedItems(
       />
       <QuickAddPanel
         isOpen={panelOpen}
-        product={panelItem}
+        // The item as the host draws it now (its image can follow the choices)
+        product={panelItem ? items.find((it) => nestedItemKey(it) === nestedItemKey(panelItem)) ?? panelItem : null}
+        onChange={panelItem && onPanelChange ? (values) => onPanelChange(panelItem, values) : undefined}
+        formKey={formRun}
         onClose={() => setPanelOpen(false)}
         ctaLabel="Add"
         showViewDetails={false}

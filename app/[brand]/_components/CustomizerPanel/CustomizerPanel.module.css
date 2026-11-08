@@ -77,6 +77,12 @@
   cursor: pointer;
 }
 
+/* A 44×44 close over a full-bleed preview */
+.closeLarge {
+  width: 44px;
+  height: 44px;
+}
+
 /* Plain white X over dark content (e.g. the loading canvas) */
 .closeOnDark {
   background: transparent;
@@ -96,6 +102,13 @@
   overflow: hidden;
 }
 
+/* Edge to edge, as tall as it is wide — the mobile gallery's frame */
+.previewAreaFull {
+  display: block;
+  padding: 0;
+  max-height: none;
+}
+
 /* Scrollable step content */
 .body {
   flex: 1 1 auto;
@@ -110,4 +123,53 @@
   padding: var(--spacing-sm) var(--spacing-md) calc(var(--spacing-md) + env(safe-area-inset-bottom, 0px));
   border-top: var(--border-width) solid var(--border-color);
   background: var(--colors-background);
+}
+
+/* Desktop drawer (desktop="drawer"): the same panel, sliding in from the right
+   at the floating cart's width. Always in the DOM; the transform drives
+   show/hide, as on mobile. */
+@media (min-width: 768px) {
+  .rootDrawer {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-modal);
+    pointer-events: none;
+  }
+
+  .rootDrawer.rootOpen {
+    pointer-events: auto;
+  }
+
+  .rootDrawer .backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    opacity: 0;
+    transition: opacity var(--transition-base);
+  }
+
+  .rootDrawer.rootOpen .backdrop {
+    opacity: 1;
+  }
+
+  .rootDrawer .panel {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 54rem;
+    overflow: hidden;
+    background: var(--colors-background);
+    border-radius: var(--radius-panel) 0 0 var(--radius-panel);
+    transform: translateX(100%);
+    transition: transform var(--transition-base);
+  }
+
+  .rootDrawer .panelOpen {
+    transform: translateX(0);
+  }
 }
