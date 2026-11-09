@@ -1994,7 +1994,14 @@ function ProductForm({ brand, product, icons, nestedItems = [], nestedDisplay = 
 
 // ─── Page inner ───────────────────────────────────────────────────────────────
 
-function ProductDetailPageInner({ productId, previewId }: { productId: number; previewId?: string }) {
+interface ProductDetailPageProps {
+  productId: number
+  previewId?: string
+  /** Skip the product's PDP template (`/product/4a`), showing its own flow instead. */
+  withoutTemplate?: boolean
+}
+
+function ProductDetailPageInner({ productId, previewId, withoutTemplate = false }: ProductDetailPageProps) {
   const pathname = usePathname()
   const router = useRouter()
   const brand = getBrandFromPathname(pathname)
@@ -2044,7 +2051,7 @@ function ProductDetailPageInner({ productId, previewId }: { productId: number; p
   // A PDP template drives the page when this product has one (a bespoke
   // customizer opts out in the template itself). `?engine=external` swaps the
   // preview engine for the simulated external one, to review its loading state.
-  const baseTemplate = isOptionsShowcase ? undefined : renderedTemplateFor(brand, product.id)
+  const baseTemplate = isOptionsShowcase || withoutTemplate ? undefined : renderedTemplateFor(brand, product.id)
   const engineParam = searchParams.get('engine')
   const template = useMemo(
     () => (baseTemplate && engineParam === 'external' ? withExternalEngine(baseTemplate) : baseTemplate),
@@ -2393,6 +2400,6 @@ function ProductDetailPageInner({ productId, previewId }: { productId: number; p
 
 // ─── Export ───────────────────────────────────────────────────────────────────
 
-export default function ProductDetailPageClient({ productId, previewId }: { productId: number; previewId?: string }) {
-  return <ProductDetailPageInner productId={productId} previewId={previewId} />
+export default function ProductDetailPageClient(props: ProductDetailPageProps) {
+  return <ProductDetailPageInner {...props} />
 }

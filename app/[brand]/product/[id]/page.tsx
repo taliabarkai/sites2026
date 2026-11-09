@@ -9,5 +9,14 @@ export default async function ProductDetailPage({ params, searchParams }: PagePr
   const { id } = await params
   const sp = await searchParams
   const previewId = typeof sp.preview === 'string' ? sp.preview : undefined
-  return <ProductDetailPageClient productId={Number(id)} previewId={previewId} />
+  // `4a` — product 4 as it was before its PDP template: the template is
+  // skipped, so the product's own personalize flow shows
+  const withoutTemplate = /^\d+a$/i.test(id)
+  return (
+    <ProductDetailPageClient
+      productId={Number(withoutTemplate ? id.slice(0, -1) : id)}
+      previewId={previewId}
+      withoutTemplate={withoutTemplate}
+    />
+  )
 }
