@@ -14,7 +14,20 @@ import * as mnnIcons from '@/src/components/icons/mnn'
 import * as tgrIcons from '@/src/components/icons/tgr'
 import * as lalIcons from '@/src/components/icons/lal'
 import * as ibIcons from '@/src/components/icons/ib'
+import { renderedTemplateFor } from '../../product/_templates'
 import styles from './ThemeSwitcher.module.css'
+
+/**
+ * Where a theme switch lands. A live-preview product page (any product with a
+ * template — Inez, Inez Heart, Carrie…) goes to the other theme's live
+ * preview, since product ids don't carry across brands; every other page
+ * keeps its path.
+ */
+function switchPath(pathname: string, from: BrandKey, to: BrandKey): string {
+  const m = /^\/[^/]+\/product\/(\d+)\/?$/.exec(pathname)
+  if (m && renderedTemplateFor(from, Number(m[1]))) return `/${to}/product/livepreview`
+  return buildBrandPath(pathname, to)
+}
 
 const BRAND_ICONS = {
   oal: oalIcons,
@@ -72,7 +85,7 @@ export function ThemeSwitcher({ brand }: ThemeSwitcherProps = {}) {
     // in the header of every page, and the hook would opt them all out of
     // static rendering for a value only this handler needs.
     const query = typeof window === 'undefined' ? '' : window.location.search
-    router.push(`${buildBrandPath(pathname, brand)}${query}`, { scroll: false })
+    router.push(`${switchPath(pathname, currentBrand, brand)}${query}`, { scroll: false })
   }
 
   return (

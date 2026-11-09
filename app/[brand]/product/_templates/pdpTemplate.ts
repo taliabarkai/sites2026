@@ -126,6 +126,14 @@ export interface Field {
    * initials" dropdown: the field takes exactly that many characters.
    */
   lengthFrom?: number
+  /**
+   * proposed: one character, picked from a single row of square tiles of these
+   * characters instead of typed (Inez's initials: A–Z, ♥, ◆, &). With
+   * `repeat`, one row per unit ("1st initial", "2nd initial"…).
+   */
+  letterChoices?: string[]
+  /** proposed: the letter tiles in one scrolling row (default) or an open grid that wraps. */
+  letterLayout?: 'row' | 'grid'
   /** proposed: a text field that takes letters only (no digits, spaces or symbols). */
   lettersOnly?: boolean
   /** proposed: typed text is shown and kept in capitals (initials). */
@@ -223,7 +231,30 @@ export interface PlaceholderSpec {
   chain?: { style: 'cable' }
   /** Image layers swapped by a field value (diamond size, heart color). */
   overlays?: { fieldId: number; images: Record<string, string>; box: { x: number; y: number; w: number; h: number } }[]
+  /**
+   * proposed: pieces of different kinds strung on the drawn necklace, in
+   * order — an initial, an enamel heart, a diamond, a zodiac coin (Inez
+   * Heart). Drawn with the drawn chain instead of `text`; a piece whose field
+   * has no value in the preview input is left off.
+   */
+  charms?: {
+    /** The letters' font, and where the necklace sits: the box's top is its lowest point, its height the pieces' size. */
+    font: string
+    box: { x: number; y: number; w: number; h: number }
+    pieces: CharmPiece[]
+  }
 }
+
+/** One kind of piece on a charm necklace, read from a field's value. */
+export type CharmPiece =
+  /** Each character of the field's text, as a letter. */
+  | { kind: 'letters'; fieldId: number }
+  /** An enamel heart in the value's color, edged in the metal. */
+  | { kind: 'heart'; fieldId: number; colors: Record<string, string> }
+  /** A stone set in the chain: a picture or a drawn diamond cut, sized by another field. */
+  | { kind: 'stone'; fieldId: number; stones: Record<string, StoneLook>; size?: { fieldId: number; scale: Record<string, number> } }
+  /** A round metal coin with the value's symbol cut through it (a zodiac sign). */
+  | { kind: 'coin'; fieldId: number; glyphs: Record<string, string> }
 
 export interface LivePreview {
   enabled: boolean
@@ -243,6 +274,11 @@ export interface LivePreview {
    * and clearing the name returns to this sample rather than to the photo.
    */
   sampleText?: Record<number, string[]>
+  /**
+   * proposed: for a repeated one-character field, the sample by count — entry
+   * n−1 is the sample for n units, one character each ("OAL" for 3 initials).
+   */
+  sampleByCount?: Record<number, string[]>
   /** Shown while the engine is rendering (external) or always (placeholder). */
   disclaimer?: string
 }
@@ -336,6 +372,9 @@ export interface PdpTemplate {
   fields: Field[]
   livePreview: LivePreview
   flow: Flow
+
+  /** mockup-only: products put first in the page's Best Sellers row (by product id). */
+  bestSellersLead?: number[]
 
   /** Companion products under the form (nested items, the MM slipmat). */
   addons?: { id: string; title: string; image: string; price: number; originalPrice?: number; badge?: string }[]

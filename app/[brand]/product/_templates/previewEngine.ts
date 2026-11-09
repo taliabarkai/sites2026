@@ -11,7 +11,7 @@
  * `necklaceStudio`: name necklaces from the Name Necklace Studio — plates
  *   solved on the server, hung on a simulated chain here (necklaceStudio.ts).
  */
-import { fieldById, type PdpTemplate, type PlaceholderSpec, type PreviewEngine, type StoneLook, type StoneSeparator } from './pdpTemplate'
+import { fieldById, type CharmPiece, type PdpTemplate, type PlaceholderSpec, type PreviewEngine, type StoneLook, type StoneSeparator } from './pdpTemplate'
 import type { PreviewInput } from './fieldState'
 import { renderNecklaceStudio } from './necklaceStudio'
 
@@ -342,6 +342,92 @@ function necklaceLayer(
   return { glyphs, stones, chain: chainAlong(curve, gaps, fill, GAUGE) }
 }
 
+// ─── Charms: different pieces strung on one necklace (Inez Heart) ──────────
+
+/** A heart in a 100×100 box, its top centre at (50, 8). */
+const HEART_PATH = 'M50 88 C 18 66, 6 48, 6 32 C 6 18, 17 8, 30 8 C 40 8, 47 14, 50 21 C 53 14, 60 8, 70 8 C 83 8, 94 18, 94 32 C 94 48, 82 66, 50 88 Z'
+
+type Piece =
+  | { kind: 'letter'; char: string }
+  | { kind: 'heart'; color: string }
+  | { kind: 'stone'; look: StoneLook; scale: number }
+  | { kind: 'coin'; glyph: string }
+
+/** The pieces in order, each read from its field's value; one with no value is left off. */
+function resolvePieces(pieces: CharmPiece[], input: PreviewInput): Piece[] {
+  const out: Piece[] = []
+  for (const p of pieces) {
+    if (p.kind === 'letters') {
+      for (const c of (input.texts[p.fieldId] ?? []).join('').replace(/\s/g, '').toUpperCase()) out.push({ kind: 'letter', char: c })
+      continue
+    }
+    const v = input.choices[p.fieldId]
+    if (!v) continue
+    if (p.kind === 'heart' && p.colors[v]) out.push({ kind: 'heart', color: p.colors[v] })
+    if (p.kind === 'stone' && p.stones[v]) {
+      const scale = p.size ? p.size.scale[input.choices[p.size.fieldId] ?? ''] ?? 1 : 1
+      out.push({ kind: 'stone', look: p.stones[v], scale })
+    }
+    if (p.kind === 'coin' && p.glyphs[v]) out.push({ kind: 'coin', glyph: p.glyphs[v] })
+  }
+  return out
+}
+
+/**
+ * The pieces strung along the necklace, centred at its bottom with an even
+ * run of chain between them. Letters, the heart and the coin hang from the
+ * chain (it runs on across their tops); a stone is set in it (the chain
+ * stops at its setting). Each piece turns with the curve.
+ */
+function charmsLayer(
+  charms: NonNullable<PlaceholderSpec['charms']>, pieces: Piece[], fill: string, cutout: string,
+): { glyphs: string[]; stones: StonePlacement[]; chain: string } {
+  const h = charms.box.h * SIZE
+  const curve = necklaceCurve(charms.box.y * SIZE)
+  // Widths as shares of the pieces' size
+  const share = (p: Piece) => p.kind === 'letter' ? CAP_WIDTH : p.kind === 'heart' ? 0.8 : p.kind === 'coin' ? 0.8
+    : 0.42 * p.scale * ('cut' in p.look && p.look.cut !== 'round' ? 1.3 : 1)
+  const gapShare = 1.1
+  const units = pieces.reduce((n, p) => n + share(p), 0) + Math.max(0, pieces.length - 1) * gapShare
+  const size = Math.max(10, Math.min(h * 0.6, (curve.length * 0.4) / Math.max(units, 1)))
+  const gap = size * gapShare
+  const glyphs: string[] = []
+  const stones: StonePlacement[] = []
+  const gaps: [number, number][] = []
+  let s = (curve.length - units * size) / 2
+  pieces.forEach((p) => {
+    const w = share(p) * size
+    const mid = s + w / 2
+    const { p: at, angle } = curve.at(mid)
+    const hang = (inner: string) =>
+      `<g transform="translate(${at.x.toFixed(1)} ${at.y.toFixed(1)}) rotate(${angle.toFixed(1)})">${inner}</g>`
+    if (p.kind === 'letter') {
+      glyphs.push(hang(`<text x="0" y="${(size * 0.3).toFixed(1)}" text-anchor="middle" dominant-baseline="central" font-family="${esc(charms.font)}" font-size="${size.toFixed(1)}" fill="${esc(fill)}">${esc(p.char)}</text>`))
+    } else if (p.kind === 'heart') {
+      // Enamel in a thin metal edge, hung from a small ring on the chain
+      const k = w / 100
+      glyphs.push(hang(
+        `<circle cx="0" cy="${(size * 0.02).toFixed(1)}" r="${(size * 0.045).toFixed(1)}" fill="none" stroke="${esc(fill)}" stroke-width="${(size * 0.025).toFixed(1)}"/>` +
+        `<g transform="translate(${(-w / 2).toFixed(1)} ${(-size * 0.02).toFixed(1)}) scale(${k.toFixed(3)})"><path d="${HEART_PATH}" fill="${esc(p.color)}" stroke="${esc(fill)}" stroke-width="${(4 / k / 10).toFixed(1)}"/></g>`,
+      ))
+    } else if (p.kind === 'coin') {
+      // A metal disc hung from the chain, the sign cut through it
+      const r = w / 2
+      glyphs.push(hang(
+        `<circle cx="0" cy="${(r * 1.12).toFixed(1)}" r="${r.toFixed(1)}" fill="${esc(fill)}"/>` +
+        `<text x="0" y="${(r * 1.12).toFixed(1)}" text-anchor="middle" dominant-baseline="central" font-size="${(r * 1.15).toFixed(1)}" fill="${esc(cutout)}">${esc(p.glyph)}\uFE0E</text>`,
+      ))
+    } else {
+      const d = 0.42 * p.scale * size
+      stones.push({ x: at.x, y: at.y, d, look: p.look, angle })
+      const half = 'cut' in p.look && p.look.cut !== 'round' ? d * 0.65 : d / 2
+      gaps.push([mid - half * 0.9, mid + half * 0.9])
+    }
+    s += w + gap
+  })
+  return { glyphs, stones, chain: chainAlong(curve, gaps, fill, GAUGE) }
+}
+
 /**
  * The spec's text layers — and the chain, when `withChain` — as one
  * transparent SVG at SIZE×SIZE; plus the gem pictures to draw on top (an
@@ -349,7 +435,7 @@ function necklaceLayer(
  * chain the letters (and any stones) are strung on one curved necklace;
  * over a real product photo they're set as plain text in their box.
  */
-function buildLayers(spec: PlaceholderSpec, input: PreviewInput, fill: string, withChain: boolean): { svg: string; gems: StonePlacement[] } {
+function buildLayers(spec: PlaceholderSpec, input: PreviewInput, fill: string, withChain: boolean, cutout = 'Canvas'): { svg: string; gems: StonePlacement[] } {
   const glyphs: string[] = []
   const stoneSvg: string[] = []
   const gems: StonePlacement[] = []
@@ -357,6 +443,19 @@ function buildLayers(spec: PlaceholderSpec, input: PreviewInput, fill: string, w
   // Where a plain chain hangs to: the first text layer that has text
   let ends: [Pt, Pt] | null = null
   const strung = withChain && !!spec.chain
+  // Mixed pieces on the drawn necklace (an initial, a heart, a diamond, a coin)
+  if (strung && spec.charms) {
+    const out = charmsLayer(spec.charms, resolvePieces(spec.charms.pieces, input), fill, cutout)
+    glyphs.push(...out.glyphs)
+    chain = out.chain
+    out.stones.forEach((p) => {
+      if ('cut' in p.look) stoneSvg.push(diamondSvg(p, fill, stoneSvg.length))
+      else {
+        stoneSvg.push(`<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="${(p.d * 0.62).toFixed(1)}" fill="${esc(fill)}"/>`)
+        gems.push(p)
+      }
+    })
+  }
   for (const layer of spec.text ?? []) {
     const typed = (input.texts[layer.fieldId] ?? []).map((t) => t.trim()).filter(Boolean)
     // Initials typed in one field become one piece each
@@ -427,7 +526,7 @@ export async function renderPlaceholder(template: PdpTemplate, spec: Placeholder
   }
 
   // Chain (while there's no base photo), text and diamonds, drawn as SVG over the canvas
-  const { svg, gems } = buildLayers(spec, input, metalColor(template, spec, input) ?? colors.text, !base)
+  const { svg, gems } = buildLayers(spec, input, metalColor(template, spec, input) ?? colors.text, !base, colors.surface)
   const textImg = await loadImage(`data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`)
   if (textImg) ctx.drawImage(textImg, 0, 0, SIZE, SIZE)
 

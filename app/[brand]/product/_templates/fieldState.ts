@@ -69,6 +69,8 @@ function textGroup(field: Field, unit?: number): TextInputGroup {
     placeholder: field.placeholder,
     required: field.isRequired,
     keyboard: field.keyboard,
+    letters: field.letterChoices,
+    lettersLayout: field.letterLayout,
   }
 }
 

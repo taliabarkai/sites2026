@@ -189,6 +189,12 @@
   );
 }
 
+/* OAL: finishes are flat, solid colors — no sheen */
+[data-theme="oal"] .standard .swatchMedia .image,
+[data-theme="oal"] .image-only .swatchMedia .image {
+  background-image: none;
+}
+
 /* Packshots on white (a diamond, a flower) take on the tile's own fill —
    hover and selected included — rather than sitting in a white square */
 .standard .image {

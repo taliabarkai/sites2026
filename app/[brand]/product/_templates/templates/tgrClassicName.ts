@@ -70,6 +70,8 @@ export const tgrClassicName: PdpTemplate = {
   },
 
   flow: {
+    // V2 (Gallery Preview + New Layout) unless the link names another version
+    defaultPlacement: 'page',
     container: { desktop: 'inline', mobile: 'inline' },
     personalizeRow: { title: 'Personalize Yours', description: 'See your name in our signature script' },
     completion: 'addToBag',

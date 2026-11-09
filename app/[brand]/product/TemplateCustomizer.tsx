@@ -174,7 +174,7 @@ export function TemplateCustomizer({
   // Typing into a field clears its error
   const options: ProductOptionsController = {
     ...base,
-    choose: (id, valueId) => { base.choose(id, valueId); if (entered || inline) setStarted(true) },
+    choose: (id, valueId) => { base.choose(id, valueId); setInteracted(true); if (entered || inline) setStarted(true) },
     setText: (id, raw) => {
       // Initials-style fields keep letters only, in capitals
       const field = fieldById(template, Number(/^f(\d+)/.exec(id)?.[1]))
@@ -182,6 +182,7 @@ export function TemplateCustomizer({
       if (field?.lettersOnly) value = value.replace(/[^\p{L}]/gu, '')
       if (field?.uppercase) value = value.toUpperCase()
       base.setText(id, value)
+      setInteracted(true)
       if (value.trim()) setStarted(true)
       setErrors((e) => (e.includes(id) ? e.filter((x) => x !== id) : e))
     },
@@ -196,7 +197,7 @@ export function TemplateCustomizer({
   // ── V5, OAL only: an optional diamond accent ──
   const [diamondAccent, setDiamondAccent] = useState(false)
   // …unless the product asks for its stones itself (Inez)
-  const accentOffered = (placement === 'jewelry' || placement === 'panel-c') && brand === 'oal' && !template.fields.some((f) => /stone|diamond/i.test(f.cartName))
+  const accentOffered = (placement === 'jewelry' || placement === 'panel-c' || placement === 'jewelry-open') && brand === 'oal' && !template.fields.some((f) => /stone|diamond/i.test(f.cartName))
 
   // ── Nested item (demo toggle): a second necklace at 50% off, above Add to Bag ──
   // Its panel's image becomes the necklace with the name typed there, in its material
@@ -242,9 +243,13 @@ export function TemplateCustomizer({
   const buyInPanel = placement === 'panel-c'
   // V5 (Jewelry), and V4: Music Memories' two-step flow — Personalize, then
   // Customize and Add to bag — in a sheet on mobile, inline tabs on desktop
-  const jewelry = placement === 'jewelry' || buyInPanel
+  const jewelry = placement === 'jewelry' || placement === 'jewelry-open' || buyInPanel
   // V5's own entry: the "Personalize yours" card (V4 has its CTA instead)
-  const jewelryCard = placement === 'jewelry'
+  const jewelryCard = placement === 'jewelry' || placement === 'jewelry-open'
+  // V6, desktop: the steps sit open on the page from the start (no entry card,
+  // no Back); the live preview comes in with the shopper's first pick
+  const openOnPage = placement === 'jewelry-open' && !isMobile
+  const [interacted, setInteracted] = useState(false)
   // v3: the page as "On page"; on mobile, typing happens in the panel
   const tapPanel = placement === 'panel-v3'
   const tapMode = tapPanel && isMobile
@@ -315,7 +320,7 @@ export function TemplateCustomizer({
   const lastStep = stepIdx === steps.length - 1
   const inSomeStep = (f: Field) => steps.some((s) => s.fieldIds.includes(f.fieldId))
   // While the desktop card is open it shows those shared fields itself
-  const cardOpen = entered && !usePanel && !inline
+  const cardOpen = (entered || openOnPage) && !usePanel && !inline
   const pageEntryFields = cardOpen ? entryFields.filter((f) => !inSomeStep(f)) : entryFields
   const hidesEntryFields = cardOpen && pageEntryFields.length < entryFields.length
 
@@ -366,10 +371,13 @@ export function TemplateCustomizer({
   const entryIds = new Set(entryFields.map((f) => f.fieldId))
   const canAddCost = template.fields.some((f) => !entryIds.has(f.fieldId) && f.values?.some((v) => (v.priceDelta ?? 0) > 0))
   const shownFull = fullPrice
-  const pricePrefix = !inline && !started && canAddCost ? 'From ' : ''
-  // OAL: one "Starting at" price that never moves (the cheapest finish, no
-  // add-ons); the running total is on Add to bag
-  const startingAt = startingAtPricing(brand)
+  // OAL keeps prices off its finish swatches. Off sale its page price is one
+  // "Starting at" that never moves (the cheapest finish, no add-ons; the
+  // running total is on Add to bag); on sale it's the actual price — crossed
+  // out, the selling price and "Save N%" — following the choices
+  const hideFinishPrices = startingAtPricing(brand)
+  const startingAt = hideFinishPrices && !salePercent
+  const pricePrefix = !inline && !started && canAddCost && !hideFinishPrices ? 'From ' : ''
   const startFull = startingPrice(template, product.priceInCents ?? 0)
   const priceLabel = startingAt
     ? `Starting at ${formatPrice(salePercent ? onSale(startFull) : startFull)}`
@@ -383,12 +391,16 @@ export function TemplateCustomizer({
   // With a sample, the preview is the main image from page load and draws the
   // sample until the shopper types (and again if they clear it). Without one,
   // it shows only once there's text: clearing hands the slot back to the photo.
-  const input = sample && !hasText
+  const byCount = livePreview.sampleByCount
+  const input = (sample || byCount) && !hasText
     ? {
         ...shopperInput,
         texts: Object.fromEntries(
           Object.entries(shopperInput.texts).map(([id, values]) => {
-            const names = sample[Number(id)] ?? []
+            // A repeated one-character field: the sample for the count, a character per unit
+            const counted = byCount?.[Number(id)]
+            if (counted?.length && values.length) return [id, [...counted[Math.min(values.length, counted.length) - 1]]]
+            const names = sample?.[Number(id)] ?? []
             // A field sized by a count takes the sample for that count (Inez: A, OL, OAL…)
             const field = fieldById(template, Number(id))
             const n = field ? setLength(template, field, state) : null
@@ -399,7 +411,7 @@ export function TemplateCustomizer({
       }
     : shopperInput
   const inputKey = previewKey(input)
-  const previewOn = livePreview.enabled && (sample ? true : started && (!hasTextFields || hasText))
+  const previewOn = livePreview.enabled && (sample || byCount ? true : started && (!hasTextFields || hasText))
   // The badge goes up once the preview shows the shopper's own text
   // ── Behind the row: the personalization counts once saved ──────────────────
   const [saved, setSaved] = useState(false)
@@ -415,7 +427,7 @@ export function TemplateCustomizer({
     .filter(Boolean)
     .map((t) => `“${t}”`)
     .join(', ')
-  const savedDetails = summaryLines(template, panelFields.filter((f) => f.type !== 'text'), state).map((l) => l.value).join(' · ')
+  const savedDetails = summaryLines(template, panelFields.filter((f) => f.type !== 'text' && !f.fixed), state).map((l) => l.value).join(' · ')
   // The gallery and badge follow the shopper's text — or, behind the row, the save
   // V1/V3: while the panel is open the gallery behind it keeps the saved
   // necklace — the panel's own preview follows the typing, the gallery (and
@@ -428,9 +440,10 @@ export function TemplateCustomizer({
     const live = buyInPanel || !isMobile || !(rowMode || tapMode)
     // Desktop, steps open (the live preview mode): the gallery leads with the
     // preview from the start — the sample (Inez: "A") until the shopper types
-    const sampleShown = !!livePreview.sampleText && cardOpen
+    // V6 (steps open from the start): the photo leads until the first pick
+    const sampleShown = !!(livePreview.sampleText || livePreview.sampleByCount) && cardOpen && (!openOnPage || interacted)
     onPersonalizedChange?.(live ? hasText || sampleShown : isSaved)
-  }, [rowMode, tapMode, buyInPanel, isMobile, entered, isSaved, hasText, onPersonalizedChange, galleryFrozen, cardOpen, livePreview.sampleText])
+  }, [rowMode, tapMode, buyInPanel, isMobile, entered, isSaved, hasText, onPersonalizedChange, galleryFrozen, cardOpen, openOnPage, interacted, livePreview.sampleText, livePreview.sampleByCount])
   const engine = livePreview.engine
 
   const [preview, setPreview] = useState<string | null>(null)
@@ -626,17 +639,17 @@ export function TemplateCustomizer({
       const picked = summaryLines(template, [field], state)[0]?.value
       field = { ...field, name: picked && !materialImageOnly ? `${materialLabel(brand)}: ${picked}` : materialLabel(brand) }
     }
-    if (jewelry && field.type === 'text' && !field.note && field.textMaxLength && !field.keyboard && !field.lengthFrom) {
+    if (jewelry && field.type === 'text' && !field.note && field.textMaxLength && !field.keyboard && !field.lengthFrom && !field.letterChoices) {
       field = { ...field, note: { text: `Letters only, up to ${field.textMaxLength} characters` } }
     }
     // Demo toggle: the material as the carousel's standard image-only tiles
     const fieldGroups = groupsForField(template, field, state, displayType).map((g) =>
       materialImageOnly && field.pricing === 'base' && g.kind === 'choice'
-        ? { ...g, display: 'carousel' as const, tile: 'image-only' as const, size: 'sm' as const, priceBelow: !startingAt }
+        ? { ...g, display: 'carousel' as const, tile: 'image-only' as const, size: 'sm' as const, priceBelow: !hideFinishPrices }
         : g,
     ).map((g) =>
       // OAL: no prices on the finishes — the page says "Starting at", Add to bag the total
-      startingAt && field.pricing === 'base' && g.kind === 'choice'
+      hideFinishPrices && field.pricing === 'base' && g.kind === 'choice'
         ? { ...g, values: g.values.map((v) => ({ ...v, priceLabel: undefined })) }
         : g,
     )
@@ -877,8 +890,10 @@ export function TemplateCustomizer({
                 <button type="button" className={styles.personalizeRow} onClick={enter} aria-haspopup="dialog">
                   <span className={styles.rowIcon} aria-hidden="true"><AiMagicIcon size={32} /></span>
                   <span className={styles.rowText}>
-                    <span className={styles.rowTitle}>Personalize yours</span>
-                    <span className={styles.rowSub}>{rowCopy.description}</span>
+                    {/* Back out of the steps with something personalized: it's kept,
+                        and the card picks up where the shopper left off */}
+                    <span className={styles.rowTitle}>{hasText ? 'Continue Personalizing' : 'Personalize yours'}</span>
+                    <span className={styles.rowSub}>{hasText ? [savedName, savedDetails].filter(Boolean).join(' · ') : rowCopy.description}</span>
                   </span>
                   <span className={styles.rowChevron} aria-hidden="true"><ArrowIcon size={24} /></span>
                 </button>
@@ -963,7 +978,7 @@ export function TemplateCustomizer({
               /* Card: the CTA gives way to the steps, in a card on the page.
                  V5, as Music Memories: a rule, then Back, above the tabs */
               <>
-                {jewelry && (
+                {jewelry && !openOnPage && (
                   <div className={styles.backRule}>
                     <button type="button" className={styles.back} onClick={() => setEntered(false)}>
                       <span className={styles.backIcon} aria-hidden="true"><ChevronIcon size={16} /></span>
@@ -995,7 +1010,7 @@ export function TemplateCustomizer({
           watch={ctaRef}
           target={rootRef}
           onClick={inline ? undefined : buyInPanel || jewelry ? enter : rowMode ? handleAddToBag : enter}
-          label={inline ? undefined : buyInPanel ? personalizeNowLabel : jewelry ? 'Personalize now' : rowMode ? addLabel : entryCta}
+          label={inline ? undefined : jewelry ? personalizeNowLabel : rowMode ? addLabel : entryCta}
         />
       )}
 

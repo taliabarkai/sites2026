@@ -40,6 +40,8 @@ export interface ChoiceGroup {
   showPrice?: boolean
   /** Image-only tiles: each value's price label under its swatch (the PDP's metal picker). */
   priceBelow?: boolean
+  /** Text tiles drawn as squares, one character each (a row of letters). */
+  textShape?: 'pill' | 'square'
 }
 
 export interface TextInputGroup {
@@ -51,6 +53,10 @@ export interface TextInputGroup {
   required?: boolean
   /** One letter, picked from a keyboard that drops down under the field instead of typed. */
   keyboard?: boolean
+  /** One character, picked from square tiles of these characters instead of typed. */
+  letters?: string[]
+  /** The letter tiles in one scrolling row (default) or an open grid that wraps. */
+  lettersLayout?: 'row' | 'grid'
 }
 
 export interface AddonItem {

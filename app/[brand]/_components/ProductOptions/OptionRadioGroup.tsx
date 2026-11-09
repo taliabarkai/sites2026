@@ -47,6 +47,7 @@ export function OptionRadioGroup({ group, value, onChange }: { group: ChoiceGrou
         tabIndex={i === roving.focusIndex ? 0 : -1}
         size={group.size}
         imageShape={group.imageShape}
+        textShape={group.textShape}
         onSelect={() => {
           roving.setFocusIndex(i)
           onChange(v.id)
@@ -66,7 +67,7 @@ export function OptionRadioGroup({ group, value, onChange }: { group: ChoiceGrou
 
   if (isCarousel) {
     return (
-      <ScrollRow label={label} rowProps={rowProps} rowClassName={`${styles.carousel} ${sizeClass}`}>
+      <ScrollRow label={label} rowProps={rowProps} rowClassName={`${styles.carousel} ${sizeClass} ${group.textShape === 'square' ? styles.letterRow : ''}`}>
         {tiles}
       </ScrollRow>
     )
@@ -75,7 +76,7 @@ export function OptionRadioGroup({ group, value, onChange }: { group: ChoiceGrou
   return (
     <div className={styles.group}>
       {label}
-      <div {...rowProps} className={`${styles.grid} ${styles[`grid_${tile}`]} ${sizeClass}`}>
+      <div {...rowProps} className={`${styles.grid} ${styles[`grid_${tile}`]} ${sizeClass} ${group.textShape === 'square' ? styles.letterRow : ''}`}>
         {tiles}
       </div>
     </div>

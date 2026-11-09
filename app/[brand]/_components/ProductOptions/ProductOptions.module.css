@@ -369,6 +369,12 @@
   gap: var(--spacing-xxs);
 }
 
+/* Square letter tiles (Inez's initials), in a row or an open grid: each a field's height square */
+.letterRow .slot > * {
+  width: var(--field-min-height);
+  height: var(--field-min-height);
+}
+
 /* Text tiles in a carousel (Inez's number of initials): 8px apart, as in the grid */
 .carousel.tiles_text {
   gap: var(--spacing-xxs);

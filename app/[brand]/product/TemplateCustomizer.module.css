@@ -306,6 +306,31 @@
   font-weight:    var(--typography-rules-text3-font-weight, normal);
 }
 
+/* Jewelry brands (all but LAL): flat tabs on white — no box, no grey fill;
+   one light rule under both, the active step's thick dark underline sitting
+   on it, the other step in the muted color */
+[data-theme]:not([data-theme="lal"]) .tabs,
+[data-theme]:not([data-theme="lal"]) .card.cardOpen > .tabs:first-child,
+[data-theme]:not([data-theme="lal"]) .panelTabs .tabs {
+  border: none;
+  border-bottom: var(--border-width) solid var(--border-color);
+  border-radius: 0;
+  overflow: visible;
+}
+
+[data-theme]:not([data-theme="lal"]) .tab {
+  padding: var(--spacing-sm) var(--spacing-sm);
+  background: transparent;
+  border-bottom: 3px solid transparent;
+  /* The underline sits on the shared rule rather than under it */
+  margin-bottom: calc(var(--border-width) * -1);
+}
+
+[data-theme]:not([data-theme="lal"]) .tabActive {
+  background: transparent;
+  border-bottom-color: var(--colors-text);
+}
+
 /* ── Panel flow (mobile) ─────────────────────────────────────────────────── */
 
 .panelBody {

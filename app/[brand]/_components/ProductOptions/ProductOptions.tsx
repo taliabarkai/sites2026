@@ -32,6 +32,23 @@ export function ProductOptions({ groups, options, basePrice, slots }: ProductOpt
   return (
     <div className={styles.root}>
       {groups.map((group) => {
+        // One character picked from a row of square tiles: still the group's text
+        if (group.kind === 'text-input' && group.letters) {
+          return (
+            <div key={group.id} className={styles.group}>
+              <OptionRadioGroup
+                group={{
+                  kind: 'choice', id: group.id, label: group.label, display: group.lettersLayout === 'grid' ? 'grid' : 'carousel', tile: 'text', textShape: 'square',
+                  values: group.letters.map((c) => ({ id: c, label: c })),
+                }}
+                value={state.text[group.id] ?? ''}
+                onChange={(c) => setText(group.id, c)}
+              />
+              {slots?.[group.id]}
+            </div>
+          )
+        }
+
         if (group.kind === 'text-input' && group.keyboard) {
           return (
             <LetterKeyboard key={group.id} group={group} value={state.text[group.id] ?? ''} onChange={(v) => setText(group.id, v)}>

@@ -89,12 +89,17 @@ function ProductCarousel({
   brand,
   title,
   ArrowIcon,
+  lead = [],
 }: {
   brand: string
   title: string
   ArrowIcon: React.ComponentType<{ size?: number; color?: string }>
+  /** Product ids shown first, in this order (a template's `bestSellersLead`). */
+  lead?: number[]
 }) {
-  const products = getBrandProducts(brand).slice(0, 8)
+  const all = getBrandProducts(brand)
+  const leading = lead.map((id) => all.find((p) => p.id === id)).filter((p): p is ProductItem => !!p)
+  const products = [...leading, ...all.filter((p) => !lead.includes(p.id))].slice(0, 8)
   const carouselRef = useRef<HTMLDivElement>(null)
 
   const scrollCarousel = (dir: 'prev' | 'next') => {
@@ -2356,7 +2361,7 @@ function ProductDetailPageInner({ productId, previewId }: { productId: number; p
         </>
         )}
 
-        <ProductCarousel brand={brand} title="Best Sellers" ArrowIcon={icons.ArrowIcon} />
+        <ProductCarousel brand={brand} title="Best Sellers" ArrowIcon={icons.ArrowIcon} lead={template?.bestSellersLead} />
         <ReviewsSection
           ChevronIcon={icons.ChevronIcon}
           StarIcon={icons.StarIcon}

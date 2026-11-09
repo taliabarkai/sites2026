@@ -7,9 +7,9 @@ import type { PdpTemplate } from '../pdpTemplate'
  *
  * Opens on V5 (Jewelry): the finish (OAL's word for the metal) on the page;
  * then Personalize — how many initials (a carousel of text tiles, 1–5,
- * each after the first +$25), the initials typed in one field (exactly that
- * many letters, each one a piece on the chain in the preview) and the chain
- * length, stated (one size) — and Customize: the stone (a diamond by
+ * each after the first +$25), then each initial picked from its own row of
+ * square tiles (A–Z, ♥, ◆, &; each a piece on the chain in the preview) —
+ * and Customize: the stone (a diamond by
  * default — its size, then its shape — a gemstone: ruby, emerald or black
  * moissanite — or none; a stone adds $30), set between the initials or beside a single one,
  * then Add to bag. Initials come first: how many there are decides how many
@@ -32,7 +32,7 @@ export const oalInez: PdpTemplate = {
   // on the page (V2, V3) they all show here. V5, its default, has its own
   // tabs: flow.jewelrySteps.
   steps: [
-    { label: 'Personalize', hint: 'Initials & stone', fieldIds: [301, 307, 305, 306, 302, 310, 303, 311] },
+    { label: 'Personalize', hint: 'Initials & stone', fieldIds: [301, 307, 305, 302, 310, 303, 311] },
   ],
 
   fields: [
@@ -41,9 +41,10 @@ export const oalInez: PdpTemplate = {
       fieldId: 301, name: 'Select finish', cartName: 'Finish', type: 'selection', displayType: 'carousel', order: 1, isRequired: true,
       pricing: 'base', affectsPreview: true, defaultValueId: 'gold-vermeil',
       values: [
-        { id: 'sterling-silver', label: 'Sterling Silver', swatchColor: '#C9C9C9', priceLabel: '$129' },
-        { id: 'gold-vermeil',    label: 'Gold Vermeil',    swatchColor: '#E6C458', priceLabel: '$169' },
-        { id: 'rose-gold',       label: 'Rose Gold',       swatchColor: '#E8B4A0', priceLabel: '$169' },
+        // OAL's three metals, as solid swatches; no rose gold
+        { id: 'sterling-silver', label: 'Silver',           swatchColor: '#C8C8C8', priceLabel: '$129' },
+        { id: 'gold-vermeil',    label: '18K Gold Vermeil', swatchColor: '#E9DE8C', priceLabel: '$169' },
+        { id: 'solid-gold-10k',  label: '10K Solid Gold',   swatchColor: '#D5C484', priceLabel: '$389' }, // TODO: real price
       ],
     },
     {
@@ -61,18 +62,15 @@ export const oalInez: PdpTemplate = {
       ],
     },
     {
-      // The initials, in one field: letters only, in capitals, as many as
-      // chosen above
-      fieldId: 305, name: 'Your initials', cartName: 'Initials', type: 'text', displayType: 'text', order: 3, isRequired: true,
-      textMinLength: 1, textMaxLength: 5, placeholder: 'e.g. LBD', lettersOnly: true, uppercase: true, lengthFrom: 307,
+      // One initial per pick: a row of square tiles each (A–Z and a few
+      // symbols), as many rows as chosen above — "1st initial", "2nd initial"…
+      fieldId: 305, name: 'Initial', cartName: 'Initial', type: 'text', displayType: 'text', order: 3, isRequired: true,
+      textMinLength: 1, textMaxLength: 1,
+      letterChoices: [...'ABCDEFGHIJKLMNOPQRSTUVWXYZ', '♥', '◆', '&'],
+      repeat: { countFieldId: 307, min: 1, max: 5, labelPattern: '{nth} initial' },
       pricing: 'none', affectsPreview: true,
     },
-    {
-      // One size: stated, not asked
-      fieldId: 306, name: 'Chain length', cartName: 'Chain Length', type: 'selection', displayType: 'text', order: 4, isRequired: true,
-      pricing: 'none', affectsPreview: false, defaultValueId: 'one-size', fixed: true,
-      values: [{ id: 'one-size', label: 'One Size' }],
-    },
+    // No chain length: Inez comes in one size
     {
       // The stone set between the initials — each kind then shows its own choices
       fieldId: 302, name: 'Stone', cartName: 'Stone', type: 'selection', displayType: 'grid', order: 4, isRequired: true,
@@ -122,9 +120,9 @@ export const oalInez: PdpTemplate = {
     enabled: true,
     galleryPlacement: 'first',
     ribbon: 'Your Personalization',
-    // Before the shopper types: sample initials for the count chosen — 1: A,
+    // Before the shopper picks: sample initials for the count chosen — 1: A,
     // 2: OL, 3: OAL, 4: OAKL, 5: OAKLU
-    sampleText: { 305: ['A', 'OL', 'OAL', 'OAKL', 'OAKLU'] },
+    sampleByCount: { 305: ['A', 'OL', 'OAL', 'OAKL', 'OAKLU'] },
     engine: {
       kind: 'placeholder',
       spec: {
@@ -133,13 +131,13 @@ export const oalInez: PdpTemplate = {
           images: {
             'sterling-silver': '/images/oal/preview/inez-silver.png',
             'gold-vermeil':    '/images/oal/preview/inez-gold.png',
-            'rose-gold':       '/images/oal/preview/inez-rose.png',
+            'solid-gold-10k':  '/images/oal/preview/inez-10k.png',
           },
         },
         chain: { style: 'cable' },
         text: [
           {
-            // Strung on the drawn necklace: the box's top is the necklace's lowest point, its height the letters' size
+            // Strung on the drawn necklace (the initials joined, one piece per character): the box's top is the necklace's lowest point, its height the letters' size
             fieldId: 305, font: "'Cormorant Garamond', serif", box: { x: 0.14, y: 0.6, w: 0.72, h: 0.14 }, uppercase: true, perCharacter: true,
             // The stone on the chain between the initials (beside a single
             // one): the gemstone's picture, or the diamond's cut (scaled by
@@ -161,13 +159,16 @@ export const oalInez: PdpTemplate = {
     },
   },
 
+  // Its sister necklace leads the page's Best Sellers
+  bestSellersLead: [27],
+
   flow: {
     // V5 (Jewelry) unless the link names another version
     defaultPlacement: 'jewelry',
     // V5's tabs: Personalize first — the initials decide how many stones fit
     // between them — then Customize, the stone, and Add to bag
     jewelrySteps: [
-      { label: 'Personalize', fieldIds: [307, 305, 306] },
+      { label: 'Personalize', fieldIds: [307, 305] },
       { label: 'Customize',   fieldIds: [302, 310, 303, 311] },
     ],
     // Only the finish stays on the page above the CTA in V1 / V4: the stone goes

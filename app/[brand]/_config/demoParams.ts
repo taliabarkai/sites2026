@@ -320,6 +320,9 @@ export const PERSONALIZE_PLACEMENTS = [
   // then Customize (material, chain, add-ons) and Add to bag; a sheet on
   // mobile, the same tabs inline on desktop
   { value: 'jewelry',  label: 'V5', description: 'Jewelry', desktopNote: undefined },
+  // V6: V5 with the steps already open on desktop — no entry card, no Back;
+  // the gallery takes the live preview at the first pick. Mobile as V5.
+  { value: 'jewelry-open', label: 'V6', description: 'Jewelry – steps open on desktop', desktopNote: 'Mobile: same as V5' },
 ] as const
 
 export type PersonalizePlacement = (typeof PERSONALIZE_PLACEMENTS)[number]['value']

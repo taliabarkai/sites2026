@@ -3,12 +3,13 @@ import { lalMusicMemories } from './templates/lalMusicMemories'
 import { tgrClassicName } from './templates/tgrClassicName'
 import { tgrHeritageMultiName } from './templates/tgrHeritageMultiName'
 import { oalInez } from './templates/oalInez'
+import { oalInezHeartPremium } from './templates/oalInezHeartPremium'
 
 export * from './pdpTemplate'
 
 /** Every template the mockup knows, keyed by SKU — the same key Catalog 2.0 uses. */
 export const PDP_TEMPLATES: Record<string, PdpTemplate> = Object.fromEntries(
-  [lalMusicMemories, tgrClassicName, tgrHeritageMultiName, oalInez].map((t) => [t.sku, t]),
+  [lalMusicMemories, tgrClassicName, tgrHeritageMultiName, oalInez, oalInezHeartPremium].map((t) => [t.sku, t]),
 )
 
 export const templateBySku = (sku: string): PdpTemplate | undefined => PDP_TEMPLATES[sku]
