@@ -365,20 +365,24 @@ export function readPersonalizePlacement(params: ReadableParams, templateDefault
  * and their bag line carries the note below.
  */
 export const FREE_PREVIEW_PRODUCT_IDS = new Set([7])
-export const FREE_PREVIEW_CART_NOTE = 'FREE PREVIEW IN 24 HOURS'
+export const FREE_PREVIEW_CART_NOTE = 'Free preview in 24 hours'
+
+/** A cart note as shown today — free-preview notes saved under older copy
+ *  (e.g. "FREE PREVIEW IN 24 HOURS") show the current wording. */
+export const displayCartNote = (note: string): string =>
+  /free preview/i.test(note) ? FREE_PREVIEW_CART_NOTE : note
 
 export const isFreePreviewProduct = (brand: string, productId: number): boolean =>
   brand === 'lal' && FREE_PREVIEW_PRODUCT_IDS.has(productId)
 
 /**
  * How a bag line's note shows in the floating cart and on the bag page
- * (`?cartnote=v2`): V1 a beige tag above the item, V2 a theme ribbon over the
- * item's image, V3 the tag above the product name (floating cart; the bag page
- * keeps it above, as in V1). V1 by default.
+ * (`?cartnote=v2`): V1 a beige eye tag below the product name, V2 a theme
+ * ribbon over the item's image, V3 the tag above the product name. V1 by default.
  */
 export const CART_NOTE_PARAM = 'cartnote'
 export const CART_NOTE_VARIANTS = [
-  { value: 'v1', label: 'V1 – Line above item' },
+  { value: 'v1', label: 'V1 – Tag below product name' },
   { value: 'v2', label: 'V2 – Ribbon on image' },
   { value: 'v3', label: 'V3 – Tag above product name' },
 ] as const

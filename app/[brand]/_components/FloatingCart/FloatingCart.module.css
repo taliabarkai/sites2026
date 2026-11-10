@@ -217,7 +217,8 @@
   width: 100%;
 }
 
-/* V3: the tag heads the copy, so image and copy both start at the top */
+/* Items with a free-preview tag (V1, V3): the copy outgrows the image, so image
+   and copy both start at the top */
 .itemMainTop {
   align-items: flex-start;
 }
@@ -236,18 +237,16 @@
   white-space: nowrap;
 }
 
-/* Item-bound promise (V1) — same type as the Christmas line, as a beige tag
-   with the text color, like the free-preview strip on the PDP */
+/* Item-bound promise (V1 under the product name, V3 above it) — same type as
+   the Christmas line, as a beige tag led by an eye icon, sized to its text */
 .itemNote {
-  padding: var(--spacing-xxxs) var(--spacing-xxs);
+  align-self: flex-start;
+  gap: var(--spacing-xxs);
+  padding: var(--spacing-xxxs) var(--spacing-xs) var(--spacing-xxxs) var(--spacing-xxs);
   background: var(--colors-surface-secondary);
   color: var(--colors-text);
   border-radius: var(--radius-sm);
-}
-
-/* V3: the tag above the product name, sized to its text */
-.itemNoteInBody {
-  align-self: flex-start;
+  white-space: normal;
 }
 
 /* V2: the same promise as a theme ribbon over the item's image, top left */

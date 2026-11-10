@@ -11,7 +11,7 @@ import * as ibIcons from '@/src/components/icons/ib'
 import { getBrandFromPathname } from '../../_config/brands'
 import { FlowControls } from './FlowControls'
 import { getBrandFeatures, getFlowConfig } from '../../_config/flow'
-import { readFlow, readWarrantyVariant, readCartNoteVariant, type CartNoteVariant } from '../../_config/demoParams'
+import { readFlow, readWarrantyVariant, readCartNoteVariant, displayCartNote, type CartNoteVariant } from '../../_config/demoParams'
 import type { BrandKey } from '../../_config/brands'
 import { Button } from '../Button'
 import { StarRating } from '../StarRating'
@@ -106,6 +106,20 @@ const PLAN_PRICE = `$${(WARRANTY_CENTS / 100).toFixed(0)}`
 
 function CartItemRow({ item, showGuarantee, brand, onRemove, onEdit, onNavigate, DropdownIcon, hasPlan, showWarranty, onTogglePlan, onOpenCarePlan, ratingAbove, onToggleRatingPosition, planVariant, cartNoteVariant }: CartItemRowProps) {
   const [detailsOpen, setDetailsOpen] = useState(false)
+  // Opening View Details grows the copy column; the image (centred against the
+  // copy) would slide down with it. Pin it where it sat before opening.
+  const imageRef = useRef<HTMLAnchorElement>(null)
+  const [imagePinTop, setImagePinTop] = useState<number | null>(null)
+  const toggleDetails = () => {
+    if (!detailsOpen) {
+      const img = imageRef.current
+      const row = img?.parentElement
+      if (img && row) setImagePinTop(img.getBoundingClientRect().top - row.getBoundingClientRect().top)
+    } else {
+      setImagePinTop(null)
+    }
+    setDetailsOpen(o => !o)
+  }
   const [confirmRemove, setConfirmRemove] = useState(false)
   const hasOptions = item.selectedOptions && item.selectedOptions.length > 0
   const { CheckboxIcon, CheckmarkIcon } = BRAND_ICONS[brand]
@@ -155,20 +169,32 @@ function CartItemRow({ item, showGuarantee, brand, onRemove, onEdit, onNavigate,
     </Link>
   )
 
+  // A promise bound to this item (e.g. LAL Royal Romance's free preview), as a
+  // beige tag led by an open eye. EyeOpenIcon is LAL-only, like the note itself.
+  const { EyeOpenIcon } = BRAND_ICONS[brand] as { EyeOpenIcon?: React.ComponentType<{ size?: number }> }
+  const noteTag = item.cartNote && (
+    <p className={`${styles.deliveryGuarantee} ${styles.itemNote}`}>
+      {EyeOpenIcon && <EyeOpenIcon size={16} />}
+      {displayCartNote(item.cartNote)}
+    </p>
+  )
+
   return (
     <article className={styles.item}>
       {/* Delivery guarantee — only on the 2nd standalone main item (companions excluded) */}
       {showGuarantee && (
         <p className={styles.deliveryGuarantee}>Guaranteed to arrive by Christmas</p>
       )}
-      {/* A promise bound to this item (e.g. LAL Royal Romance's free preview) */}
-      {item.cartNote && cartNoteVariant === 'v1' && (
-        <p className={`${styles.deliveryGuarantee} ${styles.itemNote}`}>{item.cartNote}</p>
-      )}
-      {/* V3 hangs the copy from the top (the tag heads it), so the image
-          aligns to the top too rather than centring against it */}
-      <div className={`${styles.itemMain} ${item.cartNote && cartNoteVariant === 'v3' ? styles.itemMainTop : ''}`}>
-        <Link href={itemHref} className={styles.itemImageWrap} onClick={onNavigate}>
+      {/* With a tag (V1, V3) the copy outgrows the image, so it hangs from the top
+          and the image aligns to the top too rather than centring against it */}
+      <div className={`${styles.itemMain} ${item.cartNote && cartNoteVariant !== 'v2' ? styles.itemMainTop : ''}`}>
+        <Link
+          ref={imageRef}
+          href={itemHref}
+          className={styles.itemImageWrap}
+          onClick={onNavigate}
+          style={imagePinTop != null ? { alignSelf: 'flex-start', marginTop: imagePinTop } : undefined}
+        >
           <img
             src={item.image}
             alt={item.name}
@@ -176,15 +202,13 @@ function CartItemRow({ item, showGuarantee, brand, onRemove, onEdit, onNavigate,
           />
           {/* V2: the item's note as a theme ribbon over its image */}
           {item.cartNote && cartNoteVariant === 'v2' && (
-            <span className={styles.itemNoteRibbon}>{item.cartNote}</span>
+            <span className={styles.itemNoteRibbon}>{displayCartNote(item.cartNote)}</span>
           )}
         </Link>
 
         <div className={styles.itemBody}>
           {/* V3: the item's note as a tag above the product name */}
-          {item.cartNote && cartNoteVariant === 'v3' && (
-            <p className={`${styles.deliveryGuarantee} ${styles.itemNote} ${styles.itemNoteInBody}`}>{item.cartNote}</p>
-          )}
+          {cartNoteVariant === 'v3' && noteTag}
           {/* The price always sits at the row's right edge; the stars swap between
               sharing that row (above the name) and sitting under the name. */}
           {ratingAbove ? (
@@ -194,6 +218,8 @@ function CartItemRow({ item, showGuarantee, brand, onRemove, onEdit, onNavigate,
                 {priceRow}
               </div>
               {productName(false)}
+              {/* V1: the item's note as a tag right under the product name */}
+              {cartNoteVariant === 'v1' && noteTag}
             </>
           ) : (
             <>
@@ -201,6 +227,7 @@ function CartItemRow({ item, showGuarantee, brand, onRemove, onEdit, onNavigate,
                 {productName(true)}
                 {priceRow}
               </div>
+              {cartNoteVariant === 'v1' && noteTag}
               {stars}
             </>
           )}
@@ -211,7 +238,7 @@ function CartItemRow({ item, showGuarantee, brand, onRemove, onEdit, onNavigate,
                 type="button"
                 className={styles.detailsToggle}
                 aria-expanded={detailsOpen}
-                onClick={() => setDetailsOpen(o => !o)}
+                onClick={toggleDetails}
               >
                 View Details{' '}
                 <span style={{ display: 'inline-flex', transform: detailsOpen ? 'rotate(-90deg)' : 'rotate(90deg)', transition: 'transform var(--transition-fast)' }}>

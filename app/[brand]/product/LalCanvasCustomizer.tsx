@@ -35,6 +35,7 @@ interface CustomizerIcons {
   RotateIcon: IconCmp
   RevisionsIcon?: IconCmp   // LAL-only icon; optional so the shared BRAND_ICONS type still satisfies
   ShieldIcon?: IconCmp      // LAL-only icon (free-preview USP strip); optional for the same reason
+  EyeOpenIcon?: IconCmp     // LAL-only open eye — leads the free-preview message, as on the cart tag
   AiSparkleIcon?: IconCmp   // LAL-only icon; optional for the same reason
 }
 
@@ -235,14 +236,14 @@ export function LalCanvasCustomizer({ brand, product, icons, items, previewId, n
   const {
     ChevronIcon, StarIcon, FileUploadIcon, XIcon, ShippingIcon,
     MapPinIcon, PersonIcon, ClipboardCopyIcon, RevisionsIcon,
-    EnvelopeIcon, RotateIcon, ShieldIcon,
+    EnvelopeIcon, RotateIcon, ShieldIcon, EyeOpenIcon,
   } = icons
   const RevisionsGlyph = RevisionsIcon ?? ClipboardCopyIcon
 
   // Free-preview products: the three promises, and how the demo shows them
   const uspStyle = readUspStripStyle(useSearchParams())
   const uspMessages: UspMessage[] = [
-    { Icon: EnvelopeIcon, lead: 'Free preview', rest: 'in 24 hours' },
+    { Icon: EyeOpenIcon ?? EnvelopeIcon, lead: 'Free preview', rest: 'in 24 hours' },
     { Icon: RotateIcon,   lead: 'Unlimited revisions' },
     { Icon: ShieldIcon,   lead: 'Money back', rest: 'if preview not approved' },
   ]

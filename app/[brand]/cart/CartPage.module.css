@@ -208,9 +208,12 @@
    16px margin alone rather than that stacked on the row's 32px inset. */
 /* Item-bound promise ("Free Preview in 24 HOURS") — the floating cart's line */
 .itemNote {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xxs);
   align-self: flex-start;
-  margin: 0 0 var(--spacing-xxxs);
-  padding: var(--spacing-xxxs) var(--spacing-xxs);
+  margin: 0;
+  padding: var(--spacing-xxxs) var(--spacing-xs) var(--spacing-xxxs) var(--spacing-xxs);
   background: var(--colors-surface-secondary);
   color: var(--colors-text);
   border-radius: var(--radius-sm);

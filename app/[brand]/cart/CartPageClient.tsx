@@ -22,7 +22,7 @@ import { GiftingDrawer } from '../_components/cart/GiftingOptions/GiftingDrawer'
 import { GiftPanel } from '../_components/cart/GiftingV2/GiftPanel'
 import { getGiftOptions } from '../_config/giftOptions'
 import { BRAND_GIFT_CONFIG, type BrandKey } from '../_config/brands'
-import { readFlow, readGiftingVariant, readCartNoteVariant, type CartNoteVariant } from '../_config/demoParams'
+import { readFlow, readGiftingVariant, readCartNoteVariant, displayCartNote, type CartNoteVariant } from '../_config/demoParams'
 import { getBrandFeatures, getFlowConfig } from '../_config/flow'
 import { Header } from '../_components/Header'
 import { CheckoutFooter } from '../_components/CheckoutFooter'
@@ -55,6 +55,8 @@ interface BrandIcons {
   XIcon:         React.ComponentType<IconProps>
   AiMagicIcon:   React.ComponentType<IconProps>
   WarningIcon:   React.ComponentType<IconProps>
+  /* LAL only — leads the free-preview tag on a cart item. */
+  EyeOpenIcon?:  React.ComponentType<IconProps>
 }
 
 const BRAND_ICONS: Record<string, BrandIcons> = {
@@ -277,7 +279,16 @@ function CartItemRow({ item, onRemove, icons, giftOptions, designs, onSelectGift
   )
 
   const hasOptions = item.selectedOptions && item.selectedOptions.length > 0
-  const { TrashCanIcon, ChevronIcon } = icons
+  const { TrashCanIcon, ChevronIcon, EyeOpenIcon } = icons
+
+  // A promise bound to this item (e.g. LAL Royal Romance's free preview), as a
+  // beige tag led by an open eye. EyeOpenIcon is LAL-only, like the note itself.
+  const noteTag = item.cartNote && (
+    <p className={styles.itemNote}>
+      {EyeOpenIcon && <EyeOpenIcon size={16} />}
+      {displayCartNote(item.cartNote)}
+    </p>
+  )
 
   return (
     <article className={styles.cartItem}>
@@ -285,14 +296,14 @@ function CartItemRow({ item, onRemove, icons, giftOptions, designs, onSelectGift
         // V2: the item's note as a theme ribbon over its image
         <div className={styles.itemImageNoteWrap}>
           <img src={item.image} alt={item.name} className={styles.itemImage} />
-          <span className={styles.itemNoteRibbon}>{item.cartNote}</span>
+          <span className={styles.itemNoteRibbon}>{displayCartNote(item.cartNote)}</span>
         </div>
       ) : (
         <img src={item.image} alt={item.name} className={styles.itemImage} />
       )}
       <div className={styles.itemContent}>
-        {/* A promise bound to this item (e.g. LAL Royal Romance's free preview) — V1 and V3: a tag above it */}
-        {item.cartNote && cartNoteVariant !== 'v2' && <p className={styles.itemNote}>{item.cartNote}</p>}
+        {/* V3: the item's note as a tag above the product name */}
+        {cartNoteVariant === 'v3' && noteTag}
         <div className={styles.itemTopRow}>
           <p className={styles.itemName}>{item.name}</p>
           <div className={styles.itemActions}>
@@ -312,6 +323,9 @@ function CartItemRow({ item, onRemove, icons, giftOptions, designs, onSelectGift
             </button>
           </div>
         </div>
+
+        {/* V1: the item's note as a tag under the product name */}
+        {cartNoteVariant === 'v1' && noteTag}
 
         <div className={styles.itemPrices}>
           {item.originalPrice && (
