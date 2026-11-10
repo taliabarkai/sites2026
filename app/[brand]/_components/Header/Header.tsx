@@ -184,8 +184,9 @@ export function Header({
   // The free-preview bag note's V1/V2 — on its product's page, and on the bag
   // page while a line in the bag carries a note
   const isFreePreviewPdp = !!productIdMatch && isFreePreviewProduct(brandSegment, Number(productIdMatch[1]))
-  const showCartNoteToggle = isFreePreviewPdp || (isCartPage && items.some(it => it.cartNote))
-  const demoControls = isCheckout || isCartPage || showTrackOrderToggle || isNestedDrawerDemo || pdpTemplate || showCartNoteToggle || isFinalPreview ? (
+  // The floating cart carries its own Cart note toggle; the header keeps one only on the bag page
+  const showCartNoteToggle = isCartPage && items.some(it => it.cartNote)
+  const demoControls = isCheckout || isCartPage || showTrackOrderToggle || isNestedDrawerDemo || pdpTemplate || showCartNoteToggle || isFreePreviewPdp || isFinalPreview ? (
     <>
       {/* The phases only reach the cart and checkout. Track My Order and the
           nested items Drawer product each get only their own controls. */}

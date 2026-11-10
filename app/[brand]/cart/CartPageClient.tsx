@@ -284,7 +284,7 @@ function CartItemRow({ item, onRemove, icons, giftOptions, designs, onSelectGift
   // A promise bound to this item (e.g. LAL Royal Romance's free preview), as a
   // beige tag led by an open eye. EyeOpenIcon is LAL-only, like the note itself.
   const noteTag = item.cartNote && (
-    <p className={styles.itemNote}>
+    <p className={`${styles.itemNote} ${cartNoteVariant === 'v3' ? styles.itemNoteFlush : ''}`}>
       {EyeOpenIcon && <EyeOpenIcon size={16} />}
       {displayCartNote(item.cartNote)}
     </p>

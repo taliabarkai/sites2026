@@ -6,9 +6,10 @@ import { Dropdown } from './CartSizeToggle'
 import styles from './Header.module.css'
 
 /**
- * Demo control for the free-preview bag note: V1 a line above the item, V2 a
- * ribbon over its image (`?cartnote=v2`). The floating cart's "View Bag"
- * carries the URL along, so the bag page shows the same version.
+ * Demo control for the free-preview bag note (`?cartnote=v2`, see
+ * CART_NOTE_VARIANTS). Sits in the floating cart's header, and in the site
+ * header on the bag page; "View Bag" carries the URL along, so the bag page
+ * shows the same version.
  */
 export function CartNoteToggle({ className }: { className?: string }) {
   const router       = useRouter()

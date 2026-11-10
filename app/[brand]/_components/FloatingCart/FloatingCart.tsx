@@ -10,6 +10,8 @@ import * as lalIcons from '@/src/components/icons/lal'
 import * as ibIcons from '@/src/components/icons/ib'
 import { getBrandFromPathname } from '../../_config/brands'
 import { FlowControls } from './FlowControls'
+import { CartNoteToggle } from '../Header/CartNoteToggle'
+import headerStyles from '../Header/Header.module.css'
 import { getBrandFeatures, getFlowConfig } from '../../_config/flow'
 import { readFlow, readWarrantyVariant, readCartNoteVariant, displayCartNote, type CartNoteVariant } from '../../_config/demoParams'
 import type { BrandKey } from '../../_config/brands'
@@ -108,7 +110,7 @@ function CartItemRow({ item, showGuarantee, brand, onRemove, onEdit, onNavigate,
   const [detailsOpen, setDetailsOpen] = useState(false)
   // Opening View Details grows the copy column; the image (centred against the
   // copy) would slide down with it. Pin it where it sat before opening.
-  const imageRef = useRef<HTMLAnchorElement>(null)
+  const imageRef = useRef<HTMLDivElement>(null)
   const [imagePinTop, setImagePinTop] = useState<number | null>(null)
   const toggleDetails = () => {
     if (!detailsOpen) {
@@ -173,7 +175,7 @@ function CartItemRow({ item, showGuarantee, brand, onRemove, onEdit, onNavigate,
   // beige tag led by an open eye. EyeOpenIcon is LAL-only, like the note itself.
   const { EyeOpenIcon } = BRAND_ICONS[brand] as { EyeOpenIcon?: React.ComponentType<{ size?: number }> }
   const noteTag = item.cartNote && (
-    <p className={`${styles.deliveryGuarantee} ${styles.itemNote}`}>
+    <p className={`${styles.deliveryGuarantee} ${styles.itemNote} ${cartNoteVariant === 'v3' ? styles.itemNoteFlush : ''}`}>
       {EyeOpenIcon && <EyeOpenIcon size={16} />}
       {displayCartNote(item.cartNote)}
     </p>
@@ -188,13 +190,13 @@ function CartItemRow({ item, showGuarantee, brand, onRemove, onEdit, onNavigate,
       {/* With a tag (V1, V3) the copy outgrows the image, so it hangs from the top
           and the image aligns to the top too rather than centring against it */}
       <div className={`${styles.itemMain} ${item.cartNote && cartNoteVariant !== 'v2' ? styles.itemMainTop : ''}`}>
-        <Link
+        {/* The image's column — what View Details pins in place */}
+        <div
           ref={imageRef}
-          href={itemHref}
-          className={styles.itemImageWrap}
-          onClick={onNavigate}
+          className={styles.itemMedia}
           style={imagePinTop != null ? { alignSelf: 'flex-start', marginTop: imagePinTop } : undefined}
         >
+        <Link href={itemHref} className={styles.itemImageWrap} onClick={onNavigate}>
           <img
             src={item.image}
             alt={item.name}
@@ -205,6 +207,7 @@ function CartItemRow({ item, showGuarantee, brand, onRemove, onEdit, onNavigate,
             <span className={styles.itemNoteRibbon}>{displayCartNote(item.cartNote)}</span>
           )}
         </Link>
+        </div>
 
         <div className={styles.itemBody}>
           {/* V3: the item's note as a tag above the product name */}
@@ -489,6 +492,8 @@ export function FloatingCart({
           <div className={styles.headerActions}>
             {/* Presenter control: the flow first, its settings folded under it. */}
             <FlowControls brand={brand} onNavigate={onClose} />
+            {/* Presenter control for the free-preview tag — only while a bag item carries one */}
+            {items.some(it => it.cartNote) && <CartNoteToggle className={headerStyles.cartSizeToggle} />}
 
             <button
               type="button"
