@@ -132,6 +132,10 @@
   --personalize-fill-start: var(--colors-surface-secondary);
   --personalize-fill-end:   var(--colors-surface-primary);
   --personalize-border:     var(--colors-text-secondary);
+  /* The "Your Personalization" badge: a solid fill (its green), white text and icon, title case */
+  --personalize-ribbon-background:     var(--ribbon-background);
+  --personalize-ribbon-text:           var(--ribbon-text);
+  --personalize-ribbon-text-transform: none;
 
   --related-category-hover-text:  var(--colors-text-inverse);
 

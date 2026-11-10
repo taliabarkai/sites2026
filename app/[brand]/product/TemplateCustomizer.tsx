@@ -359,18 +359,6 @@ export function TemplateCustomizer({
     setStarted(true)
     scrollUpOnOpen.current = !isMobile
   }
-  // Desktop, steps open: the page's layout learns the steps' height
-  // (--steps-height), which holds the gallery's preview pinned beside them
-  useEffect(() => {
-    const el = rootRef.current
-    const layout = el?.parentElement
-    if (!cardOpen || !el || !layout) return
-    const sync = () => layout.style.setProperty('--steps-height', `${el.offsetHeight}px`)
-    sync()
-    const ro = new ResizeObserver(sync)
-    ro.observe(el)
-    return () => { ro.disconnect(); layout.style.removeProperty('--steps-height') }
-  }, [cardOpen])
   // …once the page has re-laid itself out for the open steps: a smooth
   // scroll started in the same frame as that change is cancelled by it
   useEffect(() => {
@@ -460,18 +448,37 @@ export function TemplateCustomizer({
   // necklace — the panel's own preview follows the typing, the gallery (and
   // its badge) take the new one when the panel closes (Save)
   const galleryFrozen = (rowMode || tapMode || jewelry) && entered && isMobile
+  // V4 has no Save: the shopper's own name counts as soon as the panel closes on it
+  // Desktop, while the card is open: the gallery beside it is the preview, so it follows the typing
+  const live = buyInPanel || !isMobile || !(rowMode || tapMode)
+  // Desktop, steps open (the live preview mode): the gallery leads with the
+  // preview from the start — the sample (Inez: "A") until the shopper types
+  // V6 (steps open from the start): the photo leads until the first pick
+  const hasSample = !!(livePreview.sampleText || livePreview.sampleByCount)
+  const sampleShown = hasSample && ((cardOpen && (!openOnPage || interacted)) || (previewOnFirstPick && inline && interacted))
+  const previewEntered = live ? hasText || sampleShown : isSaved
   useEffect(() => {
     if (galleryFrozen) return
-    // V4 has no Save: the shopper's own name counts as soon as the panel closes on it
-    // Desktop, while the card is open: the gallery beside it is the preview, so it follows the typing
-    const live = buyInPanel || !isMobile || !(rowMode || tapMode)
-    // Desktop, steps open (the live preview mode): the gallery leads with the
-    // preview from the start — the sample (Inez: "A") until the shopper types
-    // V6 (steps open from the start): the photo leads until the first pick
-    const hasSample = !!(livePreview.sampleText || livePreview.sampleByCount)
-    const sampleShown = hasSample && ((cardOpen && (!openOnPage || interacted)) || (previewOnFirstPick && inline && interacted))
-    onPersonalizedChange?.(live ? hasText || sampleShown : isSaved)
-  }, [rowMode, tapMode, buyInPanel, isMobile, entered, isSaved, hasText, onPersonalizedChange, galleryFrozen, cardOpen, openOnPage, interacted, inline, previewOnFirstPick, livePreview.sampleText, livePreview.sampleByCount])
+    onPersonalizedChange?.(previewEntered)
+  }, [previewEntered, onPersonalizedChange, galleryFrozen])
+
+  // Desktop, the steps open — or, on the final live preview, the preview
+  // entered with every field on the page: the column stops being pinned and
+  // scrolls with the page (a long form stays reachable), while the gallery
+  // pins its first image, the preview, beside it
+  const unpinned = cardOpen || (previewOnFirstPick && inline && !isMobile && previewEntered)
+  // …the page's layout learning the column's height (--steps-height), which
+  // holds the preview pinned for as long as the column runs
+  useEffect(() => {
+    const el = rootRef.current
+    const layout = el?.parentElement
+    if (!unpinned || !el || !layout) return
+    const sync = () => layout.style.setProperty('--steps-height', `${el.offsetHeight}px`)
+    sync()
+    const ro = new ResizeObserver(sync)
+    ro.observe(el)
+    return () => { ro.disconnect(); layout.style.removeProperty('--steps-height') }
+  }, [unpinned])
   const engine = livePreview.engine
 
   const [preview, setPreview] = useState<string | null>(null)
@@ -840,7 +847,7 @@ export function TemplateCustomizer({
   // Desktop: while the steps are open the column is no longer pinned, so a
   // tall Customize step scrolls with the page instead of running off the window
   return (
-    <section ref={rootRef} id="buy-box" className={`${pdp.formPanel} ${cardOpen ? pdp.formPanelUnpinned : ''}`} aria-label="Product options">
+    <section ref={rootRef} id="buy-box" className={`${pdp.formPanel} ${unpinned ? pdp.formPanelUnpinned : ''}`} aria-label="Product options">
       {/* Header — title, live price, rating; above the gallery when given a slot (V2) */}
       {headerSlot ? createPortal(header, headerSlot) : header}
 

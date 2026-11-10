@@ -1928,7 +1928,8 @@
      it stays the size of the other ribbons */
   padding: calc(var(--spacing-xxs) - var(--border-width)) calc(var(--spacing-sm) - var(--border-width));
   border: var(--border-width) solid transparent;
-  background:
+  /* A theme can give it a solid fill of its own (IB green, MYKA black) */
+  background: var(--personalize-ribbon-background,
     linear-gradient(90deg,
       color-mix(in srgb, var(--personalize-fill-start) 60%, var(--colors-background)),
       var(--colors-background) 55%,
@@ -1936,8 +1937,10 @@
     linear-gradient(90deg,
       var(--personalize-border),
       color-mix(in srgb, var(--personalize-border) 30%, var(--colors-background)) 55%,
-      var(--personalize-border)) border-box;
-  color: var(--colors-text);
+      var(--personalize-border)) border-box);
+  color: var(--personalize-ribbon-text, var(--colors-text));
+  /* …and its own casing (IB and MYKA: title case, "Your Personalization") */
+  text-transform: var(--personalize-ribbon-text-transform, var(--typography-rules-ribbons1-text-transform, none));
 }
 
 /* The 20px icon hangs into the padding, so this badge keeps the others' height */

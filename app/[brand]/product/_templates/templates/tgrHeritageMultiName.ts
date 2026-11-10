@@ -36,6 +36,8 @@ export const tgrHeritageMultiName: PdpTemplate = {
   // …where each name left empty shows the next of these in the preview
   finalPreviewSampleText: { 204: ['Julie', 'Samantha', 'John', 'Amanda', 'Emma'] },
   finalPreviewFields: {
+    // No "?" tooltip beside the diamond size
+    202: { tooltip: undefined },
     203: { note: { text: 'Names are placed from left to right' } },
   },
 

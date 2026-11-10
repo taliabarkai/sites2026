@@ -155,6 +155,10 @@
   --personalize-fill-start: var(--colors-surface-secondary);
   --personalize-fill-end:   var(--colors-surface-primary);
   --personalize-border:     var(--colors-text-secondary);
+  /* The "Your Personalization" badge: dune yellow, black text and icon, title case */
+  --personalize-ribbon-background:     var(--mnn-dune-yellow);
+  --personalize-ribbon-text:           var(--mnn-black);
+  --personalize-ribbon-text-transform: none;
 
   --related-category-hover-text:  var(--colors-text-inverse);
 
