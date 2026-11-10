@@ -5,7 +5,12 @@ import Link from 'next/link'
 import type { CartItem } from '../_context/CartContext'
 import type { ProductItem } from '../../../data/products'
 import lalLoader from '@/src/assets/icons/lal/LAL.gif'
+import { useSearchParams } from 'next/navigation'
 import { RevisionsNotice } from '../_components/RevisionsNotice'
+import { UspTicker, type UspMessage } from '../_components/UspTicker'
+// Free-preview products (Royal Romance, 7): the strip replaces the revisions
+// card, the CTA adds straight to the bag, and the bag line carries a note
+import { FREE_PREVIEW_PRODUCT_IDS, FREE_PREVIEW_CART_NOTE, readUspStripStyle } from '../_config/demoParams'
 import { useNestedItems } from '../_components/NestedItems/useNestedItems'
 import type { NestedItemsDisplay } from '../_components/NestedItems'
 import type { QuickAddProduct } from '../_components/QuickAddPanel'
@@ -26,7 +31,10 @@ interface CustomizerIcons {
   MapPinIcon: IconCmp
   PersonIcon: IconCmp
   ClipboardCopyIcon: IconCmp
+  EnvelopeIcon: IconCmp
+  RotateIcon: IconCmp
   RevisionsIcon?: IconCmp   // LAL-only icon; optional so the shared BRAND_ICONS type still satisfies
+  ShieldIcon?: IconCmp      // LAL-only icon (free-preview USP strip); optional for the same reason
   AiSparkleIcon?: IconCmp   // LAL-only icon; optional for the same reason
 }
 
@@ -81,6 +89,19 @@ const SIZES: SizeOption[] = [
 ]
 
 const ACCEPTED_TYPES = '.jpg,.jpeg,.png,.webp'
+
+// ─── Photo count (single / multiple) ─────────────────────────────────────────
+// Products that ask how many photos the customer will upload before the upload
+// step, so a multi-photo portrait can be priced above a single-photo one.
+const PHOTO_COUNT_PRODUCT_IDS = new Set([7])
+type PhotoMode = 'single' | 'multiple'
+/** Placeholder upcharge for painting from several photos — set the real price here. */
+const MULTI_PHOTO_UPCHARGE_CENTS = 2000
+const MULTI_PHOTO_MAX = 10
+const PHOTO_MODES: { key: PhotoMode; title: string; image: string }[] = [
+  { key: 'single',   title: 'Single Photo',    image: '/images/lal/photo-count-single.svg' },
+  { key: 'multiple', title: 'Multiple Photos', image: '/images/lal/photo-count-multiple.svg' },
+]
 
 // LAL products carry no rating data — show a consistent canvas rating.
 
@@ -214,8 +235,17 @@ export function LalCanvasCustomizer({ brand, product, icons, items, previewId, n
   const {
     ChevronIcon, StarIcon, FileUploadIcon, XIcon, ShippingIcon,
     MapPinIcon, PersonIcon, ClipboardCopyIcon, RevisionsIcon,
+    EnvelopeIcon, RotateIcon, ShieldIcon,
   } = icons
   const RevisionsGlyph = RevisionsIcon ?? ClipboardCopyIcon
+
+  // Free-preview products: the three promises, and how the demo shows them
+  const uspStyle = readUspStripStyle(useSearchParams())
+  const uspMessages: UspMessage[] = [
+    { Icon: EnvelopeIcon, lead: 'Free preview', rest: 'in 24 hours' },
+    { Icon: RotateIcon,   lead: 'Unlimited revisions' },
+    { Icon: ShieldIcon,   lead: 'Money back', rest: 'if preview not approved' },
+  ]
 
   // Nested Items — companion products staged above the Subtotal.
   const nested = useNestedItems(brand, nestedItems, undefined, { display: nestedDisplay, description: nestedDescription })
@@ -229,6 +259,13 @@ export function LalCanvasCustomizer({ brand, product, icons, items, previewId, n
   const [photoError, setPhotoError] = useState(false)
   const [modalOpen, setModalOpen] = useState(false)
   const [previewGenerated, setPreviewGenerated] = useState(false)
+  const freePreview = FREE_PREVIEW_PRODUCT_IDS.has(product.id)
+  const askPhotoCount = PHOTO_COUNT_PRODUCT_IDS.has(product.id)
+  const [photoMode, setPhotoMode] = useState<PhotoMode>('single')
+  /** How many photos the customer picked (multiple mode; the first drives the preview). */
+  const [photoCount, setPhotoCount] = useState(0)
+  const [firstPhotoName, setFirstPhotoName] = useState('')
+  const multiplePhotos = askPhotoCount && photoMode === 'multiple'
 
   const fileInputRef  = useRef<HTMLInputElement>(null)
   const sectionRef    = useRef<HTMLElement>(null)
@@ -271,16 +308,29 @@ export function LalCanvasCustomizer({ brand, product, icons, items, previewId, n
 
   const selectedSize  = SIZES.find(s => s.key === sizeKey) ?? SIZES[0]
   const selectedFrame = FRAME_COLORS.find(f => f.key === frameKey) ?? FRAME_COLORS[0]
-  const currentPrice  = selectedSize.priceInCents
+  const currentPrice  = selectedSize.priceInCents + (multiplePhotos ? MULTI_PHOTO_UPCHARGE_CENTS : 0)
+
+  // Switching to single keeps only the first photo; the input re-opens with the
+  // right `multiple` setting next time either way
+  const handlePhotoMode = (mode: PhotoMode) => {
+    setPhotoMode(mode)
+    if (mode === 'single' && photoCount > 1) {
+      setPhotoCount(1)
+      setPhotoName(firstPhotoName)
+    }
+  }
 
   const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
+    const files = Array.from(e.target.files ?? []).slice(0, multiplePhotos ? MULTI_PHOTO_MAX : 1)
+    const file = files[0]
     if (!file) return
+    setPhotoCount(files.length)
+    setFirstPhotoName(file.name)
     // Read as a data URL so the photo survives navigation/restore from the cart
     const reader = new FileReader()
     reader.onload = () => {
       setPhotoUrl(typeof reader.result === 'string' ? reader.result : null)
-      setPhotoName(file.name)
+      setPhotoName(files.length > 1 ? `${files.length} photos selected` : file.name)
       setPhotoError(false)
       setPreviewGenerated(false) // new photo → previous preview is stale
     }
@@ -290,6 +340,7 @@ export function LalCanvasCustomizer({ brand, product, icons, items, previewId, n
   const handleRemovePhoto = () => {
     setPhotoUrl(null)
     setPhotoName('')
+    setPhotoCount(0)
     setPreviewGenerated(false)
     if (fileInputRef.current) fileInputRef.current.value = ''
   }
@@ -310,7 +361,9 @@ export function LalCanvasCustomizer({ brand, product, icons, items, previewId, n
       { label: 'Size', value: selectedSize.key },
       ...(l1 ? [{ label: 'First Line', value: l1 }] : []),
       ...(l2 ? [{ label: 'Second Line', value: l2 }] : []),
-      ...(photoName ? [{ label: 'Photo', value: photoName }] : []),
+      ...(askPhotoCount ? [{ label: 'Photos', value: multiplePhotos ? `Multiple${photoCount ? ` (${photoCount})` : ''}` : 'Single' }] : []),
+      // Several photos are counted on the Photos line above, not named one by one
+      ...(photoName && photoCount <= 1 ? [{ label: 'Photo', value: photoName }] : []),
     ]
 
     // Composite the full framed canvas for the cart thumbnail (fall back to raw photo)
@@ -331,6 +384,7 @@ export function LalCanvasCustomizer({ brand, product, icons, items, previewId, n
       rating: productRating,
       reviewCount: productReviewCount,
       selectedOptions,
+      cartNote: FREE_PREVIEW_PRODUCT_IDS.has(product.id) ? FREE_PREVIEW_CART_NOTE : undefined,
       canvasConfig: photoUrl
         ? { productId: product.id, photo: photoUrl, photoName, frameKey, sizeKey, persOn: true, line1: l1, line2: l2 }
         : undefined,
@@ -384,13 +438,57 @@ export function LalCanvasCustomizer({ brand, product, icons, items, previewId, n
           >{productReviewCount} Reviews</a>
         </div>
 
-        {/* Unlimited Revisions info card — above the header divider */}
-        <RevisionsNotice icon={<RevisionsGlyph size={24} />} />
+        {/* Unlimited Revisions info card — above the header divider
+            (free-preview products show the preview strip in its place) */}
+        {FREE_PREVIEW_PRODUCT_IDS.has(product.id) && uspStyle !== 'static' ? (
+          <UspTicker messages={uspMessages} mode={uspStyle} intervalMs={3000} dots={false} />
+        ) : FREE_PREVIEW_PRODUCT_IDS.has(product.id) ? (
+          <img
+            src="/images/lal/free-preview-strip-24h.svg"
+            alt="Free preview in 24 hours · Unlimited revisions · Money back if preview not approved"
+            className={styles.previewStrip}
+          />
+        ) : (
+          <RevisionsNotice icon={<RevisionsGlyph size={24} />} />
+        )}
       </div>
+
+      {/* Number of photos — priced apart: one photo, or several painted together */}
+      {askPhotoCount && (
+        <div className={styles.step}>
+          {/* The title, and one line pointing to the other choice */}
+          <div className={styles.photoModeHeader}>
+            <p className={styles.stepLabel} id="lal-photo-count">Number of photos</p>
+            <p className={styles.photoModeHint} id="lal-photo-count-hint">
+              {multiplePhotos
+                ? 'Have everyone in the same photo? Choose Single.'
+                : 'Not in the same photo? No problem. Choose Multiple.'}
+            </p>
+          </div>
+          <div className={styles.photoModeRow} role="radiogroup" aria-labelledby="lal-photo-count" aria-describedby="lal-photo-count-hint">
+            {PHOTO_MODES.map(m => {
+              const isSel = m.key === photoMode
+              return (
+                <button
+                  key={m.key}
+                  type="button"
+                  role="radio"
+                  aria-checked={isSel}
+                  className={`${styles.photoModeTile} ${isSel ? styles.photoModeTileActive : ''}`}
+                  onClick={() => handlePhotoMode(m.key)}
+                >
+                  <img src={m.image} alt="" className={styles.photoModeImage} />
+                  <span className={styles.photoModeTitle}>{m.title}</span>
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Add photo */}
       <div className={styles.step}>
-        <p className={styles.stepLabel}>Add photo</p>
+        <p className={styles.stepLabel}>{multiplePhotos ? 'Add photos' : 'Add photo'}</p>
         <div className={`${styles.uploadCard} ${photoError ? styles.uploadCardError : ''}`}>
           <button
             type="button"
@@ -403,9 +501,13 @@ export function LalCanvasCustomizer({ brand, product, icons, items, previewId, n
               <span className={styles.uploadIcon} aria-hidden="true"><FileUploadIcon size={24} /></span>
             )}
             <span className={styles.uploadCopy}>
-              <span className={styles.uploadTitle}>Upload your photo</span>
+              <span className={styles.uploadTitle}>{multiplePhotos ? `Upload up to ${MULTI_PHOTO_MAX} photos` : 'Upload your photo'}</span>
               <span className={styles.uploadSub}>
-                {photoUrl ? truncate(photoName) : 'Select 1 image from your device'}
+                {photoUrl
+                  ? truncate(photoName)
+                  : multiplePhotos
+                    ? 'We’ll combine or arrange them to fit your design'
+                    : 'Select 1 image from your device'}
               </span>
             </span>
           </button>
@@ -413,7 +515,7 @@ export function LalCanvasCustomizer({ brand, product, icons, items, previewId, n
             <button
               type="button"
               className={styles.uploadRemove}
-              aria-label="Remove photo"
+              aria-label={photoCount > 1 ? 'Remove photos' : 'Remove photo'}
               onClick={handleRemovePhoto}
             >
               <XIcon size={20} />
@@ -424,10 +526,11 @@ export function LalCanvasCustomizer({ brand, product, icons, items, previewId, n
           ref={fileInputRef}
           type="file"
           accept={ACCEPTED_TYPES}
+          multiple={multiplePhotos}
           className={styles.hiddenInput}
           onChange={handleFile}
         />
-        {photoError && <p className={styles.fieldError}>Please upload a photo to continue.</p>}
+        {photoError && <p className={styles.fieldError}>{multiplePhotos ? 'Please upload your photos to continue.' : 'Please upload a photo to continue.'}</p>}
       </div>
 
       {/* Select frame */}
@@ -510,8 +613,11 @@ export function LalCanvasCustomizer({ brand, product, icons, items, previewId, n
         />
       </div>
 
-      {/* Nested Items — companion products, directly above the Subtotal */}
-      {nested.ui}
+      {/* Nested Items — companion products, directly above the Subtotal
+          (spaced off the last field so its title reads as a new section) */}
+      <div className={nestedItems.length > 0 ? styles.nestedBlock : undefined}>
+        {nested.ui}
+      </div>
 
       {/* Subtotal + CTA */}
       <div className={styles.subtotalRow}>
@@ -521,9 +627,11 @@ export function LalCanvasCustomizer({ brand, product, icons, items, previewId, n
       <button
         type="button"
         className={styles.customizeBtn}
-        onClick={previewGenerated ? handleAddToBag : handleCustomize}
+        // Free-preview products skip the on-page preview (it arrives by email
+        // in 24 hours), so the CTA adds straight to the bag
+        onClick={previewGenerated || freePreview ? handleAddToBag : handleCustomize}
       >
-        {previewGenerated
+        {previewGenerated || freePreview
           ? (nested.stagedCount === 0 ? 'Add to Bag' : `Add ${1 + nested.stagedCount} Items to bag`)
           : 'Customize Now'}
       </button>

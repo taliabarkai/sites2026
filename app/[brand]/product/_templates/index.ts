@@ -38,6 +38,22 @@ export const livePreviewProductFor = (brand: string): number | undefined => {
   return Object.values(PDP_TEMPLATES).find((t) => t.id === id)?.productId
 }
 
+/**
+ * The final live preview's product per theme — as the live preview's, except
+ * TGR, which shows the Heritage multiple-name necklace (IB and MYKA keep the
+ * single-name Carrie).
+ */
+export const FINAL_PREVIEW_TEMPLATE_BY_BRAND: Record<PdpTemplate['brand'], string> = {
+  ...LIVE_PREVIEW_TEMPLATE_BY_BRAND,
+  tgr: 'tgr-heritage-multi-name',
+}
+
+/** The product id `/[brand]/product/livepreviewfinal` renders for this theme. */
+export const finalPreviewProductFor = (brand: string): number | undefined => {
+  const id = FINAL_PREVIEW_TEMPLATE_BY_BRAND[brand as PdpTemplate['brand']]
+  return Object.values(PDP_TEMPLATES).find((t) => t.id === id)?.productId
+}
+
 /** The template the PDP should render from — none when a bespoke customizer owns the page. */
 export const renderedTemplateFor = (brand: string, productId: number): PdpTemplate | undefined => {
   const t = templateForProduct(brand, productId)

@@ -33,7 +33,7 @@ export function ProductOptions({ groups, options, basePrice, slots }: ProductOpt
     <div className={styles.root}>
       {groups.map((group) => {
         // One character picked from a row of square tiles: still the group's text
-        if (group.kind === 'text-input' && group.letters) {
+        if (group.kind === 'text-input' && group.letters && !group.keyboard) {
           return (
             <div key={group.id} className={styles.group}>
               <OptionRadioGroup

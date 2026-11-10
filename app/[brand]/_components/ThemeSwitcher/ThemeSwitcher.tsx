@@ -24,6 +24,8 @@ import styles from './ThemeSwitcher.module.css'
  * keeps its path.
  */
 function switchPath(pathname: string, from: BrandKey, to: BrandKey): string {
+  // The final live preview stays the final live preview, on the other theme's product
+  if (/\/product\/livepreviewfinal(\/|$)/.test(pathname)) return `/${to}/product/livepreviewfinal`
   const m = /^\/[^/]+\/product\/(\d+)\/?$/.exec(pathname)
   if (m && renderedTemplateFor(from, Number(m[1]))) return `/${to}/product/livepreview`
   return buildBrandPath(pathname, to)

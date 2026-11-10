@@ -11,7 +11,7 @@ import * as ibIcons from '@/src/components/icons/ib'
 import { getBrandFromPathname } from '../../_config/brands'
 import { FlowControls } from './FlowControls'
 import { getBrandFeatures, getFlowConfig } from '../../_config/flow'
-import { readFlow, readWarrantyVariant } from '../../_config/demoParams'
+import { readFlow, readWarrantyVariant, readCartNoteVariant, type CartNoteVariant } from '../../_config/demoParams'
 import type { BrandKey } from '../../_config/brands'
 import { Button } from '../Button'
 import { StarRating } from '../StarRating'
@@ -92,6 +92,8 @@ interface CartItemRowProps {
    * Driven by the V1/V2 toggle in the cart header.
    */
   planVariant: PlanVariant
+  /** How the line's own note shows: V1 a line above the item, V2 a ribbon over its image. */
+  cartNoteVariant: CartNoteVariant
 }
 
 /** The two protection-plan add-on designs being presented. */
@@ -102,7 +104,7 @@ const PLAN_TITLE = '5-Year Jewelry Protection Plan'
 /** Whole-dollar plan price ("$15"), matching the nested-item card price style. */
 const PLAN_PRICE = `$${(WARRANTY_CENTS / 100).toFixed(0)}`
 
-function CartItemRow({ item, showGuarantee, brand, onRemove, onEdit, onNavigate, DropdownIcon, hasPlan, showWarranty, onTogglePlan, onOpenCarePlan, ratingAbove, onToggleRatingPosition, planVariant }: CartItemRowProps) {
+function CartItemRow({ item, showGuarantee, brand, onRemove, onEdit, onNavigate, DropdownIcon, hasPlan, showWarranty, onTogglePlan, onOpenCarePlan, ratingAbove, onToggleRatingPosition, planVariant, cartNoteVariant }: CartItemRowProps) {
   const [detailsOpen, setDetailsOpen] = useState(false)
   const [confirmRemove, setConfirmRemove] = useState(false)
   const hasOptions = item.selectedOptions && item.selectedOptions.length > 0
@@ -159,16 +161,30 @@ function CartItemRow({ item, showGuarantee, brand, onRemove, onEdit, onNavigate,
       {showGuarantee && (
         <p className={styles.deliveryGuarantee}>Guaranteed to arrive by Christmas</p>
       )}
-      <div className={styles.itemMain}>
+      {/* A promise bound to this item (e.g. LAL Royal Romance's free preview) */}
+      {item.cartNote && cartNoteVariant === 'v1' && (
+        <p className={`${styles.deliveryGuarantee} ${styles.itemNote}`}>{item.cartNote}</p>
+      )}
+      {/* V3 hangs the copy from the top (the tag heads it), so the image
+          aligns to the top too rather than centring against it */}
+      <div className={`${styles.itemMain} ${item.cartNote && cartNoteVariant === 'v3' ? styles.itemMainTop : ''}`}>
         <Link href={itemHref} className={styles.itemImageWrap} onClick={onNavigate}>
           <img
             src={item.image}
             alt={item.name}
             className={styles.itemImage}
           />
+          {/* V2: the item's note as a theme ribbon over its image */}
+          {item.cartNote && cartNoteVariant === 'v2' && (
+            <span className={styles.itemNoteRibbon}>{item.cartNote}</span>
+          )}
         </Link>
 
         <div className={styles.itemBody}>
+          {/* V3: the item's note as a tag above the product name */}
+          {item.cartNote && cartNoteVariant === 'v3' && (
+            <p className={`${styles.deliveryGuarantee} ${styles.itemNote} ${styles.itemNoteInBody}`}>{item.cartNote}</p>
+          )}
           {/* The price always sits at the row's right edge; the stars swap between
               sharing that row (above the name) and sitting under the name. */}
           {ratingAbove ? (
@@ -239,6 +255,7 @@ function CartItemRow({ item, showGuarantee, brand, onRemove, onEdit, onNavigate,
               </button>
             )}
           </div>
+
         </div>
       </div>
 
@@ -361,6 +378,8 @@ export function FloatingCart({
   // than present and empty.
   const showWarranty = getBrandFeatures(brand).warranty && warrantyVariant !== 'hidden'
 
+  const cartNoteVariant = readCartNoteVariant(searchParams)
+
   const query = searchParams.toString()
   const nextStepHref = `/${brand}/${flowConfig.hasCartPage ? 'cart' : 'checkout'}${query ? `?${query}` : ''}`
   const carePlanImage = CARE_PLAN_IMAGES[brand]
@@ -380,7 +399,8 @@ export function FloatingCart({
   const showGuaranteeFor = items.map(it => {
     if (it.isCompanion) return false
     mainCount += 1
-    return mainCount === 2
+    // A line with its own note (the free preview) shows that instead
+    return mainCount === 2 && !it.cartNote
   })
 
   useEffect(() => {
@@ -491,6 +511,7 @@ export function FloatingCart({
                 ratingAbove={ratingAbove}
                 onToggleRatingPosition={() => setRatingAbove(a => !a)}
                 planVariant={planVariant}
+                cartNoteVariant={cartNoteVariant}
               />
             ))
           )}

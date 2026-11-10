@@ -1,0 +1,171 @@
+/* ─── Strip ────────────────────────────────────────────────────────────────── */
+.strip {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  background: var(--colors-surface-secondary);
+  border-radius: var(--radius-sm);
+  color: var(--colors-text);
+}
+
+/* ─── One message: icon left, text on one row ───────────────────────────────── */
+.message {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  white-space: nowrap;
+}
+
+.icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  width: var(--spacing-md);
+  height: var(--spacing-md);
+  color: var(--colors-text);
+}
+
+.text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.lead {
+  font-family:    var(--typography-rules-paragraph3-font-family);
+  font-size:      var(--typography-rules-paragraph3-font-size);
+  line-height:    var(--typography-rules-paragraph3-line-height);
+  font-weight:    var(--typography-rules-paragraph3-font-weight, 600);
+  letter-spacing: var(--typography-rules-paragraph3-letter-spacing, normal);
+  text-transform: var(--typography-rules-paragraph3-text-transform, none);
+}
+
+.rest {
+  font-family:    var(--typography-rules-paragraph4-font-family);
+  font-size:      var(--typography-rules-paragraph4-font-size);
+  line-height:    var(--typography-rules-paragraph4-line-height);
+  font-weight:    var(--typography-rules-paragraph4-font-weight, normal);
+  letter-spacing: var(--typography-rules-paragraph4-letter-spacing, normal);
+  text-transform: var(--typography-rules-paragraph4-text-transform, none);
+}
+
+/* ─── Rotate: one slide at a time, the next rising into place ───────────────── */
+.viewport {
+  position: relative;
+  overflow: hidden;
+  height: calc(var(--spacing-md) + 2 * var(--spacing-xs));
+}
+
+.slide {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 var(--spacing-sm);
+  opacity: 0;
+  transform: translateY(60%);
+  transition: opacity var(--transition-base), transform var(--transition-base);
+  pointer-events: none;
+}
+
+.slideActive {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+/* The one leaving goes up and out */
+.slidePrev {
+  transform: translateY(-60%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .slide { transform: none; transition: none; }
+}
+
+.dots {
+  display: flex;
+  justify-content: center;
+  gap: var(--spacing-xxs);
+  padding-bottom: var(--spacing-xxs);
+  margin-top: calc(-1 * var(--spacing-xxxs));
+}
+
+/* 6px dot inside a larger hit area */
+.dot {
+  position: relative;
+  width: var(--spacing-xxs);
+  height: var(--spacing-xxs);
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-full);
+  background: var(--colors-text-secondary);
+  opacity: 0.35;
+  cursor: pointer;
+  transition: opacity var(--transition-fast), width var(--transition-fast);
+}
+
+.dot::after {
+  content: '';
+  position: absolute;
+  inset: calc(-1 * var(--spacing-xxs));
+}
+
+/* The current one stretches into a short pill */
+.dotActive {
+  width: var(--spacing-sm);
+  background: var(--colors-text);
+  opacity: 1;
+}
+
+/* ─── Marquee: every message in one slow, continuous row ────────────────────── */
+.marqueeStrip {
+  display: flex;
+  align-items: center;
+  height: calc(var(--spacing-md) + 2 * var(--spacing-xs));
+}
+
+.marqueeTrack {
+  display: flex;
+  width: max-content;
+  animation: usp-marquee 24s linear infinite;
+}
+
+.marqueeStrip:hover .marqueeTrack,
+.marqueeStrip:focus-within .marqueeTrack {
+  animation-play-state: paused;
+}
+
+.marqueeRun {
+  display: flex;
+  flex-shrink: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.marqueeItem {
+  display: flex;
+  align-items: center;
+}
+
+/* A small dot between messages, with room either side */
+.separator {
+  width: var(--spacing-xxxs);
+  height: var(--spacing-xxxs);
+  margin: 0 var(--spacing-lg);
+  border-radius: var(--radius-full);
+  background: var(--colors-text-secondary);
+}
+
+@keyframes usp-marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marqueeStrip { height: auto; padding: var(--spacing-xs) var(--spacing-sm); }
+  .marqueeTrack { animation: none; width: 100%; }
+  .marqueeRun { flex-wrap: wrap; gap: var(--spacing-xxs); }
+  .marqueeRun[aria-hidden] { display: none; }
+  .separator { margin: 0 var(--spacing-sm); }
+}

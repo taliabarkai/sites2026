@@ -162,6 +162,13 @@ export const oalInez: PdpTemplate = {
   // Its sister necklace leads the page's Best Sellers
   bestSellersLead: [27],
 
+  // The final live preview: the number of initials as a dropdown (prices on
+  // the right), and each initial a dropdown that opens a keyboard of its keys
+  finalPreviewFields: {
+    307: { displayType: 'visual_dropdown_list' },
+    305: { keyboard: true },
+  },
+
   flow: {
     // V5 (Jewelry) unless the link names another version
     defaultPlacement: 'jewelry',

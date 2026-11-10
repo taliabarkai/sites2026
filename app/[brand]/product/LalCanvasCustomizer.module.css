@@ -1,3 +1,11 @@
+/* ─── Free-preview strip (replaces the revisions card on free-preview products) ─ */
+.previewStrip {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius-sm);
+}
+
 /* ─── Unlimited revisions card ───────────────────────────────────────────────── */
 .revisionsCard {
   display: flex;
@@ -50,6 +58,12 @@
   margin-bottom: 0;
 }
 
+/* Nested items section — a new section after the fields, so more room above
+   its title than between two fields */
+.nestedBlock {
+  margin-top: var(--spacing-lg);
+}
+
 .stepHeaderRow {
   display: flex;
   align-items: center;
@@ -83,6 +97,87 @@
   font-family:    var(--typography-rules-text3-font-family);
   font-size:      var(--typography-rules-text3-font-size);
   line-height:    var(--typography-rules-text3-line-height);
+}
+
+/* ─── Number of photos (single / multiple) ───────────────────────────────────── */
+/* Title with its helper line tucked under it */
+.photoModeHeader {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xxxs);
+}
+
+.photoModeRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-xs);
+}
+
+.photoModeTile {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xs);
+  text-align: left;
+  background: var(--colors-background);
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: border-color var(--transition-fast), background-color var(--transition-fast);
+}
+
+.photoModeTile:hover {
+  border-color: var(--form-field-border-color-hover, var(--colors-text));
+}
+
+.photoModeTileActive {
+  background: var(--colors-surface-primary);
+  border-color: var(--border-strong);
+}
+
+.photoModeImage {
+  flex-shrink: 0;
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-sm);
+  display: block;
+}
+
+@media (min-width: 768px) {
+  .photoModeImage {
+    width: 72px;
+    height: 72px;
+  }
+}
+
+
+/* Regular when idle, bold once picked — as the orientation tiles do */
+.photoModeTitle {
+  color: var(--colors-text);
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  font-weight:    var(--typography-rules-text1-font-weight, normal);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+}
+
+.photoModeTileActive .photoModeTitle {
+  font-family:    var(--typography-rules-text2-font-family);
+  font-size:      var(--typography-rules-text2-font-size);
+  line-height:    var(--typography-rules-text2-line-height);
+  font-weight:    var(--typography-rules-text2-font-weight, 600);
+  letter-spacing: var(--typography-rules-text2-letter-spacing, normal);
+}
+
+
+.photoModeHint {
+  margin: 0;
+  color: var(--colors-text-secondary);
+  font-family:    var(--typography-rules-text3-font-family);
+  font-size:      var(--typography-rules-text3-font-size);
+  line-height:    var(--typography-rules-text3-line-height);
+  font-weight:    var(--typography-rules-text3-font-weight, normal);
+  letter-spacing: var(--typography-rules-text3-letter-spacing, normal);
 }
 
 /* ─── Step 1: upload ─────────────────────────────────────────────────────────── */

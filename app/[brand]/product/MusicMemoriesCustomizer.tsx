@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import Link from 'next/link'
 import type { CartItem } from '../_context/CartContext'
 import type { ProductItem } from '../../../data/products'
@@ -28,6 +29,12 @@ interface MusicMemoriesCustomizerProps {
   addItem: (item: CartItem) => void
   openCart: (added?: boolean) => void
   onLivePreviewChange?: (image: string | null) => void
+  /**
+   * Opt-in, for the final live preview only: draw the header (breadcrumbs,
+   * title, price, reviews) into this element — above the gallery on mobile.
+   * Absent or null, the header stays where it always is.
+   */
+  headerSlot?: HTMLElement | null
 }
 
 type FrameType = 'canvas' | 'metal' | 'acrylic'
@@ -371,7 +378,7 @@ function SongCombo({ id, songId, onSelect, onClear }: SongComboProps) {
 
 // ─── Main component ──────────────────────────────────────────────────────────
 
-export function MusicMemoriesCustomizer({ brand, product, icons, nestedItems = [], addItem, openCart, onLivePreviewChange }: MusicMemoriesCustomizerProps) {
+export function MusicMemoriesCustomizer({ brand, product, icons, nestedItems = [], addItem, openCart, onLivePreviewChange, headerSlot }: MusicMemoriesCustomizerProps) {
   // Rating shown beside the price — same numbers the category card and the
   // PDP reviews section read from the product registry.
   const productRating = product.rating ?? 0
@@ -680,6 +687,42 @@ export function MusicMemoriesCustomizer({ brand, product, icons, nestedItems = [
     </>
   )
 
+  // The product header: in the form, or portaled into the page's slot above the gallery
+  const header = (
+    <div className={pdp.productHeader}>
+      <nav className={pdp.breadcrumb} aria-label="Breadcrumb">
+        <ol className={pdp.breadcrumbList}>
+          <li><Link href={`/${brand}`} className={pdp.breadcrumbLink}>Home</Link></li>
+          <li aria-hidden="true" className={pdp.breadcrumbSep}><ChevronIcon size={20} /></li>
+          <li><Link href={`/${brand}/category`} className={pdp.breadcrumbLink}>Best Sellers</Link></li>
+        </ol>
+      </nav>
+
+      <div className={pdp.productTitlePriceGroup}>
+        <h1 className={pdp.productTitle}>{product.name}</h1>
+        <div className={pdp.priceRow}>
+          <span className={pdp.priceCurrent} style={{ color: 'var(--colors-text)' }}>{formatPrice(currentPrice)}</span>
+        </div>
+      </div>
+
+      <div className={pdp.ratingRow}>
+        <div className={pdp.stars} aria-label={`${productRating} out of 5 stars`}>
+          {[1, 2, 3, 4, 5].map(i => (
+            <span key={i} className={i <= filledStars ? pdp.starFilled : pdp.starEmpty}>
+              <StarIcon size={20} />
+            </span>
+          ))}
+        </div>
+        <span className={pdp.ratingValue}>{productRating}</span>
+        <a
+          href="#reviews"
+          className={pdp.ratingCount}
+          onClick={e => { e.preventDefault(); document.getElementById('reviews')?.scrollIntoView({ behavior: 'smooth', block: 'start' }) }}
+        >{productReviewCount} Reviews</a>
+      </div>
+    </div>
+  )
+
   return (
     <section className={pdp.formPanel} aria-label="Product options">
       {/* Offscreen preview instance — the single source for gallery + cart images */}
@@ -693,39 +736,8 @@ export function MusicMemoriesCustomizer({ brand, product, icons, nestedItems = [
         />
       </div>
 
-      {/* Header — mirrors LalCanvasCustomizer */}
-      <div className={pdp.productHeader}>
-        <nav className={pdp.breadcrumb} aria-label="Breadcrumb">
-          <ol className={pdp.breadcrumbList}>
-            <li><Link href={`/${brand}`} className={pdp.breadcrumbLink}>Home</Link></li>
-            <li aria-hidden="true" className={pdp.breadcrumbSep}><ChevronIcon size={20} /></li>
-            <li><Link href={`/${brand}/category`} className={pdp.breadcrumbLink}>Best Sellers</Link></li>
-          </ol>
-        </nav>
-
-        <div className={pdp.productTitlePriceGroup}>
-          <h1 className={pdp.productTitle}>{product.name}</h1>
-          <div className={pdp.priceRow}>
-            <span className={pdp.priceCurrent} style={{ color: 'var(--colors-text)' }}>{formatPrice(currentPrice)}</span>
-          </div>
-        </div>
-
-        <div className={pdp.ratingRow}>
-          <div className={pdp.stars} aria-label={`${productRating} out of 5 stars`}>
-            {[1, 2, 3, 4, 5].map(i => (
-              <span key={i} className={i <= filledStars ? pdp.starFilled : pdp.starEmpty}>
-                <StarIcon size={20} />
-              </span>
-            ))}
-          </div>
-          <span className={pdp.ratingValue}>{productRating}</span>
-          <a
-            href="#reviews"
-            className={pdp.ratingCount}
-            onClick={e => { e.preventDefault(); document.getElementById('reviews')?.scrollIntoView({ behavior: 'smooth', block: 'start' }) }}
-          >{productReviewCount} Reviews</a>
-        </div>
-      </div>
+      {/* Header — mirrors LalCanvasCustomizer (or, given a slot, drawn there) */}
+      {headerSlot ? createPortal(header, headerSlot) : header}
 
       <div className={styles.customizer}>
         {/* ── Default state: song + artist fields, then Personalize CTA ── */}

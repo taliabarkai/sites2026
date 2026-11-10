@@ -40,10 +40,10 @@ export const oalInezHeartPremium: PdpTemplate = {
   gallery: { desktop: 'heroGridPhotoFirst', mobile: 'carousel' },
   sale: { percent: 15 },
 
-  // V1–V4's one step: every field in page order (the finish stays on the page
-  // behind the Personalize row). V5, its default, has its own tabs: flow.jewelrySteps.
+  // V1–V4's one step: every field in page order — the finish too, which V2
+  // (all on the page) needs here; behind the Personalize row it stays on the page. V5, its default, has its own tabs: flow.jewelrySteps.
   steps: [
-    { label: 'Personalize', hint: 'Initial, zodiac & diamond', fieldIds: [401, 402, 403, 404, 405, 406] },
+    { label: 'Personalize', hint: 'Initial, zodiac & diamond', fieldIds: [400, 401, 402, 403, 404, 405, 406] },
   ],
 
   fields: [

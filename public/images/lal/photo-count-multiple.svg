@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80" width="80" height="80">
+  <!-- Several photos, one person in each, fanned out -->
+  <g fill="none" stroke="#2b2522" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <g transform="rotate(-12 26 42)">
+      <rect x="10" y="22" width="32" height="38" rx="3" fill="#ffffff"/>
+      <circle cx="26" cy="37" r="5"/>
+      <path d="M17 54c1.2-6 4.4-9 9-9s7.8 3 9 9"/>
+    </g>
+    <g transform="rotate(12 54 42)">
+      <rect x="38" y="22" width="32" height="38" rx="3" fill="#ffffff"/>
+      <circle cx="54" cy="37" r="5"/>
+      <path d="M45 54c1.2-6 4.4-9 9-9s7.8 3 9 9"/>
+    </g>
+    <rect x="24" y="16" width="32" height="40" rx="3" fill="#ffffff"/>
+    <circle cx="40" cy="32" r="5"/>
+    <path d="M31 50c1.2-6 4.4-9 9-9s7.8 3 9 9"/>
+  </g>
+</svg>

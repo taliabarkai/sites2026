@@ -27,6 +27,18 @@ export const tgrHeritageMultiName: PdpTemplate = {
     { label: 'Customize',   hint: 'Material, diamonds & chain', fieldIds: [201, 202, 206], display: { 201: 'visual' } },
   ],
 
+  // The final live preview (everything on the page): one list, no step
+  // headings — material, diamond size, number of names, the names, chain
+  // length (no "diamonds between the names" line) — and the names note in grey
+  finalPreviewSteps: [
+    { label: 'Personalize', fieldIds: [201, 202, 203, 204, 206] },
+  ],
+  // …where each name left empty shows the next of these in the preview
+  finalPreviewSampleText: { 204: ['Julie', 'Samantha', 'John', 'Amanda', 'Emma'] },
+  finalPreviewFields: {
+    203: { note: { text: 'Names are placed from left to right' } },
+  },
+
   fields: [
     {
       fieldId: 201, name: 'Select material', cartName: 'Material', type: 'selection', displayType: 'carousel', order: 1, isRequired: true,

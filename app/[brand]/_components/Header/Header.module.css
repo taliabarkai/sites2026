@@ -22,6 +22,16 @@
   transform: translateY(-100%);
 }
 
+/* The final live preview on mobile: not sticky — the header scrolls away and
+   the product gallery takes the top of the screen */
+@media (max-width: 767px) {
+  .wrapperScrollsOnMobile.wrapperScrollsOnMobile {
+    position: relative;
+    top: auto;
+    transform: none;
+  }
+}
+
 /* Only the bar is sticky, at every width — the topline (announcement +
    utility links) scrolls away with the page. Sticking at minus the topline's
    height (measured in Header.tsx) parks it just above the viewport. */

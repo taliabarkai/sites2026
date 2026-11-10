@@ -206,6 +206,48 @@
    reads as an underline on the title rather than the top of the first line.
    Its own top padding goes too, so the distance under "My Bag" is the title's
    16px margin alone rather than that stacked on the row's 32px inset. */
+/* Item-bound promise ("Free Preview in 24 HOURS") — the floating cart's line */
+.itemNote {
+  align-self: flex-start;
+  margin: 0 0 var(--spacing-xxxs);
+  padding: var(--spacing-xxxs) var(--spacing-xxs);
+  background: var(--colors-surface-secondary);
+  color: var(--colors-text);
+  border-radius: var(--radius-sm);
+  font-family:    var(--typography-rules-text2-font-family);
+  font-size:      var(--typography-rules-text2-font-size);
+  line-height:    var(--typography-rules-text2-line-height);
+  font-weight:    var(--typography-rules-text2-font-weight, normal);
+  letter-spacing: var(--typography-rules-text2-letter-spacing, normal);
+  text-transform: var(--typography-rules-text2-text-transform, none);
+}
+
+/* V2: the image and its note ribbon — sits in the image's grid cell */
+.itemImageNoteWrap {
+  position: relative;
+  grid-row: 1;
+  align-self: start;
+  width: 160px;
+}
+
+.itemNoteRibbon {
+  position: absolute;
+  top: var(--spacing-xxs);
+  left: var(--spacing-xxs);
+  max-width: calc(100% - 2 * var(--spacing-xxs));
+  z-index: var(--z-raised);
+  padding: var(--spacing-xxxs) var(--spacing-xxs);
+  background: var(--ribbon-promo-background, var(--ribbon-background));
+  color: var(--ribbon-promo-text, var(--ribbon-text));
+  border-radius: var(--ribbon-border-radius, var(--radius-sm));
+  font-family:    var(--typography-rules-ribbons1-font-family, var(--font-family-main-bold));
+  font-size:      var(--typography-rules-ribbons1-font-size);
+  line-height:    var(--typography-rules-ribbons1-line-height);
+  font-weight:    var(--typography-rules-ribbons1-font-weight, 700);
+  letter-spacing: var(--typography-rules-ribbons1-letter-spacing, normal);
+  text-transform: var(--typography-rules-ribbons1-text-transform, uppercase);
+}
+
 .cartItem:first-of-type {
   border-top: none;
   padding-top: 0;

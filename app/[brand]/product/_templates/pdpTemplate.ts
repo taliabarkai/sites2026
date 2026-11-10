@@ -373,6 +373,16 @@ export interface PdpTemplate {
   livePreview: LivePreview
   flow: Flow
 
+  /**
+   * mockup-only: field changes for the final live preview only
+   * (`/product/livepreviewfinal`) — the same fields, drawn differently there.
+   */
+  finalPreviewFields?: Record<number, Partial<Field>>
+  /** mockup-only: the final live preview's own step order, when it differs. */
+  finalPreviewSteps?: PresentationStep[]
+  /** mockup-only: the final live preview's own sample names (filling the names left empty). */
+  finalPreviewSampleText?: Record<number, string[]>
+
   /** mockup-only: products put first in the page's Best Sellers row (by product id). */
   bestSellersLead?: number[]
 

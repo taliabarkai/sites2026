@@ -303,6 +303,26 @@ export function readMaterialDisplay(params: ReadableParams, brand = ''): Materia
   return MATERIAL_DISPLAYS.find((d) => d.value === raw)?.value ?? defaultMaterialDisplay(brand)
 }
 
+/**
+ * The final live preview (`/[brand]/product/livepreviewfinal`): one version —
+ * the gallery preview + new layout (live preview's V2) — and a mobile toggle
+ * for where the product info sits: above the gallery (as V2) or below it.
+ */
+export const MOBILE_LAYOUT_PARAM = 'mobileLayout'
+export const MOBILE_LAYOUTS = [
+  { value: 'info-above',    label: 'Info above gallery' },
+  { value: 'gallery-above', label: 'Gallery above info' },
+] as const
+export type MobileLayout = (typeof MOBILE_LAYOUTS)[number]['value']
+
+export function readMobileLayout(params: ReadableParams): MobileLayout {
+  return params.get(MOBILE_LAYOUT_PARAM) === 'gallery-above' ? 'gallery-above' : 'info-above'
+}
+
+/** The final live preview's pages: its one-URL demo and every product under it. */
+export const FINAL_PREVIEW_SEGMENT = 'livepreviewfinal'
+export const isFinalPreviewPath = (pathname: string) => pathname.includes(`/product/${FINAL_PREVIEW_SEGMENT}`)
+
 export const PERSONALIZE_PARAM = 'personalize'
 
 export const PERSONALIZE_PLACEMENTS = [
@@ -333,4 +353,56 @@ export const DEFAULT_PERSONALIZE_PLACEMENT: PersonalizePlacement = 'panel'
 export function readPersonalizePlacement(params: ReadableParams, templateDefault?: PersonalizePlacement): PersonalizePlacement {
   const raw = params.get(PERSONALIZE_PARAM)
   return PERSONALIZE_PLACEMENTS.find((f) => f.value === raw)?.value ?? templateDefault ?? DEFAULT_PERSONALIZE_PLACEMENT
+}
+
+// ─── Free-preview cart note ───────────────────────────────────────────────────
+
+/**
+ * LAL products whose preview arrives by email (Royal Romance, 7). Their
+ * revisions card is the free-preview strip, their CTA adds straight to the bag,
+ * and their bag line carries the note below.
+ */
+export const FREE_PREVIEW_PRODUCT_IDS = new Set([7])
+export const FREE_PREVIEW_CART_NOTE = 'FREE PREVIEW IN 24 HOURS'
+
+export const isFreePreviewProduct = (brand: string, productId: number): boolean =>
+  brand === 'lal' && FREE_PREVIEW_PRODUCT_IDS.has(productId)
+
+/**
+ * How a bag line's note shows in the floating cart and on the bag page
+ * (`?cartnote=v2`): V1 a beige tag above the item, V2 a theme ribbon over the
+ * item's image, V3 the tag above the product name (floating cart; the bag page
+ * keeps it above, as in V1). V1 by default.
+ */
+export const CART_NOTE_PARAM = 'cartnote'
+export const CART_NOTE_VARIANTS = [
+  { value: 'v1', label: 'V1 – Line above item' },
+  { value: 'v2', label: 'V2 – Ribbon on image' },
+  { value: 'v3', label: 'V3 – Tag above product name' },
+] as const
+export type CartNoteVariant = (typeof CART_NOTE_VARIANTS)[number]['value']
+
+export function readCartNoteVariant(params: ReadableParams): CartNoteVariant {
+  const raw = params.get(CART_NOTE_PARAM)?.toLowerCase()
+  return CART_NOTE_VARIANTS.find(v => v.value === raw)?.value ?? 'v1'
+}
+
+// ─── Free-preview USP strip ───────────────────────────────────────────────────
+
+/**
+ * How the free-preview product shows its three promises (`?usp=marquee`):
+ * the original static strip image, one message at a time rotating every 3s,
+ * or a slow scrolling marquee. Rotating by default.
+ */
+export const USP_STRIP_PARAM = 'usp'
+export const USP_STRIP_STYLES = [
+  { value: 'rotate',  label: 'Rotating (3s)' },
+  { value: 'marquee', label: 'Scrolling marquee' },
+  { value: 'static',  label: 'Static strip' },
+] as const
+export type UspStripStyle = (typeof USP_STRIP_STYLES)[number]['value']
+
+export function readUspStripStyle(params: ReadableParams): UspStripStyle {
+  const raw = params.get(USP_STRIP_PARAM)?.toLowerCase()
+  return USP_STRIP_STYLES.find(s => s.value === raw)?.value ?? 'rotate'
 }

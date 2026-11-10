@@ -60,7 +60,7 @@ import { AIPreviewCustomizer } from '../_components/AIPreviewCustomizer'
 import { ProductOptions, useProductOptions } from '../_components/ProductOptions'
 import type { OptionGroup, SelectedOption } from '../_components/ProductOptions'
 import { OPTION_GROUPS, OPTIONS_SHOWCASE_PRODUCT_ID, optionsShowcaseProduct } from './[id]/_data/optionGroups'
-import { isNestedDrawerProduct, personalizeFlowFor, readGalleryLayout, readNestedDescriptionState, readPersonalizePlacement, readNestedItemOn, readMaterialDisplay, readNestedDrawerCount } from '../_config/demoParams'
+import { isNestedDrawerProduct, personalizeFlowFor, readGalleryLayout, readNestedDescriptionState, readPersonalizePlacement, readNestedItemOn, readMaterialDisplay, readNestedDrawerCount, readMobileLayout } from '../_config/demoParams'
 import type { DiamondSetting, PersonalizeFields, PersonalizeFlow } from '../_config/demoParams'
 
 // LAL products that use the song-based Music Memories customizer
@@ -90,12 +90,15 @@ function ProductCarousel({
   title,
   ArrowIcon,
   lead = [],
+  hrefFor,
 }: {
   brand: string
   title: string
   ArrowIcon: React.ComponentType<{ size?: number; color?: string }>
   /** Product ids shown first, in this order (a template's `bestSellersLead`). */
   lead?: number[]
+  /** Where a card links: the final live preview keeps its products inside it. */
+  hrefFor?: (p: ProductItem) => string
 }) {
   const all = getBrandProducts(brand)
   const leading = lead.map((id) => all.find((p) => p.id === id)).filter((p): p is ProductItem => !!p)
@@ -124,7 +127,7 @@ function ProductCarousel({
                 originalPrice={p.originalPrice}
                 defaultImage={p.image}
                 hoverImage={p.hoverImage}
-                href={`/${brand}${p.href}`}
+                href={hrefFor ? hrefFor(p) : `/${brand}${p.href}`}
                 quickAddProduct={toQuickAddProduct(p)}
                 swatches={brand !== 'lal' ? DEFAULT_PRODUCT_SWATCHES : undefined}
               />
@@ -1999,9 +2002,16 @@ interface ProductDetailPageProps {
   previewId?: string
   /** Skip the product's PDP template (`/product/4a`), showing its own flow instead. */
   withoutTemplate?: boolean
+  /**
+   * The final live preview (`/product/livepreviewfinal`): one version — the
+   * gallery preview + new layout (live preview's V2) — with the mobile
+   * layout (info above or below the gallery) from `?mobileLayout=`, and the
+   * mobile gallery sticky on every live-preview product, Music Memories too.
+   */
+  finalPreview?: boolean
 }
 
-function ProductDetailPageInner({ productId, previewId, withoutTemplate = false }: ProductDetailPageProps) {
+function ProductDetailPageInner({ productId, previewId, withoutTemplate = false, finalPreview = false }: ProductDetailPageProps) {
   const pathname = usePathname()
   const router = useRouter()
   const brand = getBrandFromPathname(pathname)
@@ -2053,10 +2063,15 @@ function ProductDetailPageInner({ productId, previewId, withoutTemplate = false 
   // preview engine for the simulated external one, to review its loading state.
   const baseTemplate = isOptionsShowcase || withoutTemplate ? undefined : renderedTemplateFor(brand, product.id)
   const engineParam = searchParams.get('engine')
-  const template = useMemo(
-    () => (baseTemplate && engineParam === 'external' ? withExternalEngine(baseTemplate) : baseTemplate),
-    [baseTemplate, engineParam],
-  )
+  const template = useMemo(() => {
+    let t = baseTemplate && engineParam === 'external' ? withExternalEngine(baseTemplate) : baseTemplate
+    // The final live preview draws some fields its own way (Inez: dropdowns)
+    const changes = finalPreview ? t?.finalPreviewFields : undefined
+    if (t && changes) t = { ...t, fields: t.fields.map((f) => (changes[f.fieldId] ? { ...f, ...changes[f.fieldId] } : f)) }
+    if (t && finalPreview && t.finalPreviewSteps) t = { ...t, steps: t.finalPreviewSteps }
+    if (t && finalPreview && t.finalPreviewSampleText) t = { ...t, livePreview: { ...t.livePreview, sampleText: t.finalPreviewSampleText } }
+    return t
+  }, [baseTemplate, engineParam, finalPreview])
 
   // Gallery: the template picks the desktop layout and where the preview goes;
   // without one, each brand keeps its own layout.
@@ -2072,7 +2087,10 @@ function ProductDetailPageInner({ productId, previewId, withoutTemplate = false 
   // photos in the gallery until the shopper saves a personalization; then the
   // preview is pushed in front of them
   // "In panel v3" does the same on mobile, until the shopper types their own name
-  const placement = template ? readPersonalizePlacement(searchParams, template.flow.defaultPlacement) : undefined
+  // The final live preview has one version: V2's (Gallery Preview + New Layout)
+  const placement = template ? (finalPreview ? 'page' : readPersonalizePlacement(searchParams, template.flow.defaultPlacement)) : undefined
+  const isMusicMemories = !template && brand === 'lal' && MUSIC_MEMORIES_PRODUCT_IDS.has(product.id)
+  const mobileLayout = readMobileLayout(searchParams)
   const isMobile = useIsMobile()
   // Every version leads with the product's own photo; the preview is pushed in
   // front once it's the shopper's own — typed (desktop, V2) or saved (mobile V1, V3)
@@ -2080,14 +2098,19 @@ function ProductDetailPageInner({ productId, previewId, withoutTemplate = false 
   // V2 (mobile): the product header moves above the gallery — the customizer
   // keeps drawing it (the price is live) into this slot
   // …and V2 (Preview in gallery) uses the same header-above layout
-  const headerAbove = placement === 'page' && isMobile
+  // Final live preview: the info above the gallery unless the mobile layout
+  // toggle puts the gallery first; Music Memories draws its header there too
+  const headerAbove = finalPreview
+    ? isMobile && mobileLayout === 'info-above' && (!!template || isMusicMemories)
+    : placement === 'page' && isMobile
   const [headerSlot, setHeaderSlot] = useState<HTMLDivElement | null>(null)
   // The mobile gallery's box (it lands just under the site header when scrolled to)
   const mobileGalleryRef = useRef<HTMLDivElement>(null)
   // V2 on mobile: the gallery sticks under the header while the shopper fills in
   // the form below it — the preview updates in view as they type — and leaves
   // with the Add to Bag button once that scrolls up to it
-  const stickyGallery = placement === 'page' && isMobile && !!template
+  // (Final live preview: in both mobile layouts, on every live-preview product)
+  const stickyGallery = finalPreview ? isMobile && (!!template || isMusicMemories) : placement === 'page' && isMobile && !!template
   useEffect(() => {
     const el = mobileGalleryRef.current
     if (!stickyGallery || !el) return
@@ -2097,7 +2120,10 @@ function ProductDetailPageInner({ productId, previewId, withoutTemplate = false 
       el.style.top = `${top}px`
       // A focused field scrolls into view below the gallery, not behind it
       document.documentElement.style.scrollPaddingTop = `${top + el.offsetHeight}px`
+      // The page's main button: the template customizer marks it; Music
+      // Memories' is its own CTA button
       const cta = document.querySelector('#buy-box [data-main-cta]')
+        ?? document.querySelector('section[aria-label="Product options"] button[class*="ctaButton"]')
       if (!cta) { el.style.transform = ''; return }
       // Once the button comes within the form's own gap of the gallery's bottom
       // edge, they scroll away together — keeping that gap between them
@@ -2115,7 +2141,7 @@ function ProductDetailPageInner({ productId, previewId, withoutTemplate = false 
       el.style.transform = ''
       document.documentElement.style.scrollPaddingTop = ''
     }
-  }, [stickyGallery])
+  }, [stickyGallery, mobileLayout])
   // Added to your bag (as Music Memories): the preview stays, its ribbon goes.
   // Personalize Another starts the customizer over — a fresh one, back at the top.
   const [addedToBag, setAddedToBag] = useState(false)
@@ -2321,10 +2347,13 @@ function ProductDetailPageInner({ productId, previewId, withoutTemplate = false 
               nestedOffer={nestedOn}
               materialImageOnly={readMaterialDisplay(searchParams, brand) === 'image'}
               onPersonalizeAnother={personalizeAnother}
+              fillEmptyFromSample={finalPreview}
               belowCta={<UspBadges brand={brand} icons={icons} />}
             />
           ) : brand === 'lal' && MUSIC_MEMORIES_PRODUCT_IDS.has(product.id) ? (
             <MusicMemoriesCustomizer
+              // Final live preview, info above the gallery: its header goes in the slot
+              headerSlot={finalPreview && headerAbove ? headerSlot : null}
               brand={brand}
               product={product}
               icons={icons}
@@ -2368,7 +2397,14 @@ function ProductDetailPageInner({ productId, previewId, withoutTemplate = false 
         </>
         )}
 
-        <ProductCarousel brand={brand} title="Best Sellers" ArrowIcon={icons.ArrowIcon} lead={template?.bestSellersLead} />
+        <ProductCarousel
+          brand={brand}
+          title="Best Sellers"
+          ArrowIcon={icons.ArrowIcon}
+          lead={template?.bestSellersLead}
+          // The final live preview keeps its products inside it
+          hrefFor={finalPreview ? (p) => `/${brand}/product/livepreviewfinal/${p.id}` : undefined}
+        />
         <ReviewsSection
           ChevronIcon={icons.ChevronIcon}
           StarIcon={icons.StarIcon}

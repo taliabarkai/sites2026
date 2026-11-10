@@ -217,6 +217,11 @@
   width: 100%;
 }
 
+/* V3: the tag heads the copy, so image and copy both start at the top */
+.itemMainTop {
+  align-items: flex-start;
+}
+
 .deliveryGuarantee {
   display: flex;
   align-items: center;
@@ -231,7 +236,41 @@
   white-space: nowrap;
 }
 
+/* Item-bound promise (V1) — same type as the Christmas line, as a beige tag
+   with the text color, like the free-preview strip on the PDP */
+.itemNote {
+  padding: var(--spacing-xxxs) var(--spacing-xxs);
+  background: var(--colors-surface-secondary);
+  color: var(--colors-text);
+  border-radius: var(--radius-sm);
+}
+
+/* V3: the tag above the product name, sized to its text */
+.itemNoteInBody {
+  align-self: flex-start;
+}
+
+/* V2: the same promise as a theme ribbon over the item's image, top left */
+.itemNoteRibbon {
+  position: absolute;
+  top: var(--spacing-xxxs);
+  left: var(--spacing-xxxs);
+  max-width: calc(100% - 2 * var(--spacing-xxxs));
+  z-index: var(--z-raised);
+  padding: var(--spacing-xxxs) var(--spacing-xxs);
+  background: var(--ribbon-promo-background, var(--ribbon-background));
+  color: var(--ribbon-promo-text, var(--ribbon-text));
+  border-radius: var(--ribbon-border-radius, var(--radius-sm));
+  font-family:    var(--typography-rules-ribbons1-font-family, var(--font-family-main-bold));
+  font-size:      var(--typography-rules-ribbons1-font-size);
+  line-height:    var(--typography-rules-ribbons1-line-height);
+  font-weight:    var(--typography-rules-ribbons1-font-weight, 700);
+  letter-spacing: var(--typography-rules-ribbons1-letter-spacing, normal);
+  text-transform: var(--typography-rules-ribbons1-text-transform, uppercase);
+}
+
 .itemImageWrap {
+  position: relative;
   display: block;
   width: 148px;
   height: 148px;

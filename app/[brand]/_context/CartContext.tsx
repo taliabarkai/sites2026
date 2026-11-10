@@ -45,6 +45,8 @@ export interface CartItem {
   selectedOptions?: SelectedOption[]
   giftPackaging?: GiftPackaging
   canvasConfig?: CanvasConfig   // LAL custom canvas — lets the PDP restore the preview
+  /** A promise bound to this line, shown above it in the floating cart and the bag (e.g. LAL Royal Romance's "Free Preview in 24 HOURS"). */
+  cartNote?: string
   isCompanion?: boolean         // added as a nested/companion product (not a standalone main item)
   warranty?: boolean            // 5-year protection plan selected for this item
   /**

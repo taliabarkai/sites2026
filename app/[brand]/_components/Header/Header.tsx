@@ -19,10 +19,13 @@ import { NestedDrawerCountToggle } from './NestedDrawerCountToggle'
 import { NestedDescriptionToggle } from './NestedDescriptionToggle'
 import { GalleryLayoutToggle } from './GalleryLayoutToggle'
 import { PersonalizeToggle } from './PersonalizeToggle'
+import { MobileLayoutToggle } from './MobileLayoutToggle'
 import { NestedItemToggle } from './NestedItemToggle'
 import { MaterialDisplayToggle } from './MaterialDisplayToggle'
-import { livePreviewProductFor, renderedTemplateFor } from '../../product/_templates'
-import { isNestedDrawerProduct } from '../../_config/demoParams'
+import { finalPreviewProductFor, livePreviewProductFor, renderedTemplateFor } from '../../product/_templates'
+import { isNestedDrawerProduct, isFreePreviewProduct } from '../../_config/demoParams'
+import { CartNoteToggle } from './CartNoteToggle'
+import { UspStripToggle } from './UspStripToggle'
 import { FlowControls } from '../FloatingCart/FlowControls'
 import { Topline, type ToplineProps } from '../Topline'
 import { getBrandFromPathname, getBrandHomePath, resolveBrand, type BrandKey } from '../../_config/brands'
@@ -151,9 +154,12 @@ export function Header({
   const headerHidden = useRevealOnScrollUp(revealOnScrollUp, headerRef, menuOpen)
 
   /* ── Checkout mode: logo only, horizontally centered ── */
-  const wrapperClass = revealOnScrollUp
+  // The final live preview (mobile): the header scrolls away with the page —
+  // the product's gallery is what sticks there, right at the top
+  const scrollsAwayOnMobile = /\/product\/livepreviewfinal(\/|$)/.test(pathname)
+  const wrapperClass = `${revealOnScrollUp
     ? `${styles.wrapperReveal} ${headerHidden ? styles.wrapperHidden : ''}`
-    : sticky ? styles.wrapper : styles.wrapperStatic
+    : sticky ? styles.wrapper : styles.wrapperStatic} ${scrollsAwayOnMobile ? styles.wrapperScrollsOnMobile : ''}`
 
   /* Demo-only controls, on the two pages a phase actually changes. Rendered in
      both slots and switched by media query: the bar has room for them on
@@ -165,11 +171,21 @@ export function Header({
   const isNestedDrawerDemo = !!productIdMatch && isNestedDrawerProduct(brandSegment, Number(productIdMatch[1]))
   // Template PDPs (live preview) get a desktop gallery layout switch — on a
   // product's own URL and on the one-URL demo, /[brand]/product/livepreview
+  // The final live preview (/[brand]/product/livepreviewfinal[/id]): one
+  // version, so a mobile layout switch takes the version switch's place
+  const finalMatch = pathname.match(/\/product\/livepreviewfinal(?:\/(\d+))?\/?$/)
+  const isFinalPreview = !!finalMatch
   const pdpProductId = productIdMatch
     ? Number(productIdMatch[1])
-    : pathname.endsWith('/product/livepreview') ? livePreviewProductFor(brandSegment) : undefined
+    : finalMatch
+      ? (finalMatch[1] ? Number(finalMatch[1]) : finalPreviewProductFor(brandSegment))
+      : pathname.endsWith('/product/livepreview') ? livePreviewProductFor(brandSegment) : undefined
   const pdpTemplate = pdpProductId !== undefined ? renderedTemplateFor(brandSegment, pdpProductId) : undefined
-  const demoControls = isCheckout || isCartPage || showTrackOrderToggle || isNestedDrawerDemo || pdpTemplate ? (
+  // The free-preview bag note's V1/V2 — on its product's page, and on the bag
+  // page while a line in the bag carries a note
+  const isFreePreviewPdp = !!productIdMatch && isFreePreviewProduct(brandSegment, Number(productIdMatch[1]))
+  const showCartNoteToggle = isFreePreviewPdp || (isCartPage && items.some(it => it.cartNote))
+  const demoControls = isCheckout || isCartPage || showTrackOrderToggle || isNestedDrawerDemo || pdpTemplate || showCartNoteToggle || isFinalPreview ? (
     <>
       {/* The phases only reach the cart and checkout. Track My Order and the
           nested items Drawer product each get only their own controls. */}
@@ -179,9 +195,12 @@ export function Header({
       {isNestedDrawerDemo && <NestedDescriptionToggle className={styles.cartSizeToggle} />}
       {isNestedDrawerDemo && <NestedDrawerCountToggle className={styles.cartSizeToggle} />}
       {pdpTemplate && <GalleryLayoutToggle templateDefault={pdpTemplate.gallery.desktop} className={`${styles.cartSizeToggle} ${styles.desktopOnlyControl}`} />}
-      {pdpTemplate && <PersonalizeToggle templateDefault={pdpTemplate.flow.defaultPlacement} className={styles.cartSizeToggle} />}
+      {pdpTemplate && !isFinalPreview && <PersonalizeToggle templateDefault={pdpTemplate.flow.defaultPlacement} className={styles.cartSizeToggle} />}
+      {isFinalPreview && <MobileLayoutToggle className={styles.cartSizeToggle} />}
       {pdpTemplate && <NestedItemToggle className={styles.cartSizeToggle} />}
       {pdpTemplate && <MaterialDisplayToggle className={styles.cartSizeToggle} />}
+      {isFreePreviewPdp && <UspStripToggle className={styles.cartSizeToggle} />}
+      {showCartNoteToggle && <CartNoteToggle className={styles.cartSizeToggle} />}
     </>
   ) : null
   const demoBar = demoControls && <div className={styles.demoBar}>{demoControls}</div>

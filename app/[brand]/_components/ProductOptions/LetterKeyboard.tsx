@@ -11,7 +11,8 @@ const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')
 
 /**
  * A one-letter text field picked from a keyboard: it looks like the page's
- * dropdowns, and opening it drops a QWERTY grid of letters under it. The value
+ * dropdowns, and opening it drops a grid of keys under it — A to Z, or the
+ * field's own characters (letters and symbols: ♥ ◆ &). The value
  * is still text, so the cart and the preview read it like a typed one.
  *
  *   Trigger    click / Enter / Space / ↓ open it; typing a letter picks it straight away
@@ -39,6 +40,7 @@ export function LetterKeyboard({
   const triggerRef = useRef<HTMLButtonElement>(null)
   const keysRef = useRef<HTMLDivElement>(null)
   const letter = value.trim().toUpperCase()
+  const keys = group.letters ?? LETTERS
 
   // Opens up or down to fit, never moving the page; lands on the picked letter
   const dir = useDropDirection(open, triggerRef, keysRef)
@@ -113,7 +115,7 @@ export function LetterKeyboard({
 
         {open && (
           <div ref={keysRef} id={keysId} role="group" aria-labelledby={labelId} className={`${styles.list} ${kb.keyboard} ${dir === 'up' ? styles.listUp : ''}`} onKeyDown={onKeysKeyDown}>
-            {LETTERS.map((l) => (
+            {keys.map((l) => (
               <button
                 key={l}
                 type="button"

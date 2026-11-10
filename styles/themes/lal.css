@@ -15,6 +15,7 @@
   --lal-mid-grey:    #989898;
   --lal-green:       #2b8b68;
   --lal-red:         #8e0000;
+  --lal-crimson:     #A60E45;
   --lal-warning:     #f36641;
   --lal-slate:       #808080;
   --lal-option-grey: #cccccc;
@@ -146,6 +147,10 @@
   --ribbon-oos-text:               var(--lal-white);
   --ribbon-secondary-background:   var(--lal-lime);
   --ribbon-secondary-text:         var(--lal-black);
+  /* Promo ribbon (sale / free-preview) — not in tokens.json yet; the crimson
+     the free-preview note uses. Other brands fall back to the default ribbon. */
+  --ribbon-promo-background:       var(--lal-crimson);
+  --ribbon-promo-text:             var(--lal-white);
 
   /* Buttons */
   --buttons-primary-background:    var(--lal-black);

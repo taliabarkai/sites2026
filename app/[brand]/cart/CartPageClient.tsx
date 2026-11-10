@@ -22,7 +22,7 @@ import { GiftingDrawer } from '../_components/cart/GiftingOptions/GiftingDrawer'
 import { GiftPanel } from '../_components/cart/GiftingV2/GiftPanel'
 import { getGiftOptions } from '../_config/giftOptions'
 import { BRAND_GIFT_CONFIG, type BrandKey } from '../_config/brands'
-import { readFlow, readGiftingVariant } from '../_config/demoParams'
+import { readFlow, readGiftingVariant, readCartNoteVariant, type CartNoteVariant } from '../_config/demoParams'
 import { getBrandFeatures, getFlowConfig } from '../_config/flow'
 import { Header } from '../_components/Header'
 import { CheckoutFooter } from '../_components/CheckoutFooter'
@@ -188,9 +188,11 @@ interface CartItemRowProps {
   /** False on brands whose products no plan covers. */
   showWarranty: boolean
   onToggleWarranty: (itemId: string) => void
+  /** How the line's own note shows: V1 a line above the item, V2 a ribbon over its image. */
+  cartNoteVariant: CartNoteVariant
 }
 
-function CartItemRow({ item, onRemove, icons, giftOptions, designs, onSelectGift, onRemoveGift, showWarranty, onToggleWarranty }: CartItemRowProps) {
+function CartItemRow({ item, onRemove, icons, giftOptions, designs, onSelectGift, onRemoveGift, showWarranty, onToggleWarranty, cartNoteVariant }: CartItemRowProps) {
   const [detailsOpen, setDetailsOpen] = useState(false)
   // Lifted out of the tray so the control and its cards can sit in different
   // rows: the control belongs with the copy, the cards below the whole row.
@@ -279,8 +281,18 @@ function CartItemRow({ item, onRemove, icons, giftOptions, designs, onSelectGift
 
   return (
     <article className={styles.cartItem}>
-      <img src={item.image} alt={item.name} className={styles.itemImage} />
+      {item.cartNote && cartNoteVariant === 'v2' ? (
+        // V2: the item's note as a theme ribbon over its image
+        <div className={styles.itemImageNoteWrap}>
+          <img src={item.image} alt={item.name} className={styles.itemImage} />
+          <span className={styles.itemNoteRibbon}>{item.cartNote}</span>
+        </div>
+      ) : (
+        <img src={item.image} alt={item.name} className={styles.itemImage} />
+      )}
       <div className={styles.itemContent}>
+        {/* A promise bound to this item (e.g. LAL Royal Romance's free preview) — V1 and V3: a tag above it */}
+        {item.cartNote && cartNoteVariant !== 'v2' && <p className={styles.itemNote}>{item.cartNote}</p>}
         <div className={styles.itemTopRow}>
           <p className={styles.itemName}>{item.name}</p>
           <div className={styles.itemActions}>
@@ -584,6 +596,7 @@ function CartPageInner() {
                   onRemoveGift={handleRemoveGift}
                   showWarranty={SHOW_ITEM_WARRANTY && features.warranty}
                   onToggleWarranty={toggleWarranty}
+                  cartNoteVariant={readCartNoteVariant(searchParams)}
                 />
               ))}
             </div>

@@ -11,7 +11,7 @@ import { ProductOptions, useProductOptions } from '../_components/ProductOptions
 import type { ProductOptionsController } from '../_components/ProductOptions'
 import { StickyCustomizeBar } from '../_components/StickyCustomizeBar'
 import { useNestedItems } from '../_components/NestedItems/useNestedItems'
-import { SECOND_ITEM_TITLE, secondItemOffer, secondItemPreviewInput } from './_templates/secondItem'
+import { secondItemOffer, secondItemPreviewInput, secondItemTitle } from './_templates/secondItem'
 import type { PersonalizePlacement } from '../_config/demoParams'
 import { materialLabel, startingAtPricing } from '../_config/brands'
 import { fieldById, stepFields, type Field, type FieldDisplayType, type PdpTemplate, type PresentationStep } from './_templates'
@@ -63,6 +63,12 @@ export interface TemplateCustomizerProps {
   onSaved?: () => void
   /** Demo: the material picker as image-only carousel tiles instead of the standard carousel. */
   materialImageOnly?: boolean
+  /**
+   * The final live preview: a name left empty is drawn with the next sample
+   * name even once others are typed (2 names, "Talia" typed: Talia + Julie),
+   * so the preview always shows as many names as were chosen.
+   */
+  fillEmptyFromSample?: boolean
   /** Demo: offer a second of this product at 50% off, just above Add to Bag. */
   nestedOffer?: boolean
   /** True while the "Added to your bag" state stands in for the form. */
@@ -129,7 +135,7 @@ function FieldTooltip({ text, Icon }: { text: string; Icon: IconCmp }) {
  * live preview read back from the same option state.
  */
 export function TemplateCustomizer({
-  brand, template, product, icons, addItem, openCart, onLivePreviewChange, onLivePreviewLoadingChange, onPersonalizedChange, belowCta, placement, headerSlot, onSaved, onAddedChange, onPersonalizeAnother, nestedOffer, materialImageOnly,
+  brand, template, product, icons, addItem, openCart, onLivePreviewChange, onLivePreviewLoadingChange, onPersonalizedChange, belowCta, placement, headerSlot, onSaved, onAddedChange, onPersonalizeAnother, nestedOffer, materialImageOnly, fillEmptyFromSample = false,
 }: TemplateCustomizerProps) {
   const { AiMagicIcon, ArrowIcon, CheckmarkIcon, ChevronIcon, StarIcon, XIcon, TooltipIcon } = icons
   const isMobile = useIsMobile()
@@ -204,7 +210,7 @@ export function TemplateCustomizer({
   const [secondChoices, setSecondChoices] = useState<Record<string, string> | null>(null)
   const [secondPreview, setSecondPreview] = useState<string | null>(null)
   const offer = useMemo(() => (nestedOffer ? secondItemOffer(template, product, secondPreview) : null), [nestedOffer, template, product, secondPreview])
-  const nested = useNestedItems(brand, offer ? [offer] : [], SECOND_ITEM_TITLE, {
+  const nested = useNestedItems(brand, offer ? [offer] : [], secondItemTitle(template), {
     onPanelChange: (_item, values) => setSecondChoices(values.selectedOptions),
     // Unchecked: back to the product photo, the typed name forgotten
     onUnstage: () => { setSecondChoices(null); setSecondPreview(null) },
@@ -392,7 +398,20 @@ export function TemplateCustomizer({
   // sample until the shopper types (and again if they clear it). Without one,
   // it shows only once there's text: clearing hands the slot back to the photo.
   const byCount = livePreview.sampleByCount
-  const input = (sample || byCount) && !hasText
+  // Names typed so far, with the next sample name in each empty one (final live preview)
+  const partlyFilled = fillEmptyFromSample && hasText && !!sample
+  const input = partlyFilled
+    ? {
+        ...shopperInput,
+        texts: Object.fromEntries(
+          Object.entries(shopperInput.texts).map(([id, values]) => {
+            const names = sample?.[Number(id)] ?? []
+            let next = 0
+            return [id, names.length ? values.map((v) => (v.trim() ? v : names[next++ % names.length])) : values]
+          }),
+        ),
+      }
+    : (sample || byCount) && !hasText
     ? {
         ...shopperInput,
         texts: Object.fromEntries(
@@ -633,11 +652,12 @@ export function TemplateCustomizer({
       )
     }
 
-    // V5's copy: "Material: Gold Vermeil" for the material, a helper under the name
+    // V5's copy: "Material" over the material, a helper under the name
     // (The image-only tiles name the picked one beside the label themselves: "Material — Gold Vermeil")
     if (jewelry && field.pricing === 'base') {
-      const picked = summaryLines(template, [field], state)[0]?.value
-      field = { ...field, name: picked && !materialImageOnly ? `${materialLabel(brand)}: ${picked}` : materialLabel(brand) }
+      // Just "Material" (OAL: "Finish"): the carousel's tiles name the picked one
+      // themselves, and the image-only swatches name it beside the label
+      field = { ...field, name: materialLabel(brand) }
     }
     if (jewelry && field.type === 'text' && !field.note && field.textMaxLength && !field.keyboard && !field.lengthFrom && !field.letterChoices) {
       field = { ...field, note: { text: `Letters only, up to ${field.textMaxLength} characters` } }
