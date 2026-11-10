@@ -22,9 +22,9 @@
   transform: translateY(-100%);
 }
 
-/* The final live preview on mobile: not sticky — the header scrolls away and
-   the product gallery takes the top of the screen */
-@media (max-width: 767px) {
+/* The final live preview on mobile and tablet (wherever the mobile gallery
+   shows): not sticky — the header scrolls away and the gallery takes the top */
+@media (max-width: 1023px) {
   .wrapperScrollsOnMobile.wrapperScrollsOnMobile {
     position: relative;
     top: auto;

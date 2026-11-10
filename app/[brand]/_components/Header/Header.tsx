@@ -194,7 +194,7 @@ export function Header({
       {showTrackOrderToggle && <TrackOrderStateToggle className={styles.cartSizeToggle} />}
       {isNestedDrawerDemo && <NestedDescriptionToggle className={styles.cartSizeToggle} />}
       {isNestedDrawerDemo && <NestedDrawerCountToggle className={styles.cartSizeToggle} />}
-      {pdpTemplate && <GalleryLayoutToggle templateDefault={pdpTemplate.gallery.desktop} className={`${styles.cartSizeToggle} ${styles.desktopOnlyControl}`} />}
+      {pdpTemplate && !isFinalPreview && <GalleryLayoutToggle templateDefault={pdpTemplate.gallery.desktop} className={`${styles.cartSizeToggle} ${styles.desktopOnlyControl}`} />}
       {pdpTemplate && !isFinalPreview && <PersonalizeToggle templateDefault={pdpTemplate.flow.defaultPlacement} className={styles.cartSizeToggle} />}
       {isFinalPreview && <MobileLayoutToggle className={styles.cartSizeToggle} />}
       {pdpTemplate && <NestedItemToggle className={styles.cartSizeToggle} />}

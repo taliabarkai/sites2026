@@ -69,6 +69,8 @@ export interface TemplateCustomizerProps {
    * so the preview always shows as many names as were chosen.
    */
   fillEmptyFromSample?: boolean
+  /** The final live preview: the page shows the regular live price, never "Starting at". */
+  regularPrice?: boolean
   /** Demo: offer a second of this product at 50% off, just above Add to Bag. */
   nestedOffer?: boolean
   /** True while the "Added to your bag" state stands in for the form. */
@@ -135,7 +137,7 @@ function FieldTooltip({ text, Icon }: { text: string; Icon: IconCmp }) {
  * live preview read back from the same option state.
  */
 export function TemplateCustomizer({
-  brand, template, product, icons, addItem, openCart, onLivePreviewChange, onLivePreviewLoadingChange, onPersonalizedChange, belowCta, placement, headerSlot, onSaved, onAddedChange, onPersonalizeAnother, nestedOffer, materialImageOnly, fillEmptyFromSample = false,
+  brand, template, product, icons, addItem, openCart, onLivePreviewChange, onLivePreviewLoadingChange, onPersonalizedChange, belowCta, placement, headerSlot, onSaved, onAddedChange, onPersonalizeAnother, nestedOffer, materialImageOnly, fillEmptyFromSample = false, regularPrice = false,
 }: TemplateCustomizerProps) {
   const { AiMagicIcon, ArrowIcon, CheckmarkIcon, ChevronIcon, StarIcon, XIcon, TooltipIcon } = icons
   const isMobile = useIsMobile()
@@ -382,7 +384,7 @@ export function TemplateCustomizer({
   // running total is on Add to bag); on sale it's the actual price — crossed
   // out, the selling price and "Save N%" — following the choices
   const hideFinishPrices = startingAtPricing(brand)
-  const startingAt = hideFinishPrices && !salePercent
+  const startingAt = hideFinishPrices && !salePercent && !regularPrice
   const pricePrefix = !inline && !started && canAddCost && !hideFinishPrices ? 'From ' : ''
   const startFull = startingPrice(template, product.priceInCents ?? 0)
   const priceLabel = startingAt

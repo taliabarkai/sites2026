@@ -2076,7 +2076,8 @@ function ProductDetailPageInner({ productId, previewId, withoutTemplate = false,
   // Gallery: the template picks the desktop layout and where the preview goes;
   // without one, each brand keeps its own layout.
   // The header's gallery toggle (?gallery=) overrides the template's own choice
-  const galleryOverride = template ? readGalleryLayout(searchParams)?.display : undefined
+  // (Not on the final live preview: it has no gallery switch — each product's own gallery)
+  const galleryOverride = template && !finalPreview ? readGalleryLayout(searchParams)?.display : undefined
   // TGR and OAL lead every desktop PDP with Hero + grid (photo first)
   const desktopGallery: GalleryDisplay = galleryOverride
     ?? (brand === 'tgr' || brand === 'oal' ? 'heroGridPhotoFirst' : template?.gallery.desktop)
@@ -2092,6 +2093,7 @@ function ProductDetailPageInner({ productId, previewId, withoutTemplate = false,
   const isMusicMemories = !template && brand === 'lal' && MUSIC_MEMORIES_PRODUCT_IDS.has(product.id)
   const mobileLayout = readMobileLayout(searchParams)
   const isMobile = useIsMobile()
+  const isNarrow = useIsMobile('(max-width: 1023px)')
   // Every version leads with the product's own photo; the preview is pushed in
   // front once it's the shopper's own — typed (desktop, V2) or saved (mobile V1, V3)
   const behindRow = !!template
@@ -2100,8 +2102,10 @@ function ProductDetailPageInner({ productId, previewId, withoutTemplate = false,
   // …and V2 (Preview in gallery) uses the same header-above layout
   // Final live preview: the info above the gallery unless the mobile layout
   // toggle puts the gallery first; Music Memories draws its header there too
+  // On the final live preview "mobile" is every width the mobile gallery shows
+  // at (under 1024px) — tablets included — so it always sticks there
   const headerAbove = finalPreview
-    ? isMobile && mobileLayout === 'info-above' && (!!template || isMusicMemories)
+    ? isNarrow && mobileLayout === 'info-above' && (!!template || isMusicMemories)
     : placement === 'page' && isMobile
   const [headerSlot, setHeaderSlot] = useState<HTMLDivElement | null>(null)
   // The mobile gallery's box (it lands just under the site header when scrolled to)
@@ -2110,7 +2114,7 @@ function ProductDetailPageInner({ productId, previewId, withoutTemplate = false,
   // the form below it — the preview updates in view as they type — and leaves
   // with the Add to Bag button once that scrolls up to it
   // (Final live preview: in both mobile layouts, on every live-preview product)
-  const stickyGallery = finalPreview ? isMobile && (!!template || isMusicMemories) : placement === 'page' && isMobile && !!template
+  const stickyGallery = finalPreview ? isNarrow && (!!template || isMusicMemories) : placement === 'page' && isMobile && !!template
   useEffect(() => {
     const el = mobileGalleryRef.current
     if (!stickyGallery || !el) return
@@ -2348,6 +2352,7 @@ function ProductDetailPageInner({ productId, previewId, withoutTemplate = false,
               materialImageOnly={readMaterialDisplay(searchParams, brand) === 'image'}
               onPersonalizeAnother={personalizeAnother}
               fillEmptyFromSample={finalPreview}
+              regularPrice={finalPreview}
               belowCta={<UspBadges brand={brand} icons={icons} />}
             />
           ) : brand === 'lal' && MUSIC_MEMORIES_PRODUCT_IDS.has(product.id) ? (
