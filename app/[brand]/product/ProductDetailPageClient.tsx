@@ -2150,7 +2150,8 @@ function ProductDetailPageInner({ productId, previewId, withoutTemplate = false,
   // Personalize Another starts the customizer over — a fresh one, back at the top.
   const [addedToBag, setAddedToBag] = useState(false)
   const [customizerRun, setCustomizerRun] = useState(0)
-  const nestedOn = readNestedItemOn(searchParams)
+  // The final live preview opens with the nested item on
+  const nestedOn = readNestedItemOn(searchParams, finalPreview)
   // Switching versions starts the page over, at the top
   const versionKey = placement ?? ''
   const lastVersion = useRef(versionKey)
@@ -2168,9 +2169,9 @@ function ProductDetailPageInner({ productId, previewId, withoutTemplate = false,
   // The product's photos stay in place; the preview is added in front of them
   const galleryImages = images
   const slotPreview = behindRow ? (previewPersonalized ? livePreview : null) : livePreview
-  // With a sample name, the badge waits until the shopper has typed their own
+  // With a sample (a name, Inez's initials), the badge waits for the shopper's own
   const previewRibbon = template
-    ? (addedToBag || (template.livePreview.sampleText && !previewPersonalized) ? '' : template.livePreview.ribbon ?? '')
+    ? (addedToBag || ((template.livePreview.sampleText || template.livePreview.sampleByCount) && !previewPersonalized) ? '' : template.livePreview.ribbon ?? '')
     : undefined
   // Stacked top left: the personalization ribbon, then the product's own badges
   // The personalization badge takes the product badge's place (the sale is
@@ -2297,7 +2298,8 @@ function ProductDetailPageInner({ productId, previewId, withoutTemplate = false,
             images={galleryImages}
             modelImages={modelImages}
             livePreview={slotPreview}
-            ribbons={previewRibbons}
+            // The personalization badge only on the preview — on the photo, the product's own badges
+            ribbons={slotPreview ? previewRibbons : template?.gallery.badges}
             previewNote={previewNote}
             floatingProgress={!!template}
           />
@@ -2353,6 +2355,7 @@ function ProductDetailPageInner({ productId, previewId, withoutTemplate = false,
               onPersonalizeAnother={personalizeAnother}
               fillEmptyFromSample={finalPreview}
               regularPrice={finalPreview}
+              previewOnFirstPick={finalPreview}
               belowCta={<UspBadges brand={brand} icons={icons} />}
             />
           ) : brand === 'lal' && MUSIC_MEMORIES_PRODUCT_IDS.has(product.id) ? (

@@ -71,6 +71,12 @@ export interface TemplateCustomizerProps {
   fillEmptyFromSample?: boolean
   /** The final live preview: the page shows the regular live price, never "Starting at". */
   regularPrice?: boolean
+  /**
+   * The final live preview: with every field on the page (V2), the live
+   * preview — and its badge — come in at the shopper's first pick (a count,
+   * an initial, a stone), not only once they've entered their own text.
+   */
+  previewOnFirstPick?: boolean
   /** Demo: offer a second of this product at 50% off, just above Add to Bag. */
   nestedOffer?: boolean
   /** True while the "Added to your bag" state stands in for the form. */
@@ -137,7 +143,7 @@ function FieldTooltip({ text, Icon }: { text: string; Icon: IconCmp }) {
  * live preview read back from the same option state.
  */
 export function TemplateCustomizer({
-  brand, template, product, icons, addItem, openCart, onLivePreviewChange, onLivePreviewLoadingChange, onPersonalizedChange, belowCta, placement, headerSlot, onSaved, onAddedChange, onPersonalizeAnother, nestedOffer, materialImageOnly, fillEmptyFromSample = false, regularPrice = false,
+  brand, template, product, icons, addItem, openCart, onLivePreviewChange, onLivePreviewLoadingChange, onPersonalizedChange, belowCta, placement, headerSlot, onSaved, onAddedChange, onPersonalizeAnother, nestedOffer, materialImageOnly, fillEmptyFromSample = false, regularPrice = false, previewOnFirstPick = false,
 }: TemplateCustomizerProps) {
   const { AiMagicIcon, ArrowIcon, CheckmarkIcon, ChevronIcon, StarIcon, XIcon, TooltipIcon } = icons
   const isMobile = useIsMobile()
@@ -462,9 +468,10 @@ export function TemplateCustomizer({
     // Desktop, steps open (the live preview mode): the gallery leads with the
     // preview from the start — the sample (Inez: "A") until the shopper types
     // V6 (steps open from the start): the photo leads until the first pick
-    const sampleShown = !!(livePreview.sampleText || livePreview.sampleByCount) && cardOpen && (!openOnPage || interacted)
+    const hasSample = !!(livePreview.sampleText || livePreview.sampleByCount)
+    const sampleShown = hasSample && ((cardOpen && (!openOnPage || interacted)) || (previewOnFirstPick && inline && interacted))
     onPersonalizedChange?.(live ? hasText || sampleShown : isSaved)
-  }, [rowMode, tapMode, buyInPanel, isMobile, entered, isSaved, hasText, onPersonalizedChange, galleryFrozen, cardOpen, openOnPage, interacted, livePreview.sampleText, livePreview.sampleByCount])
+  }, [rowMode, tapMode, buyInPanel, isMobile, entered, isSaved, hasText, onPersonalizedChange, galleryFrozen, cardOpen, openOnPage, interacted, inline, previewOnFirstPick, livePreview.sampleText, livePreview.sampleByCount])
   const engine = livePreview.engine
 
   const [preview, setPreview] = useState<string | null>(null)

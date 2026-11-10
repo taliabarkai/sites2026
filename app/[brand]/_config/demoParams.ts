@@ -279,8 +279,10 @@ export const NESTED_ITEM_STATES = [
   { value: 'on',  label: 'On' },
 ] as const
 
-export function readNestedItemOn(params: ReadableParams): boolean {
-  return params.get(NESTED_ITEM_PARAM) === 'on'
+/** Off unless the link turns it on — or, where `defaultOn` (the final live preview), on unless it turns it off. */
+export function readNestedItemOn(params: ReadableParams, defaultOn = false): boolean {
+  const v = params.get(NESTED_ITEM_PARAM)
+  return v === 'on' || (defaultOn && v !== 'off')
 }
 
 /**

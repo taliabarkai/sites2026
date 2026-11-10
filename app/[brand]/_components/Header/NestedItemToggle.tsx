@@ -9,11 +9,11 @@ import styles from './Header.module.css'
  * Demo control for template PDPs: show the nested item — a second necklace at
  * 50% off above Add to Bag — or not (`?nested=on`). Off by default.
  */
-export function NestedItemToggle({ className }: { className?: string }) {
+export function NestedItemToggle({ className, defaultOn = false }: { className?: string; defaultOn?: boolean }) {
   const router       = useRouter()
   const pathname     = usePathname()
   const searchParams = useSearchParams()
-  const on           = readNestedItemOn(searchParams)
+  const on           = readNestedItemOn(searchParams, defaultOn)
 
   /** Rewrites only this key; anything else on the URL survives. */
   const select = (value: string) => {

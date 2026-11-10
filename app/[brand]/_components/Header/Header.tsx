@@ -197,7 +197,7 @@ export function Header({
       {pdpTemplate && !isFinalPreview && <GalleryLayoutToggle templateDefault={pdpTemplate.gallery.desktop} className={`${styles.cartSizeToggle} ${styles.desktopOnlyControl}`} />}
       {pdpTemplate && !isFinalPreview && <PersonalizeToggle templateDefault={pdpTemplate.flow.defaultPlacement} className={styles.cartSizeToggle} />}
       {isFinalPreview && <MobileLayoutToggle className={styles.cartSizeToggle} />}
-      {pdpTemplate && <NestedItemToggle className={styles.cartSizeToggle} />}
+      {pdpTemplate && <NestedItemToggle defaultOn={isFinalPreview} className={styles.cartSizeToggle} />}
       {pdpTemplate && <MaterialDisplayToggle className={styles.cartSizeToggle} />}
       {isFreePreviewPdp && <UspStripToggle className={styles.cartSizeToggle} />}
       {showCartNoteToggle && <CartNoteToggle className={styles.cartSizeToggle} />}
