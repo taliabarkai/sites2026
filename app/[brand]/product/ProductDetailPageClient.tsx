@@ -1604,13 +1604,11 @@ function ProductForm({ brand, product, icons, nestedItems = [], nestedDisplay = 
            carousel. */
         <>
           {personalizeNow ? (
-            <div className={styles.materialPicker}>
-              <OptionRadioGroup
-                group={metalCarouselGroup(product, diamondOffset, brand)}
-                value={selectedSwatchKey}
-                onChange={(id) => setSelectedSwatchKey(id as MaterialSwatch['key'])}
-              />
-            </div>
+            <OptionRadioGroup
+              group={metalCarouselGroup(product, diamondOffset, brand)}
+              value={selectedSwatchKey}
+              onChange={(id) => setSelectedSwatchKey(id as MaterialSwatch['key'])}
+            />
           ) : (
             <SwatchSelector
               swatches={swatches}

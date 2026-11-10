@@ -802,16 +802,6 @@
   width: 100%;
 }
 
-/* ── Personalize-now's material carousel — 16px from the header's divider to
-      its label's text: the form's 24px gap, less the 16px wanted, less the
-      half of the arrows' 32px row the label sits centred in ───────────────── */
-.materialPicker {
-  margin-top: calc(
-    var(--spacing-sm) - var(--spacing-md)
-    - (var(--spacing-lg) - var(--typography-rules-text2-line-height)) / 2
-  );
-}
-
 /* ── Save flow — the saved personalisation above Add to Bag ───────────────── */
 .personalizeBlock {
   display: flex;
