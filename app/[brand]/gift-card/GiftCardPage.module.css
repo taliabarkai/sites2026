@@ -719,11 +719,6 @@
 
 /* Chips share the amount tiles' look and layout (see .amountGrid). */
 
-/* The locked email chip: selected look, no invitation to click it. */
-.amountOption:has(.visuallyHiddenInput[aria-disabled="true"]) {
-  cursor: default;
-}
-
 .titleHint {
   color: var(--colors-text-secondary);
   font-family:    var(--typography-rules-text1-font-family);

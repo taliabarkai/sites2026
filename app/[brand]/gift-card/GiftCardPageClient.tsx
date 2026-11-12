@@ -37,10 +37,9 @@ const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 type SendMethod = 'email' | 'sms' | 'link' | 'print'
 
-// Email is always part of the order (the recipient is emailed the card), so
-// its chip is locked on; the others are optional extras on top of it.
-const SEND_METHODS: Array<{ id: SendMethod; label: string; locked?: boolean }> = [
-  { id: 'email', label: 'Send by email', locked: true },
+// Any combination; nothing is picked to start, and at least one is required.
+const SEND_METHODS: Array<{ id: SendMethod; label: string }> = [
+  { id: 'email', label: 'Email' },
   { id: 'sms',   label: 'SMS' },
   { id: 'link',  label: 'Get a link' },
   { id: 'print', label: 'Print at home' },
@@ -258,7 +257,7 @@ export default function GiftCardPageClient() {
   const photoDrag = useRef<{ startX: number; startY: number; startFrame: PhotoFrame } | null>(null)
   const [amountChoice, setAmountChoice] = useState<number | 'custom' | null>(null)
   const [customAmount, setCustomAmount] = useState('')
-  const [methods, setMethods]           = useState<SendMethod[]>(['email'])
+  const [methods, setMethods]           = useState<SendMethod[]>([])
   const [recipientName, setRecipientName]   = useState('')
   const [recipientEmail, setRecipientEmail] = useState('')
   const [recipientPhone, setRecipientPhone] = useState('')
@@ -386,8 +385,8 @@ export default function GiftCardPageClient() {
   }
 
   function toggleMethod(id: SendMethod, on: boolean) {
-    if (SEND_METHODS.find((option) => option.id === id)?.locked) return
     setMethods((prev) => (on ? [...prev, id] : prev.filter((item) => item !== id)))
+    clearError('method')
   }
 
   function validate(): Record<string, string> {
@@ -405,6 +404,8 @@ export default function GiftCardPageClient() {
         next.customAmount = 'Use whole dollars.'
       }
     }
+
+    if (methods.length === 0) next.method = 'Choose at least one way to send it.'
 
     if (!recipientName.trim()) next.recipientName = "Enter the recipient's name."
     if (askRecipientEmail) {
@@ -767,6 +768,7 @@ export default function GiftCardPageClient() {
                 className={styles.section}
                 role="group"
                 aria-labelledby={fieldId('method-title')}
+                aria-describedby={errors.method ? `${fieldId('method')}-error` : undefined}
               >
                 {/* The hint rides in the title, so it is read with the question and
                     wraps under it only when the line runs out. */}
@@ -784,14 +786,15 @@ export default function GiftCardPageClient() {
                         value={option.id}
                         className={styles.visuallyHiddenInput}
                         checked={methods.includes(option.id)}
-                        // Stays focusable and announced as checked, just not changeable.
-                        aria-disabled={option.locked || undefined}
                         onChange={(event) => toggleMethod(option.id, event.target.checked)}
                       />
                       <span className={styles.amountTile}>{option.label}</span>
                     </label>
                   ))}
                 </div>
+                {errors.method && (
+                  <p id={`${fieldId('method')}-error`} className={styles.error}>{errors.method}</p>
+                )}
               </div>
 
               {/* Recipient */}
