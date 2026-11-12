@@ -131,115 +131,42 @@
   transform: translateY(-3cqmax) rotate(-61deg);
 }
 
-/* Gallery photo card: two-sided, so it can flip to its back. The tilt stays on
-   .photoCard; the faces carry the rounding, clipping and shadow, because
-   overflow: hidden on the tilted wrapper would flatten the 3D flip. */
-.photoCard3d {
-  overflow: visible;
-  box-shadow: none;
-  perspective: 2000px;
-}
-
-.cardFlip {
-  position: relative;
-  display: block;
-  border-radius: inherit;
-  width: 100%;
-  height: 100%;
-  transform-style: preserve-3d;
-  transition: transform 0.7s cubic-bezier(0.4, 0.2, 0.2, 1);
-}
-
-.cardFlipped {
-  transform: rotateY(180deg);
-}
-
-.cardSideFront,
-.cardSideBack {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-  border-radius: inherit;
-  box-shadow: var(--shadow-md);
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-}
-
-.cardSideFront {
-  /* The photo can be dragged to reposition it; touch-action keeps a drag on
-     the card from scrolling the page on phones. */
+/* Gallery photo card: the photo can be dragged to reposition it;
+   touch-action keeps a drag on the card from scrolling the page on phones. */
+.photoCardDraggable {
   cursor: grab;
   touch-action: none;
   user-select: none;
   -webkit-user-select: none;
 }
 
-.cardSideFront:active {
+.photoCardDraggable:active {
   cursor: grabbing;
 }
 
-.cardSideBack {
-  /* Margins scale with the card, like its corners. */
-  --card-back-margin: 5cqmax;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: var(--card-back-margin);
-  box-sizing: border-box;
-  background: var(--colors-background);
-  color: var(--colors-text);
-  transform: rotateY(180deg);
-}
-
-/* The brand logo in the middle of the back, sized to the card. Scoped under
-   the back face so it outranks SiteLogo's own fixed header height. */
-.cardSideBack .cardBackLogo {
-  width: 24cqmax;
+/* The brand logo in the card's bottom-left corner, white with a soft shadow
+   so it reads on light and dark photos alike. Margins and size scale with the
+   card. Scoped under .photoCard to outrank SiteLogo's own header sizing. */
+.photoCard .photoCardLogo {
+  position: absolute;
+  /* 4cqmax ≈ 33px on the desktop gallery card (was 5cqmax ≈ 42px). Kept in
+     card units so the small picker tile keeps the same proportions. */
+  left: 4cqmax;
+  bottom: 4cqmax;
+  z-index: var(--z-raised);
+  width: 16cqmax;
   max-width: none;
   height: auto;
+  pointer-events: none;
+  filter: brightness(0) invert(1) drop-shadow(0 0 1cqmax var(--colors-overlay));
 }
 
-/* Room for the logo below, so long text never runs into it. */
-.cardSideBackWithText {
-  padding-bottom: calc(var(--card-back-margin) * 2 + 5cqmax);
-}
-
-/* ...and the logo moves to the bottom edge, centred, inside the same margin
-   as the sides, at three quarters of its size. */
-.cardSideBackWithText .cardBackLogo {
-  position: absolute;
-  left: 50%;
-  bottom: var(--card-back-margin);
-  width: calc(24cqmax * 0.75);
-  transform: translateX(-50%);
-}
-
-/* With text, the text takes the centre of the back... */
-.cardBackText {
-  max-width: 100%;
-  text-align: center;
-  white-space: pre-wrap;
-  overflow-wrap: anywhere;
-  font-family:    var(--typography-rules-headline5-font-family);
-  font-size:      var(--typography-rules-headline5-font-size);
-  line-height:    var(--typography-rules-headline5-line-height);
-  font-weight:    var(--typography-rules-headline5-font-weight, normal);
-  letter-spacing: var(--typography-rules-headline5-letter-spacing, normal);
-  text-transform: var(--typography-rules-headline5-text-transform, none);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .cardFlip {
-    transition: none;
-  }
-}
-
-/* Photo tools (zoom in, zoom out, rotate) in the gallery's bottom-left:
+/* Photo tools (zoom in, zoom out, rotate) in the gallery's bottom-right:
    round white buttons. Moving the photo is by dragging it. */
 .photoTools {
   --photo-control: var(--spacing-xl);
   position: absolute;
-  left: var(--spacing-sm);
+  right: var(--spacing-sm);
   bottom: var(--spacing-sm);
   z-index: var(--z-raised);
   display: flex;
@@ -274,56 +201,6 @@
 .photoTool:focus-visible {
   outline: 2px solid var(--colors-text);
   outline-offset: 2px;
-}
-
-/* Front | Back switch in the gallery's bottom-right, styled like the photo
-   tools' card: white, raised, the same height as the round buttons. */
-.sideToggle {
-  position: absolute;
-  right: var(--spacing-sm);
-  bottom: var(--spacing-sm);
-  z-index: var(--z-raised);
-  display: inline-flex;
-  align-items: stretch;
-  height: var(--spacing-xl);
-  padding: var(--spacing-xxxs);
-  box-sizing: border-box;
-  background: var(--colors-background);
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-md);
-}
-
-.sideToggleButton {
-  padding: 0 var(--spacing-sm);
-  background: transparent;
-  border: 0;
-  border-radius: var(--radius-lg);
-  color: var(--colors-text);
-  cursor: pointer;
-  font-family:    var(--typography-rules-text1-font-family);
-  font-size:      var(--typography-rules-text1-font-size);
-  line-height:    var(--typography-rules-text1-line-height);
-  font-weight:    var(--typography-rules-text1-font-weight, normal);
-  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
-  transition: background var(--transition-fast), color var(--transition-fast);
-}
-
-.sideToggleActive {
-  background: var(--colors-text);
-  color: var(--colors-text-inverse);
-}
-
-.sideToggleButton:focus-visible {
-  outline: 2px solid var(--colors-text);
-  outline-offset: 2px;
-}
-
-/* "Add text" under the card picker, shown once a photo is uploaded. */
-.backTextGroup {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-xxs);
-  margin-top: var(--spacing-xxs);
 }
 
 .photoCardImage {
@@ -548,6 +425,11 @@
      left line, so a selected first tile never pokes out past it. */
   margin-left: 0;
   padding-left: var(--spacing-xxxs);
+  /* Room under the tiles for the uploaded photo's Replace link, taken back by
+     the matching negative margin: the scroller doesn't clip the link, and the
+     row's footprint (so everything below it) doesn't move when it appears. */
+  padding-bottom: calc(var(--spacing-xxs) + var(--spacing-md));
+  margin-bottom: calc((var(--spacing-xxs) + var(--spacing-md)) * -1);
   overflow-x: auto;
   scroll-snap-type: x proximity;
   scroll-padding-inline: var(--spacing-xxxs) var(--spacing-xxs);
@@ -576,36 +458,45 @@
   cursor: pointer;
 }
 
-.removePhoto {
+.removePhoto,
+.replacePhoto {
   position: absolute;
-  top: var(--spacing-xxxs);
-  right: var(--spacing-xxxs);
   z-index: var(--z-raised);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: var(--spacing-md);
-  height: var(--spacing-md);
   padding: 0;
   background: var(--colors-background);
   border: 0;
   border-radius: var(--radius-full);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-md);
   color: var(--colors-text);
   cursor: pointer;
 }
 
-.removePhoto:focus-visible {
-  outline: 2px solid var(--colors-text);
-  outline-offset: 2px;
+/* Remove: a small badge floating over the tile's top-right corner. It
+   overhangs by less than the row's padding, so the carousel never clips it. */
+.removePhoto {
+  top: 0;
+  right: 0;
+  width: calc(var(--spacing-sm) + var(--spacing-xxxs));
+  height: calc(var(--spacing-sm) + var(--spacing-xxxs));
+  transform: translate(35%, -35%);
 }
 
-.replaceLink {
-  display: inline-block;
-  margin-top: var(--spacing-xxs);
-  color: var(--colors-text);
+/* Replace: a plain underlined word just under the tile. Absolutely placed, so
+   it sits in the gap below the row and never pushes the next step down. */
+.replacePhoto {
+  /* 8px under the tile, centred on it. */
+  top: calc(100% + var(--spacing-xxs));
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0;
+  background: none;
+  border-radius: 0;
+  box-shadow: none;
   text-decoration: underline;
-  cursor: pointer;
+  white-space: nowrap;
   font-family:    var(--typography-rules-text3-font-family);
   font-size:      var(--typography-rules-text3-font-size);
   line-height:    var(--typography-rules-text3-line-height);
@@ -613,7 +504,8 @@
   letter-spacing: var(--typography-rules-text3-letter-spacing, normal);
 }
 
-.replaceLink:focus-within {
+.removePhoto:focus-visible,
+.replacePhoto:focus-within {
   outline: 2px solid var(--colors-text);
   outline-offset: 2px;
 }
@@ -948,6 +840,15 @@
   color: var(--colors-text-secondary);
 }
 
+.hintLink {
+  color: inherit;
+  text-decoration: underline;
+}
+
+.hintLink:hover {
+  color: var(--colors-text);
+}
+
 /* ═══ Actions ════════════════════════════════════════════════════════════════ */
 
 .actions {
@@ -967,15 +868,9 @@
     gap: var(--spacing-lg);
   }
 
-  .sideToggle {
-    right: var(--spacing-md);
-    bottom: var(--spacing-md);
-    height: calc(var(--spacing-xl) + var(--spacing-xxs));
-  }
-
   .photoTools {
     --photo-control: calc(var(--spacing-xl) + var(--spacing-xxs));
-    left: var(--spacing-md);
+    right: var(--spacing-md);
     bottom: var(--spacing-md);
   }
 
@@ -1066,9 +961,8 @@
   }
 
   /* The gallery's bottom starts a topline's height below the fold at the top
-     of the page, so the photo controls sit that much higher. */
-  .photoTools,
-  .sideToggle {
+     of the page, so the photo tools sit that much higher. */
+  .photoTools {
     bottom: calc(var(--spacing-md) + var(--topline-height, 0px));
   }
 

@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useId, useMemo, useRef, useState } from 'react'
+import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import * as oalIcons from '@/src/components/icons/oal'
 import * as mnnIcons from '@/src/components/icons/mnn'
@@ -11,7 +12,6 @@ import { Header } from '../_components/Header'
 import { Footer } from '../_components/Footer'
 import { Button } from '../_components/Button'
 import { FloatingCart } from '../_components/FloatingCart'
-import { Checkbox } from '../_components/Checkbox'
 import { SiteLogo } from '../_components/SiteLogo'
 import { BRANDS, getBrandFromPathname } from '../_config/brands'
 import { prefixFooterColumns, prefixNavLinks, withBrandPrefix } from '../_config/brandPaths'
@@ -35,15 +35,26 @@ const BRAND_ICONS = {
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
-type SendMethod = 'email' | 'link' | 'print'
+type SendMethod = 'email' | 'sms' | 'link' | 'print'
 
 // Email is always part of the order (the recipient is emailed the card), so
 // its chip is locked on; the others are optional extras on top of it.
 const SEND_METHODS: Array<{ id: SendMethod; label: string; locked?: boolean }> = [
   { id: 'email', label: 'Send by email', locked: true },
+  { id: 'sms',   label: 'SMS' },
   { id: 'link',  label: 'Get a link' },
   { id: 'print', label: 'Print at home' },
 ]
+
+/** A US number as it's typed: 5559876543 → (555) 987-6543. A leading 1 is dropped. */
+function formatUsPhone(raw: string): string {
+  let digits = raw.replace(/\D/g, '')
+  if (digits.length > 10 && digits.startsWith('1')) digits = digits.slice(1)
+  digits = digits.slice(0, 10)
+  if (digits.length <= 3) return digits.length ? `(${digits}` : ''
+  if (digits.length <= 6) return `(${digits.slice(0, 3)}) ${digits.slice(3)}`
+  return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`
+}
 
 /** The uploaded photo card's tilt, matching .photoCard's rotate() in the CSS. */
 const PHOTO_CARD_TILT_DEG = 61
@@ -52,7 +63,6 @@ const CARD_RATIO = 1.586
 const ZOOM_MIN = 1
 const ZOOM_MAX = 3
 const ZOOM_STEP = 0.25
-const BACK_TEXT_MAX = 80
 
 // ─── Photo framing ────────────────────────────────────────────────────────────
 // The uploaded photo is drawn at its "cover" size (just big enough to fill the
@@ -224,8 +234,7 @@ export default function GiftCardPageClient() {
   const { items, isOpen, subtotal, addItem, openCart, closeCart, removeItem } = useCart()
   const brand = getBrandFromPathname(pathname)
   const brandLabel = BRANDS.find((item) => item.key === brand)?.label ?? ''
-  const icons = BRAND_ICONS[brand]
-  const { FileUploadIcon, RotateIcon, XIcon, ZoomInIcon, ZoomOutIcon } = icons
+  const { FileUploadIcon, RotateIcon, XIcon, ZoomInIcon, ZoomOutIcon } = BRAND_ICONS[brand]
 
   const navLinks = prefixNavLinks(brand, DEFAULT_NAV_LINKS)
   const footerColumns = prefixFooterColumns(brand, DEFAULT_FOOTER_COLUMNS)
@@ -245,9 +254,6 @@ export default function GiftCardPageClient() {
   // How the uploaded photo is framed in its card, and its natural size once loaded.
   const [photoFrame, setPhotoFrame]     = useState<PhotoFrame>(DEFAULT_FRAME)
   const [photoNatural, setPhotoNatural] = useState<{ w: number; h: number } | null>(null)
-  const [addBackText, setAddBackText]   = useState(false)
-  const [backText, setBackText]         = useState('')
-  const [showBack, setShowBack]         = useState(false)
   // An in-progress drag on the gallery photo: where the pointer and frame started.
   const photoDrag = useRef<{ startX: number; startY: number; startFrame: PhotoFrame } | null>(null)
   const [amountChoice, setAmountChoice] = useState<number | 'custom' | null>(null)
@@ -255,6 +261,7 @@ export default function GiftCardPageClient() {
   const [methods, setMethods]           = useState<SendMethod[]>(['email'])
   const [recipientName, setRecipientName]   = useState('')
   const [recipientEmail, setRecipientEmail] = useState('')
+  const [recipientPhone, setRecipientPhone] = useState('')
   const [message, setMessage]           = useState('')
   const [errors, setErrors]             = useState<Record<string, string>>({})
 
@@ -268,6 +275,7 @@ export default function GiftCardPageClient() {
   // ── Derived ───────────────────────────────────────────────────────────────
   const sendsByEmail      = methods.includes('email')
   const askRecipientEmail = sendsByEmail
+  const askRecipientPhone = methods.includes('sms')
 
   const design = useMemo(
     () => GIFT_CARD_DESIGNS.find((item) => item.id === designId) ?? null,
@@ -327,13 +335,9 @@ export default function GiftCardPageClient() {
 
   function removeUpload() {
     setUpload(null)
-    setAddBackText(false)
-    setBackText('')
-    setShowBack(false)
     setDesignId(GIFT_CARD_DESIGNS[0].id)
   }
 
-  const hasBackText = addBackText && backText.trim().length > 0
   const photoCover = photoNatural ? coverSize(photoNatural) : null
   const framedPhotoStyle = photoStyle(photoFrame, photoCover)
 
@@ -407,6 +411,11 @@ export default function GiftCardPageClient() {
       if (!recipientEmail.trim()) next.recipientEmail = "Enter the recipient's email."
       else if (!EMAIL_PATTERN.test(recipientEmail.trim())) next.recipientEmail = 'Enter a valid email, e.g. name@example.com.'
     }
+    if (askRecipientPhone) {
+      const digits = recipientPhone.replace(/\D/g, '')
+      if (!digits) next.recipientPhone = "Enter the recipient's phone number."
+      else if (digits.length !== 10) next.recipientPhone = 'Enter a 10-digit phone number, e.g. (555) 987-6543.'
+    }
 
     return next
   }
@@ -431,8 +440,8 @@ export default function GiftCardPageClient() {
       { label: 'Delivery', value: SEND_METHODS.filter((m) => methods.includes(m.id)).map((m) => m.label).join(', ') },
       { label: 'To', value: recipientName.trim() },
       ...(askRecipientEmail ? [{ label: 'Email', value: recipientEmail.trim() }] : []),
+      ...(askRecipientPhone ? [{ label: 'Phone', value: `+1 ${recipientPhone}` }] : []),
       ...(message.trim() ? [{ label: 'Message', value: message.trim() }] : []),
-      ...(usingUpload && addBackText && backText.trim() ? [{ label: 'Back of card', value: backText.trim() }] : []),
     ]
 
     addItem({
@@ -469,90 +478,56 @@ export default function GiftCardPageClient() {
             <div className={joinClasses(styles.previewColumn, styles.galleryColumn)}>
               <div className={styles.gallerySticky}>
                 {galleryImage.photo ? (
-                  // An uploaded photo, cropped to fill a landscape card. The card
-                  // has a back (the optional text) and flips to show it while the
-                  // text field has focus.
+                  // An uploaded photo, cropped to fill a landscape card, with the
+                  // brand logo in its bottom-left corner. Drag the photo to move it.
                   <div className={styles.photoStage}>
-                    <span className={joinClasses(styles.photoCard, styles.photoCard3d)}>
-                      <span className={joinClasses(styles.cardFlip, showBack && styles.cardFlipped)}>
-                        <span
-                          className={styles.cardSideFront}
-                          onPointerDown={startPhotoDrag}
-                          onPointerMove={movePhotoDrag}
-                          onPointerUp={endPhotoDrag}
-                          onPointerCancel={endPhotoDrag}
-                        >
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img
-                            src={galleryImage.src}
-                            alt={galleryImage.alt}
-                            draggable={false}
-                            className={styles.photoCardImage}
-                            style={framedPhotoStyle}
-                            onLoad={notePhotoSize}
-                          />
-                        </span>
-                        <span
-                          className={joinClasses(styles.cardSideBack, hasBackText && styles.cardSideBackWithText)}
-                          aria-hidden={!showBack}
-                        >
-                          {/* Logo alone: centred. With text: the text takes the centre
-                              and the logo drops to the bottom edge, a quarter smaller. */}
-                          {hasBackText && <span className={styles.cardBackText}>{backText}</span>}
-                          <SiteLogo brand={brand} className={styles.cardBackLogo} />
-                        </span>
-                      </span>
+                    <span
+                      className={joinClasses(styles.photoCard, styles.photoCardDraggable)}
+                      onPointerDown={startPhotoDrag}
+                      onPointerMove={movePhotoDrag}
+                      onPointerUp={endPhotoDrag}
+                      onPointerCancel={endPhotoDrag}
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={galleryImage.src}
+                        alt={galleryImage.alt}
+                        draggable={false}
+                        className={styles.photoCardImage}
+                        style={framedPhotoStyle}
+                        onLoad={notePhotoSize}
+                      />
+                      <SiteLogo brand={brand} tone="inverse" className={styles.photoCardLogo} />
                     </span>
 
-                    {/* Photo tools, bottom-left: zoom and turn. Moving is by drag. */}
-                    {!showBack && (
-                      <div className={styles.photoTools} role="group" aria-label="Adjust your photo">
-                        <button
-                          type="button"
-                          className={styles.photoTool}
-                          onClick={() => zoomPhoto(ZOOM_STEP)}
-                          disabled={photoFrame.zoom >= ZOOM_MAX}
-                          aria-label="Zoom in"
-                        >
-                          <ZoomInIcon size={24} />
-                        </button>
-                        <button
-                          type="button"
-                          className={styles.photoTool}
-                          onClick={() => zoomPhoto(-ZOOM_STEP)}
-                          disabled={photoFrame.zoom <= ZOOM_MIN}
-                          aria-label="Zoom out"
-                        >
-                          <ZoomOutIcon size={24} />
-                        </button>
-                        <button
-                          type="button"
-                          className={styles.photoTool}
-                          onClick={rotatePhoto}
-                          aria-label="Rotate photo"
-                        >
-                          <RotateIcon size={24} />
-                        </button>
-                      </div>
-                    )}
-
-                    {/* Front | Back, bottom-right. Also mirrors the flip that happens
-                        on its own while the back text is being typed. */}
-                    <div className={styles.sideToggle} role="group" aria-label="Card side">
-                      {([
-                        { label: 'Front', back: false },
-                        { label: 'Back',  back: true },
-                      ] as const).map((side) => (
-                        <button
-                          key={side.label}
-                          type="button"
-                          className={joinClasses(styles.sideToggleButton, showBack === side.back && styles.sideToggleActive)}
-                          aria-pressed={showBack === side.back}
-                          onClick={() => setShowBack(side.back)}
-                        >
-                          {side.label}
-                        </button>
-                      ))}
+                    {/* Photo tools, bottom-right: zoom and turn. Moving is by drag. */}
+                    <div className={styles.photoTools} role="group" aria-label="Adjust your photo">
+                      <button
+                        type="button"
+                        className={styles.photoTool}
+                        onClick={() => zoomPhoto(ZOOM_STEP)}
+                        disabled={photoFrame.zoom >= ZOOM_MAX}
+                        aria-label="Zoom in"
+                      >
+                        <ZoomInIcon size={24} />
+                      </button>
+                      <button
+                        type="button"
+                        className={styles.photoTool}
+                        onClick={() => zoomPhoto(-ZOOM_STEP)}
+                        disabled={photoFrame.zoom <= ZOOM_MIN}
+                        aria-label="Zoom out"
+                      >
+                        <ZoomOutIcon size={24} />
+                      </button>
+                      <button
+                        type="button"
+                        className={styles.photoTool}
+                        onClick={rotatePhoto}
+                        aria-label="Rotate photo"
+                      >
+                        <RotateIcon size={24} />
+                      </button>
                     </div>
                   </div>
                 ) : (
@@ -652,6 +627,7 @@ export default function GiftCardPageClient() {
                                   style={framedPhotoStyle}
                                   onLoad={notePhotoSize}
                                 />
+                                <SiteLogo brand={brand} tone="inverse" className={styles.photoCardLogo} />
                               </span>
                             </span>
                           </span>
@@ -668,14 +644,16 @@ export default function GiftCardPageClient() {
                         onClick={removeUpload}
                         aria-label="Remove your photo"
                       >
-                        <XIcon size={16} />
+                        <XIcon size={12} />
                       </button>
-                      <label className={styles.replaceLink}>
+                      {/* Replace: an underlined word just under the tile, out of the layout flow. */}
+                      <label className={styles.replacePhoto}>
                         <input
                           type="file"
                           accept="image/*"
                           className={styles.visuallyHiddenInput}
                           onChange={handleUpload}
+                          aria-label="Replace your photo"
                         />
                         Replace
                       </label>
@@ -691,53 +669,13 @@ export default function GiftCardPageClient() {
                       <span className={styles.designTile}>
                         <span className={styles.uploadTile}>
                           <FileUploadIcon size={24} />
-                          <span>Upload your own</span>
+                          <span>Upload your own image</span>
                         </span>
                       </span>
                     </label>
                   )}
                 </div>
 
-                {/* Text for the back of a photo card. */}
-                {upload && designId === 'custom' && (
-                  <div className={styles.backTextGroup}>
-                    <Checkbox
-                      checked={addBackText}
-                      onChange={(on) => {
-                        setAddBackText(on)
-                        if (!on) setShowBack(false)
-                      }}
-                      icons={icons}
-                    >
-                      Add text
-                    </Checkbox>
-                    {addBackText && (
-                      <div className={styles.textareaWrap}>
-                        <label htmlFor={fieldId('backText')} className={styles.srOnly}>
-                          Text for the back of the card
-                        </label>
-                        <textarea
-                          id={fieldId('backText')}
-                          className={styles.textarea}
-                          rows={2}
-                          maxLength={BACK_TEXT_MAX}
-                          value={backText}
-                          placeholder="Text for the back of the card"
-                          onFocus={() => setShowBack(true)}
-                          onBlur={() => setShowBack(false)}
-                          onChange={(event) => {
-                            setBackText(event.target.value)
-                            setShowBack(true)
-                          }}
-                          aria-describedby={`${fieldId('backText')}-count`}
-                        />
-                        <span id={`${fieldId('backText')}-count`} className={styles.counterInside}>
-                          {backText.length} / {BACK_TEXT_MAX}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                )}
               </div>
 
               {/* Amount */}
@@ -892,10 +830,52 @@ export default function GiftCardPageClient() {
                 </div>
               )}
 
+              {/* Phone — only when SMS is one of the ways to send it. */}
+              {askRecipientPhone && (
+                <div className={styles.section}>
+                  <div className={styles.titledField}>
+                    <label htmlFor={fieldId('recipientPhone')} className={styles.sectionTitle}>
+                      What&apos;s Their Phone Number?
+                    </label>
+                    <div className={joinClasses(styles.prefixControl, errors.recipientPhone && styles.inputInvalid)}>
+                      <span className={styles.prefix} aria-hidden="true">+1</span>
+                      <input
+                        id={fieldId('recipientPhone')}
+                        type="tel"
+                        inputMode="tel"
+                        autoComplete="off"
+                        data-focus-ring="none"
+                        className={styles.prefixInput}
+                        value={recipientPhone}
+                        placeholder="(555) 987-6543"
+                        onChange={(event) => {
+                          setRecipientPhone(formatUsPhone(event.target.value))
+                          clearError('recipientPhone')
+                        }}
+                        aria-invalid={errors.recipientPhone ? true : undefined}
+                        aria-describedby={[
+                          errors.recipientPhone ? `${fieldId('recipientPhone')}-error` : null,
+                          `${fieldId('recipientPhone')}-consent`,
+                        ].filter(Boolean).join(' ')}
+                      />
+                    </div>
+                    {errors.recipientPhone && (
+                      <p id={`${fieldId('recipientPhone')}-error`} className={styles.error}>{errors.recipientPhone}</p>
+                    )}
+                    <p id={`${fieldId('recipientPhone')}-consent`} className={styles.hint}>
+                      By continuing, you agree to {brandLabel}&apos;s{' '}
+                      <Link href={withBrandPrefix(brand, '/terms')} className={styles.hintLink}>terms of service</Link>
+                      {' '}and{' '}
+                      <Link href={withBrandPrefix(brand, '/privacy')} className={styles.hintLink}>privacy policy</Link>.
+                    </p>
+                  </div>
+                </div>
+              )}
+
               {/* Message (optional) */}
               <div className={styles.section}>
                 <div className={styles.titledField}>
-                  <label htmlFor={fieldId('message')} className={styles.sectionTitle}>Your Message</label>
+                  <label htmlFor={fieldId('message')} className={styles.sectionTitle}>Add Personal Message</label>
                   {/* The count sits inside the box, bottom right. */}
                   <div className={styles.textareaWrap}>
                     <textarea
