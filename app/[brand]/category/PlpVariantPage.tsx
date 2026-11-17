@@ -135,16 +135,16 @@ export function PlpVariantPage({ variant }: { variant: PlpVariant }) {
     </div>
   )
 
-  // Single toggle button (V1, V2) — the label names the current view.
+  // Single toggle button (V2) — an action: the label names the view a click
+  // switches TO, not the one on screen.
   const viewToggleProps = {
     type: 'button' as const,
-    'aria-pressed': view === 'model',
     'aria-label': view === 'model'
-      ? `${modelLabel} view. Switch to product view`
-      : `Product view. Switch to ${modelLabel.toLowerCase()} view`,
+      ? 'Switch to product view'
+      : `Switch to ${brand === 'lal' ? 'in-room' : 'model'} view`,
     onClick: () => setView((v) => (v === 'model' ? 'product' : 'model')),
   }
-  const viewToggleLabel = view === 'model' ? modelLabel : 'Product'
+  const viewToggleLabel = view === 'model' ? 'Product' : modelLabel
 
   // Two-button Product / Model segment (V3, V4).
   const viewSegment = (extraBtnClass = '') => (

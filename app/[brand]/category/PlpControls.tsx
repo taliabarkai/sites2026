@@ -145,18 +145,19 @@ export function PlpToolbar({ brand, controls, extra }: { brand: BrandKey; contro
 
         {extra && <div className="hidden md:flex">{extra}</div>}
 
+        {/* An action button: label and icon name the view a click switches TO,
+            not the one on screen. No aria-pressed — the label itself changes. */}
         <button
           type="button"
-          aria-pressed={view === 'model'}
           aria-label={view === 'model'
-            ? `${modelLabel} view. Switch to product view`
-            : `Product view. Switch to ${modelLabel.toLowerCase()} view`}
+            ? 'Switch to product view'
+            : `Switch to ${brand === 'lal' ? 'in-room' : 'model'} view`}
           onClick={() => setView((v) => (v === 'model' ? 'product' : 'model'))}
           className={`${styles.ctl} ${styles.viewToggle}`}
         >
-          {/* Icon names the current view; LAL (wall art) is text only. */}
-          {brand !== 'lal' && (view === 'model' ? <ModelViewIcon size={18} /> : <ProductViewIcon size={18} />)}
-          {view === 'model' ? `${modelLabel === 'On Model' ? 'Model' : modelLabel} View` : 'Product View'}
+          {/* LAL (wall art) is text only. */}
+          {brand !== 'lal' && (view === 'model' ? <ProductViewIcon size={18} /> : <ModelViewIcon size={18} />)}
+          {view === 'model' ? 'Product View' : `${modelLabel === 'On Model' ? 'Model' : modelLabel} View`}
         </button>
 
         <div role="group" aria-label="Grid view" className={`${styles.segment} flex md:hidden`}>
