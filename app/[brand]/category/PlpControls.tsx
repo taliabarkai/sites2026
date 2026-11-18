@@ -126,7 +126,7 @@ export function PlpToolbar({ brand, controls, extra }: { brand: BrandKey; contro
   const filterCount = activeMaterials.size
 
   // LAL is wall art — the second view is the piece in a room, not on a model.
-  const modelLabel = brand === 'lal' ? 'In Room' : 'On Model'
+  const modelViewLabel = brand === 'lal' ? 'Room View' : 'Model View'
   const btnClass = (on: boolean) => `${styles.segmentBtn} ${styles.iconBtn} ${on ? styles.segmentBtnOn : ''}`
 
   return (
@@ -151,13 +151,13 @@ export function PlpToolbar({ brand, controls, extra }: { brand: BrandKey; contro
           type="button"
           aria-label={view === 'model'
             ? 'Switch to product view'
-            : `Switch to ${brand === 'lal' ? 'in-room' : 'model'} view`}
+            : `Switch to ${modelViewLabel.toLowerCase()}`}
           onClick={() => setView((v) => (v === 'model' ? 'product' : 'model'))}
           className={`${styles.ctl} ${styles.viewToggle}`}
         >
-          {/* LAL (wall art) is text only. */}
-          {brand !== 'lal' && (view === 'model' ? <ProductViewIcon size={18} /> : <ModelViewIcon size={18} />)}
-          {view === 'model' ? 'Product View' : `${modelLabel === 'On Model' ? 'Model' : modelLabel} View`}
+          {/* Jewelry brands: pendant necklace / person. LAL (wall art): frame / house. */}
+          {view === 'model' ? <ProductViewIcon size={18} /> : <ModelViewIcon size={18} />}
+          {view === 'model' ? 'Product View' : modelViewLabel}
         </button>
 
         <div role="group" aria-label="Grid view" className={`${styles.segment} flex md:hidden`}>
