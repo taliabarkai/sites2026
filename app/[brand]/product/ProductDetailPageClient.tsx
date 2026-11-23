@@ -60,6 +60,7 @@ import { AIPreviewCustomizer } from '../_components/AIPreviewCustomizer'
 import { ProductOptions, useProductOptions } from '../_components/ProductOptions'
 import type { OptionGroup, SelectedOption } from '../_components/ProductOptions'
 import { OPTION_GROUPS, OPTIONS_SHOWCASE_PRODUCT_ID, optionsShowcaseProduct } from './[id]/_data/optionGroups'
+import { flowPath } from '../_config/personalizationFlows'
 import { isNestedDrawerProduct, personalizeFlowFor, readGalleryLayout, readNestedDescriptionState, readPersonalizePlacement, readNestedItemOn, readMaterialDisplay, readNestedDrawerCount } from '../_config/demoParams'
 import type { DiamondSetting, PersonalizeFields, PersonalizeFlow } from '../_config/demoParams'
 
@@ -2097,14 +2098,21 @@ interface ProductDetailPageProps {
   /** Skip the product's PDP template (`/product/4a`), showing its own flow instead. */
   withoutTemplate?: boolean
   /**
-   * The final live preview (`/product/livepreviewfinal`): one version — the
-   * gallery preview + new layout (live preview's V2) — with the gallery
-   * above the product info on mobile, and the mobile gallery sticky on every live-preview product, Music Memories too.
+   * Custom Personalization (`/product/custom-personalization`, once the final
+   * live preview): one version — the gallery preview + new layout (live
+   * preview's V2) — with the gallery above the product info on mobile, and the
+   * mobile gallery sticky on every live-preview product, Music Memories too.
    */
   finalPreview?: boolean
+  /**
+   * Simple Personalization (`/product/simple-personalization`): the live
+   * preview's V2, fixed — no version or gallery switches — with the gallery
+   * first on mobile and the product name and details under it.
+   */
+  simpleFlow?: boolean
 }
 
-function ProductDetailPageInner({ productId, previewId, withoutTemplate = false, finalPreview = false }: ProductDetailPageProps) {
+function ProductDetailPageInner({ productId, previewId, withoutTemplate = false, finalPreview = false, simpleFlow = false }: ProductDetailPageProps) {
   const pathname = usePathname()
   const router = useRouter()
   const brand = getBrandFromPathname(pathname)
@@ -2170,7 +2178,7 @@ function ProductDetailPageInner({ productId, previewId, withoutTemplate = false,
   // without one, each brand keeps its own layout.
   // The header's gallery toggle (?gallery=) overrides the template's own choice
   // (Not on the final live preview: it has no gallery switch — each product's own gallery)
-  const galleryOverride = template && !finalPreview ? readGalleryLayout(searchParams)?.display : undefined
+  const galleryOverride = template && !finalPreview && !simpleFlow ? readGalleryLayout(searchParams)?.display : undefined
   // TGR and OAL lead every desktop PDP with Hero + grid (photo first)
   const desktopGallery: GalleryDisplay = galleryOverride
     ?? (brand === 'tgr' || brand === 'oal' ? 'heroGridPhotoFirst' : template?.gallery.desktop)
@@ -2182,7 +2190,8 @@ function ProductDetailPageInner({ productId, previewId, withoutTemplate = false,
   // preview is pushed in front of them
   // "In panel v3" does the same on mobile, until the shopper types their own name
   // The final live preview has one version: V2's (Gallery Preview + New Layout)
-  const placement = template ? (finalPreview ? 'page' : readPersonalizePlacement(searchParams, template.flow.defaultPlacement)) : undefined
+  // The two personalization flows are V2 (gallery preview + new layout), fixed
+  const placement = template ? (finalPreview || simpleFlow ? 'page' : readPersonalizePlacement(searchParams, template.flow.defaultPlacement)) : undefined
   const isMusicMemories = !template && brand === 'lal' && MUSIC_MEMORIES_PRODUCT_IDS.has(product.id)
   const isMobile = useIsMobile()
   const isNarrow = useIsMobile('(max-width: 1023px)')
@@ -2195,7 +2204,8 @@ function ProductDetailPageInner({ productId, previewId, withoutTemplate = false,
   // Final live preview: always the gallery first, the info below it
   // On the final live preview "mobile" is every width the mobile gallery shows
   // at (under 1024px) — tablets included — so it always sticks there
-  const headerAbove = !finalPreview && placement === 'page' && isMobile
+  // V2 (mobile): the product header above the gallery — not on the flows, which lead with the gallery
+  const headerAbove = !finalPreview && !simpleFlow && placement === 'page' && isMobile
   const [headerSlot, setHeaderSlot] = useState<HTMLDivElement | null>(null)
   // The mobile gallery's box (it lands just under the site header when scrolled to)
   const mobileGalleryRef = useRef<HTMLDivElement>(null)
@@ -2510,7 +2520,7 @@ function ProductDetailPageInner({ productId, previewId, withoutTemplate = false,
           ArrowIcon={icons.ArrowIcon}
           lead={template?.bestSellersLead}
           // The final live preview keeps its products inside it
-          hrefFor={finalPreview ? (p) => `/${brand}/product/livepreviewfinal/${p.id}` : undefined}
+          hrefFor={finalPreview ? (p) => flowPath(brand, 'custom', p.id) : undefined}
         />
         <ReviewsSection
           ChevronIcon={icons.ChevronIcon}

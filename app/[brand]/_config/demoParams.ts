@@ -305,10 +305,6 @@ export function readMaterialDisplay(params: ReadableParams, brand = ''): Materia
   return MATERIAL_DISPLAYS.find((d) => d.value === raw)?.value ?? defaultMaterialDisplay(brand)
 }
 
-/** The final live preview's pages: its one-URL demo and every product under it. */
-export const FINAL_PREVIEW_SEGMENT = 'livepreviewfinal'
-export const isFinalPreviewPath = (pathname: string) => pathname.includes(`/product/${FINAL_PREVIEW_SEGMENT}`)
-
 export const PERSONALIZE_PARAM = 'personalize'
 
 export const PERSONALIZE_PLACEMENTS = [

@@ -1,7 +1,9 @@
-import ProductDetailPageClient from '../../ProductDetailPageClient'
+import { redirect } from 'next/navigation'
+import { resolveBrand } from '../../../_config/brands'
+import { flowPath } from '../../../_config/personalizationFlows'
 
-/** Any product in the final live preview — the Best Sellers links on a final page land here. */
-export default async function FinalLivePreviewProductPage({ params }: { params: Promise<{ brand: string; id: string }> }) {
-  const { id } = await params
-  return <ProductDetailPageClient productId={Number(id)} finalPreview />
+/** Old final live preview product links land on the same product in Custom Personalization. */
+export default async function FinalLivePreviewProductRedirect({ params }: { params: Promise<{ brand: string; id: string }> }) {
+  const { brand, id } = await params
+  redirect(flowPath(resolveBrand(brand), 'custom', Number(id)))
 }

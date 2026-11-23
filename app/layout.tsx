@@ -9,6 +9,15 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
+      <head>
+        {/* A page shown in a phone frame on /[brand]/flows hides Next's dev
+            tools button (local dev only) — it would float over every frame */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: "try{if(window.top!==window.self&&/\\/flows\\/?$/.test(window.top.location.pathname)){var s=document.createElement('style');s.textContent='nextjs-portal{display:none!important}';document.head.appendChild(s)}}catch(e){}",
+          }}
+        />
+      </head>
       <body suppressHydrationWarning>{children}</body>
     </html>
   )

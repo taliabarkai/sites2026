@@ -1,18 +1,9 @@
-import { notFound } from 'next/navigation'
+import { redirect } from 'next/navigation'
 import { resolveBrand } from '../../_config/brands'
-import ProductDetailPageClient from '../ProductDetailPageClient'
-import { finalPreviewProductFor } from '../_templates'
+import { flowPath } from '../../_config/personalizationFlows'
 
-/**
- * The final live preview: `/[brand]/product/livepreviewfinal` shows the
- * theme's final product (as live preview's, but TGR shows the Heritage
- * multiple-name necklace), on one version — the gallery
- * preview + new layout (live preview's V2) — with a mobile layout switch.
- * `/livepreview` itself is untouched.
- */
-export default async function FinalLivePreviewPage({ params }: { params: Promise<{ brand: string }> }) {
+/** The final live preview is now Custom Personalization — old links land there. */
+export default async function FinalLivePreviewRedirect({ params }: { params: Promise<{ brand: string }> }) {
   const { brand } = await params
-  const productId = finalPreviewProductFor(resolveBrand(brand))
-  if (productId === undefined) notFound()
-  return <ProductDetailPageClient productId={productId} finalPreview />
+  redirect(flowPath(resolveBrand(brand), 'custom'))
 }
