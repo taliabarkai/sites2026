@@ -83,14 +83,30 @@
   line-height:    var(--typography-rules-ribbons1-line-height);
   font-weight:    var(--typography-rules-ribbons1-font-weight, 700);
   letter-spacing: var(--typography-rules-ribbons1-letter-spacing, normal);
-  transition:
-    top var(--transition-base),
-    transform var(--transition-base);
+  transition: top var(--transition-base);
 }
 
+/* Tucked: a full-width secondary button just under the sticky header —
+   two classes, so it outranks the ribbon look */
 .previewDockTucked .previewDockTab {
   top: calc(100% + var(--dock-header-bottom, 0px) + var(--spacing-xxs));
-  transform: translateX(-50%);
+  left: var(--layout-page-margin);
+  right: var(--layout-page-margin);
+  transform: none;
+  justify-content: center;
+  gap: var(--spacing-xxs);
+  min-height: var(--buttons-secondary-min-height);
+  padding: var(--buttons-secondary-padding);
+  background: var(--buttons-secondary-background);
+  color: var(--buttons-secondary-text);
+  border: var(--border-width) solid var(--buttons-secondary-border-color);
+  border-radius: var(--buttons-secondary-border-radius);
+  font-family:    var(--typography-rules-button1-font-family);
+  font-size:      var(--typography-rules-button1-font-size);
+  line-height:    var(--typography-rules-button1-line-height);
+  font-weight:    var(--typography-rules-button1-font-weight);
+  letter-spacing: var(--typography-rules-button1-letter-spacing, normal);
+  text-transform: var(--typography-rules-button1-text-transform, none);
 }
 
 .previewDockTab:focus-visible {
@@ -1834,13 +1850,19 @@
 }
 
 /* Desktop, the personalization open (the details column unpinned): only the
-   first image — the live preview — is pinned under the header, for as long
-   as the steps' column runs (its row is held that tall); then it lets go and
-   the rest of the gallery follows under it at full size. Nothing cropped, no
-   scrolling inside the gallery. */
+   first image — the live preview — is pinned under the header, whole, for as
+   long as any of the steps' column is on screen: its row is held the
+   column's height plus its own (it's square, as wide as the gallery — 100cqw),
+   so it lets go only once the column's last line has scrolled up past it.
+   Then the rest of the gallery follows under it at full size. Nothing
+   cropped, no scrolling inside the gallery. */
 @media (min-width: 1024px) {
+  .heroGridGallery {
+    container-type: inline-size;
+  }
+
   .layout:has(.formPanelUnpinned) .heroGridHeroSlot {
-    min-height: var(--steps-height, auto);
+    min-height: calc(var(--steps-height, 0px) + 100cqw);
   }
 
   .layout:has(.formPanelUnpinned) .heroGridHeroSlot > .heroGridHero {

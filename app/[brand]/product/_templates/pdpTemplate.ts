@@ -189,6 +189,8 @@ export interface NecklaceStudioEngine {
   coatings: Record<string, StudioCoating>
   /** For a material missing from `coatings`. */
   defaultCoating: StudioCoating
+  /** A diamond in the chain between each pair of names: the size field, and each size's real diameter (mm). A value missing here ("None") sets none. */
+  stones?: { fieldId: number; diameterMm: Record<string, number> }
 }
 
 /** A stone: a picture of the gem, or a diamond cut the renderer draws itself. */

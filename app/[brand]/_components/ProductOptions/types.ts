@@ -32,6 +32,8 @@ export interface ChoiceGroup {
   /** Falls back to the first enabled value. */
   defaultValueId?: string
   required?: boolean
+  /** Image-only swatches: the label is just the picked value ("18K Gold Vermeil"); the group's name stays for screen readers. */
+  valueOnlyLabel?: boolean
   /** Image-only swatch size. */
   size?: 'sm' | 'lg'
   /** Shape of `big` tile images. Defaults to 'circle'. */

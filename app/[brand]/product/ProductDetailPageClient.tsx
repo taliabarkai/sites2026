@@ -707,7 +707,7 @@ function galleryImageClass(base: string, src: string, modelImages: string[]): st
  * gallery itself is back in view, and once Add to Bag scrolls up under it.
  * Always in the DOM — a CSS transform drives it, as the panels do.
  */
-function PreviewDock({ src, active, galleryRef, anchorFieldIds, ribbon, ribbonIcon, ChevronIcon }: {
+function PreviewDock({ src, active, galleryRef, anchorFieldIds, ribbon, RibbonIcon, ChevronIcon }: {
   src: string | null
   active: boolean
   galleryRef: React.RefObject<HTMLDivElement | null>
@@ -715,7 +715,7 @@ function PreviewDock({ src, active, galleryRef, anchorFieldIds, ribbon, ribbonIc
   anchorFieldIds: number[]
   /** The personalization ribbon ("Your Personalization") and its wand — the dock's toggle */
   ribbon: string
-  ribbonIcon: React.ReactNode
+  RibbonIcon: React.ComponentType<{ size?: number }>
   ChevronIcon: React.ComponentType<{ size?: number }>
 }) {
   const [open, setOpen] = useState(true)
@@ -782,9 +782,10 @@ function PreviewDock({ src, active, galleryRef, anchorFieldIds, ribbon, ribbonIc
         aria-label={open ? `${ribbon}: hide preview` : `${ribbon}: show preview`}
         tabIndex={shown ? 0 : -1}
       >
-        {ribbonIcon}
+        {/* The ribbon's own icon sizes on the image; 24px in the tucked full-width button */}
+        <RibbonIcon size={open ? 20 : 24} />
         {ribbon}
-        <span className={open ? styles.previewDockChevronUp : styles.previewDockChevronDown}><ChevronIcon size={16} /></span>
+        <span className={open ? styles.previewDockChevronUp : styles.previewDockChevronDown}><ChevronIcon size={open ? 16 : 24} /></span>
       </button>
     </div>
   )
@@ -2400,7 +2401,7 @@ function ProductDetailPageInner({ productId, previewId, withoutTemplate = false,
           />
         </div>
         {previewDock && (
-          <PreviewDock src={slotPreview} active={!!slotPreview && !addedToBag} galleryRef={mobileGalleryRef} anchorFieldIds={dockAnchorFieldIds} ribbon={template.livePreview.ribbon ?? 'Your Personalization'} ribbonIcon={<icons.AiMagicIcon size={20} />} ChevronIcon={icons.ChevronIcon} />
+          <PreviewDock src={slotPreview} active={!!slotPreview && !addedToBag} galleryRef={mobileGalleryRef} anchorFieldIds={dockAnchorFieldIds} ribbon={template.livePreview.ribbon ?? 'Your Personalization'} RibbonIcon={icons.AiMagicIcon} ChevronIcon={icons.ChevronIcon} />
         )}
 
         {/* Two-column layout on desktop, single column on mobile */}

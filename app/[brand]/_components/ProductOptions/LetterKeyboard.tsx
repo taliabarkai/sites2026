@@ -91,8 +91,11 @@ export function LetterKeyboard({
       <div
         ref={rootRef}
         className={styles.dropdown}
-        // Tabbing past the last key closes it
-        onBlur={(e) => { if (open && !rootRef.current?.contains(e.relatedTarget as Node)) setOpen(false) }}
+        // Tabbing past the last key closes it — only when focus lands on something
+        // outside. Safari (iPhone) doesn't focus a tapped button, so a tap on a key
+        // blurs with nowhere to go (relatedTarget null) before its click lands;
+        // closing then would drop the pick. Taps outside close it via pointerdown.
+        onBlur={(e) => { if (open && e.relatedTarget && !rootRef.current?.contains(e.relatedTarget as Node)) setOpen(false) }}
       >
         <button
           ref={triggerRef}

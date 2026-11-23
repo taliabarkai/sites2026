@@ -480,12 +480,19 @@ export function TemplateCustomizer({
   // pins its first image, the preview, beside it
   const unpinned = cardOpen || (previewOnFirstPick && inline && !isMobile && previewEntered)
   // …the page's layout learning the column's height (--steps-height), which
-  // holds the preview pinned for as long as the column runs
+  // holds the preview pinned for as long as the column runs. It keeps the
+  // tallest the column has been while open: switching to a shorter step
+  // (Customize after Personalize) mustn't shrink the row under a scrolled
+  // page — the preview would let go and slide up, its top cut off.
   useEffect(() => {
     const el = rootRef.current
     const layout = el?.parentElement
     if (!unpinned || !el || !layout) return
-    const sync = () => layout.style.setProperty('--steps-height', `${el.offsetHeight}px`)
+    let tallest = 0
+    const sync = () => {
+      tallest = Math.max(tallest, el.offsetHeight)
+      layout.style.setProperty('--steps-height', `${tallest}px`)
+    }
     sync()
     const ro = new ResizeObserver(sync)
     ro.observe(el)
@@ -713,6 +720,11 @@ export function TemplateCustomizer({
       // OAL: no prices on the finishes — the page says "Starting at", Add to bag the total
       hideFinishPrices && field.pricing === 'base' && g.kind === 'choice'
         ? { ...g, values: g.values.map((v) => ({ ...v, priceLabel: undefined })) }
+        : g,
+    ).map((g) =>
+      // OAL: no "Select finish" title over the swatches — just the picked one, "18K Gold Vermeil"
+      brand === 'oal' && field.pricing === 'base' && g.kind === 'choice'
+        ? { ...g, valueOnlyLabel: true }
         : g,
     )
     const slots = Object.fromEntries(
