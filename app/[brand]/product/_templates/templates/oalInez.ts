@@ -164,6 +164,8 @@ export const oalInez: PdpTemplate = {
 
   // The final live preview: the number of initials as a dropdown (prices on
   // the right), and each initial a dropdown that opens a keyboard of its keys
+  // The stone, gemstone, size and shape open the live preview too, as the initial does
+  finalPreviewEntryFieldIds: [302, 310, 303, 311],
   finalPreviewFields: {
     307: { displayType: 'visual_dropdown_list' },
     305: { keyboard: true },

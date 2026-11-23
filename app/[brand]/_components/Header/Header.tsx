@@ -19,7 +19,6 @@ import { NestedDrawerCountToggle } from './NestedDrawerCountToggle'
 import { NestedDescriptionToggle } from './NestedDescriptionToggle'
 import { GalleryLayoutToggle } from './GalleryLayoutToggle'
 import { PersonalizeToggle } from './PersonalizeToggle'
-import { MobileLayoutToggle } from './MobileLayoutToggle'
 import { NestedItemToggle } from './NestedItemToggle'
 import { MaterialDisplayToggle } from './MaterialDisplayToggle'
 import { finalPreviewProductFor, livePreviewProductFor, renderedTemplateFor } from '../../product/_templates'
@@ -155,8 +154,9 @@ export function Header({
 
   /* ── Checkout mode: logo only, horizontally centered ── */
   // The final live preview (mobile): the header scrolls away with the page —
-  // the product's gallery is what sticks there, right at the top
-  const scrollsAwayOnMobile = /\/product\/livepreviewfinal(\/|$)/.test(pathname)
+  // the product's gallery is what sticks there, right at the top. Not OAL: its
+  // header stays sticky and the live preview docks over it (PreviewDock)
+  const scrollsAwayOnMobile = brandSegment !== 'oal' && /\/product\/livepreviewfinal(\/|$)/.test(pathname)
   const wrapperClass = `${revealOnScrollUp
     ? `${styles.wrapperReveal} ${headerHidden ? styles.wrapperHidden : ''}`
     : sticky ? styles.wrapper : styles.wrapperStatic} ${scrollsAwayOnMobile ? styles.wrapperScrollsOnMobile : ''}`
@@ -197,7 +197,6 @@ export function Header({
       {isNestedDrawerDemo && <NestedDrawerCountToggle className={styles.cartSizeToggle} />}
       {pdpTemplate && !isFinalPreview && <GalleryLayoutToggle templateDefault={pdpTemplate.gallery.desktop} className={`${styles.cartSizeToggle} ${styles.desktopOnlyControl}`} />}
       {pdpTemplate && !isFinalPreview && <PersonalizeToggle templateDefault={pdpTemplate.flow.defaultPlacement} className={styles.cartSizeToggle} />}
-      {isFinalPreview && <MobileLayoutToggle className={styles.cartSizeToggle} />}
       {pdpTemplate && <NestedItemToggle defaultOn={isFinalPreview} className={styles.cartSizeToggle} />}
       {pdpTemplate && <MaterialDisplayToggle className={styles.cartSizeToggle} />}
       {isFreePreviewPdp && <UspStripToggle className={styles.cartSizeToggle} />}

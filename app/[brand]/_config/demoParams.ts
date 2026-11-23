@@ -305,22 +305,6 @@ export function readMaterialDisplay(params: ReadableParams, brand = ''): Materia
   return MATERIAL_DISPLAYS.find((d) => d.value === raw)?.value ?? defaultMaterialDisplay(brand)
 }
 
-/**
- * The final live preview (`/[brand]/product/livepreviewfinal`): one version —
- * the gallery preview + new layout (live preview's V2) — and a mobile toggle
- * for where the product info sits: above the gallery (as V2) or below it.
- */
-export const MOBILE_LAYOUT_PARAM = 'mobileLayout'
-export const MOBILE_LAYOUTS = [
-  { value: 'info-above',    label: 'Info above gallery' },
-  { value: 'gallery-above', label: 'Gallery above info' },
-] as const
-export type MobileLayout = (typeof MOBILE_LAYOUTS)[number]['value']
-
-export function readMobileLayout(params: ReadableParams): MobileLayout {
-  return params.get(MOBILE_LAYOUT_PARAM) === 'gallery-above' ? 'gallery-above' : 'info-above'
-}
-
 /** The final live preview's pages: its one-URL demo and every product under it. */
 export const FINAL_PREVIEW_SEGMENT = 'livepreviewfinal'
 export const isFinalPreviewPath = (pathname: string) => pathname.includes(`/product/${FINAL_PREVIEW_SEGMENT}`)

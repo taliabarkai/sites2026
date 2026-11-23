@@ -60,7 +60,7 @@ import { AIPreviewCustomizer } from '../_components/AIPreviewCustomizer'
 import { ProductOptions, useProductOptions } from '../_components/ProductOptions'
 import type { OptionGroup, SelectedOption } from '../_components/ProductOptions'
 import { OPTION_GROUPS, OPTIONS_SHOWCASE_PRODUCT_ID, optionsShowcaseProduct } from './[id]/_data/optionGroups'
-import { isNestedDrawerProduct, personalizeFlowFor, readGalleryLayout, readNestedDescriptionState, readPersonalizePlacement, readNestedItemOn, readMaterialDisplay, readNestedDrawerCount, readMobileLayout } from '../_config/demoParams'
+import { isNestedDrawerProduct, personalizeFlowFor, readGalleryLayout, readNestedDescriptionState, readPersonalizePlacement, readNestedItemOn, readMaterialDisplay, readNestedDrawerCount } from '../_config/demoParams'
 import type { DiamondSetting, PersonalizeFields, PersonalizeFlow } from '../_config/demoParams'
 
 // LAL products that use the song-based Music Memories customizer
@@ -693,6 +693,101 @@ function RibbonStack({ items }: { items?: string[] }) {
 /** A gallery image's class — packshots blend onto the tint, on-model shots don't. */
 function galleryImageClass(base: string, src: string, modelImages: string[]): string {
   return modelImages.includes(src) ? `${base} ${styles.galleryModelImage}` : base
+}
+
+// ─── Preview dock (OAL final live preview, mobile mockup) ───────────────────
+
+/**
+ * Mockup, OAL on the final live preview (under 1024px): the gallery scrolls
+ * away with the page, and once the shopper's own preview comes in (their
+ * first pick) it slides down from the top of the screen — over the sticky
+ * site header — at its own 1:1 and stays there, with a tab on its bottom edge
+ * to tuck it away and bring it back: its "Your Personalization" ribbon,
+ * centred at the bottom of the image. Tucked, the ribbon hangs under the header. It leaves while the
+ * gallery itself is back in view, and once Add to Bag scrolls up under it.
+ * Always in the DOM — a CSS transform drives it, as the panels do.
+ */
+function PreviewDock({ src, active, galleryRef, anchorFieldIds, ribbon, ribbonIcon, ChevronIcon }: {
+  src: string | null
+  active: boolean
+  galleryRef: React.RefObject<HTMLDivElement | null>
+  /** The fields that open the preview — the first one still on screen is kept clear of the dock */
+  anchorFieldIds: number[]
+  /** The personalization ribbon ("Your Personalization") and its wand — the dock's toggle */
+  ribbon: string
+  ribbonIcon: React.ReactNode
+  ChevronIcon: React.ComponentType<{ size?: number }>
+}) {
+  const [open, setOpen] = useState(true)
+  const [wanted, setWanted] = useState(false)
+  // Where the sticky header ends: the tucked tab hangs just below it
+  const [headerBottom, setHeaderBottom] = useState(0)
+  const ref = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    if (!active) { setWanted(false); return }
+    const update = () => {
+      const el = ref.current
+      if (!el) return
+      const header = document.querySelector('header')
+      const headerBottom = Math.max(0, header ? header.getBoundingClientRect().bottom : 0)
+      setHeaderBottom(headerBottom)
+      // The gallery more than half gone under the header…
+      const g = galleryRef.current?.getBoundingClientRect()
+      const galleryGone = !g || g.bottom < headerBottom + g.height / 2
+      // …and Add to Bag not yet scrolled up under the dock (it covers the header)
+      const cta = document.querySelector('#buy-box [data-main-cta]')
+      const ctaPassed = cta ? cta.getBoundingClientRect().bottom < el.offsetHeight : false
+      setWanted(galleryGone && !ctaPassed)
+    }
+    update()
+    window.addEventListener('scroll', update, { passive: true })
+    window.addEventListener('resize', update)
+    return () => {
+      window.removeEventListener('scroll', update)
+      window.removeEventListener('resize', update)
+    }
+  }, [active, galleryRef])
+  const shown = active && wanted && !!src
+  // As it slides in (or back down from the tab), the dock pushes the editor
+  // down: the page scrolls so the first preview field still on screen (Inez:
+  // the initial) sits just under the dock instead of behind it
+  useEffect(() => {
+    const el = ref.current
+    if (!shown || !open || !el) return
+    const fields = [...document.querySelectorAll<HTMLElement>('#buy-box [data-field-id]')]
+      .filter((f) => anchorFieldIds.includes(Number(f.dataset.fieldId)) && f.offsetParent)
+    const anchor = fields.find((f) => f.getBoundingClientRect().bottom > 0)
+    if (!anchor) return
+    const gap = parseFloat(getComputedStyle(el).getPropertyValue('--dock-anchor-gap')) || 0
+    const target = el.offsetHeight + gap
+    const top = anchor.getBoundingClientRect().top
+    if (top < target) window.scrollBy({ top: top - target, behavior: 'smooth' })
+  }, [shown, open, anchorFieldIds])
+  const state = !shown ? '' : open ? styles.previewDockOpen : styles.previewDockTucked
+  return (
+    <div
+      ref={ref}
+      className={`${styles.previewDock} ${state}`}
+      style={{ '--dock-header-bottom': `${headerBottom}px` } as React.CSSProperties}
+      aria-hidden={!shown}
+    >
+      <div className={styles.previewDockImage}>
+        {src && <img src={src} alt="Live preview of your design" />}
+      </div>
+      <button
+        type="button"
+        className={`${styles.previewDockTab} ${styles.ribbonWithIcon}`}
+        onClick={() => setOpen((o) => !o)}
+        aria-expanded={open}
+        aria-label={open ? `${ribbon}: hide preview` : `${ribbon}: show preview`}
+        tabIndex={shown ? 0 : -1}
+      >
+        {ribbonIcon}
+        {ribbon}
+        <span className={open ? styles.previewDockChevronUp : styles.previewDockChevronDown}><ChevronIcon size={16} /></span>
+      </button>
+    </div>
+  )
 }
 
 // ─── Desktop 2×2 static grid (non-OAL) ───────────────────────────────────────
@@ -2002,9 +2097,8 @@ interface ProductDetailPageProps {
   withoutTemplate?: boolean
   /**
    * The final live preview (`/product/livepreviewfinal`): one version — the
-   * gallery preview + new layout (live preview's V2) — with the mobile
-   * layout (info above or below the gallery) from `?mobileLayout=`, and the
-   * mobile gallery sticky on every live-preview product, Music Memories too.
+   * gallery preview + new layout (live preview's V2) — with the gallery
+   * above the product info on mobile, and the mobile gallery sticky on every live-preview product, Music Memories too.
    */
   finalPreview?: boolean
 }
@@ -2089,7 +2183,6 @@ function ProductDetailPageInner({ productId, previewId, withoutTemplate = false,
   // The final live preview has one version: V2's (Gallery Preview + New Layout)
   const placement = template ? (finalPreview ? 'page' : readPersonalizePlacement(searchParams, template.flow.defaultPlacement)) : undefined
   const isMusicMemories = !template && brand === 'lal' && MUSIC_MEMORIES_PRODUCT_IDS.has(product.id)
-  const mobileLayout = readMobileLayout(searchParams)
   const isMobile = useIsMobile()
   const isNarrow = useIsMobile('(max-width: 1023px)')
   // Every version leads with the product's own photo; the preview is pushed in
@@ -2098,13 +2191,10 @@ function ProductDetailPageInner({ productId, previewId, withoutTemplate = false,
   // V2 (mobile): the product header moves above the gallery — the customizer
   // keeps drawing it (the price is live) into this slot
   // …and V2 (Preview in gallery) uses the same header-above layout
-  // Final live preview: the info above the gallery unless the mobile layout
-  // toggle puts the gallery first; Music Memories draws its header there too
+  // Final live preview: always the gallery first, the info below it
   // On the final live preview "mobile" is every width the mobile gallery shows
   // at (under 1024px) — tablets included — so it always sticks there
-  const headerAbove = finalPreview
-    ? isNarrow && mobileLayout === 'info-above' && (!!template || isMusicMemories)
-    : placement === 'page' && isMobile
+  const headerAbove = !finalPreview && placement === 'page' && isMobile
   const [headerSlot, setHeaderSlot] = useState<HTMLDivElement | null>(null)
   // The mobile gallery's box (it lands just under the site header when scrolled to)
   const mobileGalleryRef = useRef<HTMLDivElement>(null)
@@ -2112,7 +2202,14 @@ function ProductDetailPageInner({ productId, previewId, withoutTemplate = false,
   // the form below it — the preview updates in view as they type — and leaves
   // with the Add to Bag button once that scrolls up to it
   // (Final live preview: in both mobile layouts, on every live-preview product)
-  const stickyGallery = finalPreview ? isNarrow && (!!template || isMusicMemories) : placement === 'page' && isMobile && !!template
+  // Mockup, OAL's final live preview: no sticky gallery — the preview docks
+  // at the top once the shopper's own design comes in (see PreviewDock)
+  const previewDock = finalPreview && brand === 'oal' && isNarrow && !!template
+  // The fields that open the preview: the text ones (Inez: the initial) and the template's own picks
+  const dockAnchorFieldIds = useMemo(() => template
+    ? [...template.fields.filter((f) => f.type === 'text').map((f) => f.fieldId), ...(template.finalPreviewEntryFieldIds ?? [])]
+    : [], [template])
+  const stickyGallery = previewDock ? false : finalPreview ? isNarrow && (!!template || isMusicMemories) : placement === 'page' && isMobile && !!template
   useEffect(() => {
     const el = mobileGalleryRef.current
     if (!stickyGallery || !el) return
@@ -2143,7 +2240,7 @@ function ProductDetailPageInner({ productId, previewId, withoutTemplate = false,
       el.style.transform = ''
       document.documentElement.style.scrollPaddingTop = ''
     }
-  }, [stickyGallery, mobileLayout])
+  }, [stickyGallery])
   // Added to your bag (as Music Memories): the preview stays, its ribbon goes.
   // Personalize Another starts the customizer over — a fresh one, back at the top.
   const [addedToBag, setAddedToBag] = useState(false)
@@ -2302,6 +2399,9 @@ function ProductDetailPageInner({ productId, previewId, withoutTemplate = false,
             floatingProgress={!!template}
           />
         </div>
+        {previewDock && (
+          <PreviewDock src={slotPreview} active={!!slotPreview && !addedToBag} galleryRef={mobileGalleryRef} anchorFieldIds={dockAnchorFieldIds} ribbon={template.livePreview.ribbon ?? 'Your Personalization'} ribbonIcon={<icons.AiMagicIcon size={20} />} ChevronIcon={icons.ChevronIcon} />
+        )}
 
         {/* Two-column layout on desktop, single column on mobile */}
         <div className={`${styles.layout} ${!template && desktopGallery !== 'heroGridPhotoFirst' ? '' : desktopGallery === 'slider' ? styles.layoutSlider : styles.layoutLivePreview} ${(template || desktopGallery === 'heroGridPhotoFirst') && (desktopGallery === 'heroGrid' || desktopGallery === 'heroGridPhotoFirst' || desktopGallery === 'overlayThumbs') ? styles.layoutCenteredForm : ''} ${desktopGallery === 'overlayThumbs' ? styles.layoutOverlay : ''}`}>

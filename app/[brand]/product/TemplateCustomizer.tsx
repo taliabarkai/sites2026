@@ -3,7 +3,7 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { createPortal, flushSync } from 'react-dom'
 import Link from 'next/link'
-import type { CartItem } from '../_context/CartContext'
+import { useCart, type CartItem } from '../_context/CartContext'
 import type { ProductItem } from '../../../data/products'
 import { Button } from '../_components/Button'
 import { CustomizerPanel, useIsMobile } from '../_components/CustomizerPanel'
@@ -73,8 +73,10 @@ export interface TemplateCustomizerProps {
   regularPrice?: boolean
   /**
    * The final live preview: with every field on the page (V2), the live
-   * preview — and its badge — come in at the shopper's first pick (a count,
-   * an initial, a stone), not only once they've entered their own text.
+   * preview — and its badge — come in with the shopper's own personalization:
+   * an initial picked (OAL Inez) or a name typed (TGR Heritage), or a pick in
+   * one of the template's `finalPreviewEntryFieldIds` (Inez: stone, size,
+   * shape). Any other pick (a material, a count) only changes the price.
    */
   previewOnFirstPick?: boolean
   /** Demo: offer a second of this product at 50% off, just above Add to Bag. */
@@ -179,6 +181,9 @@ export function TemplateCustomizer({
     // eslint-disable-next-line react-hooks/exhaustive-deps -- only a change of count drives it
   }, [lengthKey])
   const [errors, setErrors] = useState<string[]>([])
+  // The bag item being edited (Edit on "Added to your bag"), until Update Item
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const { items: cartItems, replaceItems } = useCart()
   // The preview starts with the shopper's first selection and stays from then
   // on — on a stepped page, once they open the steps (as MM does): picking a
   // material on the page beforehand only moves the price. Until then the
@@ -188,7 +193,14 @@ export function TemplateCustomizer({
   // Typing into a field clears its error
   const options: ProductOptionsController = {
     ...base,
-    choose: (id, valueId) => { base.choose(id, valueId); setInteracted(true); if (entered || inline) setStarted(true) },
+    // (Final live preview: only text enters the preview — or a pick in one of
+    // the template's entry fields, as Inez's stone, size and shape)
+    choose: (id, valueId) => {
+      base.choose(id, valueId)
+      const fieldId = Number(/^f(\d+)/.exec(id)?.[1])
+      if (!previewOnFirstPick || template.finalPreviewEntryFieldIds?.includes(fieldId)) setInteracted(true)
+      if (entered || inline) setStarted(true)
+    },
     setText: (id, raw) => {
       // Initials-style fields keep letters only, in capitals
       const field = fieldById(template, Number(/^f(\d+)/.exec(id)?.[1]))
@@ -586,7 +598,7 @@ export function TemplateCustomizer({
     }
     const accent = accentOffered && diamondAccent
     const selectedOptions = [...cartOptions(template, state), ...(accent ? [{ label: 'Diamond accent', value: 'Yes' }] : [])]
-    addItem({
+    const item: CartItem = {
       id: `${product.id}-${Date.now()}`,
       name: product.name,
       price: price + (accent ? DIAMOND_ACCENT_CENTS : 0),
@@ -596,7 +608,18 @@ export function TemplateCustomizer({
       rating: product.rating,
       reviewCount: product.reviewCount,
       selectedOptions,
-    })
+    }
+    // Editing the design just added (Edit → Update Item): it replaces that bag
+    // item in place — same id and spot, its gift packaging and protection kept.
+    // If it has left the bag meanwhile, it goes back in as a new item.
+    const editing = editingId ? cartItems.find((it) => it.id === editingId) : undefined
+    if (editing) {
+      Object.assign(item, { ...editing, ...item, id: editing.id })
+      replaceItems(cartItems.map((it) => (it.id === editing.id ? item : it)))
+    } else {
+      addItem(item)
+    }
+    setEditingId(null)
     // The nested item, staged in its Quick Add panel, goes in with it
     nested.stagedItems.forEach((it) => addItem(it))
     nested.clear()
@@ -609,6 +632,7 @@ export function TemplateCustomizer({
       .filter(Boolean)
     const textLabels = new Set(template.fields.filter((f) => f.type === 'text').map((f) => f.cartName))
     setAddedItem({
+      id: item.id,
       image: (!loading && preview) || product.image,
       title: texts.length ? texts.map((t) => `“${t}”`).join(', ') : product.name,
       subtitle: selectedOptions
@@ -618,16 +642,18 @@ export function TemplateCustomizer({
       rows: selectedOptions.map((o) => ({ k: o.label, v: o.value })),
     })
     setAddedOpen(false)
-    openCart(true)
+    // An update isn't a new add, so the bag opens without "Successfully added"
+    openCart(!editing)
   }
 
   // ── Added to your bag (as Music Memories) ───────────────────────────────────
-  const [addedItem, setAddedItem] = useState<{ image: string; title: string; subtitle: string; rows: { k: string; v: string }[] } | null>(null)
+  const [addedItem, setAddedItem] = useState<{ id: string; image: string; title: string; subtitle: string; rows: { k: string; v: string }[] } | null>(null)
   const [addedOpen, setAddedOpen] = useState(false)
   useEffect(() => { onAddedChange?.(!!addedItem) }, [addedItem, onAddedChange])
   useEffect(() => () => onAddedChange?.(false), [onAddedChange])
   /** Edit: back to the form with this design's answers (behind the row: the panel opens). */
   const editAdded = () => {
+    if (addedItem) setEditingId(addedItem.id)
     setAddedItem(null)
     if (rowMode || container === 'panel') enter()
   }
@@ -752,7 +778,8 @@ export function TemplateCustomizer({
 
   const personalizeNowLabel = hasText ? 'Continue Personalizing' : 'Personalize Now'
   const nextLabel = (flow.nextCta ?? 'Continue to {next}').replace('{next}', steps[stepIdx + 1]?.label ?? '')
-  const addLabel = `Add to Bag – ${formatPrice(price + nested.nestedTotal)}`
+  // Back from "Added to your bag" through Edit: the button updates that item
+  const addLabel = editingId ? 'Update Item' : `Add to Bag – ${formatPrice(price + nested.nestedTotal)}`
   // V5: "Add to bag · $199", with its add-ons in the total
   const jewelryTotal = price + nested.nestedTotal + (diamondAccent ? DIAMOND_ACCENT_CENTS : 0)
 

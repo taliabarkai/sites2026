@@ -378,6 +378,13 @@ export interface PdpTemplate {
    * (`/product/livepreviewfinal`) — the same fields, drawn differently there.
    */
   finalPreviewFields?: Record<number, Partial<Field>>
+  /**
+   * mockup-only: on the final live preview, the live preview comes in with the
+   * shopper's own text (a name, an initial) — or a pick in one of these
+   * selection fields (Inez: the stone, its size and shape). Other picks
+   * (finish, a count) only change the price and options.
+   */
+  finalPreviewEntryFieldIds?: number[]
   /** mockup-only: the final live preview's own step order, when it differs. */
   finalPreviewSteps?: PresentationStep[]
   /** mockup-only: the final live preview's own sample names (filling the names left empty). */
