@@ -484,6 +484,75 @@ html, body { height: 100%; overflow: hidden; overscroll-behavior: none; backgrou
 .upsell { font-size: 13px; }
 .ptoast { font-size: 13.5px; top: calc(70px + env(safe-area-inset-top, 0px)); }
 .lnk { font-size: 14px !important; }
+/* ---------- desktop (1024px and up), matched to sites2026 /lal/product/1 (desktop computed styles) ---------- */
+html.dt, html.dt body { height: auto; overflow: visible; overscroll-behavior: auto; background: #fff; }
+html.dt .scr { position: relative; inset: auto; transform: none; width: auto; overflow: visible; user-select: auto; -webkit-user-select: auto; font-size: 10px; }
+.dk { min-height: 100vh; }
+.dk-head { position: sticky; top: -34px; z-index: 8; max-width: none; background: #fff; }
+.dk-top { height: 34px; background: #e8ff36; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 16px; padding: 0 32px; font-size: 13px; line-height: 18px; }
+.dk-top p { margin: 0; }
+.dk-top .ce { font-weight: 600; }
+.dk-top .rt { justify-self: end; display: flex; align-items: center; gap: 12px; }
+.dk-top .rt i { width: 1px; height: 16px; background: #000; }
+.dk-bar { height: 64px; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; padding: 0 32px; }
+.dk-bar .l { display: flex; align-items: center; gap: 24px; }
+.dk-bar .l button { display: inline-flex; align-items: center; gap: 8px; border: 0; background: none; padding: 0; font: 400 13px/18px 'Poppins', system-ui, sans-serif; color: #000; cursor: pointer; }
+.dk-bar .lp-logo { justify-self: center; }
+.dk-bar .lp-logosvg { width: 200px; height: 32px; }
+.dk-bar .r { justify-self: end; display: flex; align-items: center; gap: 16px; }
+.dk-lay { display: grid; grid-template-columns: auto minmax(380px, 620px) 1fr; column-gap: 48px; align-items: start; max-width: 1920px; margin: 0 auto; padding-right: 32px; }
+.dk-gal { position: sticky; top: 100px; display: flex; gap: 8px; align-items: flex-start; padding: 24px 0 0 32px; }
+.dk-thumbs { display: flex; flex-direction: column; gap: 8px; width: 90px; flex: none; }
+.dk-thumb { position: relative; width: 90px; height: 90px; padding: 0; border: 1px solid transparent; border-radius: 4px; background: #f3efea; overflow: hidden; cursor: pointer; display: grid; place-items: center; transition: border-color .15s ease; }
+.dk-thumb:hover { border-color: #ccc; }
+.dk-thumb[aria-current="true"] { border-color: #000; box-shadow: inset 0 0 0 2px #fff; }
+.dk-thumb img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.dk-thumb.lv { background: #f5f5f5; }
+.dk-main { position: relative; overflow: hidden; aspect-ratio: 1 / 1; background: #f3efea; }
+.dk-main.lv { background: #f5f5f5; }
+.dk-live { position: absolute; inset: 0; display: grid; place-items: center; }
+.dk-rib { position: absolute; top: 16px; left: 16px; z-index: 2; background: #e8ff36; padding: 8px 16px; border-radius: 4px; font-size: 14px; line-height: 14px; font-weight: 600; letter-spacing: .5px; text-transform: uppercase; }
+.dk-main .arbtn { right: 24px; bottom: 24px; font-size: 14px; }
+.dk-form { position: sticky; top: 88px; display: flex; flex-direction: column; padding: 32px; }
+.dk-form.open { position: relative; top: auto; }
+.dk-back { align-self: flex-start; display: inline-flex; align-items: center; gap: 4px; margin: 24px 0; border: 0; background: none; padding: 0; font: 600 13px/18px 'Poppins', system-ui, sans-serif; color: #000; cursor: pointer; }
+.dk-back svg { width: 18px; height: 18px; transform: rotate(180deg); }
+.dk-flow { border: 1px solid #e3e3e3; border-radius: 8px; overflow: hidden; background: #fff; }
+.dk-flow .cz-tabs { border: 0; border-radius: 0; border-bottom: 1px solid #e3e3e3; }
+.dk-flow .cz-step { padding: 24px 16px 16px; }
+.dk .lp-bsh { padding: 64px 32px 16px; }
+.dk .lp-bst { padding: 0 32px; scroll-padding: 0 32px; }
+.dk .lp-card { flex: 0 0 340px; }
+.dk .lp-rv { max-width: 1100px; margin: 0 auto; padding: 64px 32px; }
+.dk .lp-rsum { flex-direction: row; align-items: center; gap: 64px; margin-bottom: 32px; }
+.dk .lp-rscore { flex: none; width: 260px; }
+.dk .lp-bars { flex: 1; max-width: 520px; }
+.dk .lp-filters { flex-direction: row; }
+.dk .lp-photos li { flex-basis: 120px; height: 120px; }
+.dk .lp-rg { display: grid; grid-template-columns: 1fr 1fr; gap: 32px 48px; }
+html.dt .ptoast { position: fixed; top: 88px; left: 50%; right: auto; width: max-content; max-width: 480px; transform: translate(-50%, -6px); }
+html.dt .ptoast.show { transform: translate(-50%, 0); }
+/* View in Room on desktop: no AR on a computer, so a QR code hands off to the phone */
+.dk-scrim { position: fixed; inset: 0; z-index: 30; background: rgb(0 0 0 / .45); }
+.dk-qr { position: fixed; left: 50%; top: 50%; z-index: 31; transform: translate(-50%, -50%); width: min(660px, calc(100vw - 64px)); background: #fff; border-radius: 8px; padding: 40px; display: grid; grid-template-columns: 200px 1fr; gap: 32px; align-items: center; font-size: 13px; line-height: 18px; animation: dkIn .25s ease-out; }
+.dk-qrc { display: block; width: 200px; height: 200px; padding: 10px; border: 1px solid #e3e3e3; border-radius: 4px; shape-rendering: crispEdges; }
+.dk-qr h2 { margin: 0 0 8px; font-size: 20px; line-height: 24px; font-weight: 600; letter-spacing: 0; text-transform: uppercase; }
+.dk-qr p { margin: 0 0 16px; }
+.dk-qr ol { margin: 0 0 16px; padding-left: 18px; display: flex; flex-direction: column; gap: 6px; }
+.dk-cfg { display: flex; align-items: center; gap: 12px; padding: 12px; background: #f5f5f5; border-radius: 4px; }
+.dk-cfg .th { flex: none; width: 44px; height: 56px; display: grid; place-items: center; }
+.dk-cfg b { display: block; font-weight: 600; }
+.dk-cfg small { font-size: 12px; line-height: 16px; color: #707070; }
+.dk-qr .dk-fine { margin: 12px 0 0; font-size: 12px; line-height: 16px; color: #707070; }
+.dk-x { position: absolute; top: 12px; right: 12px; width: 36px; height: 36px; border: 0; border-radius: 9999px; background: none; padding: 0; display: grid; place-items: center; cursor: pointer; }
+.dk-x svg { width: 20px; height: 20px; }
+@keyframes dkIn { from { opacity: 0; transform: translate(-50%, -46%); } }
+/* Add to bag on desktop: the cart slides in from the right */
+html.dt .cartwrap { position: fixed; inset: 0; z-index: 30; }
+html.dt .cart { left: auto; top: 0; width: 420px; padding: 32px; border-radius: 8px 0 0 8px; }
+html.dt .scr.cartin .cart { animation: dkCart .25s ease-out; }
+@keyframes dkCart { from { transform: translateX(100%); } }
+@media (prefers-reduced-motion: reduce) { .dk-qr, html.dt .scr.cartin .cart { animation: none; } }
 </style>
 </head>
 <body>
@@ -986,8 +1055,69 @@ html, body { height: 100%; overflow: hidden; overscroll-behavior: none; backgrou
     return out + finder(0, 0) + finder(18, 0) + finder(0, 18);
   }
 
+  /* ---------- desktop (1024px and up), matched to sites2026 /lal/product/1 (desktop) ---------- */
+  // A computer has no AR, so View in Room opens a QR code that hands off to the phone.
+  var DQ = window.matchMedia('(min-width: 1024px)');
+  function isDesk() { return DQ.matches; }
+  // Square main image: as tall as the screen below the header (max 940px), narrowing so the form keeps 380px
+  function dkCell() { return Math.round(Math.max(300, Math.min(window.innerHeight - 160, 940, window.innerWidth - 638))); }
+  function deskView() {
+    var p = pdp(), c = dkCell(), live = S.cust;
+    var logo = p.match(/<a class="lp-logo"[\s\S]*?<\/a>/)[0];
+    var head = p.slice(p.indexOf('<div class="lp-ph">'), p.indexOf('<div class="lp-cz">'));
+    var trust = p.match(/<ul class="lp-trust">[\s\S]*?<\/ul>/)[0];
+    var below = p.slice(p.indexOf('<div class="lp-bsh">'), -6);
+    var gi = live ? (S.gi || 'live') : (S.gi && S.gi !== 'live' ? S.gi : 'img1');
+    var thumbs = (live ? [['live', '<span class="dk-tl">' + flatArt(44, 58) + '</span>', 'Live preview']] : [])
+      .concat([['img1', '<img src="images/music-memories-1.jpg" alt="">', 'Product photo'], ['img2', '<img src="images/music-memories-2.gif" alt="">', 'Customer photo']]);
+    var main = gi === 'live'
+      ? '<div class="dk-live" id="czPrev">' + flatArt(c * 0.5, c * 0.64) + '</div><span class="dk-rib">Live preview</span>' +
+        '<button type="button" class="arbtn" data-act="v2ar" aria-label="View in Room"><span class="icb">' + ARICON + '</span><span class="lbl"><span>View in Room</span></span></button>'
+      : '<img class="lp-gimg" src="images/music-memories-' + (gi === 'img2' ? '2.gif' : '1.jpg') + '" alt="Music Memories Custom Canvas">';
+    var form = live
+      ? '<button type="button" class="dk-back" data-act="custclose">' + IC.chev + 'Back</button><div class="dk-flow">' + custSteps() + '</div>'
+      : '<div class="lp-cz">' + lf('inSong', 'Pick your song', 'e.g. Yellow', S.song).replace('</label>', '</label><button type="button" class="lp-auto" data-act="autofill">Autofill</button>').replace('class="lp-field"', 'class="lp-field lp-af"') +
+        lf('inArtist', 'Name the artist', 'e.g. Coldplay', S.artist) + '<button type="button" class="lp-cta" data-act="preview">See how it looks</button></div>';
+    return '<div class="lp dk"><header class="dk-head">' +
+      '<div class="dk-top"><p>Subscribe &amp; Get 10% Off</p><p class="ce">Free Shipping on All Orders</p><p class="rt"><a>Need help?</a><i></i><a>Track My Order</a><i></i><a>Contact Us</a></p></div>' +
+      '<div class="dk-bar"><div class="l"><button type="button">' + IC.menu + 'Menu</button><button type="button">' + IC.search + 'Search</button></div>' + logo +
+      '<div class="r">' + IC.person + '<span class="lp-bag">' + IC.bag + (S.bag ? '<b>' + S.bag + '</b>' : '') + '</span></div></div></header>' +
+      '<div class="dk-lay"><div class="dk-gal"><div class="dk-thumbs">' + thumbs.map(function (t) {
+        return '<button type="button" class="dk-thumb' + (t[0] === 'live' ? ' lv' : '') + '" data-gi="' + t[0] + '" aria-label="' + t[2] + '" aria-current="' + (t[0] === gi) + '">' + t[1] + '</button>';
+      }).join('') + '</div><div class="dk-main v2' + (gi === 'live' ? ' lv' : '') + '" style="width:' + c + 'px">' + main + '</div></div>' +
+      '<section class="dk-form' + (live ? ' open' : '') + '">' + head + form + trust + '</section></div>' + below + '</div>' +
+      (S.qr ? dkQr() : '');
+  }
+  function dkQr() {
+    return '<div class="dk-scrim" data-act="closeqr"></div><div class="dk-qr" role="dialog" aria-modal="true" aria-labelledby="qrT">' +
+      '<button type="button" class="dk-x" data-act="closeqr" aria-label="Close">' + IC.x + '</button>' +
+      '<svg class="dk-qrc" viewBox="0 0 25 25" role="img" aria-label="QR code">' + qr() + '</svg>' +
+      '<div><h2 id="qrT">View in Room</h2><p>See your canvas on your own wall, at real size.</p>' +
+      '<ol><li>Scan the code with your phone camera</li><li>Point your phone at the wall</li><li>Mark where the wall meets the floor</li></ol>' +
+      '<div class="dk-cfg"><span class="th">' + flatArt(40, 54) + '</span><span><b>' + esc(songTxt()) + (isSample() ? ' (sample song)' : '') + '</b>' +
+      '<small>' + sz().w + ' × ' + sz().h + ' in · ' + mt().label + (S.mat === 'canvas' ? ' · ' + fr().label + ' frame' : '') + '</small></span></div>' +
+      '<p class="dk-fine">Your song, size and frame come with you.</p></div></div>';
+  }
+  function deskAct(a) {
+    switch (a) {
+      case 'v2ar': case 'ar': case 'vir': case 'qr': S.qr = true; render(); return true;
+      case 'closeqr': S.qr = false; render(); return true;
+      case 'preview': S.cust = true; S.tab = 1; S.gi = 'live'; render(); return true;
+      case 'custclose': S.cust = false; S.gi = null; render(); return true;
+      case 'bag': S.cart = true; S.bag += 1; render(); return true; // the live preview stays open behind the cart
+      case 'toreviews': var rv = $('#reviews'); if (rv) window.scrollTo({ top: rv.getBoundingClientRect().top + window.scrollY - 80, behavior: 'smooth' }); return true;
+    }
+    return false;
+  }
+  // Crossing 1024px ends any AR session: the phone and desktop layouts don't share one
+  DQ.addEventListener('change', function () { stopStream(); Object.assign(S, { ar: null, sheetUp: false, perm: false, qr: false }); render(); });
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Escape' || !isDesk() || !(S.qr || S.cart)) return;
+    S.qr = false; S.cart = false; render();
+  });
+
   /* ---------- render ---------- */
-  var VIEWS = { pdp: pdp, cam: cam, find: find, line: line, place: place, adjust: adjust, photo: photo };
+  var VIEWS ={ pdp: pdp, cam: cam, find: find, line: line, place: place, adjust: adjust, photo: photo };
   function stepKey() {
     return { pdp: S.returned ? 'I' : 'A', desk: 'A2', qr: 'B', cam: 'C', find: 'D', line: 'E', place: 'F', adjust: 'G', photo: 'H' }[S.screen];
   }
@@ -1001,7 +1131,8 @@ html, body { height: 100%; overflow: hidden; overscroll-behavior: none; backgrou
       scr.classList.toggle('czin', S.cust && !last.cust);
       var keep = S.screen === last.screen && S.cust === last.cust && S.tab === last.tab;
       var sy = keep && $('#scr .scroll') ? $('#scr .scroll').scrollTop : 0, cy2 = keep && $('#scr .v2-scroll') ? $('#scr .v2-scroll').scrollTop : 0;
-      scr.innerHTML = VIEWS[S.screen]() + (S.cust && S.screen === 'pdp' ? cust2() : '') + (S.cart ? cart() : '') + '<div class="ptoast" id="ptoast" role="status"></div>';
+      document.documentElement.classList.toggle('dt', isDesk());
+      scr.innerHTML = (isDesk() ? deskView() : VIEWS[S.screen]() + (S.cust && S.screen === 'pdp' ? cust2() : '')) + (S.cart ? cart() : '') + '<div class="ptoast" id="ptoast" role="status"></div>';
       if (sy && $('#scr .scroll')) $('#scr .scroll').scrollTop = sy;
       if (cy2 && $('#scr .v2-scroll')) $('#scr .v2-scroll').scrollTop = cy2; }
     S.shot = false;
@@ -1042,6 +1173,7 @@ html, body { height: 100%; overflow: hidden; overscroll-behavior: none; backgrou
   };
 
   function act(a) {
+    if (isDesk() && deskAct(a)) return;
     if (S.cust && S.ar && arAct(a)) return;
     if (a === 'v2ar') return startAR();
     switch (a) {
@@ -1190,6 +1322,7 @@ html, body { height: 100%; overflow: hidden; overscroll-behavior: none; backgrou
     else if (t.dataset.mat) { S.mat = t.dataset.mat; render(); }
     else if (t.dataset.frame) { S.frame = t.dataset.frame; render(); }
     else if (t.dataset.center) { S.center = t.dataset.center; render(); }
+    else if (t.dataset.gi) { S.gi = t.dataset.gi; render(); }
   });
 
   /* G2 (size-only sheet) via #g2 in the URL; G1 otherwise */
