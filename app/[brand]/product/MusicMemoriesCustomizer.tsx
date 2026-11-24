@@ -923,7 +923,8 @@ export function MusicMemoriesCustomizer({ brand, product, icons, nestedItems = [
           open={phase === 'flow'}
           onClose={() => setPhase('default')}
           ariaLabel="Personalize your canvas"
-          closeIcon={XIcon ? <XIcon size={20} /> : undefined}
+          closeIcon={XIcon ? <XIcon size={24} /> : undefined}
+          closePlain
           scrollResetKey={tab}
           preview={
             <div className={styles.panelPreviewWrap}>

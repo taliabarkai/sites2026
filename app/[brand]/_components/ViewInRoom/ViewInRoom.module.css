@@ -17,7 +17,11 @@
   overscroll-behavior: none;
   user-select: none;
   -webkit-user-select: none;
+  /* Opens out of the live preview: the top of the panel grows to fill the screen */
+  animation: virOpen 0.38s cubic-bezier(0.4, 0, 0.2, 1);
 }
+
+@keyframes virOpen { from { clip-path: inset(0 0 55% 0); } to { clip-path: inset(0); } }
 
 /* ── The trigger: on the live preview, bottom right ──────────────────────── */
 .trigger {
@@ -64,11 +68,22 @@
 
 .triggerLabel > span { padding: 0 var(--spacing-sm) 0 var(--spacing-xxxs); }
 
-/* Phone: the label shows on arrival, then slides shut to leave the icon */
-.triggerCollapse .triggerLabel { animation: virLabelShut 0.65s cubic-bezier(0.7, 0, 0.25, 1) 1.5s forwards; }
-.triggerCollapse .triggerIcon svg { animation: virSpin 0.9s cubic-bezier(0.3, 1.4, 0.5, 1) 1.9s both; }
+/* Arrival: the button is already there; the cube gives a little turn */
+.triggerIcon svg { animation: virWiggle 0.9s ease-in-out 0.3s both; }
 
+/* Phone, then: the label sweeps shut, the square squashes and springs back,
+   and the cube spins — leaving just the icon */
+.triggerCollapse { animation: virPop 0.55s cubic-bezier(0.3, 1.6, 0.5, 1) 2s both; }
+.triggerCollapse .triggerLabel { animation: virLabelShut 0.65s cubic-bezier(0.7, 0, 0.25, 1) 1.5s forwards; }
+.triggerCollapse .triggerLabel > span { animation: virLabelOut 0.45s cubic-bezier(0.5, 0, 0.75, 0) 1.5s forwards; }
+.triggerCollapse .triggerIcon svg {
+  animation: virWiggle 0.9s ease-in-out 0.3s both, virSpin 0.9s cubic-bezier(0.3, 1.4, 0.5, 1) 1.85s forwards;
+}
+
+@keyframes virWiggle { 0%, 100% { transform: rotate(0); } 25% { transform: rotate(-16deg); } 55% { transform: rotate(12deg); } 80% { transform: rotate(-5deg); } }
 @keyframes virLabelShut { to { max-width: 0; } }
+@keyframes virLabelOut { to { opacity: 0; transform: translateX(14px); } }
+@keyframes virPop { 0% { transform: scale(1); } 30% { transform: scale(0.86); } 100% { transform: scale(1); } }
 @keyframes virSpin { from { transform: rotate(0) scale(0.8); } to { transform: rotate(360deg) scale(1); } }
 
 /* ── Camera scene ────────────────────────────────────────────────────────── */
@@ -522,7 +537,8 @@
 .qrFine { margin: var(--spacing-xs) 0 0; color: var(--colors-text-secondary); }
 
 @media (prefers-reduced-motion: reduce) {
-  .triggerCollapse .triggerLabel, .triggerCollapse .triggerIcon svg,
+  .root, .triggerIcon svg, .triggerCollapse, .triggerCollapse .triggerLabel,
+  .triggerCollapse .triggerLabel > span, .triggerCollapse .triggerIcon svg,
   .reticle, .card, .flash { animation: none; }
   .scene, .sheet { transition: none; }
 }
