@@ -49,6 +49,7 @@ import { PanelPortal } from '../_components/PanelPortal'
 import { StickyCustomizeBar } from '../_components/StickyCustomizeBar'
 import { useIsMobile } from '../_components/CustomizerPanel'
 import { StickyProductBar } from '../_components/StickyProductBar'
+import { ViewInRoomButton } from '../_components/ViewInRoom'
 import { TranslationAdvisor } from '../_components/TranslationAdvisor'
 import type { TranslationAdvisorVariant } from '../_components/TranslationAdvisor'
 import { MusicMemoriesCustomizer } from './MusicMemoriesCustomizer'
@@ -1012,10 +1013,12 @@ function OverlayThumbsGallery({ images, modelImages, name, rootRef, livePreview,
 
 // ─── OAL: sticky-left hero + vertical scroll right ────────────────────────────
 
-function LALDesktopGallery({ images, modelImages, name, livePreview, rootRef, ribbons, previewNote }: {
+function LALDesktopGallery({ images, modelImages, name, livePreview, rootRef, ribbons, previewNote, previewAction }: {
   images: string[]; modelImages: string[]; name: string; livePreview?: string | null; rootRef?: GalleryRootRef
   /** Template PDPs: a ribbon stack in the theme's colors, and a note on the preview. MM passes neither ("Live Preview"). */
   ribbons?: string[]; previewNote?: React.ReactNode
+  /** Drawn on the live preview, bottom right (Music Memories: View in Room). */
+  previewAction?: React.ReactNode
 }) {
   const [activeIdx, setActiveIdx] = useState(0)
   const hadPreview = useRef(false)
@@ -1051,6 +1054,7 @@ function LALDesktopGallery({ images, modelImages, name, livePreview, rootRef, ri
           ? <RibbonStack items={ribbons} />
           : <span className={styles.livePreviewRibbon}>Live Preview</span>)}
         {showRibbon && previewNote && <div className={styles.livePreviewNote}>{previewNote}</div>}
+        {showRibbon && previewAction}
         <img src={allImages[activeIdx]} alt={name} className={galleryImageClass(styles.oalGalleryImage, allImages[activeIdx], modelImages)} loading="eager" />
       </div>
     </div>
@@ -2148,6 +2152,8 @@ function ProductDetailPageInner({ productId, previewId, withoutTemplate = false,
   const icons = BRAND_ICONS[brand]
 
   const [livePreview, setLivePreview] = useState<string | null>(null)
+  // Music Memories, desktop: each press of View in Room on the gallery preview opens the QR code
+  const [viewInRoomRequest, setViewInRoomRequest] = useState(0)
   const [livePreviewLoading, setLivePreviewLoading] = useState(false)
   const [previewPersonalized, setPreviewPersonalized] = useState(false)
   // The desktop gallery — the desktop sticky bar comes up once it's scrolled past
@@ -2418,7 +2424,8 @@ function ProductDetailPageInner({ productId, previewId, withoutTemplate = false,
         <div className={`${styles.layout} ${!template && desktopGallery !== 'heroGridPhotoFirst' ? '' : desktopGallery === 'slider' ? styles.layoutSlider : styles.layoutLivePreview} ${(template || desktopGallery === 'heroGridPhotoFirst') && (desktopGallery === 'heroGrid' || desktopGallery === 'heroGridPhotoFirst' || desktopGallery === 'overlayThumbs') ? styles.layoutCenteredForm : ''} ${desktopGallery === 'overlayThumbs' ? styles.layoutOverlay : ''}`}>
           {/* Left: gallery — sideScroll (LAL): thumbnails left; heroGrid (template PDPs): one full-width image, then two across; stickyHero (OAL): sticky+scroll; grid/default (TGR, others): 2×2 */}
           {desktopGallery === 'sideScroll'
-            ? <LALDesktopGallery images={galleryImages} modelImages={modelImages} name={product.name} livePreview={slotPreview} rootRef={galleryRef} ribbons={template ? previewRibbons : undefined} previewNote={template ? previewNote : undefined} />
+            ? <LALDesktopGallery images={galleryImages} modelImages={modelImages} name={product.name} livePreview={slotPreview} rootRef={galleryRef} ribbons={template ? previewRibbons : undefined} previewNote={template ? previewNote : undefined}
+                previewAction={isMusicMemories ? <ViewInRoomButton Icon={'ViewInRoomIcon' in icons ? icons.ViewInRoomIcon : undefined} collapse={false} onClick={() => setViewInRoomRequest((n) => n + 1)} /> : undefined} />
             : desktopGallery === 'slider'
               ? <SliderGallery images={galleryImages} modelImages={modelImages} name={product.name} rootRef={galleryRef} livePreview={slotPreview} ribbons={previewRibbons} ribbonIcon={ribbonIcon} previewNote={previewNote} skipTo="buy-box" icons={icons} />
             : desktopGallery === 'overlayThumbs'
@@ -2478,6 +2485,7 @@ function ProductDetailPageInner({ productId, previewId, withoutTemplate = false,
               addItem={addItem}
               openCart={openCart}
               onLivePreviewChange={setLivePreview}
+              viewInRoomRequest={viewInRoomRequest}
             />
           ) : brand === 'lal' ? (
             <LalCanvasCustomizer

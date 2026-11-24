@@ -9,6 +9,7 @@ import { SONG_CATALOG, getSongById } from '../../../data/songs'
 import { CustomizerPanel, useIsMobile } from '../_components/CustomizerPanel'
 import { useNestedItems } from '../_components/NestedItems/useNestedItems'
 import type { QuickAddProduct } from '../_components/QuickAddPanel'
+import { ViewInRoom, ViewInRoomButton, ViewInRoomQr } from '../_components/ViewInRoom'
 import pdp from './ProductDetailPage.module.css'
 import styles from './MusicMemoriesCustomizer.module.css'
 
@@ -35,6 +36,8 @@ interface MusicMemoriesCustomizerProps {
    * Absent or null, the header stays where it always is.
    */
   headerSlot?: HTMLElement | null
+  /** Desktop: goes up each time the gallery's View in Room button is pressed — opens the QR code. */
+  viewInRoomRequest?: number
 }
 
 type FrameType = 'canvas' | 'metal' | 'acrylic'
@@ -95,11 +98,20 @@ const FRAME_COLORS: { value: string; label: string; hex: string; light?: boolean
   { value: 'wood-dark', label: 'Dark wood', hex: '#5C4033' },
 ]
 
-const FRAME_TYPES: { value: FrameType; label: string; thumb: string }[] = [
-  { value: 'canvas', label: 'Canvas', thumb: '/images/lal/music-memories/Canvas.png' },
-  { value: 'metal', label: 'Metal', thumb: '/images/lal/music-memories/Metal.png' },
-  { value: 'acrylic', label: 'Acrylic', thumb: '/images/lal/music-memories/Acrylic.png' },
+// `edge`: the panel's edge color on the wall in View in Room (canvas uses its frame color)
+const FRAME_TYPES: { value: FrameType; label: string; thumb: string; edge: string }[] = [
+  { value: 'canvas', label: 'Canvas', thumb: '/images/lal/music-memories/Canvas.png', edge: '#1F1F1F' },
+  { value: 'metal', label: 'Metal', thumb: '/images/lal/music-memories/Metal.png', edge: '#A9A9A9' },
+  { value: 'acrylic', label: 'Acrylic', thumb: '/images/lal/music-memories/Acrylic.png', edge: '#F2F2F2' },
 ]
+
+// View in Room hand-off: the QR link carries the shopper's choices in these params
+const VIR_PARAMS = ['vir', 'song', 'artist', 'memory', 'names', 'center', 'size', 'frame', 'color'] as const
+
+function sizeInches(size: string): { w: number; h: number } {
+  const [w, h] = size.split('x').map(Number)
+  return { w: w || 12, h: h || 16 }
+}
 
 const SLIPMAT = {
   name: 'Music Memories Custom Slipmat',
@@ -378,13 +390,13 @@ function SongCombo({ id, songId, onSelect, onClear }: SongComboProps) {
 
 // ─── Main component ──────────────────────────────────────────────────────────
 
-export function MusicMemoriesCustomizer({ brand, product, icons, nestedItems = [], addItem, openCart, onLivePreviewChange, headerSlot }: MusicMemoriesCustomizerProps) {
+export function MusicMemoriesCustomizer({ brand, product, icons, nestedItems = [], addItem, openCart, onLivePreviewChange, headerSlot, viewInRoomRequest = 0 }: MusicMemoriesCustomizerProps) {
   // Rating shown beside the price — same numbers the category card and the
   // PDP reviews section read from the product registry.
   const productRating = product.rating ?? 0
   const productReviewCount = product.reviewCount ?? 0
 
-  const { ChevronIcon, StarIcon, XIcon, PersonIcon, ShippingIcon, MapPinIcon, RevisionsIcon, ClipboardCopyIcon } = icons
+  const { ChevronIcon, StarIcon, XIcon, PersonIcon, ShippingIcon, MapPinIcon, RevisionsIcon, ClipboardCopyIcon, ViewInRoomIcon, ArrowIcon, CameraIcon } = icons
   const RevisionsGlyph = RevisionsIcon ?? ClipboardCopyIcon
   const isMobile = useIsMobile()
 
@@ -424,15 +436,19 @@ export function MusicMemoriesCustomizer({ brand, product, icons, nestedItems = [
   // feed it to the gallery. Kept as state so the inline preview + cart reuse it.
   const serializerRef = useRef<HTMLDivElement>(null)
   const [previewImage, setPreviewImage] = useState<string | null>(null)
+  // The artwork alone (no frame photo) — what View in Room hangs on the wall
+  const [artworkImage, setArtworkImage] = useState<string | null>(null)
 
   useEffect(() => {
     if (phase === 'default') {
       setPreviewImage(null)
+      setArtworkImage(null)
       onLivePreviewChange?.(null)
       return
     }
     const svg = serializerRef.current?.querySelector('svg')
     if (!svg) return
+    setArtworkImage(`data:image/svg+xml;charset=utf-8,${encodeURIComponent(new XMLSerializer().serializeToString(svg))}`)
     let cancelled = false
     composeFramedPreview(frameSrc, svg as SVGSVGElement, frameWindow)
       .then(img => {
@@ -446,8 +462,72 @@ export function MusicMemoriesCustomizer({ brand, product, icons, nestedItems = [
 
   useEffect(() => () => onLivePreviewChange?.(null), [onLivePreviewChange])
 
+  // ── View in Room ───────────────────────────────────────────────────────────
+  // Phone: the camera, inside the personalize panel. Desktop: a QR code to the phone.
+  const [arOpen, setArOpen] = useState(false)
+  const [arFromQr, setArFromQr] = useState(false)
+  const [qrOpen, setQrOpen] = useState(false)
+  const [qrUrl, setQrUrl] = useState('')
+
+  // Opened from the desktop QR code: take the shopper's choices from the link,
+  // open Frame Options, and go straight to View in Room
+  useEffect(() => {
+    const p = new URLSearchParams(window.location.search)
+    if (p.get('vir') !== '1') return
+    const pick = <T extends string>(v: string | null, allowed: readonly T[]) => (v && (allowed as readonly string[]).includes(v) ? (v as T) : null)
+    setSongTitle(p.get('song') ?? '')
+    setArtist(p.get('artist') ?? '')
+    setMemory(p.get('memory') ?? '')
+    setNames(p.get('names') ?? '')
+    const center = pick(p.get('center'), CENTER_COLORS.map((c) => c.value)); if (center) setCenterColor(center)
+    const sz = pick(p.get('size'), SIZE_OPTIONS.map((s) => s.value)); if (sz) setSize(sz)
+    const frame = pick(p.get('frame'), FRAME_TYPES.map((f) => f.value)); if (frame) setFrameType(frame)
+    const color = pick(p.get('color'), FRAME_COLORS.map((c) => c.value)); if (color) setFrameColor(color)
+    setPhase('flow')
+    setTab('customize')
+    setArFromQr(true)
+    setArOpen(true)
+    // The link has done its job: a reload shouldn't open the camera again
+    VIR_PARAMS.forEach((k) => p.delete(k))
+    const q = p.toString()
+    window.history.replaceState(null, '', `${window.location.pathname}${q ? `?${q}` : ''}${window.location.hash}`)
+  }, [])
+
+  // Desktop: the gallery's View in Room button
+  useEffect(() => {
+    if (!viewInRoomRequest) return
+    const u = new URL(window.location.href)
+    VIR_PARAMS.forEach((k) => u.searchParams.delete(k))
+    u.hash = ''
+    u.searchParams.set('vir', '1')
+    const choices: [string, string][] = [['song', songTitle], ['artist', artist], ['memory', memory], ['names', names],
+      ['center', centerColor], ['size', size], ['frame', frameType], ['color', frameColor]]
+    choices.forEach(([k, v]) => { if (v.trim()) u.searchParams.set(k, v.trim()) })
+    setQrUrl(u.toString())
+    setQrOpen(true)
+    // Only a new press opens it — not the shopper's later edits
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [viewInRoomRequest])
+
+  const sizeIn = sizeInches(size)
+  const wallArt = {
+    src: artworkImage,
+    widthIn: sizeIn.w,
+    heightIn: sizeIn.h,
+    material: frameType,
+    edgeHex: isCanvas
+      ? (FRAME_COLORS.find((c) => c.value === frameColor)?.hex ?? FRAME_COLORS[1].hex)
+      : (FRAME_TYPES.find((f) => f.value === frameType)?.edge ?? FRAME_COLORS[0].hex),
+  }
+  const choiceMeta = [
+    `${sizeIn.w} × ${sizeIn.h} in`,
+    FRAME_TYPES.find((f) => f.value === frameType)?.label,
+    isCanvas ? `${FRAME_COLORS.find((c) => c.value === frameColor)?.label} frame` : null,
+  ].filter(Boolean).join(' · ')
+
   // ── Add to bag ─────────────────────────────────────────────────────────────
   const handleAddToBag = () => {
+    setArOpen(false)
     const image = previewImage ?? product.image
 
     const selectedOptions = [
@@ -830,14 +910,51 @@ export function MusicMemoriesCustomizer({ brand, product, icons, nestedItems = [
           ariaLabel="Personalize your canvas"
           closeIcon={XIcon ? <XIcon size={20} /> : undefined}
           scrollResetKey={tab}
-          preview={previewImage
-            ? <img src={previewImage} alt="" className={styles.panelPreviewImg} />
-            : <div className={styles.panelPreviewPlaceholder} aria-hidden="true" />}
+          preview={
+            <div className={styles.panelPreviewWrap}>
+              {previewImage
+                ? <img src={previewImage} alt="" className={styles.panelPreviewImg} />
+                : <div className={styles.panelPreviewPlaceholder} aria-hidden="true" />}
+              {/* Remount on each open, so the label shows again before it slides shut */}
+              {phase === 'flow' && <ViewInRoomButton Icon={ViewInRoomIcon} onClick={() => { setArFromQr(false); setArOpen(true) }} />}
+            </div>
+          }
         >
-          {mmTabs}
-          {/* CTA flows inline below the last field (not a sticky footer) */}
-          <div className={styles.panel} role="tabpanel">{mmActiveInner}{mmFooter}</div>
+          {/* While View in Room is up, the tabs live in its sheet instead (one set of fields at a time) */}
+          {!arOpen && (
+            <>
+              {mmTabs}
+              {/* CTA flows inline below the last field (not a sticky footer) */}
+              <div className={styles.panel} role="tabpanel">{mmActiveInner}{mmFooter}</div>
+            </>
+          )}
         </CustomizerPanel>
+      )}
+
+      {/* View in Room — phone: the camera, with the tabs in a sheet below the canvas */}
+      {isMobile && (
+        <ViewInRoom
+          open={arOpen}
+          onClose={() => setArOpen(false)}
+          art={wallArt}
+          icons={{ ViewInRoomIcon, ArrowIcon, CameraIcon }}
+          fromQr={arFromQr}
+          sheetHeader={mmTabs}
+          sheetKey={tab}
+        >
+          <div className={styles.panel} role="tabpanel">{mmActiveInner}{mmFooter}</div>
+        </ViewInRoom>
+      )}
+
+      {/* View in Room — desktop: a QR code that opens it on the phone */}
+      {!isMobile && (
+        <ViewInRoomQr
+          open={qrOpen}
+          onClose={() => setQrOpen(false)}
+          url={qrUrl}
+          closeIcon={XIcon ? <XIcon size={24} /> : null}
+          choice={{ image: previewImage, name: songTitle.trim() || product.name, meta: choiceMeta }}
+        />
       )}
     </section>
   )

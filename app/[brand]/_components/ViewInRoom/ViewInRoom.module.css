@@ -1,0 +1,528 @@
+/* ── View in Room ─────────────────────────────────────────────────────────────
+   Phone: the live camera with the canvas on the wall at its real size.
+   Desktop: a QR code that hands the shopper's choices to their phone. */
+
+/* Dark glass over the camera: the theme's text color, see-through */
+.root {
+  --vir-glass: color-mix(in srgb, var(--colors-text) 55%, transparent);
+  --vir-glass-strong: color-mix(in srgb, var(--colors-text) 72%, transparent);
+
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-modal);
+  overflow: hidden;
+  background: var(--colors-text);
+  color: var(--colors-text-inverse);
+  touch-action: none;
+  overscroll-behavior: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* ── The trigger: on the live preview, bottom right ──────────────────────── */
+.trigger {
+  position: absolute;
+  right: var(--spacing-sm);
+  bottom: var(--spacing-sm);
+  z-index: var(--z-raised);
+  display: inline-flex;
+  align-items: stretch;
+  height: 44px;
+  padding: 0;
+  overflow: hidden;
+  border: var(--border-width) solid var(--colors-text);
+  border-radius: var(--radius-sm);
+  background: var(--colors-background);
+  color: var(--colors-text);
+  box-shadow: var(--shadow-md);
+  cursor: pointer;
+  font-family:    var(--typography-rules-button1-font-family);
+  font-size:      var(--typography-rules-button1-font-size);
+  line-height:    var(--typography-rules-button1-line-height);
+  font-weight:    var(--typography-rules-button1-font-weight, normal);
+  letter-spacing: var(--typography-rules-button1-letter-spacing, normal);
+  text-transform: var(--typography-rules-button1-text-transform, none);
+  transition: transform var(--transition-fast);
+}
+
+.trigger:active { transform: scale(0.94); }
+
+.triggerIcon {
+  flex: none;
+  width: 42px;
+  display: grid;
+  place-items: center;
+}
+
+.triggerLabel {
+  display: flex;
+  align-items: center;
+  max-width: 180px;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.triggerLabel > span { padding: 0 var(--spacing-sm) 0 var(--spacing-xxxs); }
+
+/* Phone: the label shows on arrival, then slides shut to leave the icon */
+.triggerCollapse .triggerLabel { animation: virLabelShut 0.65s cubic-bezier(0.7, 0, 0.25, 1) 1.5s forwards; }
+.triggerCollapse .triggerIcon svg { animation: virSpin 0.9s cubic-bezier(0.3, 1.4, 0.5, 1) 1.9s both; }
+
+@keyframes virLabelShut { to { max-width: 0; } }
+@keyframes virSpin { from { transform: rotate(0) scale(0.8); } to { transform: rotate(360deg) scale(1); } }
+
+/* ── Camera scene ────────────────────────────────────────────────────────── */
+.scene {
+  position: absolute;
+  inset: 0;
+  transition: transform var(--transition-base);
+}
+
+.video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.dim { filter: blur(3px) brightness(0.55); }
+
+.vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse at 50% 45%, transparent 55%, color-mix(in srgb, var(--colors-text) 28%, transparent));
+}
+
+/* The canvas: its edge (frame or panel), the artwork inside */
+.art {
+  position: absolute;
+  z-index: var(--z-raised);
+  box-sizing: border-box;
+  border: var(--vir-edge-w) solid var(--vir-edge);
+  background: var(--vir-edge);
+  box-shadow: var(--shadow-md);
+  cursor: grab;
+  touch-action: none;
+}
+
+.art:active { cursor: grabbing; }
+
+.art img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+}
+
+/* Metal and acrylic are frameless: a hairline edge, and acrylic catches the light */
+.art_metal, .art_acrylic { border-width: var(--border-width); }
+
+.art_acrylic::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(140deg, color-mix(in srgb, var(--colors-background) 45%, transparent) 0 22%, transparent 40%);
+}
+
+.pill {
+  position: absolute;
+  z-index: var(--z-raised);
+  transform: translateX(-50%);
+  padding: var(--spacing-xxxs) var(--spacing-xs);
+  border-radius: var(--radius-full);
+  background: var(--colors-background);
+  color: var(--colors-text);
+  box-shadow: var(--shadow-sm);
+  white-space: nowrap;
+  pointer-events: none;
+  font-family:    var(--typography-rules-text4-font-family);
+  font-size:      var(--typography-rules-text4-font-size);
+  line-height:    var(--typography-rules-text4-line-height);
+  font-weight:    var(--typography-rules-text4-font-weight, normal);
+  letter-spacing: var(--typography-rules-text4-letter-spacing, normal);
+  text-transform: var(--typography-rules-text4-text-transform, none);
+}
+
+.hint {
+  position: absolute;
+  left: 50%;
+  z-index: var(--z-raised);
+  transform: translateX(-50%);
+  padding: var(--spacing-xxs) var(--spacing-sm);
+  border-radius: var(--radius-full);
+  background: var(--vir-glass);
+  white-space: nowrap;
+  pointer-events: none;
+  font-family:    var(--typography-rules-text3-font-family);
+  font-size:      var(--typography-rules-text3-font-size);
+  line-height:    var(--typography-rules-text3-line-height);
+  font-weight:    var(--typography-rules-text3-font-weight, normal);
+  letter-spacing: var(--typography-rules-text3-letter-spacing, normal);
+  text-transform: var(--typography-rules-text3-text-transform, none);
+}
+
+/* ── Looking for a wall ──────────────────────────────────────────────────── */
+.reticle {
+  position: absolute;
+  left: 50%;
+  top: 34%;
+  width: 130px;
+  height: 130px;
+  transform: translateX(-50%);
+  animation: virPulse 1.4s ease-in-out infinite;
+}
+
+.reticle::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border: 2px solid var(--colors-text-inverse);
+  clip-path: polygon(0 0,30% 0,30% 4%,4% 4%,4% 30%,0 30%, 0 70%,4% 70%,4% 96%,30% 96%,30% 100%,0 100%, 100% 100%,70% 100%,70% 96%,96% 96%,96% 70%,100% 70%, 100% 30%,96% 30%,96% 4%,70% 4%,70% 0,100% 0);
+}
+
+.reticleOk { animation: none; }
+.reticleOk::before { border-color: var(--colors-brand-default-primary); border-width: 3px; }
+
+@keyframes virPulse { 50% { transform: translateX(-50%) scale(0.9); opacity: 0.7; } }
+
+/* ── The wall/floor line ─────────────────────────────────────────────────── */
+.dragzone {
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-raised);
+  cursor: ns-resize;
+  touch-action: none;
+}
+
+.calib {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 0;
+  z-index: var(--z-raised);
+  border-top: 3px dashed var(--colors-brand-default-primary);
+  pointer-events: none;
+}
+
+.calibHandle {
+  position: absolute;
+  top: -12px;
+  width: 22px;
+  height: 22px;
+  border-radius: var(--radius-full);
+  background: var(--colors-brand-default-primary);
+  border: 2px solid var(--colors-text);
+}
+
+/* ── Top bar ─────────────────────────────────────────────────────────────── */
+.hud {
+  position: absolute;
+  top: calc(var(--spacing-sm) + env(safe-area-inset-top, 0px));
+  left: var(--spacing-sm);
+  right: var(--spacing-sm);
+  z-index: var(--z-sticky);
+  display: flex;
+  justify-content: space-between;
+  gap: var(--spacing-xs);
+}
+
+.chip {
+  height: 42px;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xxs);
+  padding: 0 var(--spacing-sm) 0 var(--spacing-xs);
+  border: 0;
+  border-radius: var(--radius-full);
+  background: var(--vir-glass);
+  color: var(--colors-text-inverse);
+  white-space: nowrap;
+  cursor: pointer;
+  font-family:    var(--typography-rules-text2-font-family);
+  font-size:      var(--typography-rules-text2-font-size);
+  line-height:    var(--typography-rules-text2-line-height);
+  font-weight:    var(--typography-rules-text2-font-weight, normal);
+  letter-spacing: var(--typography-rules-text2-letter-spacing, normal);
+  text-transform: var(--typography-rules-text2-text-transform, none);
+}
+
+.backIcon { transform: scaleX(-1); }
+
+/* ── Toasts ──────────────────────────────────────────────────────────────── */
+.toast {
+  position: absolute;
+  left: var(--spacing-md);
+  right: var(--spacing-md);
+  z-index: var(--z-sticky);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-sm);
+  background: var(--vir-glass-strong);
+  color: var(--colors-text-inverse);
+  text-align: center;
+  pointer-events: none;
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  font-weight:    var(--typography-rules-text1-font-weight, normal);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+  text-transform: var(--typography-rules-text1-text-transform, none);
+}
+
+.toastTop { top: calc(70px + env(safe-area-inset-top, 0px)); }
+.toastBottom { bottom: calc(var(--spacing-lg) + env(safe-area-inset-bottom, 0px)); background: var(--vir-glass); }
+
+.toastOk {
+  background: var(--colors-brand-default-primary);
+  color: var(--colors-text);
+  font-family:    var(--typography-rules-text2-font-family);
+  font-weight:    var(--typography-rules-text2-font-weight, normal);
+}
+
+/* ── Step cards (camera access, the line) ────────────────────────────────── */
+.card {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: var(--z-header);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-md) var(--spacing-sm) calc(var(--spacing-md) + env(safe-area-inset-bottom, 0px));
+  border-radius: var(--radius-panel) var(--radius-panel) 0 0;
+  background: var(--colors-background);
+  color: var(--colors-text);
+  animation: virUp var(--transition-base);
+}
+
+@keyframes virUp { from { transform: translateY(30px); opacity: 0; } }
+
+.cardTitle {
+  margin: 0;
+  font-family:    var(--typography-rules-headline8-font-family);
+  font-size:      var(--typography-rules-headline8-font-size);
+  line-height:    var(--typography-rules-headline8-line-height);
+  font-weight:    var(--typography-rules-headline8-font-weight, normal);
+  letter-spacing: var(--typography-rules-headline8-letter-spacing, normal);
+  text-transform: var(--typography-rules-headline8-text-transform, none);
+}
+
+.cardText, .cardNote, .cardError {
+  margin: 0;
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  font-weight:    var(--typography-rules-text1-font-weight, normal);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+  text-transform: var(--typography-rules-text1-text-transform, none);
+}
+
+.cardText { color: var(--colors-text-secondary); }
+
+.cardNote {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-sm);
+  background: var(--colors-brand-default-primary);
+}
+
+.cardError { color: var(--colors-error); }
+
+/* Lime, like the product page's own buttons */
+.primary {
+  width: 100%;
+  height: 50px;
+  margin-top: var(--spacing-xxs);
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: var(--colors-brand-default-primary);
+  color: var(--colors-text);
+  cursor: pointer;
+  font-family:    var(--typography-rules-button1-font-family);
+  font-size:      var(--typography-rules-button1-font-size);
+  line-height:    var(--typography-rules-button1-line-height);
+  font-weight:    var(--typography-rules-button1-font-weight, normal);
+  letter-spacing: var(--typography-rules-button1-letter-spacing, normal);
+  text-transform: var(--typography-rules-button1-text-transform, none);
+}
+
+.link {
+  align-self: center;
+  padding: var(--spacing-xxs);
+  border: 0;
+  background: none;
+  color: var(--colors-text);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+  font-family:    var(--typography-rules-links1-font-family);
+  font-size:      var(--typography-rules-links1-font-size);
+  line-height:    var(--typography-rules-links1-line-height);
+  font-weight:    var(--typography-rules-links1-font-weight, normal);
+  letter-spacing: var(--typography-rules-links1-letter-spacing, normal);
+}
+
+/* ── The customizer sheet ────────────────────────────────────────────────── */
+.sheet {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: var(--z-header);
+  display: flex;
+  flex-direction: column;
+  background: var(--colors-background);
+  color: var(--colors-text);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  box-shadow: 0 -4px 18px color-mix(in srgb, var(--colors-text) 14%, transparent);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  transition: top 0.35s ease;
+  visibility: hidden;
+}
+
+.sheetOn { visibility: visible; }
+.sheetDragging { transition: none; }
+
+.handle {
+  flex: none;
+  position: relative;
+  padding: 22px var(--spacing-sm) var(--spacing-xs);
+  cursor: grab;
+  touch-action: none;
+}
+
+.grab {
+  position: absolute;
+  top: var(--spacing-xxs);
+  left: 50%;
+  width: 40px;
+  height: 5px;
+  margin-left: -20px;
+  border-radius: var(--radius-full);
+  background: var(--border-color);
+}
+
+.sheetScroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 0 var(--spacing-sm) var(--spacing-md);
+  touch-action: pan-y;
+}
+
+/* The photo */
+.flash {
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-toast);
+  background: var(--colors-background);
+  pointer-events: none;
+  animation: virFlash 0.5s ease-out forwards;
+}
+
+@keyframes virFlash { to { opacity: 0; } }
+
+/* ── Desktop: the QR code hand-off ───────────────────────────────────────── */
+.qr {
+  display: grid;
+  gap: var(--spacing-lg);
+  align-items: center;
+  color: var(--colors-text);
+}
+
+@media (min-width: 768px) {
+  .qr {
+    grid-template-columns: 200px 1fr;
+    width: min(600px, calc(100vw - 2 * var(--spacing-xl)));
+    padding: var(--spacing-xs);
+  }
+}
+
+.qrCode {
+  display: block;
+  width: 200px;
+  height: 200px;
+  justify-self: center;
+  padding: var(--spacing-xxs);
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--radius-sm);
+  image-rendering: pixelated;
+}
+
+.qrTitle {
+  margin: 0 0 var(--spacing-xxs);
+  font-family:    var(--typography-rules-headline4-font-family);
+  font-size:      var(--typography-rules-headline4-font-size);
+  line-height:    var(--typography-rules-headline4-line-height);
+  font-weight:    var(--typography-rules-headline4-font-weight, normal);
+  letter-spacing: var(--typography-rules-headline4-letter-spacing, normal);
+  text-transform: var(--typography-rules-headline4-text-transform, none);
+}
+
+.qrText, .qrSteps, .qrFine {
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  font-weight:    var(--typography-rules-text1-font-weight, normal);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+  text-transform: var(--typography-rules-text1-text-transform, none);
+}
+
+.qrText { margin: 0 0 var(--spacing-sm); }
+
+.qrSteps {
+  margin: 0 0 var(--spacing-sm);
+  padding-left: var(--spacing-md);
+  list-style: decimal;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xxxs);
+}
+
+.qrChoice {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xs);
+  border-radius: var(--radius-sm);
+  background: var(--colors-surface-primary);
+}
+
+.qrChoice img {
+  flex: none;
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+}
+
+.qrChoiceName {
+  display: block;
+  font-family:    var(--typography-rules-text2-font-family);
+  font-size:      var(--typography-rules-text2-font-size);
+  line-height:    var(--typography-rules-text2-line-height);
+  font-weight:    var(--typography-rules-text2-font-weight, normal);
+  letter-spacing: var(--typography-rules-text2-letter-spacing, normal);
+}
+
+.qrChoiceMeta {
+  display: block;
+  color: var(--colors-text-secondary);
+  font-family:    var(--typography-rules-text3-font-family);
+  font-size:      var(--typography-rules-text3-font-size);
+  line-height:    var(--typography-rules-text3-line-height);
+  font-weight:    var(--typography-rules-text3-font-weight, normal);
+  letter-spacing: var(--typography-rules-text3-letter-spacing, normal);
+}
+
+.qrFine { margin: var(--spacing-xs) 0 0; color: var(--colors-text-secondary); }
+
+@media (prefers-reduced-motion: reduce) {
+  .triggerCollapse .triggerLabel, .triggerCollapse .triggerIcon svg,
+  .reticle, .card, .flash { animation: none; }
+  .scene, .sheet { transition: none; }
+}
