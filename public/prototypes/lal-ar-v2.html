@@ -1,0 +1,1205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>LAL AR Phone Prototype v2</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap">
+<style>
+/* Single-theme prototype of the LAL light theme: every color is set explicitly. */
+:root {
+  color-scheme: light;
+  --ink: #000000; --paper: #ffffff; --lime: #e8ff36; --grey: #f5f5f5; --beige: #F2EEEB;
+  --line: #e3e3e3; --muted: #707070; --red: #8e0000;
+  --wall: #ebe5de; --floor: #cfc4b8; --cam: #1b1b1b;
+  --font: 'Poppins', system-ui, -apple-system, sans-serif;
+  --mono: ui-monospace, 'SF Mono', Menlo, monospace;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: var(--paper); color: var(--ink); font-family: var(--font); font-size: 15px; line-height: 1.55; }
+a { color: inherit; }
+button { font-family: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+
+.topline { background: var(--lime); font-size: 12px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; text-align: center;
+  padding: calc(9px + env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) 9px max(16px, env(safe-area-inset-left, 0px)); }
+.wrap { max-width: 1180px; margin: 0 auto; padding: 32px max(16px, env(safe-area-inset-right, 0px)) calc(64px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));
+  display: flex; flex-direction: column; gap: 32px; }
+header { max-width: 720px; }
+h1 { font-size: 28px; line-height: 1.15; font-weight: 700; text-transform: uppercase; letter-spacing: .02em; margin: 0; text-wrap: balance; }
+h2 { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .1em; margin: 0 0 10px; }
+h3 { font-size: 16px; font-weight: 600; margin: 0; }
+p { margin: 0 0 10px; }
+.lead { font-size: 16px; font-weight: 300; }
+.sub { color: var(--muted); font-size: 14px; }
+code { font-family: var(--mono); font-size: .88em; background: var(--grey); padding: 1px 5px; }
+
+.proto { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 40px; align-items: start; }
+@media (min-width: 921px) { .stage { position: sticky; top: 16px; padding: 24px 12px; min-height: 0; } }
+@media (max-width: 920px) { .proto { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 420px) { .stage { padding: 16px 0; min-height: 0; background: none; border: 0; } }
+.stage { background: var(--grey); border: 1px solid var(--line); padding: 32px 12px; display: grid; place-items: center; min-height: 700px; }
+
+.panel { display: flex; flex-direction: column; gap: 28px; min-width: 0; }
+.steps { list-style: none; margin: 0; padding: 0; border-top: 2px solid var(--ink); }
+.steps li { border-bottom: 1px solid var(--line); }
+.steps button { width: 100%; display: grid; grid-template-columns: 28px 1fr; gap: 10px; align-items: center; text-align: left; background: none; border: 0; padding: 7px 0; font-size: 14px; cursor: pointer; }
+.steps button i { font-style: normal; font-weight: 700; font-size: 11px; width: 24px; height: 24px; display: grid; place-items: center; border: 1px solid var(--ink); }
+.steps button:hover span { text-decoration: underline; }
+.steps button[aria-current="step"] { font-weight: 600; }
+.steps button[aria-current="step"] i { background: var(--lime); border-color: var(--lime); }
+.note { background: var(--grey); padding: 16px 18px; display: flex; flex-direction: column; gap: 8px; }
+.note p { margin: 0; font-size: 14px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { font-size: 11px; font-weight: 600; padding: 2px 8px; border: 1px solid var(--ink); white-space: nowrap; }
+.chip.must { background: var(--ink); color: var(--paper); }
+.chip.nice { background: var(--lime); border-color: var(--lime); }
+.chip.later { background: var(--beige); border-color: var(--beige); }
+.chip.no { color: var(--red); border-color: var(--red); background: var(--paper); text-decoration: line-through; }
+.optrow { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+.optrow > span { font-size: 13px; color: var(--muted); }
+.seg { display: flex; border: 1px solid var(--ink); }
+.seg button { flex: 1; background: var(--paper); border: 0; padding: 8px 6px; font-size: 13px; cursor: pointer; }
+.seg button + button { border-left: 1px solid var(--ink); }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--paper); font-weight: 600; }
+.restart { background: var(--paper); border: 1px solid var(--ink); padding: 8px 14px; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; cursor: pointer; }
+.faked { margin: 0; padding-left: 18px; font-size: 14px; color: var(--muted); display: flex; flex-direction: column; gap: 4px; }
+
+/* device frames */
+.phone { width: 316px; height: 636px; border: 8px solid var(--ink); border-radius: 40px; overflow: hidden; position: relative; background: var(--paper); flex: none; }
+.scr { position: absolute; inset: 0; overflow: hidden; font-size: 12px; line-height: 1.4; user-select: none; -webkit-user-select: none; }
+.laptop { width: min(640px, 100%); aspect-ratio: 16 / 10; border: 8px solid var(--ink); border-bottom-width: 18px; border-radius: 12px 12px 4px 4px; position: relative; overflow: hidden; background: var(--paper); }
+[hidden] { display: none !important; }
+
+/* store UI */
+.scroll { position: absolute; inset: 0; overflow-y: auto; }
+.ann { background: var(--lime); text-align: center; font-size: 9.5px; font-weight: 600; padding: 4px 0; letter-spacing: .05em; }
+.bar { height: 40px; display: flex; align-items: center; justify-content: space-between; padding: 0 14px; border-bottom: 1px solid var(--line); font-weight: 700; font-size: 11px; letter-spacing: .14em; }
+.bag { position: relative; display: inline-grid; }
+.bag b { position: absolute; right: -7px; top: -6px; background: var(--lime); font-size: 9px; letter-spacing: 0; min-width: 15px; height: 15px; border-radius: 99px; display: grid; place-items: center; }
+.gal { background: var(--grey); height: 230px; position: relative; display: grid; place-items: center; }
+.scroll .gal { padding-bottom: 44px; }
+.arbtn { position: absolute; right: 10px; bottom: 10px; background: var(--lime); color: var(--ink); border: 0; font-size: 10px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; padding: 9px 14px; cursor: pointer; box-shadow: 0 2px 6px rgb(0 0 0 / .12); }
+.arbtn:hover { background: #d9f020; }
+.arbtn, .btn.ic { display: inline-flex; align-items: center; justify-content: center; gap: 7px; }
+.rot { width: 1.6em; height: 1.6em; flex: none; }
+.pad { padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+.pt { font-weight: 600; font-size: 14px; }
+.price { color: var(--ink); font-weight: 600; font-size: 15px; }
+.field { border: 1px solid #ccc; border-radius: 8px; padding: 7px 10px; font-size: 10.5px; color: var(--muted); display: flex; flex-direction: column; gap: 1px; }
+.field input, .field select { border: 0; padding: 0; font: 400 13px var(--font); color: var(--ink); background: transparent; width: 100%; outline: none; }
+.field:focus-within { border-color: var(--ink); }
+.lblrow { font-size: 11px; font-weight: 600; display: flex; gap: 6px; }
+.lblrow span { font-weight: 400; color: var(--muted); }
+.btn { display: block; width: 100%; border: 0; background: var(--ink); color: var(--paper); text-transform: uppercase; font-weight: 600; font-size: 11px; letter-spacing: .06em; text-align: center; padding: 12px 8px; cursor: pointer; }
+.btn.sec { background: var(--paper); color: var(--ink); border: 1px solid var(--ink); }
+.btn.lime { background: var(--lime); color: var(--ink); }
+.btn:disabled { opacity: .35; cursor: default; }
+.lnk { background: none; border: 0; padding: 0; text-decoration: underline; cursor: pointer; font-size: inherit; }
+.pnote { padding: 9px 10px; font-size: 11px; }
+.pnote.lime { background: var(--lime); }
+.pnote.grey { background: var(--grey); display: flex; flex-direction: column; gap: 6px; }
+.pnote table { border-collapse: collapse; width: 100%; font-size: 10.5px; }
+.pnote td { padding: 2px 0; border-bottom: 1px solid var(--line); }
+.sw { display: flex; gap: 10px; }
+.sw button { width: 26px; height: 26px; border-radius: 50%; border: 1px solid #bbb; cursor: pointer; padding: 0; }
+.sw button[aria-pressed="true"] { outline: 2px solid var(--ink); outline-offset: 2px; }
+
+/* artwork */
+.art { position: absolute; display: flex; flex-direction: column; align-items: center; box-shadow: 0 4px 12px rgb(0 0 0 / .3); overflow: hidden; }
+.art.flat { position: relative; box-shadow: 0 3px 8px rgb(0 0 0 / .18); }
+.art .vinyl { border-radius: 50%; flex: none; background: radial-gradient(circle, var(--vc, #DC7957) 0 33%, #111 34% 47%, #2a2a2a 48% 49%, #111 50% 100%); }
+.art .sn { font-weight: 700; line-height: 1.1; max-width: 88%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #111; }
+.art .sa { line-height: 1.1; color: #555; max-width: 88%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.art .pb { height: 2px; background: #333; flex: none; }
+#wallArt { cursor: grab; touch-action: none; }
+#wallArt:active { cursor: grabbing; }
+
+/* camera scene */
+.room { position: absolute; inset: 0; background: var(--cam); overflow: hidden; touch-action: none; }
+.room .wall { position: absolute; left: 0; right: 0; top: 0; height: 430px; background: linear-gradient(180deg, #e2dbd3, var(--wall) 60%); }
+.room .floor { position: absolute; left: 0; right: 0; top: 430px; bottom: 0; background: linear-gradient(180deg, var(--floor), #b8ab9d); }
+.room .base { position: absolute; left: 0; right: 0; top: 424px; height: 6px; background: #f6f2ee; }
+.room svg { position: absolute; }
+.room .vig { position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 45%, transparent 55%, rgb(0 0 0 / .28)); pointer-events: none; }
+.room.dim > :not(.vig) { filter: blur(3px) brightness(.55); }
+.hud { position: absolute; top: 14px; left: 12px; right: 12px; display: flex; justify-content: space-between; z-index: 5; }
+.round { width: 34px; height: 34px; border-radius: 50%; background: rgb(0 0 0 / .45); border: 0; color: var(--paper); font-size: 15px; font-weight: 600; display: grid; place-items: center; cursor: pointer; }
+.toast { position: absolute; left: 14px; right: 14px; background: rgb(0 0 0 / .72); color: var(--paper); padding: 9px 12px; font-size: 12px; text-align: center; border-radius: 4px; z-index: 4; pointer-events: none; }
+.toast.ok { background: var(--lime); color: var(--ink); font-weight: 600; }
+.pill { position: absolute; background: var(--paper); color: var(--ink); font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 99px; white-space: nowrap; transform: translateX(-50%); box-shadow: 0 1px 3px rgb(0 0 0 / .2); pointer-events: none; z-index: 3; }
+.reticle { position: absolute; left: 50%; top: 220px; width: 110px; height: 110px; transform: translateX(-50%); animation: pulse 1.4s ease-in-out infinite; }
+.reticle::before { content: ""; position: absolute; inset: 0; border: 2px solid var(--paper); clip-path: polygon(0 0,30% 0,30% 4%,4% 4%,4% 30%,0 30%, 0 70%,4% 70%,4% 96%,30% 96%,30% 100%,0 100%, 100% 100%,70% 100%,70% 96%,96% 96%,96% 70%,100% 70%, 100% 30%,96% 30%,96% 4%,70% 4%,70% 0,100% 0); }
+.reticle.ok { animation: none; }
+.reticle.ok::before { border-color: var(--lime); border-width: 3px; }
+@keyframes pulse { 50% { transform: translateX(-50%) scale(.9); opacity: .7; } }
+.calib { position: absolute; left: 0; right: 0; height: 0; border-top: 3px dashed var(--lime); z-index: 3; pointer-events: none; }
+.calib .h { position: absolute; top: -12px; width: 22px; height: 22px; border-radius: 50%; background: var(--lime); border: 2px solid var(--ink); }
+.calib.ok { border-top-style: solid; }
+.calib.ok .h { background: var(--ink); border-color: var(--lime); }
+.dragzone { position: absolute; inset: 0; z-index: 2; cursor: ns-resize; touch-action: none; }
+.dock { position: absolute; left: 0; right: 0; bottom: 0; padding: 28px 12px 18px; display: flex; flex-direction: column; gap: 12px; background: linear-gradient(0deg, rgb(0 0 0 / .65), transparent); z-index: 4; }
+.dock .btn.lime { border-radius: 4px; padding: 14px 8px; font-size: 12px; }
+.hud .grp { display: flex; gap: 8px; }
+.shutter { width: 58px; height: 58px; border-radius: 50%; border: 5px solid var(--paper); background: rgb(255 255 255 / .3); flex: none; cursor: pointer; padding: 0; }
+.shutter:active { background: rgb(255 255 255 / .7); }
+.cfg { background: var(--paper); color: var(--ink); border: 0; font-size: 12px; padding: 9px 12px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 10px; text-align: left; }
+.cfg .cfgt { min-width: 0; display: flex; flex-direction: column; }
+.cfg .cfgt b { font-weight: 600; }
+.cfg .chg { font-size: 11px; font-weight: 600; text-decoration: underline; white-space: nowrap; flex: none; }
+.cfg small { display: block; font-weight: 400; color: var(--muted); font-size: 11px; }
+.cfg.lime { background: var(--lime); font-weight: 600; font-size: 11px; padding: 10px 12px; white-space: nowrap; }
+.hint { position: absolute; left: 50%; transform: translateX(-50%); background: rgb(0 0 0 / .55); color: var(--paper); padding: 6px 12px; border-radius: 99px; font-size: 11px; white-space: nowrap; pointer-events: none; z-index: 3; transition: opacity .3s; }
+
+.sheet { position: absolute; left: 0; right: 0; bottom: 0; background: var(--paper); border-radius: 10px 10px 0 0; padding: 10px 14px 18px; display: flex; flex-direction: column; gap: 9px; z-index: 6; }
+.scr.enter .sheet, .scr.cartin .cart { animation: up .25s ease-out; }
+@keyframes up { from { transform: translateY(30px); opacity: 0; } }
+.sheet .grab { width: 36px; height: 4px; background: var(--line); border-radius: 4px; align-self: center; }
+.sheet .lbl { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; display: flex; justify-content: space-between; }
+.sheet .lbl span { font-weight: 400; text-transform: none; letter-spacing: 0; color: var(--muted); }
+.sheet .foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.sheet .foot .btn { width: auto; padding: 10px 24px; }
+.opts { display: flex; gap: 5px; }
+.opts button { flex: 1; font: 600 11px var(--font); padding: 6px 2px; border: 1px solid #ccc; background: var(--paper); cursor: pointer; border-radius: 4px; line-height: 1.25; }
+.opts button small { display: block; font-weight: 400; color: var(--muted); font-size: 9.5px; }
+.opts button[aria-pressed="true"] { border: 1.5px solid var(--ink); background: var(--grey); }
+.samp { display: flex; align-items: center; gap: 6px; font-size: 11.5px; background: var(--grey); padding: 7px 9px; }
+.samp .tag { background: var(--lime); font-size: 9px; font-weight: 700; text-transform: uppercase; padding: 1px 5px; letter-spacing: .05em; }
+.samp .lnk { margin-left: auto; font-size: 11px; font-weight: 600; }
+.perso { display: flex; flex-direction: column; gap: 6px; }
+
+.sysdlg { position: absolute; inset: 0; background: rgb(0 0 0 / .35); display: grid; place-items: center; z-index: 10; }
+.sysdlg > div { width: 250px; background: rgb(245 245 245 / .97); border-radius: 14px; text-align: center; font-family: -apple-system, BlinkMacSystemFont, sans-serif; overflow: hidden; }
+.sysdlg p { padding: 16px 16px 12px; margin: 0; font-size: 13px; }
+.sysdlg p b { display: block; margin-bottom: 4px; }
+.sysdlg .r { display: flex; border-top: 1px solid #ccc; }
+.sysdlg .r button { flex: 1; background: none; border: 0; padding: 11px; color: #0a63d6; font-size: 14px; cursor: pointer; font-family: inherit; }
+.sysdlg .r button + button { border-left: 1px solid #ccc; font-weight: 600; }
+.flash { position: absolute; inset: 0; background: #fff; z-index: 9; pointer-events: none; animation: flash .5s ease-out forwards; }
+@keyframes flash { to { opacity: 0; } }
+.photoframe { position: absolute; inset: 0; border: 12px solid var(--paper); z-index: 4; pointer-events: none; }
+
+.cartwrap { position: absolute; inset: 0; z-index: 12; }
+.cartwrap .scrim { position: absolute; inset: 0; background: rgb(0 0 0 / .45); }
+.cart { position: absolute; left: 0; right: 0; bottom: 0; background: var(--paper); padding: 16px 14px 20px; display: flex; flex-direction: column; gap: 12px; border-radius: 10px 10px 0 0; }
+.cart h4 { margin: 0; font-size: 13px; text-transform: uppercase; letter-spacing: .05em; }
+.item { display: grid; grid-template-columns: 64px 1fr; gap: 12px; align-items: center; }
+.item .thumb { width: 64px; height: 80px; background: var(--grey); display: grid; place-items: center; }
+.upsell { border: 1px dashed #bbb; padding: 9px 10px; color: var(--muted); font-size: 11px; }
+
+.ptoast { position: absolute; left: 20px; right: 20px; top: 60px; background: var(--ink); color: var(--paper); padding: 9px 12px; font-size: 11.5px; text-align: center; border-radius: 4px; z-index: 20; opacity: 0; transform: translateY(-6px); transition: all .2s; pointer-events: none; }
+.ptoast.show { opacity: 1; transform: none; }
+
+/* laptop */
+.lnav { height: 34px; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; border-bottom: 1px solid var(--line); font-weight: 700; font-size: 10px; letter-spacing: .14em; }
+.lpdp { position: absolute; inset: 34px 0 0; display: grid; grid-template-columns: 1.1fr 1fr; gap: 16px; padding: 14px 18px; }
+.lpdp .gal { height: auto; }
+.lpdp .col { display: flex; flex-direction: column; gap: 7px; min-width: 0; font-size: 11px; }
+.lpdp .field { padding: 5px 8px; }
+.lpdp .field input, .lpdp .field select { font-size: 11px; }
+.lpdp .btn { padding: 8px; font-size: 10px; }
+.lscrim { position: absolute; inset: 0; background: rgb(0 0 0 / .45); z-index: 5; }
+.lmodal { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(82%, 470px); background: var(--paper); padding: 18px; display: grid; grid-template-columns: auto 1fr; gap: 16px; align-items: center; border-radius: 8px; font-size: 11.5px; z-index: 6; }
+.lmodal h4 { margin: 0 0 6px; font-size: 13px; text-transform: uppercase; letter-spacing: .04em; }
+.lmodal ol { margin: 0; padding-left: 16px; }
+.lmodal .x { position: absolute; top: 6px; right: 8px; background: none; border: 0; font-size: 16px; cursor: pointer; }
+.lmodal .btn { margin-top: 10px; padding: 8px; font-size: 10px; }
+.qr { width: 110px; height: 110px; }
+@media (prefers-reduced-motion: reduce) { .reticle, .sheet, .cart, .flash { animation: none; } .flash { opacity: 0; } }
+/* ---------- Personalize panel, matched to sites2026 CustomizerPanel (mobile computed styles) ---------- */
+.cz-wrap { position: absolute; inset: 0; z-index: 15; font-family: 'Poppins', system-ui, sans-serif; color: #000; }
+.cz-scrim { position: absolute; inset: 0; background: rgb(0 0 0 / .45); }
+.cz-panel { position: absolute; inset: 0; background: #fff; border-radius: 8px 8px 0 0; overflow: hidden; display: flex; flex-direction: column; }
+.cz-body { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: none; }
+.czin .cz-panel { animation: czup .3s ease-out; }
+@keyframes czup { from { transform: translateY(40px); opacity: 0; } }
+.cz-x { position: absolute; top: 16px; right: 16px; z-index: 2; width: 36px; height: 36px; border-radius: 9999px; border: 0; background: #fff; box-shadow: 0 1px 3px rgb(0 0 0 / .08); display: grid; place-items: center; padding: 0; cursor: pointer; }
+.cz-x svg { width: 20px; height: 20px; }
+.cz-prev { flex: none; background: #f5f5f5; padding: 16px; display: grid; place-items: center; }
+.cz-body { padding: 24px 16px; }
+.cz-tabs { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid #e3e3e3; border-radius: 8px; overflow: hidden; }
+.cz-tab { display: grid; grid-template-columns: 24px 1fr; column-gap: 10px; align-items: center; padding: 14px 16px; background: #f5f5f5; border: 0; border-bottom: 2px solid transparent; text-align: left; cursor: pointer; font-family: inherit; color: #707070; }
+.cz-tab.on { background: #fff; border-bottom-color: #e8ff36; color: #000; }
+.cz-tab .st { grid-row: 1 / 3; width: 24px; height: 24px; border-radius: 9999px; border: 1px solid #707070; display: grid; place-items: center; font-size: 11px; line-height: 16.5px; font-weight: 700; }
+.cz-tab.on .st { background: #e8ff36; border-color: #e8ff36; color: #000; }
+.cz-tab .tt { font-size: 14px; line-height: 21px; font-weight: 600; }
+.cz-tab .ts { font-size: 12px; line-height: 18px; color: #707070; }
+.cz-step { display: flex; flex-direction: column; gap: 24px; padding-top: 24px; }
+.cz-step .lp-note { margin-top: 0; }
+.cz-l { font-size: 13px; line-height: 19.5px; font-weight: 600; letter-spacing: .13px; }
+.cz-l span { font-weight: 400; color: #707070; }
+.cz-lr { display: flex; justify-content: space-between; align-items: center; }
+.cz-sg { border: 0; background: none; padding: 0; font: 400 12px/18px 'Poppins', system-ui, sans-serif; color: #707070; text-decoration: underline; cursor: pointer; }
+.cz-sw { display: flex; gap: 12px; }
+.cz-sw button { width: 32px; height: 32px; border-radius: 9999px; border: 0; padding: 0; cursor: pointer; }
+.cz-sw button.light { border: 1px solid #e3e3e3; }
+.cz-sw button[aria-pressed="true"] { box-shadow: 0 0 0 2px #f5f5f5, 0 0 0 3.5px #000; }
+.cz-mat, .cz-sel { position: relative; }
+.cz-mat select, .cz-sel select { width: 100%; -webkit-appearance: none; appearance: none; background: #fff; border: 1px solid #ccc; border-radius: 4px; color: #000; outline: none; cursor: pointer; }
+.cz-mat select { height: 54px; padding: 6px 40px 6px 64px; font: 400 14px/21px 'Poppins', system-ui, sans-serif; }
+.cz-sel select { height: 44px; padding: 0 40px 0 14px; font: 400 16px/24px 'Poppins', system-ui, sans-serif; }
+.cz-mat select:focus, .cz-sel select:focus { border-color: #000; }
+.cz-mat svg, .cz-sel svg { position: absolute; right: 15px; top: 50%; width: 12px; height: 6px; transform: translateY(-50%); pointer-events: none; }
+.cz-mat .th { position: absolute; left: 15px; top: 7px; width: 40px; height: 40px; border-radius: 4px; pointer-events: none; box-shadow: inset 0 0 0 1px rgb(0 0 0 / .06); }
+.cz-mat .th.canvas { background: linear-gradient(160deg, #fbf9f6 0 55%, #e6e1da 56%); }
+.cz-mat .th.metal { background: linear-gradient(135deg, #f4f4f4, #cfcfcf 50%, #f2f2f2); }
+.cz-mat .th.acrylic { background: linear-gradient(140deg, #fff 0 40%, #e4eef3 41% 55%, #fff 56%); }
+.cz-nest { display: flex; flex-direction: column; gap: 16px; }
+.cz-nest h2 { margin: 0; font-size: 15px; line-height: 20px; font-weight: 700; letter-spacing: 0; text-transform: none; }
+.cz-card { position: relative; display: flex; gap: 16px; align-items: center; min-height: 142px; background: #fff; border: 1px solid #e3e3e3; border-radius: 8px; padding: 0; text-align: left; cursor: pointer; font-family: inherit; color: #000; overflow: hidden; }
+.cz-card.on { border-color: #000; }
+.cz-card .md { flex: 0 0 140px; height: 140px; display: grid; place-items: center; background: #f3efea; }
+.cz-card .in { display: flex; flex-direction: column; gap: 8px; padding-right: 48px; }
+.cz-card .nm { font-size: 13px; line-height: 18px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.cz-card .pr { font-size: 13px; line-height: 20px; font-weight: 600; color: #8e0000; }
+.cz-card .ck { position: absolute; top: 12px; right: 12px; width: 24px; height: 24px; border-radius: 9999px; border: 1.5px solid #000; display: grid; place-items: center; }
+.cz-card.on .ck { background: #000; }
+.cz-card .ck svg { width: 12px; height: 12px; }
+.cz-sub { display: flex; justify-content: space-between; font-size: 16px; line-height: 24px; }
+.cz-sub strong { font-weight: 400; }
+.cz-ctas { display: flex; flex-direction: column; gap: 12px; }
+.cz-vir { display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: 100%; height: 50px; background: #fff; border: 1px solid #000; border-radius: 4px; color: #000; font: 600 14px/21px 'Poppins', system-ui, sans-serif; letter-spacing: .14px; text-transform: uppercase; cursor: pointer; }
+.cz-vir .rot { width: 22px; height: 22px; }
+.cz-step select option { font-size: 16px; }
+/* desktop: the same panel as a drawer on the right of the laptop */
+.lap-cz .cz-wrap { z-index: 4; }
+.lap-cz .cz-panel { left: auto; width: 390px; zoom: .6; height: calc(100% / .6); border-radius: 0; }
+/* ---------- product page, matched to sites2026 /lal/product/1 (mobile computed styles) ---------- */
+.lp { background: #fff; color: #000; font-family: 'Poppins', system-ui, sans-serif; font-size: 10px; line-height: 15px; }
+.lp svg { display: block; flex: none; }
+.lp h1, .lp h2, .lp h3 { letter-spacing: 0; text-wrap: wrap; }
+.lp-head { position: sticky; top: -44px; z-index: 8; background: #fff; }
+.lp-topline { height: 44px; background: #e8ff36; display: flex; align-items: center; justify-content: center; padding: 8px 16px; font-size: 13px; line-height: 18px; font-weight: 600; }
+.lp-bar { height: 64px; display: grid; grid-template-columns: 60px 1fr auto; align-items: center; gap: 16px; padding: 12px 16px; }
+.lp-l, .lp-r { display: flex; gap: 12px; align-items: center; }
+.lp-r { justify-self: end; }
+.lp-logo { justify-self: center; font-weight: 700; font-size: 15px; letter-spacing: .16em; white-space: nowrap; }
+.lp-bag { position: relative; }
+.lp-bag b { position: absolute; right: -7px; top: -6px; background: #e8ff36; font-size: 9px; line-height: 1; min-width: 16px; height: 16px; border-radius: 99px; display: grid; place-items: center; }
+.lp-gal { position: relative; }
+.lp-track { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; }
+.lp-track::-webkit-scrollbar { display: none; }
+.lp-slide { flex: 0 0 100%; aspect-ratio: 1 / 1; position: relative; overflow: hidden; scroll-snap-align: start; display: grid; place-items: center; background: #f3efea; }
+.lp-prog { position: relative; height: 2px; background: #e3e3e3; overflow: hidden; }
+.lp-prog i { position: absolute; left: 0; top: 0; bottom: 0; width: 50%; background: #000; transition: transform .25s ease; }
+.lp .arbtn { bottom: 16px; right: 16px; }
+.lp-room { position: absolute; inset: 0; background: linear-gradient(180deg, #e9e2da, #efe9e3 80%, #d3c8bc 80%, #c4b7a9); }
+.lp-sofa { position: absolute; left: 19%; width: 62%; bottom: 20%; height: 26.7%; border-radius: 8% 8% 3% 3%; background: linear-gradient(180deg, #b3aca2 0 52%, #a39b90 52%); }
+.lp-sofa::before, .lp-sofa::after { content: ""; position: absolute; bottom: 4%; width: 12%; height: 60%; background: #968e83; border-radius: 30%; }
+.lp-sofa::before { left: -2%; } .lp-sofa::after { right: -2%; }
+.lp-ra { position: absolute; box-shadow: 0 3px 8px rgb(0 0 0 / .25); }
+.lp-form { padding: 0 16px; }
+.lp-ph { display: flex; flex-direction: column; gap: 16px; padding-top: 16px; }
+.lp-bc { list-style: none; margin: 0; padding: 0; display: flex; align-items: center; gap: 4px; }
+.lp-bc a { font-size: 12px; line-height: 16px; color: #707070; }
+.lp-bc .sep { color: #707070; }
+.lp-bc .sep svg { width: 20px; height: 20px; }
+.lp-bc .sep path { fill: #707070; }
+.lp-tp { display: flex; flex-direction: column; gap: 8px; }
+.lp-title { margin: 0; font-size: 20px; line-height: 24px; font-weight: 600; text-transform: uppercase; }
+.lp-price { font-size: 20px; line-height: 24px; font-weight: 600; }
+.lp-rating { display: flex; align-items: center; gap: 8px; height: 20px; }
+.lp-rating .lp-stars { margin-right: 4px; }
+.lp-rating .v { font-size: 13px; line-height: 18px; font-weight: 600; }
+.lp-rating .c { font-size: 13px; line-height: 18px; text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
+.lp-stars { display: inline-flex; gap: 2px; }
+.lp-stars > span, .lp-stars svg { width: var(--s); height: var(--s); }
+.lp-stars .off path { fill: #8c8c8c; stroke: #8c8c8c; }
+.lp-cz { display: flex; flex-direction: column; gap: 24px; margin-top: 24px; }
+.lp-field { display: flex; flex-direction: column; gap: 8px; }
+.lp-field label { font-size: 13px; line-height: 19.5px; font-weight: 600; letter-spacing: .13px; color: #000; }
+.lp-field input { width: 100%; height: 44px; border: 1px solid #ccc; border-radius: 4px; padding: 0 14px; background: #fff; color: #000; font: 400 16px/24px 'Poppins', system-ui, sans-serif; outline: none; -webkit-appearance: none; appearance: none; }
+.lp-field input::placeholder { color: #9b9b9b; opacity: 1; }
+.lp-field input:focus { border-color: #000; }
+.lp-cta { width: 100%; height: 50px; border: 0; border-radius: 4px; background: #e8ff36; color: #000; font: 600 14px/21px 'Poppins', system-ui, sans-serif; letter-spacing: .14px; text-transform: uppercase; cursor: pointer; }
+.lp-trust { list-style: none; margin: 24px 0 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+.lp-trust li { display: flex; align-items: center; gap: 12px; font-size: 13px; line-height: 18px; }
+.lp-trust svg { width: 24px; height: 24px; }
+.lp-bsh { padding: 32px 16px 16px; }
+.lp-bsh h2, .lp-rscore h2 { margin: 0; font-size: 20px; line-height: 24px; font-weight: 600; text-transform: uppercase; }
+.lp-bst { display: flex; gap: 4px; padding: 0 16px; overflow-x: auto; scroll-snap-type: x mandatory; scroll-padding: 0 16px; scrollbar-width: none; }
+.lp-bst::-webkit-scrollbar { display: none; }
+.lp-card { flex: 0 0 152px; scroll-snap-align: start; }
+.lp-card .im { position: relative; aspect-ratio: 1 / 1; background: #f3efea; display: grid; place-items: center; }
+.lp-card .qa { position: absolute; right: 16px; bottom: 16px; width: 40px; height: 40px; background: #fff; border: 1px solid #e3e3e3; display: grid; place-items: center; padding: 0; cursor: pointer; }
+.lp-card .qa svg { width: 20px; height: 20px; }
+.lp-card .in { padding: 12px 8px; display: flex; flex-direction: column; gap: 8px; }
+.lp-card p { margin: 0; font-size: 13px; line-height: 17px; }
+.lp-card .in span { font-size: 12px; line-height: 14px; font-weight: 600; }
+.lp-mc { width: 46%; aspect-ratio: 3 / 4; background: #fff; border: 4px solid #1f1f1f; box-shadow: 0 2px 6px rgb(0 0 0 / .18); position: relative; display: block; }
+.lp-mc::before { content: ""; position: absolute; inset: 14% 12% 30%; background: var(--c); opacity: .85; }
+.lp-mc.v::before { inset: 10% 14% auto; aspect-ratio: 1; opacity: 1; border-radius: 50%; background: radial-gradient(circle, var(--c) 0 33%, #111 34% 100%); }
+.lp-rv { padding: 48px 16px; }
+.lp-rsum { display: flex; flex-direction: column; gap: 24px; margin-bottom: 24px; }
+.lp-rscore { display: flex; flex-direction: column; align-items: center; gap: 16px; text-align: center; }
+.lp-rscore .sc { margin: 0; font-size: 52px; line-height: 52px; font-weight: 700; letter-spacing: .5px; }
+.lp-rscore .bo { margin: 0; font-size: 12px; line-height: 16px; }
+.lp-bars { display: flex; flex-direction: column; gap: 4px; }
+.lp-bars button { display: flex; align-items: center; gap: 12px; height: 16px; padding: 0; border: 0; background: none; font: 400 12px/16px 'Poppins', system-ui, sans-serif; color: #000; text-align: left; cursor: pointer; }
+.lp-bars span { min-width: 41px; }
+.lp-bars i { flex: 1; height: 12px; background: #f5f5f5; position: relative; }
+.lp-bars b { position: absolute; left: 0; top: 0; bottom: 0; background: #000; }
+.lp-bars em { font-style: normal; min-width: 22px; text-align: right; }
+.lp-filters { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; margin-bottom: 32px; }
+.lp-chip { display: inline-flex; align-items: center; gap: 8px; height: 42px; padding: 8px 16px; background: #fff; border: 1px solid #e3e3e3; border-radius: 9999px; font: 400 13px/18px 'Poppins', system-ui, sans-serif; color: #000; cursor: pointer; }
+.lp-chip svg { width: 24px; height: 24px; transform: rotate(90deg); }
+.lp-photos { display: flex; flex-direction: column; gap: 12px; margin-bottom: 32px; }
+.lp-photos .hd { display: flex; justify-content: space-between; gap: 16px; }
+.lp-photos h3 { margin: 0; font-size: 13px; line-height: 18px; font-weight: 400; }
+.lp-photos .hd button { border: 0; background: none; padding: 0; font: 400 13px/18px 'Poppins', system-ui, sans-serif; text-decoration: underline; color: #000; cursor: pointer; }
+.lp-photos ul { list-style: none; margin: 0; padding: 0; display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; }
+.lp-photos li { flex: 0 0 96px; height: 96px; border-radius: 4px; background: #f3efea; display: grid; place-items: center; }
+.lp-photos .lp-mc, .lp-rc .th .lp-mc { width: 52%; border-width: 3px; }
+.lp-rg { display: flex; flex-direction: column; gap: 24px; }
+.lp-rc { display: flex; flex-direction: column; gap: 8px; padding-bottom: 24px; border-bottom: 1px solid #e3e3e3; }
+.lp-rc .hd { display: flex; justify-content: space-between; gap: 16px; }
+.lp-rc .meta { display: flex; align-items: center; gap: 12px; }
+.lp-rc .av { position: relative; width: 40px; height: 40px; border: 1px solid #000; border-radius: 9999px; display: grid; place-items: center; font-size: 13px; line-height: 19.5px; font-weight: 600; flex: none; }
+.lp-rc .bd { position: absolute; left: 26px; top: 26px; width: 16px; height: 16px; border-radius: 9999px; background: #000; border: 2px solid #fff; display: grid; place-items: center; }
+.lp-rc .bd svg { width: 8px; height: 8px; }
+.lp-rc .nb { display: flex; flex-direction: column; gap: 2px; }
+.lp-rc .n { font-size: 13px; line-height: 20px; font-weight: 600; }
+.lp-rc .lo, .lp-rc .dt { font-size: 12px; line-height: 16px; color: #707070; }
+.lp-rc .dt { white-space: nowrap; }
+.lp-rc p { margin: 0; font-size: 13px; line-height: 18px; }
+.lp-rc .th { display: flex; gap: 8px; }
+.lp-rc .th span:not(.lp-mc) { width: 72px; height: 72px; border-radius: 4px; background: #f3efea; display: grid; place-items: center; }
+.lp-rc .th .more { background: #fff !important; border: 1px solid #e3e3e3; font-size: 13px; line-height: 20px; font-weight: 600; }
+.lp-more { display: flex; justify-content: center; margin-top: 32px; }
+.lp-more button { height: 44px; padding: 12px 28px; background: #fff; border: 1px solid #000; font: 600 14px/18px 'Poppins', system-ui, sans-serif; text-transform: uppercase; color: #000; cursor: pointer; }
+.lp-note { margin-top: 24px; padding: 12px 14px; font-size: 13px; line-height: 18px; border-radius: 4px; }
+.lp-note.lime { background: #e8ff36; }
+.lp-note.grey { background: #f5f5f5; display: flex; flex-direction: column; gap: 8px; }
+.lp-note table { border-collapse: collapse; width: 100%; font-size: 12px; }
+.lp-note td { padding: 3px 0; border-bottom: 1px solid #e3e3e3; }
+.lp-note .lnk { font-size: 13px !important; }
+.exitvr { height: 42px; display: inline-flex; align-items: center; gap: 6px; padding: 0 16px 0 12px; border: 0; border-radius: 9999px; background: rgb(0 0 0 / .55); color: #fff; font: 600 13px/18px 'Poppins', system-ui, sans-serif; cursor: pointer; white-space: nowrap; }
+.exitvr svg { width: 20px; height: 20px; }
+.v2-shot { position: absolute; right: 16px; bottom: calc(100% + 14px); height: 42px; display: inline-flex; align-items: center; gap: 8px; padding: 0 16px 0 12px; border: 0; border-radius: 9999px; background: rgb(0 0 0 / .55); color: #fff; font: 600 13px/18px 'Poppins', system-ui, sans-serif; cursor: pointer; white-space: nowrap; }
+.v2-shot svg { width: 20px; height: 20px; }
+/* camera step: its sheet covers the collapsed tabs */
+.v2.cam .v2-prev .sheet { z-index: 8; padding-bottom: calc(26px + env(safe-area-inset-bottom, 0px)) !important; }
+.sysdlg .r .allowcam { flex: 1; padding: 11px; color: #0a63d6; font-size: 16px; font-weight: 600; border-left: 1px solid #ccc; cursor: pointer; text-align: center; font-family: -apple-system, BlinkMacSystemFont, sans-serif; }
+/* prototype helper: Autofill link beside the first label */
+.lp-af { display: grid; grid-template-columns: 1fr auto; row-gap: 8px; align-items: baseline; }
+.lp-af input { grid-column: 1 / -1; }
+.lp-auto { border: 0; background: none; padding: 0; font: 400 12px/18px 'Poppins', system-ui, sans-serif; color: #707070; text-decoration: underline; cursor: pointer; }
+.lp-gimg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+.lp-logosvg { display: block; width: 120px; height: 32px; }
+/* ---------- v2: AR inside the live preview ---------- */
+.v2 .v2-prev { position: absolute; left: 0; right: 0; top: 0; background: #f5f5f5; overflow: hidden; transition: height .35s ease; }
+.v2-flat { position: absolute; inset: 0; display: grid; place-items: center; }
+.v2 .arbtn { right: 16px; bottom: 16px; z-index: 3; }
+.v2 .arbtn, .v2 .arbtn:hover { background: #fff; color: #000; }
+/* all white with a black border and black icon; the label slides shut to leave the icon square */
+.v2 .arbtn { height: 44px; padding: 0; gap: 0; border: 1px solid #000; box-shadow: 0 2px 8px rgb(0 0 0 / .14); overflow: hidden; }
+.v2 .arbtn .icb { width: 42px; align-self: stretch; flex: none; display: grid; place-items: center; background: #fff; }
+.v2 .arbtn .aric { width: 22px; height: 22px; }
+.v2 .arbtn .lbl { display: block; overflow: hidden; white-space: nowrap; max-width: 160px; transition: max-width .65s cubic-bezier(.7, 0, .25, 1); }
+.v2 .arbtn .lbl span { display: block; padding: 0 16px 0 2px; transition: opacity .3s ease-in, transform .45s cubic-bezier(.5, 0, .75, 0); }
+.v2 .arbtn.mini .lbl { max-width: 0; }
+.v2 .arbtn.mini .lbl span { opacity: 0; transform: translateX(14px); }
+.v2 .arbtn:active { transform: scale(.94); }
+/* arrival: the button is already there; the cube gives a little turn */
+.v2 .arbtn.in .aric { animation: virWiggle .9s ease-in-out .3s both; }
+/* collapse: label sweeps shut, then the square squashes and springs back while the cube spins */
+.v2 .arbtn.anim { animation: virPop .55s cubic-bezier(.3, 1.6, .5, 1) .5s both; }
+.v2 .arbtn.anim .aric { animation: virSpin .9s cubic-bezier(.3, 1.4, .5, 1) .35s both; }
+@keyframes virWiggle { 0%, 100% { transform: rotate(0); } 25% { transform: rotate(-16deg); } 55% { transform: rotate(12deg); } 80% { transform: rotate(-5deg); } }
+@keyframes virPop { 0% { transform: scale(1); } 30% { transform: scale(.86); } 100% { transform: scale(1); } }
+@keyframes virSpin { from { transform: rotate(0) scale(.8); } to { transform: rotate(360deg) scale(1); } }
+@media (prefers-reduced-motion: reduce) { .v2 .arbtn, .v2 .arbtn .aric, .v2 .arbtn .lbl, .v2 .arbtn .lbl span { transition: none !important; animation: none !important; } }
+.v2-scene { position: absolute; inset: 0; transition: transform .35s ease; }
+.room.real { background: #111; }
+.room.real .ph { position: absolute; inset: 0; background: #111 center / cover no-repeat; }
+.room.real video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.room.real.dim > :not(.vig) { filter: blur(3px) brightness(.55); }
+.v2-sheet { position: absolute; left: 0; right: 0; bottom: 0; z-index: 7; background: #fff; display: flex; flex-direction: column; transition: top .35s ease; }
+.v2.ar .v2-sheet { border-radius: 14px 14px 0 0; box-shadow: 0 -4px 18px rgb(0 0 0 / .14); padding-bottom: env(safe-area-inset-bottom, 0px); }
+.v2-handle { flex: none; padding: 22px 16px 12px; position: relative; cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none; }
+.v2-handle .grab { position: absolute; top: 8px; left: 50%; width: 40px; height: 5px; margin-left: -20px; border-radius: 5px; background: #d6d6d6; }
+.v2-handle.off { cursor: default; }
+.v2-handle.off .cz-tabs { opacity: .55; }
+.v2.ar .v2-scroll { padding-top: 0; }
+.v2-handle .arw { width: 34px; height: 34px; border-radius: 9999px; background: #e8ff36; display: grid; place-items: center; flex: none; transition: transform .3s ease; }
+.v2-handle .arw svg { width: 22px; height: 22px; }
+.v2-handle.up .arw { transform: rotate(180deg); }
+.v2-handle.off { cursor: default; }
+.v2-handle.off .arw { background: #f5f5f5; }
+.v2-handle.off .arw path { stroke: #9b9b9b; }
+.v2-handle .tx { display: flex; flex-direction: column; font-size: 13px; line-height: 18px; font-weight: 600; min-width: 0; }
+.v2-handle .tx small { font-size: 12px; line-height: 16px; font-weight: 400; color: #707070; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.v2-scroll { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 24px 16px calc(24px + env(safe-area-inset-bottom, 0px)); scrollbar-width: none; }
+.v2 .v2-prev .hud { top: calc(14px + env(safe-area-inset-top, 0px)); }
+/* ---------- full-screen phone overrides ---------- */
+html, body { height: 100%; overflow: hidden; overscroll-behavior: none; background: #1b1b1b; }
+.scr { position: fixed; top: 0; bottom: 0; left: 50%; transform: translateX(-50%); width: min(100vw, 460px); font-size: 14px; background: var(--paper); }
+.scroll { -webkit-overflow-scrolling: touch; overscroll-behavior: contain; padding-bottom: env(safe-area-inset-bottom, 0px); }
+.ann { font-size: 11px; padding: calc(6px + env(safe-area-inset-top, 0px)) 0 6px; }
+.bar { height: 50px; font-size: 13px; padding: 0 18px; }
+.gal { height: 340px; }
+.scroll .gal { padding-bottom: 56px; }
+.arbtn { font-size: 12px; padding: 12px 18px; right: 14px; bottom: 14px; }
+.pad { padding: 18px; gap: 12px; }
+.pt { font-size: 17px; }
+.price { font-size: 18px; }
+.field { font-size: 12px; padding: 9px 12px; border-radius: 10px; }
+.field input, .field select { font-size: 16px; }
+.lblrow { font-size: 13px; }
+.sw { gap: 12px; }
+.sw button { width: 32px; height: 32px; }
+.btn { font-size: 13px; padding: 16px 10px; }
+.pnote { font-size: 13px; padding: 11px 12px; }
+.pnote table { font-size: 12.5px; }
+.hud { top: calc(14px + env(safe-area-inset-top, 0px)); left: 16px; right: 16px; }
+.round { width: 42px; height: 42px; font-size: 17px; }
+.round svg { width: 20px; height: 20px; }
+.toast { font-size: 14px; padding: 11px 14px; left: 18px; right: 18px; }
+.toast.top { top: calc(70px + env(safe-area-inset-top, 0px)) !important; }
+.pill { font-size: 12px; padding: 3px 10px; }
+.hint { font-size: 13px; padding: 8px 14px; }
+.reticle { top: 34%; width: 130px; height: 130px; }
+.dock { padding: 36px 16px calc(18px + env(safe-area-inset-bottom, 0px)); gap: 12px; }
+.dock .btn.lime { font-size: 14px; padding: 17px 10px; }
+.cfg { font-size: 15px; padding: 12px 14px; }
+.cfg small { font-size: 13px; }
+.cfg .chg { font-size: 13px; }
+.sheet { padding: 12px 18px calc(20px + env(safe-area-inset-bottom, 0px)); gap: 11px; }
+.sheet .lbl { font-size: 12px; }
+.sheet .foot .btn { padding: 14px 30px; }
+.opts { gap: 6px; }
+.opts button { font-size: 14px; padding: 9px 2px; }
+.opts button small { font-size: 11.5px; }
+.samp { font-size: 13.5px; padding: 9px 11px; }
+.samp .lnk { font-size: 13px; }
+.sysdlg > div { width: 280px; }
+.sysdlg p { font-size: 14px; }
+.sysdlg .r button { font-size: 16px; }
+.photoframe { border-width: 14px; }
+.cart { padding: 20px 18px calc(22px + env(safe-area-inset-bottom, 0px)); gap: 14px; }
+.cart h4 { font-size: 15px; }
+.item { grid-template-columns: 76px 1fr; font-size: 14px; }
+.item .thumb { width: 76px; height: 96px; }
+.upsell { font-size: 13px; }
+.ptoast { font-size: 13.5px; top: calc(70px + env(safe-area-inset-top, 0px)); }
+.lnk { font-size: 14px !important; }
+</style>
+</head>
+<body>
+<div class="scr" id="scr"></div>
+
+<script>
+(function () {
+  var SIZES = [
+    { id: '9x12', code: 'XS', w: 9, h: 12, price: 50 },
+    { id: '12x16', code: 'S', w: 12, h: 16, price: 75 },
+    { id: '18x24', code: 'M', w: 18, h: 24, price: 120 },
+    { id: '24x32', code: 'L', w: 24, h: 32, price: 145 },
+    { id: '30x40', code: 'XL', w: 30, h: 40, price: 190 }
+  ];
+  var MATS = [
+    { id: 'canvas', label: 'Canvas', delta: 0 },
+    { id: 'metal', label: 'Metal', delta: 75 },
+    { id: 'acrylic', label: 'Acrylic', delta: 115 }
+  ];
+  var FRAMES = [
+    { id: 'white', label: 'White', c: '#FFFFFF' },
+    { id: 'black', label: 'Black', c: '#1F1F1F' },
+    { id: 'wood-light', label: 'Light wood', c: '#D4A574' },
+    { id: 'wood-dark', label: 'Dark wood', c: '#5C4033' }
+  ];
+  var W = 300, H = 620, FLOOR = 430, K = 2.6, EYE = 57, LINE_START = 368;
+  // Scene scales to the screen: floor line at 69% of the height, a 84 in sofa spans 73% of the width.
+  function measure() {
+    var r = document.getElementById('scr').getBoundingClientRect();
+    W = r.width; H = r.height; FLOOR = Math.round(H * 0.69); K = W / (typeof S !== 'undefined' && S && S.ar && S.src && S.src !== 'drawn' ? 100 : 115); LINE_START = FLOOR - Math.round(H * 0.1);
+  }
+  var ROT = '<svg class="rot" width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M17.172 9.16797C17.352 9.47997 17.748 9.59997 18.06 9.43197C18.372 9.25197 18.492 8.85597 18.312 8.54397L17.748 8.85597L17.172 9.16797ZM17.748 8.85597L18.312 8.54397C16.404 5.05197 12.036 3.77997 8.54397 5.68797L8.85597 6.25197L9.16797 6.82797C12.024 5.26797 15.612 6.31197 17.172 9.16797L17.748 8.85597ZM8.85597 6.25197L8.54397 5.68797C5.05197 7.59597 3.77997 11.964 5.68797 15.456L6.25197 15.144L6.82797 14.832C5.26797 11.976 6.31197 8.38797 9.16797 6.82797L8.85597 6.25197ZM6.25197 15.144L5.68797 15.456C7.59597 18.948 11.976 20.22 15.456 18.312L15.144 17.748L14.832 17.172C11.976 18.744 8.38797 17.688 6.82797 14.832L6.25197 15.144ZM15.144 17.748L15.456 18.312C16.572 17.712 17.496 16.824 18.156 15.744L17.592 15.408L17.04 15.072C16.5 15.948 15.744 16.68 14.832 17.172L15.144 17.748Z" fill="currentColor"/><path d="M18.084 9.12005L18 4.80005" stroke="currentColor" stroke-width="1.296" stroke-linecap="round"/><path d="M18.084 9.12012L14.124 9.49212" stroke="currentColor" stroke-width="1.296" stroke-linecap="round"/></svg>';
+  var IC = {
+    x: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 5.03L18.98 4L12 10.97L5.03 4L4 5.03L10.98 12L4 18.97L5.03 20L12 13.03L18.98 20L20 18.97L13.03 12L20 5.03Z" fill="black"/></svg>',
+    caret: '<svg viewBox="0 0 12 6" fill="none" aria-hidden="true"><path d="M1 .5l5 5 5-5" stroke="#000" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    menu: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M0.5 2.5H23.5" stroke="black"/><path d="M0.5 11.5H23.5" stroke="black"/><path d="M0.5 20.5H23.5" stroke="black"/></svg>',
+    search: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M21.14 20.44L15.94 15.24C17.31 13.68 18.02 11.66 17.93 9.58999C17.83 7.51999 16.93 5.57999 15.42 4.15999C13.91 2.73999 11.91 1.96999 9.83999 1.99999C7.76999 2.02999 5.79999 2.86999 4.32999 4.32999C2.86999 5.79999 2.02999 7.76999 1.99999 9.83999C1.96999 11.91 2.73999 13.91 4.15999 15.42C5.57999 16.93 7.51999 17.83 9.58999 17.93C11.66 18.02 13.68 17.31 15.24 15.94L20.44 21.14L21.14 20.44ZM9.98999 16.94C8.37999 16.94 6.82999 16.38 5.58999 15.36C4.33999 14.34 3.48999 12.92 3.17999 11.35C2.86999 9.76999 3.10999 8.13999 3.86999 6.71999C4.61999 5.30999 5.84999 4.19999 7.32999 3.57999C8.81999 2.96999 10.47 2.87999 12 3.34999C13.54 3.81999 14.87 4.79999 15.76 6.13999C16.65 7.46999 17.06 9.07999 16.9 10.67C16.74 12.27 16.03 13.77 14.9 14.9C14.25 15.55 13.49 16.06 12.65 16.41C11.8 16.76 10.9 16.94 9.98999 16.94Z" fill="black"/></svg>',
+    person: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path fill-rule="evenodd" clip-rule="evenodd" d="M7.34999 7.78C7.34999 5.3 9.35999 3.3 11.83 3.3C14.3 3.3 16.31 5.3 16.31 7.78C16.31 10.26 14.3 12.27 11.83 12.27C9.35999 12.27 7.34999 10.26 7.34999 7.78ZM11.83 2C8.63999 2 6.04999 4.59 6.04999 7.78C6.04999 9.89 7.17999 11.73 8.84999 12.74C4.70999 13.99 1.67999 17.64 1.67999 22H2.97999C2.97999 17.39 6.97999 13.58 12 13.58C17.03 13.58 21.03 17.39 21.03 22H22.33C22.33 17.56 19.18 13.85 14.92 12.67C16.53 11.65 17.61 9.84 17.61 7.78C17.61 4.59 15.02 2 11.83 2Z" fill="black"/></svg>',
+    bag: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M19.83 7.48992H17.94C17.83 6.03992 17.18 4.68992 16.11 3.69992C15.04 2.70992 13.65 2.16992 12.19 2.16992C10.74 2.16992 9.34 2.70992 8.28 3.69992C7.21 4.68992 6.56 6.03992 6.45 7.48992H4.56L2.19 21.6899H22.19L19.83 7.48992ZM12.19 3.05992C13.41 3.05992 14.58 3.50992 15.48 4.32992C16.38 5.14992 16.94 6.27992 17.05 7.48992H7.34C7.45 6.27992 8.01 5.14992 8.91 4.32992C9.81 3.50992 10.98 3.05992 12.19 3.05992ZM5.32 8.37992H19.07L21.14 20.7999H3.25L5.32 8.37992Z" fill="black"/></svg>',
+    chev: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path fill-rule="evenodd" clip-rule="evenodd" d="M13.45 12L9.41998 7.97L10.38 7L15.38 12L10.38 17L9.41998 16.03L13.45 12Z" fill="black"/></svg>',
+    down: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path fill-rule="evenodd" clip-rule="evenodd" d="M13.45 12L9.41998 7.97L10.38 7L15.38 12L10.38 17L9.41998 16.03L13.45 12Z" fill="black"/></svg>',
+    star: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M14.292 9.57588L14.352 9.79188H14.568H21.744L15.588 14.2679L15.396 14.3999L15.48 14.6159L18.252 21.8279L12.18 17.3999L12 17.2799L11.82 17.3999L5.74798 21.8279L8.51998 14.6159L8.60398 14.3999L8.41198 14.2679L2.25598 9.79188H9.43198H9.64798L9.70798 9.57588L12 2.32788L14.292 9.57588Z" fill="black" stroke="black" stroke-width="0.6"/></svg>',
+    rev: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M13.1356 6.18906H5.05084V1.94362H13.1343V6.18906H13.1356ZM6.29292 4.94697H11.8922V3.1857H6.29292V4.94697Z" fill="black"/><path d="M9.17702 9.6967H5.03467C4.82849 9.6967 4.66205 9.53026 4.66205 9.32408C4.66205 9.11789 4.82849 8.95145 5.03467 8.95145H9.17578C9.38196 8.95145 9.5484 9.11789 9.5484 9.32408C9.5484 9.53026 9.38196 9.6967 9.17578 9.6967H9.17702Z" fill="black"/><path d="M7.28528 11.8939H5.0073C4.80111 11.8939 4.63467 11.7275 4.63467 11.5213C4.63467 11.3151 4.80111 11.1487 5.0073 11.1487H7.28528C7.49146 11.1487 7.6579 11.3151 7.6579 11.5213C7.6579 11.7275 7.49146 11.8939 7.28528 11.8939Z" fill="black"/><path d="M7.07916 14.0899H5.0496C4.84341 14.0899 4.67697 13.9235 4.67697 13.7173C4.67697 13.5111 4.84341 13.3447 5.0496 13.3447H7.07916C7.28534 13.3447 7.45178 13.5111 7.45178 13.7173C7.45178 13.9235 7.28534 14.0899 7.07916 14.0899Z" fill="black"/><path d="M8.16841 16.2872H5.02097C4.81478 16.2872 4.64835 16.1208 4.64835 15.9146C4.64835 15.7084 4.81478 15.5419 5.02097 15.5419H8.16841C8.37459 15.5419 8.54103 15.7084 8.54103 15.9146C8.54103 16.1208 8.37459 16.2872 8.16841 16.2872Z" fill="black"/><path d="M10.7631 18.4087H5.00605C4.79986 18.4087 4.63342 18.2422 4.63342 18.036C4.63342 17.8298 4.79986 17.6634 5.00605 17.6634H10.7619C10.968 17.6634 11.1345 17.8298 11.1345 18.036C11.1345 18.2422 10.968 18.4087 10.7619 18.4087H10.7631Z" fill="black"/><path d="M12.2712 18.8496C10.962 18.8496 9.70253 18.4 8.67781 17.5566C7.50777 16.594 6.78364 15.2339 6.63707 13.726C6.49051 12.2181 6.94014 10.7438 7.90276 9.57373C8.86537 8.40369 10.2254 7.67955 11.7333 7.53299C13.24 7.38642 14.7156 7.83605 15.8856 8.79867C17.0557 9.76128 17.7798 11.1214 17.9264 12.6292C18.0729 14.1371 17.6233 15.6115 16.6607 16.7815C15.6981 17.9516 14.338 18.6769 12.8301 18.8235C12.6438 18.8421 12.4562 18.8508 12.2712 18.8508V18.8496ZM12.2898 8.74898C12.1445 8.74898 11.9991 8.75644 11.8526 8.7701C10.6751 8.88437 9.6131 9.45076 8.8604 10.3637C8.10894 11.2779 7.75743 12.4293 7.8717 13.6068C7.98597 14.7843 8.55236 15.8462 9.46529 16.5989C10.3795 17.3504 11.5309 17.7019 12.7084 17.5876C13.8859 17.4734 14.9478 16.907 15.7005 15.9928C16.452 15.0799 16.8035 13.9272 16.6892 12.7497C16.575 11.5722 16.0086 10.5103 15.0957 9.75755C14.2958 9.09925 13.312 8.74774 12.2898 8.74774V8.74898Z" fill="black"/><path d="M14.934 19.4657C14.934 20.1476 14.38 20.7015 13.6981 20.7015H4.43096C3.74905 20.7015 3.19509 20.1476 3.19509 19.4657V6.08348C3.19509 5.40157 3.74905 4.8476 4.43096 4.8476H5.05076V3.60552H4.43096C3.06467 3.60552 1.953 4.71719 1.953 6.08348V19.4657C1.953 20.832 3.06467 21.9436 4.43096 21.9436H13.6969C15.0632 21.9436 16.1748 20.832 16.1748 19.4657V17.2995C15.7997 17.6547 15.3836 17.9553 14.9328 18.1938V19.4657H14.934Z" fill="black"/><path d="M16.1761 9.05702V6.08348C16.1761 4.71719 15.0645 3.60552 13.6982 3.60552H13.1355V4.8476H13.6982C14.3801 4.8476 14.934 5.40157 14.934 6.08348V8.16396C15.2682 8.34158 15.5861 8.55274 15.8855 8.79867C15.9861 8.88189 16.0817 8.96883 16.1761 9.05702Z" fill="black"/><path d="M21.5705 17.0411L17.8368 14.3334C17.7486 14.7594 17.6108 15.1743 17.4269 15.5705L20.7743 17.9975L19.7807 19.3675L16.4904 16.9815C16.2022 17.3007 15.8818 17.5827 15.5377 17.8249L19.1286 20.4283C19.331 20.5761 19.567 20.6469 19.8005 20.6469C20.1558 20.6469 20.5073 20.4829 20.7309 20.1737L21.8289 18.6596C22.204 18.1429 22.0872 17.4175 21.5705 17.0424V17.0411Z" fill="black"/><path d="M13.1356 6.18906H5.05084V1.94362H13.1343V6.18906H13.1356ZM6.29292 4.94697H11.8922V3.1857H6.29292V4.94697Z" fill="black"/><path d="M11.4303 15.6711C11.2825 15.6711 11.1347 15.6127 11.0241 15.496L9.22434 13.5968C9.01194 13.3733 9.02188 13.0193 9.24545 12.8069C9.46903 12.5945 9.82302 12.6044 10.0354 12.828L11.4675 14.3396L14.5678 11.653C14.8013 11.4505 15.154 11.4754 15.3565 11.7089C15.559 11.9424 15.5329 12.2951 15.3006 12.4976L11.7967 15.5357C11.6911 15.6276 11.5607 15.6723 11.4303 15.6723V15.6711Z" fill="black"/></svg>',
+    ship: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20.9801 7.48283C20.943 7.30823 20.8645 7.14508 20.7513 7.00707C20.6382 6.86906 20.4935 6.76021 20.3295 6.68966L14.6906 4.11643C14.1567 3.87356 13.4956 4.02005 13.1486 4.4682L12.155 6.02467L5.33833 9.00267L4.11051 7.68618C4.11305 7.68566 4.11567 7.68566 4.11822 7.68618L10.0405 5.11199H10.0492C10.0835 5.09687 10.121 5.09055 10.1583 5.09357C10.1957 5.0966 10.2317 5.10889 10.2631 5.12934L10.5667 5.62182L11.5767 5.18331L11.1671 4.51542L11.1344 4.4682C10.7932 4.02584 10.1359 3.87453 9.60295 4.1145L3.67875 6.6858H3.66911C3.50469 6.75657 3.35978 6.86598 3.24669 7.00474C3.1336 7.1435 3.05568 7.30751 3.01954 7.48283C2.98737 7.64656 2.99501 7.81563 3.0418 7.97579C3.08859 8.13596 3.17317 8.28255 3.28842 8.40321L4.48445 9.68694L3.96305 10.2652L3.94667 10.2845C3.76774 10.5002 3.63996 10.7536 3.57291 11.0258C3.50586 11.2979 3.50128 11.5817 3.55951 11.8559C3.61773 12.13 3.73726 12.3875 3.90913 12.6089C4.08099 12.8303 4.30074 13.0099 4.55191 13.1343V16.3725L12.1916 19.7457L19.7465 16.3725L19.7407 14.178L18.6526 14.6686V15.667L12.7332 18.3039V14.313C13.2628 14.7636 13.9355 15.0113 14.6309 15.0117C15.0352 15.012 15.4352 14.9273 15.8047 14.763L19.4313 13.1536L19.4467 13.1459C19.7009 13.0235 19.9238 12.8448 20.0986 12.6235C20.2734 12.4021 20.3955 12.1439 20.4557 11.8683C20.5159 11.5927 20.5126 11.3071 20.446 11.033C20.3793 10.7589 20.2512 10.5036 20.0713 10.2864L19.521 9.68115L20.7093 8.40803C20.8255 8.28699 20.9109 8.13968 20.958 7.9786C21.0052 7.81753 21.0127 7.64745 20.9801 7.48283ZM12.155 7.21779L17.552 9.69465L12.181 12.104L6.47942 9.69465L12.155 7.21779ZM4.6213 11.6318C4.59645 11.5195 4.59723 11.403 4.62359 11.2911C4.64996 11.1791 4.70122 11.0745 4.77357 10.9851L5.31906 10.3857L11.0794 12.824L10.9426 13.0476C10.7116 13.4239 10.3519 13.7038 9.93036 13.8353C9.50877 13.9668 9.05381 13.941 8.6498 13.7627L5.03282 12.157C4.92898 12.1063 4.83799 12.0327 4.76671 11.9417C4.69543 11.8507 4.64571 11.7448 4.6213 11.6318ZM11.6442 18.3106L5.63613 15.6622V13.6162L8.2084 14.7582C8.57793 14.9225 8.97786 15.0072 9.38225 15.0069C9.81504 15.007 10.2425 14.9111 10.6336 14.7259C11.0248 14.5407 11.37 14.271 11.6442 13.9361V18.3106ZM19.3918 11.6318C19.3674 11.7448 19.3177 11.8507 19.2464 11.9417C19.1751 12.0327 19.0841 12.1063 18.9803 12.157L15.3633 13.7627C14.9593 13.9412 14.5043 13.9671 14.0827 13.8356C13.661 13.7041 13.3014 13.4241 13.0705 13.0476L13.0002 12.9319L18.6863 10.377L19.2386 10.9851C19.3111 11.0744 19.3625 11.179 19.3891 11.291C19.4156 11.4029 19.4165 11.5194 19.3918 11.6318ZM18.6584 9.0046L13.1563 6.48052L14.0237 5.12548C14.0552 5.10455 14.0916 5.0919 14.1293 5.0887C14.167 5.0855 14.2049 5.09185 14.2396 5.10717L19.8785 7.6804L19.8901 7.68618L18.6584 9.0046Z" fill="black"/></svg>',
+    pin: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M11.8 4C8.59 4 6 6.71 6 10C6 11.19 6.36 12.13 6.91 13.03L11.29 20.11C11.4 20.29 11.59 20.4 11.8 20.4C12.01 20.4 12.2 20.29 12.31 20.11L16.69 13.03C17.24 12.13 17.6 11.19 17.6 10C17.6 6.71 15.01 4 11.8 4ZM11.8 5.2C14.34 5.2 16.4 7.33 16.4 10C16.4 10.96 16.15 11.61 15.66 12.4L11.8 18.65L7.94 12.4C7.45 11.61 7.2 10.96 7.2 10C7.2 7.33 9.27 5.2 11.8 5.2ZM11.8 6.8C10.15 6.8 8.8 8.15 8.8 9.8C8.8 11.45 10.15 12.8 11.8 12.8C13.45 12.8 14.8 11.45 14.8 9.8C14.8 8.15 13.45 6.8 11.8 6.8ZM11.8 8C12.8 8 13.6 8.8 13.6 9.8C13.6 10.8 12.8 11.6 11.8 11.6C10.8 11.6 10 10.8 10 9.8C10 8.8 10.8 8 11.8 8Z" fill="black"/></svg>',
+    check: '<svg viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M1.8 5.2l2.2 2.1 4.2-4.6" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+  };
+  var SAMPLE = { song: 'Yellow', artist: 'Coldplay' };
+
+  var STEPS = [
+    { k: 'A', label: 'Product page, phone' },
+    { k: 'A2', id: 'A', label: 'Product page, desktop' },
+    { k: 'B', label: 'QR code hand-off' },
+    { k: 'C', label: 'Camera access' },
+    { k: 'D', label: 'Find a wall' },
+    { k: 'E', label: 'Mark the wall/floor line' },
+    { k: 'F', label: 'Placed at real size' },
+    { k: 'G', label: 'Adjust in place' },
+    { k: 'H', label: 'Photo of the wall' },
+    { k: 'I', label: 'Saved, back on the product page' }
+  ];
+  var NOTES = {
+    A: ['Product page, phone', 'The button sits on the gallery image. Leave the song empty to see the sample song in AR (Q3), or type one to see it on the wall.', [['must', '"View in Room" button']]],
+    A2: ['Product page, desktop', 'Same button, but desktop has no AR, so it opens a QR code.', [['must', '"View in Room" button']]],
+    B: ['QR code hand-off', 'The link carries the shopper\'s song, size and frame. Tap the button under the QR code to act as the phone scanning it.', [['must', 'QR code to phone'], ['later', 'Mock wall with sofa']]],
+    C: ['Camera access', 'We explain first, then the browser asks. Allow camera shows a mock of the browser prompt. Don\'t Allow and Not now go back to the product page with a size guide (Q2 proposal).', [['must', 'AR in mobile browser, no app'], ['no', 'App download']]],
+    D: ['Find a wall', 'One instruction. Set Wall detection to Slow to see the tips that replace it when no wall is found. The build waits about 6 seconds; the prototype waits 3.', [['must', 'Live camera AR'], ['must', 'Fast wall detection']]],
+    E: ['Mark the wall/floor line', 'Drag anywhere on the screen to move the lime line onto the skirting board. It snaps when it\'s close. Confirm without moving it and the canvas hangs too high, which is the point of this step.', [['must', 'Mark wall/floor line first']]],
+    F: ['Placed at real size', 'The canvas hangs centered, 57 in above the line. Drag it with one finger. Pinch does nothing on purpose. Tap Change to adjust, or the camera button at the top for a photo. Save takes the shopper back to the product page to add to bag there, so the nested item still shows first.', [['must', 'Drag with a finger'], ['must', 'Personalization in AR'], ['nice', '"Real size" label'], ['no', 'Add to cart from AR'], ['no', 'Free pinch resize'], ['no', '3D rotation']]],
+    G: ['Adjust in place', 'Switch between G1 and G2 under Options to compare. Size snaps to the five real sizes and the price updates as you tap. You can still drag the canvas while the sheet is open.', [['must', 'Change type, size, frame with price'], ['must', 'Size snaps to real sizes'], ['no', 'Settings locked before AR']]],
+    H: ['Photo of the wall', 'The camera button at the top right of the wall view saves a photo to the phone. Share would open the phone\'s own share sheet.', [['must', 'Take a photo of the AR view']]],
+    I: ['Saved, back on the product page', 'Save writes the wall choices to the product page, with a note naming what changed so the new price isn\'t a surprise (Q4). The shopper adds to bag from here, so the nested item still shows before Add to bag. Closing AR with ✕ leaves without saving.', [['no', 'Add to cart from AR']]]
+  };
+
+  var S, timers = [], toastT, drag = null, last = {};
+  function fresh(keep) {
+    var s = { screen: 'pdp', entry: 'phone', variant: 'g1', detect: 'fast', song: '', artist: '', size: '12x16', mat: 'canvas', frame: 'black',
+      floorY: FLOOR, lineY: LINE_START, cx: null, cy: null, snap: null, returned: false, fallback: false, fromQR: false, moved: false,
+      perso: false, cart: false, perm: false, find: 'looking', retried: false, shot: false, bag: 0,
+      cust: false, tab: 1, nest: false, occ: '', names: '', center: '#DC7957' };
+    if (keep) { s.entry = keep.entry; s.variant = keep.variant; s.detect = keep.detect; }
+    if (s.entry === 'desktop') s.screen = 'desk';
+    return s;
+  }
+  measure();
+  S = fresh();
+
+  function $(sel, root) { return (root || document).querySelector(sel); }
+  function by(list, id) { return list.filter(function (x) { return x.id === id; })[0]; }
+  function sz() { return by(SIZES, S.size); }
+  function mt() { return by(MATS, S.mat); }
+  function fr() { return by(FRAMES, S.frame); }
+  function price(sizeId, matId) { return by(SIZES, sizeId || S.size).price + by(MATS, matId || S.mat).delta; }
+  function esc(t) { return String(t).replace(/[&<>"']/g, function (c) { return '&#' + c.charCodeAt(0) + ';'; }); }
+  function isSample() { return !S.song.trim(); }
+  function songTxt() { return isSample() ? SAMPLE.song : S.song.trim(); }
+  function artistTxt() { return isSample() && !S.artist.trim() ? SAMPLE.artist : S.artist.trim(); }
+  function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
+  function cfgLabel() { return sz().code + ' · ' + mt().label + (S.mat === 'canvas' ? ' · ' + fr().label : ''); }
+  function later(fn, ms) { timers.push(setTimeout(fn, ms)); }
+
+  /* ---------- artwork ---------- */
+  function artStyle(w, h) {
+    var st = 'width:' + w + 'px;height:' + h + 'px;--vc:' + S.center + ';';
+    if (S.mat === 'canvas') st += 'border:' + Math.max(2, w * 0.06) + 'px solid ' + fr().c + ';background:#fff;';
+    else if (S.mat === 'metal') st += 'border:1px solid #a9a9a9;background:linear-gradient(135deg,#f4f4f4,#dcdcdc 50%,#f7f7f7);';
+    else st += 'border:1px solid rgba(255,255,255,.95);background:linear-gradient(140deg,#fff 0 40%,#eef4f7 41% 55%,#fff 56%);';
+    return st;
+  }
+  function artInner(w, h) {
+    var d = Math.min(w, h) * 0.58, fs = w * 0.085;
+    var t = '<div class="vinyl" style="width:' + d + 'px;height:' + d + 'px;margin-top:' + (h * 0.1) + 'px"></div>';
+    if (fs >= 3.5) t += '<div class="sn" style="font-size:' + fs + 'px;margin-top:' + (h * 0.06) + 'px">' + esc(songTxt()) + '</div>' +
+      '<div class="sa" style="font-size:' + (fs * 0.68) + 'px">' + esc(artistTxt()) + '</div>';
+    t += '<div class="pb" style="width:66%;margin-top:' + (h * 0.04) + 'px"></div>';
+    return t;
+  }
+  function flatArt(maxW, maxH) {
+    var s = sz(), k = Math.min(maxH / s.h, maxW / s.w), w = s.w * k, h = s.h * k;
+    return '<div class="art flat" style="' + artStyle(w, h) + '">' + artInner(w, h) + '</div>';
+  }
+  function geo() {
+    var s = sz(), w = s.w * K, h = s.h * K;
+    var cx = S.cx == null ? W / 2 : S.cx, cy = S.cy == null ? S.floorY - EYE * K : S.cy;
+    cx = clamp(cx, w / 2 + 4, W - w / 2 - 4);
+    var topMin = H * 0.12; cy = clamp(cy, topMin + h / 2, Math.max(topMin + h / 2, S.floorY - 6 - h / 2));
+    return { w: w, h: h, cx: cx, cy: cy, left: cx - w / 2, top: cy - h / 2 };
+  }
+  function wallArt() {
+    var g = geo();
+    return '<div class="art" id="wallArt" style="left:' + g.left + 'px;top:' + g.top + 'px;' + artStyle(g.w, g.h) + '">' + artInner(g.w, g.h) + '</div>' +
+      '<div class="pill" id="pill" style="left:' + g.cx + 'px;top:' + Math.max(H * 0.1, g.top - 28) + 'px">' + sz().w + ' × ' + sz().h + ' in · real size</div>';
+  }
+  function refreshWallArt() {
+    var a = $('#wallArt'), p = $('#pill'); if (!a) return;
+    var g = geo();
+    a.setAttribute('style', 'left:' + g.left + 'px;top:' + g.top + 'px;' + artStyle(g.w, g.h));
+    a.innerHTML = artInner(g.w, g.h);
+    p.style.left = g.cx + 'px'; p.style.top = Math.max(H * 0.1, g.top - 28) + 'px';
+  }
+
+  /* ---------- scene ---------- */
+  function room(dim) {
+    if (S.src === 'photo' && S.photo) return '<div class="room real' + (dim ? ' dim' : '') + '"><div class="ph" style="background-image:url(' + S.photo + ')"></div><div class="vig"></div></div>';
+    if (S.src === 'live') return '<div class="room real' + (dim ? ' dim' : '') + '"><video id="camv" autoplay playsinline muted></video><div class="vig"></div></div>';
+    var sw = 84 * K, sh = sw * 80 / 186, sl = W * 0.073, pw = 13.8 * K, ph = pw * 3, pl = sl + sw + W * 0.027;
+    return '<div class="room' + (dim ? ' dim' : '') + '"><div class="wall" style="height:' + FLOOR + 'px"></div><div class="base" style="top:' + (FLOOR - 6) + 'px"></div><div class="floor" style="top:' + FLOOR + 'px"></div>' +
+      '<svg style="left:' + sl + 'px;top:' + (FLOOR - sh + 2) + 'px" width="' + sw + '" height="' + sh + '" viewBox="0 0 186 80" aria-hidden="true">' +
+      '<rect x="8" y="0" width="170" height="44" rx="10" fill="#b3aca2"/><rect x="0" y="30" width="186" height="38" rx="9" fill="#a39b90"/>' +
+      '<rect x="0" y="24" width="22" height="44" rx="8" fill="#968e83"/><rect x="164" y="24" width="22" height="44" rx="8" fill="#968e83"/>' +
+      '<rect x="14" y="66" width="6" height="12" fill="#6e665c"/><rect x="166" y="66" width="6" height="12" fill="#6e665c"/></svg>' +
+      '<svg style="left:' + pl + 'px;top:' + (FLOOR - ph * 0.9) + 'px" width="' + pw + '" height="' + ph + '" viewBox="0 0 30 90" aria-hidden="true">' +
+      '<ellipse cx="15" cy="22" rx="12" ry="22" fill="#8a9a78"/><ellipse cx="9" cy="36" rx="8" ry="16" fill="#7a8b68"/>' +
+      '<rect x="7" y="58" width="16" height="22" fill="#d8cfc5"/></svg><div class="vig"></div></div>';
+  }
+  var camSvg = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>';
+  function hud(photo) { return '<div class="hud"><button class="exitvr" data-act="close"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true" style="transform:scaleX(-1)"><path d="M6 12H17.37" stroke="#fff" stroke-width="1.5"/><path d="M12.32 6.32001L18 12L12.32 17.68" stroke="#fff" stroke-width="1.5"/></svg>Exit View in Room</button></div>'; }
+  var bagSvg = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="1.8" aria-hidden="true"><path d="M5 8h14l-1 13H6L5 8z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>';
+
+  /* ---------- screens ---------- */
+  function sizeSelect(id) {
+    return '<select id="' + id + '">' + SIZES.map(function (s) {
+      return '<option value="' + s.id + '"' + (s.id === S.size ? ' selected' : '') + '>' + s.code + ' – ' + s.w + '" x ' + s.h + '" · $' + price(s.id) + '</option>';
+    }).join('') + '</select>';
+  }
+  function diffNote() {
+    if (!S.returned || !S.snap) return '';
+    var ch = [];
+    if (S.snap.size !== S.size) ch.push(sz().code + ' · ' + sz().w + ' × ' + sz().h + ' in');
+    if (S.snap.mat !== S.mat) ch.push(mt().label);
+    if (S.mat === 'canvas' && (S.snap.frame !== S.frame || S.snap.mat !== S.mat)) ch.push(fr().label + ' frame');
+    if (S.snap.song !== S.song) ch.push('song "' + esc(S.song) + '"');
+    if (!ch.length) return '<div class="lp-note lime">Saved from your wall: <b>' + cfgLabel() + '</b>. Nothing changed.</div>';
+    return '<div class="lp-note lime">Saved from your wall: <b>' + ch.join(', ') + '</b></div>';
+  }
+  function fallbackNote() {
+    if (!S.fallback) return '';
+    return '<div class="lp-note grey"><b>No camera? Here\'s the size guide.</b><table>' + SIZES.map(function (s) {
+      return '<tr><td>' + s.code + '</td><td>' + s.w + ' × ' + s.h + ' in</td><td>' + Math.round(s.w * 2.54) + ' × ' + Math.round(s.h * 2.54) + ' cm</td></tr>';
+    }).join('') + '</table><button class="lnk" data-act="ar" style="align-self:flex-start;font-size:11px">Try the camera again</button></div>';
+  }
+  /* ---------- product page, matched to sites2026 /lal/product/1 (mobile) ---------- */
+  var BEST = [
+    ['Music Memories Custom Canvas', 99, '#DC7957', 1], ['Pop Your Memories - Custom Pop Art Canvas', 89, '#E0679E'],
+    ['Watercolor Dream Custom Canvas', 79, '#57BADD'], ['Sketching Memories - Vertical Canvas', 79, '#8f8f8f'],
+    ['All of Us Here - Custom Portrait Canvas', 99, '#91A36B'], ['Forever in Lines - Custom Portrait Canvas', 89, '#A46C93'],
+    ['Royal Romance - Custom Canvas for Couple', 89, '#C9A25B'], ['Memory Map - Custom 3D Map', 119, '#5B7FA8']
+  ];
+  var REVIEWS = [
+    ['Alexandra S.', 'Texas, United States', 'May 2025', 5, 'Absolutely stunning — the quality exceeded my expectations. Arrived beautifully packaged and looks exactly as pictured.'],
+    ['Maria T.', 'London, United Kingdom', 'Apr 2025', 4, 'Really happy with this purchase. The craftsmanship is excellent and it feels very premium. Would definitely order again.'],
+    ['Jessica R.', 'Sydney, Australia', 'Mar 2025', 5, 'Great gift for my sister — she loved the personal touch. Delivery was fast and the packaging was lovely.'],
+    ['Sofia K.', 'Berlin, Germany', 'Feb 2025', 4, 'Beautiful piece. The engraving is crisp and the metal feels solid. Very pleased with the result.', 1]
+  ];
+  var BARS = [['5 Stars', 963], ['4 Stars', 0], ['3 Stars', 41], ['2 Stars', 15], ['1 Star', 5]];
+  function stars(n, px) {
+    var h = '<span class="lp-stars" style="--s:' + px + 'px" aria-label="' + n + ' out of 5 stars">';
+    for (var i = 0; i < 5; i++) h += '<span class="' + (i < n ? 'on' : 'off') + '">' + IC.star + '</span>';
+    return h + '</span>';
+  }
+  function lf(id, label, ph, val) {
+    return '<div class="lp-field"><label for="' + id + '">' + label + '</label><input type="text" id="' + id + '" placeholder="' + ph + '" value="' + esc(val) + '" autocomplete="off"></div>';
+  }
+  function mini(c, vinyl) { return '<span class="lp-mc' + (vinyl ? ' v' : '') + '" style="--c:' + c + '"></span>'; }
+  // Slide 2: the canvas over a sofa, at true scale (an 84 in sofa spans 62% of the slide)
+  function roomSlide() {
+    var s = sz(), k = 62 / 84, w = s.w * k, h = s.h * k;
+    return '<div class="lp-room"><span class="lp-sofa"></span>' +
+      '<div class="art lp-ra" style="left:' + (50 - w / 2) + '%;top:' + (45 - h) + '%;width:' + w + '%;height:' + h + '%;' + artStyle(1, 1).replace(/width:[^;]+;height:[^;]+;/, '').replace(/border:([\d.]+)px/, 'border:3px') + '"><div class="vinyl" style="width:58%;aspect-ratio:1;margin-top:12%"></div><div class="pb" style="width:66%;margin-top:14%"></div></div></div>';
+  }
+  function gallery() {
+    return '<div class="lp-gal"><div class="lp-track" id="gtrack">' +
+      '<div class="lp-slide"><img class="lp-gimg" src="images/music-memories-1.jpg" alt="Music Memories Custom Canvas"></div>' +
+      '<div class="lp-slide"><img class="lp-gimg" src="images/music-memories-2.gif" alt="Music Memories Custom Canvas held by a customer"></div></div>' +
+      '<div class="lp-prog"><i id="gprog"></i></div></div>';
+  }
+  function pdp() {
+    var h = '<div class="scroll lp">' +
+      '<header class="lp-head"><div class="lp-topline">Free Shipping on All Orders</div>' +
+      '<div class="lp-bar"><div class="lp-l">' + IC.menu + IC.search + '</div><a class="lp-logo" aria-label="Lime and Lou home"><svg class="lp-logosvg" role="img" aria-label="Lime and Lou" viewBox="0 0 223 35"><g fill="none" fill-rule="evenodd"><g fill="#000"><g><g><g><path d="M4.774 29.431L4.725 1.144 0 1.152.057 34.165 20.035 34.13 20.027 29.405zM23.159 1.192L23.213 34.11 27.938 34.103 27.884 1.185zM63.935 1.199L53.044 23.018 42.074 1.199 34.623 1.199 34.683 34.111 39.408 34.102 39.358 6.317 51.535 30.535 54.577 30.529 66.666 6.31 66.716 34.111 71.442 34.102 71.382 1.199zM95.554 5.819L95.546 1.094 77.492 1.125 77.554 33.711 95.55 33.709 95.549 28.983 82.271 28.985 82.254 20.324 91.492 20.308 91.483 15.582 82.245 15.598 82.227 5.842z" transform="translate(-20.000000, -59.000000) translate(0.000000, 40.000000) translate(20.000000, 19.000000)"/><g><path d="M27.767 19.963l-.008-4.725c-2.907.005-5.639 1.142-7.69 3.2-.58.582-1.083 1.22-1.51 1.898L7.337 5.76l13.318-.023-.008-4.726-18.737.033v5.413l14.865 19.307c-.858 2.363-3.124 4.056-5.78 4.061h-.015v-.015h-.01c-2.085 0-3.930-1.042-5.046-2.633l-.06-.085-.007-.012c-.668-1-1.029-2.173-1.031-3.403h-.014v-.015c-.004-1.743.737-3.414 2.033-4.584L3.68 15.571c-2.29 2.067-3.599 5.020-3.593 8.1.003 1.648.375 3.21 1.035 4.61l.03.065c.039.081.081.16.122.241.044.086.086.172.132.256l.024.043c.496.904 1.122 1.743 1.873 2.491 2.055 2.048 4.782 3.175 7.682 3.175h.02c3.695-.007 6.96-1.865 8.924-4.692l3.105 4.033 3.744-2.883-4.95-6.428.006-.064c.706-2.617 3.097-4.550 5.934-4.555M118.978 1.126l-4.726.008.033 19.346c.004 2.490-.943 4.813-2.668 6.540-1.627 1.630-3.766 2.527-6.024 2.527h-.002c-4.783 0-8.682-4.054-8.690-9.035l-.034-19.386-4.725.009.033 19.385c.013 7.582 6.031 13.751 13.416 13.753h.002c3.521 0 6.848-1.390 9.368-3.914 2.618-2.622 4.056-6.133 4.050-9.887l-.033-19.346zM80.481 26.086c-2.357 2.366-5.494 3.672-8.834 3.678h-.022c-6.884 0-12.490-5.595-12.503-12.481-.005-3.340 1.290-6.482 3.647-8.848 2.357-2.365 5.495-3.671 8.834-3.677h.023c3.330 0 6.464 1.295 8.825 3.647 2.365 2.357 3.671 5.494 3.677 8.834.006 3.340-1.290 6.481-3.647 8.847M71.626.033h-.030C66.992.040 62.670 1.840 59.421 5.100c-3.249 3.260-5.033 7.590-5.025 12.190.016 9.490 7.742 17.200 17.228 17.199h.030c4.602-.008 8.926-1.808 12.174-5.067 3.248-3.260 5.033-7.590 5.024-12.191-.007-4.602-1.807-8.925-5.067-12.174-3.252-3.240-7.570-5.024-12.160-5.024M39.454 29.431L39.405 1.144 34.680 1.152 34.737 34.165 54.715 34.130 54.707 29.405z" transform="translate(-20.000000, -59.000000) translate(0.000000, 40.000000) translate(20.000000, 19.000000) translate(103.483265, 0.000000)"/></g></g></g></g></g></g></svg></a>' +
+      '<div class="lp-r">' + IC.person + '<span class="lp-bag">' + IC.bag + (S.bag ? '<b>' + S.bag + '</b>' : '') + '</span></div></div></header>' +
+      gallery() +
+      '<section class="lp-form"><div class="lp-ph">' +
+      '<nav aria-label="Breadcrumb"><ol class="lp-bc"><li><a>Home</a></li><li class="sep" aria-hidden="true">' + IC.chev + '</li><li><a>Best Sellers</a></li></ol></nav>' +
+      '<div class="lp-tp"><h1 class="lp-title">Music Memories Custom Canvas</h1><div class="lp-price" id="pdpPrice">$' + price() + '</div></div>' +
+      '<div class="lp-rating">' + stars(5, 20) + '<span class="v">4.9</span><a class="c" data-act="toreviews">1024 Reviews</a></div></div>' +
+      '<div class="lp-cz">' + lf('inSong', 'Pick your song', 'e.g. Yellow', S.song).replace('</label>', '</label><button type="button" class="lp-auto" data-act="autofill">Autofill</button>').replace('class="lp-field"', 'class="lp-field lp-af"') + lf('inArtist', 'Name the artist', 'e.g. Coldplay', S.artist) +
+      lf('inOcc', 'What\'s the occasion?', 'e.g. Our Wedding Song', S.occ) + lf('inNames', 'Add Names or special date', 'e.g. Alex &amp; Max, 10.10.2021', S.names) +
+      '<div class="lp-field"><span class="cz-l">Color of the center — <span>' + CENTERS.filter(function (c) { return c[1] === S.center; })[0][0] + '</span></span><div class="cz-sw">' +
+      CENTERS.map(function (c) { return '<button type="button" data-center="' + c[1] + '" style="background:' + c[1] + '" aria-label="' + c[0] + '" aria-pressed="' + (c[1] === S.center) + '"></button>'; }).join('') + '</div></div>' +
+      '<button type="button" class="lp-cta" data-act="preview">See how it looks</button></div>' +
+      '<ul class="lp-trust">' + [[IC.rev, 'Free Unlimited Revisions'], [IC.person, 'Made by real artists'], [IC.ship, 'Free Shipping On All Orders'], [IC.pin, 'American-Made']].map(function (t) {
+        return '<li><span>' + t[0] + '</span>' + t[1] + '</li>';
+      }).join('') + '</ul></section>' +
+      '<div class="lp-bsh"><h2>Best Sellers</h2></div><div class="lp-bst">' + BEST.map(function (b) {
+        return '<article class="lp-card"><div class="im">' + (b[3] ? '<img class="lp-gimg" src="images/music-memories-1.jpg" alt="">' : mini(b[2], b[3])) + '<button class="qa" data-act="quick" aria-label="Quick add">' + IC.bag + '</button></div>' +
+          '<div class="in"><p>' + b[0] + '</p><span>$' + b[1] + '</span></div></article>';
+      }).join('') + '</div>';
+    var max = 963;
+    h += '<section class="lp-rv" id="reviews"><div class="lp-rsum"><div class="lp-rscore"><h2>Reviews</h2><p class="sc">4.9</p>' + stars(5, 32) +
+      '<p class="bo">Based on 1024 global reviews</p></div><div class="lp-bars">' + BARS.map(function (b) {
+        return '<button type="button"><span>' + b[0] + '</span><i><b style="width:' + (b[1] / max * 100) + '%"></b></i><em>' + b[1] + '</em></button>';
+      }).join('') + '</div></div>' +
+      '<div class="lp-filters"><button type="button" class="lp-chip">Filter by Ratings' + IC.down + '</button><button type="button" class="lp-chip">Sort: Newest Rating' + IC.down + '</button></div>' +
+      '<div class="lp-photos"><div class="hd"><h3>Customer reviews with photos</h3><button type="button">View All</button></div><ul>' +
+      ['#DC7957', '#57BADD', '#A46C93', '#91A36B', '#DC7957', '#C9A25B'].map(function (c) { return '<li>' + mini(c, 1) + '</li>'; }).join('') + '</ul></div>' +
+      '<div class="lp-rg">' + REVIEWS.map(function (r) {
+        return '<article class="lp-rc"><div class="hd"><div class="meta"><div class="av">' + r[0][0] + '<span class="bd">' + IC.check + '</span></div>' +
+          '<div class="nb"><span class="n">' + r[0] + '</span><span class="lo">' + r[1] + '</span></div></div><span class="dt">' + r[2] + '</span></div>' +
+          stars(r[3], 20) + '<p>' + r[4] + '</p>' + (r[5] ? '<div class="th"><span>' + mini('#DC7957', 1) + '</span><span>' + mini('#57BADD', 1) + '</span><span class="more">+1</span></div>' : '') + '</article>';
+      }).join('') + '</div><div class="lp-more"><button type="button">Load More Reviews</button></div></section></div>';
+    return h;
+  }
+  /* ---------- Personalize panel, matched to sites2026 CustomizerPanel (mobile) ---------- */
+  var CENTERS = [['Purple', '#A46C93'], ['Orange', '#DC7957'], ['Blue', '#57BADD'], ['Green', '#91A36B']];
+  var NEST = { name: 'Pop Your Memories - Custom Pop Art Canvas', price: 89 };
+  function subtotal() { return price() + (S.nest ? NEST.price : 0); }
+  function cust(pw) {
+    var t1 = S.tab === 1;
+    var h = '<div class="cz-wrap"><div class="cz-scrim" data-act="custclose"></div><div class="cz-panel" role="dialog" aria-modal="true" aria-label="Personalize your canvas">' +
+      '<button type="button" class="cz-x" data-act="custclose" aria-label="Close">' + IC.x + '</button>' +
+      '<div class="cz-prev" id="czPrev" style="height:' + Math.round(pw * 0.8) + 'px">' + flatArt(pw * 0.5, pw * 0.64) + '</div>' +
+      '<div class="cz-body"><div class="cz-tabs" role="tablist">' +
+      '<button type="button" role="tab" aria-selected="' + t1 + '" class="cz-tab' + (t1 ? ' on' : '') + '" data-act="tab1"><span class="st">1</span><span class="tt">Personalize</span><span class="ts">Song, names &amp; date</span></button>' +
+      '<button type="button" role="tab" aria-selected="' + !t1 + '" class="cz-tab' + (!t1 ? ' on' : '') + '" data-act="tab2"><span class="st">2</span><span class="tt">Frame Options</span><span class="ts">Size, color &amp; material</span></button></div>' +
+      '<div class="cz-step" role="tabpanel">';
+    if (t1) {
+      h += lf('pSong', 'Pick your song', 'e.g. Yellow', S.song) + lf('pArtist', 'Name the artist', 'e.g. Coldplay', S.artist) +
+        lf('pOcc', 'What\'s the occasion?', 'e.g. Our Wedding Song', S.occ) + lf('pNames', 'Add Names or special date', 'e.g. Alex &amp; Max, 10.10.2021', S.names) +
+        '<div class="lp-field"><span class="cz-l">Color of the center — <span>' + CENTERS.filter(function (c) { return c[1] === S.center; })[0][0] + '</span></span><div class="cz-sw">' +
+        CENTERS.map(function (c) { return '<button type="button" data-center="' + c[1] + '" style="background:' + c[1] + '" aria-label="' + c[0] + '" aria-pressed="' + (c[1] === S.center) + '"></button>'; }).join('') + '</div></div>' +
+        '<button type="button" class="lp-cta" data-act="tab2">Continue to frame options</button>';
+    } else {
+      h += diffNote() + fallbackNote() +
+        '<div class="lp-field"><span class="cz-l">Material</span><div class="cz-mat"><span class="th ' + S.mat + '"></span><select id="czMat" aria-label="Material">' +
+        MATS.map(function (m) { return '<option value="' + m.id + '"' + (m.id === S.mat ? ' selected' : '') + '>' + m.label + '</option>'; }).join('') + '</select>' + IC.caret + '</div></div>' +
+        (S.mat === 'canvas' ? '<div class="lp-field"><span class="cz-l">Frame color — <span>' + fr().label + '</span></span><div class="cz-sw">' +
+          FRAMES.map(function (f) { return '<button type="button" data-frame="' + f.id + '" class="' + (f.id === 'white' ? 'light' : '') + '" style="background:' + f.c + '" aria-label="' + f.label + ' frame" aria-pressed="' + (f.id === S.frame) + '"></button>'; }).join('') + '</div></div>' : '') +
+        '<div class="lp-field"><div class="cz-lr"><span class="cz-l">Choose size</span><button type="button" class="cz-sg" data-act="sizeguide">Size guide</button></div><div class="cz-sel"><select id="czSize" aria-label="Choose size">' +
+        SIZES.map(function (s) { return '<option value="' + s.id + '"' + (s.id === S.size ? ' selected' : '') + '>' + s.code + ' – ' + s.w + '" x ' + s.h + '"</option>'; }).join('') + '</select>' + IC.caret + '</div></div>' +
+        '<section class="cz-nest"><h2>Your Stack Starts Here</h2><button type="button" class="cz-card' + (S.nest ? ' on' : '') + '" data-act="nest" aria-pressed="' + !!S.nest + '">' +
+        '<span class="md">' + mini('#E0679E') + '</span><span class="in"><span class="nm">' + NEST.name + '</span><span class="pr">$' + NEST.price + '</span></span><span class="ck">' + (S.nest ? IC.check : '') + '</span></button></section>' +
+        '<div class="cz-sub"><span>Subtotal:</span><strong>$' + subtotal() + '</strong></div>' +
+        '<div class="cz-ctas"><button type="button" class="lp-cta" data-act="bag">Add to bag</button></div>';
+    }
+    return h + '</div></div></div></div>';
+  }
+  /* ---------- v2: AR inside the panel's live preview ---------- */
+  // Collapsed, the sheet shows just the dragger and the two tabs; HANDLE is measured after each render
+  var HANDLE = 124, lastHandleTap = 0;
+  // Real camera: a live feed works only on a top-level https page (e.g. Vercel). Inside the
+  // Claude artifact viewer the camera is blocked, so the page takes a photo of the wall instead.
+  var LIVE = window.self === window.top && window.isSecureContext && !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+  var stream = null;
+  function stopStream() { if (stream) { stream.getTracks().forEach(function (t) { t.stop(); }); stream = null; } }
+  function collapsed() { return 'calc(100% - ' + HANDLE + 'px - env(safe-area-inset-bottom, 0px))'; }
+  var ARROW = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 14.5l6-6 6 6" stroke="#000" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  function custSteps() { var h = cust(W), i = h.indexOf('<div class="cz-tabs"'); return h.slice(i, h.length - 18); }
+  // During setup (camera, wall, line) the tabs stay hidden; they slide in once the canvas is on the wall
+  function v2top() { if (!S.ar) return Math.round(W * 0.8) + 'px'; if (S.ar !== 'on') return '100%'; return S.sheetUp ? Math.round(H * 0.42) + 'px' : collapsed(); }
+  function v2topPx() { if (!S.ar) return W * 0.8; if (S.ar !== 'on') return H; return S.sheetUp ? Math.round(H * 0.42) : H - HANDLE; }
+  function v2prevH() { return S.ar ? '100%' : Math.round(W * 0.8) + 'px'; }
+  // With the sheet up, the camera view slides up so the canvas stays above the sheet
+  function v2shift() {
+    if (S.ar !== 'on' || !S.sheetUp) return 0;
+    var g = geo();
+    return clamp(g.top + g.h + 28 - v2topPx(), 0, Math.max(0, g.top - 64));
+  }
+  // View in Room: shows its label on arrival, then shrinks to the icon
+  var ARICON = '<svg class="aric" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.6 3.9L12 2.5l2.4 1.4"/><path d="M18.1 6.1l2.4 1.4v2.8"/><path d="M20.5 13.7v2.8l-2.4 1.4"/><path d="M14.4 20.1L12 21.5l-2.4-1.4"/><path d="M5.9 17.9l-2.4-1.4v-2.8"/><path d="M3.5 10.3V7.5l2.4-1.4"/><path d="M8.6 10.1L12 12l3.4-1.9"/><path d="M12 12v3.9"/><path d="M3.5 7.5l2.3 1.2"/><path d="M20.5 7.5l-2.3 1.2"/><path d="M12 21.5v-2.6"/></svg>';
+  var virT = null;
+  function virCollapseSoon() {
+    clearTimeout(virT); S.virMini = false;
+    virT = setTimeout(function () { S.virMini = true; var b = $('.v2 .arbtn'); if (b) { b.classList.remove('in'); b.classList.add('mini', 'anim'); } }, 1500);
+  }
+  function v2preview() {
+    if (!S.ar) return '<div class="v2-flat" id="czPrev">' + flatArt(W * 0.5, W * 0.64) + '</div><button type="button" class="arbtn' + (S.virMini ? ' mini' : '') + (S.virEnter ? ' in' : '') + '" data-act="v2ar" aria-label="View in Room"><span class="icb">' + ARICON + '</span><span class="lbl"><span>View in Room</span></span></button>';
+    if (S.ar === 'cam') return cam();
+    if (S.ar === 'find') return find();
+    if (S.ar === 'line') return line();
+    var g = geo();
+    return '<div class="v2-scene" id="v2scene" style="transform:translateY(' + (-v2shift()) + 'px)">' + room() + wallArt() +
+      (S.moved || S.sheetUp ? '' : '<div class="hint" id="hint" style="top:' + Math.min(g.top + g.h + 14, FLOOR - 30) + 'px">☝ Drag to move</div>') + '</div>' +
+      hud(true) + (S.shot ? '<div class="flash"></div>' : '');
+  }
+  function cust2() {
+    var on = S.ar === 'on', steps = custSteps(), cut = steps.indexOf('<div class="cz-step"');
+    return '<div class="cz-wrap"><div class="cz-scrim"></div><div class="cz-panel v2' + (S.ar ? ' ar' : '') + (S.ar === 'cam' ? ' cam' : '') + '" role="dialog" aria-modal="true" aria-label="Personalize your canvas">' +
+      '<div class="v2-prev" id="v2prev" style="height:' + v2prevH() + '">' + v2preview() + '</div>' +
+      (S.ar ? '' : '<button type="button" class="cz-x" data-act="custclose" aria-label="Close">' + IC.x + '</button>') +
+      '<div class="v2-sheet" id="v2sheet" style="top:' + v2top() + '">' +
+      (on ? '<button type="button" class="v2-shot" data-act="shoot">' + camSvg + 'Take Photo</button>' : '') +
+      (S.ar ? '<div class="v2-handle' + (on ? '' : ' off') + (S.sheetUp ? ' up' : '') + '" id="v2handle" aria-label="Drag up to edit your canvas"><span class="grab" aria-hidden="true"></span>' + steps.slice(0, cut) + '</div>' +
+        '<div class="v2-scroll">' + steps.slice(cut) + '</div>' : '<div class="v2-scroll">' + steps + '</div>') + '</div></div></div>';
+  }
+  function setSheet(up) {
+    S.sheetUp = up;
+    var sh = $('#v2sheet'), sc = $('#v2scene'), hd = $('#v2handle');
+    if (!sh) return;
+    sh.style.transition = ''; sh.style.top = v2top();
+    if (sc) sc.style.transform = 'translateY(' + (-v2shift()) + 'px)';
+    var hn = $('#hint'); if (hn) hn.style.opacity = up || S.moved ? 0 : 1;
+    if (hd) { hd.classList.toggle('up', up); hd.setAttribute('aria-label', (up ? 'Hide' : 'Show') + ' your options'); }
+  }
+  function setSheetSoon() {
+    var sh = $('#v2sheet'), sc = $('#v2scene'); if (!sh) return;
+    sh.style.transition = 'none'; sh.style.top = collapsed(); if (sc) { sc.style.transition = 'none'; sc.style.transform = 'none'; }
+    sh.offsetHeight; sh.style.transition = ''; if (sc) sc.style.transition = '';
+    setSheet(true);
+  }
+  function startAR() {
+    S.snap = { size: S.size, mat: S.mat, frame: S.frame, song: S.song, artist: S.artist };
+    var sh = $('#v2sheet'), pv = $('#v2prev');
+    if (sh) { sh.style.top = '100%'; pv.style.height = '100%'; }
+    later(function () {
+      Object.assign(S, { ar: 'cam', src: null, perm: false, find: 'looking', retried: false, lineY: LINE_START, floorY: FLOOR, cx: null, cy: null, moved: false, sheetUp: false, fallback: false });
+      render();
+    }, 380);
+  }
+  function exitAR(patch) {
+    stopStream();
+    Object.assign(S, { ar: null, sheetUp: false, perm: false }, patch || {});
+    render();
+  }
+  function arAct(a) {
+    if (a === 'tab1' || a === 'tab2') {
+      if (S.ar !== 'on') { toast('Finish placing your canvas first.'); return true; }
+      if (Date.now() - lastHandleTap < 500) return true;
+    }
+    switch (a) {
+      case 'allow': S.perm = true; render(); return true;
+      case 'sample': S.src = 'drawn'; S.perm = true; render(); return true;
+      case 'samephoto': Object.assign(S, { src: 'photo', ar: 'line', lineY: Math.round(H * 0.62) }); render(); return true;
+      case 'live':
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' } }, audio: false }).then(function (st) {
+          stream = st; Object.assign(S, { src: 'live', ar: 'find', find: 'looking', retried: false }); render();
+        }).catch(function () { exitAR(); });
+        return true;
+      case 'grant': Object.assign(S, { src: S.src || 'drawn', perm: false, ar: 'find', find: 'looking', retried: false }); render(); return true;
+      case 'deny': case 'notnow': exitAR(); return true;  // back to where the shopper left off
+      case 'retry': Object.assign(S, { find: 'looking', retried: true }); render(); return true;
+      case 'lineok':
+        var off = S.src === 'drawn' && Math.abs(S.lineY - FLOOR) > 1;
+        Object.assign(S, { ar: 'on', floorY: S.lineY, cx: null, cy: null, moved: false, sheetUp: false }); render();
+        var shs = $('#v2sheet'); if (shs) { shs.style.transition = 'none'; shs.style.top = '100%'; shs.offsetHeight; shs.style.transition = ''; shs.style.top = v2top(); }
+        toast(off ? 'The line is above the skirting board, so the canvas hangs too high.' : 'Drag up the tabs to change it while you look.');
+        return true;
+      case 'close': exitAR(); return true;
+      case 'shoot': S.shot = true; render(); toast('Photo saved to your phone'); return true;
+      case 'help': toast(S.ar === 'on' ? 'Drag the canvas to move it. Drag up the tabs to change song, size or frame.' : (HELP[S.ar] || 'Follow the instruction at the top of the screen.')); return true;
+    }
+    return false;
+  }
+  function swatches() {
+    return FRAMES.map(function (f) {
+      return '<button type="button" data-frame="' + f.id + '" style="background:' + f.c + '" aria-label="' + f.label + ' frame" aria-pressed="' + (f.id === S.frame) + '"></button>';
+    }).join('');
+  }
+  function desk() {
+    var h = '<div class="lnav"><span>☰ SHOP</span><span>LIME &amp; LOU</span><span class="bag">' + bagSvg + '</span></div>' +
+      '<div class="lpdp"><div class="gal" id="pdpArt">' + flatArt(130, 170) + '</div><div class="col">' +
+      '<div class="pt" style="font-size:13px">Music Memories Custom Canvas</div><div class="price" id="pdpPrice" style="font-size:13px">$' + price() + '</div>' +
+      '<label class="field">Song<input id="inSong" value="' + esc(S.song) + '" placeholder="e.g. Yellow" autocomplete="off"></label>' +
+      '<label class="field">Artist<input id="inArtist" value="' + esc(S.artist) + '" placeholder="e.g. Coldplay" autocomplete="off"></label>' +
+      '<label class="field">Size' + sizeSelect('inSize') + '</label>' +
+      '<button class="btn" data-act="preview">See how it looks</button><button class="btn lime ic" data-act="qr">' + ROT + 'View in Room</button></div></div>';
+    if (S.screen === 'qr') h += '<div class="lscrim" data-act="closeqr"></div><div class="lmodal"><button class="x" data-act="closeqr" aria-label="Close">✕</button>' +
+      '<svg class="qr" viewBox="0 0 25 25" role="img" aria-label="QR code placeholder">' + qr() + '</svg><div><h4>View in Room</h4>' +
+      '<ol><li>Scan with your phone camera</li><li>Point it at the wall</li><li>Mark where the wall meets the floor</li></ol>' +
+      '<p style="margin:8px 0 0;color:var(--muted)">Your song, size and frame come with you.</p>' +
+      '<button class="btn lime" data-act="scan">Act as the phone: scan it →</button></div></div>';
+    return h;
+  }
+  function cam() {
+    // In the artifact there is no live feed: the same approve-camera steps, and the mock
+    // browser prompt's Allow opens the phone's own camera to photograph the wall.
+    if (!LIVE) return room(true) + '<div class="sheet" style="gap:12px;padding:22px 18px 26px"><div style="font-weight:600;font-size:15px;text-transform:uppercase">Use your camera</div>' +
+      '<div>We\'ll show your canvas on your own wall at its real size. Nothing is recorded or saved.</div>' +
+      '<button class="btn" data-act="allow">Allow camera</button><button class="lnk" data-act="notnow" style="font-size:12px">Not now</button></div>' +
+      (S.perm ? '<div class="sysdlg"><div><p><b>Allow this website to use your camera?</b>Lime &amp; Lou wants to show a canvas on your wall.</p><div class="r"><button data-act="deny">Don\'t Allow</button>' +
+        '<label class="allowcam">Allow<input type="file" accept="image/*" capture="environment" id="camfile" hidden></label></div></div></div>' : '');
+    var h = room(true) + '<div class="sheet" style="gap:12px;padding:22px 18px 26px"><div style="font-weight:600;font-size:15px;text-transform:uppercase">Use your camera</div>' +
+      '<div>We\'ll show your canvas on your own wall at its real size. Nothing is recorded or saved.</div>' +
+      '<button class="btn" data-act="live">Allow camera</button><button class="lnk" data-act="notnow" style="font-size:12px">Not now</button></div>';
+    if (S.perm) h += '<div class="sysdlg"><div><p><b>Allow this website to use your camera?</b>Lime &amp; Lou wants to show a canvas on your wall.</p>' +
+      '<div class="r"><button data-act="deny">Don\'t Allow</button><button data-act="grant">Allow</button></div></div></div>';
+    return h;
+  }
+  function find() {
+    var h = room() + hud() + '<div class="reticle' + (S.find === 'found' ? ' ok' : '') + '"></div>' +
+      '<div class="toast top">Point at an empty wall, about 2 m (6 ft) away</div>';
+    if (S.find === 'found') h += '<div class="toast ok" style="bottom:28px">Wall found</div>';
+    else if (S.find === 'tips') h += '<div class="sheet" style="gap:8px"><div class="grab"></div><div style="font-weight:600;font-size:13px">Still looking for a wall</div>' +
+      '<ul style="margin:0;padding-left:16px;display:flex;flex-direction:column;gap:3px"><li>Turn on more light</li><li>Step back a little</li><li>Aim at a plain part of the wall</li></ul>' +
+      '<button class="btn" data-act="retry">Try again</button></div>';
+    else h += '<div class="toast" style="bottom:28px;background:rgb(0 0 0 / .5)">Looking for a wall…</div>';
+    return h;
+  }
+  function line() {
+    var ok = S.src === 'drawn' && Math.abs(S.lineY - FLOOR) < 1;
+    return room() + '<div class="dragzone" id="dragzone"></div>' + hud() +
+      '<div class="calib' + (ok ? ' ok' : '') + '" id="calib" style="top:' + (S.lineY - 1) + 'px"><span class="h" style="left:34px"></span><span class="h" style="right:34px"></span></div>' +
+      '<div class="toast top' + (ok ? ' ok' : '') + '" id="lineToast">' + (ok ? 'That looks right' : 'Drag the line to where the wall meets the floor') + '</div>' +
+      '<div class="sheet" style="padding:14px 14px 20px"><div style="color:var(--muted)">We use this line to show your canvas at its real size.</div>' +
+      '<button class="btn" data-act="lineok">That\'s the line</button></div>';
+  }
+  function place() {
+    var g = geo();
+    return room() + wallArt() + hud(true) +
+      (S.moved ? '' : '<div class="hint" id="hint" style="top:' + Math.min(g.top + g.h + 14, FLOOR - 30) + 'px">☝ Drag to move</div>') +
+      '<div class="dock"><button class="cfg" data-act="adjust"><span class="cfgt"><b>' + cfgLabel() + '</b><small>$' + price() + (isSample() ? ' · Sample song' : '') + '</small></span><span class="chg">Change ›</span></button>' +
+      '<button class="btn lime" data-act="save">Save</button></div>';
+  }
+  function persoRow() {
+    if (S.perso) return '<div class="perso">' +
+      lf('gSong', 'Pick your song', 'e.g. Yellow', S.song) + lf('gArtist', 'Name the artist', 'e.g. Coldplay', S.artist) + '</div>';
+    if (isSample()) return '<div class="samp"><span class="tag">Sample</span>' + SAMPLE.song + ' · ' + SAMPLE.artist + '<button class="lnk" data-act="perso">Personalize</button></div>';
+    return '<div class="samp">♪ ' + esc(songTxt()) + (artistTxt() ? ' · ' + esc(artistTxt()) : '') + '<button class="lnk" data-act="perso">Edit</button></div>';
+  }
+  function adjust() {
+    var full = S.variant === 'g1';
+    var sizes = '<div class="opts">' + SIZES.map(function (s) {
+      var sub = full ? '$' + price(s.id) : s.w + '×' + s.h + '<br>$' + price(s.id);
+      return '<button type="button" data-size="' + s.id + '" aria-pressed="' + (s.id === S.size) + '">' + s.code + '<small>' + sub + '</small></button>';
+    }).join('') + '</div>';
+    var h = room() + wallArt() + hud(true) + '<div class="sheet"><div class="grab"></div>' + persoRow();
+    // While typing the song, the sheet shows only the song fields so the wall stays in view.
+    if (S.perso) return h + '<div class="foot"><span class="price">$' + price() + '</span><button class="btn" data-act="persodone">OK</button></div></div>';
+    if (full) {
+      h += '<div class="lbl">Size <span>snaps to real sizes</span></div>' + sizes + '<div class="lbl">Material</div><div class="opts">' + MATS.map(function (m) {
+        return '<button type="button" data-mat="' + m.id + '" aria-pressed="' + (m.id === S.mat) + '">' + m.label + '<small>' + (m.delta ? '+$' + m.delta : 'Included') + '</small></button>';
+      }).join('') + '</div>';
+      if (S.mat === 'canvas') h += '<div class="lbl">Frame color <span>' + fr().label + '</span></div><div class="sw">' + swatches() + '</div>';
+    } else {
+      h += '<div class="lbl">Size <span>' + mt().label + (S.mat === 'canvas' ? ' · ' + fr().label + ' frame' : '') + '</span></div>' + sizes +
+        '<button class="lnk" data-act="save" style="align-self:flex-start;font-size:11px">Save and change material or frame</button>';
+    }
+    return h + '<div class="foot"><span class="price" id="adjPrice">$' + price() + '</span><button class="btn" data-act="done">Done</button></div></div>';
+  }
+  function photo() {
+    return room() + wallArt() + '<div class="photoframe"></div>' + (S.shot ? '<div class="flash"></div>' : '') +
+      '<div class="toast top" style="left:44px;right:44px">Photo saved to your phone</div>' +
+      '<div class="sheet" style="flex-direction:row;gap:8px;padding:16px 14px 22px"><button class="btn sec" data-act="share">Share</button><button class="btn" data-act="back">Back to wall</button></div>';
+  }
+  function cart() {
+    return '<div class="cartwrap"><div class="scrim" data-act="closecart"></div><div class="cart"><h4>Added to your bag</h4>' +
+      '<div class="item"><div class="thumb">' + flatArt(48, 64) + '</div><div><div style="font-weight:600">Music Memories Custom Canvas</div>' +
+      '<div style="color:var(--muted);font-size:11px">' + cfgLabel() + ' · ' + esc(songTxt()) + (isSample() ? ' (sample)' : '') + '</div><div class="price" style="font-size:13px">$' + price() + '</div></div></div>' +
+      (S.nest ? '<div class="item"><div class="thumb">' + mini('#E0679E') + '</div><div><div style="font-weight:600">' + NEST.name + '</div><div class="price" style="font-size:13px">$' + NEST.price + '</div></div></div>' : '') +
+      '<button class="btn" data-act="checkout">Checkout</button><button class="lnk" data-act="closecart" style="font-size:12px">' + 'Keep shopping' + '</button></div></div>';
+  }
+  function qr() {
+    var out = '<rect width="25" height="25" fill="#fff"/>', seed = 7;
+    function rnd() { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; }
+    function finder(x, y) { return '<rect x="' + x + '" y="' + y + '" width="7" height="7" fill="#000"/><rect x="' + (x + 1) + '" y="' + (y + 1) + '" width="5" height="5" fill="#fff"/><rect x="' + (x + 2) + '" y="' + (y + 2) + '" width="3" height="3" fill="#000"/>'; }
+    for (var y = 0; y < 25; y++) for (var x = 0; x < 25; x++) {
+      var inF = (x < 8 && y < 8) || (x > 16 && y < 8) || (x < 8 && y > 16);
+      if (!inF && rnd() > 0.52) out += '<rect x="' + x + '" y="' + y + '" width="1" height="1" fill="#000"/>';
+    }
+    return out + finder(0, 0) + finder(18, 0) + finder(0, 18);
+  }
+
+  /* ---------- render ---------- */
+  var VIEWS = { pdp: pdp, cam: cam, find: find, line: line, place: place, adjust: adjust, photo: photo };
+  function stepKey() {
+    return { pdp: S.returned ? 'I' : 'A', desk: 'A2', qr: 'B', cam: 'C', find: 'D', line: 'E', place: 'F', adjust: 'G', photo: 'H' }[S.screen];
+  }
+  function render() {
+    timers.forEach(clearTimeout); timers = [];
+    measure();
+    {
+      var scr = $('#scr');
+      scr.classList.toggle('enter', S.screen !== last.screen);
+      scr.classList.toggle('cartin', S.cart && !last.cart);
+      scr.classList.toggle('czin', S.cust && !last.cust);
+      var keep = S.screen === last.screen && S.cust === last.cust && S.tab === last.tab;
+      var sy = keep && $('#scr .scroll') ? $('#scr .scroll').scrollTop : 0, cy2 = keep && $('#scr .v2-scroll') ? $('#scr .v2-scroll').scrollTop : 0;
+      scr.innerHTML = VIEWS[S.screen]() + (S.cust && S.screen === 'pdp' ? cust2() : '') + (S.cart ? cart() : '') + '<div class="ptoast" id="ptoast" role="status"></div>';
+      if (sy && $('#scr .scroll')) $('#scr .scroll').scrollTop = sy;
+      if (cy2 && $('#scr .v2-scroll')) $('#scr .v2-scroll').scrollTop = cy2; }
+    S.shot = false;
+    last = { screen: S.screen, cart: S.cart, cust: S.cust, tab: S.tab };
+    bind();
+    schedule();
+  }
+  function go(screen, patch) { if (patch) Object.assign(S, patch); S.screen = screen; render(); }
+  function toast(msg) {
+    var t = $('#ptoast'); if (!t) return;
+    t.textContent = msg; t.classList.add('show');
+    clearTimeout(toastT); toastT = setTimeout(function () { t.classList.remove('show'); }, 2600);
+  }
+  function schedule() {
+    if ((S.ar || S.screen) !== 'find') return;
+    if (S.find === 'looking') {
+      if (S.detect === 'slow' && !S.retried) later(function () { S.find = 'tips'; render(); }, 3000);
+      else later(function () { S.find = 'found'; render(); }, S.retried ? 1500 : 1800);
+    } else if (S.find === 'found') later(function () { if (S.ar) { S.ar = 'line'; S.lineY = LINE_START; render(); } else go('line', { lineY: LINE_START }); }, 900);
+  }
+  function enterAR(fromQR) {
+    S.snap = { size: S.size, mat: S.mat, frame: S.frame, song: S.song, artist: S.artist };
+    Object.assign(S, { returned: false, fallback: false, fromQR: !!fromQR, cx: null, cy: null, moved: false, perso: false, perm: false, cart: false, find: 'looking', retried: false, lineY: LINE_START, floorY: FLOOR });
+    S.screen = 'cam'; render();
+    if (fromQR) toast('Opened from your QR code. Your choices came with you.');
+  }
+  // Save writes the AR choices to the product page; close (✕) drops them.
+  function leaveAR(save) {
+    if (!save && S.snap) Object.assign(S, { size: S.snap.size, mat: S.snap.mat, frame: S.snap.frame, song: S.snap.song, artist: S.snap.artist });
+    go('pdp', { returned: !!save, perso: false, cust: true, tab: 2 });
+  }
+
+  var HELP = {
+    find: 'Tips: more light, step back, aim at a plain part of the wall.',
+    line: 'Find the skirting board, the strip where the wall meets the floor, and drag the line onto it.',
+    place: 'Drag the canvas with one finger. Tap Change for size or material. Save when it looks right.',
+    adjust: 'Tap a size to see it on the wall at its real size. Drag the canvas to move it.'
+  };
+
+  function act(a) {
+    if (S.cust && S.ar && arAct(a)) return;
+    if (a === 'v2ar') return startAR();
+    switch (a) {
+      case 'ar': enterAR(false); break;
+      case 'qr': go('qr'); break;
+      case 'closeqr': go('desk'); break;
+      case 'scan': enterAR(true); break;
+      case 'allow': S.perm = true; render(); break;
+      case 'grant': S.perm = false; go('find', { find: 'looking', retried: false }); break;
+      case 'deny': case 'notnow': go('pdp', { perm: false, fallback: true, returned: false, cust: true, tab: 2 }); toast(a === 'deny' ? 'Camera blocked. You can turn it on in your browser settings.' : 'No problem. Here\'s the size guide.'); break;
+      case 'retry': go('find', { find: 'looking', retried: true }); break;
+      case 'lineok': go('place', { floorY: S.lineY, cx: null, cy: null }); if (Math.abs(S.lineY - FLOOR) > 1) toast('The line is above the skirting board, so the canvas hangs too high. Go back to E to fix it.'); break;
+      case 'adjust': go('adjust'); break;
+      case 'done': go('place', { perso: false }); break;
+      case 'persodone': S.perso = false; render(); break;
+      case 'perso': S.perso = true; render(); var i = $('#gSong'); if (i) i.focus(); break;
+      case 'shoot': go('photo', { shot: true }); S.shot = false; break;
+      case 'back': go('place'); break;
+      case 'share': toast('Your phone\'s share sheet opens here.'); break;
+      case 'bag': S.cust = false; S.cart = true; S.bag += 1; render(); break;
+      case 'tab1': S.tab = 1; render(); break;
+      case 'tab2': S.tab = 2; render(); break;
+      case 'custclose': S.cust = false; render(); break;
+      case 'nest': S.nest = !S.nest; render(); break;
+      case 'vir': if (S.screen === 'desk') go('qr'); else enterAR(false); break;
+      case 'sizeguide': toast('Opens the size guide, as on the live site.'); break;
+      case 'closecart': S.cart = false; render(); break;
+      case 'checkout': toast('Checkout opens here. That\'s the end of the prototype.'); break;
+      case 'autofill': Object.assign(S, { song: 'Yellow', artist: 'Coldplay', occ: 'Our Wedding Song', names: 'Alex & Max, 10.10.2021', center: '#91A36B' }); render(); break;
+      case 'preview': S.cust = true; S.tab = 2; S.virMini = false; S.virEnter = true; render(); S.virEnter = false; virCollapseSoon(); break;
+      case 'quick': toast('Opens Quick Add, as on the live site.'); break;
+      case 'toreviews': var rv = $('#reviews'), sc = $('#scr .scroll'); if (rv && sc) sc.scrollTo({ top: rv.offsetTop - 64, behavior: 'smooth' }); break;
+      case 'close': leaveAR(false); break;
+      case 'save': leaveAR(true); break;
+      case 'help': toast(HELP[S.screen] || 'Follow the instruction at the top of the screen.'); break;
+    }
+  }
+
+  function bind() {
+    var song = $('#inSong'), artist = $('#inArtist'), size = $('#inSize'), mat = $('#inMat');
+    function liveFlat() {
+      var g1 = $('#gs1'), g2 = $('#gs2');
+      if (g1) { g1.innerHTML = flatArt(170, 215); g2.innerHTML = roomSlide(); return; }
+      var holder = $('#pdpArt'); if (holder) holder.innerHTML = flatArt(130, 170);
+    }
+    var gt = $('#gtrack'), gp = $('#gprog');
+    if (gt) gt.addEventListener('scroll', function () { gp.style.transform = 'translateX(' + Math.round(gt.scrollLeft / gt.clientWidth) * 100 + '%)'; }, { passive: true });
+    if (song) song.addEventListener('input', function () { S.song = song.value; liveFlat(); });
+    [['inOcc', 'occ'], ['inNames', 'names']].forEach(function (p) { var el = document.getElementById(p[0]); if (el) el.addEventListener('input', function () { S[p[1]] = el.value; }); });
+    if (artist) artist.addEventListener('input', function () { S.artist = artist.value; liveFlat(); });
+    if (size) size.addEventListener('change', function () { S.size = size.value; render(); });
+    if (mat) mat.addEventListener('change', function () { S.mat = mat.value; render(); });
+    [['pSong', 'song'], ['pArtist', 'artist'], ['pOcc', 'occ'], ['pNames', 'names']].forEach(function (p) {
+      var el = document.getElementById(p[0]); if (!el) return;
+      el.addEventListener('input', function () { S[p[1]] = el.value; if (S.ar === 'on' && (p[1] === 'song' || p[1] === 'artist')) refreshWallArt(); var pv = $('#czPrev'); if (pv && p[1] !== 'occ' && p[1] !== 'names') pv.innerHTML = flatArt(pv.clientWidth * 0.5, pv.clientWidth * 0.64); });
+    });
+    var cm = $('#czMat'), cs = $('#czSize');
+    if (cm) cm.addEventListener('change', function () { S.mat = cm.value; render(); });
+    if (cs) cs.addEventListener('change', function () { S.size = cs.value; render(); });
+    var gs = $('#gSong'), ga = $('#gArtist');
+    if (gs) gs.addEventListener('input', function () { S.song = gs.value; refreshWallArt(); });
+    if (ga) ga.addEventListener('input', function () { S.artist = ga.value; refreshWallArt(); });
+
+    var art = $('#wallArt');
+    if (art && (S.screen === 'place' || S.screen === 'adjust' || S.ar === 'on')) {
+      art.addEventListener('pointerdown', function (e) {
+        if (drag) return; // a second finger is ignored, so pinch does nothing
+        var g = geo();
+        drag = { id: e.pointerId, x: e.clientX, y: e.clientY, cx: g.cx, cy: g.cy };
+        art.setPointerCapture(e.pointerId); e.preventDefault();
+      });
+      art.addEventListener('pointermove', function (e) {
+        if (!drag || e.pointerId !== drag.id) return;
+        S.cx = drag.cx + e.clientX - drag.x; S.cy = drag.cy + e.clientY - drag.y;
+        var g = geo(); S.cx = g.cx; S.cy = g.cy;
+        refreshWallArt();
+        if (!S.moved && Math.abs(e.clientX - drag.x) + Math.abs(e.clientY - drag.y) > 6) { S.moved = true; var h = $('#hint'); if (h) h.style.opacity = 0; }
+      });
+      var end = function (e) { if (drag && e.pointerId === drag.id) drag = null; };
+      art.addEventListener('pointerup', end); art.addEventListener('pointercancel', end);
+    }
+
+    var hd = $('#v2handle'), sh = $('#v2sheet');
+    if (hd) {
+      var hdr = null;
+      hd.addEventListener('pointerdown', function (e) {
+        if (hdr) return;
+        if (S.ar !== 'on') { toast('Finish placing your canvas first.'); return; }
+        var tb = e.target.closest('[data-act]');
+        hdr = { id: e.pointerId, y: e.clientY, top: sh.offsetTop, moved: false, tab: tb ? tb.dataset.act : null };
+        hd.setPointerCapture(e.pointerId); sh.style.transition = 'none'; e.preventDefault();
+      });
+      hd.addEventListener('pointermove', function (e) {
+        if (!hdr || e.pointerId !== hdr.id) return;
+        var dy = e.clientY - hdr.y; if (Math.abs(dy) > 5) hdr.moved = true;
+        sh.style.top = clamp(hdr.top + dy, H * 0.3, H - HANDLE) + 'px';
+      });
+      var hend = function (e) {
+        if (!hdr || e.pointerId !== hdr.id) return;
+        var t = hdr.top + (e.clientY - hdr.y), moved = hdr.moved, tab = hdr.tab; hdr = null; lastHandleTap = Date.now();
+        if (!moved && tab) { S.tab = tab === 'tab1' ? 1 : 2; if (!S.sheetUp) { S.sheetUp = true; render(); setSheetSoon(); } else render(); return; }
+        setSheet(moved ? t < H * 0.72 : !S.sheetUp);
+      };
+      hd.addEventListener('pointerup', hend); hd.addEventListener('pointercancel', hend);
+      var hh = hd.offsetHeight;
+      if (hh && Math.abs(hh - HANDLE) > 1) {
+        HANDLE = hh;
+        sh.style.transition = 'none'; sh.style.top = v2top();
+        var pv = $('#v2prev'); if (pv) { pv.style.transition = 'none'; pv.style.height = v2prevH(); }
+        sh.offsetHeight; sh.style.transition = ''; if (pv) pv.style.transition = '';
+      }
+    }
+    var cf = $('#camfile');
+    if (cf) cf.addEventListener('change', function () {
+      var file = cf.files && cf.files[0]; if (!file) return;
+      if (S.photo) URL.revokeObjectURL(S.photo);
+      S.photo = URL.createObjectURL(file);
+      Object.assign(S, { src: 'photo', ar: 'line', lineY: Math.round(H * 0.62) }); render();
+    });
+    var cv = $('#camv');
+    if (cv && stream) { cv.srcObject = stream; var pl = cv.play(); if (pl && pl.catch) pl.catch(function () {}); }
+    var dz = $('#dragzone');
+    if (dz) {
+      var ld = null;
+      var setY = function (clientY) {
+        var r = $('#scr').getBoundingClientRect();
+        var y = clamp(clientY - r.top, FLOOR - H * 0.3, FLOOR + H * 0.2);
+        if (S.src === 'drawn' && Math.abs(y - FLOOR) < 14) y = FLOOR;
+        S.lineY = y;
+        var ok = S.src === 'drawn' && y === FLOOR, c = $('#calib'), t = $('#lineToast');
+        c.style.top = (y - 1) + 'px'; c.classList.toggle('ok', ok);
+        t.classList.toggle('ok', ok); t.textContent = ok ? 'That looks right' : 'Drag the line to where the wall meets the floor';
+      };
+      dz.addEventListener('pointerdown', function (e) { if (ld != null) return; ld = e.pointerId; dz.setPointerCapture(e.pointerId); setY(e.clientY); e.preventDefault(); });
+      dz.addEventListener('pointermove', function (e) { if (e.pointerId === ld) setY(e.clientY); });
+      var lend = function (e) { if (e.pointerId === ld) ld = null; };
+      dz.addEventListener('pointerup', lend); dz.addEventListener('pointercancel', lend);
+    }
+  }
+
+  // one delegated click handler for both device frames
+  document.getElementById('scr').addEventListener('click', function (e) {
+    var t = e.target.closest('button, [data-act]'); if (!t) return;
+    if (t.dataset.act) return act(t.dataset.act);
+    if (t.dataset.size) { S.size = t.dataset.size; render(); }
+    else if (t.dataset.mat) { S.mat = t.dataset.mat; render(); }
+    else if (t.dataset.frame) { S.frame = t.dataset.frame; render(); }
+    else if (t.dataset.center) { S.center = t.dataset.center; render(); }
+  });
+
+  /* G2 (size-only sheet) via #g2 in the URL; G1 otherwise */
+  function readHash() { S.variant = location.hash === '#g2' ? 'g2' : 'g1'; }
+  readHash();
+  window.addEventListener('hashchange', function () { readHash(); render(); });
+  var rt; window.addEventListener('resize', function () { clearTimeout(rt); rt = setTimeout(function () { if (!drag) { measure(); S.cx = null; S.cy = null; S.floorY = FLOOR; S.lineY = LINE_START; render(); } }, 150); });
+
+  render();
+})();
+</script>
+</body>
+</html>
