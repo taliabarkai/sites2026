@@ -519,11 +519,6 @@ export function MusicMemoriesCustomizer({ brand, product, icons, nestedItems = [
       ? (FRAME_COLORS.find((c) => c.value === frameColor)?.hex ?? FRAME_COLORS[1].hex)
       : (FRAME_TYPES.find((f) => f.value === frameType)?.edge ?? FRAME_COLORS[0].hex),
   }
-  const choiceMeta = [
-    `${sizeIn.w} × ${sizeIn.h} in`,
-    FRAME_TYPES.find((f) => f.value === frameType)?.label,
-    isCanvas ? `${FRAME_COLORS.find((c) => c.value === frameColor)?.label} frame` : null,
-  ].filter(Boolean).join(' · ')
 
   // ── Add to bag ─────────────────────────────────────────────────────────────
   const handleAddToBag = () => {
@@ -969,7 +964,6 @@ export function MusicMemoriesCustomizer({ brand, product, icons, nestedItems = [
           onClose={() => setQrOpen(false)}
           url={qrUrl}
           closeIcon={XIcon ? <XIcon size={24} /> : null}
-          choice={{ image: previewImage, name: songTitle.trim() || product.name, meta: choiceMeta }}
         />
       )}
     </section>

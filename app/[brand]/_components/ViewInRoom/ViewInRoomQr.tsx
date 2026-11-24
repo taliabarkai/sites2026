@@ -12,15 +12,13 @@ interface ViewInRoomQrProps {
   /** The phone link: this product page, the shopper's choices, and View in Room. */
   url: string
   closeIcon: ReactNode
-  /** What they're taking with them. */
-  choice: { image: string | null; name: string; meta: string }
 }
 
 /**
  * View in Room on a computer: there's no AR on desktop, so a QR code opens this
  * product on the shopper's phone with their song, size and frame filled in.
  */
-export function ViewInRoomQr({ open, onClose, url, closeIcon, choice }: ViewInRoomQrProps) {
+export function ViewInRoomQr({ open, onClose, url, closeIcon }: ViewInRoomQrProps) {
   const [code, setCode] = useState<string | null>(null)
 
   useEffect(() => {
@@ -44,14 +42,6 @@ export function ViewInRoomQr({ open, onClose, url, closeIcon, choice }: ViewInRo
             <li>Point your phone at the wall</li>
             <li>Mark where the wall meets the floor</li>
           </ol>
-          <div className={styles.qrChoice}>
-            {choice.image && <img src={choice.image} alt="" />}
-            <span>
-              <span className={styles.qrChoiceName}>{choice.name}</span>
-              <span className={styles.qrChoiceMeta}>{choice.meta}</span>
-            </span>
-          </div>
-          <p className={styles.qrFine}>Your song, size and frame come with you.</p>
         </div>
       </div>
     </Modal>
