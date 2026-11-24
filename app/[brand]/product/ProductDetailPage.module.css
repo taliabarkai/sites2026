@@ -117,6 +117,91 @@
   }
 }
 
+/* ── Music Memories (LAL 1, 16, 17, 19), desktop ≥1200px ───────────────────
+   Gallery (thumbnails + square image) at the page margin, sticky under the
+   header bar while the taller form scrolls, released where the form ends.
+   The form, 400–520px wide, sits centred in the space right of the gallery:
+   equal space either side, never under 72px. The row stops at 1920px; wider
+   screens leave the extra on the right.
+   As the window narrows: the form's 400px and the two 72px sides come first,
+   then the gallery shrinks; the form grows past 400px (up to 520px) only once
+   the gallery is at full size, and the sides take whatever is left. */
+@media (min-width: 1200px) {
+  [data-theme="lal"] .layout.layoutMusicMemories {
+    --mm-thumb: 90px; /* .lalThumb */
+    --mm-thumb-gap: var(--spacing-xxs);
+    --mm-thumb-rail: calc(var(--mm-thumb) + var(--mm-thumb-gap));
+    --mm-side-min: var(--spacing-xxxl);
+    --mm-form-min: 400px;
+    --mm-form-max: 520px;
+    /* The thumbnail column's height (--mm-thumbs is set on this element) */
+    --mm-thumb-col: calc(var(--mm-thumbs, 1) * var(--mm-thumb-rail) - var(--mm-thumb-gap));
+    /* Image side: the screen below the full header (topline + bar), 24px clear
+       above and below; never shorter than the thumbnail column, at most 900px */
+    --mm-image: min(
+      900px,
+      max(
+        var(--mm-thumb-col),
+        calc(100dvh - var(--layout-header-height) - var(--topline-height) - 2 * var(--spacing-md))
+      )
+    );
+
+    grid-template-columns:
+      min(
+        calc(var(--mm-thumb-rail) + var(--mm-image)),
+        calc(100% - 2 * var(--mm-side-min) - var(--mm-form-min))
+      )
+      minmax(var(--mm-side-min), 1fr)
+      minmax(var(--mm-form-min), var(--mm-form-max))
+      minmax(var(--mm-side-min), 1fr);
+    column-gap: 0;
+    align-items: start;
+    max-width: var(--layout-max-width);
+    margin: 0;
+    padding-left: var(--layout-page-margin);
+    padding-right: 0;
+  }
+
+  /* The gallery's width comes from its track; the page margin is on the row */
+  .layoutMusicMemories .lalGallery {
+    grid-column: 1;
+    container: mm-gallery / inline-size;
+    gap: var(--mm-thumb-gap);
+    padding: 0;
+    margin-top: var(--spacing-md);
+    /* Just under the sticky header bar (the topline scrolls away), 24px clear */
+    top: var(--sticky-top);
+    align-self: start;
+  }
+
+  /* The image takes the gallery's width beside the rail, square */
+  .layoutMusicMemories .lalMainCell {
+    flex: 1;
+    min-width: 0;
+    height: auto;
+    max-height: none;
+  }
+
+  .layoutMusicMemories > .formPanel {
+    grid-column: 3;
+    padding-inline: 0;
+  }
+
+  /* Too narrow for the thumbnails beside an image at least as tall as their
+     column (n thumbnails need a gallery of 98n + 90px): the image takes the
+     whole gallery. Only from 6 thumbnails can that happen at ≥1200px — the
+     gallery is never under 624px there. */
+  @container mm-gallery (width < 678px) {
+    .lalThumbCol:has(> :nth-child(6)) { display: none; }
+  }
+  @container mm-gallery (width < 776px) {
+    .lalThumbCol:has(> :nth-child(7)) { display: none; }
+  }
+  @container mm-gallery (width < 874px) {
+    .lalThumbCol:has(> :nth-child(8)) { display: none; }
+  }
+}
+
 /* ── Desktop 2×2 image grid (non-OAL brands) ─────────────────────────────── */
 .desktopGallery {
   display: none;

@@ -2302,9 +2302,17 @@ function ProductDetailPageInner({ productId, previewId, withoutTemplate = false,
             floatingProgress={!!template}
           />
         </div>
+        {previewDock && (
+          <PreviewDock src={slotPreview} active={!!slotPreview && !addedToBag} galleryRef={mobileGalleryRef} anchorFieldIds={dockAnchorFieldIds} ribbon={template.livePreview.ribbon ?? 'Your Personalization'} RibbonIcon={icons.AiMagicIcon} ChevronIcon={icons.ChevronIcon} />
+        )}
 
         {/* Two-column layout on desktop, single column on mobile */}
-        <div className={`${styles.layout} ${!template && desktopGallery !== 'heroGridPhotoFirst' ? '' : desktopGallery === 'slider' ? styles.layoutSlider : styles.layoutLivePreview} ${(template || desktopGallery === 'heroGridPhotoFirst') && (desktopGallery === 'heroGrid' || desktopGallery === 'heroGridPhotoFirst' || desktopGallery === 'overlayThumbs') ? styles.layoutCenteredForm : ''} ${desktopGallery === 'overlayThumbs' ? styles.layoutOverlay : ''}`}>
+        {/* Music Memories (desktop ≥1200px): its own sticky-gallery layout; the
+            thumbnail count (photos + the live preview) sets the image's minimum */}
+        <div
+          className={`${styles.layout} ${!template && desktopGallery !== 'heroGridPhotoFirst' ? '' : desktopGallery === 'slider' ? styles.layoutSlider : styles.layoutLivePreview} ${(template || desktopGallery === 'heroGridPhotoFirst') && (desktopGallery === 'heroGrid' || desktopGallery === 'heroGridPhotoFirst' || desktopGallery === 'overlayThumbs') ? styles.layoutCenteredForm : ''} ${desktopGallery === 'overlayThumbs' ? styles.layoutOverlay : ''} ${isMusicMemories && !isOptionsShowcase ? styles.layoutMusicMemories : ''}`}
+          style={isMusicMemories && !isOptionsShowcase ? ({ '--mm-thumbs': galleryImages.length + (slotPreview ? 1 : 0) } as React.CSSProperties) : undefined}
+        >
           {/* Left: gallery — sideScroll (LAL): thumbnails left; heroGrid (template PDPs): one full-width image, then two across; stickyHero (OAL): sticky+scroll; grid/default (TGR, others): 2×2 */}
           {desktopGallery === 'sideScroll'
             ? <LALDesktopGallery images={galleryImages} modelImages={modelImages} name={product.name} livePreview={slotPreview} rootRef={galleryRef} ribbons={template ? previewRibbons : undefined} previewNote={template ? previewNote : undefined} />
