@@ -1101,7 +1101,8 @@ html.dt .scr.cartin .cart { animation: dkCart .25s ease-out; }
     switch (a) {
       case 'v2ar': case 'ar': case 'vir': case 'qr': S.qr = true; render(); return true;
       case 'closeqr': S.qr = false; render(); return true;
-      case 'preview': S.cust = true; S.tab = 1; S.gi = 'live'; render(); return true;
+      // Every selection made on the page: skip ahead to Frame Options, as on the phone
+      case 'preview': S.cust = true; S.tab = [S.song, S.artist, S.occ, S.names].every(function (v) { return v.trim(); }) ? 2 : 1; S.gi = 'live'; render(); return true;
       case 'custclose': S.cust = false; S.gi = null; render(); return true;
       case 'bag': S.cart = true; S.bag += 1; render(); return true; // the live preview stays open behind the cart
       case 'toreviews': var rv = $('#reviews'); if (rv) window.scrollTo({ top: rv.getBoundingClientRect().top + window.scrollY - 80, behavior: 'smooth' }); return true;
