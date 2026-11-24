@@ -31,7 +31,7 @@ export function ViewInRoomQr({ open, onClose, url, closeIcon }: ViewInRoomQrProp
   }, [open, url])
 
   return (
-    <Modal open={open} onClose={onClose} labelledBy="vir-qr-title" closeIcon={closeIcon} centered>
+    <Modal open={open} onClose={onClose} labelledBy="vir-qr-title" closeIcon={closeIcon} centered className={styles.qrModal}>
       <div className={styles.qr}>
         {code ? <img className={styles.qrCode} src={code} alt="QR code that opens View in Room on your phone" /> : <span className={styles.qrCode} aria-hidden="true" />}
         <div>

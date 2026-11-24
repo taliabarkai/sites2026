@@ -450,9 +450,11 @@
 }
 
 @media (min-width: 768px) {
+  /* The dialog itself: no wider than 660px (the role selector outranks Modal's own max-width) */
+  [role="dialog"].qrModal { max-width: 660px; }
+
   .qr {
     grid-template-columns: 200px 1fr;
-    width: min(600px, calc(100vw - 2 * var(--spacing-xl)));
     padding: var(--spacing-xs);
   }
 }
@@ -491,8 +493,9 @@
 
 .qrSteps {
   margin: 0;
-  padding-left: var(--spacing-md);
-  list-style: decimal;
+  /* The numbers line up with the title and description's left edge */
+  padding-left: 0;
+  list-style: decimal inside;
   display: flex;
   flex-direction: column;
   gap: var(--spacing-xxxs);
