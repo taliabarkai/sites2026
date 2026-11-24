@@ -35,9 +35,30 @@ interface MusicMemoriesCustomizerProps {
    * Absent or null, the header stays where it always is.
    */
   headerSlot?: HTMLElement | null
+  /**
+   * The final flows, where the gallery (V1/V2 sticky, V3 the dock) is the live preview: the
+   * two steps (Personalize, Frame Options) sit right on the page from the
+   * start, at every width — no "See how it looks" step, no Back, no mobile
+   * panel. The gallery keeps the product's photos until the shopper's first
+   * change; from then on it leads with the live preview.
+   */
+  inlineSteps?: boolean
+  /**
+   * With inline steps: no tabs — every option (Personalize's, then Frame
+   * Options') in one longer form, ending in the subtotal and Add to bag.
+   */
+  singleStep?: boolean
 }
 
 type FrameType = 'canvas' | 'metal' | 'acrylic'
+
+// Demo autofill (the final flows): song + artist, occasion, names and date, in turn
+const AUTOFILL_SONGS: [string, string][] = [
+  ['Yellow', 'Coldplay'], ['Perfect', 'Ed Sheeran'], ['At Last', 'Etta James'],
+  ['Golden Hour', 'JVKE'], ['Lover', 'Taylor Swift'], ['Make You Feel My Love', 'Adele'],
+]
+const AUTOFILL_OCCASIONS = ['Our Wedding Song', 'Our First Dance', 'Our 10th Anniversary', 'Where It All Began']
+const AUTOFILL_NAMES_DATES = ['Alex & Max, 10.10.2021', 'Sarah & Daniel, 06.18.2019', 'Mia & Noah, 09.02.2023', 'Emma & Leo, 05.27.2016']
 type Phase = 'default' | 'flow' | 'saved'
 type Tab = 'personalize' | 'customize'
 
@@ -378,7 +399,7 @@ function SongCombo({ id, songId, onSelect, onClear }: SongComboProps) {
 
 // ─── Main component ──────────────────────────────────────────────────────────
 
-export function MusicMemoriesCustomizer({ brand, product, icons, nestedItems = [], addItem, openCart, onLivePreviewChange, headerSlot }: MusicMemoriesCustomizerProps) {
+export function MusicMemoriesCustomizer({ brand, product, icons, nestedItems = [], addItem, openCart, onLivePreviewChange, headerSlot, inlineSteps = false, singleStep = false }: MusicMemoriesCustomizerProps) {
   // Rating shown beside the price — same numbers the category card and the
   // PDP reviews section read from the product registry.
   const productRating = product.rating ?? 0
@@ -391,7 +412,7 @@ export function MusicMemoriesCustomizer({ brand, product, icons, nestedItems = [
   // Nested Items — companion products staged above the Subtotal.
   const nested = useNestedItems(brand, nestedItems)
 
-  const [phase, setPhase] = useState<Phase>('default')
+  const [phase, setPhase] = useState<Phase>(inlineSteps ? 'flow' : 'default')
   const [tab, setTab] = useState<Tab>('personalize')
   const [songTitle, setSongTitle] = useState('')
   const [artist, setArtist] = useState('')
@@ -405,6 +426,14 @@ export function MusicMemoriesCustomizer({ brand, product, icons, nestedItems = [
   const [slipmat, setSlipmat] = useState(false)
 
   const isCanvas = frameType === 'canvas'
+
+  // Inline steps: the preview waits for the shopper's first change to any
+  // field or selection — compared with where the form started, and kept once on
+  const startValues = useRef(JSON.stringify([songTitle, artist, memory, names, centerColor, size, frameType, frameColor]))
+  const [interacted, setInteracted] = useState(false)
+  useEffect(() => {
+    if (!interacted && JSON.stringify([songTitle, artist, memory, names, centerColor, size, frameType, frameColor]) !== startValues.current) setInteracted(true)
+  }, [interacted, songTitle, artist, memory, names, centerColor, size, frameType, frameColor])
   const centerHex = CENTER_COLORS.find(c => c.value === centerColor)?.hex ?? CENTER_COLORS[0].hex
 
   // Pricing (ported from getDisplayPrice): canvas price at size + frame premium.
@@ -426,7 +455,7 @@ export function MusicMemoriesCustomizer({ brand, product, icons, nestedItems = [
   const [previewImage, setPreviewImage] = useState<string | null>(null)
 
   useEffect(() => {
-    if (phase === 'default') {
+    if (phase === 'default' || (inlineSteps && !interacted)) {
       setPreviewImage(null)
       onLivePreviewChange?.(null)
       return
@@ -442,7 +471,7 @@ export function MusicMemoriesCustomizer({ brand, product, icons, nestedItems = [
       })
       .catch(() => { /* leave the previous preview on failure */ })
     return () => { cancelled = true }
-  }, [phase, songTitle, memory, names, centerColor, frameSrc, onLivePreviewChange])
+  }, [phase, inlineSteps, interacted, songTitle, memory, names, centerColor, frameSrc, onLivePreviewChange])
 
   useEffect(() => () => onLivePreviewChange?.(null), [onLivePreviewChange])
 
@@ -537,9 +566,24 @@ export function MusicMemoriesCustomizer({ brand, product, icons, nestedItems = [
     </>
   )
 
+  // Inline steps: a new step starts at its top — the tabs scrolled back into
+  // view (under the sticky gallery: the page's scroll padding keeps them clear)
+  const tabsRef = useRef<HTMLDivElement>(null)
+  const lastTab = useRef(tab)
+  useEffect(() => {
+    if (lastTab.current === tab) return
+    lastTab.current = tab
+    const el = tabsRef.current
+    if (!inlineSteps || !el) return
+    const padding = parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop) || 0
+    if (el.getBoundingClientRect().top < padding) {
+      el.scrollIntoView({ block: 'start', behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' })
+    }
+  }, [tab, inlineSteps])
+
   // ── Flow pieces shared by the desktop inline card + the mobile slide-in panel ──
   const mmTabs = (
-    <div className={styles.tabs} role="tablist">
+    <div ref={tabsRef} className={`${styles.tabs} ${inlineSteps ? styles.tabsInline : ''}`} role="tablist">
       <button
         type="button" role="tab" aria-selected={tab === 'personalize'}
         className={`${styles.tab} ${tab === 'personalize' ? styles.tabActive : ''}`}
@@ -561,10 +605,29 @@ export function MusicMemoriesCustomizer({ brand, product, icons, nestedItems = [
     </div>
   )
 
+  // Demo (inline steps — the final flows): "Autofill" fills the Personalize
+  // step's text fields, a different song each click
+  const autofillRun = useRef(0)
+  const autofill = () => {
+    const i = autofillRun.current++
+    const [song, by] = AUTOFILL_SONGS[i % AUTOFILL_SONGS.length]
+    setSongTitle(song)
+    setArtist(by)
+    setMemory(AUTOFILL_OCCASIONS[i % AUTOFILL_OCCASIONS.length])
+    setNames(AUTOFILL_NAMES_DATES[i % AUTOFILL_NAMES_DATES.length])
+  }
+
   // Song title drives the record's center title. (Song combo hidden for now — no lyrics API.)
   const songTitleField = (
     <div className={styles.field}>
-      <label className={styles.label} htmlFor="mm-song-title">Pick your song</label>
+      {inlineSteps ? (
+        <div className={styles.labelRow}>
+          <label className={styles.label} htmlFor="mm-song-title">Pick your song</label>
+          <button type="button" className={styles.autofillButton} onClick={autofill}>Autofill</button>
+        </div>
+      ) : (
+        <label className={styles.label} htmlFor="mm-song-title">Pick your song</label>
+      )}
       <input type="text" id="mm-song-title" className={styles.input} placeholder="e.g. Yellow"
         value={songTitle} onChange={e => setSongTitle(e.target.value)} />
     </div>
@@ -739,7 +802,8 @@ export function MusicMemoriesCustomizer({ brand, product, icons, nestedItems = [
       {/* Header — mirrors LalCanvasCustomizer (or, given a slot, drawn there) */}
       {headerSlot ? createPortal(header, headerSlot) : header}
 
-      <div className={styles.customizer}>
+      {/* Header drawn above the gallery: the form keeps the gap it had under the header */}
+      <div className={`${styles.customizer} ${headerSlot ? styles.customizerHeaderless : ''}`}>
         {/* ── Default state: song + artist fields, then Personalize CTA ── */}
         {phase === 'default' && (
           <>
@@ -751,22 +815,43 @@ export function MusicMemoriesCustomizer({ brand, product, icons, nestedItems = [
           </>
         )}
 
-        {/* ── Flow state — desktop: inline 2-tab card ── */}
-        {phase === 'flow' && !isMobile && (
+        {/* ── Flow state — desktop: inline 2-tab card (inline steps: every width, no Back) ── */}
+        {phase === 'flow' && (!isMobile || inlineSteps) && (
           <>
-            <button type="button" className={styles.flowBack} onClick={() => setPhase('default')}>
-              <svg width="8" height="12" viewBox="0 0 8 12" aria-hidden="true" fill="none">
-                <path d="M7 1L2 6l5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-              Back
-            </button>
-            <div className={styles.flowCard}>
-              {mmTabs}
-              <div className={styles.panel} role="tabpanel">
-                {mmActiveInner}
-                {mmFooter}
+            {!inlineSteps && (
+              <button type="button" className={styles.flowBack} onClick={() => setPhase('default')}>
+                <svg width="8" height="12" viewBox="0 0 8 12" aria-hidden="true" fill="none">
+                  <path d="M7 1L2 6l5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                Back
+              </button>
+            )}
+            {/* Single form: every option, no tabs, then the subtotal and Add to bag */}
+            {inlineSteps && singleStep ? (
+              <div className={`${styles.panel} ${styles.panelSingle}`}>
+                {mmPersonalizeInner}
+                {mmCustomizeInner}
+                {subtotalRow}
+                <button type="button" className={styles.ctaButton} onClick={handleAddToBag} disabled={!songTitle.trim()}>
+                  Add to bag
+                </button>
               </div>
-            </div>
+            ) : isMobile ? (
+              /* Mobile (inline steps): laid out as in the slide-in panel — the
+                 tabs in their own box, the fields under them, no card */
+              <>
+                {mmTabs}
+                <div className={`${styles.panel} ${styles.panelInline}`} role="tabpanel">{mmActiveInner}{mmFooter}</div>
+              </>
+            ) : (
+              <div className={styles.flowCard}>
+                {mmTabs}
+                <div className={styles.panel} role="tabpanel">
+                  {mmActiveInner}
+                  {mmFooter}
+                </div>
+              </div>
+            )}
           </>
         )}
 
@@ -822,8 +907,8 @@ export function MusicMemoriesCustomizer({ brand, product, icons, nestedItems = [
         ))}
       </ul>
 
-      {/* ── Flow state — mobile: shared slide-in panel ── */}
-      {isMobile && (
+      {/* ── Flow state — mobile: shared slide-in panel (not with inline steps) ── */}
+      {isMobile && !inlineSteps && (
         <CustomizerPanel
           open={phase === 'flow'}
           onClose={() => setPhase('default')}

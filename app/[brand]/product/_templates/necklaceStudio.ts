@@ -19,6 +19,12 @@ import { defaults } from '@/necklace-studio/engine/settings.ts'
 import type { NecklaceStudioEngine } from './pdpTemplate'
 
 type Plate = { meta: PlateMeta; img: HTMLImageElement; spec: PlateSpec }
+
+/** Product content, not UI: a diamond's body, its facet lines and its edge (shared with the placeholder engine). */
+export const DIAMOND = { light: '#FFFFFF', body: '#E4E9EF', facet: '#B9C2CC' }
+
+/** The stones set in the chain between the names: their real diameter, in a bezel of the metal. */
+export type StudioStone = { diameterMm: number; metal: string }
 type Links = { meta: LinksMeta; imgs: Record<'flat' | 'edge' | 'connection', HTMLImageElement> }
 
 // ─── Assets (cached per name + coating; the server caches by content key) ─────
@@ -134,7 +140,7 @@ function frame(nk: Necklace, plates: Plate[], size: number) {
 }
 
 /** The studio's draw order: chain links → plates → connection rings over the loops. */
-function draw(ctx: CanvasRenderingContext2D, nk: Necklace, plates: Plate[], links: Links, size: number, background: string) {
+function draw(ctx: CanvasRenderingContext2D, nk: Necklace, plates: Plate[], links: Links, size: number, background: string, stone: StudioStone | null) {
   const v = frame(nk, plates, size)
   const at = (x: number, y: number) => ({ x: v.ox + x * v.scale, y: v.oy + y * v.scale })
 
@@ -170,13 +176,74 @@ function draw(ctx: CanvasRenderingContext2D, nk: Necklace, plates: Plate[], link
   })
 
   for (const l of placed) if (l.kind === 'connection') drawLink('connection', l.x, l.y, l.angle)
+
+  // The diamonds between the names, at their real size on the chain
+  if (stone) {
+    const r = (stone.diameterMm / 2) * v.scale
+    for (const pt of stonePoints(nk)) drawDiamond(ctx, at(pt.x, pt.y), r, stone.metal)
+  }
+}
+
+/**
+ * Where each stone sits: on the chain halfway between one name and the next —
+ * the chain point nearest the midpoint of the first plate's last loop and the
+ * next plate's first.
+ */
+function stonePoints(nk: Necklace): { x: number; y: number }[] {
+  const out: { x: number; y: number }[] = []
+  for (let k = 0; k + 1 < nk.plates.length; k++) {
+    const a = nk.plates[k], b = nk.plates[k + 1]
+    const ea = a.hung ? a.p[0] : a.p[1]
+    const eb = b.p[0]
+    const mx = (nk.x[ea] + nk.x[eb]) / 2, my = (nk.y[ea] + nk.y[eb]) / 2
+    let best = { x: mx, y: my }, bd = Infinity
+    for (const seg of nk.segments) {
+      for (const id of seg.particles) {
+        const d = (nk.x[id] - mx) ** 2 + (nk.y[id] - my) ** 2
+        if (d < bd) { bd = d; best = { x: nk.x[id], y: nk.y[id] } }
+      }
+    }
+    out.push(best)
+  }
+  return out
+}
+
+/** A round brilliant in a thin bezel of the metal: body, table and star facets. */
+function drawDiamond(ctx: CanvasRenderingContext2D, c: { x: number; y: number }, r: number, metal: string) {
+  ctx.save()
+  // The bezel
+  ctx.beginPath()
+  ctx.arc(c.x, c.y, r * 1.18, 0, Math.PI * 2)
+  ctx.fillStyle = metal
+  ctx.fill()
+  // The stone
+  const g = ctx.createRadialGradient(c.x - r * 0.2, c.y - r * 0.3, 0, c.x, c.y, r * 1.4)
+  g.addColorStop(0, DIAMOND.light)
+  g.addColorStop(1, DIAMOND.body)
+  ctx.beginPath()
+  ctx.arc(c.x, c.y, r, 0, Math.PI * 2)
+  ctx.fillStyle = g
+  ctx.fill()
+  // Table and star facets
+  ctx.strokeStyle = DIAMOND.facet
+  ctx.lineWidth = Math.max(0.6, r * 0.06)
+  ctx.beginPath()
+  ctx.arc(c.x, c.y, r * 0.45, 0, Math.PI * 2)
+  for (let i = 0; i < 8; i++) {
+    const a = (i * Math.PI) / 4
+    ctx.moveTo(c.x + Math.cos(a) * r * 0.45, c.y + Math.sin(a) * r * 0.45)
+    ctx.lineTo(c.x + Math.cos(a + Math.PI / 8) * r * 0.92, c.y + Math.sin(a + Math.PI / 8) * r * 0.92)
+  }
+  ctx.stroke()
+  ctx.restore()
 }
 
 // ─── Engine ───────────────────────────────────────────────────────────────────
 
 /**
  * One render: the names in the selected material's coating, settled and
- * drawn at `size`×`size` on `background`. Null when there is nothing to draw.
+ * drawn at `size`×`size` on `background` — with `stone` set in the chain
+ * between each pair of names. Null when there is nothing to draw.
  */
 export async function renderNecklaceStudio(
   engine: NecklaceStudioEngine,
@@ -185,6 +252,7 @@ export async function renderNecklaceStudio(
   materialId: string | undefined,
   size: number,
   background: string,
+  stone: StudioStone | null = null,
 ): Promise<string | null> {
   const list = names.map((n) => n.trim()).filter(Boolean)
   if (list.length === 0) return null
@@ -199,6 +267,6 @@ export async function renderNecklaceStudio(
   canvas.height = size
   const ctx = canvas.getContext('2d')
   if (!ctx) return null
-  draw(ctx, nk, plates, links, size, background)
+  draw(ctx, nk, plates, links, size, background, stone)
   return canvas.toDataURL('image/jpeg', 0.9)
 }

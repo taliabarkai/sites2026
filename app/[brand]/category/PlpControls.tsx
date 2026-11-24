@@ -126,7 +126,7 @@ export function PlpToolbar({ brand, controls, extra }: { brand: BrandKey; contro
   const filterCount = activeMaterials.size
 
   // LAL is wall art — the second view is the piece in a room, not on a model.
-  const modelLabel = brand === 'lal' ? 'In Room' : 'On Model'
+  const modelViewLabel = brand === 'lal' ? 'Room View' : 'Model View'
   const btnClass = (on: boolean) => `${styles.segmentBtn} ${styles.iconBtn} ${on ? styles.segmentBtnOn : ''}`
 
   return (
@@ -145,18 +145,19 @@ export function PlpToolbar({ brand, controls, extra }: { brand: BrandKey; contro
 
         {extra && <div className="hidden md:flex">{extra}</div>}
 
+        {/* An action button: label and icon name the view a click switches TO,
+            not the one on screen. No aria-pressed — the label itself changes. */}
         <button
           type="button"
-          aria-pressed={view === 'model'}
           aria-label={view === 'model'
-            ? `${modelLabel} view. Switch to product view`
-            : `Product view. Switch to ${modelLabel.toLowerCase()} view`}
+            ? 'Switch to product view'
+            : `Switch to ${modelViewLabel.toLowerCase()}`}
           onClick={() => setView((v) => (v === 'model' ? 'product' : 'model'))}
           className={`${styles.ctl} ${styles.viewToggle}`}
         >
-          {/* Icon names the current view; LAL (wall art) is text only. */}
-          {brand !== 'lal' && (view === 'model' ? <ModelViewIcon size={18} /> : <ProductViewIcon size={18} />)}
-          {view === 'model' ? `${modelLabel === 'On Model' ? 'Model' : modelLabel} View` : 'Product View'}
+          {/* Jewelry brands: pendant necklace / person. LAL (wall art): frame / house. */}
+          {view === 'model' ? <ProductViewIcon size={18} /> : <ModelViewIcon size={18} />}
+          {view === 'model' ? 'Product View' : modelViewLabel}
         </button>
 
         <div role="group" aria-label="Grid view" className={`${styles.segment} flex md:hidden`}>

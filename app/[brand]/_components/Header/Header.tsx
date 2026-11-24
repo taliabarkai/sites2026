@@ -19,10 +19,11 @@ import { NestedDrawerCountToggle } from './NestedDrawerCountToggle'
 import { NestedDescriptionToggle } from './NestedDescriptionToggle'
 import { GalleryLayoutToggle } from './GalleryLayoutToggle'
 import { PersonalizeToggle } from './PersonalizeToggle'
-import { MobileLayoutToggle } from './MobileLayoutToggle'
 import { NestedItemToggle } from './NestedItemToggle'
 import { MaterialDisplayToggle } from './MaterialDisplayToggle'
-import { finalPreviewProductFor, livePreviewProductFor, renderedTemplateFor } from '../../product/_templates'
+import { StepsLayoutToggle } from './StepsLayoutToggle'
+import { flowProductFor, livePreviewProductFor, renderedTemplateFor } from '../../product/_templates'
+import { isFinalFlow, personalizationFlowOf } from '../../_config/personalizationFlows'
 import { isNestedDrawerProduct, isFreePreviewProduct } from '../../_config/demoParams'
 import { CartNoteToggle } from './CartNoteToggle'
 import { UspStripToggle } from './UspStripToggle'
@@ -154,12 +155,17 @@ export function Header({
   const headerHidden = useRevealOnScrollUp(revealOnScrollUp, headerRef, menuOpen)
 
   /* ── Checkout mode: logo only, horizontally centered ── */
-  // The final live preview (mobile): the header scrolls away with the page —
-  // the product's gallery is what sticks there, right at the top
-  const scrollsAwayOnMobile = /\/product\/livepreviewfinal(\/|$)/.test(pathname)
+  // Custom Personalization (mobile): the header scrolls away with the page —
+  // the product's gallery is what sticks there, right at the top. Not OAL: its
+  // header stays sticky and the live preview docks over it (PreviewDock)
+  const flowPage = personalizationFlowOf(pathname)
+  const scrollsAwayOnMobile = brandSegment !== 'oal' && flowPage?.flow === 'custom'
+  // The final flows (V1–V3): not sticky at any width, on any theme — on mobile
+  // the sticky gallery or the preview dock takes the top
+  const scrollsAway = isFinalFlow(flowPage?.flow)
   const wrapperClass = `${revealOnScrollUp
     ? `${styles.wrapperReveal} ${headerHidden ? styles.wrapperHidden : ''}`
-    : sticky ? styles.wrapper : styles.wrapperStatic} ${scrollsAwayOnMobile ? styles.wrapperScrollsOnMobile : ''}`
+    : sticky ? styles.wrapper : styles.wrapperStatic} ${scrollsAwayOnMobile ? styles.wrapperScrollsOnMobile : ''} ${scrollsAway ? styles.wrapperScrolls : ''}`
 
   /* Demo-only controls, on the two pages a phase actually changes. Rendered in
      both slots and switched by media query: the bar has room for them on
@@ -171,14 +177,13 @@ export function Header({
   const isNestedDrawerDemo = !!productIdMatch && isNestedDrawerProduct(brandSegment, Number(productIdMatch[1]))
   // Template PDPs (live preview) get a desktop gallery layout switch — on a
   // product's own URL and on the one-URL demo, /[brand]/product/livepreview
-  // The final live preview (/[brand]/product/livepreviewfinal[/id]): one
-  // version, so a mobile layout switch takes the version switch's place
-  const finalMatch = pathname.match(/\/product\/livepreviewfinal(?:\/(\d+))?\/?$/)
-  const isFinalPreview = !!finalMatch
+  // The personalization flows (/[brand]/product/simple-personalization,
+  // /custom-personalization[/id]): one version each, so no version or gallery switch
+  const isFinalPreview = flowPage?.flow === 'custom' || flowPage?.flow === 'v3'
   const pdpProductId = productIdMatch
     ? Number(productIdMatch[1])
-    : finalMatch
-      ? (finalMatch[1] ? Number(finalMatch[1]) : finalPreviewProductFor(brandSegment))
+    : flowPage
+      ? (flowPage.productId ?? flowProductFor(flowPage.flow, brandSegment))
       : pathname.endsWith('/product/livepreview') ? livePreviewProductFor(brandSegment) : undefined
   const pdpTemplate = pdpProductId !== undefined ? renderedTemplateFor(brandSegment, pdpProductId) : undefined
   // The free-preview bag note's V1/V2 — on its product's page, and on the bag
@@ -186,7 +191,7 @@ export function Header({
   const isFreePreviewPdp = !!productIdMatch && isFreePreviewProduct(brandSegment, Number(productIdMatch[1]))
   // The floating cart carries its own Cart note toggle; the header keeps one only on the bag page
   const showCartNoteToggle = isCartPage && items.some(it => it.cartNote)
-  const demoControls = isCheckout || isCartPage || showTrackOrderToggle || isNestedDrawerDemo || pdpTemplate || showCartNoteToggle || isFreePreviewPdp || isFinalPreview ? (
+  const demoControls = isCheckout || isCartPage || showTrackOrderToggle || isNestedDrawerDemo || pdpTemplate || showCartNoteToggle || isFreePreviewPdp || flowPage ? (
     <>
       {/* The phases only reach the cart and checkout. Track My Order and the
           nested items Drawer product each get only their own controls. */}
@@ -195,11 +200,12 @@ export function Header({
       {showTrackOrderToggle && <TrackOrderStateToggle className={styles.cartSizeToggle} />}
       {isNestedDrawerDemo && <NestedDescriptionToggle className={styles.cartSizeToggle} />}
       {isNestedDrawerDemo && <NestedDrawerCountToggle className={styles.cartSizeToggle} />}
-      {pdpTemplate && !isFinalPreview && <GalleryLayoutToggle templateDefault={pdpTemplate.gallery.desktop} className={`${styles.cartSizeToggle} ${styles.desktopOnlyControl}`} />}
-      {pdpTemplate && !isFinalPreview && <PersonalizeToggle templateDefault={pdpTemplate.flow.defaultPlacement} className={styles.cartSizeToggle} />}
-      {isFinalPreview && <MobileLayoutToggle className={styles.cartSizeToggle} />}
+      {pdpTemplate && !flowPage && <GalleryLayoutToggle templateDefault={pdpTemplate.gallery.desktop} className={`${styles.cartSizeToggle} ${styles.desktopOnlyControl}`} />}
+      {pdpTemplate && !flowPage && <PersonalizeToggle templateDefault={pdpTemplate.flow.defaultPlacement} className={styles.cartSizeToggle} />}
       {pdpTemplate && <NestedItemToggle defaultOn={isFinalPreview} className={styles.cartSizeToggle} />}
       {pdpTemplate && <MaterialDisplayToggle className={styles.cartSizeToggle} />}
+      {/* The final flows on LAL: Music Memories' options in tabs or one form */}
+      {brandSegment === 'lal' && isFinalFlow(flowPage?.flow) && <StepsLayoutToggle className={styles.cartSizeToggle} />}
       {isFreePreviewPdp && <UspStripToggle className={styles.cartSizeToggle} />}
       {showCartNoteToggle && <CartNoteToggle className={styles.cartSizeToggle} />}
     </>
@@ -275,7 +281,8 @@ export function Header({
             <div className={styles.actions}>
               <div className={styles.demoInline}>{demoControls}</div>
               <ThemeSwitcher brand={brandSegment} />
-              <button type="button" className={styles.iconButton} aria-label="Account">
+              {/* Hidden on mobile for now (accountButton) — may come back */}
+              <button type="button" className={`${styles.iconButton} ${styles.accountButton}`} aria-label="Account">
                 <PersonIcon />
               </button>
               <button

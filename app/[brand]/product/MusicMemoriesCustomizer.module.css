@@ -10,6 +10,10 @@
   color: var(--colors-text);
 }
 
+.customizerHeaderless {
+  padding-top: var(--spacing-md);
+}
+
 /* ── Fields ─────────────────────────────────────────────────────────────── */
 
 .field {
@@ -40,6 +44,28 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+}
+
+/* Demo affordance (the final flows): fills the Personalize step's text
+   fields. A quiet link, as checkout's Autofill. */
+.autofillButton {
+  font-family:    var(--typography-rules-text3-font-family);
+  font-size:      var(--typography-rules-text3-font-size);
+  font-weight:    var(--typography-rules-text3-font-weight, normal);
+  line-height:    var(--typography-rules-text3-line-height);
+  letter-spacing: var(--typography-rules-text3-letter-spacing, normal);
+  color: var(--colors-text-secondary);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color var(--transition-fast);
+}
+
+.autofillButton:hover {
+  color: var(--colors-text);
 }
 
 .sizeGuideLink {
@@ -199,6 +225,14 @@
   font-family: inherit;
 }
 
+/* Inline steps on a phone: the page margin leaves the tabs a little less
+   room than the slide-in panel did — keep "Frame Options" on one line */
+@media (max-width: 767px) {
+  .tabsInline .tab {
+    padding-inline: var(--spacing-xs);
+  }
+}
+
 .tabActive {
   background: var(--colors-background);
   border-bottom-color: var(--colors-brand-default-primary);
@@ -258,6 +292,19 @@
 @media (max-width: 767px) {
   .panel {
     padding-top: var(--spacing-md);
+  }
+}
+
+/* Single form (no tabs): the fields sit straight in the page column — no
+   card padding at any width */
+.panel.panelSingle {
+  padding: 0;
+}
+
+/* Inline steps (on the page): the form's own gap already sits under the tabs */
+@media (max-width: 767px) {
+  .panel.panelInline {
+    padding-top: 0;
   }
 }
 

@@ -36,8 +36,9 @@ export const tgrHeritageMultiName: PdpTemplate = {
   // …where each name left empty shows the next of these in the preview
   finalPreviewSampleText: { 204: ['Julie', 'Samantha', 'John', 'Amanda', 'Emma'] },
   finalPreviewFields: {
-    // No "?" tooltip beside the diamond size
-    202: { tooltip: undefined },
+    // No "?" tooltip beside the diamond size, and its tiles in one swipeable
+    // row like the material's — no second row on mobile (on desktop all four fit)
+    202: { tooltip: undefined, displayType: 'carousel' },
     203: { note: { text: 'Names are placed from left to right' } },
   },
 
@@ -54,8 +55,8 @@ export const tgrHeritageMultiName: PdpTemplate = {
     },
     {
       fieldId: 202, name: 'Select diamond size', cartName: 'Diamond', type: 'selection', displayType: 'grid', order: 2, isRequired: true,
-      // Not drawn by the studio yet (stones are deferred in its HANDOFF), so no re-render
-      pricing: 'delta', affectsPreview: false, defaultValueId: '0.05', showPriceDelta: false,
+      // Drawn in the preview: a diamond of this size between each pair of names
+      pricing: 'delta', affectsPreview: true, defaultValueId: '0.05', showPriceDelta: false,
       tooltip: 'Carat weight per diamond. Larger stones sit slightly higher on the plate.',
       values: [
         { id: '0.05', label: '0.05CT', image: '/images/tgr/diamond-0.05.webp', priceDelta: 0 },
@@ -105,14 +106,16 @@ export const tgrHeritageMultiName: PdpTemplate = {
     galleryPlacement: 'replaceHero',
     ribbon: 'Your Personalization',
     sampleText: { 204: ['Jake', 'Emma', 'Alice', 'Sage', 'Mia'] },
-    // One Carrie plate per name on one chain, from the Name Necklace Studio.
-    // The studio doesn't set stones yet, so the diamonds aren't drawn.
+    // One Carrie plate per name on one chain, from the Name Necklace Studio,
+    // with a diamond of the picked size set in the chain between each pair
     engine: {
       kind: 'necklaceStudio',
       textFieldId: 204,
       materialFieldId: 201,
       coatings: { 'gold-plated': 'GP', 'gold-vermeil': 'VMGP', 'rose-gold-plated': 'RGP', 'solid-gold-10k': 'GP' },
       defaultCoating: 'VMGP',
+      // Round brilliant diameters by carat weight
+      stones: { fieldId: 202, diameterMm: { '0.05': 2.5, '0.10': 3.0, '0.30': 4.3 } },
     },
   },
 

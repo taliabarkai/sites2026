@@ -32,6 +32,14 @@
   }
 }
 
+/* The final flows (V1–V3): not sticky at any width — the header scrolls away
+   with the page (mobile: the sticky gallery or preview dock takes the top) */
+.wrapperScrolls.wrapperScrolls {
+  position: relative;
+  top: auto;
+  transform: none;
+}
+
 /* Only the bar is sticky, at every width — the topline (announcement +
    utility links) scrolls away with the page. Sticking at minus the topline's
    height (measured in Header.tsx) parks it just above the viewport. */
@@ -464,6 +472,13 @@
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   outline: none;
+}
+
+/* The account icon: hidden on mobile for now (it may come back) */
+@media (max-width: 767px) {
+  .iconButton.accountButton {
+    display: none;
+  }
 }
 
 .cartButton {

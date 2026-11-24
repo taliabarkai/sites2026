@@ -11,9 +11,9 @@
  * `necklaceStudio`: name necklaces from the Name Necklace Studio — plates
  *   solved on the server, hung on a simulated chain here (necklaceStudio.ts).
  */
-import { fieldById, type CharmPiece, type PdpTemplate, type PlaceholderSpec, type PreviewEngine, type StoneLook, type StoneSeparator } from './pdpTemplate'
+import { fieldById, type CharmPiece, type NecklaceStudioEngine, type PdpTemplate, type PlaceholderSpec, type PreviewEngine, type StoneLook, type StoneSeparator } from './pdpTemplate'
 import type { PreviewInput } from './fieldState'
-import { renderNecklaceStudio } from './necklaceStudio'
+import { DIAMOND, renderNecklaceStudio, type StudioStone } from './necklaceStudio'
 
 /** Output size — the PDP gallery slots are square. */
 const SIZE = 1200
@@ -148,8 +148,6 @@ function resolveStone(sep: StoneSeparator | undefined, input: PreviewInput): { l
 /** A stone placed in the render: its centre and diameter, and what it is. */
 interface StonePlacement { x: number; y: number; d: number; look: StoneLook; angle?: number }
 
-/** Product content, not UI: a diamond's body, its facet lines and its edge. */
-const DIAMOND = { light: '#FFFFFF', body: '#E4E9EF', facet: '#B9C2CC' }
 
 /** A diamond cut drawn in SVG, in a thin setting of the metal. */
 function diamondSvg(p: StonePlacement, metal: string, id: number): string {
@@ -570,12 +568,22 @@ export function withExternalEngine(template: PdpTemplate, latencyMs = 1400): Pdp
   }
 }
 
+/** The diamonds between the names (TGR Heritage): the picked size's diameter, in the material's swatch metal — none for "None". */
+function studioStone(template: PdpTemplate, engine: NecklaceStudioEngine, input: PreviewInput): StudioStone | null {
+  if (!engine.stones) return null
+  const diameterMm = engine.stones.diameterMm[input.choices[engine.stones.fieldId] ?? '']
+  if (!diameterMm) return null
+  const material = template.fields.find((f) => f.fieldId === engine.materialFieldId)
+  const metal = material?.values?.find((v) => v.id === input.choices[engine.materialFieldId])?.swatchColor ?? DIAMOND.facet
+  return { diameterMm, metal }
+}
+
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms))
 
 export async function renderPreview(template: PdpTemplate, engine: PreviewEngine, input: PreviewInput, colors: PreviewColors): Promise<string | null> {
   if (engine.kind === 'placeholder') return renderPlaceholder(template, engine.spec, input, colors)
   if (engine.kind === 'necklaceStudio') {
-    return renderNecklaceStudio(engine, template.sku, input.texts[engine.textFieldId] ?? [], input.choices[engine.materialFieldId], SIZE, colors.surface)
+    return renderNecklaceStudio(engine, template.sku, input.texts[engine.textFieldId] ?? [], input.choices[engine.materialFieldId], SIZE, colors.surface, studioStone(template, engine, input))
   }
   // external: POST { sku, fields } to engine.endpoint in production.
   await wait(engine.simulatedLatencyMs ?? 1200)

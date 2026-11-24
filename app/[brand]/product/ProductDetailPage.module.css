@@ -14,6 +14,16 @@
   .page {
     --sticky-top: calc(var(--layout-header-height) + var(--spacing-md));
   }
+
+  /* The final flows: the header scrolls away, so the sticky form column and
+     gallery hold just below the top of the screen instead of under it */
+  .page.pageHeaderScrolls {
+    --sticky-top: var(--spacing-md);
+  }
+
+  .pageHeaderScrolls .lalGallery {
+    top: var(--sticky-top);
+  }
 }
 
 /* ── Mobile swipeable gallery ─────────────────────────────────────────────── */
@@ -27,6 +37,112 @@
   position: sticky;
   z-index: var(--z-sticky);
   background: var(--colors-background);
+}
+
+/* Preview dock (OAL final live preview, mobile mockup): the shopper's preview
+   slides down from the top of the screen, over the sticky site header, and
+   stays. Its "Your Personalization" ribbon, centred at the bottom of the
+   image, is the toggle: it tucks the dock away and brings it back.
+   Hidden: fully above the screen, ribbon included. Tucked: only the ribbon shows. */
+.previewDock {
+  /* Room under the dock for the first preview field it keeps in view */
+  --dock-anchor-gap: var(--spacing-sm);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: calc(var(--z-header) + 1);
+  background: var(--colors-card-image-bg);
+  box-shadow: var(--shadow-sm);
+  transform: translateY(-100%);
+  transition: transform var(--transition-base);
+}
+
+.previewDockOpen {
+  transform: translateY(0);
+}
+
+/* The preview at its own 1:1, the full width of the screen */
+.previewDockImage {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  max-width: 100%;
+}
+
+.previewDockImage img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* The ribbon (its look from .ribbonWithIcon, later in this file): open, it sits
+   centred at the bottom of the image; tucked, it drops out from under the
+   dock to hang just below the sticky header */
+.previewDockTab {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translate(-50%, calc(-100% - var(--spacing-sm)));
+  white-space: nowrap;
+  cursor: pointer;
+  border-radius: var(--ribbon-border-radius, var(--radius-sm));
+  box-shadow: var(--shadow-sm);
+  font-family:    var(--typography-rules-ribbons1-font-family, var(--font-family-main-bold));
+  font-size:      var(--typography-rules-ribbons1-font-size);
+  line-height:    var(--typography-rules-ribbons1-line-height);
+  font-weight:    var(--typography-rules-ribbons1-font-weight, 700);
+  letter-spacing: var(--typography-rules-ribbons1-letter-spacing, normal);
+  transition: top var(--transition-base);
+}
+
+/* Tucked: a full-width secondary button just under the sticky header —
+   two classes, so it outranks the ribbon look */
+.previewDockTucked .previewDockTab {
+  top: calc(100% + var(--dock-header-bottom, 0px) + var(--spacing-xxs));
+  left: var(--layout-page-margin);
+  right: var(--layout-page-margin);
+  transform: none;
+  justify-content: center;
+  gap: var(--spacing-xxs);
+  min-height: var(--buttons-secondary-min-height);
+  padding: var(--buttons-secondary-padding);
+  background: var(--buttons-secondary-background);
+  color: var(--buttons-secondary-text);
+  border: var(--border-width) solid var(--buttons-secondary-border-color);
+  border-radius: var(--buttons-secondary-border-radius);
+  font-family:    var(--typography-rules-button1-font-family);
+  font-size:      var(--typography-rules-button1-font-size);
+  line-height:    var(--typography-rules-button1-line-height);
+  font-weight:    var(--typography-rules-button1-font-weight);
+  letter-spacing: var(--typography-rules-button1-letter-spacing, normal);
+  text-transform: var(--typography-rules-button1-text-transform, none);
+}
+
+.previewDockTab:focus-visible {
+  outline: var(--border-width) solid var(--colors-text);
+  outline-offset: 2px;
+}
+
+/* The brand chevron points right: up to tuck the dock away, down to bring it back */
+.previewDockChevronUp,
+.previewDockChevronDown {
+  display: flex;
+  transition: transform var(--transition-fast);
+}
+
+.previewDockChevronUp { transform: rotate(-90deg); }
+.previewDockChevronDown { transform: rotate(90deg); }
+
+@media (prefers-reduced-motion: reduce) {
+  .previewDock,
+  .previewDockTab,
+  .previewDockChevronUp,
+  .previewDockChevronDown { transition: none; }
+}
+
+@media (min-width: 1024px) {
+  .previewDock { display: none; }
 }
 
 /* Where "scroll to the gallery" lands: just under the site header */
@@ -500,6 +616,11 @@
 /* LAL: space between the header divider and the Add photo step */
 [data-theme="lal"] .productHeader {
   margin-bottom: var(--spacing-md);
+}
+
+/* Above the gallery (V2): the slot's own padding is the gap — no extra margin */
+[data-theme] .headerAbove .productHeader {
+  margin-bottom: 0;
 }
 
 .productTitlePriceGroup {
@@ -1829,13 +1950,19 @@
 }
 
 /* Desktop, the personalization open (the details column unpinned): only the
-   first image — the live preview — is pinned under the header, for as long
-   as the steps' column runs (its row is held that tall); then it lets go and
-   the rest of the gallery follows under it at full size. Nothing cropped, no
-   scrolling inside the gallery. */
+   first image — the live preview — is pinned under the header, whole, for as
+   long as any of the steps' column is on screen: its row is held the
+   column's height plus its own (it's square, as wide as the gallery — 100cqw),
+   so it lets go only once the column's last line has scrolled up past it.
+   Then the rest of the gallery follows under it at full size. Nothing
+   cropped, no scrolling inside the gallery. */
 @media (min-width: 1024px) {
+  .heroGridGallery {
+    container-type: inline-size;
+  }
+
   .layout:has(.formPanelUnpinned) .heroGridHeroSlot {
-    min-height: var(--steps-height, auto);
+    min-height: calc(var(--steps-height, 0px) + 100cqw);
   }
 
   .layout:has(.formPanelUnpinned) .heroGridHeroSlot > .heroGridHero {

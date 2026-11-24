@@ -306,24 +306,21 @@ export function readMaterialDisplay(params: ReadableParams, brand = ''): Materia
 }
 
 /**
- * The final live preview (`/[brand]/product/livepreviewfinal`): one version —
- * the gallery preview + new layout (live preview's V2) — and a mobile toggle
- * for where the product info sits: above the gallery (as V2) or below it.
+ * The final flows, LAL (Music Memories): the options in two tabs —
+ * Personalize, then Frame Options — or all in one longer form (`?steps=single`).
+ * Tabs by default.
  */
-export const MOBILE_LAYOUT_PARAM = 'mobileLayout'
-export const MOBILE_LAYOUTS = [
-  { value: 'info-above',    label: 'Info above gallery' },
-  { value: 'gallery-above', label: 'Gallery above info' },
+export const STEPS_LAYOUT_PARAM = 'steps'
+export const STEPS_LAYOUTS = [
+  { value: 'tabs',   label: 'Tabs – Personalize, then Frame Options' },
+  { value: 'single', label: 'Single – every option in one form' },
 ] as const
-export type MobileLayout = (typeof MOBILE_LAYOUTS)[number]['value']
+export type StepsLayout = (typeof STEPS_LAYOUTS)[number]['value']
 
-export function readMobileLayout(params: ReadableParams): MobileLayout {
-  return params.get(MOBILE_LAYOUT_PARAM) === 'gallery-above' ? 'gallery-above' : 'info-above'
+export function readStepsLayout(params: ReadableParams): StepsLayout {
+  const raw = params.get(STEPS_LAYOUT_PARAM)
+  return STEPS_LAYOUTS.find((l) => l.value === raw)?.value ?? 'tabs'
 }
-
-/** The final live preview's pages: its one-URL demo and every product under it. */
-export const FINAL_PREVIEW_SEGMENT = 'livepreviewfinal'
-export const isFinalPreviewPath = (pathname: string) => pathname.includes(`/product/${FINAL_PREVIEW_SEGMENT}`)
 
 export const PERSONALIZE_PARAM = 'personalize'
 

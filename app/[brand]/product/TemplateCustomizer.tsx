@@ -3,7 +3,7 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { createPortal, flushSync } from 'react-dom'
 import Link from 'next/link'
-import type { CartItem } from '../_context/CartContext'
+import { useCart, type CartItem } from '../_context/CartContext'
 import type { ProductItem } from '../../../data/products'
 import { Button } from '../_components/Button'
 import { CustomizerPanel, useIsMobile } from '../_components/CustomizerPanel'
@@ -16,7 +16,7 @@ import type { PersonalizePlacement } from '../_config/demoParams'
 import { materialLabel, startingAtPricing } from '../_config/brands'
 import { fieldById, stepFields, type Field, type FieldDisplayType, type PdpTemplate, type PresentationStep } from './_templates'
 import {
-  allGroups, cartOptions, derivedText, startingPrice, groupId, groupsForField, isVisible, offeredValues, setLength, shortOfSetLength, tooShort, missingRequired, parsePriceLabel, previewInput, previewKey, summaryLines, templatePrice, textValues,
+  allGroups, cartOptions, derivedText, startingPrice, groupId, groupsForField, isVisible, offeredValues, repeatCount, setLength, shortOfSetLength, tooShort, missingRequired, parsePriceLabel, previewInput, previewKey, summaryLines, templatePrice, textValues,
 } from './_templates/fieldState'
 import { blankPreview, debounceFor, isRemote, readPreviewColors, renderPreview } from './_templates/previewEngine'
 import pdp from './ProductDetailPage.module.css'
@@ -73,12 +73,27 @@ export interface TemplateCustomizerProps {
   regularPrice?: boolean
   /**
    * The final live preview: with every field on the page (V2), the live
-   * preview — and its badge — come in at the shopper's first pick (a count,
-   * an initial, a stone), not only once they've entered their own text.
+   * preview — and its badge — come in with the shopper's own personalization:
+   * an initial picked (OAL Inez) or a name typed (TGR Heritage), or a pick in
+   * one of the template's `finalPreviewEntryFieldIds` (Inez: stone, size,
+   * shape). Any other pick (a material, a count) only changes the price.
    */
   previewOnFirstPick?: boolean
   /** Demo: offer a second of this product at 50% off, just above Add to Bag. */
   nestedOffer?: boolean
+  /**
+   * Demo (the final flows): an "Autofill" link beside the first text field's
+   * label fills every text field on show — names, or letters for initials —
+   * with different picks on each click.
+   */
+  autofill?: boolean
+  /**
+   * The final flows: the sticky bar (every field on the page) is Add to Bag.
+   * With every required text field filled it adds straight to the bag, the
+   * live preview as the item's image; until then it scrolls back up to the
+   * form, as Continue customization does.
+   */
+  stickyAddToBag?: boolean
   /** True while the "Added to your bag" state stands in for the form. */
   onAddedChange?: (added: boolean) => void
   /** "Personalize Another": the page starts the customizer over from scratch. */
@@ -142,8 +157,11 @@ function FieldTooltip({ text, Icon }: { text: string; Icon: IconCmp }) {
  * (`panel`, mobile). Fields render through ProductOptions; the price and the
  * live preview read back from the same option state.
  */
+/** Demo autofill's names, in turn. */
+const AUTOFILL_NAMES = ['Olivia', 'Noah', 'Emma', 'Sophia', 'Liam', 'Ava', 'Mia', 'Lucas', 'Grace', 'Leo', 'Isla', 'Ruby', 'Theo', 'Maya', 'Ella', 'Zoe', 'Jack', 'Lily']
+
 export function TemplateCustomizer({
-  brand, template, product, icons, addItem, openCart, onLivePreviewChange, onLivePreviewLoadingChange, onPersonalizedChange, belowCta, placement, headerSlot, onSaved, onAddedChange, onPersonalizeAnother, nestedOffer, materialImageOnly, fillEmptyFromSample = false, regularPrice = false, previewOnFirstPick = false,
+  brand, template, product, icons, addItem, openCart, onLivePreviewChange, onLivePreviewLoadingChange, onPersonalizedChange, belowCta, placement, headerSlot, onSaved, onAddedChange, onPersonalizeAnother, nestedOffer, autofill = false, stickyAddToBag = false, materialImageOnly, fillEmptyFromSample = false, regularPrice = false, previewOnFirstPick = false,
 }: TemplateCustomizerProps) {
   const { AiMagicIcon, ArrowIcon, CheckmarkIcon, ChevronIcon, StarIcon, XIcon, TooltipIcon } = icons
   const isMobile = useIsMobile()
@@ -179,6 +197,9 @@ export function TemplateCustomizer({
     // eslint-disable-next-line react-hooks/exhaustive-deps -- only a change of count drives it
   }, [lengthKey])
   const [errors, setErrors] = useState<string[]>([])
+  // The bag item being edited (Edit on "Added to your bag"), until Update Item
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const { items: cartItems, replaceItems } = useCart()
   // The preview starts with the shopper's first selection and stays from then
   // on — on a stepped page, once they open the steps (as MM does): picking a
   // material on the page beforehand only moves the price. Until then the
@@ -188,7 +209,14 @@ export function TemplateCustomizer({
   // Typing into a field clears its error
   const options: ProductOptionsController = {
     ...base,
-    choose: (id, valueId) => { base.choose(id, valueId); setInteracted(true); if (entered || inline) setStarted(true) },
+    // (Final live preview: only text enters the preview — or a pick in one of
+    // the template's entry fields, as Inez's stone, size and shape)
+    choose: (id, valueId) => {
+      base.choose(id, valueId)
+      const fieldId = Number(/^f(\d+)/.exec(id)?.[1])
+      if (!previewOnFirstPick || template.finalPreviewEntryFieldIds?.includes(fieldId)) setInteracted(true)
+      if (entered || inline) setStarted(true)
+    },
     setText: (id, raw) => {
       // Initials-style fields keep letters only, in capitals
       const field = fieldById(template, Number(/^f(\d+)/.exec(id)?.[1]))
@@ -200,6 +228,39 @@ export function TemplateCustomizer({
       if (value.trim()) setStarted(true)
       setErrors((e) => (e.includes(id) ? e.filter((x) => x !== id) : e))
     },
+  }
+
+  // ── Demo autofill: every text field on show, filled in one click ──────────
+  const autofillRun = useRef(0)
+  const firstTextFieldId = autofill
+    ? template.fields.find((f) => f.type === 'text' && !f.derivedFrom && isVisible(f, state))?.fieldId
+    : undefined
+  const autofillText = () => {
+    // Each click starts further along the list: a different set of names
+    let next = autofillRun.current++ * 3
+    const name = (max: number) => {
+      for (let k = 0; k < AUTOFILL_NAMES.length; k++) {
+        const n = AUTOFILL_NAMES[next++ % AUTOFILL_NAMES.length]
+        if (n.length <= max) return n
+      }
+      return AUTOFILL_NAMES[0].slice(0, max)
+    }
+    const letter = (choices?: string[]) => {
+      const letters = (choices ?? [...'ABCDEFGHIJKLMNOPRSTW']).filter((c) => /\p{L}/u.test(c))
+      return letters[Math.floor(Math.random() * letters.length)]
+    }
+    for (const f of template.fields) {
+      if (f.type !== 'text' || f.derivedFrom || !isVisible(f, state)) continue
+      const max = f.textMaxLength ?? 20
+      const n = setLength(template, f, state)
+      // A set length (Inez's initials): that many letters; a one- or two-character box: a letter; else a name
+      const value = () => (n ? Array.from({ length: n }, () => letter(f.letterChoices)).join('') : max < 3 ? letter(f.letterChoices) : name(max))
+      if (f.repeat) {
+        for (let i = 1; i <= repeatCount(template, f, state); i++) options.setText(groupId(f.fieldId, i), value())
+      } else {
+        options.setText(groupId(f.fieldId), value())
+      }
+    }
   }
 
   // A product-wide sale: what's charged is the material's price less the sale
@@ -468,12 +529,19 @@ export function TemplateCustomizer({
   // pins its first image, the preview, beside it
   const unpinned = cardOpen || (previewOnFirstPick && inline && !isMobile && previewEntered)
   // …the page's layout learning the column's height (--steps-height), which
-  // holds the preview pinned for as long as the column runs
+  // holds the preview pinned for as long as the column runs. It keeps the
+  // tallest the column has been while open: switching to a shorter step
+  // (Customize after Personalize) mustn't shrink the row under a scrolled
+  // page — the preview would let go and slide up, its top cut off.
   useEffect(() => {
     const el = rootRef.current
     const layout = el?.parentElement
     if (!unpinned || !el || !layout) return
-    const sync = () => layout.style.setProperty('--steps-height', `${el.offsetHeight}px`)
+    let tallest = 0
+    const sync = () => {
+      tallest = Math.max(tallest, el.offsetHeight)
+      layout.style.setProperty('--steps-height', `${tallest}px`)
+    }
     sync()
     const ro = new ResizeObserver(sync)
     ro.observe(el)
@@ -534,6 +602,10 @@ export function TemplateCustomizer({
     return stepIndexes.find((i) => missingRequired(template, stepFields(template, steps[i]), state, opts).length > 0) ?? null
   }
 
+  // The final flows' sticky Add to Bag: ready once the shopper has started and
+  // every required text field is filled (checked quietly — no errors shown)
+  const readyToAdd = interacted && steps.every((_, i) => missingRequired(template, stepFields(template, steps[i]), state).length === 0)
+
   const handleNext = () => {
     // A minimum that hangs on a later choice (2 initials for a stone) waits for Add to bag
     if (validate([stepIdx], { conditional: false }) !== null) return
@@ -586,7 +658,7 @@ export function TemplateCustomizer({
     }
     const accent = accentOffered && diamondAccent
     const selectedOptions = [...cartOptions(template, state), ...(accent ? [{ label: 'Diamond accent', value: 'Yes' }] : [])]
-    addItem({
+    const item: CartItem = {
       id: `${product.id}-${Date.now()}`,
       name: product.name,
       price: price + (accent ? DIAMOND_ACCENT_CENTS : 0),
@@ -596,7 +668,18 @@ export function TemplateCustomizer({
       rating: product.rating,
       reviewCount: product.reviewCount,
       selectedOptions,
-    })
+    }
+    // Editing the design just added (Edit → Update Item): it replaces that bag
+    // item in place — same id and spot, its gift packaging and protection kept.
+    // If it has left the bag meanwhile, it goes back in as a new item.
+    const editing = editingId ? cartItems.find((it) => it.id === editingId) : undefined
+    if (editing) {
+      Object.assign(item, { ...editing, ...item, id: editing.id })
+      replaceItems(cartItems.map((it) => (it.id === editing.id ? item : it)))
+    } else {
+      addItem(item)
+    }
+    setEditingId(null)
     // The nested item, staged in its Quick Add panel, goes in with it
     nested.stagedItems.forEach((it) => addItem(it))
     nested.clear()
@@ -609,6 +692,7 @@ export function TemplateCustomizer({
       .filter(Boolean)
     const textLabels = new Set(template.fields.filter((f) => f.type === 'text').map((f) => f.cartName))
     setAddedItem({
+      id: item.id,
       image: (!loading && preview) || product.image,
       title: texts.length ? texts.map((t) => `“${t}”`).join(', ') : product.name,
       subtitle: selectedOptions
@@ -618,16 +702,18 @@ export function TemplateCustomizer({
       rows: selectedOptions.map((o) => ({ k: o.label, v: o.value })),
     })
     setAddedOpen(false)
-    openCart(true)
+    // An update isn't a new add, so the bag opens without "Successfully added"
+    openCart(!editing)
   }
 
   // ── Added to your bag (as Music Memories) ───────────────────────────────────
-  const [addedItem, setAddedItem] = useState<{ image: string; title: string; subtitle: string; rows: { k: string; v: string }[] } | null>(null)
+  const [addedItem, setAddedItem] = useState<{ id: string; image: string; title: string; subtitle: string; rows: { k: string; v: string }[] } | null>(null)
   const [addedOpen, setAddedOpen] = useState(false)
   useEffect(() => { onAddedChange?.(!!addedItem) }, [addedItem, onAddedChange])
   useEffect(() => () => onAddedChange?.(false), [onAddedChange])
   /** Edit: back to the form with this design's answers (behind the row: the panel opens). */
   const editAdded = () => {
+    if (addedItem) setEditingId(addedItem.id)
     setAddedItem(null)
     if (rowMode || container === 'panel') enter()
   }
@@ -681,12 +767,19 @@ export function TemplateCustomizer({
     // Demo toggle: the material as the carousel's standard image-only tiles
     const fieldGroups = groupsForField(template, field, state, displayType).map((g) =>
       materialImageOnly && field.pricing === 'base' && g.kind === 'choice'
-        ? { ...g, display: 'carousel' as const, tile: 'image-only' as const, size: 'sm' as const, priceBelow: !hideFinishPrices }
+        // Every theme, OAL included, prices each swatch under it, as TGR does
+        ? { ...g, display: 'carousel' as const, tile: 'image-only' as const, size: 'sm' as const, priceBelow: true }
         : g,
     ).map((g) =>
       // OAL: no prices on the finishes — the page says "Starting at", Add to bag the total
-      hideFinishPrices && field.pricing === 'base' && g.kind === 'choice'
+      // (Not on the image-only swatches: they show each price, as TGR's)
+      hideFinishPrices && !materialImageOnly && field.pricing === 'base' && g.kind === 'choice'
         ? { ...g, values: g.values.map((v) => ({ ...v, priceLabel: undefined })) }
+        : g,
+    ).map((g) =>
+      // OAL: no "Select finish" title over the swatches — just the picked one, "18K Gold Vermeil"
+      brand === 'oal' && field.pricing === 'base' && g.kind === 'choice'
+        ? { ...g, valueOnlyLabel: true }
         : g,
     )
     const slots = Object.fromEntries(
@@ -702,8 +795,11 @@ export function TemplateCustomizer({
     )
     return (
       <div key={field.fieldId} className={styles.field} data-field-id={field.fieldId}>
-        {(showHelpLink || field.tooltip) && (
+        {(showHelpLink || field.tooltip || field.fieldId === firstTextFieldId) && (
           <div className={styles.fieldAside}>
+            {field.fieldId === firstTextFieldId && (
+              <button type="button" className={styles.autofillButton} onClick={autofillText}>Autofill</button>
+            )}
             {field.tooltip && <FieldTooltip text={field.tooltip} Icon={TooltipIcon} />}
             {showHelpLink && (
               <a href="#" className={styles.helpLink} onClick={(e) => e.preventDefault()}>{field.helpLink}</a>
@@ -752,7 +848,8 @@ export function TemplateCustomizer({
 
   const personalizeNowLabel = hasText ? 'Continue Personalizing' : 'Personalize Now'
   const nextLabel = (flow.nextCta ?? 'Continue to {next}').replace('{next}', steps[stepIdx + 1]?.label ?? '')
-  const addLabel = `Add to Bag – ${formatPrice(price + nested.nestedTotal)}`
+  // Back from "Added to your bag" through Edit: the button updates that item
+  const addLabel = editingId ? 'Update Item' : `Add to Bag – ${formatPrice(price + nested.nestedTotal)}`
   // V5: "Add to bag · $199", with its add-ons in the total
   const jewelryTotal = price + nested.nestedTotal + (diamondAccent ? DIAMOND_ACCENT_CENTS : 0)
 
@@ -1045,8 +1142,8 @@ export function TemplateCustomizer({
         <StickyCustomizeBar
           watch={ctaRef}
           target={rootRef}
-          onClick={inline ? undefined : buyInPanel || jewelry ? enter : rowMode ? handleAddToBag : enter}
-          label={inline ? undefined : jewelry ? personalizeNowLabel : rowMode ? addLabel : entryCta}
+          onClick={inline ? (stickyAddToBag && readyToAdd ? handleAddToBag : undefined) : buyInPanel || jewelry ? enter : rowMode ? handleAddToBag : enter}
+          label={inline ? (stickyAddToBag ? addLabel : undefined) : jewelry ? personalizeNowLabel : rowMode ? addLabel : entryCta}
         />
       )}
 

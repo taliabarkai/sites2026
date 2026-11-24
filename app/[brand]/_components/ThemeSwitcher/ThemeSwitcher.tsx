@@ -15,6 +15,7 @@ import * as tgrIcons from '@/src/components/icons/tgr'
 import * as lalIcons from '@/src/components/icons/lal'
 import * as ibIcons from '@/src/components/icons/ib'
 import { renderedTemplateFor } from '../../product/_templates'
+import { PERSONALIZATION_FLOWS, flowPath, personalizationFlowOf } from '../../_config/personalizationFlows'
 import styles from './ThemeSwitcher.module.css'
 
 /**
@@ -24,8 +25,9 @@ import styles from './ThemeSwitcher.module.css'
  * keeps its path.
  */
 function switchPath(pathname: string, from: BrandKey, to: BrandKey): string {
-  // The final live preview stays the final live preview, on the other theme's product
-  if (/\/product\/livepreviewfinal(\/|$)/.test(pathname)) return `/${to}/product/livepreviewfinal`
+  // A personalization flow stays that flow, on the other theme's product
+  const flow = personalizationFlowOf(pathname)?.flow
+  if (flow) return flowPath(to, flow)
   const m = /^\/[^/]+\/product\/(\d+)\/?$/.exec(pathname)
   if (m && renderedTemplateFor(from, Number(m[1]))) return `/${to}/product/livepreview`
   return buildBrandPath(pathname, to)
@@ -51,6 +53,9 @@ export function ThemeSwitcher({ brand }: ThemeSwitcherProps = {}) {
   const [open, setOpen] = useState(false)
 
   const currentBrand = brand ?? getBrandFromPathname(pathname)
+  // On a personalization flow, only the themes that flow has been built for
+  const flow = personalizationFlowOf(pathname)?.flow
+  const themes = flow ? BRANDS.filter((b) => PERSONALIZATION_FLOWS[flow].brands.includes(b.key)) : BRANDS
   const current = getBrandMeta(currentBrand)
   const { ChevronIcon } = BRAND_ICONS[currentBrand]
 
@@ -110,7 +115,7 @@ export function ThemeSwitcher({ brand }: ThemeSwitcherProps = {}) {
 
       {open && (
         <ul id={menuId} className={styles.menu} role="listbox" aria-label="Select theme">
-          {BRANDS.map((brand) => {
+          {themes.map((brand) => {
             const isActive = brand.key === currentBrand
             return (
               <li key={brand.key} role="option" aria-selected={isActive}>

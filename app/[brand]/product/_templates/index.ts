@@ -1,4 +1,5 @@
 import type { PdpTemplate } from './pdpTemplate'
+import type { PersonalizationFlow } from '../../_config/personalizationFlows'
 import { lalMusicMemories } from './templates/lalMusicMemories'
 import { tgrClassicName } from './templates/tgrClassicName'
 import { tgrHeritageMultiName } from './templates/tgrHeritageMultiName'
@@ -39,19 +40,39 @@ export const livePreviewProductFor = (brand: string): number | undefined => {
 }
 
 /**
- * The final live preview's product per theme — as the live preview's, except
- * TGR, which shows the Heritage multiple-name necklace (IB and MYKA keep the
- * single-name Carrie).
+ * The personalization flows' product per theme (see _config/personalizationFlows):
+ * Simple — the single-name necklace (Classic Name, on every jewelry theme);
+ * Custom — the jewelry with several options (OAL Inez, TGR Heritage multi-name)
+ * and LAL's Music Memories. A theme missing here has no page in that flow yet.
  */
-export const FINAL_PREVIEW_TEMPLATE_BY_BRAND: Record<PdpTemplate['brand'], string> = {
-  ...LIVE_PREVIEW_TEMPLATE_BY_BRAND,
-  tgr: 'tgr-heritage-multi-name',
+const FINAL_FLOW_TEMPLATES: Partial<Record<PdpTemplate['brand'], string>> = {
+  oal: 'tgr-classic-name', tgr: 'tgr-classic-name', ib: 'tgr-classic-name', mnn: 'tgr-classic-name', lal: 'lal-music-memories',
 }
 
-/** The product id `/[brand]/product/livepreviewfinal` renders for this theme. */
-export const finalPreviewProductFor = (brand: string): number | undefined => {
-  const id = FINAL_PREVIEW_TEMPLATE_BY_BRAND[brand as PdpTemplate['brand']]
-  return Object.values(PDP_TEMPLATES).find((t) => t.id === id)?.productId
+/**
+ * The final flows' products with several options (complex), per theme — each
+ * flow takes them as it takes the name necklace. Only the themes that have one.
+ */
+export const FINAL_FLOW_COMPLEX_TEMPLATES: Partial<Record<PdpTemplate['brand'], string>> = {
+  oal: 'oal-inez', tgr: 'tgr-heritage-multi-name',
+}
+
+export const templateProductId = (templateId: string): number | undefined =>
+  Object.values(PDP_TEMPLATES).find((t) => t.id === templateId)?.productId
+
+export const FLOW_TEMPLATE_BY_BRAND: Record<PersonalizationFlow, Partial<Record<PdpTemplate['brand'], string>>> = {
+  simple: { oal: 'tgr-classic-name', tgr: 'tgr-classic-name', ib: 'tgr-classic-name', mnn: 'tgr-classic-name' },
+  custom: { oal: 'oal-inez', tgr: 'tgr-heritage-multi-name', lal: 'lal-music-memories' },
+  // The final flows: the name necklace on every jewelry theme, Music Memories on LAL
+  v1: FINAL_FLOW_TEMPLATES,
+  v2: FINAL_FLOW_TEMPLATES,
+  v3: FINAL_FLOW_TEMPLATES,
+}
+
+/** The product id a personalization flow's page renders for this theme. */
+export const flowProductFor = (flow: PersonalizationFlow, brand: string): number | undefined => {
+  const id = FLOW_TEMPLATE_BY_BRAND[flow][brand as PdpTemplate['brand']]
+  return id ? Object.values(PDP_TEMPLATES).find((t) => t.id === id)?.productId : undefined
 }
 
 /** The template the PDP should render from — none when a bespoke customizer owns the page. */

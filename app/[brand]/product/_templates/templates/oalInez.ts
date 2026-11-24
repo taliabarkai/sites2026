@@ -48,10 +48,10 @@ export const oalInez: PdpTemplate = {
       ],
     },
     {
-      // How many initials, as a carousel of text tiles: the field below takes
-      // exactly that many letters. The first is in the price; each one after
-      // adds $25, shown on the tile: "2 initials (+$25)"
-      fieldId: 307, name: 'Select number of initials (1-5)', cartName: 'Number of Initials', type: 'selection', displayType: 'carousel', order: 2, isRequired: true,
+      // How many initials, as a dropdown (prices on the right): the field below
+      // takes exactly that many letters. The first is in the price; each one
+      // after adds $25: "2 initials  +$25"
+      fieldId: 307, name: 'Select number of initials (1-5)', cartName: 'Number of Initials', type: 'selection', displayType: 'visual_dropdown_list', order: 2, isRequired: true,
       pricing: 'delta', affectsPreview: false, defaultValueId: '1',
       values: [
         { id: '1', label: '1 initial',  priceDelta: 0 },
@@ -62,10 +62,10 @@ export const oalInez: PdpTemplate = {
       ],
     },
     {
-      // One initial per pick: a row of square tiles each (A–Z and a few
-      // symbols), as many rows as chosen above — "1st initial", "2nd initial"…
+      // One initial per pick: a dropdown that opens a keyboard of its keys (A–Z
+      // and a few symbols), as many as chosen above — "1st initial", "2nd initial"…
       fieldId: 305, name: 'Initial', cartName: 'Initial', type: 'text', displayType: 'text', order: 3, isRequired: true,
-      textMinLength: 1, textMaxLength: 1,
+      textMinLength: 1, textMaxLength: 1, keyboard: true,
       letterChoices: [...'ABCDEFGHIJKLMNOPQRSTUVWXYZ', '♥', '◆', '&'],
       repeat: { countFieldId: 307, min: 1, max: 5, labelPattern: '{nth} initial' },
       pricing: 'none', affectsPreview: true,
@@ -162,12 +162,9 @@ export const oalInez: PdpTemplate = {
   // Its sister necklace leads the page's Best Sellers
   bestSellersLead: [27],
 
-  // The final live preview: the number of initials as a dropdown (prices on
-  // the right), and each initial a dropdown that opens a keyboard of its keys
-  finalPreviewFields: {
-    307: { displayType: 'visual_dropdown_list' },
-    305: { keyboard: true },
-  },
+  // The final live preview: the stone, gemstone, size and shape open the live
+  // preview too, as the initial does
+  finalPreviewEntryFieldIds: [302, 310, 303, 311],
 
   flow: {
     // V5 (Jewelry) unless the link names another version
