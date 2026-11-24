@@ -462,6 +462,14 @@ export function MusicMemoriesCustomizer({ brand, product, icons, nestedItems = [
 
   useEffect(() => () => onLivePreviewChange?.(null), [onLivePreviewChange])
 
+  // Desktop has no first step: the live preview starts with the shopper's first
+  // edit to any field, in either tab (picking a tab alone doesn't count)
+  const fieldsKey = [songTitle, artist, memory, names, centerColor, size, frameType, frameColor].join('|')
+  const initialFieldsKey = useRef(fieldsKey)
+  useEffect(() => {
+    if (!isMobile && phase === 'default' && fieldsKey !== initialFieldsKey.current) setPhase('flow')
+  }, [fieldsKey, isMobile, phase])
+
   // ── View in Room ───────────────────────────────────────────────────────────
   // Phone: the camera, inside the personalize panel. Desktop: a QR code to the phone.
   const [arOpen, setArOpen] = useState(false)
@@ -698,7 +706,8 @@ export function MusicMemoriesCustomizer({ brand, product, icons, nestedItems = [
       {centerColorField}
     </>
   )
-  const mmPersonalizeInner = personalizeFields(false)
+  // Desktop opens straight on the tabs, so Autofill moves into Personalize there
+  const mmPersonalizeInner = personalizeFields(!isMobile)
 
   // Every Personalize field done on the page: See how it looks skips ahead to Frame Options
   const personalizeComplete = [songTitle, artist, memory, names].every(v => v.trim())
@@ -831,33 +840,29 @@ export function MusicMemoriesCustomizer({ brand, product, icons, nestedItems = [
       {headerSlot ? createPortal(header, headerSlot) : header}
 
       <div className={styles.customizer}>
-        {/* ── Default state: the Personalize fields (with Autofill), then See how it looks ── */}
+        {/* ── Desktop: the 2-tab card from the start (no first step, no Back).
+             The live preview starts with the shopper's first edit. Until the
+             screen size is known it hides below 768px, so phones don't flash it.
+             One stable element either way, so typing never remounts its fields. ── */}
+        {!isMobile && phase !== 'saved' && (
+          <div className={`${styles.flowCard} ${phase === 'default' ? styles.desktopOnly : ''}`}>
+            {mmTabs}
+            <div className={styles.panel} role="tabpanel">
+              {mmActiveInner}
+              {mmFooter}
+            </div>
+          </div>
+        )}
+
+        {/* ── Phone, first step: the Personalize fields (with Autofill), then
+             See how it looks opens the panel. Hidden on desktop. ── */}
         {phase === 'default' && (
-          <>
+          <div className={styles.phoneOnly}>
             {personalizeFields(true)}
             <button type="button" className={styles.ctaButton} onClick={() => { setPhase('flow'); setTab(personalizeComplete ? 'customize' : 'personalize') }}>
               See how it looks
             </button>
-          </>
-        )}
-
-        {/* ── Flow state — desktop: inline 2-tab card ── */}
-        {phase === 'flow' && !isMobile && (
-          <>
-            <button type="button" className={styles.flowBack} onClick={() => setPhase('default')}>
-              <svg width="8" height="12" viewBox="0 0 8 12" aria-hidden="true" fill="none">
-                <path d="M7 1L2 6l5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-              Back
-            </button>
-            <div className={styles.flowCard}>
-              {mmTabs}
-              <div className={styles.panel} role="tabpanel">
-                {mmActiveInner}
-                {mmFooter}
-              </div>
-            </div>
-          </>
+          </div>
         )}
 
         {/* ── Saved state: summary + upsell + add to bag ── */}

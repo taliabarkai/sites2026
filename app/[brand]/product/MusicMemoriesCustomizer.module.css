@@ -261,22 +261,6 @@
   }
 }
 
-/* Outer back link — returns from the flow to the song-select state */
-.flowBack {
-  align-self: flex-start;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  background: none;
-  border: none;
-  padding: 0;
-  font-size: 15px;
-  font-weight: 700;
-  color: var(--colors-text);
-  cursor: pointer;
-  font-family: inherit;
-}
-
 /* ── Swatches ───────────────────────────────────────────────────────────── */
 
 .swatches {
@@ -728,4 +712,20 @@
   max-height: 42vh;
   border-radius: var(--radius-sm);
   background: var(--colors-surface-primary);
+}
+
+/* Desktop opens on the tabs; phones open on the first step. Until the screen
+   size is known (first paint), CSS picks which one shows. */
+.phoneOnly {
+  display: flex;
+  flex-direction: column;
+  gap: inherit;
+}
+
+@media (min-width: 768px) {
+  .phoneOnly { display: none; }
+}
+
+@media (max-width: 767px) {
+  .desktopOnly { display: none; }
 }
