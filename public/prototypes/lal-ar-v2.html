@@ -1076,8 +1076,7 @@ html.dt .scr.cartin .cart { animation: dkCart .25s ease-out; }
       : '<img class="lp-gimg" src="images/music-memories-' + (gi === 'img2' ? '2.gif' : '1.jpg') + '" alt="Music Memories Custom Canvas">';
     var form = live
       ? '<button type="button" class="dk-back" data-act="custclose">' + IC.chev + 'Back</button><div class="dk-flow">' + custSteps() + '</div>'
-      : '<div class="lp-cz">' + lf('inSong', 'Pick your song', 'e.g. Yellow', S.song).replace('</label>', '</label><button type="button" class="lp-auto" data-act="autofill">Autofill</button>').replace('class="lp-field"', 'class="lp-field lp-af"') +
-        lf('inArtist', 'Name the artist', 'e.g. Coldplay', S.artist) + '<button type="button" class="lp-cta" data-act="preview">See how it looks</button></div>';
+      : p.slice(p.indexOf('<div class="lp-cz">'), p.indexOf('<ul class="lp-trust">')); // the same selections as the phone PDP
     return '<div class="lp dk"><header class="dk-head">' +
       '<div class="dk-top"><p>Subscribe &amp; Get 10% Off</p><p class="ce">Free Shipping on All Orders</p><p class="rt"><a>Need help?</a><i></i><a>Track My Order</a><i></i><a>Contact Us</a></p></div>' +
       '<div class="dk-bar"><div class="l"><button type="button">' + IC.menu + 'Menu</button><button type="button">' + IC.search + 'Search</button></div>' + logo +
