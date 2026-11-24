@@ -90,6 +90,12 @@
   color: var(--colors-text-inverse);
 }
 
+/* Just the X, in the text color, with no circle behind it */
+.closePlain {
+  background: transparent;
+  box-shadow: none;
+}
+
 /* Preview area — roughly half the viewport, fixed at the top of the sheet */
 .previewArea {
   flex: 0 0 auto;

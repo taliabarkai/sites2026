@@ -751,6 +751,16 @@
 }
 
 /* Mobile slide-in panel preview (framed mockup at the top of the sheet) */
+/* Fills the preview area so View in Room sits in its bottom-right corner */
+.panelPreviewWrap {
+  position: relative;
+  align-self: stretch;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .panelPreviewImg {
   max-height: 42vh;
   max-width: 72vw;
