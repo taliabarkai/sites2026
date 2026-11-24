@@ -642,9 +642,21 @@ export function MusicMemoriesCustomizer({ brand, product, icons, nestedItems = [
   )
 
   // Song title drives the record's center title. (Song combo hidden for now — no lyrics API.)
-  const songTitleField = (
+  // Autofill (the product page's default state): every Personalize field at once
+  const autofill = () => {
+    setSongTitle('Yellow')
+    setArtist('Coldplay')
+    setMemory('Our Wedding Song')
+    setNames('Alex & Max, 10.10.2021')
+    setCenterColor('green')
+  }
+
+  const songTitleField = (withAutofill = false) => (
     <div className={styles.field}>
-      <label className={styles.label} htmlFor="mm-song-title">Pick your song</label>
+      <div className={styles.labelRow}>
+        <label className={styles.label} htmlFor="mm-song-title">Pick your song</label>
+        {withAutofill && <button type="button" className={styles.sizeGuideLink} onClick={autofill}>Autofill</button>}
+      </div>
       <input type="text" id="mm-song-title" className={styles.input} placeholder="e.g. Yellow"
         value={songTitle} onChange={e => setSongTitle(e.target.value)} />
     </div>
@@ -674,9 +686,9 @@ export function MusicMemoriesCustomizer({ brand, product, icons, nestedItems = [
     </div>
   )
 
-  const mmPersonalizeInner = (
+  const personalizeFields = (withAutofill: boolean) => (
     <>
-      {songTitleField}
+      {songTitleField(withAutofill)}
       {artistField}
       <div className={styles.field}>
         <label className={styles.label} htmlFor="mm-memory">What&apos;s the occasion?</label>
@@ -691,6 +703,10 @@ export function MusicMemoriesCustomizer({ brand, product, icons, nestedItems = [
       {centerColorField}
     </>
   )
+  const mmPersonalizeInner = personalizeFields(false)
+
+  // Every Personalize field done on the page: See how it looks skips ahead to Frame Options
+  const personalizeComplete = [songTitle, artist, memory, names].every(v => v.trim())
 
   const mmCustomizeInner = (
     <>
@@ -820,12 +836,11 @@ export function MusicMemoriesCustomizer({ brand, product, icons, nestedItems = [
       {headerSlot ? createPortal(header, headerSlot) : header}
 
       <div className={styles.customizer}>
-        {/* ── Default state: song + artist fields, then Personalize CTA ── */}
+        {/* ── Default state: the Personalize fields (with Autofill), then See how it looks ── */}
         {phase === 'default' && (
           <>
-            {songTitleField}
-            {artistField}
-            <button type="button" className={styles.ctaButton} onClick={() => { setPhase('flow'); setTab('personalize') }}>
+            {personalizeFields(true)}
+            <button type="button" className={styles.ctaButton} onClick={() => { setPhase('flow'); setTab(personalizeComplete ? 'customize' : 'personalize') }}>
               See how it looks
             </button>
           </>
