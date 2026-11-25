@@ -18,6 +18,12 @@ export interface ToplineProps {
    */
   actionLabel?: string
   onAction?: () => void
+  /**
+   * `promo`: just the centre message, on one row at every width, in the
+   * theme's promo colors (--layout-promo-bar-*) — the final flows' promo bar,
+   * under the header bar.
+   */
+  variant?: 'default' | 'promo'
 }
 
 export function Topline({
@@ -31,7 +37,17 @@ export function Topline({
   contactHref = '/contact-us',
   actionLabel,
   onAction,
+  variant = 'default',
 }: ToplineProps) {
+  if (variant === 'promo') {
+    return (
+      <div className={`${styles.bar} ${styles.promoBar}`} role="region" aria-label="Announcement">
+        <div className={styles.promoInner}>
+          <p className={styles.center}>{promoCenter}</p>
+        </div>
+      </div>
+    )
+  }
   return (
     <div className={styles.bar} role="region" aria-label="Announcement">
       <div className={styles.inner}>

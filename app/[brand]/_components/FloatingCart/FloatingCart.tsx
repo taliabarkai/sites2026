@@ -10,8 +10,6 @@ import * as lalIcons from '@/src/components/icons/lal'
 import * as ibIcons from '@/src/components/icons/ib'
 import { getBrandFromPathname } from '../../_config/brands'
 import { FlowControls } from './FlowControls'
-import { CartNoteToggle } from '../Header/CartNoteToggle'
-import headerStyles from '../Header/Header.module.css'
 import { getBrandFeatures, getFlowConfig } from '../../_config/flow'
 import { readFlow, readWarrantyVariant, readCartNoteVariant, displayCartNote, type CartNoteVariant } from '../../_config/demoParams'
 import type { BrandKey } from '../../_config/brands'
@@ -492,8 +490,6 @@ export function FloatingCart({
           <div className={styles.headerActions}>
             {/* Presenter control: the flow first, its settings folded under it. */}
             <FlowControls brand={brand} onNavigate={onClose} />
-            {/* Presenter control for the free-preview tag — only while a bag item carries one */}
-            {items.some(it => it.cartNote) && <CartNoteToggle className={headerStyles.cartSizeToggle} />}
 
             <button
               type="button"

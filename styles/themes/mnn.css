@@ -72,6 +72,9 @@
   /* Announcement bar */
   --layout-announcements-bar-background: var(--mnn-sand);
   --layout-announcements-bar-text:       var(--mnn-charcoal);
+  /* Promo topline (the final flows' marketing message) */
+  --layout-promo-bar-background: var(--mnn-dune-yellow);
+  --layout-promo-bar-text:       var(--mnn-charcoal);
 
   /* Ribbon */
   --ribbon-background: var(--mnn-white);

@@ -71,6 +71,9 @@
   /* Announcement bar */
   --layout-announcements-bar-background: var(--tgr-neutral);
   --layout-announcements-bar-text:       var(--tgr-raisin);
+  /* Promo topline (the final flows' marketing message) */
+  --layout-promo-bar-background: var(--tgr-baby-blue);
+  --layout-promo-bar-text:       var(--tgr-raisin);
 
   /* Ribbon */
   --ribbon-background: var(--tgr-baby-blue);

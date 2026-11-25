@@ -20,6 +20,7 @@
   --oal-option-grey: #cccccc;
   --oal-stone-grey:  #cccccc;
   --oal-graphite:    #707070;
+  --oal-plum:        #4f2a3c;
 }
 
 /* ── Semantic tokens ──────────────────────────────────────────────────────── */
@@ -69,6 +70,9 @@
   /* Announcement bar */
   --layout-announcements-bar-background: var(--oal-black);
   --layout-announcements-bar-text:       var(--oal-white);
+  /* Promo topline (the final flows' marketing message) */
+  --layout-promo-bar-background: var(--oal-plum);
+  --layout-promo-bar-text:       var(--oal-white);
 
   /* Ribbon */
   --ribbon-background: var(--oal-black);

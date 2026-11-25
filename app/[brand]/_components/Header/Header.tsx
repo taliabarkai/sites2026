@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useSearchParams } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import { DEFAULT_NAV_LINKS, DEFAULT_TOPLINE, type NavLink } from '../../_config/siteContent'
 import { Button } from '../Button'
@@ -22,9 +22,10 @@ import { PersonalizeToggle } from './PersonalizeToggle'
 import { NestedItemToggle } from './NestedItemToggle'
 import { MaterialDisplayToggle } from './MaterialDisplayToggle'
 import { StepsLayoutToggle } from './StepsLayoutToggle'
+import { ToplineToggle } from './ToplineToggle'
 import { flowProductFor, livePreviewProductFor, renderedTemplateFor } from '../../product/_templates'
 import { isFinalFlow, personalizationFlowOf } from '../../_config/personalizationFlows'
-import { isNestedDrawerProduct, isFreePreviewProduct } from '../../_config/demoParams'
+import { isNestedDrawerProduct, isFreePreviewProduct, readToplineShown, TOPLINE_PROMO } from '../../_config/demoParams'
 import { CartNoteToggle } from './CartNoteToggle'
 import { UspStripToggle } from './UspStripToggle'
 import { FlowControls } from '../FloatingCart/FlowControls'
@@ -98,6 +99,7 @@ export function Header({
   showStateToggle = true,
 }: HeaderProps) {
   const pathname = usePathname()
+  const searchParams = useSearchParams()
   const brandSegment = resolveBrand(brand ?? getBrandFromPathname(pathname))
   const logoHref = getBrandHomePath(brandSegment)
 
@@ -163,6 +165,9 @@ export function Header({
   // The final flows (V1–V3): not sticky at any width, on any theme — on mobile
   // the sticky gallery or the preview dock takes the top
   const scrollsAway = isFinalFlow(flowPage?.flow)
+  // …and their promo bar under the header: the promo message in the theme's
+  // promo colors, shown or hidden (the header's Topline toggle)
+  const promoBarShown = scrollsAway && readToplineShown(searchParams)
   const wrapperClass = `${revealOnScrollUp
     ? `${styles.wrapperReveal} ${headerHidden ? styles.wrapperHidden : ''}`
     : sticky ? styles.wrapper : styles.wrapperStatic} ${scrollsAwayOnMobile ? styles.wrapperScrollsOnMobile : ''} ${scrollsAway ? styles.wrapperScrolls : ''}`
@@ -206,6 +211,7 @@ export function Header({
       {pdpTemplate && <MaterialDisplayToggle className={styles.cartSizeToggle} />}
       {/* The final flows on LAL: Music Memories' options in tabs or one form */}
       {brandSegment === 'lal' && isFinalFlow(flowPage?.flow) && <StepsLayoutToggle className={styles.cartSizeToggle} />}
+      {isFinalFlow(flowPage?.flow) && <ToplineToggle className={styles.cartSizeToggle} />}
       {isFreePreviewPdp && <UspStripToggle className={styles.cartSizeToggle} />}
       {showCartNoteToggle && <CartNoteToggle className={styles.cartSizeToggle} />}
     </>
@@ -299,6 +305,8 @@ export function Header({
             </div>
           </div>
         </div>
+        {/* The final flows: the promo bar under the header bar, in the theme's promo colors */}
+        {promoBarShown && <Topline promoCenter={TOPLINE_PROMO} variant="promo" />}
       </div>
 
       {/* Always in the DOM: the CSS transform drives show/hide so the panel

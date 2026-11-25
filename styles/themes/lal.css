@@ -70,6 +70,9 @@
   /* Announcement bar */
   --layout-announcements-bar-background: var(--lal-lime);
   --layout-announcements-bar-text:       var(--lal-black);
+  /* Promo topline (the final flows' marketing message) */
+  --layout-promo-bar-background: var(--lal-black);
+  --layout-promo-bar-text:       var(--lal-white);
 
   /* Ribbon */
   --ribbon-background: var(--lal-black);

@@ -97,3 +97,22 @@
     justify-self: end;
   }
 }
+
+/* Promo variant (the final flows): one message, centred on one row at every
+   width, in the theme's promo colors */
+.bar.promoBar {
+  background: var(--layout-promo-bar-background);
+  color:      var(--layout-promo-bar-text);
+}
+
+.promoInner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  max-width: var(--layout-max-width);
+  margin: 0 auto;
+  padding: var(--spacing-xxs) var(--spacing-sm);
+  min-height: 44px;
+  text-align: center;
+  white-space: nowrap;
+}

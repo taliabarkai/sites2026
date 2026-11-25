@@ -322,6 +322,17 @@ export function readStepsLayout(params: ReadableParams): StepsLayout {
   return STEPS_LAYOUTS.find((l) => l.value === raw)?.value ?? 'tabs'
 }
 
+/**
+ * The final flows: the promo topline — the marketing bar under the header —
+ * shown, or hidden (`?topline=hide`). Shown by default.
+ */
+export const TOPLINE_PARAM = 'topline'
+export const TOPLINE_PROMO = '20% Off Everything with code WINTER20'
+
+export function readToplineShown(params: ReadableParams): boolean {
+  return params.get(TOPLINE_PARAM) !== 'hide'
+}
+
 export const PERSONALIZE_PARAM = 'personalize'
 
 export const PERSONALIZE_PLACEMENTS = [

@@ -73,6 +73,9 @@
   /* Announcement bar */
   --layout-announcements-bar-background: var(--ib-navy);
   --layout-announcements-bar-text:       var(--ib-white);
+  /* Promo topline (the final flows' marketing message) */
+  --layout-promo-bar-background: var(--ib-olive);
+  --layout-promo-bar-text:       var(--ib-white);
 
   /* Ribbon */
   --ribbon-background: var(--ib-olive);
