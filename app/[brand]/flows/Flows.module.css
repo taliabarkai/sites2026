@@ -24,6 +24,63 @@
   margin-bottom: var(--spacing-xl);
 }
 
+/* Final flows: the title and its description on the left, the toggles on
+   the right (stacked on a phone) */
+.headerSplit {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-xl);
+}
+
+.headerMain {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+@media (min-width: 1024px) {
+  /* Title, description and toggles side by side from the left, 48px apart */
+  .headerSplit {
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    gap: calc(var(--spacing-md) * 2);
+  }
+
+  /* The description beside the title, 48px between them */
+  .headerMain {
+    flex-direction: row;
+    align-items: center;
+    gap: calc(var(--spacing-md) * 2);
+  }
+
+  .headerSplit .toggleList {
+    max-width: 48rem;
+  }
+}
+
+.toggleList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xxxs);
+  color: var(--colors-text-secondary);
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+  font-weight:    var(--typography-rules-text1-font-weight, normal);
+}
+
+.toggleList strong {
+  color: var(--colors-text);
+  font-family: var(--typography-rules-text2-font-family);
+  font-weight: var(--typography-rules-text2-font-weight, 600);
+}
+
 .title {
   margin: 0;
   font-family:    var(--typography-rules-headline2-font-family);

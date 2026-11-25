@@ -1,5 +1,4 @@
 import type { Metadata } from 'next'
-import Link from 'next/link'
 import { BRANDS, getBrandMeta, resolveBrand, type BrandKey } from '../_config/brands'
 import { FINAL_FLOWS, PERSONALIZATION_FLOWS, flowPath, type FinalFlow } from '../_config/personalizationFlows'
 import { getBrandProducts } from '../../../data/products/getBrandProducts'
@@ -18,13 +17,13 @@ const productName = (brand: BrandKey, id: number | undefined) =>
 
 const FLOW_COPY: Record<FinalFlow, { name: string; intro: string }> = {
   v1: {
-    name: 'Sticky gallery',
+    name: 'Sticky gallery (current layout)',
     intro:
       'Simple Personalization’s layout. The gallery comes first on mobile, with the product name and details under it, ' +
       'and it sticks under the header while the shopper fills in the form, so the preview updates in view.',
   },
   v2: {
-    name: 'Product info above the gallery',
+    name: 'Sticky gallery with new layout – product info above the gallery',
     intro:
       'V1 with the breadcrumbs, product name, price and reviews above the gallery on mobile (the live preview’s V2). ' +
       'The gallery still sticks while the shopper fills in the form.',
@@ -42,27 +41,24 @@ const COMPLEX = (Object.entries(FINAL_FLOW_COMPLEX_TEMPLATES) as [BrandKey, stri
   .map(([brand, templateId]) => ({ brand, id: templateProductId(templateId) }))
   .filter((x): x is { brand: BrandKey; id: number } => x.id !== undefined)
 
-export default async function FinalFlowsPage({ params }: { params: Promise<{ brand: string }> }) {
-  const { brand } = await params
-  const current = resolveBrand(brand)
+export default async function FinalFlowsPage() {
   const label = (b: BrandKey) => BRANDS.find((x) => x.key === b)?.shortLabel ?? b.toUpperCase()
 
   return (
     <main className={styles.page}>
       <HideDevTools />
-      <header className={styles.header}>
-        <h1 className={styles.title}>Final flows</h1>
-        <p className={styles.intro}>
-          The three final personalization flows, on every theme. Each one takes simple and complex products alike: however
-          many options a product has, the flow stays the same. Every frame is live at phone size, so you can scroll and tap
-          inside it, or open the full page.
-        </p>
-        <nav aria-label="Sections" className={styles.jump}>
-          {FINAL_FLOWS.map((f) => (
-            <a key={f} href={`#${f}`}>{PERSONALIZATION_FLOWS[f].label} · {FLOW_COPY[f].name}</a>
-          ))}
-          <Link href={`/${current}/flows`}>All flows and prototypes →</Link>
-        </nav>
+      {/* Title and description on the left; what each flow's toggles switch on the right */}
+      <header className={styles.headerSplit}>
+        <div className={styles.headerMain}>
+          <h1 className={styles.title}>Final flows</h1>
+          <p className={styles.intro}>Every flow has toggles at the top of its page.</p>
+        </div>
+        <ul className={styles.toggleList} aria-label="Toggles on each flow">
+          <li><strong>Topline</strong> – show or hide the promo bar under the header</li>
+          <li><strong>Nested item</strong> – show or hide the second-item offer above Add to Bag (jewelry themes)</li>
+          <li><strong>Material</strong> – how the materials display: a carousel of tiles, or image-only swatches (jewelry themes)</li>
+          <li><strong>Layout</strong> – the personalization in two tabs, to keep it short, or in one single form (LAL)</li>
+        </ul>
       </header>
 
       {FINAL_FLOWS.map((f) => (
@@ -70,7 +66,6 @@ export default async function FinalFlowsPage({ params }: { params: Promise<{ bra
           <div className={styles.sectionHead}>
             <h2 id={`${f}-title`} className={styles.sectionTitle}>{PERSONALIZATION_FLOWS[f].label} · {FLOW_COPY[f].name}</h2>
             <p className={styles.sectionIntro}>{FLOW_COPY[f].intro}</p>
-            <p className={styles.path}>/[brand]/product/{PERSONALIZATION_FLOWS[f].segment}</p>
           </div>
           <ul className={styles.row}>
             {PERSONALIZATION_FLOWS[f].brands.map((b) => (
