@@ -20,6 +20,7 @@
   --mnn-dune-yellow: #E6C379;
   --mnn-warning:    #ef7d60;
   --mnn-forest:     #09391e;
+  --mnn-mint:       #dde9e1;
   --mnn-option-grey: #cccccc;
   --mnn-stone-grey:  #cccccc;
   --mnn-graphite:    #707070;
@@ -173,6 +174,9 @@
 
   /* Ribbon variants */
   --ribbon-border-radius:          var(--radius-full);
+  /* The PDP's "Save 15%" badge: a light theme color, dark text */
+  --price-badge-background:        var(--mnn-mint);
+  --price-badge-text:              var(--mnn-black);
   --ribbon-bundle-background:      var(--mnn-forest);
   --ribbon-bundle-text:            var(--mnn-white);
   --ribbon-oos-background:         var(--mnn-mid-grey);

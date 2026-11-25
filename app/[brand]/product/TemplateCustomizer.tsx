@@ -94,6 +94,8 @@ export interface TemplateCustomizerProps {
    * form, as Continue customization does.
    */
   stickyAddToBag?: boolean
+  /** Demo (`?name=Jessica` on the final flows): typed into the first text field on load. */
+  prefillText?: string
   /** True while the "Added to your bag" state stands in for the form. */
   onAddedChange?: (added: boolean) => void
   /** "Personalize Another": the page starts the customizer over from scratch. */
@@ -161,7 +163,7 @@ function FieldTooltip({ text, Icon }: { text: string; Icon: IconCmp }) {
 const AUTOFILL_NAMES = ['Olivia', 'Noah', 'Emma', 'Sophia', 'Liam', 'Ava', 'Mia', 'Lucas', 'Grace', 'Leo', 'Isla', 'Ruby', 'Theo', 'Maya', 'Ella', 'Zoe', 'Jack', 'Lily']
 
 export function TemplateCustomizer({
-  brand, template, product, icons, addItem, openCart, onLivePreviewChange, onLivePreviewLoadingChange, onPersonalizedChange, belowCta, placement, headerSlot, onSaved, onAddedChange, onPersonalizeAnother, nestedOffer, autofill = false, stickyAddToBag = false, materialImageOnly, fillEmptyFromSample = false, regularPrice = false, previewOnFirstPick = false,
+  brand, template, product, icons, addItem, openCart, onLivePreviewChange, onLivePreviewLoadingChange, onPersonalizedChange, belowCta, placement, headerSlot, onSaved, onAddedChange, onPersonalizeAnother, nestedOffer, autofill = false, stickyAddToBag = false, prefillText, materialImageOnly, fillEmptyFromSample = false, regularPrice = false, previewOnFirstPick = false,
 }: TemplateCustomizerProps) {
   const { AiMagicIcon, ArrowIcon, CheckmarkIcon, ChevronIcon, StarIcon, XIcon, TooltipIcon } = icons
   const isMobile = useIsMobile()
@@ -232,6 +234,16 @@ export function TemplateCustomizer({
 
   // ── Demo autofill: every text field on show, filled in one click ──────────
   const autofillRun = useRef(0)
+  // Demo: a name already typed on load (the switch comparison page's frames)
+  const prefilled = useRef(false)
+  useEffect(() => {
+    if (!prefillText || prefilled.current) return
+    const f = template.fields.find((x) => x.type === 'text' && !x.derivedFrom && isVisible(x, state))
+    if (!f) return
+    prefilled.current = true
+    options.setText(groupId(f.fieldId, f.repeat ? 1 : undefined), prefillText)
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- once, on load
+  }, [prefillText])
   const firstTextFieldId = autofill
     ? template.fields.find((f) => f.type === 'text' && !f.derivedFrom && isVisible(f, state))?.fieldId
     : undefined

@@ -30,13 +30,19 @@ export interface ProductImageCarouselProps {
   progressPlacement?: 'below' | 'floating'
   /** On-model shots among `images` — shown as they are, not blended onto the tint. */
   modelImages?: string[]
+  /** `bar` (default): the progress line. `dots`: one dot per image, over the image, bottom centre. */
+  pagination?: 'bar' | 'dots'
+  /** With dots: something after them, past a divider (V2's "▶ Video") */
+  paginationExtra?: ReactNode
+  /** The slide in view, as the shopper swipes — for a pagination drawn outside (V2's B) */
+  onActiveIndexChange?: (index: number) => void
 }
 
 /**
  * Horizontally scrollable image carousel with snap slides and a progress bar.
  * Shared between the PDP mobile gallery and the QuickAdd panel's ≤4-image variant.
  */
-export function ProductImageCarousel({ images, livePreview, livePreviewRibbon = 'Live Preview', livePreviewRibbonTone = 'brand', livePreviewRibbons, ribbonIcon, saleRibbons, livePreviewOverlay, className, peek = false, showProgress = true, progressPlacement = 'below', modelImages = [] }: ProductImageCarouselProps) {
+export function ProductImageCarousel({ images, livePreview, livePreviewRibbon = 'Live Preview', livePreviewRibbonTone = 'brand', livePreviewRibbons, ribbonIcon, saleRibbons, livePreviewOverlay, className, peek = false, showProgress = true, progressPlacement = 'below', modelImages = [], pagination = 'bar', paginationExtra, onActiveIndexChange }: ProductImageCarouselProps) {
   const [activeIdx, setActiveIdx] = useState(0)
   const trackRef = useRef<HTMLDivElement>(null)
   const allImages = livePreview ? [livePreview, ...images] : images
@@ -44,8 +50,10 @@ export function ProductImageCarousel({ images, livePreview, livePreviewRibbon = 
   const onScroll = useCallback(() => {
     const el = trackRef.current
     if (!el) return
-    setActiveIdx(Math.round(el.scrollLeft / el.clientWidth))
-  }, [])
+    const i = Math.round(el.scrollLeft / el.clientWidth)
+    setActiveIdx(i)
+    onActiveIndexChange?.(i)
+  }, [onActiveIndexChange])
 
   const rootClass = [styles.carousel, peek ? styles.peek : '', className]
     .filter(Boolean)
@@ -79,7 +87,20 @@ export function ProductImageCarousel({ images, livePreview, livePreviewRibbon = 
           </div>
         ))}
       </div>
-      {showProgress && allImages.length > 1 && (
+      {showProgress && pagination === 'dots' && allImages.length > 1 && (
+        <div className={styles.dots}>
+          <span className={styles.dotList} aria-hidden="true">
+            {allImages.map((_, i) => <span key={i} className={`${styles.dot} ${i === activeIdx ? styles.dotActive : ''}`} />)}
+          </span>
+          {paginationExtra && (
+            <>
+              <span className={styles.dotsDivider} aria-hidden="true" />
+              {paginationExtra}
+            </>
+          )}
+        </div>
+      )}
+      {showProgress && pagination === 'bar' && allImages.length > 1 && (
         <div className={`${styles.progressTrack} ${progressPlacement === 'floating' ? styles.progressFloating : ''}`} aria-hidden="true">
           <div
             className={styles.progressBar}

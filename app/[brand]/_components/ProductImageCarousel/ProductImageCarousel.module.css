@@ -107,7 +107,8 @@
   position: absolute;
   left: var(--spacing-sm);
   right: var(--spacing-sm);
-  bottom: var(--spacing-md);
+  /* A parent can lift it clear of its own controls (V2's preview switch) */
+  bottom: var(--carousel-overlay-bottom, var(--spacing-md));
   z-index: var(--z-raised);
   display: flex;
   flex-wrap: wrap;
@@ -173,4 +174,50 @@
 .ribbonSale {
   background: var(--colors-price-sale);
   color: var(--colors-text-inverse);
+}
+
+/* Dots pagination: one per image, over the image, bottom centre — a parent
+   can lift them clear of its own controls (V2's preview switch) */
+.dots {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: var(--carousel-dots-bottom, var(--spacing-sm));
+  z-index: var(--z-raised);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: var(--spacing-xs);
+  pointer-events: none;
+  color: var(--colors-text);
+}
+
+.dotList {
+  display: flex;
+  gap: var(--spacing-xxs);
+}
+
+/* The "|" between the dots and what follows them (V2's Video) */
+.dotsDivider {
+  width: var(--border-width);
+  height: var(--spacing-sm);
+  background: currentColor;
+}
+
+/* What follows the dots takes taps; the dots themselves let them through */
+.dots > :not(.dotList):not(.dotsDivider) {
+  pointer-events: auto;
+}
+
+.dot {
+  width: var(--spacing-xxs);
+  height: var(--spacing-xxs);
+  border-radius: var(--radius-full);
+  /* The text color, faint — the active dot is the same color at full strength */
+  background: color-mix(in srgb, var(--colors-text) 25%, transparent);
+  transition: background-color var(--transition-fast);
+}
+
+.dotActive {
+  background: var(--colors-text);
 }

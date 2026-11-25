@@ -1,33 +1,37 @@
 'use client'
 
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import { TOPLINE_PARAM, readToplineShown } from '../../_config/demoParams'
+import { TOPLINE_PARAM, TOPLINE_MODES, readToplineMode } from '../../_config/demoParams'
 import { Dropdown } from './CartSizeToggle'
 import styles from './Header.module.css'
 
 /**
  * Demo control for the final flows: the promo topline — the marketing bar
- * under the header — shown, or hidden (`?topline=hide`).
+ * under the header — scrolling away, sticky at the top of the screen, or
+ * hidden (`?topline=sticky`, `?topline=hide`).
  */
 export function ToplineToggle({ className }: { className?: string }) {
   const router       = useRouter()
   const pathname     = usePathname()
   const searchParams = useSearchParams()
-  const shown        = readToplineShown(searchParams)
+  const mode         = readToplineMode(searchParams)
 
   /** Rewrites only this key; anything else on the URL survives. */
-  const select = (show: boolean) => {
+  const select = (value: string) => {
     const params = new URLSearchParams(searchParams.toString())
-    params.set(TOPLINE_PARAM, show ? 'show' : 'hide')
+    params.set(TOPLINE_PARAM, value)
     router.replace(`${pathname}?${params.toString()}`, { scroll: false })
   }
 
   return (
-    <Dropdown label={`Topline: ${shown ? 'On' : 'Off'}`} title="Topline" className={className}>
+    <Dropdown label={`Topline: ${mode === 'sticky' ? 'Sticky' : mode === 'hide' ? 'Off' : 'On'}`} title="Topline" className={className}>
       {close => (
         <div className={`${styles.scenarioRow} ${styles.scenarioList}`}>
-          <button type="button" aria-pressed={shown} onClick={() => { select(true); close() }}>Show topline</button>
-          <button type="button" aria-pressed={!shown} onClick={() => { select(false); close() }}>Hide topline</button>
+          {TOPLINE_MODES.map(m => (
+            <button key={m.value} type="button" aria-pressed={mode === m.value} onClick={() => { select(m.value); close() }}>
+              {m.label}
+            </button>
+          ))}
         </div>
       )}
     </Dropdown>

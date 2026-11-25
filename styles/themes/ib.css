@@ -150,6 +150,9 @@
 
   /* Ribbon variants */
   --ribbon-border-radius:          var(--radius-sm);
+  /* The PDP's "Save 15%" badge: a light theme color, dark text */
+  --price-badge-background:        var(--ib-stone);
+  --price-badge-text:              var(--ib-navy);
   --ribbon-bundle-background:      var(--ib-copper);
   --ribbon-bundle-text:            var(--ib-white);
   --ribbon-oos-background:         var(--ib-slate);

@@ -66,6 +66,20 @@ export function Dropdown({ label, title, className, children }: DropdownProps) {
   const [anchor, setAnchor] = useState<{ top: number; right?: number; centre?: number } | null>(null)
   const panelRef   = useRef<HTMLDivElement>(null)
   const triggerRef = useRef<HTMLButtonElement>(null)
+  // Mobile: centred under the trigger, but kept inside the page's side
+  // margins — the first chip sits near the left edge, and a centred panel
+  // would run off the screen there
+  // (Measured as the panel mounts: it renders through a portal, so it isn't
+  // there yet when the trigger's own effects run)
+  const [left, setLeft] = useState<number | null>(null)
+  const centre = anchor?.centre
+  const setPanel = useCallback((panel: HTMLDivElement | null) => {
+    panelRef.current = panel
+    if (!panel || centre === undefined) { setLeft(null); return }
+    const margin = parseFloat(getComputedStyle(panel).getPropertyValue('--layout-page-margin')) || 16
+    const width = panel.offsetWidth
+    setLeft(Math.min(Math.max(centre - width / 2, margin), window.innerWidth - margin - width))
+  }, [centre])
 
   const measure = useCallback(() => {
     const r = triggerRef.current?.getBoundingClientRect()
@@ -121,10 +135,12 @@ export function Dropdown({ label, title, className, children }: DropdownProps) {
       {open && anchor && (
         <PanelPortal>
           <div
-            ref={panelRef}
+            ref={setPanel}
             className={styles.scenarioPanel}
             style={anchor.centre !== undefined
-              ? { top: anchor.top, left: anchor.centre, transform: 'translateX(-50%)' }
+              ? left !== null
+                ? { top: anchor.top, left }
+                : { top: anchor.top, left: anchor.centre, transform: 'translateX(-50%)' }
               : { top: anchor.top, right: anchor.right }}
             role="group"
             aria-label={title}

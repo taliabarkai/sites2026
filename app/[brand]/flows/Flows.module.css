@@ -331,3 +331,24 @@
   .page { --frame-scale: 0.42; }
   .row { gap: var(--spacing-md) var(--spacing-sm); }
 }
+
+/* The V2 switch designs page: real 375px phones, unscaled, at every width */
+.page.pageFullSize {
+  --phone-width: 375px;
+  --phone-height: 812px;
+  --frame-scale: 1;
+}
+
+/* …side by side, scrolling sideways when the window is narrower than the row */
+.rowScroll {
+  flex-wrap: nowrap;
+  /* Labels sit above the phones: aligned on the bottom edge, the phones line
+     up however many lines a caption takes */
+  align-items: flex-end;
+  overflow-x: auto;
+  padding-bottom: var(--spacing-sm);
+}
+
+.rowScroll > * {
+  flex: none;
+}

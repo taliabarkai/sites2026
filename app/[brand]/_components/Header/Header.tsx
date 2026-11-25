@@ -23,9 +23,10 @@ import { NestedItemToggle } from './NestedItemToggle'
 import { MaterialDisplayToggle } from './MaterialDisplayToggle'
 import { StepsLayoutToggle } from './StepsLayoutToggle'
 import { ToplineToggle } from './ToplineToggle'
+import { GallerySwitchToggle } from './GallerySwitchToggle'
 import { flowProductFor, livePreviewProductFor, renderedTemplateFor } from '../../product/_templates'
 import { isFinalFlow, personalizationFlowOf } from '../../_config/personalizationFlows'
-import { isNestedDrawerProduct, isFreePreviewProduct, readToplineShown, TOPLINE_PROMO } from '../../_config/demoParams'
+import { isNestedDrawerProduct, isFreePreviewProduct, readToplineMode, TOPLINE_PROMO } from '../../_config/demoParams'
 import { CartNoteToggle } from './CartNoteToggle'
 import { UspStripToggle } from './UspStripToggle'
 import { FlowControls } from '../FloatingCart/FlowControls'
@@ -167,10 +168,36 @@ export function Header({
   const scrollsAway = isFinalFlow(flowPage?.flow)
   // …and their promo bar under the header: the promo message in the theme's
   // promo colors, shown or hidden (the header's Topline toggle)
-  const promoBarShown = scrollsAway && readToplineShown(searchParams)
+  const toplineMode = scrollsAway ? readToplineMode(searchParams) : 'hide'
+  const promoBarShown = toplineMode !== 'hide'
+  // Sticky: the header sticks parked above the screen so only the promo bar
+  // stays in view; the page's sticky gallery (it lands under the header's
+  // bottom edge) sits just below it. The bar's height is published for the
+  // desktop's sticky column and V3's dock.
+  const promoSticky = toplineMode === 'sticky'
+  const promoRef = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    const header = headerRef.current
+    const promo = promoRef.current
+    const root = document.documentElement
+    if (!promoSticky || !header || !promo) return
+    const sync = () => {
+      header.style.setProperty('--header-promo-offset', `${header.offsetHeight - promo.offsetHeight}px`)
+      root.style.setProperty('--promo-sticky-height', `${promo.offsetHeight}px`)
+    }
+    sync()
+    const observer = new ResizeObserver(sync)
+    observer.observe(header)
+    observer.observe(promo)
+    return () => {
+      observer.disconnect()
+      header.style.removeProperty('--header-promo-offset')
+      root.style.removeProperty('--promo-sticky-height')
+    }
+  }, [promoSticky])
   const wrapperClass = `${revealOnScrollUp
     ? `${styles.wrapperReveal} ${headerHidden ? styles.wrapperHidden : ''}`
-    : sticky ? styles.wrapper : styles.wrapperStatic} ${scrollsAwayOnMobile ? styles.wrapperScrollsOnMobile : ''} ${scrollsAway ? styles.wrapperScrolls : ''}`
+    : sticky ? styles.wrapper : styles.wrapperStatic} ${scrollsAwayOnMobile ? styles.wrapperScrollsOnMobile : ''} ${scrollsAway && !promoSticky ? styles.wrapperScrolls : ''} ${promoSticky ? styles.wrapperPromoSticky : ''}`
 
   /* Demo-only controls, on the two pages a phase actually changes. Rendered in
      both slots and switched by media query: the bar has room for them on
@@ -198,6 +225,8 @@ export function Header({
   const showCartNoteToggle = isCartPage && items.some(it => it.cartNote)
   const demoControls = isCheckout || isCartPage || showTrackOrderToggle || isNestedDrawerDemo || pdpTemplate || showCartNoteToggle || isFreePreviewPdp || flowPage ? (
     <>
+      {/* V2 (mobile), first: how the shopper switches between their personalization and the photos */}
+      {flowPage?.flow === 'v2' && <GallerySwitchToggle className={`${styles.cartSizeToggle} ${styles.mobileOnlyControl}`} />}
       {/* The phases only reach the cart and checkout. Track My Order and the
           nested items Drawer product each get only their own controls. */}
       {(isCheckout || isCartPage) && <FlowControls brand={brandSegment} />}
@@ -306,7 +335,7 @@ export function Header({
           </div>
         </div>
         {/* The final flows: the promo bar under the header bar, in the theme's promo colors */}
-        {promoBarShown && <Topline promoCenter={TOPLINE_PROMO} variant="promo" />}
+        {promoBarShown && <div ref={promoRef}><Topline promoCenter={TOPLINE_PROMO} variant="promo" /></div>}
       </div>
 
       {/* Always in the DOM: the CSS transform drives show/hide so the panel

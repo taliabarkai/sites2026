@@ -14,7 +14,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             tools button (local dev only) — it would float over every frame */}
         <script
           dangerouslySetInnerHTML={{
-            __html: "try{if(window.top!==window.self&&/\\/(final-)?flows\\/?$/.test(window.top.location.pathname)){var s=document.createElement('style');s.textContent='nextjs-portal{display:none!important}';document.head.appendChild(s)}}catch(e){}",
+            __html: "try{if(window.top!==window.self&&/\\/(final-)?flows(\\/switch)?\\/?$/.test(window.top.location.pathname)){var s=document.createElement('style');s.textContent='nextjs-portal{display:none!important}';document.head.appendChild(s)}}catch(e){}",
           }}
         />
       </head>

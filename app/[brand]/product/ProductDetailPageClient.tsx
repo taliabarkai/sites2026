@@ -62,7 +62,7 @@ import { ProductOptions, useProductOptions } from '../_components/ProductOptions
 import type { OptionGroup, SelectedOption } from '../_components/ProductOptions'
 import { OPTION_GROUPS, OPTIONS_SHOWCASE_PRODUCT_ID, optionsShowcaseProduct } from './[id]/_data/optionGroups'
 import { flowPath, type FinalFlow } from '../_config/personalizationFlows'
-import { isNestedDrawerProduct, personalizeFlowFor, readGalleryLayout, readNestedDescriptionState, readPersonalizePlacement, readNestedItemOn, readMaterialDisplay, readNestedDrawerCount, readStepsLayout } from '../_config/demoParams'
+import { isNestedDrawerProduct, personalizeFlowFor, readGalleryLayout, readNestedDescriptionState, readPersonalizePlacement, readNestedItemOn, readMaterialDisplay, readNestedDrawerCount, readStepsLayout, readGallerySwitch, type GallerySwitch } from '../_config/demoParams'
 import type { DiamondSetting, PersonalizeFields, PersonalizeFlow } from '../_config/demoParams'
 
 // LAL products that use the song-based Music Memories customizer
@@ -659,10 +659,139 @@ function ReviewsSection({
 
 // ─── Mobile swipeable gallery ─────────────────────────────────────────────────
 
+/** What V2's preview / photos switch needs: its style, its labels and icons. */
+interface GallerySwitchProps {
+  style: GallerySwitch
+  /** The personalization's own name ("Your Personalization") */
+  previewLabel: string
+  /** On the photos: the product's own badges ("15% off") */
+  photoRibbons?: string[]
+  /** Demo (`?gview=photos`): the view the preview's arrival lands on — the photos, for a still of that state */
+  startOn?: 'preview' | 'photos'
+  PreviewIcon: React.ComponentType<{ size?: number }>
+  /** After the photos' dots: "▶ Video" */
+  PlayIcon: React.ComponentType<{ size?: number }>
+}
+
 /** Mobile PDP image gallery — the shared carousel, hidden on desktop via CSS. */
-function MobileGallery({ images, modelImages, livePreview, ribbons, previewNote, floatingProgress }: { images: string[]; modelImages: string[]; livePreview?: string | null; ribbons?: string[]; previewNote?: React.ReactNode; floatingProgress?: boolean }) {
+function MobileGallery({ images, modelImages, livePreview, ribbons, previewNote, floatingProgress, gallerySwitch }: { images: string[]; modelImages: string[]; livePreview?: string | null; ribbons?: string[]; previewNote?: React.ReactNode; floatingProgress?: boolean; gallerySwitch?: GallerySwitchProps }) {
   const ribbonIcon = useContext(RibbonIconContext)
-  return <ProductImageCarousel images={images} modelImages={modelImages} livePreview={livePreview} livePreviewRibbons={ribbons} ribbonIcon={ribbonIcon} saleRibbons={ribbonIcon?.sale} livePreviewOverlay={previewNote} progressPlacement={floatingProgress ? 'floating' : 'below'} className={styles.mobileGallery} />
+  // V2: the preview never sits in the swipe — the shopper's design can be
+  // handled in place, so a swipe there would fight it. A switch shows either
+  // the preview (one image, no swipe) or the photos (swipe, dots); the
+  // preview's arrival (the first change) brings it to the front.
+  const [view, setView] = useState<'preview' | 'photos'>('preview')
+  const hasPreview = !!livePreview
+  const startOn = gallerySwitch?.startOn ?? 'preview'
+  useEffect(() => { if (hasPreview) setView(startOn) }, [hasPreview, startOn])
+  // B draws the photos' dots itself: the photo in view, from the start of each visit
+  const [photoIdx, setPhotoIdx] = useState(0)
+  useEffect(() => { setPhotoIdx(0) }, [view])
+  if (!gallerySwitch) {
+    return <ProductImageCarousel images={images} modelImages={modelImages} livePreview={livePreview} livePreviewRibbons={ribbons} ribbonIcon={ribbonIcon} saleRibbons={ribbonIcon?.sale} livePreviewOverlay={previewNote} progressPlacement={floatingProgress ? 'floating' : 'below'} className={styles.mobileGallery} />
+  }
+  const { style, previewLabel, photoRibbons, PreviewIcon, PlayIcon } = gallerySwitch
+  const showPreview = hasPreview && view === 'preview'
+  const videoLink = <button type="button" className={styles.galleryVideo}><PlayIcon size={24} />Video</button>
+  return (
+    <div className={styles.mobileGallery}>
+      {showPreview ? (
+        /* The product's own badges ("15% off") top left, as on the photos —
+           no personalization badge: the switch already names it */
+        <ProductImageCarousel key="preview" images={[]} livePreview={livePreview} livePreviewRibbons={photoRibbons ?? []} ribbonIcon={ribbonIcon} saleRibbons={ribbonIcon?.sale} livePreviewOverlay={previewNote} />
+      ) : (
+        <ProductImageCarousel
+          key="photos" images={images} modelImages={modelImages} livePreviewRibbons={photoRibbons} ribbonIcon={ribbonIcon} saleRibbons={ribbonIcon?.sale} pagination="dots"
+          // The product's video, after the dots (mockup: no video to play yet)
+          // B draws the whole row itself (below)
+          showProgress={style !== 'text' && style !== 'stack'}
+          paginationExtra={videoLink}
+          onActiveIndexChange={style === 'text' || style === 'stack' ? setPhotoIdx : undefined}
+        />
+      )}
+      {style === 'text' && (
+        /* B: the pagination row is the switch, framed like a button. Before a
+           preview: the dots and Video. With the preview showing, one framed
+           box holds "Your Personalization" (outlined: in view) and
+           "Photos". On the photos, the frame shrinks to "Your Personalization"
+           alone — a button back to it — and the dots and Video animate in
+           beside it. */
+        <div className={styles.galleryTextRow}>
+          {hasPreview && (
+            <span key="frame" className={`${styles.galleryTextFrame} ${styles.galleryTextEnter}`}>
+              <button type="button" className={styles.galleryTextItem} aria-pressed={showPreview} onClick={() => setView('preview')}>
+                <PreviewIcon size={16} />{previewLabel}
+              </button>
+              {showPreview && (
+                <button type="button" key="photos-word" className={`${styles.galleryTextItem} ${styles.galleryTextEnter}`} aria-pressed={false} onClick={() => setView('photos')}>
+                  Photos
+                </button>
+              )}
+            </span>
+          )}
+          {!showPreview && (
+            <>
+              <span key="photos-dots" className={`${styles.galleryTextDots} ${hasPreview ? styles.galleryTextEnter : ''}`} aria-label={`Photo ${photoIdx + 1} of ${images.length}`}>
+                {images.map((_, i) => <span key={i} className={`${styles.galleryTextDot} ${i === photoIdx ? styles.galleryTextDotActive : ''}`} />)}
+              </span>
+              <span key="video" className={`${styles.galleryTextVideo} ${hasPreview ? styles.galleryTextEnter : ''}`}>
+                <span className={styles.galleryTextDivider} aria-hidden="true" />
+                {videoLink}
+              </span>
+            </>
+          )}
+        </div>
+      )}
+      {style === 'stack' && (
+        /* B2: B's framed switch, always holding both choices (the one in view
+           outlined). On the photos, their dots and Video rise in above it;
+           before a preview there's no switch, just the dots and Video. */
+        <div className={styles.galleryStack}>
+          {!showPreview && (
+            <div key="dots-line" className={`${styles.galleryTextLine} ${hasPreview ? styles.galleryTextEnter : ''}`}>
+              <span className={styles.galleryTextDots} aria-label={`Photo ${photoIdx + 1} of ${images.length}`}>
+                {images.map((_, i) => <span key={i} className={`${styles.galleryTextDot} ${i === photoIdx ? styles.galleryTextDotActive : ''}`} />)}
+              </span>
+              <span className={styles.galleryTextVideo}>
+                <span className={styles.galleryTextDivider} aria-hidden="true" />
+                {videoLink}
+              </span>
+            </div>
+          )}
+          {hasPreview && (
+            <span key="frame" className={`${styles.galleryTextFrame} ${styles.galleryTextEnter}`}>
+              <button type="button" className={styles.galleryTextItem} aria-pressed={showPreview} onClick={() => setView('preview')}>
+                <PreviewIcon size={16} />{previewLabel}
+              </button>
+              <button type="button" className={styles.galleryTextItem} aria-pressed={!showPreview} onClick={() => setView('photos')}>
+                Photos
+              </button>
+            </span>
+          )}
+        </div>
+      )}
+      {hasPreview && style === 'pill' && (
+        /* A: both choices at once, full width in a row under the image (clear
+           of the photos' dots) — it sticks with the gallery */
+        <div className={styles.previewSwitchRow}>
+          <div className={styles.previewSwitchPill} role="group" aria-label="Show">
+            <button type="button" aria-pressed={view === 'preview'} onClick={() => setView('preview')}>
+              <PreviewIcon size={16} />{previewLabel}
+            </button>
+            <button type="button" aria-pressed={view === 'photos'} onClick={() => setView('photos')}>
+              Product Photos
+            </button>
+          </div>
+        </div>
+      )}
+      {hasPreview && style === 'chip' && (
+        /* C: one chip, top right in both views, naming where it goes */
+        <button type="button" className={styles.previewSwitchChip} onClick={() => setView(view === 'preview' ? 'photos' : 'preview')}>
+          {view === 'preview' ? 'Product Photos' : previewLabel}
+        </button>
+      )}
+    </div>
+  )
 }
 
 /**
@@ -771,7 +900,9 @@ function PreviewDock({ src, active, galleryRef, anchorFieldIds, ribbon, RibbonIc
   useEffect(() => {
     const el = ref.current
     if (!shown || !open || !el) return
-    document.documentElement.style.scrollPaddingTop = `${el.offsetHeight}px`
+    // …and under the final flows' sticky promo bar, when there is one
+    const promo = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--promo-sticky-height')) || 0
+    document.documentElement.style.scrollPaddingTop = `${promo + el.offsetHeight}px`
     return () => { document.documentElement.style.scrollPaddingTop = '' }
   }, [shown, open])
   const state = !shown ? '' : open ? styles.previewDockOpen : styles.previewDockTucked
@@ -2286,6 +2417,14 @@ function ProductDetailPageInner({ productId, previewId, withoutTemplate = false,
       document.documentElement.style.scrollPaddingTop = ''
     }
   }, [stickyGallery])
+  // Demo (`?scroll=320` on the final flows): the page starts scrolled down —
+  // once the preview has had a moment to come in (the comparison page's frames)
+  const demoScroll = finalFlow ? Number(searchParams.get('scroll')) || 0 : 0
+  useEffect(() => {
+    if (!demoScroll) return
+    const timer = setTimeout(() => window.scrollTo(0, demoScroll), 1500)
+    return () => clearTimeout(timer)
+  }, [demoScroll])
   // Added to your bag (as Music Memories): the preview stays, its ribbon goes.
   // Personalize Another starts the customizer over — a fresh one, back at the top.
   const [addedToBag, setAddedToBag] = useState(false)
@@ -2442,6 +2581,15 @@ function ProductDetailPageInner({ productId, previewId, withoutTemplate = false,
             ribbons={slotPreview ? previewRibbons : template?.gallery.badges}
             previewNote={previewNote}
             floatingProgress={!!template}
+            // V2: the preview and the photos behind a switch (the header's Switch toggle)
+            gallerySwitch={finalFlow === 'v2' ? {
+              style: readGallerySwitch(searchParams),
+              previewLabel: template?.livePreview.ribbon ?? 'Your Personalization',
+              photoRibbons: template?.gallery.badges,
+              PreviewIcon: icons.AiMagicIcon,
+              PlayIcon: icons.PlayIcon,
+              startOn: searchParams.get('gview') === 'photos' ? 'photos' : 'preview',
+            } : undefined}
           />
         </div>
         {previewDock && (
@@ -2502,6 +2650,8 @@ function ProductDetailPageInner({ productId, previewId, withoutTemplate = false,
               nestedOffer={nestedOn}
               // Final flows: an Autofill link for the text fields (demo)
               autofill={!!finalFlow}
+              // Demo (`?name=`): a name already typed on load
+              prefillText={finalFlow ? searchParams.get('name') ?? undefined : undefined}
               stickyAddToBag={!!finalFlow}
               materialImageOnly={readMaterialDisplay(searchParams, brand) === 'image'}
               onPersonalizeAnother={personalizeAnother}

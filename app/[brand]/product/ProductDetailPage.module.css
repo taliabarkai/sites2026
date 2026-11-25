@@ -18,7 +18,8 @@
   /* The final flows: the header scrolls away, so the sticky form column and
      gallery hold just below the top of the screen instead of under it */
   .page.pageHeaderScrolls {
-    --sticky-top: var(--spacing-md);
+    /* …under the sticky promo bar when there is one */
+    --sticky-top: calc(var(--promo-sticky-height, 0px) + var(--spacing-md));
   }
 
   .pageHeaderScrolls .lalGallery {
@@ -48,7 +49,8 @@
   /* Room under the dock for the first preview field it keeps in view */
   --dock-anchor-gap: var(--spacing-sm);
   position: fixed;
-  top: 0;
+  /* Under the final flows' sticky promo bar, when there is one */
+  top: var(--promo-sticky-height, 0px);
   left: 0;
   right: 0;
   z-index: calc(var(--z-header) + 1);
@@ -675,9 +677,11 @@
 .priceSave {
   align-self: center;
   padding: var(--spacing-xxxs) var(--spacing-xs);
-  border-radius: var(--radius-full);
-  background: var(--colors-price-sale);
-  color: var(--colors-text-inverse);
+  /* Rounded unless the theme squares it (OAL) */
+  border-radius: var(--price-badge-border-radius, var(--radius-full));
+  /* A light theme color with dark text (each theme sets its own) */
+  background: var(--price-badge-background, var(--colors-price-sale));
+  color: var(--price-badge-text, var(--colors-text-inverse));
   font-family:    var(--typography-rules-text4-font-family);
   font-size:      var(--typography-rules-text4-font-size);
   line-height:    var(--typography-rules-text4-line-height);
@@ -2156,4 +2160,246 @@
 .ribbonSale {
   background: var(--colors-price-sale);
   color: var(--colors-text-inverse);
+}
+
+/* ── V2 (mobile): the preview / photos switch ─────────────────────────────── */
+
+/* A — the pill in its own row under the image, on the page background */
+.previewSwitchRow {
+  display: flex;
+  justify-content: center;
+  padding: var(--spacing-xs) var(--layout-page-margin);
+  background: var(--colors-background);
+}
+
+.previewSwitchPill,
+.previewSwitchChip {
+  position: absolute;
+  z-index: var(--z-raised);
+  font-family:    var(--typography-rules-text3-font-family);
+  font-size:      var(--typography-rules-text3-font-size);
+  line-height:    var(--typography-rules-text3-line-height);
+  letter-spacing: var(--typography-rules-text3-letter-spacing, normal);
+  font-weight:    var(--typography-rules-text3-font-weight, normal);
+  white-space: nowrap;
+}
+
+.previewSwitchPill {
+  position: static;
+  /* Full width inside the page margins, the two choices in equal halves */
+  flex: 1;
+  display: flex;
+  gap: var(--spacing-xxxs);
+  padding: var(--spacing-xxxs);
+  background: var(--colors-background);
+  border: var(--border-width) solid var(--border-color);
+  /* Rounded unless the theme squares it (OAL) */
+  border-radius: var(--preview-switch-border-radius, var(--radius-full));
+}
+
+.previewSwitchPill button,
+.previewSwitchChip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xxs);
+  padding: var(--spacing-xxs) var(--spacing-sm);
+  border-radius: var(--preview-switch-border-radius, var(--radius-full));
+  color: var(--colors-text);
+  font: inherit;
+  cursor: pointer;
+  transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+
+.previewSwitchPill button {
+  /* Equal halves, whatever each label's length (a little less side padding,
+     so "Your Personalization" fits its half on a 375px phone) */
+  flex: 1 1 0;
+  padding-inline: var(--spacing-xs);
+  justify-content: center;
+  border: none;
+  background: transparent;
+}
+
+.previewSwitchPill button[aria-pressed="true"] {
+  background: var(--colors-text);
+  color: var(--colors-text-inverse);
+}
+
+/* C — one chip, top right in both views */
+.previewSwitchChip {
+  top: var(--spacing-sm);
+  right: var(--spacing-sm);
+  background: var(--colors-background);
+  border: var(--border-width) solid var(--border-color);
+  font-family:    var(--typography-rules-text3-font-family);
+  font-size:      var(--typography-rules-text3-font-size);
+  line-height:    var(--typography-rules-text3-line-height);
+}
+
+/* V2's photos: "▶ Video" after the dots */
+.galleryVideo {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xxxs);
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--colors-text);
+  cursor: pointer;
+  font-family:    var(--typography-rules-text4-font-family);
+  font-size:      var(--typography-rules-text4-font-size);
+  line-height:    var(--typography-rules-text4-line-height);
+  letter-spacing: var(--typography-rules-text4-letter-spacing, normal);
+  font-weight:    var(--typography-rules-text4-font-weight, normal);
+}
+
+/* Just the play triangle: the brand icon's circle behind it is hidden here,
+   and the triangle takes the text color. The icon's empty sides are pulled in
+   so the triangle sits 4px from "Video" and the row keeps the text's height */
+.galleryVideo svg {
+  flex: none;
+  margin-inline: calc(-1 * var(--spacing-xxs));
+  margin-block: calc(-1 * var(--spacing-xxxs));
+}
+
+.galleryVideo svg path:first-of-type {
+  display: none;
+}
+
+.galleryVideo svg path:last-of-type {
+  fill: currentColor;
+}
+
+/* ── V2's B: the pagination row is the switch ─────────────────────────────── */
+.galleryTextRow {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: var(--spacing-sm);
+  z-index: var(--z-raised);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: 0 var(--layout-page-margin);
+  color: var(--colors-text);
+  pointer-events: none;
+}
+
+.galleryTextRow button {
+  pointer-events: auto;
+}
+
+/* The frame: white, a grey hairline, the theme's switch corners. It holds
+   both choices on the preview and only "Your Personalization" on the photos;
+   where the browser can, its width eases between the two */
+.galleryTextFrame {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xxxs);
+  padding: var(--spacing-xxxs);
+  background: var(--colors-background);
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--preview-switch-border-radius, var(--radius-full));
+  interpolate-size: allow-keywords;
+  transition: width var(--transition-base);
+  pointer-events: auto;
+}
+
+.galleryTextItem {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xxxs);
+  padding: var(--spacing-xxs) var(--spacing-sm);
+  /* Room for the selected outline, so nothing shifts when it moves */
+  border: var(--border-width) solid transparent;
+  border-radius: var(--preview-switch-border-radius, var(--radius-full));
+  background: none;
+  color: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+  font-family:    var(--typography-rules-text3-font-family);
+  font-size:      var(--typography-rules-text3-font-size);
+  line-height:    var(--typography-rules-text3-line-height);
+  letter-spacing: var(--typography-rules-text3-letter-spacing, normal);
+  font-weight:    var(--typography-rules-text3-font-weight, normal);
+}
+
+/* The one in view: outlined in the text color on every side, as a picked
+   material tile below it is */
+.galleryTextItem[aria-pressed="true"] {
+  cursor: default;
+  border-color: var(--colors-text);
+}
+
+.galleryTextDivider {
+  width: var(--border-width);
+  height: var(--spacing-sm);
+  background: currentColor;
+}
+
+.galleryTextDots {
+  display: flex;
+  gap: var(--spacing-xxs);
+}
+
+.galleryTextDot {
+  width: var(--spacing-xxs);
+  height: var(--spacing-xxs);
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--colors-text) 25%, transparent);
+  transition: background-color var(--transition-fast);
+}
+
+.galleryTextDotActive {
+  background: var(--colors-text);
+}
+
+.galleryTextVideo {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+/* Each swap (the word Photos ↔ the dots, Video, the personalization's name
+   arriving) fades and rises into place */
+.galleryTextEnter {
+  animation: galleryTextIn var(--transition-base) both;
+}
+
+@keyframes galleryTextIn {
+  from { opacity: 0; transform: translateY(var(--spacing-xxxs)) scale(0.96); }
+  to   { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .galleryTextEnter {
+    animation: none;
+  }
+}
+
+/* ── V2's B2: B's switch, always both choices; the dots rise in above it ─── */
+.galleryStack {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: var(--spacing-sm);
+  z-index: var(--z-raised);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: 0 var(--layout-page-margin);
+  color: var(--colors-text);
+  pointer-events: none;
+}
+
+.galleryStack button {
+  pointer-events: auto;
+}
+
+.galleryTextLine {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
 }

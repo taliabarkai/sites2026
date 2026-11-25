@@ -842,3 +842,20 @@
   }
 }
 
+
+/* A demo control that only changes the mobile layout (V2's preview / photos
+   switch): on desktop the gallery shows every photo beside the form */
+@media (min-width: 1024px) {
+  .mobileOnlyControl {
+    display: none;
+  }
+}
+
+/* The final flows' sticky promo bar: the header sticks parked above the
+   screen by everything but the bar (measured in Header.tsx), so only the bar
+   stays in view */
+.wrapperPromoSticky.wrapperPromoSticky {
+  position: sticky;
+  top: calc(var(--header-promo-offset, 0px) * -1);
+  transform: none;
+}

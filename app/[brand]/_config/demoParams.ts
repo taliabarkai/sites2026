@@ -324,13 +324,47 @@ export function readStepsLayout(params: ReadableParams): StepsLayout {
 
 /**
  * The final flows: the promo topline — the marketing bar under the header —
- * shown, or hidden (`?topline=hide`). Shown by default.
+ * shown, sticky at the top of the screen (`?topline=sticky`), or hidden
+ * (`?topline=hide`). Shown by default.
  */
 export const TOPLINE_PARAM = 'topline'
 export const TOPLINE_PROMO = '20% Off Everything with code WINTER20'
 
-export function readToplineShown(params: ReadableParams): boolean {
-  return params.get(TOPLINE_PARAM) !== 'hide'
+/** `show`: scrolls away with the header; `sticky`: stays at the top of the
+ *  screen (the sticky gallery below it); `hide`: not there. */
+export const TOPLINE_MODES = [
+  { value: 'show',   label: 'On – scrolls away' },
+  { value: 'sticky', label: 'Sticky – stays at the top' },
+  { value: 'hide',   label: 'Off' },
+] as const
+export type ToplineMode = (typeof TOPLINE_MODES)[number]['value']
+
+export function readToplineMode(params: ReadableParams): ToplineMode {
+  const raw = params.get(TOPLINE_PARAM)
+  return TOPLINE_MODES.find((m) => m.value === raw)?.value ?? 'show'
+}
+
+/**
+ * The final flow V2 on mobile: how the shopper switches between their
+ * personalization (the preview, which doesn't swipe) and the product's photos
+ * (`?switch=chip`). `pill` (A): a two-way pill under the image; `text` (B):
+ * the pagination row itself — "Your Personalization | Photos", the word
+ * Photos opening into the dots; `chip` (C): one chip top right that swaps
+ * between them; `stack` (B2): B's switch always holding both choices, the
+ * photos' dots appearing above it. Pill by default.
+ */
+export const GALLERY_SWITCH_PARAM = 'switch'
+export const GALLERY_SWITCHES = [
+  { value: 'pill', label: 'A – Full-width switch under the image' },
+  { value: 'text', label: 'B – Text in the pagination row' },
+  { value: 'stack', label: 'B2 – Switch always both, dots above it' },
+  { value: 'chip', label: 'C – Chip top right: swaps the two' },
+] as const
+export type GallerySwitch = (typeof GALLERY_SWITCHES)[number]['value']
+
+export function readGallerySwitch(params: ReadableParams): GallerySwitch {
+  const raw = params.get(GALLERY_SWITCH_PARAM)
+  return GALLERY_SWITCHES.find((s) => s.value === raw)?.value ?? 'pill'
 }
 
 export const PERSONALIZE_PARAM = 'personalize'

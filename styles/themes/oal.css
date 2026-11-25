@@ -148,6 +148,12 @@
 
   /* Ribbon variants */
   --ribbon-border-radius:          var(--radius-sm);
+  /* The PDP's "Save 15%" badge: a light theme color, dark text */
+  --price-badge-background:        var(--oal-light-grey);
+  --price-badge-text:              var(--oal-black);
+  /* OAL is sharp: the Save badge and V2's preview / photos switch too */
+  --price-badge-border-radius:     var(--radius-sm);
+  --preview-switch-border-radius:  var(--radius-sm);
   --ribbon-bundle-background:      var(--oal-black);
   --ribbon-bundle-text:            var(--oal-white);
   --ribbon-oos-background:         var(--oal-dark-grey);
