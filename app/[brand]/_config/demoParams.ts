@@ -352,7 +352,9 @@ export function readToplineMode(params: ReadableParams): ToplineMode {
  * Photos opening into the dots; `stack` (B2): B's switch always holding both
  * choices, on the image's bottom edge, the dots above it; `link` (D): the pagination row folds into
  * one "View Photos" link on the preview, and opens back into the dots with a
- * wand first, to go back. Pill by default.
+ * wand first, to go back; `thumbs` (E): no swipe — the preview (the sample
+ * name until the shopper types) as the main image, thumbnails under it to
+ * tap between it and the photos. Pill by default.
  */
 export const GALLERY_SWITCH_PARAM = 'switch'
 export const GALLERY_SWITCHES = [
@@ -360,6 +362,7 @@ export const GALLERY_SWITCHES = [
   { value: 'text', label: 'B – Text in the pagination row' },
   { value: 'stack', label: 'B2 – Switch always both, dots above it' },
   { value: 'link', label: 'D – View Photos link; wand back' },
+  { value: 'thumbs', label: 'E – Preview first, thumbnails to switch' },
 ] as const
 export type GallerySwitch = (typeof GALLERY_SWITCHES)[number]['value']
 

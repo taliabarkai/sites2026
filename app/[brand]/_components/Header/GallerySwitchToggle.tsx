@@ -24,7 +24,7 @@ export function GallerySwitchToggle({ className }: { className?: string }) {
   }
 
   return (
-    <Dropdown label={`Switch: ${current === 'text' ? 'B – Text' : current === 'stack' ? 'B2 – Stacked' : current === 'link' ? 'D – Link' : 'A – Pill'}`} title="Preview / photos switch" className={className}>
+    <Dropdown label={`Switch: ${current === 'text' ? 'B – Text' : current === 'stack' ? 'B2 – Stacked' : current === 'link' ? 'D – Link' : current === 'thumbs' ? 'E – Thumbnails' : 'A – Pill'}`} title="Preview / photos switch" className={className}>
       {close => (
         <div className={`${styles.scenarioRow} ${styles.scenarioList}`}>
           {GALLERY_SWITCHES.map(s => (

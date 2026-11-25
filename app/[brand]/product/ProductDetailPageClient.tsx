@@ -668,6 +668,12 @@ interface GallerySwitchProps {
   photoRibbons?: string[]
   /** Demo (`?gview=photos`): the view the preview's arrival lands on — the photos, for a still of that state */
   startOn?: 'preview' | 'photos'
+  /** E: the preview from page load — the sample name ("Carrie") until the shopper types */
+  samplePreview?: string | null
+  /** E: whether the preview shows the shopper's own text yet (it comes to the front when it does) */
+  personalized?: boolean
+  /** E: photos that only fill out the count (repeats) — left out of the thumbnails */
+  repeatImages?: string[]
   PreviewIcon: React.ComponentType<{ size?: number }>
   /** After the photos' dots: "▶ Video" */
   PlayIcon: React.ComponentType<{ size?: number }>
@@ -687,6 +693,45 @@ function MobileGallery({ images, modelImages, livePreview, ribbons, previewNote,
   // B draws the photos' dots itself: the photo in view, from the start of each visit
   const [photoIdx, setPhotoIdx] = useState(0)
   useEffect(() => { setPhotoIdx(0) }, [view])
+  // E: the thumbnail in view — 0 is the preview, when there is one
+  const [thumb, setThumb] = useState(0)
+  const personalized = !!gallerySwitch?.personalized
+  useEffect(() => { if (personalized) setThumb(0) }, [personalized])
+  if (gallerySwitch?.style === 'thumbs') {
+    // E: no swipe at all — one image, picked from the thumbnails under it.
+    // The preview leads (the sample name until the shopper types, then
+    // theirs), with no personalization badge: only the product's own
+    const { samplePreview, photoRibbons, repeatImages = [] } = gallerySwitch
+    // Every photo once: no repeats (marked, or the same image twice)
+    const photos = images.filter((src, i) => !repeatImages.includes(src) && images.indexOf(src) === i)
+    const slides = samplePreview ? [samplePreview, ...photos] : photos
+    const current = Math.min(thumb, slides.length - 1)
+    const isPreview = !!samplePreview && current === 0
+    return (
+      <div className={styles.mobileGallery}>
+        {isPreview ? (
+          <ProductImageCarousel key="preview" images={[]} livePreview={samplePreview} livePreviewRibbons={photoRibbons ?? []} ribbonIcon={ribbonIcon} saleRibbons={ribbonIcon?.sale} />
+        ) : (
+          <ProductImageCarousel key={`photo-${current}`} images={[slides[current]]} modelImages={modelImages} livePreviewRibbons={photoRibbons} ribbonIcon={ribbonIcon} saleRibbons={ribbonIcon?.sale} showProgress={false} />
+        )}
+        <div className={styles.galleryThumbs} role="group" aria-label="Product images">
+          {slides.map((src, i) => (
+            <button
+              key={i}
+              type="button"
+              className={styles.galleryThumb}
+              aria-pressed={i === current}
+              aria-label={samplePreview && i === 0 ? 'Your design' : `Photo ${samplePreview ? i : i + 1}`}
+              onClick={() => setThumb(i)}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={src} alt="" className={modelImages.includes(src) ? styles.galleryThumbModel : ''} />
+            </button>
+          ))}
+        </div>
+      </div>
+    )
+  }
   if (!gallerySwitch) {
     return <ProductImageCarousel images={images} modelImages={modelImages} livePreview={livePreview} livePreviewRibbons={ribbons} ribbonIcon={ribbonIcon} saleRibbons={ribbonIcon?.sale} livePreviewOverlay={previewNote} progressPlacement={floatingProgress ? 'floating' : 'below'} className={styles.mobileGallery} />
   }
@@ -2628,6 +2673,15 @@ function ProductDetailPageInner({ productId, previewId, withoutTemplate = false,
               PreviewIcon: icons.AiMagicIcon,
               PlayIcon: icons.PlayIcon,
               startOn: searchParams.get('gview') === 'photos' ? 'photos' : 'preview',
+              // E: the preview from load (the sample name), and when it becomes theirs
+              samplePreview: livePreview,
+              personalized: previewPersonalized,
+              // (A repeat of a photo that's also shown for real — TGR's — is left to
+              // the de-duplication, so the real one stays)
+              repeatImages: (product.galleryImages ?? [])
+                .filter((g) => g.repeat)
+                .map((g) => g.src)
+                .filter((src) => ![product.image, product.hoverImage, ...(product.galleryImages ?? []).filter((g) => !g.repeat).map((g) => g.src)].includes(src)),
             } : undefined}
           />
         </div>

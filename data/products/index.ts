@@ -19,7 +19,9 @@ export type ProductItem = {
   hasModelImage?: boolean
   /** More PDP gallery images, after `image` and `hoverImage`. `onModel` marks a
    *  lifestyle shot, shown as it is rather than blended onto the image tint. */
-  galleryImages?: { src: string; onModel?: boolean }[]
+  /** `repeat`: a near or exact repeat, filling out the gallery's photo count —
+   *  left out where every image shows at once (V2's thumbnails, E) */
+  galleryImages?: { src: string; onModel?: boolean; repeat?: boolean }[]
   /** Each metal's own product shots, for a gallery that follows the metal
    *  picked. A metal with none of its own shows `image` and `hoverImage`. */
   metalImages?: Partial<Record<ProductMaterialKey, string[]>>
@@ -44,7 +46,7 @@ const oalProducts: ProductItem[] = [
     galleryImages: [
       // After the packshot and the on-model shot: a second packshot, the
       // chain lengths on model, then the packaging (as TGR ends on its own)
-      { src: 'https://cdn.oakandluna.com/digital-asset/product/singapore-chain-name-necklace-gold-vermeil-7.jpg' },
+      { src: 'https://cdn.oakandluna.com/digital-asset/product/singapore-chain-name-necklace-gold-vermeil-7.jpg', repeat: true },
       { src: 'https://cdn.oakandluna.com/digital-asset/product/singapore-chain-name-necklace-gold-vermeil-1.jpg', onModel: true },
       { src: 'https://cdn.oakandluna.com/digital-asset/product/singapore-chain-name-necklace-gold-vermeil-6.jpg', onModel: true },
     ] },
@@ -101,8 +103,8 @@ const tgrProducts: ProductItem[] = [
       { src: '/images/products/tgr/tgr-05-lena.webp' },
       // Mockup: the packshot and the on-model shot again, for a six-photo
       // gallery (the packaging comes last) until there are more photos
-      { src: '/images/products/tgr/tgr-05-product.jpg' },
-      { src: '/images/products/tgr/tgr-05-model.jpg', onModel: true },
+      { src: '/images/products/tgr/tgr-05-product.jpg', repeat: true },
+      { src: '/images/products/tgr/tgr-05-model.jpg', onModel: true, repeat: true },
     ] },
   { id: 6 , name: 'Nova Birthstone Necklace with Engraved Names in 18K Gold Plating', image: '/images/products/tgr/tgr-06-product.jpg', hoverImage: '/images/products/tgr/tgr-06-model.jpg', href: '/product/6', price: '$100', priceInCents: 10000, rating: 4.4, reviewCount: 162, defaultSwatchKey: 'vermeil' },
   { id: 8 , name: 'Coco Hexagon Ring', image: '/images/products/tgr/tgr-08-product.jpg', hoverImage: '/images/products/tgr/tgr-08-model.jpg', href: '/product/8', price: '$105', priceInCents: 10500, rating: 4.6, reviewCount: 356, defaultSwatchKey: 'vermeil' },
