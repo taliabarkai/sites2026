@@ -61,7 +61,7 @@ import { AIPreviewCustomizer } from '../_components/AIPreviewCustomizer'
 import { ProductOptions, useProductOptions } from '../_components/ProductOptions'
 import type { OptionGroup, SelectedOption } from '../_components/ProductOptions'
 import { OPTION_GROUPS, OPTIONS_SHOWCASE_PRODUCT_ID, optionsShowcaseProduct } from './[id]/_data/optionGroups'
-import { flowPath, type FinalFlow } from '../_config/personalizationFlows'
+import { flowPath, isV2Flow, type FinalFlow } from '../_config/personalizationFlows'
 import { isNestedDrawerProduct, personalizeFlowFor, readGalleryLayout, readNestedDescriptionState, readPersonalizePlacement, readNestedItemOn, readMaterialDisplay, readNestedDrawerCount, readStepsLayout, readGallerySwitch, type GallerySwitch } from '../_config/demoParams'
 import type { DiamondSetting, PersonalizeFields, PersonalizeFlow } from '../_config/demoParams'
 
@@ -675,6 +675,10 @@ interface GallerySwitchProps {
   /** E: photos that only fill out the count (repeats) — left out of the thumbnails */
   repeatImages?: string[]
   PreviewIcon: React.ComponentType<{ size?: number }>
+  /** Final-Poc (B2 only): the choice in view filled black, its text and icon white; "Gallery" for "Photos" */
+  poc?: boolean
+  /** Final-Poc: the icon before "Gallery" */
+  GalleryIcon?: React.ComponentType<{ size?: number }>
   /** After the photos' dots: "▶ Video" */
   PlayIcon: React.ComponentType<{ size?: number }>
 }
@@ -735,7 +739,7 @@ function MobileGallery({ images, modelImages, livePreview, ribbons, previewNote,
   if (!gallerySwitch) {
     return <ProductImageCarousel images={images} modelImages={modelImages} livePreview={livePreview} livePreviewRibbons={ribbons} ribbonIcon={ribbonIcon} saleRibbons={ribbonIcon?.sale} livePreviewOverlay={previewNote} progressPlacement={floatingProgress ? 'floating' : 'below'} className={styles.mobileGallery} />
   }
-  const { style, previewLabel, photoRibbons, PreviewIcon, PlayIcon } = gallerySwitch
+  const { style, previewLabel, photoRibbons, PreviewIcon, PlayIcon, poc, GalleryIcon } = gallerySwitch
   const showPreview = hasPreview && view === 'preview'
   const videoLink = <button type="button" className={styles.galleryVideo}><PlayIcon size={24} />Video</button>
   return (
@@ -808,13 +812,13 @@ function MobileGallery({ images, modelImages, livePreview, ribbons, previewNote,
             </div>
           )}
           {hasPreview && (
-            <div className={styles.galleryB2Switch}>
+            <div className={`${styles.galleryB2Switch} ${poc ? styles.galleryPocSwitch : ''}`}>
               <span className={`${styles.galleryTextFrame} ${styles.galleryTextEnter}`}>
                 <button type="button" className={styles.galleryTextItem} aria-pressed={showPreview} onClick={() => setView('preview')}>
                   <PreviewIcon size={16} />{previewLabel}
                 </button>
                 <button type="button" className={styles.galleryTextItem} aria-pressed={!showPreview} onClick={() => setView('photos')}>
-                  Photos
+                  {poc ? <>{GalleryIcon && <GalleryIcon size={16} />}Gallery</> : 'Photos'}
                 </button>
               </span>
             </div>
@@ -2351,7 +2355,7 @@ interface ProductDetailPageProps {
 function ProductDetailPageInner({ productId, previewId, withoutTemplate = false, finalPreview: finalPreviewProp = false, simpleFlow: simpleFlowProp = false, finalFlow }: ProductDetailPageProps) {
   // The final flows build on the earlier two: V1 and V2 on Simple's page, V3 on Custom's
   const finalPreview = finalPreviewProp || finalFlow === 'v3'
-  const simpleFlow = simpleFlowProp || finalFlow === 'v1' || finalFlow === 'v2'
+  const simpleFlow = simpleFlowProp || finalFlow === 'v1' || isV2Flow(finalFlow)
   const pathname = usePathname()
   const router = useRouter()
   const brand = getBrandFromPathname(pathname)
@@ -2447,7 +2451,7 @@ function ProductDetailPageInner({ productId, previewId, withoutTemplate = false,
   // at (under 1024px) — tablets included — so it always sticks there
   // V2 (mobile): the product header above the gallery — not on the flows, which lead with the gallery
   // Final flow V2: the header above the gallery on mobile, Music Memories too
-  const headerAbove = isMobile && (finalFlow === 'v2'
+  const headerAbove = isMobile && (isV2Flow(finalFlow)
     ? !!template || isMusicMemories
     : !finalPreview && !simpleFlow && placement === 'page')
   const [headerSlot, setHeaderSlot] = useState<HTMLDivElement | null>(null)
@@ -2666,8 +2670,11 @@ function ProductDetailPageInner({ productId, previewId, withoutTemplate = false,
             previewNote={previewNote}
             floatingProgress={!!template}
             // V2: the preview and the photos behind a switch (the header's Switch toggle)
-            gallerySwitch={finalFlow === 'v2' ? {
-              style: readGallerySwitch(searchParams),
+            // Final-Poc: B2, restyled — the choice in view filled; Gallery with an image icon
+            gallerySwitch={isV2Flow(finalFlow) ? {
+              style: finalFlow === 'poc' ? 'stack' : readGallerySwitch(searchParams),
+              poc: finalFlow === 'poc',
+              GalleryIcon: icons.ImageIcon,
               previewLabel: template?.livePreview.ribbon ?? 'Your Personalization',
               photoRibbons: template?.gallery.badges,
               PreviewIcon: icons.AiMagicIcon,

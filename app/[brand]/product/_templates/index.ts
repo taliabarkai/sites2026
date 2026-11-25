@@ -67,6 +67,7 @@ export const FLOW_TEMPLATE_BY_BRAND: Record<PersonalizationFlow, Partial<Record<
   v1: FINAL_FLOW_TEMPLATES,
   v2: FINAL_FLOW_TEMPLATES,
   v3: FINAL_FLOW_TEMPLATES,
+  poc: FINAL_FLOW_TEMPLATES,
 }
 
 /** The product id a personalization flow's page renders for this theme. */

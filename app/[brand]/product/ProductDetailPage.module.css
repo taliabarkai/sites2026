@@ -2471,6 +2471,13 @@
   color: var(--colors-text);
 }
 
+/* Final-Poc: the choice in view filled in the text color (black), its text
+   and icon inverse (white) — the frame's hairline as B2 has it */
+.galleryPocSwitch .galleryTextItem[aria-pressed="true"] {
+  background: var(--colors-text);
+  color: var(--colors-text-inverse);
+}
+
 /* ── V2's E: thumbnails under the image, no swipe ─────────────────────────── */
 .galleryThumbs {
   display: flex;

@@ -34,6 +34,12 @@ const FLOW_COPY: Record<FinalFlow, { name: string; intro: string }> = {
       'Custom Personalization’s Option 1, as OAL had it. Every option is on the page and the gallery scrolls away ' +
       'with it. Once the shopper’s own design comes in, the preview docks at the top, behind a Your Personalization toggle.',
   },
+  poc: {
+    name: 'V2 with the B2 switch',
+    intro:
+      'V2 with its preview / gallery switch fixed to B2: centred on the image’s bottom edge, the choice in view filled black. ' +
+      'Your Personalization shows the shopper’s design, Gallery the product photos and video.',
+  },
 }
 
 // The complex products: the same flows, with several options driving the preview

@@ -13,7 +13,7 @@ export const tgrClassicName: PdpTemplate = {
   id: 'tgr-classic-name',
   brand: 'tgr',
   // IB and MNN share TGR's catalog in the mockup, so they get Carrie too
-  // OAL's single-name necklace (its product 5, Singapore Chain Name) too — the Simple Personalization flow
+  // OAL's single-name necklace (its product 5, the Belle name necklace) too — the Simple Personalization flow
   alsoOn: ['ib', 'mnn', 'oal'],
   sku: 'TGR-CLASSIC-COCKTAIL-NAME', // TODO: real SKU
   productId: 5,
