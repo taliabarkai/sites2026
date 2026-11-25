@@ -2172,8 +2172,7 @@
   background: var(--colors-background);
 }
 
-.previewSwitchPill,
-.previewSwitchChip {
+.previewSwitchPill {
   position: absolute;
   z-index: var(--z-raised);
   font-family:    var(--typography-rules-text3-font-family);
@@ -2197,8 +2196,7 @@
   border-radius: var(--preview-switch-border-radius, var(--radius-full));
 }
 
-.previewSwitchPill button,
-.previewSwitchChip {
+.previewSwitchPill button {
   display: inline-flex;
   align-items: center;
   gap: var(--spacing-xxs);
@@ -2225,16 +2223,6 @@
   color: var(--colors-text-inverse);
 }
 
-/* C — one chip, top right in both views */
-.previewSwitchChip {
-  top: var(--spacing-sm);
-  right: var(--spacing-sm);
-  background: var(--colors-background);
-  border: var(--border-width) solid var(--border-color);
-  font-family:    var(--typography-rules-text3-font-family);
-  font-size:      var(--typography-rules-text3-font-size);
-  line-height:    var(--typography-rules-text3-line-height);
-}
 
 /* V2's photos: "▶ Video" after the dots */
 .galleryVideo {
@@ -2402,4 +2390,83 @@
   display: flex;
   align-items: center;
   gap: var(--spacing-xs);
+}
+
+/* ── V2's D: View Photos ↔ the dots, the wand going back ─────────────────── */
+/* On the photos: the wand and "Your Personalization" lead the row, bold like
+   Video — the way back to the preview (its own class: Video's hides the play
+   icon's circle, which would clip the wand) */
+.galleryWandLink {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xxxs);
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--colors-text);
+  cursor: pointer;
+  white-space: nowrap;
+  font-family:    var(--typography-rules-text4-font-family);
+  font-size:      var(--typography-rules-text4-font-size);
+  line-height:    var(--typography-rules-text4-line-height);
+  letter-spacing: var(--typography-rules-text4-letter-spacing, normal);
+  font-weight:    var(--typography-rules-text4-font-weight, normal);
+}
+
+/* D, on the preview: where the shopper is — the wand and its name, bold like
+   "View Photos" */
+.galleryHereLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xxxs);
+  white-space: nowrap;
+  font-family:    var(--typography-rules-text4-font-family);
+  font-size:      var(--typography-rules-text4-font-size);
+  line-height:    var(--typography-rules-text4-line-height);
+  letter-spacing: var(--typography-rules-text4-letter-spacing, normal);
+  font-weight:    var(--typography-rules-text4-font-weight, normal);
+}
+
+.galleryHereText {
+  white-space: nowrap;
+}
+
+/* ── V2's B2: the switch on the image's bottom edge, the dots just above ─── */
+.galleryB2 {
+  /* Half the switch's height (it hangs this far below the image), and the
+     room kept under the image for it once it's there */
+  --b2-half: var(--spacing-md);
+  --b2-pad: 0px;
+}
+
+.galleryB2.galleryB2Pad {
+  --b2-pad: var(--b2-half);
+  padding-bottom: var(--b2-pad);
+  background: var(--colors-background);
+}
+
+.galleryB2Dots {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(var(--b2-pad) + var(--b2-half) + var(--spacing-xs));
+  z-index: var(--z-raised);
+  display: flex;
+  justify-content: center;
+  color: var(--colors-text);
+  pointer-events: none;
+}
+
+.galleryB2Dots button {
+  pointer-events: auto;
+}
+
+/* Centred on the image's bottom edge: half on the image, half below */
+.galleryB2Switch {
+  position: absolute;
+  left: 50%;
+  bottom: var(--b2-pad);
+  z-index: var(--z-raised);
+  transform: translate(-50%, 50%);
+  color: var(--colors-text);
 }

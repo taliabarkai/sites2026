@@ -17,13 +17,6 @@ export const metadata: Metadata = { title: 'V2 switch designs — Oak and Luna' 
 const NAME = 'Jessica'
 const SCROLL = 300
 
-const NOTES: Record<GallerySwitch, string> = {
-  pill: 'Your Personalization / Product Photos, full width under the image.',
-  text: 'The pagination row is the switch; its frame shrinks to a button on the photos.',
-  stack: 'The switch always holds both; the dots appear above it on the photos.',
-  chip: 'One chip top right that swaps between the two.',
-}
-
 const href = (s: GallerySwitch) =>
   `${flowPath('oal', 'v2')}?switch=${s}&name=${NAME}&scroll=${SCROLL}`
 
@@ -42,10 +35,10 @@ export default function SwitchDesignsPage() {
           <PhoneFrame
             key={s.value}
             href={href(s.value)}
-            label={s.label.split(' – ')[0]}
+            label={`Option ${s.label.split(' – ')[0]}`}
             title={s.label.split(' – ')[1] ?? s.label}
-            caption={NOTES[s.value]}
             metaFirst
+            labelOnly
           />
         ))}
       </ul>

@@ -347,18 +347,19 @@ export function readToplineMode(params: ReadableParams): ToplineMode {
 /**
  * The final flow V2 on mobile: how the shopper switches between their
  * personalization (the preview, which doesn't swipe) and the product's photos
- * (`?switch=chip`). `pill` (A): a two-way pill under the image; `text` (B):
- * the pagination row itself — "Your Personalization | Photos", the word
- * Photos opening into the dots; `chip` (C): one chip top right that swaps
- * between them; `stack` (B2): B's switch always holding both choices, the
- * photos' dots appearing above it. Pill by default.
+ * (`?switch=text`). `pill` (A): a full-width switch under the image; `text`
+ * (B): the pagination row itself — "Your Personalization | Photos", the word
+ * Photos opening into the dots; `stack` (B2): B's switch always holding both
+ * choices, on the image's bottom edge, the dots above it; `link` (D): the pagination row folds into
+ * one "View Photos" link on the preview, and opens back into the dots with a
+ * wand first, to go back. Pill by default.
  */
 export const GALLERY_SWITCH_PARAM = 'switch'
 export const GALLERY_SWITCHES = [
   { value: 'pill', label: 'A – Full-width switch under the image' },
   { value: 'text', label: 'B – Text in the pagination row' },
   { value: 'stack', label: 'B2 – Switch always both, dots above it' },
-  { value: 'chip', label: 'C – Chip top right: swaps the two' },
+  { value: 'link', label: 'D – View Photos link; wand back' },
 ] as const
 export type GallerySwitch = (typeof GALLERY_SWITCHES)[number]['value']
 

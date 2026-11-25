@@ -694,7 +694,7 @@ function MobileGallery({ images, modelImages, livePreview, ribbons, previewNote,
   const showPreview = hasPreview && view === 'preview'
   const videoLink = <button type="button" className={styles.galleryVideo}><PlayIcon size={24} />Video</button>
   return (
-    <div className={styles.mobileGallery}>
+    <div className={`${styles.mobileGallery} ${style === 'stack' ? styles.galleryB2 : ''} ${style === 'stack' && hasPreview ? styles.galleryB2Pad : ''}`}>
       {showPreview ? (
         /* The product's own badges ("15% off") top left, as on the photos —
            no personalization badge: the switch already names it */
@@ -704,9 +704,9 @@ function MobileGallery({ images, modelImages, livePreview, ribbons, previewNote,
           key="photos" images={images} modelImages={modelImages} livePreviewRibbons={photoRibbons} ribbonIcon={ribbonIcon} saleRibbons={ribbonIcon?.sale} pagination="dots"
           // The product's video, after the dots (mockup: no video to play yet)
           // B draws the whole row itself (below)
-          showProgress={style !== 'text' && style !== 'stack'}
+          showProgress={style !== 'text' && style !== 'stack' && style !== 'link'}
           paginationExtra={videoLink}
-          onActiveIndexChange={style === 'text' || style === 'stack' ? setPhotoIdx : undefined}
+          onActiveIndexChange={style === 'text' || style === 'stack' || style === 'link' ? setPhotoIdx : undefined}
         />
       )}
       {style === 'text' && (
@@ -744,11 +744,66 @@ function MobileGallery({ images, modelImages, livePreview, ribbons, previewNote,
       )}
       {style === 'stack' && (
         /* B2: B's framed switch, always holding both choices (the one in view
-           outlined). On the photos, their dots and Video rise in above it;
-           before a preview there's no switch, just the dots and Video. */
-        <div className={styles.galleryStack}>
+           outlined), centred on the image's bottom edge — half on the image,
+           half below it. The dots and Video keep one spot just above it, in
+           every state (before a preview, with no switch, too), so they never
+           move; they show on the photos. */
+        <>
           {!showPreview && (
-            <div key="dots-line" className={`${styles.galleryTextLine} ${hasPreview ? styles.galleryTextEnter : ''}`}>
+            <div key="dots-line" className={`${styles.galleryB2Dots} ${hasPreview ? styles.galleryTextEnter : ''}`}>
+              <span className={styles.galleryTextLine}>
+                <span className={styles.galleryTextDots} aria-label={`Photo ${photoIdx + 1} of ${images.length}`}>
+                  {images.map((_, i) => <span key={i} className={`${styles.galleryTextDot} ${i === photoIdx ? styles.galleryTextDotActive : ''}`} />)}
+                </span>
+                <span className={styles.galleryTextVideo}>
+                  <span className={styles.galleryTextDivider} aria-hidden="true" />
+                  {videoLink}
+                </span>
+              </span>
+            </div>
+          )}
+          {hasPreview && (
+            <div className={styles.galleryB2Switch}>
+              <span className={`${styles.galleryTextFrame} ${styles.galleryTextEnter}`}>
+                <button type="button" className={styles.galleryTextItem} aria-pressed={showPreview} onClick={() => setView('preview')}>
+                  <PreviewIcon size={16} />{previewLabel}
+                </button>
+                <button type="button" className={styles.galleryTextItem} aria-pressed={!showPreview} onClick={() => setView('photos')}>
+                  Photos
+                </button>
+              </span>
+            </div>
+          )}
+        </>
+      )}
+      {style === 'link' && (
+        /* D: the pagination row is the way between the two. Before a
+           preview: the dots and Video. On the preview, they fold into
+           "✦ Your Personalization | View Photos" (the link in Video's style). Tapping it opens the row back
+           into the dots and Video, with a wand first — the personalization
+           as page zero of the gallery — to go back to it. */
+        <div className={styles.galleryTextRow}>
+          {showPreview ? (
+            /* Where you are (the wand, "Your Personalization"), then the way to the photos */
+            <span key="view-photos" className={`${styles.galleryTextLine} ${styles.galleryTextEnter}`}>
+              <span className={styles.galleryHereLabel} aria-current="true">
+                <PreviewIcon size={16} /><span className={styles.galleryHereText}>{previewLabel}</span>
+              </span>
+              <span className={styles.galleryTextDivider} aria-hidden="true" />
+              <button type="button" className={styles.galleryVideo} onClick={() => setView('photos')}>
+                View Photos
+              </button>
+            </span>
+          ) : (
+            <span key="photos-line" className={`${styles.galleryTextLine} ${hasPreview ? styles.galleryTextEnter : ''}`}>
+              {hasPreview && (
+                <>
+                  <button type="button" className={styles.galleryWandLink} onClick={() => setView('preview')}>
+                    <PreviewIcon size={16} />{previewLabel}
+                  </button>
+                  <span className={styles.galleryTextDivider} aria-hidden="true" />
+                </>
+              )}
               <span className={styles.galleryTextDots} aria-label={`Photo ${photoIdx + 1} of ${images.length}`}>
                 {images.map((_, i) => <span key={i} className={`${styles.galleryTextDot} ${i === photoIdx ? styles.galleryTextDotActive : ''}`} />)}
               </span>
@@ -756,16 +811,6 @@ function MobileGallery({ images, modelImages, livePreview, ribbons, previewNote,
                 <span className={styles.galleryTextDivider} aria-hidden="true" />
                 {videoLink}
               </span>
-            </div>
-          )}
-          {hasPreview && (
-            <span key="frame" className={`${styles.galleryTextFrame} ${styles.galleryTextEnter}`}>
-              <button type="button" className={styles.galleryTextItem} aria-pressed={showPreview} onClick={() => setView('preview')}>
-                <PreviewIcon size={16} />{previewLabel}
-              </button>
-              <button type="button" className={styles.galleryTextItem} aria-pressed={!showPreview} onClick={() => setView('photos')}>
-                Photos
-              </button>
             </span>
           )}
         </div>
@@ -783,12 +828,6 @@ function MobileGallery({ images, modelImages, livePreview, ribbons, previewNote,
             </button>
           </div>
         </div>
-      )}
-      {hasPreview && style === 'chip' && (
-        /* C: one chip, top right in both views, naming where it goes */
-        <button type="button" className={styles.previewSwitchChip} onClick={() => setView(view === 'preview' ? 'photos' : 'preview')}>
-          {view === 'preview' ? 'Product Photos' : previewLabel}
-        </button>
       )}
     </div>
   )

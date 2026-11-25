@@ -4,15 +4,19 @@ import styles from './Flows.module.css'
 /**
  * A live, phone-sized view of one page — scaled down, still scrollable and
  * tappable. `metaFirst`: its label, title, caption and link above the phone
- * instead of below it.
+ * instead of below it. `labelOnly`: just the label — no title, caption or link.
  */
-export function PhoneFrame({ href, title, caption, label, metaFirst = false }: { href: string; title: string; caption?: string; label: string; metaFirst?: boolean }) {
+export function PhoneFrame({ href, title, caption, label, metaFirst = false, labelOnly = false }: { href: string; title: string; caption?: string; label: string; metaFirst?: boolean; labelOnly?: boolean }) {
   const meta = (
     <div className={styles.meta}>
       <span className={styles.badge}>{label}</span>
-      <p className={styles.itemTitle}>{title}</p>
-      {caption && <p className={styles.caption}>{caption}</p>}
-      <Link href={href} className={styles.open}>Open full page</Link>
+      {!labelOnly && (
+        <>
+          <p className={styles.itemTitle}>{title}</p>
+          {caption && <p className={styles.caption}>{caption}</p>}
+          <Link href={href} className={styles.open}>Open full page</Link>
+        </>
+      )}
     </div>
   )
   return (

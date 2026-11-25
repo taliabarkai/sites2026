@@ -8,7 +8,7 @@ import styles from './Header.module.css'
 /**
  * Demo control for the final flow V2 (mobile): how the shopper switches
  * between their personalization and the photos — the pill (A), text in the
- * pagination row (B), or the chip top right (C) (`?switch=text`, `?switch=chip`).
+ * pagination row (B, B2), or the View Photos link (D) (`?switch=text`, …).
  */
 export function GallerySwitchToggle({ className }: { className?: string }) {
   const router       = useRouter()
@@ -24,7 +24,7 @@ export function GallerySwitchToggle({ className }: { className?: string }) {
   }
 
   return (
-    <Dropdown label={`Switch: ${current === 'chip' ? 'C – Chip' : current === 'text' ? 'B – Text' : current === 'stack' ? 'B2 – Stacked' : 'A – Pill'}`} title="Preview / photos switch" className={className}>
+    <Dropdown label={`Switch: ${current === 'text' ? 'B – Text' : current === 'stack' ? 'B2 – Stacked' : current === 'link' ? 'D – Link' : 'A – Pill'}`} title="Preview / photos switch" className={className}>
       {close => (
         <div className={`${styles.scenarioRow} ${styles.scenarioList}`}>
           {GALLERY_SWITCHES.map(s => (
