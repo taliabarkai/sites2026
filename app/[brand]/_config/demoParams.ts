@@ -345,6 +345,25 @@ export function readToplineMode(params: ReadableParams): ToplineMode {
 }
 
 /**
+ * Final-Poc and V3 on desktop: the gallery's layout (`?dgallery=hero`).
+ * `grid`: the photos two across, the preview growing in above them once the
+ * shopper types; `hero`: the first image in focus, full width, the rest two
+ * across below it (the preview takes the first image's place).
+ */
+export const DESKTOP_GALLERY_PARAM = 'dgallery'
+
+export const DESKTOP_GALLERY_MODES = [
+  { value: 'grid', label: '2-column grid – the preview grows in on top' },
+  { value: 'hero', label: 'First image in focus – the rest below' },
+] as const
+export type DesktopGalleryMode = (typeof DESKTOP_GALLERY_MODES)[number]['value']
+
+export function readDesktopGallery(params: ReadableParams): DesktopGalleryMode {
+  const raw = params.get(DESKTOP_GALLERY_PARAM)
+  return DESKTOP_GALLERY_MODES.find((m) => m.value === raw)?.value ?? 'grid'
+}
+
+/**
  * The final flow V2 on mobile: how the shopper switches between their
  * personalization (the preview, which doesn't swipe) and the product's photos
  * (`?switch=text`). `pill` (A): a full-width switch under the image; `text`

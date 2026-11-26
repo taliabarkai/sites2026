@@ -1990,6 +1990,13 @@
   position: static;
 }
 
+/* The final flows, desktop: the personalization badge in the top right corner */
+.ribbonStackRight {
+  left: auto;
+  right: var(--spacing-sm);
+  align-items: flex-end;
+}
+
 /* ── Hero grid: first image full width, the rest two across (template PDPs) ── */
 .heroGridGallery {
   display: none;
@@ -2019,9 +2026,12 @@
    grows open from the top — the preview sliding down into it, its bottom edge
    first — and pushes the photos down */
 .heroGridReveal {
+  /* A long, soft ease-out: quick to start, settling gently */
+  --hero-reveal-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --hero-reveal-time: 800ms;
   display: grid;
   grid-template-rows: 0fr;
-  transition: grid-template-rows 520ms ease;
+  transition: grid-template-rows var(--hero-reveal-time) var(--hero-reveal-ease);
 }
 
 .heroGridRevealOpen {
@@ -2039,6 +2049,17 @@
 
 .heroGridRevealClip > .heroGridHero {
   flex: none;
+  /* …and the preview fades in as it slides down, a beat behind the row */
+  opacity: 0;
+  transform: translateY(calc(-1 * var(--spacing-lg)));
+  transition:
+    opacity var(--hero-reveal-time) var(--hero-reveal-ease) 120ms,
+    transform var(--hero-reveal-time) var(--hero-reveal-ease);
+}
+
+.heroGridRevealOpen .heroGridRevealClip > .heroGridHero {
+  opacity: 1;
+  transform: none;
 }
 
 /* No gap under the folded row (the photos start at the very top): the grid's
@@ -2052,15 +2073,29 @@
 }
 
 .heroGridReveal {
-  transition: grid-template-rows 520ms ease, padding-bottom 520ms ease;
+  transition:
+    grid-template-rows var(--hero-reveal-time) var(--hero-reveal-ease),
+    padding-bottom var(--hero-reveal-time) var(--hero-reveal-ease);
 }
 
 .heroGridRevealOpen {
   padding-bottom: 4px;
 }
 
+/* First image in focus: the preview fades in over the photo it replaces */
+.heroGridPreviewIn {
+  animation: heroGridPreviewIn 700ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes heroGridPreviewIn {
+  from { opacity: 0; transform: scale(0.98); }
+  to   { opacity: 1; transform: none; }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .heroGridReveal { transition: none; }
+  .heroGridReveal,
+  .heroGridRevealClip > .heroGridHero { transition: none; }
+  .heroGridPreviewIn { animation: none; }
 }
 
 /* Desktop, the personalization open (the details column unpinned): only the

@@ -62,7 +62,7 @@ import { ProductOptions, useProductOptions } from '../_components/ProductOptions
 import type { OptionGroup, SelectedOption } from '../_components/ProductOptions'
 import { OPTION_GROUPS, OPTIONS_SHOWCASE_PRODUCT_ID, optionsShowcaseProduct } from './[id]/_data/optionGroups'
 import { flowPath, isV2Flow, type FinalFlow } from '../_config/personalizationFlows'
-import { isNestedDrawerProduct, personalizeFlowFor, readGalleryLayout, readNestedDescriptionState, readPersonalizePlacement, readNestedItemOn, readMaterialDisplay, readNestedDrawerCount, readStepsLayout, readGallerySwitch, type GallerySwitch } from '../_config/demoParams'
+import { isNestedDrawerProduct, personalizeFlowFor, readGalleryLayout, readNestedDescriptionState, readPersonalizePlacement, readNestedItemOn, readMaterialDisplay, readNestedDrawerCount, readStepsLayout, readGallerySwitch, readDesktopGallery, type GallerySwitch } from '../_config/demoParams'
 import type { DiamondSetting, PersonalizeFields, PersonalizeFlow } from '../_config/demoParams'
 
 // LAL products that use the song-based Music Memories customizer
@@ -897,12 +897,13 @@ type RibbonIcon = { on: string; icon: React.ReactNode; sale?: string[] }
 // desktop gallery's ribbon stack picks it up without threading a prop through each
 const RibbonIconContext = createContext<RibbonIcon | undefined>(undefined)
 
-function RibbonStack({ items }: { items?: string[] }) {
+function RibbonStack({ items, right = false }: { items?: string[]; right?: boolean }) {
   if (!items?.length) return null
   const ri = useContext(RibbonIconContext)
   // Stacked top left: the personalization badge (with its wand) above the product's own
+  // (`right`: the final flows' desktop personalization badge, top right)
   return (
-    <div className={styles.ribbonStack}>
+    <div className={`${styles.ribbonStack} ${right ? styles.ribbonStackRight : ''}`}>
       {items.map((text) => (
         <span key={text} className={`${styles.livePreviewRibbon} ${styles.livePreviewRibbonThemed} ${ri?.on === text ? styles.ribbonWithIcon : ''} ${ri?.sale?.includes(text) ? styles.ribbonSale : ''}`}>
           {ri?.on === text && ri.icon}
@@ -1086,9 +1087,11 @@ function DesktopGallery({ images, modelImages, name, rootRef, livePreview, ribbo
  * The live preview, once there is one, takes the full-width hero with its
  * ribbon and pushes the default first image down into the grid.
  */
-function HeroGridGallery({ images, modelImages, name, rootRef, livePreview, ribbons, previewNote, revealHero = false }: {
+function HeroGridGallery({ images, modelImages, name, rootRef, livePreview, ribbons, previewNote, revealHero = false, cornerRibbon }: {
   images: string[]; modelImages: string[]; name: string; rootRef?: GalleryRootRef
   livePreview?: string | null; ribbons?: string[]; previewNote?: React.ReactNode
+  /** The final flows: the personalization badge, top right of the preview — the product's own ("15% off") keep the top left */
+  cornerRibbon?: string
   /**
    * Final-Poc: no hero until the preview — the photos two across — then the
    * preview grows in above them from the top, pushing them down, and the
@@ -1160,8 +1163,11 @@ function HeroGridGallery({ images, modelImages, name, rootRef, livePreview, ribb
   const heroCell = (
     <div ref={heroRef} className={`${styles.desktopGridCell} ${styles.heroGridHero}`}>
       {(!revealHero || livePreview) && <RibbonStack items={ribbons} />}
+      {livePreview && cornerRibbon && <RibbonStack items={[cornerRibbon]} right />}
       {livePreview && previewNote && <div className={styles.livePreviewNote}>{previewNote}</div>}
-      {hero && <img src={hero} alt={name} className={galleryImageClass(styles.desktopGridImage, hero, modelImages)} loading="eager" />}
+      {/* (Keyed on photo vs. preview: the preview fades in once as it takes the
+          photo's place, not again on every keystroke) */}
+      {hero && <img key={livePreview ? 'preview' : 'photo'} src={hero} alt={name} className={`${galleryImageClass(styles.desktopGridImage, hero, modelImages)} ${livePreview && !revealHero ? styles.heroGridPreviewIn : ''}`} loading="eager" />}
     </div>
   )
   return (
@@ -1174,6 +1180,8 @@ function HeroGridGallery({ images, modelImages, name, rootRef, livePreview, ribb
       </div>
       {rest.map((src, i) => (
         <div key={`${src.slice(0, 64)}-${i}`} className={styles.desktopGridCell}>
+          {/* Final-Poc / V3, no preview yet: the first photo leads, with the product's badges */}
+          {revealHero && !livePreview && i === 0 && <RibbonStack items={ribbons} />}
           <img src={src} alt="" className={galleryImageClass(styles.desktopGridImage, src, modelImages)} loading="lazy" />
         </div>
       ))}
@@ -2761,7 +2769,10 @@ function ProductDetailPageInner({ productId, previewId, withoutTemplate = false,
   const heroPreview = photoFirst ? ((finalFlow ? ownText : previewPersonalized) ? livePreview : null) : slotPreview
   const heroImages = photoFirst ? images : galleryImages
   // On the preview: its ribbon stack. On the photo: the product's badges only.
-  const heroRibbons = heroPreview ? previewRibbons : template?.gallery.badges
+  // The final flows: the product's badges ("15% off") always top left; the
+  // personalization badge top right of the preview
+  const heroRibbons = finalFlow ? template?.gallery.badges : heroPreview ? previewRibbons : template?.gallery.badges
+  const heroCornerRibbon = finalFlow && heroPreview && previewRibbon ? previewRibbon : undefined
 
   const previewNote = template
     ? <LivePreviewNote disclaimer={template.livePreview.disclaimer} loading={livePreviewLoading} />
@@ -2920,7 +2931,7 @@ function ProductDetailPageInner({ productId, previewId, withoutTemplate = false,
             : desktopGallery === 'overlayThumbs'
               ? <OverlayThumbsGallery images={galleryImages} modelImages={modelImages} name={product.name} rootRef={galleryRef} livePreview={slotPreview} ribbons={previewRibbons} previewNote={previewNote} />
             : desktopGallery === 'heroGrid' || desktopGallery === 'heroGridPhotoFirst'
-              ? <HeroGridGallery images={heroImages} modelImages={modelImages} name={product.name} rootRef={galleryRef} livePreview={heroPreview} ribbons={heroRibbons} previewNote={previewNote} revealHero={finalFlow === 'poc' || finalFlow === 'v3'} />
+              ? <HeroGridGallery images={heroImages} modelImages={modelImages} name={product.name} rootRef={galleryRef} livePreview={heroPreview} ribbons={heroRibbons} previewNote={previewNote} revealHero={(finalFlow === 'poc' || finalFlow === 'v3') && readDesktopGallery(searchParams) === 'grid'} cornerRibbon={heroCornerRibbon} />
             : desktopGallery === 'stickyHero'
               ? <OALDesktopGallery images={galleryImages} modelImages={modelImages} name={product.name} rootRef={galleryRef} />
               : <DesktopGallery images={galleryImages} modelImages={modelImages} name={product.name} rootRef={galleryRef} livePreview={template ? slotPreview : undefined} ribbons={previewRibbons} previewNote={previewNote} />

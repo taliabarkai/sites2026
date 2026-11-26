@@ -24,6 +24,7 @@ import { MaterialDisplayToggle } from './MaterialDisplayToggle'
 import { StepsLayoutToggle } from './StepsLayoutToggle'
 import { ToplineToggle } from './ToplineToggle'
 import { GallerySwitchToggle } from './GallerySwitchToggle'
+import { DesktopGalleryToggle } from './DesktopGalleryToggle'
 import { flowProductFor, livePreviewProductFor, renderedTemplateFor } from '../../product/_templates'
 import { isFinalFlow, personalizationFlowOf } from '../../_config/personalizationFlows'
 import { isNestedDrawerProduct, isFreePreviewProduct, readToplineMode, TOPLINE_PROMO } from '../../_config/demoParams'
@@ -227,6 +228,8 @@ export function Header({
     <>
       {/* V2 (mobile), first: how the shopper switches between their personalization and the photos */}
       {flowPage?.flow === 'v2' && <GallerySwitchToggle className={`${styles.cartSizeToggle} ${styles.mobileOnlyControl}`} />}
+      {/* Final-Poc and V3 (desktop, jewelry): the gallery two across, or the first image in focus */}
+      {(flowPage?.flow === 'poc' || flowPage?.flow === 'v3') && brandSegment !== 'lal' && <DesktopGalleryToggle className={`${styles.cartSizeToggle} ${styles.desktopOnlyControl}`} />}
       {/* The phases only reach the cart and checkout. Track My Order and the
           nested items Drawer product each get only their own controls. */}
       {(isCheckout || isCartPage) && <FlowControls brand={brandSegment} />}
