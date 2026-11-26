@@ -40,6 +40,28 @@
   background: var(--colors-background);
 }
 
+/* Final-Poc: while the shopper types, the gallery eases down to a strip as
+   tall as the keyboard leaves room for (set from the page's script) — the
+   image cropped to its middle, where the name sits — and the switch and dots
+   step aside */
+.mobileGalleryTyping {
+  --carousel-slide-max-height: var(--gallery-typing-height);
+}
+
+.mobileGalleryTyping .galleryB2.galleryB2Pad {
+  --b2-pad: 0px;
+}
+
+.mobileGalleryTyping .galleryB2Switch,
+.mobileGalleryTyping .galleryB2Dots {
+  display: none;
+}
+
+/* The field it keeps in view sits this far under the strip */
+.mobileGalleryTyping ~ * [data-field-id] {
+  scroll-margin-top: var(--spacing-md);
+}
+
 /* Preview dock (OAL final live preview, mobile mockup): the shopper's preview
    slides down from the top of the screen, over the sticky site header, and
    stays. Its "Your Personalization" ribbon, centred at the bottom of the

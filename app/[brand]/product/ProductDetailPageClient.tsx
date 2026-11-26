@@ -679,6 +679,8 @@ interface GallerySwitchProps {
   poc?: boolean
   /** Final-Poc: the icon before "Gallery" */
   GalleryIcon?: React.ComponentType<{ size?: number }>
+  /** Final-Poc: the shopper is typing — their preview comes to the front */
+  typing?: boolean
   /** After the photos' dots: "▶ Video" */
   PlayIcon: React.ComponentType<{ size?: number }>
 }
@@ -694,6 +696,8 @@ function MobileGallery({ images, modelImages, livePreview, ribbons, previewNote,
   const hasPreview = !!livePreview
   const startOn = gallerySwitch?.startOn ?? 'preview'
   useEffect(() => { if (hasPreview) setView(startOn) }, [hasPreview, startOn])
+  const typing = !!gallerySwitch?.typing
+  useEffect(() => { if (typing && hasPreview) setView('preview') }, [typing, hasPreview])
   // B draws the photos' dots itself: the photo in view, from the start of each visit
   const [photoIdx, setPhotoIdx] = useState(0)
   useEffect(() => { setPhotoIdx(0) }, [view])
@@ -2479,7 +2483,10 @@ function ProductDetailPageInner({ productId, previewId, withoutTemplate = false,
     if (!stickyGallery || !el) return
     const update = () => {
       const header = document.querySelector('header')
-      const top = Math.max(0, header ? header.getBoundingClientRect().bottom : 0)
+      // While the shopper types (Final-Poc), iOS can pan the visible area
+      // within the page — the gallery follows it, so it stays on screen
+      const panned = el.dataset.typing ? window.visualViewport?.offsetTop ?? 0 : 0
+      const top = Math.max(0, header ? header.getBoundingClientRect().bottom : 0) + panned
       el.style.top = `${top}px`
       // A focused field scrolls into view below the gallery, not behind it
       document.documentElement.style.scrollPaddingTop = `${top + el.offsetHeight}px`
@@ -2497,14 +2504,87 @@ function ProductDetailPageInner({ productId, previewId, withoutTemplate = false,
     update()
     window.addEventListener('scroll', update, { passive: true })
     window.addEventListener('resize', update)
+    // The keyboard opening and closing, and the gallery's own height changing
+    // (Final-Poc: it shrinks while the shopper types)
+    const vv = window.visualViewport
+    vv?.addEventListener('resize', update)
+    vv?.addEventListener('scroll', update)
+    const ro = new ResizeObserver(update)
+    ro.observe(el)
     return () => {
       window.removeEventListener('scroll', update)
       window.removeEventListener('resize', update)
+      vv?.removeEventListener('resize', update)
+      vv?.removeEventListener('scroll', update)
+      ro.disconnect()
       el.style.top = ''
       el.style.transform = ''
       document.documentElement.style.scrollPaddingTop = ''
     }
   }, [stickyGallery])
+  // Final-Poc (mobile): while the shopper types in a text field, the sticky
+  // gallery shrinks to a strip — as tall as the space the keyboard leaves,
+  // less the field — so the preview and the field they type in both stay in
+  // view. The switch and dots step aside; the full square comes back on blur.
+  const compactWhileTyping = stickyGallery && finalFlow === 'poc'
+  const [typingField, setTypingField] = useState<HTMLElement | null>(null)
+  useEffect(() => {
+    if (!compactWhileTyping) { setTypingField(null); return }
+    // A field that opens the keyboard: text, not a select or a checkbox
+    const fieldOf = (t: EventTarget | null) =>
+      t instanceof HTMLElement && t.matches('input:not([type="checkbox"]):not([type="radio"]), textarea')
+        ? t.closest<HTMLElement>('#buy-box [data-field-id]')
+        : null
+    const onIn = (e: FocusEvent) => { const field = fieldOf(e.target); if (field) setTypingField(field) }
+    const onOut = (e: FocusEvent) => { if (fieldOf(e.target) && !fieldOf(e.relatedTarget)) setTypingField(null) }
+    document.addEventListener('focusin', onIn)
+    document.addEventListener('focusout', onOut)
+    return () => {
+      document.removeEventListener('focusin', onIn)
+      document.removeEventListener('focusout', onOut)
+    }
+  }, [compactWhileTyping])
+  useEffect(() => {
+    const el = mobileGalleryRef.current
+    if (!typingField || !el) return
+    el.dataset.typing = 'true'
+    // The gallery shrinking above the page's content would have the browser
+    // shift the page to hold its place (scroll anchoring) — the field would
+    // drift back down under the keyboard
+    const root = document.documentElement
+    root.style.overflowAnchor = 'none'
+    const vv = window.visualViewport
+    let settle: ReturnType<typeof setTimeout> | undefined
+    const fit = () => {
+      // The visible height (above the keyboard), less the header, the field and
+      // the field's gap above and below it
+      const visible = vv?.height ?? window.innerHeight
+      const header = document.querySelector('header')
+      const headerBottom = Math.max(0, header ? header.getBoundingClientRect().bottom - (vv?.offsetTop ?? 0) : 0)
+      const gap = parseFloat(getComputedStyle(typingField).scrollMarginTop) || 0
+      const room = visible - headerBottom - typingField.offsetHeight - 2 * gap
+      // Never taller than the square; never shorter than a third of it
+      const height = Math.round(Math.min(el.offsetWidth, Math.max(el.offsetWidth / 3, room)))
+      el.style.setProperty('--gallery-typing-height', `${height}px`)
+      // The field right under the gallery, its gap between them. The gallery
+      // is stuck in place, so the field keeps its distance below it while it
+      // shrinks — this holds at any point of the shrink; after the browser's
+      // own scroll to the focused field
+      clearTimeout(settle)
+      settle = setTimeout(() => {
+        window.scrollBy(0, typingField.getBoundingClientRect().top - el.getBoundingClientRect().bottom - gap)
+      }, 300)
+    }
+    fit()
+    vv?.addEventListener('resize', fit)
+    return () => {
+      vv?.removeEventListener('resize', fit)
+      clearTimeout(settle)
+      delete el.dataset.typing
+      el.style.removeProperty('--gallery-typing-height')
+      root.style.overflowAnchor = ''
+    }
+  }, [typingField])
   // Demo (`?scroll=320` on the final flows): the page starts scrolled down —
   // once the preview has had a moment to come in (the comparison page's frames)
   const demoScroll = finalFlow ? Number(searchParams.get('scroll')) || 0 : 0
@@ -2660,7 +2740,7 @@ function ProductDetailPageInner({ productId, previewId, withoutTemplate = false,
 
         {/* Mobile gallery — hidden on desktop */}
         {/* Template PDPs: the pagination bar floats over the image */}
-        <div ref={mobileGalleryRef} className={`${styles.mobileGalleryAnchor} ${stickyGallery ? styles.mobileGallerySticky : ''}`}>
+        <div ref={mobileGalleryRef} className={`${styles.mobileGalleryAnchor} ${stickyGallery ? styles.mobileGallerySticky : ''} ${typingField ? styles.mobileGalleryTyping : ''}`}>
           <MobileGallery
             images={galleryImages}
             modelImages={modelImages}
@@ -2675,6 +2755,7 @@ function ProductDetailPageInner({ productId, previewId, withoutTemplate = false,
               style: finalFlow === 'poc' ? 'stack' : readGallerySwitch(searchParams),
               poc: finalFlow === 'poc',
               GalleryIcon: icons.ImageIcon,
+              typing: !!typingField,
               previewLabel: template?.livePreview.ribbon ?? 'Your Personalization',
               photoRibbons: template?.gallery.badges,
               PreviewIcon: icons.AiMagicIcon,

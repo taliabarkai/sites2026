@@ -22,6 +22,10 @@
   scroll-snap-align: start;
   position: relative;
   aspect-ratio: 1; /* square for all brands */
+  /* A parent can shorten the square to a strip, the image cropped to its
+     middle (Final-Poc, while the shopper types); it eases between the two */
+  max-height: var(--carousel-slide-max-height, 100vw);
+  transition: max-height var(--transition-base);
   overflow: hidden;
   background-color: var(--colors-card-image-bg);
 }
