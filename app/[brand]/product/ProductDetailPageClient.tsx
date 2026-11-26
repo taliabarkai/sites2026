@@ -681,12 +681,21 @@ interface GallerySwitchProps {
   GalleryIcon?: React.ComponentType<{ size?: number }>
   /** The final flows: the shopper is typing — their preview comes to the front */
   typing?: boolean
+  /** B2 / Final-Poc on LAL: the dots and Video in a row of their own below the image and the tabs, not over the image (as LAL's own gallery has them) */
+  dotsBelow?: boolean
   /** After the photos' dots: "▶ Video" */
   PlayIcon: React.ComponentType<{ size?: number }>
 }
 
 /** Mobile PDP image gallery — the shared carousel, hidden on desktop via CSS. */
-function MobileGallery({ images, modelImages, livePreview, ribbons, previewNote, floatingProgress, gallerySwitch }: { images: string[]; modelImages: string[]; livePreview?: string | null; ribbons?: string[]; previewNote?: React.ReactNode; floatingProgress?: boolean; gallerySwitch?: GallerySwitchProps }) {
+function MobileGallery({ images, modelImages, livePreview, ribbons, previewNote, floatingProgress, gallerySwitch, dotsBelow, hideDots, PlayIcon: DotsPlayIcon }: {
+  images: string[]; modelImages: string[]; livePreview?: string | null; ribbons?: string[]; previewNote?: React.ReactNode; floatingProgress?: boolean; gallerySwitch?: GallerySwitchProps
+  /** LAL's final flows (no switch: the preview is the first slide, and swipes): dots and Video in a row below the image */
+  dotsBelow?: boolean
+  /** …hidden while the gallery is a strip for typing */
+  hideDots?: boolean
+  PlayIcon?: React.ComponentType<{ size?: number }>
+}) {
   const ribbonIcon = useContext(RibbonIconContext)
   // V2: the preview never sits in the swipe — the shopper's design can be
   // handled in place, so a swipe there would fight it. A switch shows either
@@ -740,14 +749,24 @@ function MobileGallery({ images, modelImages, livePreview, ribbons, previewNote,
       </div>
     )
   }
+  if (!gallerySwitch && dotsBelow) {
+    return (
+      <ProductImageCarousel
+        images={images} modelImages={modelImages} livePreview={livePreview} livePreviewRibbons={ribbons} ribbonIcon={ribbonIcon} saleRibbons={ribbonIcon?.sale} livePreviewOverlay={previewNote}
+        pagination="dots" dotsPlacement="below" showProgress={!hideDots}
+        paginationExtra={DotsPlayIcon ? <button type="button" className={styles.galleryVideo}><DotsPlayIcon size={24} />Video</button> : undefined}
+        className={styles.mobileGallery}
+      />
+    )
+  }
   if (!gallerySwitch) {
     return <ProductImageCarousel images={images} modelImages={modelImages} livePreview={livePreview} livePreviewRibbons={ribbons} ribbonIcon={ribbonIcon} saleRibbons={ribbonIcon?.sale} livePreviewOverlay={previewNote} progressPlacement={floatingProgress ? 'floating' : 'below'} className={styles.mobileGallery} />
   }
-  const { style, previewLabel, photoRibbons, PreviewIcon, PlayIcon, poc, GalleryIcon } = gallerySwitch
+  const { style, previewLabel, photoRibbons, PreviewIcon, PlayIcon, poc, GalleryIcon, dotsBelow: b2DotsBelow } = gallerySwitch
   const showPreview = hasPreview && view === 'preview'
   const videoLink = <button type="button" className={styles.galleryVideo}><PlayIcon size={24} />Video</button>
   return (
-    <div className={`${styles.mobileGallery} ${style === 'stack' ? styles.galleryB2 : ''} ${style === 'stack' && hasPreview ? styles.galleryB2Pad : ''}`}>
+    <div className={`${styles.mobileGallery} ${style === 'stack' ? styles.galleryB2 : ''} ${style === 'stack' && hasPreview ? styles.galleryB2Pad : ''} ${style === 'stack' && b2DotsBelow ? styles.galleryB2DotsBelow : ''}`}>
       {showPreview ? (
         /* The product's own badges ("15% off") top left, as on the photos —
            no personalization badge: the switch already names it */
@@ -2657,6 +2676,8 @@ function ProductDetailPageInner({ productId, previewId, withoutTemplate = false,
     }
   }, [typingField])
   const galleryCompact = compactWhileTyping && !!typingField && keyboardOpen
+  // LAL on Final-Poc and V3: no preview / photos switch (its preview swipes with the photos)
+  const lalFinalCarousel = brand === 'lal' && (finalFlow === 'poc' || finalFlow === 'v3')
   useEffect(() => {
     const el = mobileGalleryRef.current
     if (!typingField || !galleryCompact || !el) return
@@ -2888,7 +2909,12 @@ function ProductDetailPageInner({ productId, previewId, withoutTemplate = false,
             // V3: the same switch (the preview never sits in the photos' swipe);
             // the gallery scrolls away, and the dock carries the preview while
             // the shopper types below it
-            gallerySwitch={isV2Flow(finalFlow) || finalFlow === 'v3' ? {
+            // (LAL on Final-Poc and V3: no switch — its preview is the first
+            // slide and swipes with the photos; the dots and Video sit below)
+            dotsBelow={lalFinalCarousel}
+            hideDots={galleryCompact}
+            PlayIcon={icons.PlayIcon}
+            gallerySwitch={(isV2Flow(finalFlow) || finalFlow === 'v3') && !lalFinalCarousel ? {
               style: finalFlow === 'poc' || finalFlow === 'v3' ? 'stack' : readGallerySwitch(searchParams),
               poc: finalFlow === 'poc' || finalFlow === 'v3',
               GalleryIcon: icons.ImageIcon,

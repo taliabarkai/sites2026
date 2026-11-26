@@ -196,6 +196,12 @@
   color: var(--colors-text);
 }
 
+/* …or in a row of their own under the image, 16px above and below */
+.dotsBelow {
+  position: static;
+  padding-block: var(--spacing-sm);
+}
+
 .dotList {
   display: flex;
   gap: var(--spacing-xxs);

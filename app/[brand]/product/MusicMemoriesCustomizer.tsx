@@ -551,6 +551,19 @@ export function MusicMemoriesCustomizer({ brand, product, icons, nestedItems = [
 
   // ── Add to bag ─────────────────────────────────────────────────────────────
   const handleAddToBag = () => {
+    // Add to Bag never looks disabled: with the song (the one required
+    // field) still empty, it takes the shopper to it instead
+    if (!songTitle.trim()) {
+      setTab('personalize')
+      setTimeout(() => {
+        const field = document.getElementById('mm-song-title')
+        if (!field) return
+        const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+        field.scrollIntoView({ block: 'center', behavior: reduce ? 'auto' : 'smooth' })
+        field.focus({ preventScroll: true })
+      }, 50)
+      return
+    }
     setArOpen(false)
     const image = previewImage ?? product.image
 
@@ -820,7 +833,7 @@ export function MusicMemoriesCustomizer({ brand, product, icons, nestedItems = [
   ) : (
     <>
       {subtotalRow}
-      <button type="button" className={styles.ctaButton} onClick={handleAddToBag} disabled={!songTitle.trim()}>
+      <button type="button" className={styles.ctaButton} onClick={handleAddToBag}>
         Add to bag
       </button>
     </>
@@ -907,7 +920,7 @@ export function MusicMemoriesCustomizer({ brand, product, icons, nestedItems = [
                 {mmPersonalizeInner}
                 {mmCustomizeInner}
                 {subtotalRow}
-                <button type="button" className={styles.ctaButton} onClick={handleAddToBag} disabled={!songTitle.trim()}>
+                <button type="button" className={styles.ctaButton} onClick={handleAddToBag}>
                   Add to bag
                 </button>
               </div>

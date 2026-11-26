@@ -143,7 +143,7 @@
   --form-option-border-color: var(--lal-option-grey);
 
   /* Ribbon variants */
-  --ribbon-border-radius:          var(--radius-sm);
+  --ribbon-border-radius:          0px; /* Figma: radius/ribbon = 0 */
   /* The PDP's "Save 15%" badge: a light theme color, dark text */
   --price-badge-background:        var(--lal-border-grey);
   --price-badge-text:              var(--lal-black);

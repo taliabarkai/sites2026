@@ -149,7 +149,10 @@
   --form-option-border-color: var(--ib-option-grey);
 
   /* Ribbon variants */
-  --ribbon-border-radius:          var(--radius-sm);
+  --ribbon-border-radius:          0px; /* Figma: radius/ribbon = 0 */
+  /* Final flows' Your Personalization / Gallery switch: the chosen tab navy, white text */
+  --preview-switch-selected-background: var(--colors-brand-default-primary);
+  --preview-switch-selected-text:       var(--colors-text-inverse);
   /* The PDP's "Save 15%" badge: a light theme color, dark text */
   --price-badge-background:        var(--ib-stone);
   --price-badge-text:              var(--ib-navy);

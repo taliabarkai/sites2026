@@ -36,13 +36,15 @@ export interface ProductImageCarouselProps {
   paginationExtra?: ReactNode
   /** The slide in view, as the shopper swipes — for a pagination drawn outside (V2's B) */
   onActiveIndexChange?: (index: number) => void
+  /** With dots: `over` (default) the image's bottom; `below` a row of their own under it (LAL's final flows) */
+  dotsPlacement?: 'over' | 'below'
 }
 
 /**
  * Horizontally scrollable image carousel with snap slides and a progress bar.
  * Shared between the PDP mobile gallery and the QuickAdd panel's ≤4-image variant.
  */
-export function ProductImageCarousel({ images, livePreview, livePreviewRibbon = 'Live Preview', livePreviewRibbonTone = 'brand', livePreviewRibbons, ribbonIcon, saleRibbons, livePreviewOverlay, className, peek = false, showProgress = true, progressPlacement = 'below', modelImages = [], pagination = 'bar', paginationExtra, onActiveIndexChange }: ProductImageCarouselProps) {
+export function ProductImageCarousel({ images, livePreview, livePreviewRibbon = 'Live Preview', livePreviewRibbonTone = 'brand', livePreviewRibbons, ribbonIcon, saleRibbons, livePreviewOverlay, className, peek = false, showProgress = true, progressPlacement = 'below', modelImages = [], pagination = 'bar', paginationExtra, onActiveIndexChange, dotsPlacement = 'over' }: ProductImageCarouselProps) {
   const [activeIdx, setActiveIdx] = useState(0)
   const trackRef = useRef<HTMLDivElement>(null)
   const allImages = livePreview ? [livePreview, ...images] : images
@@ -88,7 +90,7 @@ export function ProductImageCarousel({ images, livePreview, livePreviewRibbon = 
         ))}
       </div>
       {showProgress && pagination === 'dots' && allImages.length > 1 && (
-        <div className={styles.dots}>
+        <div className={`${styles.dots} ${dotsPlacement === 'below' ? styles.dotsBelow : ''}`}>
           <span className={styles.dotList} aria-hidden="true">
             {allImages.map((_, i) => <span key={i} className={`${styles.dot} ${i === activeIdx ? styles.dotActive : ''}`} />)}
           </span>

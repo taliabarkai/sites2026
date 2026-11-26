@@ -2606,6 +2606,35 @@
   pointer-events: auto;
 }
 
+/* LAL: the dots and Video below the image in a row of their own — the
+   image, then the tabs (still half on its bottom edge), then the dots */
+.galleryB2DotsBelow {
+  display: flex;
+  flex-direction: column;
+}
+
+.galleryB2.galleryB2DotsBelow.galleryB2Pad {
+  padding-bottom: 0;
+}
+
+.galleryB2DotsBelow .galleryB2Switch {
+  position: relative;
+  left: auto;
+  bottom: auto;
+  order: 1;
+  display: flex;
+  justify-content: center;
+  margin-top: calc(-1 * var(--b2-half));
+  transform: none;
+}
+
+.galleryB2DotsBelow .galleryB2Dots {
+  position: static;
+  order: 2;
+  /* 16px above and below the dots */
+  padding-block: var(--spacing-sm);
+}
+
 /* Centred on the image's bottom edge: half on the image, half below */
 .galleryB2Switch {
   position: absolute;
@@ -2631,9 +2660,17 @@
   text-transform: var(--personalize-ribbon-text-transform, var(--typography-rules-ribbons1-text-transform, none));
 }
 
+/* …and the ribbon's corners, on the tabs and the frame round them (LAL, OAL,
+   IB square; TGR, MYKA round) */
+.galleryPocSwitch .galleryTextFrame,
+.galleryPocSwitch .galleryTextItem {
+  border-radius: var(--ribbon-border-radius, var(--preview-switch-border-radius, var(--radius-full)));
+}
+
 .galleryPocSwitch .galleryTextItem[aria-pressed="true"] {
   border-color: transparent;
-  background: var(--personalize-ribbon-background,
+  /* A theme can give the chosen tab its own fill (MYKA: black, white text) */
+  background: var(--preview-switch-selected-background, var(--personalize-ribbon-background,
     linear-gradient(90deg,
       color-mix(in srgb, var(--personalize-fill-start) 60%, var(--colors-background)),
       var(--colors-background) 55%,
@@ -2641,8 +2678,8 @@
     linear-gradient(90deg,
       var(--personalize-border),
       color-mix(in srgb, var(--personalize-border) 30%, var(--colors-background)) 55%,
-      var(--personalize-border)) border-box);
-  color: var(--personalize-ribbon-text, var(--colors-text));
+      var(--personalize-border)) border-box));
+  color: var(--preview-switch-selected-text, var(--personalize-ribbon-text, var(--colors-text)));
 }
 
 /* ── V2's E: thumbnails under the image, no swipe ─────────────────────────── */
