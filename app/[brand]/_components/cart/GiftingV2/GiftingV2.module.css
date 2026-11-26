@@ -341,3 +341,183 @@
   white-space: nowrap;
   border: 0;
 }
+
+/* ── V3: the "Which item" step inline, in place of the packaging cards ──── */
+
+.inlineStep {
+  animation: inlineStepIn var(--transition-base);
+}
+
+@keyframes inlineStepIn {
+  from { opacity: 0; transform: translateY(var(--spacing-xxs)); }
+  to   { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .inlineStep { animation: none; }
+}
+
+.inlineHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xxs);
+  margin-bottom: var(--spacing-xxs);
+}
+
+/* Arrow and word are one button, so either is a hit target. */
+.inlineBack {
+  appearance: none;
+  border: none;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xxs);
+  color: var(--colors-text);
+  cursor: pointer;
+}
+
+.inlineBackLabel {
+  font-family:    var(--typography-rules-text2-font-family);
+  font-size:      var(--typography-rules-text2-font-size);
+  line-height:    var(--typography-rules-text2-line-height);
+  font-weight:    var(--typography-rules-text2-font-weight, 600);
+  letter-spacing: var(--typography-rules-text2-letter-spacing, normal);
+}
+
+.inlineBack:hover .inlineBackLabel {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.inlineBack:focus-visible {
+  outline: 2px solid var(--colors-text);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* The brand arrow points right; Back points left. */
+.inlineBackIcon {
+  display: inline-flex;
+  transform: rotate(180deg);
+}
+
+.inlinePicker {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+/* The packaging cards' measure, so the item cards land where the packaging
+   was and the step reads as the same row moving on. */
+.itemChoiceGroupInline {
+  grid-template-columns: none;
+  grid-auto-flow: column;
+  grid-auto-columns: calc((100% - 2.5 * var(--spacing-xs)) / 3.5);
+  justify-content: start;
+  padding-bottom: var(--spacing-xxs);
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  overscroll-behavior-x: contain;
+}
+
+.itemChoiceGroupInline .itemChoice {
+  height: 100%;
+  scroll-snap-align: start;
+}
+
+@media (max-width: 767px) {
+  .itemChoiceGroupInline {
+    grid-auto-columns: calc((100% - 1.5 * var(--spacing-xs)) / 2.5);
+  }
+}
+
+/* ── V4: everything inline, under a stepper ─────────────────────────────── */
+
+.inlineStack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+/* Focused programmatically when its step appears — a landmark for screen
+   readers, not a control, so no ring. */
+.inlineHeading:focus {
+  outline: none;
+}
+
+/* The panel's body, minus its scroll and inset: the page scrolls instead. */
+.inlineDetails {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+/* The panel's footer, without its rule — the step's own divider closes it. */
+.inlineActions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-sm);
+}
+
+/* V4's item and personalize steps sit in their own bordered box under the
+   step title, so a gift in progress reads as one contained task. */
+.inlineBox {
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-md);
+}
+
+@media (max-width: 767px) {
+  .inlineBox {
+    padding: var(--spacing-sm);
+  }
+}
+
+/* V4's Edit: the fields, opened inside the wrapped card under its row. */
+.editFields {
+  display: flex;
+  flex-direction: column;
+}
+
+.editFields:focus {
+  outline: none;
+}
+
+/* Save takes Edit's place and its look — the same link, moved down. */
+.saveLink {
+  flex: 0 0 auto;
+  white-space: nowrap;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: var(--colors-text);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  font-family:    var(--typography-rules-text1-font-family);
+  font-size:      var(--typography-rules-text1-font-size);
+  line-height:    var(--typography-rules-text1-line-height);
+  letter-spacing: var(--typography-rules-text1-letter-spacing, normal);
+}
+
+.saveLink:disabled {
+  color: var(--colors-text-disabled);
+  cursor: not-allowed;
+}
+
+.saveLink:focus-visible {
+  outline: 2px solid var(--colors-text);
+  outline-offset: 2px;
+}
+
+/* The box takes focus when its step appears — a landmark, not a control. */
+.inlineBox:focus {
+  outline: none;
+}
+
+.inlineActionsEnd {
+  justify-content: flex-end;
+}

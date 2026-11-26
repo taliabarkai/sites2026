@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useRef, useState } from 'react'
+import type React from 'react'
 import { AssignedItemRow } from './AssignedItemRow'
 import { GiftItemList } from './GiftItemList'
 import { GiftOptionCard } from './GiftOptionCard'
@@ -35,6 +36,8 @@ interface GiftingOptionsProps {
   designs:     DesignOption[]
   onChange:    (assignments: GiftAssignment[]) => void
   onGenerateNote: () => Promise<string>
+  /** Rendered last inside the section, above its closing divider — the step's Continue. */
+  footer?: React.ReactNode
 }
 
 /**
@@ -52,7 +55,7 @@ interface DrawerState {
 }
 
 export function GiftingOptions({
-  options, items, assignments, icons, designs, onChange, onGenerateNote, stepNumber,
+  options, items, assignments, icons, designs, onChange, onGenerateNote, stepNumber, footer,
 }: GiftingOptionsProps) {
   const { GiftIcon, CheckmarkIcon } = icons
 
@@ -310,6 +313,8 @@ export function GiftingOptions({
           onGenerateNote={onGenerateNote}
         />
       )}
+
+      {footer}
 
       {pendingRemoveItem && (
         <RemoveGiftDialog

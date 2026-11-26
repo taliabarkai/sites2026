@@ -1153,6 +1153,29 @@
 }
 
 /* Remove pinned top-right, edit bottom-right. */
+/* Opened for editing in place (V4): the row keeps its look on top, and the
+   fields sit under a rule inside the same border. */
+.assignedCardExpanded {
+  flex-direction: column;
+}
+
+.assignedCardRow {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+}
+
+.assignedCardExpandedBody {
+  border-top: var(--border-width) solid var(--border-color);
+  padding: var(--spacing-md);
+}
+
+@media (max-width: 767px) {
+  .assignedCardExpandedBody {
+    padding: var(--spacing-sm);
+  }
+}
+
 .assignedActions {
   flex-shrink: 0;
   display: flex;
@@ -1365,11 +1388,12 @@
   color: var(--colors-text);
 }
 
-/* Phones have room for about one and a half. */
+/* Phones show two and a half — at one and a half the cards ran most of the
+   screen tall. */
 @media (max-width: 767px) {
   .itemCardRow,
   .itemCardRow:has(> :nth-child(-n + 3):last-child) {
-    grid-auto-columns: calc((100% - 0.5 * var(--spacing-xs)) / 1.5);
+    grid-auto-columns: calc((100% - 1.5 * var(--spacing-xs)) / 2.5);
   }
 }
 
@@ -1435,6 +1459,6 @@
 
 @media (max-width: 767px) {
   .optionRow {
-    grid-auto-columns: calc((100% - 0.5 * var(--spacing-xs)) / 1.5);
+    grid-auto-columns: calc((100% - 1.5 * var(--spacing-xs)) / 2.5);
   }
 }

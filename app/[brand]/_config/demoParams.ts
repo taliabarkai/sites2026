@@ -11,7 +11,7 @@
 
 import { FLOWS, DEFAULT_FLOW, type Flow } from './flow'
 
-export const GIFTING_VARIANTS = ['v1', 'v2'] as const
+export const GIFTING_VARIANTS = ['v1', 'v2', 'v3', 'v4'] as const
 
 export type GiftingVariant = (typeof GIFTING_VARIANTS)[number]
 

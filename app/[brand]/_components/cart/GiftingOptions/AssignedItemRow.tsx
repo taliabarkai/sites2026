@@ -1,5 +1,6 @@
 'use client'
 
+import type React from 'react'
 import {
   formatPrice,
   type CartItem,
@@ -19,6 +20,12 @@ interface AssignedItemRowProps {
   designs:    DesignOption[]
   onEdit:     (assignment: GiftAssignment) => void
   onRemove:   (itemId: string) => void
+  /**
+   * Opened for editing in place (V4): rendered inside the card, under the row,
+   * which keeps its image and copy. Edit is hidden while it is open — the
+   * content brings its own Save.
+   */
+  expanded?: React.ReactNode
 }
 
 /**
@@ -34,7 +41,7 @@ interface AssignedItemRowProps {
  * only controls, so there is no whole-card hover to imply otherwise.
  */
 export function AssignedItemRow({
-  item, option, assignment, icons, designs, onEdit, onRemove,
+  item, option, assignment, icons, designs, onEdit, onRemove, expanded,
 }: AssignedItemRowProps) {
   const { TrashCanIcon } = icons
 
@@ -43,8 +50,8 @@ export function AssignedItemRow({
   const design = designs.find(d => d.key === assignment.design)
   const imageUrl = (option.designs && design?.image) || option.imageUrl
 
-  return (
-    <li className={styles.assignedCard}>
+  const row = (
+    <>
       <span className={styles.optionCardImageWrap}>
         <img
           src={imageUrl}
@@ -71,15 +78,32 @@ export function AssignedItemRow({
         >
           <TrashCanIcon size={24} />
         </button>
-        <button
-          type="button"
-          className={styles.itemStateEdit}
-          aria-label={`Edit gifting for ${item.name}`}
-          onClick={() => onEdit(assignment)}
-        >
-          Edit
-        </button>
+        {!expanded && (
+          <button
+            type="button"
+            className={styles.itemStateEdit}
+            aria-label={`Edit gifting for ${item.name}`}
+            onClick={() => onEdit(assignment)}
+          >
+            Edit
+          </button>
+        )}
       </span>
+    </>
+  )
+
+  if (expanded) {
+    return (
+      <li className={`${styles.assignedCard} ${styles.assignedCardExpanded}`} data-gift-row={item.id}>
+        <div className={styles.assignedCardRow}>{row}</div>
+        <div className={styles.assignedCardExpandedBody}>{expanded}</div>
+      </li>
+    )
+  }
+
+  return (
+    <li className={styles.assignedCard} data-gift-row={item.id}>
+      {row}
     </li>
   )
 }

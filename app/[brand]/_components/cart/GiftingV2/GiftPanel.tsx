@@ -1,15 +1,12 @@
 'use client'
 
-import { useEffect, useId, useRef, useState } from 'react'
+import { useEffect, useId, useState } from 'react'
 import type React from 'react'
 import { Button } from '../../Button'
 import { PanelPortal } from '../../PanelPortal'
 import type { IconProps } from '@/src/components/icons/Icon'
 import {
-  formatPrice,
   requiredFieldsMet,
-  MAX_NAME_LENGTH,
-  MAX_NOTE_LENGTH,
   type CartItem,
   type DesignOption,
   type GiftOption,
@@ -22,8 +19,8 @@ import {
    locally. */
 import v1 from '../GiftingOptions/GiftingOptions.module.css'
 import styles from './GiftingV2.module.css'
-
-const COUNTER_ANNOUNCE_DELAY = 900
+import { GiftDetails } from './GiftDetails'
+import { ItemPicker } from './ItemPicker'
 
 /**
  * V2 needs a back affordance that V1 has no step to go back from, so it asks
@@ -33,6 +30,8 @@ const COUNTER_ANNOUNCE_DELAY = 900
 export interface GiftingV2Icons extends GiftingIcons {
   /** Rotated to read as an "i" — the panel's only informational affordance. */
   WarningIcon: React.ComponentType<IconProps>
+  /** V3 only — the inline step's Back. Points right; rotated where used. */
+  ArrowIcon?:  React.ComponentType<IconProps>
 }
 
 /**
@@ -78,6 +77,12 @@ interface GiftPanelProps {
   onAddToBag:    () => void
   onClose:       () => void
   onGenerateNote: () => Promise<string>
+  /**
+   * V3 asks which item on the page, before the panel opens, so the panel's own
+   * item step never shows. When given, "Change Item" appears and hands the
+   * question back to the page instead of stepping back inside the panel.
+   */
+  onChangeItem?: () => void
 }
 
 /**
@@ -89,7 +94,7 @@ interface GiftPanelProps {
  */
 export function GiftPanel({
   icons, option, eligibleItems, selectedItem, exclusionNote, designs,
-  draft, onDraftChange, onAddToBag, onClose, onGenerateNote,
+  draft, onDraftChange, onAddToBag, onClose, onGenerateNote, onChangeItem,
 }: GiftPanelProps) {
   const { XIcon, CheckmarkIcon, WarningIcon } = icons
 
@@ -97,17 +102,9 @@ export function GiftPanel({
   // `[]`-keyed effect would run before the node exists and bail. Keying on the
   // node itself is what makes the trap and the per-step focus actually arm.
   const [panelEl, setPanelEl] = useState<HTMLDivElement | null>(null)
-  const fileRef = useRef<HTMLInputElement>(null)
   const titleId       = useId()
-  const noteCounterId = useId()
-  const nameCounterId = useId()
-  const nameFieldId   = useId()
-  const tipId         = useId()
 
   const [open, setOpen]                     = useState(false)
-  const [generating, setGenerating]         = useState(false)
-  const [announcedCount, setAnnouncedCount] = useState(draft.note.length)
-  const [tipOpen, setTipOpen]               = useState(false)
 
   const step      = draft.history[draft.history.length - 1]
   const canGoBack = draft.history.length > 1
@@ -173,316 +170,36 @@ export function GiftPanel({
     first?.focus()
   }, [step, panelEl])
 
-  // Counter announces on a delay, not on every keystroke.
-  useEffect(() => {
-    const t = setTimeout(() => setAnnouncedCount(draft.note.length), COUNTER_ANNOUNCE_DELAY)
-    return () => clearTimeout(t)
-  }, [draft.note])
-
-  const handleGenerate = async () => {
-    setGenerating(true)
-    try {
-      const generated = await onGenerateNote()
-      patch({ note: generated.slice(0, MAX_NOTE_LENGTH) })
-    } finally {
-      setGenerating(false)
-    }
-  }
-
-  const selectedDesign = designs.find(d => d.key === draft.design) ?? null
-  // The preview follows the chosen design, so the shopper sees what ships.
-  const previewImage = selectedDesign?.image ?? option.imageUrl
-
-  /** Shared by both radiogroups: arrows move the selection and the focus together. */
-  const rovingKeyDown = (
-    e: React.KeyboardEvent,
-    index: number,
-    length: number,
-    selector: string,
-    onMove: (nextIndex: number) => void,
-  ) => {
-    const isNext = e.key === 'ArrowRight' || e.key === 'ArrowDown'
-    const isPrev = e.key === 'ArrowLeft'  || e.key === 'ArrowUp'
-    if (!isNext && !isPrev) return
-    e.preventDefault()
-    const next = (index + (isNext ? 1 : -1) + length) % length
-    onMove(next)
-    panelEl?.querySelectorAll<HTMLElement>(selector)[next]?.focus()
-  }
-
   // ── Step: which item ────────────────────────────────────────────────────────
   const itemStep = (
     <div className={v1.stepArea}>
-      <div className={styles.stepHeadingRow}>
-        <h3 className={styles.stepHeading}>Which item is this gift for?</h3>
-
-        {/* The exclusion is a footnote to the question, so it hangs off the
-            question rather than sitting under the grid where it reads as a
-            caption for the last card. */}
-        {exclusionNote && (
-          <span
-            className={styles.infoWrap}
-            onMouseEnter={() => setTipOpen(true)}
-            onMouseLeave={() => setTipOpen(false)}
-          >
-            <button
-              type="button"
-              data-info-tip
-              className={styles.infoButton}
-              aria-label="Why some items are missing"
-              aria-describedby={tipId}
-              aria-expanded={tipOpen}
-              onFocus={() => setTipOpen(true)}
-              onBlur={() => setTipOpen(false)}
-              onClick={() => setTipOpen(open => !open)}
-            >
-              {/* Upside down, so the warning glyph reads as an information "i". */}
-              <span className={styles.infoIcon} aria-hidden="true">
-                <WarningIcon size={16} />
-              </span>
-            </button>
-
-            {/* Always in the DOM so aria-describedby resolves; only its
-                visibility turns on and off. */}
-            <span
-              id={tipId}
-              role="tooltip"
-              className={`${styles.tooltip} ${tipOpen ? styles.tooltipVisible : ''}`}
-            >
-              {exclusionNote}
-            </span>
-          </span>
-        )}
-      </div>
-
-      {/* Two columns at any count — the grid owns that, so there is no inline
-          column maths here. */}
-      <div
-        className={styles.itemChoiceGroup}
-        role="radiogroup"
-        aria-label="Which item is this gift for?"
-      >
-        {eligibleItems.map((item, index) => {
-          const checked = item.id === draft.itemId
-          return (
-            <button
-              key={item.id}
-              data-item-choice
-              type="button"
-              role="radio"
-              aria-checked={checked}
-              /* Nothing is chosen on open, so the first row carries the tab stop
-                 until one is — otherwise the group would be unreachable. */
-              tabIndex={checked || (draft.itemId === null && index === 0) ? 0 : -1}
-              className={`${styles.itemChoice} ${checked ? styles.itemChoiceSelected : ''}`}
-              onClick={() => patch({ itemId: item.id })}
-              onKeyDown={e => rovingKeyDown(
-                e, index, eligibleItems.length, '[data-item-choice]',
-                next => patch({ itemId: eligibleItems[next].id }),
-              )}
-            >
-              <span className={styles.itemChoiceThumbWrap}>
-                <img src={item.imageUrl} alt="" aria-hidden="true" className={styles.itemChoiceThumb} />
-              </span>
-              <span className={styles.itemChoiceName}>{item.name}</span>
-              {item.price != null && (
-                <span className={styles.itemChoicePrice}>{formatPrice(item.price)}</span>
-              )}
-              {/* Top right, out of the reading path: the card is read downward
-                  and the state is confirmed at its corner. */}
-              <span
-                className={`${styles.itemChoiceMark} ${checked ? styles.itemChoiceMarkSelected : ''}`}
-                aria-hidden="true"
-              >
-                {checked && <CheckmarkIcon size={14} />}
-              </span>
-            </button>
-          )
-        })}
-      </div>
+      <ItemPicker
+        items={eligibleItems}
+        selectedItemId={draft.itemId}
+        exclusionNote={exclusionNote}
+        icons={{ CheckmarkIcon, WarningIcon }}
+        mode="radio"
+        onSelect={itemId => patch({ itemId })}
+      />
     </div>
   )
 
   // ── Step: configuration ─────────────────────────────────────────────────────
-  const designBlock = option.designs && designs.length > 0 && (
-    <div className={v1.fieldBlock}>
-      <span className={v1.fieldLabel} id={`${titleId}-designs`}>Choose a design</span>
-      {/* Text chips rather than a thumbnail grid: design counts vary by brand
-          and a grid stops working past about six. The preview above carries
-          the artwork. */}
-      <div className={styles.designChips} role="radiogroup" aria-labelledby={`${titleId}-designs`}>
-        {designs.map((d, index) => {
-          const checked = d.key === draft.design
-          return (
-            <button
-              key={d.key}
-              data-design-chip
-              type="button"
-              role="radio"
-              aria-checked={checked}
-              tabIndex={checked || (!selectedDesign && index === 0) ? 0 : -1}
-              className={`${styles.designChip} ${checked ? styles.designChipSelected : ''}`}
-              onClick={() => patch({ design: d.key })}
-              onKeyDown={e => rovingKeyDown(
-                e, index, designs.length, '[data-design-chip]',
-                next => patch({ design: designs[next].key }),
-              )}
-            >
-              {d.label}
-            </button>
-          )
-        })}
-      </div>
-    </div>
-  )
-
-  const photoBlock = option.wantsPhoto && (
-    <div className={v1.fieldBlock}>
-      <span className={styles.fieldLabelRow}>
-        <span className={v1.fieldLabel}>Upload a photo</span>
-        <span className={styles.fieldRequired}>Required</span>
-      </span>
-      {/* The button below is the real control, so the input stays out of the
-          tab order rather than making the shopper tab past a hidden field. */}
-      <input
-        ref={fileRef}
-        type="file"
-        accept="image/*"
-        className={v1.photoInput}
-        tabIndex={-1}
-        aria-hidden="true"
-        onChange={e => patch({ photo: Boolean(e.target.files?.length) })}
-      />
-      <button type="button" className={v1.photoButton} onClick={() => fileRef.current?.click()}>
-        {draft.photo ? 'Photo added · Replace' : 'Add photo'}
-      </button>
-    </div>
-  )
-
-  const nameBlock = option.wantsName && (
-    <div className={v1.fieldBlock}>
-      <span className={styles.fieldLabelRow}>
-        <label className={v1.fieldLabel} htmlFor={nameFieldId}>Name on the box</label>
-        <span className={styles.fieldRequired}>Required</span>
-      </span>
-      <div className={v1.nameFieldWrap}>
-        <input
-          id={nameFieldId}
-          type="text"
-          className={v1.nameInput}
-          placeholder={`Up to ${MAX_NAME_LENGTH} characters`}
-          value={draft.pname}
-          autoComplete="off"
-          required
-          aria-required="true"
-          aria-describedby={nameCounterId}
-          onChange={e => patch({ pname: e.target.value.slice(0, MAX_NAME_LENGTH) })}
-        />
-        <span id={nameCounterId} className={v1.nameCounter} aria-live="polite">
-          {draft.pname.length}/{MAX_NAME_LENGTH} characters
-        </span>
-      </div>
-    </div>
-  )
-
   const configStep = (
-    <>
-      {/* Which piece this is for, confirmed before the packaging it goes in —
-          the shopper chose the item a screen ago and should not have to reopen
-          the picker to check. Deliberately the item's own photograph: the
-          packaging shot below cannot confirm which item was picked. */}
-      {selectedItem && (
-        <div className={`${v1.fieldBlock} ${styles.giftForBlock}`}>
-          <span className={v1.fieldLabel}>Gift for</span>
-          <div className={styles.giftForRow}>
-            <span className={styles.giftForThumbWrap}>
-              <img
-                src={selectedItem.imageUrl}
-                alt=""
-                aria-hidden="true"
-                className={styles.giftForThumb}
-              />
-            </span>
-            <span className={styles.giftForName}>{selectedItem.name}</span>
-
-            {/* Only when a picker was actually shown. The header's back arrow is
-                the same action; this is the local one, for a mistake noticed
-                mid-form. Going back keeps the draft, so anything already typed
-                survives the change. */}
-            {canGoBack && (
-              <button
-                type="button"
-                className={styles.giftForChange}
-                onClick={() => patch({ history: draft.history.slice(0, -1) })}
-              >
-                Change Item
-              </button>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* One rule closes the "Gift for" answer... */}
-      {selectedItem && <hr className={v1.drawerDivider} />}
-
-      {/* V1's option block: the preview on the left, name, contents and price
-          stacked beside it. The image follows the chosen design. */}
-      <div className={v1.optionBlock}>
-        <span className={v1.optionBlockThumb}>
-          <img src={previewImage} alt="" aria-hidden="true" className={v1.optionBlockImage} />
-        </span>
-        <div className={v1.optionBlockText}>
-          <p className={v1.optionBlockName}>{option.name}</p>
-          {/* Contents only — absent on options that are the image, the name and
-              the price and nothing more. */}
-          {option.description && (
-            <p className={v1.optionBlockDescription}>{option.description}</p>
-          )}
-          <p className={v1.optionBlockPrice}>{formatPrice(option.price)}</p>
-        </div>
-      </div>
-
-      {/* ...and a second rule closes the gift itself, so the fields that
-          personalise it start on their own ground. LAL's note image is portrait
-          and runs taller than its copy, which without this crowds the first
-          label underneath. */}
-      <hr className={v1.drawerDivider} />
-
-      <div className={v1.stepArea}>
-        {designBlock}
-        {photoBlock}
-        {nameBlock}
-
-        <div className={v1.noteBlock}>
-          <div className={v1.noteLabelRow}>
-            <span className={v1.noteLabel}>Your gift note</span>
-            <button
-              type="button"
-              className={v1.noteAssist}
-              onClick={handleGenerate}
-              disabled={generating}
-            >
-              {generating ? 'Generating' : 'Create gift note'}
-            </button>
-          </div>
-
-          <div className={v1.noteFieldWrap}>
-            <textarea
-              className={v1.noteTextarea}
-              aria-label="Your gift note"
-              aria-describedby={noteCounterId}
-              placeholder="Write your message or generate one with our AI gift note assistant"
-              value={draft.note}
-              rows={5}
-              onChange={e => patch({ note: e.target.value.slice(0, MAX_NOTE_LENGTH) })}
-            />
-            <span id={noteCounterId} className={v1.noteCounter} aria-live="polite">
-              {announcedCount}/{MAX_NOTE_LENGTH}
-            </span>
-          </div>
-        </div>
-      </div>
-    </>
+    <GiftDetails
+      option={option}
+      selectedItem={selectedItem}
+      designs={designs}
+      draft={draft}
+      onDraftChange={onDraftChange}
+      onGenerateNote={onGenerateNote}
+      /* Only when a picker was actually shown — in the panel (a step back) or,
+         in V3, on the page. Going back keeps the draft, so anything already
+         typed survives the change. */
+      onChangeItem={onChangeItem ?? (canGoBack
+        ? () => patch({ history: draft.history.slice(0, -1) })
+        : undefined)}
+    />
   )
 
   // The note is optional by design and must never gate the primary action; only

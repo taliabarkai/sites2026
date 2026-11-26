@@ -841,7 +841,7 @@ function CartPageInner() {
       {/* Item and packaging are both settled by the time this opens, so either
           panel goes straight to the fields — no item step, no picker. */}
       {giftDraft && draftOption && draftItem && (
-        giftingVariant === 'v2' ? (
+        giftingVariant !== 'v1' ? (
           <GiftPanel
             icons={{ ...giftingIcons, WarningIcon: icons.WarningIcon }}
             option={draftOption}

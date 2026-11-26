@@ -1,5 +1,6 @@
 'use client'
 
+import type React from 'react'
 /* The wrapped card is V1's, imported unchanged: the two variants show the same
    thing once an item is wrapped, so they should show it the same way. */
 import { AssignedItemRow } from '../GiftingOptions/AssignedItemRow'
@@ -23,6 +24,9 @@ interface GiftedItemListProps {
   designs:     DesignOption[]
   onEdit:   (assignment: GiftAssignment) => void
   onRemove: (itemId: string) => void
+  /** V4: the item being edited inline — its card expands to show `editor`. */
+  editingItemId?: string | null
+  editor?: React.ReactNode
 }
 
 /**
@@ -33,7 +37,7 @@ interface GiftedItemListProps {
  * product list here would offer a second, contradictory way in.
  */
 export function GiftedItemList({
-  items, options, assignments, icons, designs, onEdit, onRemove,
+  items, options, assignments, icons, designs, onEdit, onRemove, editingItemId, editor,
 }: GiftedItemListProps) {
   return (
     <ul className={styles.itemList}>
@@ -55,6 +59,8 @@ export function GiftedItemList({
             designs={designs}
             onEdit={onEdit}
             onRemove={onRemove}
+            /* Edited where it sits, so the shopper never loses which gift it was. */
+            expanded={item.id === editingItemId ? editor : undefined}
           />
         )
       })}

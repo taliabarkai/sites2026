@@ -53,6 +53,7 @@ interface BrandIcons {
   TrashCanIcon:  React.ComponentType<IconProps>
   AiMagicIcon:   React.ComponentType<IconProps>
   WarningIcon:   React.ComponentType<IconProps>
+  ArrowIcon:     React.ComponentType<IconProps>
 }
 
 const BRAND_ICONS: Record<string, BrandIcons> = {
@@ -960,6 +961,20 @@ function CheckoutPageInner() {
     })
   }
 
+  /* The gifting step's Continue. Handed to the gifting section to render inside
+     itself, above its closing divider, rather than sitting after it. */
+  const giftingContinue = (
+    <div className="flex">
+      <Button
+        variant="primary"
+        className={styles.continueBtn}
+        onClick={() => animateAndComplete(GIFTING_STEP)}
+      >
+        {continueLabel(GIFTING_STEP)}
+      </Button>
+    </div>
+  )
+
   // ── Mobile summary sheet ────────────────────────────────────────────────────
   const [mobileSummaryOpen, setMobileSummaryOpen] = useState(false)
 
@@ -1653,7 +1668,10 @@ function CheckoutPageInner() {
                 </AccordionStep>
               )}
 
-              {flowConfig.gifting !== 'checkout' || !isActive(GIFTING_STEP) ? null : giftingVariant === 'v2' ? (
+              {/* Continue goes inside the gifting section, above its closing
+                  divider, so the step ends the way shipping and payment do —
+                  button, rule, then the next step's title. */}
+              {flowConfig.gifting !== 'checkout' || !isActive(GIFTING_STEP) ? null : giftingVariant !== 'v1' ? (
                 <GiftingSectionV2
                   stepNumber={stepLabel(GIFTING_STEP)}
                   options={giftingOptions}
@@ -1661,8 +1679,10 @@ function CheckoutPageInner() {
                   items={giftItems}
                   assignments={giftAssignments}
                   onChange={setGiftAssignments}
-                  icons={{ ...giftingIcons, WarningIcon: icons.WarningIcon }}
+                  icons={{ ...giftingIcons, WarningIcon: icons.WarningIcon, ArrowIcon: icons.ArrowIcon }}
                   onGenerateNote={generateGiftNote}
+                  variant={giftingVariant}
+                  footer={giftingContinue}
                 />
               ) : (
                 <GiftingOptions
@@ -1674,19 +1694,8 @@ function CheckoutPageInner() {
                   onChange={setGiftAssignments}
                   icons={giftingIcons}
                   onGenerateNote={generateGiftNote}
+                  footer={giftingContinue}
                 />
-              )}
-
-              {flowConfig.gifting === 'checkout' && isActive(GIFTING_STEP) && (
-                <div className={styles.stepContinueRow}>
-                  <Button
-                    variant="primary"
-                    className={styles.continueBtn}
-                    onClick={() => animateAndComplete(GIFTING_STEP)}
-                  >
-                    {continueLabel(GIFTING_STEP)}
-                  </Button>
-                </div>
               )}
 
               {/* ── Step 4: Payment ── */}
@@ -1995,7 +2004,7 @@ function CheckoutPageInner() {
                   {...summaryProps}
                   showDetails
                   collapsibleItems
-                  defaultItemsOpen={flowConfig.hasCartPage || giftingVariant === 'v2'}
+                  defaultItemsOpen={flowConfig.hasCartPage || giftingVariant !== 'v1'}
                   showPromo={flowConfig.promo === 'checkout'}
                   showUsps={flowConfig.usps === 'checkout'}
                   uspsWarranty={features.warranty}
