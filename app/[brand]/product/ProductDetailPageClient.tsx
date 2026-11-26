@@ -2525,9 +2525,14 @@ function ProductDetailPageInner({ productId, previewId, withoutTemplate = false,
   // Final-Poc (mobile): while the shopper types in a text field, the sticky
   // gallery shrinks to a strip — as tall as the space the keyboard leaves,
   // less the field — so the preview and the field they type in both stay in
-  // view. The switch and dots step aside; the full square comes back on blur.
+  // view. The switch and dots step aside. The full square comes back once the
+  // keyboard goes — on blur, or when it's put away with the field still focused.
   const compactWhileTyping = stickyGallery && finalFlow === 'poc'
   const [typingField, setTypingField] = useState<HTMLElement | null>(null)
+  const typingFieldRef = useRef<HTMLElement | null>(null)
+  // The visible height with no keyboard: taken as a field is first focused
+  // (the keyboard comes up after) — moving between fields keeps it
+  const fullHeightRef = useRef(0)
   useEffect(() => {
     if (!compactWhileTyping) { setTypingField(null); return }
     // A field that opens the keyboard: text, not a select or a checkbox
@@ -2535,8 +2540,18 @@ function ProductDetailPageInner({ productId, previewId, withoutTemplate = false,
       t instanceof HTMLElement && t.matches('input:not([type="checkbox"]):not([type="radio"]), textarea')
         ? t.closest<HTMLElement>('#buy-box [data-field-id]')
         : null
-    const onIn = (e: FocusEvent) => { const field = fieldOf(e.target); if (field) setTypingField(field) }
-    const onOut = (e: FocusEvent) => { if (fieldOf(e.target) && !fieldOf(e.relatedTarget)) setTypingField(null) }
+    const onIn = (e: FocusEvent) => {
+      const field = fieldOf(e.target)
+      if (!field) return
+      if (!typingFieldRef.current) fullHeightRef.current = Math.max(window.innerHeight, window.visualViewport?.height ?? 0)
+      typingFieldRef.current = field
+      setTypingField(field)
+    }
+    const onOut = (e: FocusEvent) => {
+      if (!fieldOf(e.target) || fieldOf(e.relatedTarget)) return
+      typingFieldRef.current = null
+      setTypingField(null)
+    }
     document.addEventListener('focusin', onIn)
     document.addEventListener('focusout', onOut)
     return () => {
@@ -2544,9 +2559,24 @@ function ProductDetailPageInner({ productId, previewId, withoutTemplate = false,
       document.removeEventListener('focusout', onOut)
     }
   }, [compactWhileTyping])
+  // Whether the keyboard is up: the visible height well under the full one
+  const [keyboardOpen, setKeyboardOpen] = useState(false)
+  useEffect(() => {
+    if (!typingField) { setKeyboardOpen(false); return }
+    const vv = window.visualViewport
+    const check = () => setKeyboardOpen(Math.min(vv?.height ?? Infinity, window.innerHeight) < fullHeightRef.current * 0.8)
+    check()
+    vv?.addEventListener('resize', check)
+    window.addEventListener('resize', check)
+    return () => {
+      vv?.removeEventListener('resize', check)
+      window.removeEventListener('resize', check)
+    }
+  }, [typingField])
+  const galleryCompact = !!typingField && keyboardOpen
   useEffect(() => {
     const el = mobileGalleryRef.current
-    if (!typingField || !el) return
+    if (!typingField || !galleryCompact || !el) return
     el.dataset.typing = 'true'
     // The gallery shrinking above the page's content would have the browser
     // shift the page to hold its place (scroll anchoring) — the field would
@@ -2558,7 +2588,7 @@ function ProductDetailPageInner({ productId, previewId, withoutTemplate = false,
     const fit = () => {
       // The visible height (above the keyboard), less the header, the field and
       // the field's gap above and below it
-      const visible = vv?.height ?? window.innerHeight
+      const visible = Math.min(vv?.height ?? Infinity, window.innerHeight)
       const header = document.querySelector('header')
       const headerBottom = Math.max(0, header ? header.getBoundingClientRect().bottom - (vv?.offsetTop ?? 0) : 0)
       const gap = parseFloat(getComputedStyle(typingField).scrollMarginTop) || 0
@@ -2577,14 +2607,16 @@ function ProductDetailPageInner({ productId, previewId, withoutTemplate = false,
     }
     fit()
     vv?.addEventListener('resize', fit)
+    window.addEventListener('resize', fit)
     return () => {
       vv?.removeEventListener('resize', fit)
+      window.removeEventListener('resize', fit)
       clearTimeout(settle)
       delete el.dataset.typing
       el.style.removeProperty('--gallery-typing-height')
       root.style.overflowAnchor = ''
     }
-  }, [typingField])
+  }, [typingField, galleryCompact])
   // Demo (`?scroll=320` on the final flows): the page starts scrolled down —
   // once the preview has had a moment to come in (the comparison page's frames)
   const demoScroll = finalFlow ? Number(searchParams.get('scroll')) || 0 : 0
@@ -2740,7 +2772,7 @@ function ProductDetailPageInner({ productId, previewId, withoutTemplate = false,
 
         {/* Mobile gallery — hidden on desktop */}
         {/* Template PDPs: the pagination bar floats over the image */}
-        <div ref={mobileGalleryRef} className={`${styles.mobileGalleryAnchor} ${stickyGallery ? styles.mobileGallerySticky : ''} ${typingField ? styles.mobileGalleryTyping : ''}`}>
+        <div ref={mobileGalleryRef} className={`${styles.mobileGalleryAnchor} ${stickyGallery ? styles.mobileGallerySticky : ''} ${galleryCompact ? styles.mobileGalleryTyping : ''}`}>
           <MobileGallery
             images={galleryImages}
             modelImages={modelImages}
@@ -2755,7 +2787,7 @@ function ProductDetailPageInner({ productId, previewId, withoutTemplate = false,
               style: finalFlow === 'poc' ? 'stack' : readGallerySwitch(searchParams),
               poc: finalFlow === 'poc',
               GalleryIcon: icons.ImageIcon,
-              typing: !!typingField,
+              typing: galleryCompact,
               previewLabel: template?.livePreview.ribbon ?? 'Your Personalization',
               photoRibbons: template?.gallery.badges,
               PreviewIcon: icons.AiMagicIcon,
