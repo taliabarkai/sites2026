@@ -40,10 +40,10 @@
   background: var(--colors-background);
 }
 
-/* Final-Poc: while the shopper types, the gallery eases down to a strip as
-   tall as the keyboard leaves room for (set from the page's script) — the
-   image cropped to its middle, where the name sits — and the switch and dots
-   step aside */
+/* The final flows (V1, V2, Final-Poc): while the shopper types, the gallery
+   eases down to a strip as tall as the keyboard leaves room for (set from the
+   page's script) — the image cropped to its middle, where the name sits — and
+   V2's switch, whichever its style, and dots step aside */
 .mobileGalleryTyping {
   --carousel-slide-max-height: var(--gallery-typing-height);
 }
@@ -53,20 +53,24 @@
 }
 
 .mobileGalleryTyping .galleryB2Switch,
-.mobileGalleryTyping .galleryB2Dots {
+.mobileGalleryTyping .galleryB2Dots,
+.mobileGalleryTyping .previewSwitchRow,
+.mobileGalleryTyping .galleryTextRow,
+.mobileGalleryTyping .galleryThumbs {
   display: none;
 }
 
 /* The field it keeps in view sits this far under the strip */
-.mobileGalleryTyping ~ * [data-field-id] {
+.mobileGalleryTyping ~ * [data-field-id],
+.mobileGalleryTyping ~ * [data-typing-field] {
   scroll-margin-top: var(--spacing-md);
 }
 
-/* Preview dock (OAL final live preview, mobile mockup): the shopper's preview
-   slides down from the top of the screen, over the sticky site header, and
-   stays. Its "Your Personalization" ribbon, centred at the bottom of the
-   image, is the toggle: it tucks the dock away and brings it back.
-   Hidden: fully above the screen, ribbon included. Tucked: only the ribbon shows. */
+/* Preview dock (final flow V3, mobile): a white bar slides down from the top
+   of the screen, over the sticky site header, and stays — the preview's
+   thumbnail on the left, "Your Personalization" and a caret on the right.
+   Expanded: the preview the full width above that row. Hidden: fully above
+   the screen. */
 .previewDock {
   /* Room under the dock for the first preview field it keeps in view */
   --dock-anchor-gap: var(--spacing-sm);
@@ -76,93 +80,128 @@
   left: 0;
   right: 0;
   z-index: calc(var(--z-header) + 1);
-  background: var(--colors-card-image-bg);
+  background: var(--colors-background);
+  border-bottom: var(--border-width) solid var(--border-color);
   box-shadow: var(--shadow-sm);
   transform: translateY(-100%);
   transition: transform var(--transition-base);
 }
 
-.previewDockOpen {
+.previewDockShown {
   transform: translateY(0);
 }
 
-/* The preview at its own 1:1, the full width of the screen */
+/* The preview, the full width of the screen. Collapsed: a strip, the piece
+   shrunk to fit it on the image tint. Expanded: the whole square at full
+   size. It eases between the two — the piece zooming up as it opens. */
 .previewDockImage {
   width: 100%;
   aspect-ratio: 1 / 1;
-  max-width: 100%;
+  max-height: calc(var(--spacing-xxl) * 3);
+  overflow: hidden;
+  background: var(--colors-card-image-bg);
+  transition: max-height var(--transition-base);
 }
 
-.previewDockImage img {
+.previewDockExpanded .previewDockImage {
+  max-height: 100vw;
+}
+
+.previewDockImage {
+  position: relative;
+}
+
+/* The whole piece, always — never cut at its edges: collapsed it's shrunk
+   into the strip above the badge (the preview's square is mostly backdrop
+   around the piece, so it's drawn half as big again and only that backdrop
+   overflows); as the strip opens to the square it zooms back to full size */
+.previewDockPiece {
+  position: relative;
   display: block;
   width: 100%;
-  height: 100%;
+  height: calc(100% - var(--spacing-lg));
   object-fit: contain;
+  transform: scale(1.5);
+  transition: height var(--transition-base), transform var(--transition-base);
 }
 
-/* The ribbon (its look from .ribbonWithIcon, later in this file): open, it sits
-   centred at the bottom of the image; tucked, it drops out from under the
-   dock to hang just below the sticky header */
-.previewDockTab {
+.previewDockExpanded .previewDockPiece {
+  height: 100%;
+  transform: none;
+}
+
+/* The preview's corner — its plain backdrop — stretched across the strip */
+.previewDockBackdrop {
   position: absolute;
-  top: 100%;
-  left: 50%;
-  transform: translate(-50%, calc(-100% - var(--spacing-sm)));
-  white-space: nowrap;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 0 0;
+  transform: scale(12);
+  transform-origin: 0 0;
+}
+
+/* The toggle: the badge over the image's bottom edge, centred — the row
+   across the bottom takes the tap */
+.previewDockBar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--layout-page-margin);
+  background: none;
+  border: none;
+  color: var(--colors-text);
+  text-align: left;
   cursor: pointer;
+}
+
+.previewDockBar:focus-visible {
+  outline: var(--border-width) solid var(--colors-text);
+  outline-offset: calc(-1 * var(--spacing-xxxs));
+}
+
+.previewDockLabel {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+/* The badge (its fill and border from .ribbonWithIcon): the ribbon's own
+   type, corners and case — "YOUR PERSONALIZATION" on OAL */
+.previewDockPill {
+  gap: var(--spacing-xxs);
   border-radius: var(--ribbon-border-radius, var(--radius-sm));
-  box-shadow: var(--shadow-sm);
+  white-space: nowrap;
   font-family:    var(--typography-rules-ribbons1-font-family, var(--font-family-main-bold));
   font-size:      var(--typography-rules-ribbons1-font-size);
   line-height:    var(--typography-rules-ribbons1-line-height);
   font-weight:    var(--typography-rules-ribbons1-font-weight, 700);
   letter-spacing: var(--typography-rules-ribbons1-letter-spacing, normal);
-  transition: top var(--transition-base);
 }
 
-/* Tucked: a full-width secondary button just under the sticky header —
-   two classes, so it outranks the ribbon look */
-.previewDockTucked .previewDockTab {
-  top: calc(100% + var(--dock-header-bottom, 0px) + var(--spacing-xxs));
-  left: var(--layout-page-margin);
-  right: var(--layout-page-margin);
-  transform: none;
-  justify-content: center;
-  gap: var(--spacing-xxs);
-  min-height: var(--buttons-secondary-min-height);
-  padding: var(--buttons-secondary-padding);
-  background: var(--buttons-secondary-background);
-  color: var(--buttons-secondary-text);
-  border: var(--border-width) solid var(--buttons-secondary-border-color);
-  border-radius: var(--buttons-secondary-border-radius);
-  font-family:    var(--typography-rules-button1-font-family);
-  font-size:      var(--typography-rules-button1-font-size);
-  line-height:    var(--typography-rules-button1-line-height);
-  font-weight:    var(--typography-rules-button1-font-weight);
-  letter-spacing: var(--typography-rules-button1-letter-spacing, normal);
-  text-transform: var(--typography-rules-button1-text-transform, none);
+/* The brand caret points right: down to expand, up to collapse */
+.previewDockLabel svg {
+  flex: none;
 }
 
-.previewDockTab:focus-visible {
-  outline: var(--border-width) solid var(--colors-text);
-  outline-offset: 2px;
-}
-
-/* The brand chevron points right: up to tuck the dock away, down to bring it back */
-.previewDockChevronUp,
-.previewDockChevronDown {
+.previewDockCaretUp,
+.previewDockCaretDown {
   display: flex;
   transition: transform var(--transition-fast);
 }
 
-.previewDockChevronUp { transform: rotate(-90deg); }
-.previewDockChevronDown { transform: rotate(90deg); }
+.previewDockCaretUp { transform: rotate(-90deg); }
+.previewDockCaretDown { transform: rotate(90deg); }
 
 @media (prefers-reduced-motion: reduce) {
   .previewDock,
-  .previewDockTab,
-  .previewDockChevronUp,
-  .previewDockChevronDown { transition: none; }
+  .previewDockCaretUp,
+  .previewDockCaretDown { transition: none; }
 }
 
 @media (min-width: 1024px) {
@@ -1975,6 +2014,54 @@
   grid-column: 1 / -1;
 }
 
+/* Final-Poc: the hero row folded away until the preview comes in; then it
+   grows open from the top — the preview sliding down into it, its bottom edge
+   first — and pushes the photos down */
+.heroGridReveal {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 520ms ease;
+}
+
+.heroGridRevealOpen {
+  grid-template-rows: 1fr;
+}
+
+/* Clips the hero while the row opens, holding it to the row's bottom edge */
+.heroGridRevealClip {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.heroGridRevealClip > .heroGridHero {
+  flex: none;
+}
+
+/* No gap under the folded row (the photos start at the very top): the grid's
+   4px gap moves onto the photos and the open hero, as space below each */
+.heroGridGallery:has(> .heroGridReveal) {
+  row-gap: 0;
+}
+
+.heroGridGallery:has(> .heroGridReveal) > .desktopGridCell {
+  margin-bottom: 4px;
+}
+
+.heroGridReveal {
+  transition: grid-template-rows 520ms ease, padding-bottom 520ms ease;
+}
+
+.heroGridRevealOpen {
+  padding-bottom: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .heroGridReveal { transition: none; }
+}
+
 /* Desktop, the personalization open (the details column unpinned): only the
    first image — the live preview — is pinned under the header, whole, for as
    long as any of the steps' column is on screen: its row is held the
@@ -2169,6 +2256,26 @@
   color: var(--personalize-ribbon-text, var(--colors-text));
   /* …and its own casing (IB and MYKA: title case, "Your Personalization") */
   text-transform: var(--personalize-ribbon-text-transform, var(--typography-rules-ribbons1-text-transform, none));
+}
+
+/* The final flows, desktop: the personalization badge on the gallery is the
+   mobile switch's chosen tab — filled in the text color, its wand and words
+   inverse, in the tab's own type, corners and case */
+@media (min-width: 1024px) {
+  .pageHeaderScrolls .ribbonStack > .ribbonWithIcon {
+    gap: var(--spacing-xxxs);
+    padding: var(--spacing-xxs) var(--spacing-sm);
+    border: none;
+    border-radius: var(--preview-switch-border-radius, var(--radius-full));
+    background: var(--colors-text);
+    color: var(--colors-text-inverse);
+    text-transform: none;
+    font-family:    var(--typography-rules-text3-font-family);
+    font-size:      var(--typography-rules-text3-font-size);
+    line-height:    var(--typography-rules-text3-line-height);
+    letter-spacing: var(--typography-rules-text3-letter-spacing, normal);
+    font-weight:    var(--typography-rules-text3-font-weight, normal);
+  }
 }
 
 /* The 20px icon hangs into the padding, so this badge keeps the others' height */

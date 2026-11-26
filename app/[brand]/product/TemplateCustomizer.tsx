@@ -49,6 +49,10 @@ export interface TemplateCustomizerProps {
   onLivePreviewLoadingChange: (loading: boolean) => void
   /** True once the preview shows the shopper's own text rather than the template's sample. */
   onPersonalizedChange?: (personalized: boolean) => void
+  /** Whether the shopper's own text is in (not the sample's) — the final flows' badge waits for it */
+  onOwnTextChange?: (hasText: boolean) => void
+  /** The first text field's title, saying what typing brings (V3: "Your name, in our signature script – see it as you type") */
+  previewLabel?: string
   /** Drawn right under the page's main CTA — Personalize or Add to Bag (the USPs). */
   belowCta?: React.ReactNode
   /**
@@ -163,7 +167,7 @@ function FieldTooltip({ text, Icon }: { text: string; Icon: IconCmp }) {
 const AUTOFILL_NAMES = ['Olivia', 'Noah', 'Emma', 'Sophia', 'Liam', 'Ava', 'Mia', 'Lucas', 'Grace', 'Leo', 'Isla', 'Ruby', 'Theo', 'Maya', 'Ella', 'Zoe', 'Jack', 'Lily']
 
 export function TemplateCustomizer({
-  brand, template, product, icons, addItem, openCart, onLivePreviewChange, onLivePreviewLoadingChange, onPersonalizedChange, belowCta, placement, headerSlot, onSaved, onAddedChange, onPersonalizeAnother, nestedOffer, autofill = false, stickyAddToBag = false, prefillText, materialImageOnly, fillEmptyFromSample = false, regularPrice = false, previewOnFirstPick = false,
+  brand, template, product, icons, addItem, openCart, onLivePreviewChange, onLivePreviewLoadingChange, onPersonalizedChange, onOwnTextChange, previewLabel, belowCta, placement, headerSlot, onSaved, onAddedChange, onPersonalizeAnother, nestedOffer, autofill = false, stickyAddToBag = false, prefillText, materialImageOnly, fillEmptyFromSample = false, regularPrice = false, previewOnFirstPick = false,
 }: TemplateCustomizerProps) {
   const { AiMagicIcon, ArrowIcon, CheckmarkIcon, ChevronIcon, StarIcon, XIcon, TooltipIcon } = icons
   const isMobile = useIsMobile()
@@ -245,6 +249,10 @@ export function TemplateCustomizer({
     // eslint-disable-next-line react-hooks/exhaustive-deps -- once, on load
   }, [prefillText])
   const firstTextFieldId = autofill
+    ? template.fields.find((f) => f.type === 'text' && !f.derivedFrom && isVisible(f, state))?.fieldId
+    : undefined
+  // The field that takes the preview title: the first text field the shopper sees
+  const previewLabelFieldId = previewLabel
     ? template.fields.find((f) => f.type === 'text' && !f.derivedFrom && isVisible(f, state))?.fieldId
     : undefined
   const autofillText = () => {
@@ -534,6 +542,7 @@ export function TemplateCustomizer({
     if (galleryFrozen) return
     onPersonalizedChange?.(previewEntered)
   }, [previewEntered, onPersonalizedChange, galleryFrozen])
+  useEffect(() => { onOwnTextChange?.(hasText) }, [hasText, onOwnTextChange])
 
   // Desktop, the steps open — or, on the final live preview, the preview
   // entered with every field on the page: the column stops being pinned and
@@ -773,6 +782,11 @@ export function TemplateCustomizer({
       // themselves, and the image-only swatches name it beside the label
       field = { ...field, name: materialLabel(brand) }
     }
+    // (Its error keeps the plain name: "Please fill in your name")
+    const plainName = field.name
+    if (field.fieldId === previewLabelFieldId && previewLabel) {
+      field = { ...field, name: previewLabel }
+    }
     if (jewelry && field.type === 'text' && !field.note && field.textMaxLength && !field.keyboard && !field.lengthFrom && !field.letterChoices) {
       field = { ...field, note: { text: `Letters only, up to ${field.textMaxLength} characters` } }
     }
@@ -801,7 +815,7 @@ export function TemplateCustomizer({
         const n = setLength(template, field, state)
         const message = text && n && shortOfSetLength(template, field, text, state)
           ? `Please enter ${n} letters` // 3 initials chosen, 2 typed
-          : text && field.minLengthWhen && tooShort(field, text, state) ? field.minLengthWhen.message : `Please fill in ${g.label.toLowerCase()}`
+          : text && field.minLengthWhen && tooShort(field, text, state) ? field.minLengthWhen.message : `Please fill in ${(g.label === previewLabel ? plainName : g.label).toLowerCase()}`
         return [g.id, <p key="err" className={styles.error} role="alert">{message}</p>]
       }),
     )

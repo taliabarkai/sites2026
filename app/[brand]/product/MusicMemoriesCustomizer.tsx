@@ -695,7 +695,7 @@ export function MusicMemoriesCustomizer({ brand, product, icons, nestedItems = [
   // Song title drives the record's center title. (Song combo hidden for now — no lyrics API.)
 
   const songTitleField = (withAutofill = false) => (
-    <div className={styles.field}>
+    <div className={styles.field} data-typing-field>
       <div className={styles.labelRow}>
         <label className={styles.label} htmlFor="mm-song-title">Pick your song</label>
         {(withAutofill || inlineSteps) && <button type="button" className={styles.autofillButton} onClick={autofill}>Autofill</button>}
@@ -706,7 +706,7 @@ export function MusicMemoriesCustomizer({ brand, product, icons, nestedItems = [
   )
 
   const artistField = (
-    <div className={styles.field}>
+    <div className={styles.field} data-typing-field>
       <label className={styles.label} htmlFor="mm-artist">Name the artist</label>
       <input type="text" id="mm-artist" className={styles.input} placeholder="e.g. Coldplay"
         value={artist} onChange={e => setArtist(e.target.value)} />
@@ -733,12 +733,12 @@ export function MusicMemoriesCustomizer({ brand, product, icons, nestedItems = [
     <>
       {songTitleField(withAutofill)}
       {artistField}
-      <div className={styles.field}>
+      <div className={styles.field} data-typing-field>
         <label className={styles.label} htmlFor="mm-memory">What&apos;s the occasion?</label>
         <input type="text" id="mm-memory" className={styles.input} placeholder="e.g. Our Wedding Song"
           value={memory} onChange={e => setMemory(e.target.value)} />
       </div>
-      <div className={styles.field}>
+      <div className={styles.field} data-typing-field>
         <label className={styles.label} htmlFor="mm-names">Add Names or special date</label>
         <input type="text" id="mm-names" className={styles.input} placeholder="e.g. Alex & Max, 10.10.2021"
           value={names} onChange={e => setNames(e.target.value)} />

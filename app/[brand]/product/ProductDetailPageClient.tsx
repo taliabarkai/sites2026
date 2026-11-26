@@ -679,7 +679,7 @@ interface GallerySwitchProps {
   poc?: boolean
   /** Final-Poc: the icon before "Gallery" */
   GalleryIcon?: React.ComponentType<{ size?: number }>
-  /** Final-Poc: the shopper is typing — their preview comes to the front */
+  /** The final flows: the shopper is typing — their preview comes to the front */
   typing?: boolean
   /** After the photos' dots: "▶ Video" */
   PlayIcon: React.ComponentType<{ size?: number }>
@@ -921,30 +921,35 @@ function galleryImageClass(base: string, src: string, modelImages: string[]): st
 // ─── Preview dock (OAL final live preview, mobile mockup) ───────────────────
 
 /**
- * Mockup, OAL on the final live preview (under 1024px): the gallery scrolls
- * away with the page, and once the shopper's own preview comes in (their
- * first pick) it slides down from the top of the screen — over the sticky
- * site header — at its own 1:1 and stays there, with a tab on its bottom edge
- * to tuck it away and bring it back: its "Your Personalization" ribbon,
- * centred at the bottom of the image. Tucked, the ribbon hangs under the header. It leaves while the
- * gallery itself is back in view, and once Add to Bag scrolls up under it.
- * Always in the DOM — a CSS transform drives it, as the panels do.
+ * Final flow V3 (under 1024px): the gallery scrolls away with the page, and
+ * while the shopper is in a text field (personalizing their name) — not
+ * while they browse — a white bar
+ * slides down from the top of the screen — over the sticky site header — and
+ * stays: the preview's thumbnail on the left, "Your Personalization" and a
+ * caret on the right. Tapping it expands the preview to the full width (its
+ * own 1:1) above the same row; tapping again collapses it back to the bar. It
+ * leaves while the gallery itself is back in view, and once Add to Bag
+ * scrolls up under it. Always in the DOM — a CSS transform drives it, as the
+ * panels do.
  */
-function PreviewDock({ src, active, galleryRef, anchorFieldIds, ribbon, RibbonIcon, ChevronIcon }: {
+function PreviewDock({ src, active, galleryRef, anchorFieldIds, ribbon, RibbonIcon, CaretIcon, untilTop = false }: {
   src: string | null
   active: boolean
+  /** V3: in whenever the gallery is scrolled away — Add to Bag passing under it doesn't send it off */
+  untilTop?: boolean
   galleryRef: React.RefObject<HTMLDivElement | null>
   /** The fields that open the preview — the first one still on screen is kept clear of the dock */
   anchorFieldIds: number[]
-  /** The personalization ribbon ("Your Personalization") and its wand — the dock's toggle */
+  /** The personalization's name ("Your Personalization") — the bar's label */
   ribbon: string
+  /** The personalization's wand, before its name */
   RibbonIcon: React.ComponentType<{ size?: number }>
-  ChevronIcon: React.ComponentType<{ size?: number }>
+  /** The brand's dropdown caret (it points right): down to expand, up to collapse */
+  CaretIcon: React.ComponentType<{ size?: number }>
 }) {
-  const [open, setOpen] = useState(true)
+  // Collapsed (the bar) when it slides in; expanded shows the full preview
+  const [open, setOpen] = useState(false)
   const [wanted, setWanted] = useState(false)
-  // Where the sticky header ends: the tucked tab hangs just below it
-  const [headerBottom, setHeaderBottom] = useState(0)
   const ref = useRef<HTMLDivElement>(null)
   useEffect(() => {
     if (!active) { setWanted(false); return }
@@ -953,7 +958,6 @@ function PreviewDock({ src, active, galleryRef, anchorFieldIds, ribbon, RibbonIc
       if (!el) return
       const header = document.querySelector('header')
       const headerBottom = Math.max(0, header ? header.getBoundingClientRect().bottom : 0)
-      setHeaderBottom(headerBottom)
       // The gallery more than half gone under the header…
       const g = galleryRef.current?.getBoundingClientRect()
       const galleryGone = !g || g.bottom < headerBottom + g.height / 2
@@ -961,7 +965,7 @@ function PreviewDock({ src, active, galleryRef, anchorFieldIds, ribbon, RibbonIc
       const cta = document.querySelector('#buy-box [data-main-cta]')
         ?? document.querySelector('section[aria-label="Product options"] button[class*="ctaButton"]')
       const ctaPassed = cta ? cta.getBoundingClientRect().bottom < el.offsetHeight : false
-      setWanted(galleryGone && !ctaPassed)
+      setWanted(galleryGone && (untilTop || !ctaPassed))
     }
     update()
     window.addEventListener('scroll', update, { passive: true })
@@ -970,14 +974,14 @@ function PreviewDock({ src, active, galleryRef, anchorFieldIds, ribbon, RibbonIc
       window.removeEventListener('scroll', update)
       window.removeEventListener('resize', update)
     }
-  }, [active, galleryRef])
+  }, [active, galleryRef, untilTop])
   const shown = active && wanted && !!src
   // As it slides in (or back down from the tab), the dock pushes the editor
   // down: the page scrolls so the first preview field still on screen (Inez:
   // the initial) sits just under the dock instead of behind it
   useEffect(() => {
     const el = ref.current
-    if (!shown || !open || !el) return
+    if (!shown || !el) return
     const fields = [...document.querySelectorAll<HTMLElement>('#buy-box [data-field-id]')]
       .filter((f) => anchorFieldIds.includes(Number(f.dataset.fieldId)) && f.offsetParent)
     const anchor = fields.find((f) => f.getBoundingClientRect().bottom > 0)
@@ -987,39 +991,50 @@ function PreviewDock({ src, active, galleryRef, anchorFieldIds, ribbon, RibbonIc
     const top = anchor.getBoundingClientRect().top
     if (top < target) window.scrollBy({ top: top - target, behavior: 'smooth' })
   }, [shown, open, anchorFieldIds])
-  // While it's open, anything scrolled into view (a focused field, a step's
+  // While it's in, anything scrolled into view (a focused field, a step's
   // tabs) lands below the dock instead of behind it
   useEffect(() => {
     const el = ref.current
-    if (!shown || !open || !el) return
+    if (!shown || !el) return
     // …and under the final flows' sticky promo bar, when there is one
     const promo = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--promo-sticky-height')) || 0
     document.documentElement.style.scrollPaddingTop = `${promo + el.offsetHeight}px`
     return () => { document.documentElement.style.scrollPaddingTop = '' }
   }, [shown, open])
-  const state = !shown ? '' : open ? styles.previewDockOpen : styles.previewDockTucked
   return (
     <div
       ref={ref}
-      className={`${styles.previewDock} ${state}`}
-      style={{ '--dock-header-bottom': `${headerBottom}px` } as React.CSSProperties}
+      className={`${styles.previewDock} ${shown ? styles.previewDockShown : ''} ${open ? styles.previewDockExpanded : ''}`}
       aria-hidden={!shown}
     >
+      {/* The preview the full width: collapsed, a strip cropped to the name
+          in the middle; expanded, the whole of it at its own 1:1 */}
       <div className={styles.previewDockImage}>
-        {src && <img src={src} alt="Live preview of your design" />}
+        {/* Behind it, the preview's own backdrop (its corner, blown up), so
+            the shrunk piece sits on its own color edge to edge */}
+        {src && <img src={src} alt="" aria-hidden="true" className={styles.previewDockBackdrop} />}
+        {src && <img src={src} alt="Live preview of your design" className={styles.previewDockPiece} />}
       </div>
       <button
         type="button"
-        className={`${styles.previewDockTab} ${styles.ribbonWithIcon}`}
+        className={styles.previewDockBar}
+        // The text field keeps focus (and the keyboard stays up): a tap here
+        // isn't leaving the field, which would send the dock away
+        onPointerDown={(e) => e.preventDefault()}
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open}
-        aria-label={open ? `${ribbon}: hide preview` : `${ribbon}: show preview`}
+        aria-label={open ? `${ribbon}: collapse preview` : `${ribbon}: expand preview`}
         tabIndex={shown ? 0 : -1}
       >
-        {/* The ribbon's own icon sizes on the image; 24px in the tucked full-width button */}
-        <RibbonIcon size={open ? 20 : 24} />
-        {ribbon}
-        <span className={open ? styles.previewDockChevronUp : styles.previewDockChevronDown}><ChevronIcon size={open ? 16 : 24} /></span>
+        {/* The personalization badge itself, as on the gallery image — wand,
+            name and the caret in it — centred in the space it has */}
+        <span className={styles.previewDockLabel}>
+          <span className={`${styles.previewDockPill} ${styles.ribbonWithIcon}`}>
+            <RibbonIcon size={20} />
+            {ribbon}
+            <span className={open ? styles.previewDockCaretUp : styles.previewDockCaretDown}><CaretIcon size={16} /></span>
+          </span>
+        </span>
       </button>
     </div>
   )
@@ -1062,11 +1077,22 @@ function DesktopGallery({ images, modelImages, name, rootRef, livePreview, ribbo
  * The live preview, once there is one, takes the full-width hero with its
  * ribbon and pushes the default first image down into the grid.
  */
-function HeroGridGallery({ images, modelImages, name, rootRef, livePreview, ribbons, previewNote }: {
+function HeroGridGallery({ images, modelImages, name, rootRef, livePreview, ribbons, previewNote, revealHero = false }: {
   images: string[]; modelImages: string[]; name: string; rootRef?: GalleryRootRef
   livePreview?: string | null; ribbons?: string[]; previewNote?: React.ReactNode
+  /**
+   * Final-Poc: no hero until the preview — the photos two across — then the
+   * preview grows in above them from the top, pushing them down, and the
+   * gallery leads with that one image
+   */
+  revealHero?: boolean
 }) {
-  const [hero, ...rest] = livePreview ? [livePreview, ...images] : images
+  // (While it folds away again, the hero keeps the last preview it drew)
+  const lastPreview = useRef<string | null>(null)
+  if (livePreview) lastPreview.current = livePreview
+  const [hero, ...rest] = revealHero
+    ? [livePreview ?? lastPreview.current ?? '', ...images]
+    : livePreview ? [livePreview, ...images] : images
   const heroRef = useRef<HTMLDivElement>(null)
   const glideRef = useRef<number | null>(null)
 
@@ -1125,11 +1151,13 @@ function HeroGridGallery({ images, modelImages, name, rootRef, livePreview, ribb
   return (
     <div ref={rootRef} className={styles.heroGridGallery}>
       {/* The hero in a row of its own, which holds it pinned beside the open steps */}
-      <div className={styles.heroGridHeroSlot}>
-        <div ref={heroRef} className={`${styles.desktopGridCell} ${styles.heroGridHero}`}>
-          <RibbonStack items={ribbons} />
-          {livePreview && previewNote && <div className={styles.livePreviewNote}>{previewNote}</div>}
-          <img src={hero} alt={name} className={galleryImageClass(styles.desktopGridImage, hero, modelImages)} loading="eager" />
+      <div className={`${styles.heroGridHeroSlot} ${revealHero ? styles.heroGridReveal : ''} ${revealHero && livePreview ? styles.heroGridRevealOpen : ''}`}>
+        <div className={revealHero ? styles.heroGridRevealClip : styles.heroGridRevealNone}>
+          <div ref={heroRef} className={`${styles.desktopGridCell} ${styles.heroGridHero}`}>
+            {(!revealHero || livePreview) && <RibbonStack items={ribbons} />}
+            {livePreview && previewNote && <div className={styles.livePreviewNote}>{previewNote}</div>}
+            {hero && <img src={hero} alt={name} className={galleryImageClass(styles.desktopGridImage, hero, modelImages)} loading="eager" />}
+          </div>
         </div>
       </div>
       {rest.map((src, i) => (
@@ -2399,6 +2427,8 @@ function ProductDetailPageInner({ productId, previewId, withoutTemplate = false,
   const [viewInRoomRequest, setViewInRoomRequest] = useState(0)
   const [livePreviewLoading, setLivePreviewLoading] = useState(false)
   const [previewPersonalized, setPreviewPersonalized] = useState(false)
+  // The shopper's own text in a field (the sample's doesn't count)
+  const [ownText, setOwnText] = useState(false)
   // The desktop gallery — the desktop sticky bar comes up once it's scrolled past
   const galleryRef = useRef<HTMLDivElement>(null)
   // The Drawer demo's charm count and description come from the header's
@@ -2429,8 +2459,9 @@ function ProductDetailPageInner({ productId, previewId, withoutTemplate = false,
   // (Not on the final live preview: it has no gallery switch — each product's own gallery)
   const galleryOverride = template && !finalPreview && !simpleFlow ? readGalleryLayout(searchParams)?.display : undefined
   // TGR and OAL lead every desktop PDP with Hero + grid (photo first)
+  // (Final-Poc: Hero + grid on every theme, the hero only once there's a preview)
   const desktopGallery: GalleryDisplay = galleryOverride
-    ?? (brand === 'tgr' || brand === 'oal' ? 'heroGridPhotoFirst' : template?.gallery.desktop)
+    ?? (brand === 'tgr' || brand === 'oal' || (finalFlow === 'poc' && template) ? 'heroGridPhotoFirst' : template?.gallery.desktop)
     ?? (brand === 'lal' ? 'sideScroll' : 'grid')
   // `replaceHero`: the preview takes the first photo's place — that photo is
   // for category pages; the PDP leads with the preview itself
@@ -2483,7 +2514,7 @@ function ProductDetailPageInner({ productId, previewId, withoutTemplate = false,
     if (!stickyGallery || !el) return
     const update = () => {
       const header = document.querySelector('header')
-      // While the shopper types (Final-Poc), iOS can pan the visible area
+      // While the shopper types (the final flows), iOS can pan the visible area
       // within the page — the gallery follows it, so it stays on screen
       const panned = el.dataset.typing ? window.visualViewport?.offsetTop ?? 0 : 0
       const top = Math.max(0, header ? header.getBoundingClientRect().bottom : 0) + panned
@@ -2505,7 +2536,7 @@ function ProductDetailPageInner({ productId, previewId, withoutTemplate = false,
     window.addEventListener('scroll', update, { passive: true })
     window.addEventListener('resize', update)
     // The keyboard opening and closing, and the gallery's own height changing
-    // (Final-Poc: it shrinks while the shopper types)
+    // (the final flows: it shrinks while the shopper types)
     const vv = window.visualViewport
     vv?.addEventListener('resize', update)
     vv?.addEventListener('scroll', update)
@@ -2522,23 +2553,28 @@ function ProductDetailPageInner({ productId, previewId, withoutTemplate = false,
       document.documentElement.style.scrollPaddingTop = ''
     }
   }, [stickyGallery])
-  // Final-Poc (mobile): while the shopper types in a text field, the sticky
+  // Final flows V1, V2 and Final-Poc (mobile): while the shopper types in a text field, the sticky
   // gallery shrinks to a strip — as tall as the space the keyboard leaves,
   // less the field — so the preview and the field they type in both stay in
   // view. The switch and dots step aside. The full square comes back once the
   // keyboard goes — on blur, or when it's put away with the field still focused.
-  const compactWhileTyping = stickyGallery && finalFlow === 'poc'
+  // (V3 has no sticky gallery: its preview docks instead)
+  const compactWhileTyping = stickyGallery && !!finalFlow
+  // V3 tracks the same focus: its preview dock comes in only while the
+  // shopper is in a text field, not while they browse the page
+  const trackTyping = compactWhileTyping || previewDock
   const [typingField, setTypingField] = useState<HTMLElement | null>(null)
   const typingFieldRef = useRef<HTMLElement | null>(null)
   // The visible height with no keyboard: taken as a field is first focused
   // (the keyboard comes up after) — moving between fields keeps it
   const fullHeightRef = useRef(0)
   useEffect(() => {
-    if (!compactWhileTyping) { setTypingField(null); return }
+    if (!trackTyping) { setTypingField(null); return }
     // A field that opens the keyboard: text, not a select or a checkbox
     const fieldOf = (t: EventTarget | null) =>
       t instanceof HTMLElement && t.matches('input:not([type="checkbox"]):not([type="radio"]), textarea')
-        ? t.closest<HTMLElement>('#buy-box [data-field-id]')
+        // The template's fields; Music Memories marks its own text fields
+        ? t.closest<HTMLElement>('#buy-box [data-field-id], [data-typing-field]')
         : null
     const onIn = (e: FocusEvent) => {
       const field = fieldOf(e.target)
@@ -2558,7 +2594,34 @@ function ProductDetailPageInner({ productId, previewId, withoutTemplate = false,
       document.removeEventListener('focusin', onIn)
       document.removeEventListener('focusout', onOut)
     }
-  }, [compactWhileTyping])
+  }, [trackTyping])
+  // V3: the dock comes in once the shopper has typed their name — their own
+  // text, then a pause in the typing — and from then on shows whenever the
+  // gallery is scrolled away (emptying the field takes it away again)
+  const [dockReady, setDockReady] = useState(false)
+  useEffect(() => {
+    if (!previewDock) { setDockReady(false); return }
+    // Once in, it stays in after the shopper leaves the field: from then on
+    // it's there whenever the gallery is scrolled away (see PreviewDock)
+    if (!typingField) return
+    // What's in the field (the jewelry's name, Music Memories' song): each
+    // keystroke starts the wait over; an emptied field sends the dock away
+    const input = typingField.querySelector<HTMLInputElement | HTMLTextAreaElement>('input, textarea')
+    let timer: ReturnType<typeof setTimeout> | undefined
+    const restart = () => {
+      clearTimeout(timer)
+      if (!input?.value.trim()) { setDockReady(false); return }
+      timer = setTimeout(() => setDockReady(true), 800)
+    }
+    // A field already filled in (back in it, or Music Memories redrawing its
+    // field on the first keystroke): the same short wait
+    restart()
+    input?.addEventListener('input', restart)
+    return () => {
+      clearTimeout(timer)
+      input?.removeEventListener('input', restart)
+    }
+  }, [previewDock, typingField])
   // Whether the keyboard is up: the visible height well under the full one
   const [keyboardOpen, setKeyboardOpen] = useState(false)
   useEffect(() => {
@@ -2573,7 +2636,7 @@ function ProductDetailPageInner({ productId, previewId, withoutTemplate = false,
       window.removeEventListener('resize', check)
     }
   }, [typingField])
-  const galleryCompact = !!typingField && keyboardOpen
+  const galleryCompact = compactWhileTyping && !!typingField && keyboardOpen
   useEffect(() => {
     const el = mobileGalleryRef.current
     if (!typingField || !galleryCompact || !el) return
@@ -2585,6 +2648,7 @@ function ProductDetailPageInner({ productId, previewId, withoutTemplate = false,
     root.style.overflowAnchor = 'none'
     const vv = window.visualViewport
     let settle: ReturnType<typeof setTimeout> | undefined
+    let settleAgain: ReturnType<typeof setTimeout> | undefined
     const fit = () => {
       // The visible height (above the keyboard), less the header, the field and
       // the field's gap above and below it
@@ -2600,10 +2664,16 @@ function ProductDetailPageInner({ productId, previewId, withoutTemplate = false,
       // is stuck in place, so the field keeps its distance below it while it
       // shrinks — this holds at any point of the shrink; after the browser's
       // own scroll to the focused field
+      // shrinks — once it has settled; a second pass corrects for a gallery
+      // that wasn't stuck yet when the first one ran (V2: info above it)
+      const place = () => {
+        const off = typingField.getBoundingClientRect().top - el.getBoundingClientRect().bottom - gap
+        if (Math.abs(off) > 1) window.scrollBy(0, off)
+      }
       clearTimeout(settle)
-      settle = setTimeout(() => {
-        window.scrollBy(0, typingField.getBoundingClientRect().top - el.getBoundingClientRect().bottom - gap)
-      }, 300)
+      clearTimeout(settleAgain)
+      settle = setTimeout(place, 300)
+      settleAgain = setTimeout(place, 600)
     }
     fit()
     vv?.addEventListener('resize', fit)
@@ -2612,6 +2682,7 @@ function ProductDetailPageInner({ productId, previewId, withoutTemplate = false,
       vv?.removeEventListener('resize', fit)
       window.removeEventListener('resize', fit)
       clearTimeout(settle)
+      clearTimeout(settleAgain)
       delete el.dataset.typing
       el.style.removeProperty('--gallery-typing-height')
       root.style.overflowAnchor = ''
@@ -2648,9 +2719,13 @@ function ProductDetailPageInner({ productId, previewId, withoutTemplate = false,
   // The product's photos stay in place; the preview is added in front of them
   const galleryImages = images
   const slotPreview = behindRow ? (previewPersonalized ? livePreview : null) : livePreview
-  // With a sample (a name, Inez's initials), the badge waits for the shopper's own
+  // With a sample (a name, Inez's initials), the badge waits for the shopper's own.
+  // The final flows: their own text, typed in — a first pick that brings in
+  // the sample ("Carrie") isn't it, nor a field cleared back to empty
+  const sampleOnly = (template?.livePreview.sampleText || template?.livePreview.sampleByCount)
+    && (!previewPersonalized || (!!finalFlow && !ownText))
   const previewRibbon = template
-    ? (addedToBag || ((template.livePreview.sampleText || template.livePreview.sampleByCount) && !previewPersonalized) ? '' : template.livePreview.ribbon ?? '')
+    ? (addedToBag || sampleOnly ? '' : template.livePreview.ribbon ?? '')
     : undefined
   // Stacked top left: the personalization ribbon, then the product's own badges
   // The personalization badge takes the product badge's place (the sale is
@@ -2670,7 +2745,8 @@ function ProductDetailPageInner({ productId, previewId, withoutTemplate = false,
   // shopper types; then the live preview is pushed in above it as the hero.
   // The other layouts follow the template (sample name from page load).
   const photoFirst = desktopGallery === 'heroGridPhotoFirst'
-  const heroPreview = photoFirst ? (previewPersonalized ? livePreview : null) : slotPreview
+  // (The final flows: once the shopper's own text is in — not a sample)
+  const heroPreview = photoFirst ? ((finalFlow ? ownText : previewPersonalized) ? livePreview : null) : slotPreview
   const heroImages = photoFirst ? images : galleryImages
   // On the preview: its ribbon stack. On the photo: the product's badges only.
   const heroRibbons = heroPreview ? previewRibbons : template?.gallery.badges
@@ -2783,11 +2859,15 @@ function ProductDetailPageInner({ productId, previewId, withoutTemplate = false,
             floatingProgress={!!template}
             // V2: the preview and the photos behind a switch (the header's Switch toggle)
             // Final-Poc: B2, restyled — the choice in view filled; Gallery with an image icon
-            gallerySwitch={isV2Flow(finalFlow) ? {
-              style: finalFlow === 'poc' ? 'stack' : readGallerySwitch(searchParams),
-              poc: finalFlow === 'poc',
+            // V3: the same switch (the preview never sits in the photos' swipe);
+            // the gallery scrolls away, and the dock carries the preview while
+            // the shopper types below it
+            gallerySwitch={isV2Flow(finalFlow) || finalFlow === 'v3' ? {
+              style: finalFlow === 'poc' || finalFlow === 'v3' ? 'stack' : readGallerySwitch(searchParams),
+              poc: finalFlow === 'poc' || finalFlow === 'v3',
               GalleryIcon: icons.ImageIcon,
-              typing: galleryCompact,
+              // Typing brings the preview to the front (V3: once their own name is in)
+              typing: galleryCompact || (finalFlow === 'v3' && !!typingField && ownText),
               previewLabel: template?.livePreview.ribbon ?? 'Your Personalization',
               photoRibbons: template?.gallery.badges,
               PreviewIcon: icons.AiMagicIcon,
@@ -2806,7 +2886,7 @@ function ProductDetailPageInner({ productId, previewId, withoutTemplate = false,
           />
         </div>
         {previewDock && (
-          <PreviewDock src={slotPreview} active={!!slotPreview && !addedToBag} galleryRef={mobileGalleryRef} anchorFieldIds={dockAnchorFieldIds} ribbon={template?.livePreview.ribbon ?? 'Your Personalization'} RibbonIcon={icons.AiMagicIcon} ChevronIcon={icons.ChevronIcon} />
+          <PreviewDock src={slotPreview} active={!!slotPreview && !addedToBag && dockReady} galleryRef={mobileGalleryRef} anchorFieldIds={dockAnchorFieldIds} ribbon={template?.livePreview.ribbon ?? 'Your Personalization'} RibbonIcon={icons.AiMagicIcon} CaretIcon={icons.DropdownIcon} untilTop={finalFlow === 'v3'} />
         )}
 
         {/* Two-column layout on desktop, single column on mobile */}
@@ -2825,7 +2905,7 @@ function ProductDetailPageInner({ productId, previewId, withoutTemplate = false,
             : desktopGallery === 'overlayThumbs'
               ? <OverlayThumbsGallery images={galleryImages} modelImages={modelImages} name={product.name} rootRef={galleryRef} livePreview={slotPreview} ribbons={previewRibbons} previewNote={previewNote} />
             : desktopGallery === 'heroGrid' || desktopGallery === 'heroGridPhotoFirst'
-              ? <HeroGridGallery images={heroImages} modelImages={modelImages} name={product.name} rootRef={galleryRef} livePreview={heroPreview} ribbons={heroRibbons} previewNote={previewNote} />
+              ? <HeroGridGallery images={heroImages} modelImages={modelImages} name={product.name} rootRef={galleryRef} livePreview={heroPreview} ribbons={heroRibbons} previewNote={previewNote} revealHero={finalFlow === 'poc'} />
             : desktopGallery === 'stickyHero'
               ? <OALDesktopGallery images={galleryImages} modelImages={modelImages} name={product.name} rootRef={galleryRef} />
               : <DesktopGallery images={galleryImages} modelImages={modelImages} name={product.name} rootRef={galleryRef} livePreview={template ? slotPreview : undefined} ribbons={previewRibbons} previewNote={previewNote} />
@@ -2857,12 +2937,15 @@ function ProductDetailPageInner({ productId, previewId, withoutTemplate = false,
               onLivePreviewChange={setLivePreview}
               onLivePreviewLoadingChange={setLivePreviewLoading}
               onPersonalizedChange={setPreviewPersonalized}
+              onOwnTextChange={setOwnText}
+              previewLabel={previewDock ? 'Your name, in our signature script – see it as you type' : undefined}
               placement={placement}
               headerSlot={headerAbove ? headerSlot : null}
               onAddedChange={setAddedToBag}
               nestedOffer={nestedOn}
               // Final flows: an Autofill link for the text fields (demo)
-              autofill={!!finalFlow}
+              // Autofill: LAL only (Music Memories has its own); not on the jewelry
+              autofill={!!finalFlow && brand === 'lal'}
               // Demo (`?name=`): a name already typed on load
               prefillText={finalFlow ? searchParams.get('name') ?? undefined : undefined}
               stickyAddToBag={!!finalFlow}
