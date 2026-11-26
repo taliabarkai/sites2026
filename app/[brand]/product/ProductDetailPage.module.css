@@ -75,8 +75,9 @@
   /* Room under the dock for the first preview field it keeps in view */
   --dock-anchor-gap: var(--spacing-sm);
   position: fixed;
-  /* Under the final flows' sticky promo bar, when there is one */
-  top: var(--promo-sticky-height, 0px);
+  /* Under the final flows' sticky promo bar, when there is one — and (V3)
+     pushed up by Add to Bag as it scrolls past (set from the page's script) */
+  top: calc(var(--promo-sticky-height, 0px) + var(--dock-push, 0px));
   left: 0;
   right: 0;
   z-index: calc(var(--z-header) + 1);

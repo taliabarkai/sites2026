@@ -935,7 +935,7 @@ function galleryImageClass(base: string, src: string, modelImages: string[]): st
 function PreviewDock({ src, active, galleryRef, anchorFieldIds, ribbon, RibbonIcon, CaretIcon, untilTop = false }: {
   src: string | null
   active: boolean
-  /** V3: in whenever the gallery is scrolled away — Add to Bag passing under it doesn't send it off */
+  /** V3: in whenever the gallery is scrolled away — until Add to Bag reaches it and pushes it up and off, as Final-Poc's sticky gallery goes */
   untilTop?: boolean
   galleryRef: React.RefObject<HTMLDivElement | null>
   /** The fields that open the preview — the first one still on screen is kept clear of the dock */
@@ -965,6 +965,15 @@ function PreviewDock({ src, active, galleryRef, anchorFieldIds, ribbon, RibbonIc
       const cta = document.querySelector('#buy-box [data-main-cta]')
         ?? document.querySelector('section[aria-label="Product options"] button[class*="ctaButton"]')
       const ctaPassed = cta ? cta.getBoundingClientRect().bottom < el.offsetHeight : false
+      // V3: as Final-Poc's sticky gallery does, the dock rides up with Add to
+      // Bag once the button reaches it (keeping the form's gap between them),
+      // and is pushed off the top as the page scrolls past it
+      if (untilTop && cta) {
+        const promo = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--promo-sticky-height')) || 0
+        const gap = parseFloat(getComputedStyle(cta.parentElement ?? cta).rowGap) || 0
+        const overlap = cta.getBoundingClientRect().top - gap - (promo + el.offsetHeight)
+        el.style.setProperty('--dock-push', `${Math.min(0, overlap)}px`)
+      }
       setWanted(galleryGone && (untilTop || !ctaPassed))
     }
     update()
