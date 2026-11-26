@@ -1157,17 +1157,20 @@ function HeroGridGallery({ images, modelImages, name, rootRef, livePreview, ribb
   }, [livePreview])
   useEffect(() => () => { if (glideRef.current !== null) cancelAnimationFrame(glideRef.current) }, [])
 
+  const heroCell = (
+    <div ref={heroRef} className={`${styles.desktopGridCell} ${styles.heroGridHero}`}>
+      {(!revealHero || livePreview) && <RibbonStack items={ribbons} />}
+      {livePreview && previewNote && <div className={styles.livePreviewNote}>{previewNote}</div>}
+      {hero && <img src={hero} alt={name} className={galleryImageClass(styles.desktopGridImage, hero, modelImages)} loading="eager" />}
+    </div>
+  )
   return (
     <div ref={rootRef} className={styles.heroGridGallery}>
       {/* The hero in a row of its own, which holds it pinned beside the open steps */}
       <div className={`${styles.heroGridHeroSlot} ${revealHero ? styles.heroGridReveal : ''} ${revealHero && livePreview ? styles.heroGridRevealOpen : ''}`}>
-        <div className={revealHero ? styles.heroGridRevealClip : styles.heroGridRevealNone}>
-          <div ref={heroRef} className={`${styles.desktopGridCell} ${styles.heroGridHero}`}>
-            {(!revealHero || livePreview) && <RibbonStack items={ribbons} />}
-            {livePreview && previewNote && <div className={styles.livePreviewNote}>{previewNote}</div>}
-            {hero && <img src={hero} alt={name} className={galleryImageClass(styles.desktopGridImage, hero, modelImages)} loading="eager" />}
-          </div>
-        </div>
+        {/* (Final-Poc's hero sits in a clip that opens; elsewhere it's the
+            slot's own child — that's what holds it pinned beside the steps) */}
+        {revealHero ? <div className={styles.heroGridRevealClip}>{heroCell}</div> : heroCell}
       </div>
       {rest.map((src, i) => (
         <div key={`${src.slice(0, 64)}-${i}`} className={styles.desktopGridCell}>
@@ -2468,9 +2471,9 @@ function ProductDetailPageInner({ productId, previewId, withoutTemplate = false,
   // (Not on the final live preview: it has no gallery switch — each product's own gallery)
   const galleryOverride = template && !finalPreview && !simpleFlow ? readGalleryLayout(searchParams)?.display : undefined
   // TGR and OAL lead every desktop PDP with Hero + grid (photo first)
-  // (Final-Poc: Hero + grid on every theme, the hero only once there's a preview)
+  // (Final-Poc and V3: Hero + grid on every theme, the hero only once there's a preview)
   const desktopGallery: GalleryDisplay = galleryOverride
-    ?? (brand === 'tgr' || brand === 'oal' || (finalFlow === 'poc' && template) ? 'heroGridPhotoFirst' : template?.gallery.desktop)
+    ?? (brand === 'tgr' || brand === 'oal' || ((finalFlow === 'poc' || finalFlow === 'v3') && template) ? 'heroGridPhotoFirst' : template?.gallery.desktop)
     ?? (brand === 'lal' ? 'sideScroll' : 'grid')
   // `replaceHero`: the preview takes the first photo's place — that photo is
   // for category pages; the PDP leads with the preview itself
@@ -2861,7 +2864,10 @@ function ProductDetailPageInner({ productId, previewId, withoutTemplate = false,
           <MobileGallery
             images={galleryImages}
             modelImages={modelImages}
-            livePreview={slotPreview}
+            // V3: the preview (and its switch) comes into the gallery with the
+            // dock — once the name is typed and the typing pauses — not on the
+            // first keystroke
+            livePreview={previewDock && !dockReady ? null : slotPreview}
             // The personalization badge only on the preview — on the photo, the product's own badges
             ribbons={slotPreview ? previewRibbons : template?.gallery.badges}
             previewNote={previewNote}
@@ -2914,7 +2920,7 @@ function ProductDetailPageInner({ productId, previewId, withoutTemplate = false,
             : desktopGallery === 'overlayThumbs'
               ? <OverlayThumbsGallery images={galleryImages} modelImages={modelImages} name={product.name} rootRef={galleryRef} livePreview={slotPreview} ribbons={previewRibbons} previewNote={previewNote} />
             : desktopGallery === 'heroGrid' || desktopGallery === 'heroGridPhotoFirst'
-              ? <HeroGridGallery images={heroImages} modelImages={modelImages} name={product.name} rootRef={galleryRef} livePreview={heroPreview} ribbons={heroRibbons} previewNote={previewNote} revealHero={finalFlow === 'poc'} />
+              ? <HeroGridGallery images={heroImages} modelImages={modelImages} name={product.name} rootRef={galleryRef} livePreview={heroPreview} ribbons={heroRibbons} previewNote={previewNote} revealHero={finalFlow === 'poc' || finalFlow === 'v3'} />
             : desktopGallery === 'stickyHero'
               ? <OALDesktopGallery images={galleryImages} modelImages={modelImages} name={product.name} rootRef={galleryRef} />
               : <DesktopGallery images={galleryImages} modelImages={modelImages} name={product.name} rootRef={galleryRef} livePreview={template ? slotPreview : undefined} ribbons={previewRibbons} previewNote={previewNote} />
@@ -2963,6 +2969,7 @@ function ProductDetailPageInner({ productId, previewId, withoutTemplate = false,
               fillEmptyFromSample={finalPreview}
               regularPrice={finalPreview}
               previewOnFirstPick={finalPreview}
+              keepPinned={finalFlow === 'v3'}
               belowCta={<UspBadges brand={brand} icons={icons} />}
             />
           ) : brand === 'lal' && MUSIC_MEMORIES_PRODUCT_IDS.has(product.id) ? (

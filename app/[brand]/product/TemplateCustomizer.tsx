@@ -83,6 +83,8 @@ export interface TemplateCustomizerProps {
    * shape). Any other pick (a material, a count) only changes the price.
    */
   previewOnFirstPick?: boolean
+  /** Desktop: the column stays pinned beside the gallery when the preview comes in (V3, as Final-Poc) */
+  keepPinned?: boolean
   /** Demo: offer a second of this product at 50% off, just above Add to Bag. */
   nestedOffer?: boolean
   /**
@@ -167,7 +169,7 @@ function FieldTooltip({ text, Icon }: { text: string; Icon: IconCmp }) {
 const AUTOFILL_NAMES = ['Olivia', 'Noah', 'Emma', 'Sophia', 'Liam', 'Ava', 'Mia', 'Lucas', 'Grace', 'Leo', 'Isla', 'Ruby', 'Theo', 'Maya', 'Ella', 'Zoe', 'Jack', 'Lily']
 
 export function TemplateCustomizer({
-  brand, template, product, icons, addItem, openCart, onLivePreviewChange, onLivePreviewLoadingChange, onPersonalizedChange, onOwnTextChange, previewLabel, belowCta, placement, headerSlot, onSaved, onAddedChange, onPersonalizeAnother, nestedOffer, autofill = false, stickyAddToBag = false, prefillText, materialImageOnly, fillEmptyFromSample = false, regularPrice = false, previewOnFirstPick = false,
+  brand, template, product, icons, addItem, openCart, onLivePreviewChange, onLivePreviewLoadingChange, onPersonalizedChange, onOwnTextChange, previewLabel, belowCta, placement, headerSlot, onSaved, onAddedChange, onPersonalizeAnother, nestedOffer, autofill = false, stickyAddToBag = false, prefillText, materialImageOnly, fillEmptyFromSample = false, regularPrice = false, previewOnFirstPick = false, keepPinned = false,
 }: TemplateCustomizerProps) {
   const { AiMagicIcon, ArrowIcon, CheckmarkIcon, ChevronIcon, StarIcon, XIcon, TooltipIcon } = icons
   const isMobile = useIsMobile()
@@ -548,7 +550,7 @@ export function TemplateCustomizer({
   // entered with every field on the page: the column stops being pinned and
   // scrolls with the page (a long form stays reachable), while the gallery
   // pins its first image, the preview, beside it
-  const unpinned = cardOpen || (previewOnFirstPick && inline && !isMobile && previewEntered)
+  const unpinned = cardOpen || (!keepPinned && previewOnFirstPick && inline && !isMobile && previewEntered)
   // …the page's layout learning the column's height (--steps-height), which
   // holds the preview pinned for as long as the column runs. It keeps the
   // tallest the column has been while open: switching to a shorter step

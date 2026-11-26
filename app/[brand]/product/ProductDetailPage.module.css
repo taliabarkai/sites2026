@@ -2259,26 +2259,6 @@
   text-transform: var(--personalize-ribbon-text-transform, var(--typography-rules-ribbons1-text-transform, none));
 }
 
-/* The final flows, desktop: the personalization badge on the gallery is the
-   mobile switch's chosen tab — filled in the text color, its wand and words
-   inverse, in the tab's own type, corners and case */
-@media (min-width: 1024px) {
-  .pageHeaderScrolls .ribbonStack > .ribbonWithIcon {
-    gap: var(--spacing-xxxs);
-    padding: var(--spacing-xxs) var(--spacing-sm);
-    border: none;
-    border-radius: var(--preview-switch-border-radius, var(--radius-full));
-    background: var(--colors-text);
-    color: var(--colors-text-inverse);
-    text-transform: none;
-    font-family:    var(--typography-rules-text3-font-family);
-    font-size:      var(--typography-rules-text3-font-size);
-    line-height:    var(--typography-rules-text3-line-height);
-    letter-spacing: var(--typography-rules-text3-letter-spacing, normal);
-    font-weight:    var(--typography-rules-text3-font-weight, normal);
-  }
-}
-
 /* The 20px icon hangs into the padding, so this badge keeps the others' height */
 .ribbonWithIcon svg {
   flex: none;
@@ -2601,11 +2581,33 @@
   color: var(--colors-text);
 }
 
-/* Final-Poc: the choice in view filled in the text color (black), its text
-   and icon inverse (white) — the frame's hairline as B2 has it */
+/* Final-Poc and V3: both choices in the ribbon's own type (OAL: "YOUR
+   PERSONALIZATION", "GALLERY"); the one in view wears the personalization
+   ribbon itself — its fill and fading border (TGR: the soft blue gradient;
+   a theme's own solid fill where it has one), its text color */
+.galleryPocSwitch .galleryTextItem {
+  /* 8px between the icon and its words */
+  gap: var(--spacing-xxs);
+  font-family:    var(--typography-rules-ribbons1-font-family, var(--font-family-main-bold));
+  font-size:      var(--typography-rules-ribbons1-font-size);
+  line-height:    var(--typography-rules-ribbons1-line-height);
+  font-weight:    var(--typography-rules-ribbons1-font-weight, 700);
+  letter-spacing: var(--typography-rules-ribbons1-letter-spacing, normal);
+  text-transform: var(--personalize-ribbon-text-transform, var(--typography-rules-ribbons1-text-transform, none));
+}
+
 .galleryPocSwitch .galleryTextItem[aria-pressed="true"] {
-  background: var(--colors-text);
-  color: var(--colors-text-inverse);
+  border-color: transparent;
+  background: var(--personalize-ribbon-background,
+    linear-gradient(90deg,
+      color-mix(in srgb, var(--personalize-fill-start) 60%, var(--colors-background)),
+      var(--colors-background) 55%,
+      var(--personalize-fill-end)) padding-box,
+    linear-gradient(90deg,
+      var(--personalize-border),
+      color-mix(in srgb, var(--personalize-border) 30%, var(--colors-background)) 55%,
+      var(--personalize-border)) border-box);
+  color: var(--personalize-ribbon-text, var(--colors-text));
 }
 
 /* ── V2's E: thumbnails under the image, no swipe ─────────────────────────── */
